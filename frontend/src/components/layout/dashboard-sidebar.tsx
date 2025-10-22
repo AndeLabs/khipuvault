@@ -1,6 +1,6 @@
 
 import Link from "next/link";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Home, Settings, Handshake, Lightbulb, RotateCw, Trophy } from "lucide-react";
 
 export const navItems = [

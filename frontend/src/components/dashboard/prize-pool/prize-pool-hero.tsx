@@ -1,6 +1,6 @@
 "use client"
 
-import { AnimateOnScroll } from "../components/animate-on-scroll";
+import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 

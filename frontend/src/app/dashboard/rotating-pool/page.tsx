@@ -1,9 +1,9 @@
-import { AnimateOnScroll } from "../components/animate-on-scroll";
-import { CreateTanda } from "../components/dashboard/rotating-pool/create-tanda";
-import { ExploreTandas } from "../components/dashboard/rotating-pool/explore-tandas";
-import { MyTandas } from "../components/dashboard/rotating-pool/my-tandas";
-import { TandaExplanation } from "../components/dashboard/rotating-pool/tanda-explanation";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { AnimateOnScroll } from "@/components/animate-on-scroll";
+import { CreateTanda } from "@/components/dashboard/rotating-pool/create-tanda";
+import { ExploreTandas } from "@/components/dashboard/rotating-pool/explore-tandas";
+import { MyTandas } from "@/components/dashboard/rotating-pool/my-tandas";
+import { TandaExplanation } from "@/components/dashboard/rotating-pool/tanda-explanation";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChevronLeft } from "lucide-react";
 import Link from "next/link";
 

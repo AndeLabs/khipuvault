@@ -9,13 +9,13 @@ import {
   DialogTrigger,
   DialogFooter,
   DialogDescription,
-} from "../components/ui/dialog";
-import { Button } from "../components/ui/button";
-import { Input } from "../components/ui/input";
-import { Checkbox } from "../components/ui/checkbox";
-import { Label } from "../components/ui/label";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Minus, Plus } from "lucide-react";
-import { Separator } from "../components/ui/separator";
+import { Separator } from "@/components/ui/separator";
 
 const ticketPrice = 0.0005;
 const discounts = {

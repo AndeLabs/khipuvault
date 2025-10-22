@@ -1,13 +1,13 @@
 import Link from "next/link";
 import { ChevronLeft, Plus } from "lucide-react";
-import { Button } from "../components/ui/button";
-import { YourPosition } from "../components/dashboard/individual-savings/your-position";
-import { Deposits } from "../components/dashboard/individual-savings/deposits";
-import { YieldHistoryChart } from "../components/dashboard/individual-savings/yield-history-chart";
-import { TransactionsTable } from "../components/dashboard/individual-savings/transactions-table";
-import { ProjectionsCalculator } from "../components/dashboard/individual-savings/projections-calculator";
-import { PoolStats } from "../components/dashboard/individual-savings/pool-stats";
-import { AnimateOnScroll } from "../components/animate-on-scroll";
+import { Button } from "@/components/ui/button";
+import { YourPosition } from "@/components/dashboard/individual-savings/your-position";
+import { Deposits } from "@/components/dashboard/individual-savings/deposits";
+import { YieldHistoryChart } from "@/components/dashboard/individual-savings/yield-history-chart";
+import { TransactionsTable } from "@/components/dashboard/individual-savings/transactions-table";
+import { ProjectionsCalculator } from "@/components/dashboard/individual-savings/projections-calculator";
+import { PoolStats } from "@/components/dashboard/individual-savings/pool-stats";
+import { AnimateOnScroll } from "@/components/animate-on-scroll";
 
 export default function IndividualSavingsPage() {
   return (

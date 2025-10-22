@@ -1,3 +1,13 @@
+   Creating an optimized production build ...
+Failed to compile.
+./src/app/dashboard/settings/layout.tsx
+Module not found: Can't resolve '../../lib/utils'
+https://nextjs.org/docs/messages/module-not-found
+./src/app/dashboard/settings/layout.tsx
+Module not found: Can't resolve '../../components/animate-on-scroll'
+https://nextjs.org/docs/messages/module-not-found
+./src/components/ui/button.tsx
+Module not found: Can't resolve '../lib/utils'
 # KhipuVault
 
 A decentralized Bitcoin savings platform built on Mezo, offering multiple savings strategies with automatic yield optimization through MUSD integration.

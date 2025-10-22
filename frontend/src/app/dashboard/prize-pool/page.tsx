@@ -1,11 +1,11 @@
-import { AnimateOnScroll } from "../components/animate-on-scroll";
-import { ActiveRound } from "../components/dashboard/prize-pool/active-round";
-import { DrawHistory } from "../components/dashboard/prize-pool/draw-history";
-import { PrizePoolHero } from "../components/dashboard/prize-pool/prize-pool-hero";
-import { ProbabilityCalculator } from "../components/dashboard/prize-pool/probability-calculator";
-import { RulesFaq } from "../components/dashboard/prize-pool/rules-faq";
-import { UpcomingDraws } from "../components/dashboard/prize-pool/upcoming-draws";
-import { YourStats } from "../components/dashboard/prize-pool/your-stats";
+import { AnimateOnScroll } from "@/components/animate-on-scroll";
+import { ActiveRound } from "@/components/dashboard/prize-pool/active-round";
+import { DrawHistory } from "@/components/dashboard/prize-pool/draw-history";
+import { PrizePoolHero } from "@/components/dashboard/prize-pool/prize-pool-hero";
+import { ProbabilityCalculator } from "@/components/dashboard/prize-pool/probability-calculator";
+import { RulesFaq } from "@/components/dashboard/prize-pool/rules-faq";
+import { UpcomingDraws } from "@/components/dashboard/prize-pool/upcoming-draws";
+import { YourStats } from "@/components/dashboard/prize-pool/your-stats";
 
 
 export default function PrizePoolPage() {
