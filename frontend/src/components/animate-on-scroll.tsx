@@ -1,6 +1,6 @@
 "use client";
 import { useRef, useEffect, useState, type ReactNode } from "react";
-import { cn } from "../lib/utils";
+import { cn } from "@/lib/utils";
 
 type Props = {
     children: ReactNode;
