@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Icons } from "@/components/icons";
-import { AnimateOnScroll } from "@/components/animate-on-scroll";
+import { Icons } from "../components/icons";
+import { AnimateOnScroll } from "../components/animate-on-scroll";
 
 const socialLinks = [
   { name: "Twitter", href: "#", icon: Icons.twitter },

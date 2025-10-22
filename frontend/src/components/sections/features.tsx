@@ -1,6 +1,6 @@
 import { ShieldCheck, DollarSign, Handshake, BarChart3 } from "lucide-react";
-import { AnimateOnScroll } from "@/components/animate-on-scroll";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { AnimateOnScroll } from "../components/animate-on-scroll";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 
 const featureData = [
   {

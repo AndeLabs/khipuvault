@@ -1,7 +1,7 @@
 "use client"
 
 import { Area, AreaChart, CartesianGrid, Legend, Tooltip, ResponsiveContainer, XAxis, YAxis, Line, ComposedChart } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card"
 
 const chartData = Array.from({ length: 90 }, (_, i) => {
     const date = new Date();

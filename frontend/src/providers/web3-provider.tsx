@@ -19,8 +19,8 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { RainbowKitProvider, darkTheme, lightTheme } from '@rainbow-me/rainbowkit'
-import { wagmiConfig, rainbowKitTheme, appMetadata } from '@/lib/web3/config'
-import { mezoTestnet } from '@/lib/web3/chains'
+import { wagmiConfig, rainbowKitTheme, appMetadata } from '../lib/web3/config'
+import { mezoTestnet } from '../lib/web3/chains'
 import '@rainbow-me/rainbowkit/styles.css'
 
 /**

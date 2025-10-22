@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExplorePools } from "@/components/dashboard/cooperative-savings/explore-pools";
-import { MyPools } from "@/components/dashboard/cooperative-savings/my-pools";
-import { CreatePool } from "@/components/dashboard/cooperative-savings/create-pool";
-import { AnimateOnScroll } from "@/components/animate-on-scroll";
-import { RecommendedPools } from "@/components/dashboard/cooperative-savings/recommended-pools";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
+import { ExplorePools } from "../components/dashboard/cooperative-savings/explore-pools";
+import { MyPools } from "../components/dashboard/cooperative-savings/my-pools";
+import { CreatePool } from "../components/dashboard/cooperative-savings/create-pool";
+import { AnimateOnScroll } from "../components/animate-on-scroll";
+import { RecommendedPools } from "../components/dashboard/cooperative-savings/recommended-pools";
 
 export default function CooperativeSavingsPage() {
   return (

@@ -1,5 +1,5 @@
-import { Button } from "@/components/ui/button";
-import { AnimateOnScroll } from "@/components/animate-on-scroll";
+import { Button } from "../components/ui/button";
+import { AnimateOnScroll } from "../components/animate-on-scroll";
 
 export function Hero() {
   return (

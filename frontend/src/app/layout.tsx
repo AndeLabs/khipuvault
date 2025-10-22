@@ -1,7 +1,7 @@
 import type {Metadata} from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
-import { Web3Provider, Web3ErrorBoundary } from "@/providers/web3-provider";
+import { Toaster } from "../components/ui/toaster";
+import { Web3Provider, Web3ErrorBoundary } from "../providers/web3-provider";
 
 export const metadata: Metadata = {
   title: 'KhipuVault | Ahorro Bitcoin con Rendimientos Reales',

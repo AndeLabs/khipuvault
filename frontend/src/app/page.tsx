@@ -1,10 +1,10 @@
 import Link from "next/link";
-import { Header } from "@/components/layout/header";
-import { Footer } from "@/components/layout/footer";
-import { Hero } from "@/components/sections/hero";
-import { Stats } from "@/components/sections/stats";
-import { Features } from "@/components/sections/features";
-import { Button } from "@/components/ui/button";
+import { Header } from "../components/layout/header";
+import { Footer } from "../components/layout/footer";
+import { Hero } from "../components/sections/hero";
+import { Stats } from "../components/sections/stats";
+import { Features } from "../components/sections/features";
+import { Button } from "../components/ui/button";
 
 export default function Home() {
   return (

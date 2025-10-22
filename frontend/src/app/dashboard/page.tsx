@@ -1,6 +1,6 @@
-import { PerformanceChart } from "@/components/dashboard/performance-chart";
-import { SavingPools } from "@/components/dashboard/saving-pools";
-import { SummaryCards } from "@/components/dashboard/summary-cards";
+import { PerformanceChart } from "../components/dashboard/performance-chart";
+import { SavingPools } from "../components/dashboard/saving-pools";
+import { SummaryCards } from "../components/dashboard/summary-cards";
 
 export default function DashboardPage() {
   return (
