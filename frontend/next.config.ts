@@ -1,4 +1,5 @@
 import type {NextConfig} from 'next';
+import path from 'path';
 
 const nextConfig: NextConfig = {
   /* config options here */
@@ -7,6 +8,19 @@ const nextConfig: NextConfig = {
   },
   eslint: {
     ignoreDuringBuilds: true,
+  },
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@': path.resolve(__dirname, 'src'),
+      '@/lib': path.resolve(__dirname, 'src/lib'),
+      '@/components': path.resolve(__dirname, 'src/components'),
+      '@/app': path.resolve(__dirname, 'src/app'),
+      '@/hooks': path.resolve(__dirname, 'src/hooks'),
+      '@/contracts': path.resolve(__dirname, 'src/contracts'),
+      '@/providers': path.resolve(__dirname, 'src/providers'),
+    };
+    return config;
   },
   images: {
     remotePatterns: [
