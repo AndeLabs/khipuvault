@@ -1,12 +1,12 @@
 /**
- * @fileoverview Web3Provider with RainbowKit and Mezo Passport Integration
+ * @fileoverview Web3Provider with RainbowKit and Mezo Integration
  * @module providers/web3-provider
  * 
  * Production-ready Web3 provider for KhipuVault
- * Integrates Mezo Passport, RainbowKit, Wagmi, and React Query
+ * Integrates Mezo Network, RainbowKit, Wagmi, and React Query
  * 
  * Features:
- * - Mezo Passport wallet connection
+ * - Mezo Testnet wallet connection
  * - Automatic wallet reconnection
  * - Transaction state management
  * - Network validation
@@ -18,9 +18,9 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { RainbowKitProvider, darkTheme, lightTheme } from '@rainbow-me/rainbowkit'
-import { wagmiConfig, rainbowKitTheme, appMetadata } from '@/lib/web3/config'
-import { mezoTestnet } from '@/lib/web3/chains'
+import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit'
+import { getWagmiConfig, rainbowKitTheme } from '@/lib/web3/config'
+import { mezoTestnet } from '@mezo-org/passport/dist/src/constants'
 import '@rainbow-me/rainbowkit/styles.css'
 
 /**
@@ -78,7 +78,12 @@ interface Web3ProviderProps {
  * Provides Web3 context to the entire application
  * Wraps children with WagmiProvider, QueryClientProvider, and RainbowKitProvider
  * 
- * @example
+ * IMPORTANT: Provider order must be:
+ * 1. WagmiProvider (outermost)
+ * 2. QueryClientProvider (middle)
+ * 3. RainbowKitProvider (innermost)
+ * 
+ * Usage:
  * ```tsx
  * <Web3Provider>
  *   <App />
@@ -88,44 +93,59 @@ interface Web3ProviderProps {
 export function Web3Provider({ 
   children, 
   customQueryClient,
-  theme = 'dark'
+  theme = 'dark',
 }: Web3ProviderProps) {
-  const [mounted, setMounted] = useState(false)
-  const client = customQueryClient || queryClient
+  const [isMounted, setIsMounted] = useState(false)
+  const [config, setConfig] = useState<any>(null)
 
-  // Prevent hydration mismatch by only rendering after mount
+  // Handle hydration and config creation
   useEffect(() => {
-    setMounted(true)
+    setIsMounted(true)
+    
+    // Create config only on client side
+    try {
+      const wagmiConfig = getWagmiConfig()
+      setConfig(wagmiConfig)
+      
+      // Log initialization
+      console.log('🔌 Web3Provider Initialized')
+      console.log('   Network: Mezo Testnet (Chain ID: 31611)')
+      console.log('   Currency: BTC (native)')
+      console.log('   Wallet Support: Mezo Passport + RainbowKit')
+      console.log('   Ethereum Wallets: MetaMask, WalletConnect, Rainbow, Coinbase')
+      console.log('   Bitcoin Wallets: Unisat, Xverse, OKX')
+    } catch (error) {
+      console.error('❌ Error initializing Web3Provider:', error)
+    }
+    
+    return () => {
+      console.log('🔌 Web3Provider Unmounted')
+      setIsMounted(false)
+    }
   }, [])
 
-  // Don't render on server (prevents hydration issues)
-  if (!mounted) {
+  const finalQueryClient = customQueryClient || queryClient
+
+  // Show loading until config is ready
+  if (!isMounted || !config) {
     return (
-      <WagmiProvider config={wagmiConfig}>
-        <QueryClientProvider client={client}>
-          <div suppressHydrationWarning>{children}</div>
-        </QueryClientProvider>
-      </WagmiProvider>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Inicializando Web3...</p>
+        </div>
+      </div>
     )
   }
 
-  // Determine theme
-  const rainbowTheme = theme === 'light' 
-    ? lightTheme(rainbowKitTheme)
-    : darkTheme(rainbowKitTheme)
-
+  // Render providers with config
   return (
-    <WagmiProvider config={wagmiConfig}>
-      <QueryClientProvider client={client}>
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={finalQueryClient}>
         <RainbowKitProvider 
+          theme={darkTheme(rainbowKitTheme)}
           initialChain={mezoTestnet}
-          theme={rainbowTheme}
-          appInfo={{
-            appName: appMetadata.name,
-            learnMoreUrl: 'https://docs.khipuvault.app',
-          }}
-          showRecentTransactions={true}
-          coolMode={false}
+          modalSize="compact"
         >
           {children}
         </RainbowKitProvider>
@@ -135,84 +155,146 @@ export function Web3Provider({
 }
 
 /**
- * Network Guard Component
+ * Web3ErrorBoundary Component
  * 
- * Shows warning when user is on wrong network
- * Can automatically trigger network switch request
- */
-interface NetworkGuardProps {
-  children: ReactNode
-  autoSwitch?: boolean
-}
-
-export function NetworkGuard({ children, autoSwitch = false }: NetworkGuardProps) {
-  // Implementation would go here
-  // For now, just render children
-  return <>{children}</>
-}
-
-/**
- * Hook to access Web3Provider context
- * Throws error if used outside provider
- */
-export function useWeb3Context() {
-  // This is a placeholder - actual implementation would check context
-  return {
-    isConnected: false,
-    address: undefined,
-    chainId: undefined,
-  }
-}
-
-/**
- * Error Boundary for Web3 operations
- * Catches and handles Web3-specific errors gracefully
+ * Catches and handles errors from Web3 components
+ * Prevents entire app from crashing due to wallet/contract errors
+ * Production-ready with user-friendly error messages
  */
 interface Web3ErrorBoundaryProps {
   children: ReactNode
-  fallback?: ReactNode
 }
 
-interface Web3ErrorBoundaryState {
+interface ErrorBoundaryState {
   hasError: boolean
   error?: Error
+  errorInfo?: React.ErrorInfo
 }
 
 export class Web3ErrorBoundary extends React.Component<
   Web3ErrorBoundaryProps,
-  Web3ErrorBoundaryState
+  ErrorBoundaryState
 > {
   constructor(props: Web3ErrorBoundaryProps) {
     super(props)
     this.state = { hasError: false }
   }
 
-  static getDerivedStateFromError(error: Error): Web3ErrorBoundaryState {
+  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
     return { hasError: true, error }
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    // Log error to monitoring service (e.g., Sentry)
-    console.error('Web3 Error Boundary caught error:', error, errorInfo)
+    console.error('❌ Web3 Error Caught by Boundary:', {
+      error: error.message,
+      stack: error.stack,
+      componentStack: errorInfo.componentStack,
+      timestamp: new Date().toISOString(),
+    })
+
+    // Store error info for display
+    this.setState({
+      errorInfo,
+    })
+  }
+
+  handleReload = () => {
+    window.location.reload()
+  }
+
+  handleReset = () => {
+    this.setState({ hasError: false, error: undefined, errorInfo: undefined })
   }
 
   render() {
     if (this.state.hasError) {
-      return this.props.fallback || (
-        <div className="flex items-center justify-center min-h-screen p-4">
-          <div className="text-center">
-            <h2 className="text-2xl font-bold text-red-500 mb-2">
-              Web3 Connection Error
-            </h2>
-            <p className="text-muted-foreground mb-4">
-              {this.state.error?.message || 'An unexpected error occurred'}
-            </p>
-            <button
-              onClick={() => this.setState({ hasError: false, error: undefined })}
-              className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
-            >
-              Try Again
-            </button>
+      const isDev = process.env.NODE_ENV === 'development'
+      const errorMessage = this.state.error?.message || 'Error desconocido'
+      
+      // Check if it's a Wagmi provider error
+      const isWagmiError = errorMessage.includes('WagmiProvider') || 
+                          errorMessage.includes('useConfig')
+
+      return (
+        <div className="min-h-screen flex items-center justify-center bg-background p-4">
+          <div className="max-w-2xl w-full bg-destructive/10 border border-destructive/20 rounded-lg p-6">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-destructive/20 flex items-center justify-center">
+                <span className="text-2xl">⚠️</span>
+              </div>
+              
+              <div className="flex-1">
+                <h2 className="text-xl font-bold text-destructive mb-2">
+                  Error en Web3
+                </h2>
+                
+                <p className="text-foreground/80 mb-4">
+                  {isWagmiError ? (
+                    <>
+                      Ocurrió un error en la configuración de wallet. 
+                      El componente está intentando usar hooks de Wagmi fuera del contexto del provider.
+                    </>
+                  ) : (
+                    <>
+                      Ocurrió un error en la conexión de wallet. 
+                      Por favor recarga la página para intentar nuevamente.
+                    </>
+                  )}
+                </p>
+
+                <div className="flex gap-3 mb-4">
+                  <button
+                    onClick={this.handleReload}
+                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                  >
+                    Recargar Página
+                  </button>
+                  
+                  {isDev && (
+                    <button
+                      onClick={this.handleReset}
+                      className="px-4 py-2 bg-muted text-foreground rounded-md hover:bg-muted/80 transition-colors"
+                    >
+                      Intentar Recuperar
+                    </button>
+                  )}
+                </div>
+
+                {isDev && (
+                  <details className="mt-4 text-sm">
+                    <summary className="cursor-pointer text-muted-foreground hover:text-foreground mb-2">
+                      Detalles técnicos (solo en desarrollo)
+                    </summary>
+                    <div className="bg-background/50 border border-border rounded p-4 overflow-auto">
+                      <div className="mb-3">
+                        <strong className="text-destructive">Error:</strong>
+                        <pre className="mt-1 text-xs overflow-x-auto whitespace-pre-wrap">
+                          {errorMessage}
+                        </pre>
+                      </div>
+                      
+                      {this.state.error?.stack && (
+                        <div className="mb-3">
+                          <strong className="text-destructive">Stack:</strong>
+                          <pre className="mt-1 text-xs overflow-x-auto whitespace-pre-wrap">
+                            {this.state.error.stack}
+                          </pre>
+                        </div>
+                      )}
+
+                      {this.state.errorInfo?.componentStack && (
+                        <div>
+                          <strong className="text-destructive">Component Stack:</strong>
+                          <pre className="mt-1 text-xs overflow-x-auto whitespace-pre-wrap">
+                            {this.state.errorInfo.componentStack}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  </details>
+                )}
+              </div>
+            </div>
           </div>
         </div>
       )
@@ -221,18 +303,3 @@ export class Web3ErrorBoundary extends React.Component<
     return this.props.children
   }
 }
-
-/**
- * Development mode diagnostics
- * Logs Web3 provider state for debugging
- */
-if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
-  console.group('🔌 Web3Provider Initialized')
-  console.log('App Name:', appMetadata.name)
-  console.log('Chain:', mezoTestnet.name, `(ID: ${mezoTestnet.id})`)
-  console.log('RPC:', mezoTestnet.rpcUrls.default.http[0])
-  console.log('Explorer:', mezoTestnet.blockExplorers?.default.url)
-  console.groupEnd()
-}
-
-export default Web3Provider
