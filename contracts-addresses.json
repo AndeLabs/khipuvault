@@ -1,0 +1,86 @@
+{
+  "network": "Mezo Testnet",
+  "chainId": 31611,
+  "rpcUrl": "https://rpc.test.mezo.org",
+  "explorer": "https://explorer.test.mezo.org",
+  "deployedAt": "2025-10-24",
+  "deployer": "0x8e7E7BA2BD22e6f194821Ea2cEf903eaD949F257",
+  
+  "khipuVault": {
+    "mezoIntegration": {
+      "address": "0x9AC6249d2f2E3cbAAF34E114EdF1Cb7519AF04C2",
+      "description": "Wrapper for Mezo MUSD protocol with native BTC support",
+      "status": "deployed",
+      "explorerUrl": "https://explorer.test.mezo.org/address/0x9AC6249d2f2E3cbAAF34E114EdF1Cb7519AF04C2"
+    },
+    "yieldAggregator": {
+      "address": "0xfB3265402f388d72a9b63353b4a7BeeC4fD9De4c",
+      "description": "Yield aggregation and distribution manager",
+      "status": "deployed",
+      "explorerUrl": "https://explorer.test.mezo.org/address/0xfB3265402f388d72a9b63353b4a7BeeC4fD9De4c"
+    },
+    "individualPool": {
+      "address": "0xC2c7c8E1325Ec049302F225c8A0151E561F446Ed",
+      "description": "Individual savings pool with native BTC deposits",
+      "status": "deployed",
+      "explorerUrl": "https://explorer.test.mezo.org/address/0xC2c7c8E1325Ec049302F225c8A0151E561F446Ed"
+    },
+    "cooperativePool": {
+      "address": "0xDDe8c75271E454075BD2f348213A66B142BB8906",
+      "description": "Cooperative savings pool for group deposits",
+      "status": "deployed",
+      "explorerUrl": "https://explorer.test.mezo.org/address/0xDDe8c75271E454075BD2f348213A66B142BB8906"
+    }
+  },
+  
+  "mezoProtocol": {
+    "musd": {
+      "address": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+      "description": "MUSD - Native stablecoin on Mezo",
+      "status": "native"
+    },
+    "borrowerOperations": {
+      "address": "0xCdF7028ceAB81fA0C6971208e83fa7872994beE5",
+      "description": "Mezo protocol borrowing operations",
+      "status": "native"
+    },
+    "troveManager": {
+      "address": "0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0",
+      "description": "Manages user positions (Troves)",
+      "status": "native"
+    },
+    "hintHelpers": {
+      "address": "0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6",
+      "description": "Helper for sorted trove operations",
+      "status": "native"
+    },
+    "priceFeed": {
+      "address": "0x86bCF0841622a5dAC14A313a15f96A95421b9366",
+      "description": "BTC price oracle",
+      "status": "native"
+    },
+    "sortedTroves": {
+      "address": "0x722E4D24FD6Ff8b0AC679450F3D91294607268fA",
+      "description": "Sorted list of troves",
+      "status": "native"
+    }
+  },
+  
+  "configuration": {
+    "targetLtv": 5000,
+    "targetLtvPercentage": "50%",
+    "maxFee": 500,
+    "maxFeePercentage": "5%",
+    "vaultApr": 600,
+    "vaultAprPercentage": "6%",
+    "feeCollector": "0x8e7E7BA2BD22e6f194821Ea2cEf903eaD949F257"
+  },
+  
+  "notes": {
+    "btcIsNative": true,
+    "btcDecimals": 18,
+    "noWbtcNeeded": true,
+    "payableFunctions": true,
+    "approvalNotNeeded": true
+  }
+}
