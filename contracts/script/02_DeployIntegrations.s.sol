@@ -75,18 +75,17 @@ contract DeployIntegrations is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // 1. Deploy MezoIntegration with real MUSD contracts
+        // 1. Deploy MezoIntegration with real MUSD protocol (NO WBTC - BTC is native)
         console2.log("\n[1/2] Deploying MezoIntegration...");
         console2.log("  Using Mezo MUSD Protocol Contracts:");
-        console2.log("    WBTC:", wbtc);
-        console2.log("    MUSD:", musd);
+        console2.log("    MUSD (native stablecoin):", musd);
         console2.log("    BorrowerOperations:", borrowerOperations);
         console2.log("    PriceFeed:", priceFeed);
         console2.log("    HintHelpers:", hintHelpers);
         console2.log("    TroveManager:", troveManager);
+        console2.log("  NOTE: BTC is NATIVE on Mezo (like ETH on Ethereum) - no WBTC needed");
 
         MezoIntegration mezo = new MezoIntegration(
-            wbtc,
             musd,
             borrowerOperations,
             priceFeed,
@@ -155,35 +154,15 @@ contract DeployIntegrations is Script {
     function _loadConfig() internal {
         console2.log("[LOAD] Loading configuration...");
 
-        // Load token addresses (try env first, then deployment file)
-        wbtc = vm.envOr("WBTC_ADDRESS", address(0));
-        musd = vm.envOr("MUSD_ADDRESS", address(0));
+        // Load MUSD address (already deployed on Mezo)
+        musd = vm.envAddress("MUSD_ADDRESS");
+        console2.log("  [OK] MUSD address loaded:", musd);
 
-        // For Matsnet, try to load from previous token deployment
-        if (wbtc == address(0) || musd == address(0)) {
-            string memory chainId = vm.toString(block.chainid);
-            string memory filename = string.concat("./deployments/tokens-", chainId, ".json");
-            
-            try vm.parseJson(vm.readFile(filename), ".wbtc") returns (bytes memory data) {
-                wbtc = abi.decode(data, (address));
-                console2.log("  [OK] WBTC loaded from deployment file");
-            } catch {
-                console2.log("  [WARNING] Could not load WBTC from deployment file");
-            }
-            
-            try vm.parseJson(vm.readFile(filename), ".musd") returns (bytes memory data) {
-                musd = abi.decode(data, (address));
-                console2.log("  [OK] MUSD loaded from deployment file");
-            } catch {
-                console2.log("  [WARNING] Could not load MUSD from deployment file");
-            }
-        }
-
-        // Load Mezo protocol contract addresses
-        borrowerOperations = vm.envAddress("MATSNET_BORROWER_OPERATIONS");
-        priceFeed = vm.envAddress("MATSNET_PRICE_FEED");
-        hintHelpers = vm.envAddress("MATSNET_HINT_HELPERS");
-        troveManager = vm.envAddress("MATSNET_TROVE_MANAGER");
+        // Load Mezo protocol contract addresses (already deployed on Mezo)
+        borrowerOperations = vm.envAddress("MEZO_BORROWER_OPERATIONS");
+        priceFeed = vm.envAddress("MEZO_PRICE_FEED");
+        hintHelpers = vm.envAddress("MEZO_HINT_HELPERS");
+        troveManager = vm.envAddress("MEZO_TROVE_MANAGER");
 
         // Load configuration parameters
         feeCollector = vm.envOr("FEE_COLLECTOR_ADDRESS", address(0));
@@ -206,11 +185,10 @@ contract DeployIntegrations is Script {
     function _validateConfig() internal view {
         console2.log("[VALIDATE] Validating configuration...");
 
-        // Validate token addresses
-        require(wbtc != address(0), "WBTC address not set");
+        // Validate MUSD address
         require(musd != address(0), "MUSD address not set");
         
-        // Validate Mezo contract addresses
+        // Validate Mezo protocol contract addresses
         require(borrowerOperations != address(0), "BorrowerOperations address not set");
         require(priceFeed != address(0), "PriceFeed address not set");
         require(hintHelpers != address(0), "HintHelpers address not set");
@@ -236,8 +214,7 @@ contract DeployIntegrations is Script {
         vm.serializeAddress(json, "mezoIntegration", mezoIntegration);
         vm.serializeAddress(json, "yieldAggregator", yieldAggregator);
         
-        // Dependencies
-        vm.serializeAddress(json, "wbtc", wbtc);
+        // Mezo Protocol Dependencies (already deployed on chain)
         vm.serializeAddress(json, "musd", musd);
         vm.serializeAddress(json, "borrowerOperations", borrowerOperations);
         vm.serializeAddress(json, "priceFeed", priceFeed);
@@ -282,8 +259,8 @@ contract DeployIntegrations is Script {
         console2.log("  YieldAggregator:", yieldAggregator);
         console2.log("");
         console2.log("[MEZO] MEZO PROTOCOL INTEGRATION:");
-        console2.log("  WBTC Token:", wbtc);
-        console2.log("  MUSD Token:", musd);
+        console2.log("  NOTE: BTC is NATIVE on Mezo (18 decimals, like ETH on Ethereum)");
+        console2.log("  MUSD Token (native stablecoin):", musd);
         console2.log("  BorrowerOperations:", borrowerOperations);
         console2.log("  PriceFeed:", priceFeed);
         console2.log("  HintHelpers:", hintHelpers);

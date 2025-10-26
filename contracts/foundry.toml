@@ -12,6 +12,13 @@ via_ir = true
 test = "test"
 verbosity = 3
 
+# Exclude disabled test directories
+fs_permissions = [
+    { access = "read", path = "./" },
+    { access = "read-write", path = "./deployments" }
+]
+exclude = ["test/fuzz.disabled/**", "test/integration.disabled/**"]
+
 # Gas reporting
 gas_reports = ["*"]
 

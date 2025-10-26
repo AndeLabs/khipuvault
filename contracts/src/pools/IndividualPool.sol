@@ -6,20 +6,25 @@ import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IMezoIntegration} from "../interfaces/IMezoIntegration.sol";
 import {IYieldAggregator} from "../interfaces/IYieldAggregator.sol";
 
 /**
  * @title IndividualPool
- * @notice Permite a usuarios individuales depositar BTC, mint MUSD via Mezo, y ganar yields DeFi
- * @dev Integración con Mezo para collateral management y yield vaults para rendimientos pasivos
+ * @notice Permite a usuarios individuales depositar MUSD y ganar yields optimizados
+ * @dev Pool simplificado enfocado en yield management, no en collateral management
+ * 
+ * IMPORTANTE: Solo acepta MUSD (no BTC directo)
+ * - Los usuarios deben obtener MUSD primero en mezo.org
+ * - MUSD tiene 18 decimales (ERC20 estándar)
+ * - Nos enfocamos solo en optimizar yields, no en CDP management
  * 
  * Flujo principal:
- * 1. Usuario deposita BTC/WBTC
- * 2. Contrato deposita en Mezo y mintea MUSD
- * 3. MUSD se deposita en yield aggregator (Aave/Compound)
- * 4. Yields se acumulan automáticamente
- * 5. Usuario puede retirar en cualquier momento
+ * 1. Usuario obtiene MUSD en mezo.org (deposita BTC allá)
+ * 2. Usuario aprueba MUSD a este contrato
+ * 3. Usuario deposita MUSD en IndividualPool
+ * 4. MUSD se deposita en yield aggregator para ganar rendimientos
+ * 5. Yields se acumulan automáticamente
+ * 6. Usuario puede retirar en cualquier momento
  */
 contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -32,8 +37,7 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
      * @notice Información del depósito de un usuario
      */
     struct UserDeposit {
-        uint256 btcAmount;           // BTC depositado (en wei)
-        uint256 musdMinted;          // MUSD minted contra BTC
+        uint256 musdAmount;          // MUSD depositado (18 decimals)
         uint256 yieldAccrued;        // Yields acumulados (en MUSD)
         uint256 depositTimestamp;    // Timestamp del depósito
         uint256 lastYieldUpdate;     // Última vez que se actualizaron yields
@@ -44,35 +48,26 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
                             STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Mezo integration contract
-    IMezoIntegration public immutable MEZO_INTEGRATION;
-
     /// @notice Yield aggregator contract
     IYieldAggregator public immutable YIELD_AGGREGATOR;
 
-    /// @notice WBTC token (wrapped BTC)
-    IERC20 public immutable WBTC;
-
-    /// @notice MUSD token
+    /// @notice MUSD token (Mezo native stablecoin)
     IERC20 public immutable MUSD;
 
     /// @notice Depósitos por usuario
     mapping(address => UserDeposit) public userDeposits;
 
-    /// @notice Total BTC depositado en el pool
-    uint256 public totalBtcDeposited;
-
-    /// @notice Total MUSD minted
-    uint256 public totalMusdMinted;
+    /// @notice Total MUSD depositado en el pool
+    uint256 public totalMusdDeposited;
 
     /// @notice Total yields generados
     uint256 public totalYieldsGenerated;
 
-    /// @notice Minimum deposit amount (0.001 BTC)
-    uint256 public constant MIN_DEPOSIT = 0.001 ether;
+    /// @notice Minimum deposit amount (10 MUSD)
+    uint256 public constant MIN_DEPOSIT = 10 ether;
 
-    /// @notice Maximum deposit amount (10 BTC)
-    uint256 public constant MAX_DEPOSIT = 10 ether;
+    /// @notice Maximum deposit amount (100,000 MUSD)
+    uint256 public constant MAX_DEPOSIT = 100_000 ether;
 
     /// @notice Performance fee (1% = 100 basis points)
     uint256 public performanceFee = 100; // 1%
@@ -86,7 +81,6 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
 
     event Deposited(
         address indexed user,
-        uint256 btcAmount,
         uint256 musdAmount,
         uint256 timestamp
     );
@@ -99,7 +93,6 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
 
     event Withdrawn(
         address indexed user,
-        uint256 btcAmount,
         uint256 musdAmount,
         uint256 yieldAmount
     );
@@ -132,29 +125,21 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
 
     /**
      * @notice Constructor
-     * @param _mezoIntegration Address of Mezo integration contract
      * @param _yieldAggregator Address of yield aggregator contract
-     * @param _wbtc Address of WBTC token
-     * @param _musd Address of MUSD token
+     * @param _musd Address of MUSD token (Mezo native stablecoin)
      * @param _feeCollector Address to collect performance fees
      */
     constructor(
-        address _mezoIntegration,
         address _yieldAggregator,
-        address _wbtc,
         address _musd,
         address _feeCollector
     ) Ownable(msg.sender) {
-        if (_mezoIntegration == address(0) ||
-            _yieldAggregator == address(0) ||
-            _wbtc == address(0) ||
+        if (_yieldAggregator == address(0) ||
             _musd == address(0) ||
             _feeCollector == address(0)
         ) revert InvalidAddress();
 
-        MEZO_INTEGRATION = IMezoIntegration(_mezoIntegration);
         YIELD_AGGREGATOR = IYieldAggregator(_yieldAggregator);
-        WBTC = IERC20(_wbtc);
         MUSD = IERC20(_musd);
         feeCollector = _feeCollector;
     }
@@ -164,49 +149,41 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Deposita BTC y automáticamente mint MUSD para generar yields
-     * @param btcAmount Cantidad de BTC/WBTC a depositar (en wei)
-     * @dev Usuario debe aprobar este contrato antes de llamar esta función
+     * @notice Deposita MUSD para generar yields optimizados
+     * @dev Usuario debe aprobar MUSD antes de llamar esta función
+     * @param musdAmount Cantidad de MUSD a depositar (18 decimales)
      */
-    function deposit(uint256 btcAmount) 
+    function deposit(uint256 musdAmount) 
         external 
         nonReentrant 
         whenNotPaused 
     {
-        if (btcAmount < MIN_DEPOSIT) revert MinimumDepositNotMet();
-        if (btcAmount > MAX_DEPOSIT) revert MaximumDepositExceeded();
+        if (musdAmount < MIN_DEPOSIT) revert MinimumDepositNotMet();
+        if (musdAmount > MAX_DEPOSIT) revert MaximumDepositExceeded();
         if (userDeposits[msg.sender].active) revert DepositAlreadyExists();
 
-        // 1. Transferir WBTC del usuario al contrato
-        WBTC.safeTransferFrom(msg.sender, address(this), btcAmount);
+        // 1. Transferir MUSD del usuario al contrato
+        MUSD.safeTransferFrom(msg.sender, address(this), musdAmount);
 
-        // 2. Aprobar Mezo para usar el WBTC
-        WBTC.forceApprove(address(MEZO_INTEGRATION), btcAmount);
-
-        // 3. Depositar BTC en Mezo y mint MUSD
-        uint256 musdAmount = MEZO_INTEGRATION.depositAndMint(btcAmount);
-
-        // 4. Aprobar yield aggregator para usar MUSD
+        // 2. Aprobar yield aggregator para usar MUSD
         MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
 
-        // 5. Depositar MUSD en yield vault
+        // 3. Depositar MUSD en yield vault
         YIELD_AGGREGATOR.deposit(musdAmount);
 
-        // 6. Actualizar estado del usuario
+        // 4. Actualizar estado del usuario
         userDeposits[msg.sender] = UserDeposit({
-            btcAmount: btcAmount,
-            musdMinted: musdAmount,
+            musdAmount: musdAmount,
             yieldAccrued: 0,
             depositTimestamp: block.timestamp,
             lastYieldUpdate: block.timestamp,
             active: true
         });
 
-        // 7. Actualizar totales
-        totalBtcDeposited += btcAmount;
-        totalMusdMinted += musdAmount;
+        // 5. Actualizar totales
+        totalMusdDeposited += musdAmount;
 
-        emit Deposited(msg.sender, btcAmount, musdAmount, block.timestamp);
+        emit Deposited(msg.sender, musdAmount, block.timestamp);
     }
 
     /**
@@ -276,19 +253,18 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
 
     /**
      * @notice Retira todo (principal + yields)
-     * @return btcAmount Cantidad de BTC devuelta
+     * @return musdAmount Cantidad de MUSD principal devuelta
      * @return yieldAmount Cantidad de yields en MUSD
      */
     function withdraw() 
         external 
         nonReentrant 
-        returns (uint256 btcAmount, uint256 yieldAmount) 
+        returns (uint256 musdAmount, uint256 yieldAmount) 
     {
         UserDeposit storage userDeposit = userDeposits[msg.sender];
         if (!userDeposit.active) revert NoActiveDeposit();
 
-        btcAmount = userDeposit.btcAmount;
-        uint256 musdAmount = userDeposit.musdMinted;
+        musdAmount = userDeposit.musdAmount;
 
         // 1. Calcular yields pendientes del usuario
         uint256 pendingYield = _calculateUserYield(msg.sender);
@@ -308,9 +284,8 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
         // 4. Actualizar estado ANTES de retirar del aggregator
         // Esto asegura que el siguiente cálculo de yield para otros usuarios sea correcto
         userDeposit.active = false;
-        totalBtcDeposited -= btcAmount;
-        uint256 oldTotalMusd = totalMusdMinted;
-        totalMusdMinted -= musdAmount;
+        uint256 oldTotalMusd = totalMusdDeposited;
+        totalMusdDeposited -= musdAmount;
         
         // 5. Si el pool no tiene suficiente MUSD para cubrir principal + yields,
         // retirar del aggregator solo lo necesario
@@ -319,8 +294,8 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
         if (poolMusdBalance < totalNeeded) {
             uint256 amountToWithdraw = totalNeeded - poolMusdBalance;
             
-            // Si este es el último usuario (totalMusdMinted == 0), retirar todo del aggregator
-            if (totalMusdMinted == 0) {
+            // Si este es el último usuario (totalMusdDeposited == 0), retirar todo del aggregator
+            if (totalMusdDeposited == 0) {
                 (uint256 aggregatorPrincipal, uint256 aggregatorYields) = YIELD_AGGREGATOR.getUserPosition(address(this));
                 uint256 aggregatorBalance = aggregatorPrincipal + aggregatorYields;
                 if (aggregatorBalance > 0) {
@@ -387,24 +362,20 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
             }
         }
 
-        // 6. Repagar deuda MUSD a Mezo y recuperar BTC
-        MUSD.forceApprove(address(MEZO_INTEGRATION), musdAmount);
-        uint256 btcReturned = MEZO_INTEGRATION.burnAndWithdraw(musdAmount);
+        // 6. Transferir MUSD principal al usuario
+        MUSD.safeTransfer(msg.sender, musdAmount);
 
-        // 7. Transferir BTC al usuario
-        WBTC.safeTransfer(msg.sender, btcReturned);
-
-        // 8. Transferir yields al usuario si los hay
+        // 7. Transferir yields al usuario si los hay
         if (yieldAmount > 0) {
             MUSD.safeTransfer(msg.sender, yieldAmount);
         }
 
-        // 9. Transferir fee al collector si hay
+        // 8. Transferir fee al collector si hay
         if (feeAmount > 0) {
             MUSD.safeTransfer(feeCollector, feeAmount);
         }
 
-        emit Withdrawn(msg.sender, btcReturned, musdAmount, yieldAmount);
+        emit Withdrawn(msg.sender, musdAmount, yieldAmount);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -464,12 +435,12 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
         returns (uint256 roi) 
     {
         UserDeposit memory userDeposit = userDeposits[user];
-        if (!userDeposit.active || userDeposit.musdMinted == 0) return 0;
+        if (!userDeposit.active || userDeposit.musdAmount == 0) return 0;
 
         uint256 totalYield = calculateYield(user);
         
         // ROI = (yield / principal) * 10000
-        roi = (totalYield * 10000) / userDeposit.musdMinted;
+        roi = (totalYield * 10000) / userDeposit.musdAmount;
     }
 
     /**
@@ -489,8 +460,8 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
             uint256 avgApr
         ) 
     {
-        totalBtc = totalBtcDeposited;
-        totalMusd = totalMusdMinted;
+        totalBtc = 0; // No manejamos BTC directamente
+        totalMusd = totalMusdDeposited;
         totalYields = totalYieldsGenerated;
         avgApr = YIELD_AGGREGATOR.getAverageApr();
     }
@@ -507,7 +478,7 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
      */
     function _calculateUserYield(address user) internal view returns (uint256 userYield) {
         UserDeposit memory userDeposit = userDeposits[user];
-        if (!userDeposit.active || totalMusdMinted == 0) return 0;
+        if (!userDeposit.active || totalMusdDeposited == 0) return 0;
 
         // Obtener yields totales del pool desde el aggregator
         uint256 poolTotalYield = YIELD_AGGREGATOR.getPendingYield(address(this));
@@ -516,7 +487,7 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
 
         // Calcular la proporción del usuario en el pool
         // userYield = poolYield * (userMUSD / totalMUSD)
-        userYield = (poolTotalYield * userDeposit.musdMinted) / totalMusdMinted;
+        userYield = (poolTotalYield * userDeposit.musdAmount) / totalMusdDeposited;
     }
 
     /**
@@ -572,4 +543,10 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
     function unpause() external onlyOwner {
         _unpause();
     }
+
+    /**
+     * @notice Receive function para aceptar BTC nativo
+     * @dev Necesario para recibir BTC de MezoIntegration en withdrawals
+     */
+    receive() external payable {}
 }

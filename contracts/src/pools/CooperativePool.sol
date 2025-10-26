@@ -14,8 +14,13 @@ import {IYieldAggregator} from "../interfaces/IYieldAggregator.sol";
  * @notice Permite a múltiples usuarios crear y unirse a pools cooperativos de ahorro
  * @dev Pool comunitario donde rendimientos se distribuyen equitativamente entre miembros
  * 
+ * IMPORTANTE: En Mezo, BTC es NATIVO (como ETH en Ethereum)
+ * - Los usuarios envían BTC via msg.value (funciones payable)
+ * - BTC tiene 18 decimales en Mezo (no 8 como BTC real)
+ * - No se necesita WBTC, trabajamos directamente con BTC nativo
+ * 
  * Características:
- * - Múltiples usuarios aportan pequeñas cantidades
+ * - Múltiples usuarios aportan pequeñas cantidades de BTC nativo
  * - Pool alcanza tamaño óptimo para DeFi yields
  * - Rendimientos se reparten equitativamente
  * - Permite entrada/salida flexible
@@ -77,10 +82,7 @@ contract CooperativePool is Ownable, ReentrancyGuard, Pausable {
     /// @notice Yield aggregator contract
     IYieldAggregator public immutable YIELD_AGGREGATOR;
 
-    /// @notice WBTC token
-    IERC20 public immutable WBTC;
-
-    /// @notice MUSD token
+    /// @notice MUSD token (Mezo native stablecoin)
     IERC20 public immutable MUSD;
 
     /// @notice Counter para pool IDs
@@ -188,27 +190,23 @@ contract CooperativePool is Ownable, ReentrancyGuard, Pausable {
      * @notice Constructor
      * @param _mezoIntegration Mezo integration contract address
      * @param _yieldAggregator Yield aggregator contract address
-     * @param _wbtc WBTC token address
-     * @param _musd MUSD token address
+     * @param _musd MUSD token address (Mezo native stablecoin)
      * @param _feeCollector Fee collector address
      */
     constructor(
         address _mezoIntegration,
         address _yieldAggregator,
-        address _wbtc,
         address _musd,
         address _feeCollector
     ) Ownable(msg.sender) {
         if (_mezoIntegration == address(0) ||
             _yieldAggregator == address(0) ||
-            _wbtc == address(0) ||
             _musd == address(0) ||
             _feeCollector == address(0)
         ) revert InvalidAddress();
 
         MEZO_INTEGRATION = IMezoIntegration(_mezoIntegration);
         YIELD_AGGREGATOR = IYieldAggregator(_yieldAggregator);
-        WBTC = IERC20(_wbtc);
         MUSD = IERC20(_musd);
         feeCollector = _feeCollector;
     }
@@ -271,15 +269,18 @@ contract CooperativePool is Ownable, ReentrancyGuard, Pausable {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Unirse a un pool cooperativo
+     * @notice Unirse a un pool cooperativo con BTC NATIVO
      * @param poolId ID del pool
-     * @param btcAmount Cantidad de BTC a contribuir
+     * @dev Usuario envía BTC con msg.value (función payable)
      */
-    function joinPool(uint256 poolId, uint256 btcAmount) 
+    function joinPool(uint256 poolId) 
         external 
+        payable
         nonReentrant 
         whenNotPaused 
     {
+        uint256 btcAmount = msg.value;
+        
         PoolInfo storage pool = pools[poolId];
         if (pool.poolId == 0) revert InvalidPoolId();
         if (!pool.allowNewMembers) revert PoolNotAcceptingMembers();
@@ -287,9 +288,6 @@ contract CooperativePool is Ownable, ReentrancyGuard, Pausable {
         if (poolMembers[poolId][msg.sender].active) revert AlreadyMember();
         if (btcAmount < pool.minContribution) revert ContributionTooLow();
         if (btcAmount > pool.maxContribution) revert ContributionTooHigh();
-
-        // Transferir WBTC del usuario
-        WBTC.safeTransferFrom(msg.sender, address(this), btcAmount);
 
         // Calcular shares (proporcional a contribución)
         uint256 shares = btcAmount;
@@ -392,8 +390,9 @@ contract CooperativePool is Ownable, ReentrancyGuard, Pausable {
             btcAmount = btcReturned;
         }
 
-        // Transferir BTC de vuelta al miembro
-        WBTC.safeTransfer(msg.sender, btcAmount);
+        // Transferir BTC nativo de vuelta al miembro
+        (bool success, ) = msg.sender.call{value: btcAmount}("");
+        require(success, "BTC transfer failed");
 
         // Transferir yields si existen
         if (memberYield > 0) {
@@ -564,18 +563,15 @@ contract CooperativePool is Ownable, ReentrancyGuard, Pausable {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Deposita BTC en Mezo y genera yields
+     * @notice Deposita BTC NATIVO en Mezo y genera yields
      * @param poolId ID del pool
      * @param btcAmount Cantidad de BTC a depositar
      */
     function _depositToMezo(uint256 poolId, uint256 btcAmount) internal {
         PoolInfo storage pool = pools[poolId];
 
-        // Aprobar Mezo
-        WBTC.forceApprove(address(MEZO_INTEGRATION), btcAmount);
-
-        // Depositar y mint MUSD
-        uint256 musdAmount = MEZO_INTEGRATION.depositAndMint(btcAmount);
+        // Depositar BTC nativo y mint MUSD
+        uint256 musdAmount = MEZO_INTEGRATION.depositAndMintNative{value: btcAmount}();
 
         // Aprobar yield aggregator
         MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
@@ -695,4 +691,10 @@ contract CooperativePool is Ownable, ReentrancyGuard, Pausable {
     function unpause() external onlyOwner {
         _unpause();
     }
+
+    /**
+     * @notice Receive function para aceptar BTC nativo
+     * @dev Necesario para recibir BTC de MezoIntegration en withdrawals
+     */
+    receive() external payable {}
 }

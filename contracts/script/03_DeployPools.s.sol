@@ -29,7 +29,6 @@ contract DeployPools is Script {
     // Dependencies (loaded from previous deployments)
     address public mezoIntegration;
     address public yieldAggregator;
-    address public wbtc;
     address public musd;
     address public feeCollector;
 
@@ -55,9 +54,9 @@ contract DeployPools is Script {
         console2.log("Dependencies:");
         console2.log("  MezoIntegration:", mezoIntegration);
         console2.log("  YieldAggregator:", yieldAggregator);
-        console2.log("  WBTC:", wbtc);
         console2.log("  MUSD:", musd);
         console2.log("  Fee Collector:", feeCollector);
+        console2.log("  NOTE: BTC is NATIVE on Mezo - no WBTC needed");
         console2.log("===========================================");
 
         // Validate all dependencies
@@ -65,27 +64,23 @@ contract DeployPools is Script {
 
         vm.startBroadcast(deployerPrivateKey);
 
-        // 1. Deploy IndividualPool
+        // 1. Deploy IndividualPool (MUSD-only, simplified)
         console2.log("\n[1/4] Deploying IndividualPool...");
         IndividualPool individual = new IndividualPool(
-            mezoIntegration,
             yieldAggregator,
-            wbtc,
             musd,
             feeCollector
         );
         individualPool = address(individual);
         console2.log("IndividualPool deployed at:", individualPool);
-        console2.log("  - Min Deposit: 0.005 BTC");
-        console2.log("  - Max Deposit: 10 BTC");
+        console2.log("  - Min Deposit: 10 MUSD");
+        console2.log("  - Max Deposit: 100,000 MUSD");
         console2.log("  - Performance Fee: 1%");
 
-        // 2. Deploy CooperativePool
+        // 2. Deploy CooperativePool (MUSD-only, simplified)
         console2.log("\n[2/4] Deploying CooperativePool...");
         CooperativePool cooperative = new CooperativePool(
-            mezoIntegration,
             yieldAggregator,
-            wbtc,
             musd,
             feeCollector
         );
@@ -117,7 +112,6 @@ contract DeployPools is Script {
         LotteryPool lottery = new LotteryPool(
             mezoIntegration,
             yieldAggregator,
-            wbtc,
             musd,
             vrfCoordinator,
             vrfSubscriptionId,
@@ -136,7 +130,6 @@ contract DeployPools is Script {
         RotatingPool rotating = new RotatingPool(
             mezoIntegration,
             yieldAggregator,
-            wbtc,
             musd,
             feeCollector
         );
@@ -163,7 +156,6 @@ contract DeployPools is Script {
         // Try loading from environment first
         mezoIntegration = vm.envOr("MEZO_INTEGRATION_ADDRESS", address(0));
         yieldAggregator = vm.envOr("YIELD_AGGREGATOR_ADDRESS", address(0));
-        wbtc = vm.envOr("WBTC_ADDRESS", address(0));
         musd = vm.envOr("MUSD_ADDRESS", address(0));
         feeCollector = vm.envOr("FEE_COLLECTOR_ADDRESS", address(0));
 
@@ -190,16 +182,12 @@ contract DeployPools is Script {
             }
         }
 
-        if (wbtc == address(0) || musd == address(0)) {
+        if (musd == address(0)) {
             string memory tokensFile = string.concat(
                 "./deployments/tokens-",
                 chainId,
                 ".json"
             );
-            
-            try vm.parseJson(vm.readFile(tokensFile), ".wbtc") returns (bytes memory data) {
-                wbtc = abi.decode(data, (address));
-            } catch {}
             
             try vm.parseJson(vm.readFile(tokensFile), ".musd") returns (bytes memory data) {
                 musd = abi.decode(data, (address));
@@ -221,7 +209,6 @@ contract DeployPools is Script {
     function _validateConfig() internal view {
         require(mezoIntegration != address(0), "MezoIntegration not deployed");
         require(yieldAggregator != address(0), "YieldAggregator not deployed");
-        require(wbtc != address(0), "WBTC not deployed");
         require(musd != address(0), "MUSD not deployed");
         require(feeCollector != address(0), "Fee collector not set");
     }
@@ -236,7 +223,6 @@ contract DeployPools is Script {
         vm.serializeAddress(json, "rotatingPool", rotatingPool);
         vm.serializeAddress(json, "mezoIntegration", mezoIntegration);
         vm.serializeAddress(json, "yieldAggregator", yieldAggregator);
-        vm.serializeAddress(json, "wbtc", wbtc);
         vm.serializeAddress(json, "musd", musd);
         string memory finalJson = vm.serializeAddress(json, "feeCollector", feeCollector);
         
@@ -267,8 +253,8 @@ contract DeployPools is Script {
         console2.log("  YieldAggregator:", yieldAggregator);
         console2.log("===========================================");
         console2.log("Tokens:");
-        console2.log("  WBTC:", wbtc);
         console2.log("  MUSD:", musd);
+        console2.log("  NOTE: BTC is NATIVE on Mezo (18 decimals)");
         console2.log("===========================================");
         console2.log("Configuration:");
         console2.log("  Fee Collector:", feeCollector);
