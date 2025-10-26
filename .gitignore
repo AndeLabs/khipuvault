@@ -50,7 +50,7 @@ cache/
 out/
 broadcast/
 deployments/
-lib/
+contracts/lib/
 
 # Hardhat specific
 artifacts/
