@@ -3,175 +3,196 @@
  * @module hooks/web3/use-cooperative-pools
  * 
  * Production-ready hooks for interacting with CooperativePool contract
- * on Mezo Testnet
+ * on Mezo Testnet. Uses TanStack Query for optimal state management.
  */
 
 'use client'
 
-import { useAccount, usePublicClient, useWalletClient, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { useState, useEffect } from 'react'
+import { usePublicClient, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useQuery } from '@tanstack/react-query'
 import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 import { COOPERATIVE_POOL_ABI } from '@/lib/web3/cooperative-pool-abi'
 import { parseEther, formatEther } from 'viem'
-
-// Types
-export interface PoolInfo {
-  poolId: bigint
-  name: string
-  creator: string
-  minContribution: bigint
-  maxContribution: bigint
-  maxMembers: bigint
-  currentMembers: bigint
-  totalBtcDeposited: bigint
-  totalMusdMinted: bigint
-  totalYieldGenerated: bigint
-  createdAt: bigint
-  status: number // 0=ACCEPTING, 1=ACTIVE, 2=CLOSED
-  allowNewMembers: boolean
-}
-
-export interface MemberInfo {
-  btcContributed: bigint
-  shares: bigint
-  yieldClaimed: bigint
-  joinedAt: bigint
-  active: boolean
-}
+import { normalizeBigInt } from '@/lib/query-utils'
+import {
+  fetchCooperativePools,
+  fetchPoolInfo,
+  fetchMemberInfo,
+  fetchPoolMembers,
+  fetchMemberYield,
+  type PoolInfo,
+  type MemberInfo,
+} from '@/lib/blockchain/fetch-cooperative-pools'
 
 const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePool as `0x${string}`
 
 /**
- * Hook to get all pools
+ * Hook to get all pools using TanStack Query
+ * 
+ * Benefits:
+ * - Automatic caching and deduplication
+ * - Real-time updates via refetchQueries()
+ * - Background refetching based on staleTime
+ * - Better error handling
+ * 
+ * @returns Object with pools array, loading state, and error
  */
 export function useCooperativePools() {
   const publicClient = usePublicClient()
-  const [pools, setPools] = useState<PoolInfo[]>([])
-  const [isLoading, setIsLoading] = useState(true)
 
-  // Get pool counter
+  // Get pool counter using wagmi's useReadContract (already optimized)
   const { data: poolCounter } = useReadContract({
     address: poolAddress,
     abi: COOPERATIVE_POOL_ABI,
     functionName: 'poolCounter',
   })
 
-  useEffect(() => {
-    if (!publicClient || !poolCounter) {
-      setIsLoading(false)
-      return
-    }
-
-    async function fetchPools() {
-      try {
-        setIsLoading(true)
-        const poolsData: PoolInfo[] = []
-        const count = Number(poolCounter)
-
-        // Fetch each pool info
-        for (let i = 1; i <= count; i++) {
-          try {
-            const poolInfo = await publicClient!.readContract({
-              address: poolAddress,
-              abi: COOPERATIVE_POOL_ABI,
-              functionName: 'getPoolInfo',
-              args: [BigInt(i)],
-            }) as PoolInfo
-
-            poolsData.push(poolInfo)
-          } catch (error) {
-            console.warn(`Failed to fetch pool ${i}:`, error)
-          }
-        }
-
-        setPools(poolsData)
-      } catch (error) {
-        console.error('Error fetching pools:', error)
-      } finally {
-        setIsLoading(false)
+  // Fetch all pools using useQuery
+  const { data: pools = [], isLoading, error } = useQuery({
+    queryKey: ['cooperative-pool', 'all-pools', normalizeBigInt(poolCounter)],
+    queryFn: () => {
+      if (!publicClient) {
+        return Promise.resolve([])
       }
-    }
+      return fetchCooperativePools(publicClient, Number(poolCounter || 0))
+    },
+    enabled: !!publicClient && !!poolCounter && Number(poolCounter) > 0,
+    staleTime: 30000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+  })
 
-    fetchPools()
-  }, [publicClient, poolCounter])
-
-  return { pools, isLoading, poolCounter: Number(poolCounter || 0) }
+  return {
+    pools,
+    isLoading,
+    error,
+    poolCounter: Number(poolCounter || 0),
+  }
 }
 
 /**
- * Hook to get specific pool info
+ * Hook to get specific pool info using TanStack Query
+ * 
+ * @param poolId - ID of the pool to fetch
+ * @returns Object with poolInfo, loading state, and error
  */
 export function usePoolInfo(poolId: number) {
-  const { data: poolInfo, isLoading, refetch } = useReadContract({
-    address: poolAddress,
-    abi: COOPERATIVE_POOL_ABI,
-    functionName: 'getPoolInfo',
-    args: [BigInt(poolId)],
+  const publicClient = usePublicClient()
+
+  const { data: poolInfo, isLoading, error } = useQuery({
+    queryKey: ['cooperative-pool', 'pool-info', poolId],
+    queryFn: () => {
+      if (!publicClient) {
+        return Promise.resolve(null)
+      }
+      return fetchPoolInfo(publicClient, poolId)
+    },
+    enabled: !!publicClient && poolId > 0,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
   })
 
   return {
-    poolInfo: poolInfo as PoolInfo | undefined,
+    poolInfo: poolInfo as PoolInfo | null | undefined,
     isLoading,
-    refetch,
+    error,
   }
 }
 
 /**
- * Hook to get member info for a pool
+ * Hook to get member info for a pool using TanStack Query
+ * 
+ * @param poolId - ID of the pool
+ * @param memberAddress - Address of the member
+ * @returns Object with memberInfo, loading state, and error
  */
 export function useMemberInfo(poolId: number, memberAddress?: `0x${string}`) {
-  const { data: memberInfo, isLoading, refetch } = useReadContract({
-    address: poolAddress,
-    abi: COOPERATIVE_POOL_ABI,
-    functionName: 'getMemberInfo',
-    args: memberAddress ? [BigInt(poolId), memberAddress] : undefined,
+  const publicClient = usePublicClient()
+
+  const { data: memberInfo, isLoading, error } = useQuery({
+    queryKey: ['cooperative-pool', 'member-info', poolId, memberAddress || 'none'],
+    queryFn: () => {
+      if (!publicClient || !memberAddress) {
+        return Promise.resolve(null)
+      }
+      return fetchMemberInfo(publicClient, poolId, memberAddress)
+    },
+    enabled: !!publicClient && poolId > 0 && !!memberAddress,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
   })
 
   return {
-    memberInfo: memberInfo as MemberInfo | undefined,
+    memberInfo: memberInfo as MemberInfo | null | undefined,
     isLoading,
-    refetch,
+    error,
   }
 }
 
 /**
- * Hook to get pool members
+ * Hook to get pool members using TanStack Query
+ * 
+ * @param poolId - ID of the pool
+ * @returns Object with members array, loading state, and error
  */
 export function usePoolMembers(poolId: number) {
-  const { data: members, isLoading, refetch } = useReadContract({
-    address: poolAddress,
-    abi: COOPERATIVE_POOL_ABI,
-    functionName: 'getPoolMembers',
-    args: [BigInt(poolId)],
+  const publicClient = usePublicClient()
+
+  const { data: members = [], isLoading, error } = useQuery({
+    queryKey: ['cooperative-pool', 'members', poolId],
+    queryFn: () => {
+      if (!publicClient) {
+        return Promise.resolve([])
+      }
+      return fetchPoolMembers(publicClient, poolId)
+    },
+    enabled: !!publicClient && poolId > 0,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
   })
 
   return {
-    members: (members as string[]) || [],
+    members,
     isLoading,
-    refetch,
+    error,
   }
 }
 
 /**
- * Hook to calculate member yield
+ * Hook to calculate member yield using TanStack Query
+ * 
+ * @param poolId - ID of the pool
+ * @param memberAddress - Address of the member
+ * @returns Object with yieldAmount, loading state, and error
  */
 export function useMemberYield(poolId: number, memberAddress?: `0x${string}`) {
-  const { data: yieldAmount, isLoading, refetch } = useReadContract({
-    address: poolAddress,
-    abi: COOPERATIVE_POOL_ABI,
-    functionName: 'calculateMemberYield',
-    args: memberAddress ? [BigInt(poolId), memberAddress] : undefined,
+  const publicClient = usePublicClient()
+
+  const { data: yieldAmount, isLoading, error } = useQuery({
+    queryKey: ['cooperative-pool', 'member-yield', poolId, memberAddress || 'none'],
+    queryFn: () => {
+      if (!publicClient || !memberAddress) {
+        return Promise.resolve(null)
+      }
+      return fetchMemberYield(publicClient, poolId, memberAddress)
+    },
+    enabled: !!publicClient && poolId > 0 && !!memberAddress,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
   })
 
   return {
-    yieldAmount: yieldAmount as bigint | undefined,
+    yieldAmount: yieldAmount as bigint | null | undefined,
     isLoading,
-    refetch,
+    error,
   }
 }
 
 /**
  * Hook to create a new pool
+ * 
+ * @returns Object with createPool function and transaction states
  */
 export function useCreatePool() {
   const { writeContract, data: hash, isPending, error } = useWriteContract()
@@ -210,6 +231,8 @@ export function useCreatePool() {
 
 /**
  * Hook to join a pool
+ * 
+ * @returns Object with joinPool function and transaction states
  */
 export function useJoinPool() {
   const { writeContract, data: hash, isPending, error } = useWriteContract()
@@ -243,6 +266,8 @@ export function useJoinPool() {
 
 /**
  * Hook to leave a pool
+ * 
+ * @returns Object with leavePool function and transaction states
  */
 export function useLeavePool() {
   const { writeContract, data: hash, isPending, error } = useWriteContract()
@@ -273,6 +298,8 @@ export function useLeavePool() {
 
 /**
  * Hook to claim yield from a pool
+ * 
+ * @returns Object with claimYield function and transaction states
  */
 export function useClaimYield() {
   const { writeContract, data: hash, isPending, error } = useWriteContract()
@@ -345,8 +372,13 @@ export function getPoolStatusColor(status: number): string {
  */
 export function calculatePoolAPR(totalYield: bigint, totalBtc: bigint, daysActive: number): string {
   if (totalBtc === 0n || daysActive === 0) return '0'
-  
+
   const yieldPercent = Number(totalYield) / Number(totalBtc)
   const annualizedYield = (yieldPercent / daysActive) * 365
   return (annualizedYield * 100).toFixed(2)
 }
+
+/**
+ * Re-export types for consumers
+ */
+export type { PoolInfo, MemberInfo }

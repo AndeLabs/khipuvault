@@ -4,185 +4,278 @@
  * 
  * Production-ready hooks for Prize Pool where users never lose capital
  * Yield-based lottery system on Mezo Testnet
+ * Uses TanStack Query for optimal state management and real-time updates
  */
 
 'use client'
 
 import { useAccount, usePublicClient, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { useState, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { LOTTERY_POOL_ABI } from '@/lib/web3/lottery-pool-abi'
 import { parseEther, formatEther } from 'viem'
-
-// Types matching SimpleLotteryPool contract
-export interface LotteryRound {
-  roundId: bigint
-  ticketPrice: bigint
-  maxTickets: bigint
-  totalTicketsSold: bigint
-  totalPrize: bigint
-  startTime: bigint
-  endTime: bigint
-  winner: string
-  status: number // 0=OPEN, 1=COMPLETED, 2=CANCELLED
-}
-
-export interface UserLotteryStats {
-  totalInvested: bigint
-  roundsPlayed: number
-  totalTickets: number
-  totalWinnings: bigint
-}
+import { normalizeBigInt } from '@/lib/query-utils'
+import {
+  fetchCurrentRoundId,
+  fetchRoundCounter,
+  fetchRoundInfo,
+  fetchAllRounds,
+  fetchUserTickets,
+  fetchUserInvestment,
+  fetchUserProbability,
+  fetchUserLotteryStats,
+  type LotteryRound,
+  type UserLotteryStats,
+} from '@/lib/blockchain/fetch-lottery-pools'
 
 // SimpleLotteryPool deployed on Mezo Testnet
 const LOTTERY_POOL_ADDRESS = '0x3e5d272321e28731844c20e0a0c725a97301f83a' as `0x${string}`
 
 /**
  * Hook to get current round
+ * 
+ * Uses TanStack Query for:
+ * - Automatic caching of round info
+ * - Real-time updates via refetchQueries()
+ * - Consistent error handling
+ * 
+ * @returns Object with currentRoundId, roundInfo, and loading state
  */
 export function useCurrentRound() {
-  const { data: currentRoundId } = useReadContract({
-    address: LOTTERY_POOL_ADDRESS,
-    abi: LOTTERY_POOL_ABI,
-    functionName: 'currentRoundId',
+  const publicClient = usePublicClient()
+
+  // Get current round ID (minimal fetch)
+  const { data: currentRoundId, isLoading: isLoadingId } = useQuery({
+    queryKey: ['lottery-pool', 'current-round-id'],
+    queryFn: () => fetchCurrentRoundId(publicClient!),
+    enabled: !!publicClient,
+    staleTime: 10000, // 10 seconds for current round
+    gcTime: 2 * 60 * 1000, // 2 minutes
   })
 
-  const { data: roundInfo, isLoading, refetch } = useReadContract({
-    address: LOTTERY_POOL_ADDRESS,
-    abi: LOTTERY_POOL_ABI,
-    functionName: 'getRoundInfo',
-    args: currentRoundId ? [currentRoundId] : undefined,
+  // Get round info based on current round ID
+  const { data: roundInfo, isLoading: isLoadingInfo, error } = useQuery({
+    queryKey: ['lottery-pool', 'round-info', normalizeBigInt(currentRoundId)],
+    queryFn: () => {
+      if (!publicClient || !currentRoundId) {
+        return Promise.resolve(null)
+      }
+      return fetchRoundInfo(publicClient, currentRoundId)
+    },
+    enabled: !!publicClient && !!currentRoundId,
+    staleTime: 10000,
+    gcTime: 2 * 60 * 1000,
   })
 
   return {
-    currentRoundId: currentRoundId as bigint | undefined,
-    roundInfo: roundInfo as LotteryRound | undefined,
-    isLoading,
-    refetch,
+    currentRoundId: currentRoundId as bigint | null | undefined,
+    roundInfo: roundInfo as LotteryRound | null | undefined,
+    isLoading: isLoadingId || isLoadingInfo,
+    error,
   }
 }
 
 /**
- * Hook to get all rounds
+ * Hook to get all lottery rounds using TanStack Query
+ * 
+ * Benefits:
+ * - Automatic caching of all rounds
+ * - Real-time updates via refetchQueries()
+ * - Parallel fetching for optimal performance
+ * - Better error handling
+ * 
+ * @returns Object with rounds array, loading state, and error
  */
 export function useAllRounds() {
   const publicClient = usePublicClient()
-  const [rounds, setRounds] = useState<LotteryRound[]>([])
-  const [isLoading, setIsLoading] = useState(true)
 
-  const { data: roundCounter } = useReadContract({
-    address: LOTTERY_POOL_ADDRESS,
-    abi: LOTTERY_POOL_ABI,
-    functionName: 'roundCounter',
+  // Get round counter first
+  const { data: roundCounter = 0, isLoading: isLoadingCounter } = useQuery({
+    queryKey: ['lottery-pool', 'round-counter'],
+    queryFn: () => fetchRoundCounter(publicClient!),
+    enabled: !!publicClient,
+    staleTime: 30000, // 30 seconds
+    gcTime: 5 * 60 * 1000, // 5 minutes
   })
 
-  useEffect(() => {
-    if (!publicClient || !roundCounter) {
-      setIsLoading(false)
-      return
-    }
-
-    async function fetchRounds() {
-      try {
-        setIsLoading(true)
-        const roundsData: LotteryRound[] = []
-        const count = Number(roundCounter)
-
-        for (let i = 1; i <= count; i++) {
-          try {
-            const roundInfo = await publicClient!.readContract({
-              address: LOTTERY_POOL_ADDRESS,
-              abi: LOTTERY_POOL_ABI,
-              functionName: 'getRoundInfo',
-              args: [BigInt(i)],
-            }) as LotteryRound
-
-            roundsData.push(roundInfo)
-          } catch (error) {
-            console.warn(`Failed to fetch round ${i}:`, error)
-          }
-        }
-
-        setRounds(roundsData)
-      } catch (error) {
-        console.error('Error fetching rounds:', error)
-      } finally {
-        setIsLoading(false)
+  // Fetch all rounds based on counter
+  const { data: rounds = [], isLoading: isLoadingRounds, error } = useQuery({
+    queryKey: ['lottery-pool', 'all-rounds', normalizeBigInt(roundCounter)],
+    queryFn: () => {
+      if (!publicClient) {
+        return Promise.resolve([])
       }
-    }
+      return fetchAllRounds(publicClient, roundCounter)
+    },
+    enabled: !!publicClient && roundCounter > 0,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+  })
 
-    fetchRounds()
-  }, [publicClient, roundCounter])
-
-  return { rounds, isLoading, roundCounter: Number(roundCounter || 0) }
+  return {
+    rounds,
+    isLoading: isLoadingCounter || isLoadingRounds,
+    error,
+    roundCounter,
+  }
 }
 
 /**
- * Hook to get user tickets for a round
+ * Hook to get user tickets for a round using TanStack Query
+ * 
+ * @param roundId - ID of the round
+ * @param userAddress - Address of the user (optional, uses connected account if not provided)
+ * @returns Object with tickets array, ticket count, and loading state
  */
 export function useUserTickets(roundId?: number, userAddress?: `0x${string}`) {
   const { address } = useAccount()
+  const publicClient = usePublicClient()
   const targetAddress = userAddress || address
 
-  const { data: tickets, isLoading, refetch } = useReadContract({
-    address: LOTTERY_POOL_ADDRESS,
-    abi: LOTTERY_POOL_ABI,
-    functionName: 'getUserTickets',
-    args: roundId && targetAddress ? [BigInt(roundId), targetAddress] : undefined,
+  const { data: ticketCount, isLoading, error } = useQuery({
+    queryKey: ['lottery-pool', 'user-tickets', roundId, targetAddress || 'none'],
+    queryFn: () => {
+      if (!publicClient || !roundId || !targetAddress) {
+        return Promise.resolve(null)
+      }
+      return fetchUserTickets(publicClient, roundId, targetAddress)
+    },
+    enabled: !!publicClient && !!roundId && !!targetAddress,
+    staleTime: 20000, // 20 seconds
+    gcTime: 5 * 60 * 1000,
   })
 
   // Mock return array of ticket IDs for now
-  const ticketArray = tickets ? Array.from({ length: Number(tickets) }, (_, i) => i + 1) : []
+  const ticketArray = ticketCount ? Array.from({ length: Number(ticketCount) }, (_, i) => i + 1) : []
 
   return {
     tickets: ticketArray,
-    ticketCount: tickets as bigint | undefined,
+    ticketCount: ticketCount as bigint | null | undefined,
     isLoading,
-    refetch,
+    error,
   }
 }
 
 /**
- * Hook to get user investment for a round
+ * Hook to get user investment for a round using TanStack Query
+ * 
+ * @param roundId - ID of the round
+ * @returns Object with investment amount and loading state
  */
 export function useUserInvestment(roundId?: number) {
   const { address } = useAccount()
+  const publicClient = usePublicClient()
 
-  const { data: investment, isLoading, refetch } = useReadContract({
-    address: LOTTERY_POOL_ADDRESS,
-    abi: LOTTERY_POOL_ABI,
-    functionName: 'getUserInvestment',
-    args: roundId && address ? [BigInt(roundId), address] : undefined,
+  const { data: investment, isLoading, error } = useQuery({
+    queryKey: ['lottery-pool', 'user-investment', roundId, address || 'none'],
+    queryFn: () => {
+      if (!publicClient || !roundId || !address) {
+        return Promise.resolve(null)
+      }
+      return fetchUserInvestment(publicClient, roundId, address)
+    },
+    enabled: !!publicClient && !!roundId && !!address,
+    staleTime: 20000,
+    gcTime: 5 * 60 * 1000,
   })
 
   return {
-    investment: investment as bigint | undefined,
+    investment: investment as bigint | null | undefined,
     isLoading,
-    refetch,
+    error,
   }
 }
 
 /**
- * Hook to calculate user probability
+ * Hook to calculate user probability using TanStack Query
+ * 
+ * @param roundId - ID of the round
+ * @returns Object with probability in basis points and loading state
  */
 export function useUserProbability(roundId?: number) {
   const { address } = useAccount()
+  const publicClient = usePublicClient()
 
-  const { data: probability, isLoading, refetch } = useReadContract({
-    address: LOTTERY_POOL_ADDRESS,
-    abi: LOTTERY_POOL_ABI,
-    functionName: 'calculateUserProbability',
-    args: roundId && address ? [BigInt(roundId), address] : undefined,
+  const { data: probability, isLoading, error } = useQuery({
+    queryKey: ['lottery-pool', 'user-probability', roundId, address || 'none'],
+    queryFn: () => {
+      if (!publicClient || !roundId || !address) {
+        return Promise.resolve(null)
+      }
+      return fetchUserProbability(publicClient, roundId, address)
+    },
+    enabled: !!publicClient && !!roundId && !!address,
+    staleTime: 20000,
+    gcTime: 5 * 60 * 1000,
   })
 
   return {
-    probability: probability as bigint | undefined, // Returns basis points (10000 = 100%)
+    probability: probability as bigint | null | undefined, // Returns basis points (10000 = 100%)
     isLoading,
-    refetch,
+    error,
+  }
+}
+
+/**
+ * Hook to get user lottery statistics across all rounds using TanStack Query
+ * 
+ * Uses parallel fetching for optimal performance
+ * 
+ * @param userAddress - Address of the user (optional, uses connected account if not provided)
+ * @returns Object with stats and loading state
+ */
+export function useUserLotteryStats(userAddress?: `0x${string}`) {
+  const { address } = useAccount()
+  const publicClient = usePublicClient()
+  const targetAddress = userAddress || address
+
+  // Get round counter first
+  const { data: roundCounter = 0, isLoading: isLoadingCounter } = useQuery({
+    queryKey: ['lottery-pool', 'round-counter'],
+    queryFn: () => fetchRoundCounter(publicClient!),
+    enabled: !!publicClient,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
+  })
+
+  // Fetch user stats based on round counter
+  const { data: stats = {
+    totalInvested: 0n,
+    roundsPlayed: 0,
+    totalTickets: 0,
+    totalWinnings: 0n,
+  }, isLoading: isLoadingStats, error } = useQuery({
+    queryKey: ['lottery-pool', 'user-stats', targetAddress || 'none', normalizeBigInt(roundCounter)],
+    queryFn: () => {
+      if (!publicClient || !targetAddress) {
+        return Promise.resolve({
+          totalInvested: 0n,
+          roundsPlayed: 0,
+          totalTickets: 0,
+          totalWinnings: 0n,
+        })
+      }
+      return fetchUserLotteryStats(publicClient, roundCounter, targetAddress)
+    },
+    enabled: !!publicClient && !!targetAddress && roundCounter > 0,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
+    retry: 2,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+  })
+
+  return {
+    stats: stats as UserLotteryStats,
+    isLoading: isLoadingCounter || isLoadingStats,
+    error,
   }
 }
 
 /**
  * Hook to buy tickets
+ * 
+ * @returns Object with buyTickets function and transaction states
  */
 export function useBuyTickets() {
   const { writeContract, data: hash, isPending, error } = useWriteContract()
@@ -216,6 +309,8 @@ export function useBuyTickets() {
 
 /**
  * Hook to claim prize
+ * 
+ * @returns Object with claimPrize function and transaction states
  */
 export function useClaimPrize() {
   const { writeContract, data: hash, isPending, error } = useWriteContract()
@@ -246,6 +341,8 @@ export function useClaimPrize() {
 
 /**
  * Hook to withdraw capital (for non-winners)
+ * 
+ * @returns Object with withdrawCapital function and transaction states
  */
 export function useWithdrawCapital() {
   const { writeContract, data: hash, isPending, error } = useWriteContract()
@@ -404,99 +501,6 @@ export function getRoundStatus(status: number): string {
 }
 
 /**
- * Hook to get user lottery statistics across all rounds
+ * Re-export types for consumers
  */
-export function useUserLotteryStats(userAddress?: `0x${string}`) {
-  const { address } = useAccount()
-  const publicClient = usePublicClient()
-  const targetAddress = userAddress || address
-  
-  const [stats, setStats] = useState<UserLotteryStats>({
-    totalInvested: 0n,
-    roundsPlayed: 0,
-    totalTickets: 0,
-    totalWinnings: 0n,
-  })
-  const [isLoading, setIsLoading] = useState(true)
-
-  const { data: roundCounter } = useReadContract({
-    address: LOTTERY_POOL_ADDRESS,
-    abi: LOTTERY_POOL_ABI,
-    functionName: 'roundCounter',
-  })
-
-  useEffect(() => {
-    if (!publicClient || !roundCounter || !targetAddress) {
-      setIsLoading(false)
-      return
-    }
-
-    async function fetchUserStats() {
-      try {
-        setIsLoading(true)
-        let totalInvested = 0n
-        let roundsPlayed = 0
-        let totalTickets = 0
-        let totalWinnings = 0n
-
-        const count = Number(roundCounter)
-
-        for (let i = 1; i <= count; i++) {
-          try {
-            // Get user investment for this round
-            const investment = await publicClient!.readContract({
-              address: LOTTERY_POOL_ADDRESS,
-              abi: LOTTERY_POOL_ABI,
-              functionName: 'getUserInvestment',
-              args: [BigInt(i), targetAddress],
-            }) as bigint
-
-            if (investment > 0n) {
-              totalInvested += investment
-              roundsPlayed++
-
-              // Get user tickets
-              const ticketCount = await publicClient!.readContract({
-                address: LOTTERY_POOL_ADDRESS,
-                abi: LOTTERY_POOL_ABI,
-                functionName: 'getUserTickets',
-                args: [BigInt(i), targetAddress],
-              }) as bigint
-
-              totalTickets += Number(ticketCount || 0n)
-
-              // Check if user won this round
-              const roundInfo = await publicClient!.readContract({
-                address: LOTTERY_POOL_ADDRESS,
-                abi: LOTTERY_POOL_ABI,
-                functionName: 'getRoundInfo',
-                args: [BigInt(i)],
-              }) as LotteryRound
-
-              if (roundInfo.winner.toLowerCase() === targetAddress.toLowerCase()) {
-                totalWinnings += roundInfo.winnerPrize
-              }
-            }
-          } catch (error) {
-            console.warn(`Failed to fetch user stats for round ${i}:`, error)
-          }
-        }
-
-        setStats({
-          totalInvested,
-          roundsPlayed,
-          totalTickets,
-          totalWinnings,
-        })
-      } catch (error) {
-        console.error('Error fetching user lottery stats:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }
-
-    fetchUserStats()
-  }, [publicClient, roundCounter, targetAddress])
-
-  return { stats, isLoading }
-}
+export type { LotteryRound, UserLotteryStats }
