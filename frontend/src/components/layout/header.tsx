@@ -1,5 +1,6 @@
 "use client";
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -16,8 +17,16 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-primary/20 bg-background/90 backdrop-blur-sm">
       <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
-          KhipuVault <span role="img" aria-label="mountain emoji">🏔️</span>
+        <Link href="/" className="flex items-center gap-2">
+          <Image
+            src="/logos/khipu-logo.png"
+            alt="KhipuVault Logo"
+            width={40}
+            height={40}
+            className="h-10 w-10"
+            priority
+          />
+          <span className="text-2xl font-bold hidden sm:inline">KhipuVault</span>
         </Link>
         
         <nav className="hidden items-center gap-8 md:flex">
@@ -47,8 +56,15 @@ export function Header() {
             <SheetContent side="right" className="bg-background border-l-primary/20">
               <div className="flex h-full flex-col">
                 <div className="border-b border-primary/20 pb-4">
-                  <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
-                    KhipuVault <span role="img" aria-label="mountain emoji">🏔️</span>
+                  <Link href="/" className="flex items-center gap-2">
+                    <Image
+                      src="/logos/khipu-logo.png"
+                      alt="KhipuVault Logo"
+                      width={40}
+                      height={40}
+                      className="h-10 w-10"
+                    />
+                    <span className="text-2xl font-bold">KhipuVault</span>
                   </Link>
                 </div>
                 <nav className="mt-8 flex flex-col gap-6">

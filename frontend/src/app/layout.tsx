@@ -9,6 +9,32 @@ export const revalidate = 0
 export const metadata: Metadata = {
   title: 'KhipuVault | Ahorro Bitcoin con Rendimientos Reales',
   description: 'Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.',
+  icons: {
+    icon: '/favicon.ico',
+    apple: '/logos/khipu-logo.png',
+  },
+  openGraph: {
+    title: 'KhipuVault | Ahorro Bitcoin con Rendimientos Reales',
+    description: 'Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.',
+    url: 'https://khipuvault.vercel.app',
+    siteName: 'KhipuVault',
+    images: [
+      {
+        url: '/logos/khipu-logo.png',
+        width: 512,
+        height: 512,
+        alt: 'KhipuVault Logo',
+      },
+    ],
+    locale: 'es_ES',
+    type: 'website',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'KhipuVault | Ahorro Bitcoin con Rendimientos Reales',
+    description: 'Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.',
+    images: ['/logos/khipu-logo.png'],
+  },
 };
 
 export default function RootLayout({

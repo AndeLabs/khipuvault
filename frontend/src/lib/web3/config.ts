@@ -82,11 +82,11 @@ export const wagmiConfig = typeof window !== 'undefined' ? getWagmiConfig() : nu
 export const appMetadata = {
   name: 'KhipuVault',
   description: 'Ahorro Bitcoin para Latinoamérica con MUSD de Mezo',
-  url: typeof window !== 'undefined' ? window.location.origin : 'https://khipuvault.app',
+  url: typeof window !== 'undefined' ? window.location.origin : 'https://khipuvault.vercel.app',
   icons: [
     typeof window !== 'undefined' 
-      ? `${window.location.origin}/logo.png` 
-      : 'https://khipuvault.app/logo.png'
+      ? `${window.location.origin}/logos/khipu-logo.png` 
+      : 'https://khipuvault.vercel.app/logos/khipu-logo.png'
   ],
 } as const
 

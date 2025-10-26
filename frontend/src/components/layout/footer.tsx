@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Icons } from "@/components/icons";
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
@@ -16,8 +17,15 @@ export function Footer() {
           <div className="container mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
             <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
               <div className="flex flex-col items-center gap-4 text-center md:items-start md:text-left">
-                <Link href="/" className="flex items-center gap-2 text-2xl font-bold">
-                  KhipuVault <span role="img" aria-label="mountain emoji">🏔️</span>
+                <Link href="/" className="flex items-center gap-2">
+                  <Image
+                    src="/logos/khipu-logo.png"
+                    alt="KhipuVault Logo"
+                    width={40}
+                    height={40}
+                    className="h-10 w-10"
+                  />
+                  <span className="text-2xl font-bold">KhipuVault</span>
                 </Link>
                 <p className="max-w-xs text-muted-foreground">
                   Ahorro en Bitcoin con rendimientos, inspirado en tradiciones financieras de LATAM.
