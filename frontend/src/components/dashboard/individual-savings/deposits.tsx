@@ -19,9 +19,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { useDepositToPool, useWithdrawFromPool, useClaimYield } from '@/hooks/web3/use-pool-transactions'
+import { useDepositV2, useWithdrawV2, useClaimYieldV2 } from '@/hooks/web3/use-pool-transactions-v2'
+import { useMusdApprovalV2, formatMUSD, formatMUSDShort } from '@/hooks/web3/use-musd-approval-v2'
+import { usePoolRealTimeSync } from '@/hooks/web3/use-pool-real-time-sync'
 import { useIndividualPool, formatBTC } from '@/hooks/web3/use-individual-pool'
-import { useMUSDApproval, formatMUSD, formatMUSDShort } from '@/hooks/web3/use-musd-approval'
 import { useToast } from '@/hooks/use-toast'
 import Link from 'next/link'
 
@@ -31,39 +32,66 @@ export function Deposits() {
   const musdPrice = 1 // MUSD is stablecoin, always $1
 
   const { address, isConnected, chainId } = useAccount()
-  const { walletBalances, userDeposit, refetchAll, isLoading: isPoolLoading } = useIndividualPool()
+  const { walletBalances, userDeposit, isLoading: isPoolLoading } = useIndividualPool()
   const { toast } = useToast()
   
-  // MUSD approval and balance
+  // Enable real-time sync for entire page
+  usePoolRealTimeSync()
+  
+  // MUSD approval and balance (V2 - Production Ready)
   const {
     musdBalance,
-    formattedBalance,
-    needsApproval,
-    approve,
+    balanceFormatted,
+    isApprovalNeeded,
+    approveUnlimited,
+    approveAmount,
     isApproving,
-    isWaitingApproval,
-    isApprovalComplete,
+    isApproveConfirming,
+    isApprovalConfirmed,
     error: musdError,
-  } = useMUSDApproval()
+  } = useMusdApprovalV2()
   
-  // Real blockchain transactions
-  const deposit = useDepositToPool()
-  const withdraw = useWithdrawFromPool()
-  const claim = useClaimYield()
+  // Real blockchain transactions (V2 - Production Ready)
+  const {
+    deposit,
+    isDepositing,
+    isConfirming: depositConfirming,
+    isSuccess: depositSuccess,
+    error: depositError,
+  } = useDepositV2()
+  
+  const {
+    withdraw,
+    isWithdrawing,
+    isConfirming: withdrawConfirming,
+    isSuccess: withdrawSuccess,
+    error: withdrawError,
+  } = useWithdrawV2()
+  
+  const {
+    claimYield,
+    isClaimingYield,
+    isConfirming: claimConfirming,
+    isSuccess: claimSuccess,
+    error: claimError,
+  } = useClaimYieldV2()
 
   // Calculate max amounts (MUSD-based)
   const maxDeposit = musdBalance ? Number(musdBalance) / 1e18 : 0
   const maxWithdraw = userDeposit ? Number(userDeposit.musdAmount) / 1e18 : 0
   
-  // Check if approval is needed
-  const depositNeedsApproval = needsApproval(amount)
+  // Check if approval is needed for current amount
+  const depositNeedsApproval = isApprovalNeeded(
+    amount ? BigInt(Math.floor(parseFloat(amount) * 1e18)) : BigInt(0)
+  )
 
   const handleApprove = async () => {
     try {
-      await approve(amount)
+      // Use unlimited approval for better UX (one approval per session)
+      await approveUnlimited()
       toast({
         title: "Aprobando MUSD...",
-        description: `Aprobando ${amount} MUSD para usar en el pool`,
+        description: `Aprobando MUSD ilimitado para usar en el pool`,
       })
     } catch (error) {
       toast({
@@ -76,13 +104,11 @@ export function Deposits() {
 
   const handleDeposit = async () => {
     try {
-      await deposit.deposit(amount)
+      await deposit(amount)
       toast({
-        title: "Depósito exitoso",
-        description: `Has depositado ${amount} MUSD exitosamente`,
+        title: "Depósito enviado",
+        description: `Transacción enviada. Esperando confirmación...`,
       })
-      await refetchAll()
-      setAmount('100')
     } catch (error) {
       toast({
         title: "Error en depósito",
@@ -92,14 +118,25 @@ export function Deposits() {
     }
   }
 
+  // Auto-refetch and show success when deposit is confirmed
+  useEffect(() => {
+    if (depositSuccess) {
+      const depositedAmount = amount
+      toast({
+        title: "✅ Depósito confirmado!",
+        description: `Has depositado ${depositedAmount} MUSD exitosamente`,
+      })
+      setAmount('100')
+    }
+  }, [depositSuccess, amount, toast])
+
   const handleClaim = async () => {
     try {
-      await claim.claimYield()
+      await claimYield()
       toast({
-        title: "Yield reclamado",
-        description: "Has reclamado tus yields en MUSD exitosamente",
+        title: "Reclamando yield",
+        description: "Transacción enviada. Esperando confirmación...",
       })
-      await refetchAll()
     } catch (error) {
       toast({
         title: "Error al reclamar yield",
@@ -109,17 +146,24 @@ export function Deposits() {
     }
   }
 
+  // Auto-refetch when claim is confirmed
+  useEffect(() => {
+    if (claimSuccess) {
+      toast({
+        title: "✅ Yield reclamado!",
+        description: "Has reclamado tus yields en MUSD exitosamente",
+      })
+    }
+  }, [claimSuccess, toast])
+
   const handleWithdraw = async () => {
     try {
       // withdraw() takes NO parameters - withdraws entire position
-      await withdraw.withdraw()
-      const totalAmount = maxWithdraw.toFixed(2)
+      await withdraw()
       toast({
-        title: "Retiro exitoso",
-        description: `Has retirado todo tu depósito: ${totalAmount} MUSD + yields`,
+        title: "Retiro enviado",
+        description: "Transacción enviada. Esperando confirmación...",
       })
-      await refetchAll()
-      setWithdrawAmount('50')
     } catch (error) {
       toast({
         title: "Error en retiro",
@@ -128,6 +172,18 @@ export function Deposits() {
       })
     }
   }
+
+  // Auto-refetch when withdrawal is confirmed
+  useEffect(() => {
+    if (withdrawSuccess) {
+      const totalAmount = maxWithdraw.toFixed(2)
+      toast({
+        title: "✅ Retiro confirmado!",
+        description: `Has retirado todo tu depósito: ${totalAmount} MUSD + yields`,
+      })
+      setWithdrawAmount('50')
+    }
+  }, [withdrawSuccess, maxWithdraw, toast])
 
   // Handle wallet disconnection
   if (!isConnected) {
@@ -165,7 +221,7 @@ export function Deposits() {
             {isPoolLoading ? (
               <Loader2 className="h-4 w-4 text-primary animate-spin" />
             ) : (
-              <p className="text-sm font-bold text-primary">{formatMUSDShort(musdBalance)} MUSD</p>
+              <p className="text-sm font-bold text-primary">{balanceFormatted} MUSD</p>
             )}
           </div>
           {musdError && (
@@ -182,7 +238,7 @@ export function Deposits() {
             {/* Deposit Dialog */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="secondary" size="lg" className="w-full" disabled={deposit.isPending || isApproving || !musdBalance}>
+                <Button variant="secondary" size="lg" className="w-full" disabled={isDepositing || isApproving || !musdBalance}>
                   <Plus className="mr-2 h-4 w-4" /> Añadir Fondos
                 </Button>
               </AlertDialogTrigger>
@@ -196,7 +252,7 @@ export function Deposits() {
                     Monto: {amount} MUSD (= ${(parseFloat(amount) * musdPrice).toLocaleString('en-US', { maximumFractionDigits: 2 })}) USD)
                   </p>
                   <p className="text-muted-foreground">Gas estimado: ~0.01 USD</p>
-                  <p className="text-xs text-muted-foreground">Tu saldo MUSD: {formatMUSDShort(musdBalance)} MUSD</p>
+                  <p className="text-xs text-muted-foreground">Tu saldo MUSD: {balanceFormatted} MUSD</p>
                   
                   {/* Approval Status */}
                   {depositNeedsApproval && (
@@ -208,30 +264,31 @@ export function Deposits() {
                     </div>
                   )}
 
-                  {deposit.isPending && <p className="text-blue-500 animate-pulse">⏳ Procesando depósito...</p>}
+                  {isDepositing && <p className="text-blue-500 animate-pulse">⏳ Enviando depósito...</p>}
+                  {depositConfirming && <p className="text-blue-500 animate-pulse">⏳ Confirmando en blockchain...</p>}
                   {isApproving && <p className="text-blue-500 animate-pulse">⏳ Aprobando MUSD...</p>}
-                  {isWaitingApproval && <p className="text-blue-500 animate-pulse">⏳ Confirmando aprobación en blockchain...</p>}
-                  {isApprovalComplete && <p className="text-green-500">✅ ¡MUSD aprobado! Puedes depositar ahora</p>}
-                  {deposit.isError && <p className="text-red-500">❌ Error: {deposit.error?.message || 'Error desconocido'}</p>}
-                  {deposit.isSuccess && <p className="text-green-500">✅ ¡Depósito completado!</p>}
+                  {isApproveConfirming && <p className="text-blue-500 animate-pulse">⏳ Confirmando aprobación en blockchain...</p>}
+                  {isApprovalConfirmed && !depositNeedsApproval && <p className="text-green-500">✅ ¡MUSD aprobado! Puedes depositar ahora</p>}
+                  {depositError && <p className="text-red-500">❌ Error: {depositError}</p>}
+                  {depositSuccess && <p className="text-green-500">✅ ¡Depósito completado!</p>}
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel disabled={deposit.isPending || isApproving || isWaitingApproval}>Cancelar</AlertDialogCancel>
+                  <AlertDialogCancel disabled={isDepositing || isApproving || isApproveConfirming}>Cancelar</AlertDialogCancel>
                   
                   {depositNeedsApproval ? (
                     <AlertDialogAction 
                       onClick={handleApprove}
-                      disabled={isApproving || isWaitingApproval || isApprovalComplete}
+                      disabled={isApproving || isApproveConfirming || isApprovalConfirmed}
                       className="bg-blue-600 hover:bg-blue-700"
                     >
-                      {isApproving ? 'Aprobando...' : isWaitingApproval ? 'Confirmando...' : isApprovalComplete ? '✅ Aprobado' : 'Aprobar MUSD'}
+                      {isApproving ? 'Aprobando...' : isApproveConfirming ? 'Confirmando...' : isApprovalConfirmed ? '✅ Aprobado' : 'Aprobar MUSD'}
                     </AlertDialogAction>
                   ) : (
                     <AlertDialogAction 
                       onClick={handleDeposit}
-                      disabled={deposit.isPending || !amount || parseFloat(amount) <= 0 || parseFloat(amount) > maxDeposit}
+                      disabled={isDepositing || depositConfirming || !amount || parseFloat(amount) <= 0 || parseFloat(amount) > maxDeposit}
                     >
-                      {deposit.isPending ? 'Depositando...' : 'Confirmar Depósito'}
+                      {isDepositing ? 'Enviando...' : depositConfirming ? 'Confirmando...' : 'Confirmar Depósito'}
                     </AlertDialogAction>
                   )}
                 </AlertDialogFooter>
@@ -241,7 +298,7 @@ export function Deposits() {
             {/* Withdraw Dialog */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="lg" className="w-full border-primary text-primary hover:bg-primary/10 hover:text-primary" disabled={withdraw.isPending || !userDeposit?.active}>
+                <Button variant="outline" size="lg" className="w-full border-primary text-primary hover:bg-primary/10 hover:text-primary" disabled={isWithdrawing || !userDeposit?.active}>
                   <LogOut className="mr-2 h-4 w-4" /> Retirar
                 </Button>
               </AlertDialogTrigger>
@@ -257,17 +314,18 @@ export function Deposits() {
                   <p className="text-muted-foreground">Gas estimado: ~0.01 USD</p>
                   <p className="text-xs text-muted-foreground">Saldo depositado: {formatMUSD(userDeposit?.musdAmount)} MUSD</p>
                   <p className="text-xs text-green-500">Yields acumulados: {formatMUSD(userDeposit?.yieldAccrued)} MUSD</p>
-                  {withdraw.isPending && <p className="text-blue-500 animate-pulse">⏳ Procesando retiro...</p>}
-                  {withdraw.isError && <p className="text-red-500">❌ Error: {withdraw.error?.message || 'Error desconocido'}</p>}
-                  {withdraw.isSuccess && <p className="text-green-500">✅ ¡Retiro completado!</p>}
+                  {isWithdrawing && <p className="text-blue-500 animate-pulse">⏳ Enviando retiro...</p>}
+                  {withdrawConfirming && <p className="text-blue-500 animate-pulse">⏳ Confirmando en blockchain...</p>}
+                  {withdrawError && <p className="text-red-500">❌ Error: {withdrawError}</p>}
+                  {withdrawSuccess && <p className="text-green-500">✅ ¡Retiro completado!</p>}
                 </div>
                 <AlertDialogFooter>
-                  <AlertDialogCancel disabled={withdraw.isPending}>Cancelar</AlertDialogCancel>
+                  <AlertDialogCancel disabled={isWithdrawing || withdrawConfirming}>Cancelar</AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={handleWithdraw} 
-                    disabled={withdraw.isPending || !withdrawAmount || parseFloat(withdrawAmount) <= 0 || parseFloat(withdrawAmount) > maxWithdraw}
+                    disabled={isWithdrawing || withdrawConfirming || !withdrawAmount || parseFloat(withdrawAmount) <= 0 || parseFloat(withdrawAmount) > maxWithdraw}
                   >
-                    {withdraw.isPending ? 'Retirando...' : 'Confirmar Retiro'}
+                    {isWithdrawing ? 'Enviando...' : withdrawConfirming ? 'Confirmando...' : 'Confirmar Retiro'}
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -279,10 +337,10 @@ export function Deposits() {
               size="lg" 
               className="w-full bg-primary text-primary-foreground" 
               onClick={handleClaim} 
-              disabled={claim.isPending || !userDeposit?.yieldAccrued || userDeposit.yieldAccrued === BigInt(0) || !userDeposit?.active}
+              disabled={isClaimingYield || claimConfirming || !userDeposit?.yieldAccrued || userDeposit.yieldAccrued === BigInt(0) || !userDeposit?.active}
             >
               <Gift className="mr-2 h-4 w-4" /> 
-              {claim.isPending ? 'Reclamando...' : `Reclamar ${formatMUSD(userDeposit?.yieldAccrued)} MUSD`}
+              {isClaimingYield ? 'Enviando...' : claimConfirming ? 'Confirmando...' : `Reclamar ${formatMUSD(userDeposit?.yieldAccrued)} MUSD`}
             </Button>
 
             {/* Info: Get MUSD */}
@@ -303,14 +361,14 @@ export function Deposits() {
             )}
 
             {/* Claim Status */}
-            {claim.isSuccess && (
+            {claimSuccess && (
               <div className="p-3 rounded-lg bg-green-500/20 text-green-500 text-sm">
                 ✅ Yields reclamados exitosamente
               </div>
             )}
-            {claim.isError && (
+            {claimError && (
               <div className="p-3 rounded-lg bg-red-500/20 text-red-500 text-sm">
-                ❌ Error: {claim.error?.message || 'Error desconocido'}
+                ❌ Error: {claimError}
               </div>
             )}
           </div>
@@ -333,7 +391,7 @@ export function Deposits() {
                   min="10"
                   max={maxDeposit}
                   step="1"
-                  disabled={deposit.isPending || isApproving || !musdBalance}
+                  disabled={isDepositing || isApproving || !musdBalance}
                 />
                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 font-code text-muted-foreground">MUSD</span>
               </div>
@@ -352,7 +410,7 @@ export function Deposits() {
               step={1}
               onValueChange={(value) => setAmount(value[0].toString())}
               className="[&>span:first-child]:bg-gradient-to-r from-primary to-secondary"
-              disabled={deposit.isPending || isApproving || !musdBalance}
+              disabled={isDepositing || isApproving || !musdBalance}
             />
 
             {/* Withdraw Amount Input */}
@@ -371,7 +429,7 @@ export function Deposits() {
                   min="1"
                   max={maxWithdraw}
                   step="1"
-                  disabled={withdraw.isPending || !userDeposit?.active}
+                  disabled={isWithdrawing || !userDeposit?.active}
                 />
                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 font-code text-muted-foreground">MUSD</span>
               </div>
