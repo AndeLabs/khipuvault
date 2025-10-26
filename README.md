@@ -14,20 +14,20 @@ A decentralized Bitcoin savings platform built on Mezo, offering multiple saving
 
 ## Overview
 
-KhipuVault provides four distinct savings pools designed to meet different financial goals and risk preferences:
+KhipuVault provides multiple savings pools designed to meet different financial goals and risk preferences, all powered by MUSD (Mezo's Bitcoin-backed stablecoin):
 
-- **Individual Pool**: Personal savings with auto-yield optimization
-- **Cooperative Pool**: Community pooled savings with shared rewards
-- **Lottery Pool**: Prize-based savings with no-loss lottery mechanics
-- **Rotating Pool**: Turn-based distribution system (ROSCA/Pasanaku)
+- **Individual Pool**: Personal savings with auto-yield optimization ✅ DEPLOYED
+- **Cooperative Pool**: Community pooled savings with shared rewards ✅ DEPLOYED
+- **Lottery Pool**: Prize-based savings with no-loss lottery mechanics (Coming Soon)
+- **Rotating Pool**: Turn-based distribution system (ROSCA/Pasanaku) (Coming Soon)
 
 ## Features
 
-- 🔗 **Mezo Integration**: Native MUSD (Bitcoin-backed stablecoin) support
-- 🔐 **Mezo Passport**: Unified Bitcoin and EVM wallet experience
+- 🪙 **MUSD-First**: Uses MUSD, the Bitcoin-backed stablecoin from Mezo
 - ⚡ **Yield Optimization**: Automatic routing to best yield strategies
-- 🎲 **Chainlink VRF**: Verifiable randomness for lottery mechanics
-- 🛡️ **Security First**: Comprehensive testing and audit-ready contracts
+- 🔗 **Simple Integration**: Standard EVM wallet connection (MetaMask, WalletConnect)
+- 🛡️ **Security First**: Comprehensive testing and production-ready contracts
+- 🌐 **Mezo Testnet**: Deployed and functional on Chain ID 31611
 
 ## Architecture
 
@@ -83,16 +83,40 @@ cd frontend && npm run dev
 
 ## Deployment
 
-### Testnet (Mezo Testnet)
-The contracts are deployed on Mezo Testnet (Chain ID: 31611):
+### Mezo Testnet (Chain ID: 31611)
+Production-ready contracts deployed and verified:
 
-- **IndividualPool**: `0x0Ae6141D150A3B77Cef3C8d45ff6463Bf3c83374`
-- **CooperativePool**: `0x10931caec055481F3FFd642C6903189E7A496Df3`
-- **LotteryPool**: `0xC9075e81864C6a603Ea0C87E5b8f4e3471A9D567`
-- **RotatingPool**: `0x68b6a3b7a640071f04E1e3737De24ed0f72213B5`
+**Core Pools (FUNCTIONAL)**
+- **IndividualPool**: `0x6028E4452e6059e797832578D70dBdf63317538a`
+- **CooperativePool**: `0x92eCA935773b71efB655cc7d3aB77ee23c088A7a`
 
-### Production
-For mainnet deployment, follow the deployment guides in the `docs/` directory.
+**Core Integration**
+- **MezoIntegration**: `0xa19B54b8b3f36F047E1f755c16F423143585cc6B`
+- **YieldAggregator**: `0x5BDac57B68f2Bc215340e4Dc2240f30154f4A007`
+
+**MUSD Token (Mezo Official)**
+- **MUSD**: `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503`
+
+For complete deployment details, see `contracts/deployments/pools-31611.json`
+
+## How to Use
+
+### For Users
+
+1. **Get MUSD**: Visit [mezo.org](https://mezo.org) to obtain MUSD (Bitcoin-backed stablecoin)
+2. **Connect Wallet**: Use MetaMask or any EVM wallet on Mezo Testnet
+3. **Deposit MUSD**: Choose a savings pool and deposit your MUSD
+4. **Earn Yields**: Your deposits automatically earn optimized yields
+5. **Withdraw Anytime**: Claim your yields or withdraw your funds whenever you want
+
+### Network Configuration
+
+Add Mezo Testnet to your wallet:
+- **Network Name**: Mezo Testnet
+- **RPC URL**: `https://rpc.test.mezo.org`
+- **Chain ID**: `31611`
+- **Currency**: BTC
+- **Explorer**: `https://explorer.mezo.org`
 
 ## Contributing
 
