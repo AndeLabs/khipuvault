@@ -9,8 +9,12 @@ import { YourPosition } from "@/components/dashboard/individual-savings/your-pos
 import { Deposits } from "@/components/dashboard/individual-savings/deposits";
 import { TransactionsTable } from "@/components/dashboard/individual-savings/transactions-table";
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
+import { usePoolEvents } from "@/hooks/web3/use-pool-events";
 
 export default function IndividualSavingsPage() {
+  // Listen to contract events and auto-update UI
+  usePoolEvents()
+  
   return (
     <div className="flex flex-col gap-8">
       <AnimateOnScroll>
