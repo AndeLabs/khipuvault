@@ -1,0 +1,669 @@
+// SPDX-License-Identifier: MIT
+pragma solidity 0.8.25;
+
+import {Test, console} from "forge-std/Test.sol";
+import {StdCheats} from "forge-std/StdCheats.sol";
+import {ERC20} from "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
+
+// KhipuVault contracts
+import {IndividualPool} from "../src/pools/IndividualPool.sol";
+import {MezoIntegration} from "../src/integrations/MezoIntegration.sol";
+import {YieldAggregator} from "../src/integrations/YieldAggregator.sol";
+
+// Interfaces
+import {IMezoIntegration} from "../src/interfaces/IMezoIntegration.sol";
+import {IMezoBorrowerOperations} from "../src/interfaces/IMezoBorrowerOperations.sol";
+import {IMezoPriceFeed} from "../src/interfaces/IMezoPriceFeed.sol";
+import {IMezoHintHelpers} from "../src/interfaces/IMezoHintHelpers.sol";
+import {IMezoTroveManager} from "../src/interfaces/IMezoTroveManager.sol";
+import {IMezoSortedTroves} from "../src/interfaces/IMezoSortedTroves.sol";
+
+/**
+ * @title DepositSystemTest
+ * @notice Comprehensive test suite for KhipuVault deposit system
+ * @dev Tests the complete flow: BTC deposit -> MUSD minting -> Yield generation
+ * 
+ * Test Coverage:
+ * 1. Individual Pool deposit functionality
+ * 2. MezoIntegration contract interaction
+ * 3. MUSD minting and transfer verification
+ * 4. Yield aggregation and tracking
+ * 5. Error handling and edge cases
+ * 6. Gas optimization verification
+ * 7. Security validation
+ */
+contract DepositSystemTest is Test, StdCheats {
+    // ========================================================================
+    //                            TEST STATE VARIABLES
+    // ========================================================================
+
+    // Contracts under test
+    IndividualPool public individualPool;
+    MezoIntegration public mezoIntegration;
+    YieldAggregator public yieldAggregator;
+
+    // Mock contracts for Mezo protocol
+    MockMUSD public mockMUSD;
+    MockMezoBorrowerOperations public mockBorrowerOps;
+    MockMezoPriceFeed public mockPriceFeed;
+    MockMezoHintHelpers public mockHintHelpers;
+    MockMezoTroveManager public mockTroveManager;
+    MockMezoSortedTroves public mockSortedTroves;
+
+    // Test addresses
+    address public owner = address(0x1);
+    address public user1 = address(0x2);
+    address public user2 = address(0x3);
+    address public feeCollector = address(0x4);
+
+    // Test configuration
+    uint256 public constant MIN_DEPOSIT = 0.005 ether; // 0.005 BTC
+    uint256 public constant MAX_DEPOSIT = 10 ether;    // 10 BTC
+    uint256 public constant PERFORMANCE_FEE = 100;     // 1% in basis points
+    uint256 public constant TARGET_LTV = 5000;         // 50% LTV
+    uint256 public constant BTC_PRICE = 100_000_000_000; // $100,000 BTC (18 decimals)
+
+    // ========================================================================
+    //                                EVENTS
+    // ========================================================================
+
+    event DepositTestResult(
+        string testName,
+        bool passed,
+        uint256 gasUsed,
+        string reason
+    );
+
+    // ========================================================================
+    //                                SETUP
+    // ========================================================================
+
+    function setUp() public {
+        // Setup test accounts
+        vm.startPrank(owner);
+        
+        // Deploy mock contracts
+        _deployMockContracts();
+        
+        // Deploy KhipuVault contracts
+        _deployKhipuVaultContracts();
+        
+        // Configure contracts
+        _configureContracts();
+        
+        // Fund test users
+        vm.deal(user1, 100 ether);
+        vm.deal(user2, 50 ether);
+        
+        vm.stopPrank();
+        
+        console.log("Setup completed");
+        console.log("Owner:", owner);
+        console.log("User1:", user1, "Balance:", user1.balance);
+        console.log("User2:", user2, "Balance:", user2.balance);
+    }
+
+    function _deployMockContracts() internal {
+        // Deploy mock MUSD token
+        mockMUSD = new MockMUSD("Mezo USD", "MUSD");
+        
+        // Deploy mock Mezo protocol contracts
+        mockBorrowerOps = new MockMezoBorrowerOperations();
+        mockPriceFeed = new MockMezoPriceFeed();
+        mockHintHelpers = new MockMezoHintHelpers();
+        mockTroveManager = new MockMezoTroveManager();
+        mockSortedTroves = new MockMezoSortedTroves();
+        
+        // Configure mock price feed
+        mockPriceFeed.setPrice(BTC_PRICE);
+        
+        console.log("✅ Mock contracts deployed");
+    }
+
+    function _deployKhipuVaultContracts() internal {
+        // Deploy MezoIntegration
+        mezoIntegration = new MezoIntegration(
+            address(mockMUSD),
+            address(mockBorrowerOps),
+            address(mockPriceFeed),
+            address(mockHintHelpers),
+            address(mockTroveManager),
+            address(mockSortedTroves),
+            TARGET_LTV,
+            500 // max fee 5%
+        );
+        
+        // Deploy YieldAggregator
+        yieldAggregator = new YieldAggregator(
+            address(mockMUSD),
+            owner,
+            PERFORMANCE_FEE
+        );
+        
+        // Deploy IndividualPool
+        individualPool = new IndividualPool(
+            address(mezoIntegration),
+            address(mockMUSD),
+            address(yieldAggregator),
+            MIN_DEPOSIT,
+            MAX_DEPOSIT,
+            PERFORMANCE_FEE,
+            feeCollector
+        );
+        
+        console.log("✅ KhipuVault contracts deployed");
+        console.log("   MezoIntegration:", address(mezoIntegration));
+        console.log("   YieldAggregator:", address(yieldAggregator));
+        console.log("   IndividualPool:", address(individualPool));
+    }
+
+    function _configureContracts() internal {
+        // Configure YieldAggregator
+        yieldAggregator.setPerformanceFee(PERFORMANCE_FEE);
+        yieldAggregator.setFeeCollector(feeCollector);
+        
+        // Configure MezoIntegration
+        mezoIntegration.setTargetLtv(TARGET_LTV);
+        
+        // Setup mock MUSD minting for MezoIntegration
+        mockMUSD.setMinter(address(mezoIntegration), true);
+        mockMUSD.setMinter(address(this), true); // For testing
+        
+        // Mint initial MUSD for testing
+        mockMUSD.mint(address(yieldAggregator), 1000e18);
+        
+        console.log("✅ Contracts configured");
+    }
+
+    // ========================================================================
+    //                            MAIN TEST FUNCTIONS
+    // ========================================================================
+
+    /**
+     * @notice Test complete deposit flow
+     * @dev Verifies: BTC deposit -> MUSD minting -> Yield deposit
+     */
+    function testCompleteDepositFlow() public {
+        uint256 depositAmount = 0.1 ether; // 0.1 BTC
+        
+        vm.startPrank(user1);
+        
+        // Record initial state
+        uint256 initialUserBalance = user1.balance;
+        uint256 initialPoolBtc = individualPool.totalBtcDeposited();
+        uint256 initialPoolMusd = individualPool.totalMusdMinted();
+        uint256 initialMusdBalance = mockMUSD.balanceOf(address(individualPool));
+        
+        // Calculate expected MUSD amount
+        uint256 expectedMusdAmount = (depositAmount * BTC_PRICE * TARGET_LTV) / (10000 * 1e18);
+        
+        console.log("📊 Deposit Flow Test");
+        console.log("   Deposit Amount:", depositAmount);
+        console.log("   Expected MUSD:", expectedMusdAmount);
+        console.log("   Initial User Balance:", initialUserBalance);
+        
+        // Execute deposit
+        vm.recordLogs();
+        individualPool.deposit{value: depositAmount}();
+        
+        // Get gas used
+        Vm.Log[] memory logs = vm.getRecordedLogs();
+        uint256 gasUsed = gasleft();
+        
+        // Verify final state
+        uint256 finalUserBalance = user1.balance;
+        uint256 finalPoolBtc = individualPool.totalBtcDeposited();
+        uint256 finalPoolMusd = individualPool.totalMusdMinted();
+        uint256 finalMusdBalance = mockMUSD.balanceOf(address(individualPool));
+        
+        // Assertions
+        assertEq(finalUserBalance, initialUserBalance - depositAmount, "User BTC balance should decrease");
+        assertEq(finalPoolBtc, initialPoolBtc + depositAmount, "Pool BTC should increase");
+        assertEq(finalPoolMusd, initialPoolMusd + expectedMusdAmount, "Pool MUSD should increase");
+        
+        // Verify user deposit info
+        (uint256 userBtc, uint256 userMusd, uint256 yield, , , bool active) = individualPool.getUserInfo(user1);
+        assertEq(userBtc, depositAmount, "User BTC amount should match deposit");
+        assertEq(userMusd, expectedMusdAmount, "User MUSD amount should match expected");
+        assertTrue(active, "User deposit should be active");
+        
+        console.log("✅ Complete deposit flow test passed");
+        console.log("   Gas Used:", gasUsed);
+        console.log("   Final Pool BTC:", finalPoolBtc);
+        console.log("   Final Pool MUSD:", finalPoolMusd);
+        
+        vm.stopPrank();
+        
+        emit DepositTestResult("CompleteDepositFlow", true, gasUsed, "");
+    }
+
+    /**
+     * @notice Test minimum deposit validation
+     */
+    function testMinimumDepositValidation() public {
+        vm.startPrank(user1);
+        
+        uint256 belowMinDeposit = MIN_DEPOSIT - 1;
+        
+        console.log("📏 Minimum Deposit Test");
+        console.log("   Attempting deposit:", belowMinDeposit);
+        console.log("   Minimum required:", MIN_DEPOSIT);
+        
+        // Expect revert for below minimum deposit
+        vm.expectRevert(abi.encodeWithSelector(IndividualPool.MinimumDepositNotMet.selector));
+        individualPool.deposit{value: belowMinDeposit}();
+        
+        // Should succeed with exact minimum
+        individualPool.deposit{value: MIN_DEPOSIT}();
+        
+        console.log("✅ Minimum deposit validation test passed");
+        
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice Test maximum deposit validation
+     */
+    function testMaximumDepositValidation() public {
+        vm.startPrank(user1);
+        
+        uint256 aboveMaxDeposit = MAX_DEPOSIT + 1;
+        
+        console.log("📏 Maximum Deposit Test");
+        console.log("   Attempting deposit:", aboveMaxDeposit);
+        console.log("   Maximum allowed:", MAX_DEPOSIT);
+        
+        // Expect revert for above maximum deposit
+        vm.expectRevert(abi.encodeWithSelector(IndividualPool.MaximumDepositExceeded.selector));
+        individualPool.deposit{value: aboveMaxDeposit}();
+        
+        // Should succeed with exact maximum
+        individualPool.deposit{value: MAX_DEPOSIT}();
+        
+        console.log("✅ Maximum deposit validation test passed");
+        
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice Test duplicate deposit prevention
+     */
+    function testDuplicateDepositPrevention() public {
+        vm.startPrank(user1);
+        
+        uint256 depositAmount = 0.1 ether;
+        
+        console.log("🚫 Duplicate Deposit Test");
+        console.log("   First deposit amount:", depositAmount);
+        
+        // First deposit should succeed
+        individualPool.deposit{value: depositAmount}();
+        
+        // Second deposit should fail
+        vm.expectRevert(abi.encodeWithSelector(IndividualPool.DepositAlreadyExists.selector));
+        individualPool.deposit{value: depositAmount}();
+        
+        console.log("✅ Duplicate deposit prevention test passed");
+        
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice Test MUSD transfer from MezoIntegration
+     * @dev Verifies that MUSD is properly transferred from MezoIntegration to IndividualPool
+     */
+    function testMusdTransferVerification() public {
+        uint256 depositAmount = 0.1 ether;
+        
+        vm.startPrank(user1);
+        
+        console.log("💰 MUSD Transfer Test");
+        console.log("   Deposit Amount:", depositAmount);
+        
+        // Record MUSD balances before
+        uint256 mezoIntegrationBalanceBefore = mockMUSD.balanceOf(address(mezoIntegration));
+        uint256 individualPoolBalanceBefore = mockMUSD.balanceOf(address(individualPool));
+        
+        // Execute deposit
+        individualPool.deposit{value: depositAmount}();
+        
+        // Record MUSD balances after
+        uint256 mezoIntegrationBalanceAfter = mockMUSD.balanceOf(address(mezoIntegration));
+        uint256 individualPoolBalanceAfter = mockMUSD.balanceOf(address(individualPool));
+        
+        // Verify transfers
+        assertTrue(individualPoolBalanceAfter > individualPoolBalanceBefore, "IndividualPool should receive MUSD");
+        
+        console.log("   MezoIntegration MUSD Before:", mezoIntegrationBalanceBefore);
+        console.log("   MezoIntegration MUSD After:", mezoIntegrationBalanceAfter);
+        console.log("   IndividualPool MUSD Before:", individualPoolBalanceBefore);
+        console.log("   IndividualPool MUSD After:", individualPoolBalanceAfter);
+        
+        console.log("✅ MUSD transfer verification test passed");
+        
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice Test yield aggregation after deposit
+     * @dev Verifies that MUSD is properly deposited into yield aggregator
+     */
+    function testYieldAggregation() public {
+        uint256 depositAmount = 0.1 ether;
+        
+        vm.startPrank(user1);
+        
+        console.log("📈 Yield Aggregation Test");
+        console.log("   Deposit Amount:", depositAmount);
+        
+        // Record yield aggregator state before
+        uint256 yieldAggregatorBalanceBefore = mockMUSD.balanceOf(address(yieldAggregator));
+        uint256 totalDepositsBefore = yieldAggregator.totalDeposits();
+        
+        // Execute deposit
+        individualPool.deposit{value: depositAmount}();
+        
+        // Record yield aggregator state after
+        uint256 yieldAggregatorBalanceAfter = mockMUSD.balanceOf(address(yieldAggregator));
+        uint256 totalDepositsAfter = yieldAggregator.totalDeposits();
+        
+        // Verify yield aggregator received MUSD
+        uint256 expectedMusdAmount = (depositAmount * BTC_PRICE * TARGET_LTV) / (10000 * 1e18);
+        
+        assertEq(totalDepositsAfter, totalDepositsBefore + expectedMusdAmount, "Total deposits should increase");
+        
+        console.log("   Yield Aggregator Balance Before:", yieldAggregatorBalanceBefore);
+        console.log("   Yield Aggregator Balance After:", yieldAggregatorBalanceAfter);
+        console.log("   Total Deposits Before:", totalDepositsBefore);
+        console.log("   Total Deposits After:", totalDepositsAfter);
+        console.log("   Expected MUSD Amount:", expectedMusdAmount);
+        
+        console.log("✅ Yield aggregation test passed");
+        
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice Test gas optimization
+     * @dev Verifies gas usage is within acceptable limits
+     */
+    function testGasOptimization() public {
+        uint256 depositAmount = 0.1 ether;
+        
+        vm.startPrank(user1);
+        
+        console.log("⛽ Gas Optimization Test");
+        
+        // Measure gas for deposit operation
+        uint256 gasBefore = gasleft();
+        individualPool.deposit{value: depositAmount}();
+        uint256 gasUsed = gasBefore - gasleft();
+        
+        console.log("   Gas Used for Deposit:", gasUsed);
+        
+        // Gas should be reasonable (less than 500k for complex operations)
+        assertTrue(gasUsed < 500000, "Gas usage should be optimized");
+        
+        console.log("✅ Gas optimization test passed");
+        
+        vm.stopPrank();
+    }
+
+    /**
+     * @notice Test multiple users depositing
+     * @dev Verifies system handles concurrent deposits correctly
+     */
+    function testMultipleUsersDeposit() public {
+        uint256 user1Deposit = 0.1 ether;
+        uint256 user2Deposit = 0.05 ether;
+        
+        console.log("👥 Multiple Users Test");
+        console.log("   User1 Deposit:", user1Deposit);
+        console.log("   User2 Deposit:", user2Deposit);
+        
+        // User1 deposits
+        vm.startPrank(user1);
+        individualPool.deposit{value: user1Deposit}();
+        vm.stopPrank();
+        
+        // User2 deposits
+        vm.startPrank(user2);
+        individualPool.deposit{value: user2Deposit}();
+        vm.stopPrank();
+        
+        // Verify both users have active deposits
+        (uint256 user1Btc,,,,, bool user1Active) = individualPool.getUserInfo(user1);
+        (uint256 user2Btc,,,,, bool user2Active) = individualPool.getUserInfo(user2);
+        
+        assertEq(user1Btc, user1Deposit, "User1 BTC amount should match");
+        assertEq(user2Btc, user2Deposit, "User2 BTC amount should match");
+        assertTrue(user1Active, "User1 deposit should be active");
+        assertTrue(user2Active, "User2 deposit should be active");
+        
+        // Verify total pool amounts
+        uint256 totalBtc = individualPool.totalBtcDeposited();
+        assertEq(totalBtc, user1Deposit + user2Deposit, "Total BTC should match sum of deposits");
+        
+        console.log("   Total Pool BTC:", totalBtc);
+        console.log("✅ Multiple users test passed");
+    }
+
+    /**
+     * @notice Test emergency pause functionality
+     * @dev Verifies deposits are blocked when contract is paused
+     */
+    function testEmergencyPause() public {
+        uint256 depositAmount = 0.1 ether;
+        
+        console.log("⏸️ Emergency Pause Test");
+        
+        // Pause the individual pool
+        vm.startPrank(owner);
+        individualPool.pause();
+        vm.stopPrank();
+        
+        // Attempt deposit should fail
+        vm.startPrank(user1);
+        vm.expectRevert("Pausable: paused");
+        individualPool.deposit{value: depositAmount}();
+        vm.stopPrank();
+        
+        // Unpause and verify deposit works
+        vm.startPrank(owner);
+        individualPool.unpause();
+        vm.stopPrank();
+        
+        vm.startPrank(user1);
+        individualPool.deposit{value: depositAmount}();
+        vm.stopPrank();
+        
+        console.log("✅ Emergency pause test passed");
+    }
+
+    // ========================================================================
+    //                            FUZZ TESTING
+    // ========================================================================
+
+    /**
+     * @notice Fuzz test for deposit amounts
+     * @dev Tests various deposit amounts within valid range
+     */
+    function testFuzzDeposit(uint256 depositAmount) public {
+        // Bound deposit amount to reasonable range
+        depositAmount = bound(depositAmount, MIN_DEPOSIT, MAX_DEPOSIT);
+        
+        // Give user enough balance
+        vm.deal(user1, depositAmount + 1 ether);
+        
+        vm.startPrank(user1);
+        
+        // Deposit should succeed
+        individualPool.deposit{value: depositAmount}();
+        
+        // Verify deposit was recorded correctly
+        (uint256 userBtc,,,,, bool active) = individualPool.getUserInfo(user1);
+        assertEq(userBtc, depositAmount, "User BTC amount should match deposit");
+        assertTrue(active, "Deposit should be active");
+        
+        vm.stopPrank();
+    }
+
+    // ========================================================================
+    //                            HELPER FUNCTIONS
+    // ========================================================================
+
+    /**
+     * @notice Run all tests in sequence
+     */
+    function runAllTests() public {
+        console.log("🚀 Starting KhipuVault Deposit System Tests");
+        console.log("==========================================");
+        
+        testCompleteDepositFlow();
+        testMinimumDepositValidation();
+        testMaximumDepositValidation();
+        testDuplicateDepositPrevention();
+        testMusdTransferVerification();
+        testYieldAggregation();
+        testGasOptimization();
+        testMultipleUsersDeposit();
+        testEmergencyPause();
+        
+        console.log("==========================================");
+        console.log("✅ All tests passed successfully!");
+    }
+}
+
+// ========================================================================
+//                            MOCK CONTRACTS
+// ========================================================================
+
+/**
+ * @title MockMUSD
+ * @notice Mock MUSD token for testing
+ */
+contract MockMUSD is ERC20 {
+    mapping(address => bool) public minters;
+    
+    constructor(string memory name, string memory symbol) ERC20(name, symbol) {
+        _mint(msg.sender, 1000000e18);
+    }
+    
+    function setMinter(address minter, bool isMinter) external {
+        minters[minter] = isMinter;
+    }
+    
+    function mint(address to, uint256 amount) external {
+        require(minters[msg.sender], "Not authorized to mint");
+        _mint(to, amount);
+    }
+    
+    function decimals() public pure override returns (uint8) {
+        return 18;
+    }
+}
+
+/**
+ * @title MockMezoBorrowerOperations
+ * @notice Mock BorrowerOperations for testing
+ */
+contract MockMezoBorrowerOperations {
+    function openTrove(
+        uint256 /* maxFeePercentage */,
+        uint256 /* _musdAmount */,
+        address /* _upperHint */,
+        address /* _lowerHint */
+    ) external payable {
+        // Mock implementation - just accept the ETH
+    }
+    
+    function adjustTrove(
+        uint256 /* _maxFeePercentage */,
+        uint256 /* _collWithdrawal */,
+        uint256 /* _musdChange */,
+        bool /* _isDebtIncrease */,
+        address /* _upperHint */,
+        address /* _lowerHint */
+    ) external payable {
+        // Mock implementation
+    }
+    
+    function getBorrowingFee(uint256 /* musdAmount */) external pure returns (uint256) {
+        return 1000; // 0.1% fee
+    }
+}
+
+/**
+ * @title MockMezoPriceFeed
+ * @notice Mock PriceFeed for testing
+ */
+contract MockMezoPriceFeed {
+    uint256 private price;
+    
+    function setPrice(uint256 _price) external {
+        price = _price;
+    }
+    
+    function fetchPrice() external view returns (uint256) {
+        return price;
+    }
+    
+    function lastGoodPrice() external view returns (uint256) {
+        return price;
+    }
+}
+
+/**
+ * @title MockMezoHintHelpers
+ * @notice Mock HintHelpers for testing
+ */
+contract MockMezoHintHelpers {
+    function computeNominalCR(uint256 _coll, uint256 _debt) external pure returns (uint256) {
+        if (_debt == 0) return 0;
+        return (_coll * 1e18) / _debt;
+    }
+    
+    function getApproxHint(
+        uint256 /* _cr */,
+        uint256 /* _numTrials */,
+        uint256 /* _randomSeed */
+    ) external pure returns (address, uint256, uint256) {
+        return (address(0x1), 0, 0);
+    }
+}
+
+/**
+ * @title MockMezoTroveManager
+ * @notice Mock TroveManager for testing
+ */
+contract MockMezoTroveManager {
+    uint256 public constant MUSD_GAS_COMPENSATION = 200e18;
+    
+    function getTroveStatus(address /* _borrower */) external pure returns (uint256) {
+        return 1; // Active
+    }
+    
+    function getTroveColl(address /* _borrower */) external pure returns (uint256) {
+        return 100e18;
+    }
+    
+    function getTroveDebt(address /* _borrower */) external pure returns (uint256) {
+        return 50e18;
+    }
+}
+
+/**
+ * @title MockMezoSortedTroves
+ * @notice Mock SortedTroves for testing
+ */
+contract MockMezoSortedTroves {
+    function findInsertPosition(
+        uint256 /* _ICR */,
+        uint256 /* _NICR */,
+        address /* _prevId */,
+        address /* _nextId */
+    ) external pure returns (address, address) {
+        return (address(0x1), address(0x2));
+    }
+}
