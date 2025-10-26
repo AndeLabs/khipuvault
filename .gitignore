@@ -184,27 +184,8 @@ nyc_output
 keystore/
 secrets/
 
-# Temporary documentation files
-*_SUMMARY.md
-*_SUMMARY.txt
-*_COMPLETE.md
-*_AUDIT.md
-*_INTEGRATION.md
-*_TESTING.md
-*_UPDATES.md
-*_FIX.md
-*_REVIEW.md
-*_STATUS.md
-*_GUIDE.md
-*_STEPS.md
-*_RESULTS.md
-*_VERIFICATION.md
-*_RESUMEN.txt
-CHECKLIST_*.md
-QUICK_START_*.md
-SOLUTION_*.md
-START_*.md
-SYSTEM_*.md
-ARCHIVO_*.md
-CAMBIOS_*.md
-RECOMENDACIONES_*.md
+# Documentation files (only keep README.md)
+*.md
+!README.md
+!docs/**/*.md
+*.txt
