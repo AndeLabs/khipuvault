@@ -2,6 +2,9 @@ import type {Metadata} from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { Web3Provider, Web3ErrorBoundary } from "@/providers/web3-provider";
+import { NetworkSwitcher } from "@/components/web3/network-switcher";
+
+export const revalidate = 0
 
 export const metadata: Metadata = {
   title: 'KhipuVault | Ahorro Bitcoin con Rendimientos Reales',
@@ -23,6 +26,7 @@ export default function RootLayout({
       <body className="font-body antialiased">
         <Web3ErrorBoundary>
           <Web3Provider theme="dark">
+            <NetworkSwitcher />
             {children}
             <Toaster />
           </Web3Provider>

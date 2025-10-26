@@ -5,10 +5,15 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { YourTickets } from "./your-tickets";
+import { useCurrentRound, formatBTC, formatUSD, getRoundStatus } from "@/hooks/web3/use-lottery-pool";
 
-const CountdownTimer = () => {
+interface CountdownTimerProps {
+  endTime: bigint;
+}
+
+const CountdownTimer = ({ endTime }: CountdownTimerProps) => {
     const calculateTimeLeft = (): { d?: number; h?: number; m?: number; s?: number } => {
-        const difference = +new Date("2025-01-20") - +new Date();
+        const difference = Number(endTime) * 1000 - Date.now();
         let timeLeft: { d?: number; h?: number; m?: number; s?: number } = {};
 
         if (difference > 0) {
@@ -50,49 +55,120 @@ const CountdownTimer = () => {
     );
 };
 
-
-const stats = [
-    { label: "Premio Principal", value: "0.1 BTC", subValue: "$6,000 USD", emoji: "🏆", valueColor: "text-secondary text-4xl" },
-    { label: "Precio Ticket", value: "0.0005 BTC", subValue: "$30 USD", emoji: "🎟️" },
-    { label: "Participantes", value: "847/1000", emoji: "👥", progress: 84.7 },
-    { label: "Bote Total", value: "0.5 BTC", subValue: "$30,000 USD", emoji: "💰" },
-    { label: "Termina en", value: "", emoji: "⏰", isTimer: true },
-    { label: "Probabilidad", value: "1/1000", subValue: "por ticket", emoji: "🎲" },
-];
-
 export function ActiveRound() {
+  const { currentRoundId, roundInfo, isLoading } = useCurrentRound();
+
+  if (isLoading) {
+    return (
+      <Card className="border-primary/50">
+        <CardContent className="py-12 text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Cargando sorteo activo...</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!roundInfo || !currentRoundId) {
+    return (
+      <Card className="border-primary/50">
+        <CardContent className="py-12 text-center">
+          <p className="text-muted-foreground">No hay sorteos activos en este momento</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const participationRate = roundInfo.maxTickets > 0n 
+    ? (Number(roundInfo.totalTicketsSold) / Number(roundInfo.maxTickets)) * 100 
+    : 0;
+
+  const btcPrice = 60000; // TODO: Get from price oracle
+  const totalPrizeUSD = Number(roundInfo.totalPrize) * btcPrice / 1e18;
+  const ticketPriceUSD = Number(roundInfo.ticketPrice) * btcPrice / 1e18;
+
+  const status = getRoundStatus(roundInfo.status);
+  const isActive = status === "Activo";
+
   return (
     <Card className="border-primary/50 bg-gradient-to-br from-card to-card/80 shadow-custom shadow-primary/20 animate-pulse-glow">
         <CardHeader>
             <div className="flex justify-between items-center">
                 <CardTitle className="text-2xl">Sorteo Semanal</CardTitle>
-                <Badge className="bg-primary/20 text-primary border-primary/30 text-base">🎪 Ronda #123 ACTIVA</Badge>
+                <Badge className={`${isActive ? 'bg-primary/20 text-primary border-primary/30' : 'bg-muted text-muted-foreground'} text-base`}>
+                  🎪 Ronda #{currentRoundId.toString()} {status.toUpperCase()}
+                </Badge>
             </div>
         </CardHeader>
         <CardContent className="space-y-8">
             <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-                {stats.map(stat => (
-                    <div key={stat.label} className="p-4 bg-background/50 rounded-lg flex flex-col justify-between">
-                       <div className="flex items-center justify-between text-muted-foreground text-sm">
-                           <span>{stat.label}</span>
-                           <span className="text-2xl">{stat.emoji}</span>
-                       </div>
-                       {stat.isTimer ? (
-                           <CountdownTimer />
-                       ) : (
-                           <div>
-                                <p className={`font-code font-bold ${stat.valueColor || 'text-white text-3xl'}`}>{stat.value}</p>
-                                {stat.subValue && <p className="text-xs text-muted-foreground">{stat.subValue}</p>}
-                           </div>
-                       )}
-                       {stat.progress !== undefined && (
-                           <div className="mt-2">
-                            <Progress value={stat.progress} className="h-2 [&>div]:bg-gradient-to-r from-primary to-secondary" />
-                            <p className="text-xs text-right mt-1 text-muted-foreground">{stat.progress}% lleno</p>
-                           </div>
-                       )}
-                    </div>
-                ))}
+                <div className="p-4 bg-background/50 rounded-lg flex flex-col justify-between">
+                   <div className="flex items-center justify-between text-muted-foreground text-sm">
+                       <span>Premio Principal</span>
+                       <span className="text-2xl">🏆</span>
+                   </div>
+                   <div>
+                        <p className="font-code font-bold text-secondary text-4xl">{formatBTC(roundInfo.totalPrize)}</p>
+                        <p className="text-xs text-muted-foreground">{formatUSD(totalPrizeUSD)}</p>
+                   </div>
+                </div>
+
+                <div className="p-4 bg-background/50 rounded-lg flex flex-col justify-between">
+                   <div className="flex items-center justify-between text-muted-foreground text-sm">
+                       <span>Precio Ticket</span>
+                       <span className="text-2xl">🎟️</span>
+                   </div>
+                   <div>
+                        <p className="font-code font-bold text-white text-3xl">{formatBTC(roundInfo.ticketPrice)}</p>
+                        <p className="text-xs text-muted-foreground">{formatUSD(ticketPriceUSD)}</p>
+                   </div>
+                </div>
+
+                <div className="p-4 bg-background/50 rounded-lg flex flex-col justify-between">
+                   <div className="flex items-center justify-between text-muted-foreground text-sm">
+                       <span>Participantes</span>
+                       <span className="text-2xl">👥</span>
+                   </div>
+                   <div>
+                        <p className="font-code font-bold text-white text-3xl">{roundInfo.totalTicketsSold.toString()}/{roundInfo.maxTickets.toString()}</p>
+                   </div>
+                   <div className="mt-2">
+                    <Progress value={participationRate} className="h-2 [&>div]:bg-gradient-to-r from-primary to-secondary" />
+                    <p className="text-xs text-right mt-1 text-muted-foreground">{participationRate.toFixed(1)}% lleno</p>
+                   </div>
+                </div>
+
+                <div className="p-4 bg-background/50 rounded-lg flex flex-col justify-between">
+                   <div className="flex items-center justify-between text-muted-foreground text-sm">
+                       <span>Bote Total</span>
+                       <span className="text-2xl">💰</span>
+                   </div>
+                   <div>
+                        <p className="font-code font-bold text-white text-3xl">{formatBTC(roundInfo.totalPrize)}</p>
+                        <p className="text-xs text-muted-foreground">{formatUSD(totalPrizeUSD)}</p>
+                   </div>
+                </div>
+
+                <div className="p-4 bg-background/50 rounded-lg flex flex-col justify-between">
+                   <div className="flex items-center justify-between text-muted-foreground text-sm">
+                       <span>Termina en</span>
+                       <span className="text-2xl">⏰</span>
+                   </div>
+                   <CountdownTimer endTime={roundInfo.endTime} />
+                </div>
+
+                <div className="p-4 bg-background/50 rounded-lg flex flex-col justify-between">
+                   <div className="flex items-center justify-between text-muted-foreground text-sm">
+                       <span>Probabilidad</span>
+                       <span className="text-2xl">🎲</span>
+                   </div>
+                   <div>
+                        <p className="font-code font-bold text-white text-3xl">
+                          {roundInfo.maxTickets > 0n ? `1/${roundInfo.maxTickets.toString()}` : "N/A"}
+                        </p>
+                        <p className="text-xs text-muted-foreground">por ticket</p>
+                   </div>
+                </div>
             </div>
             <YourTickets />
         </CardContent>

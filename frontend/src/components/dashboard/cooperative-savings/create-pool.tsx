@@ -1,3 +1,10 @@
+/**
+ * @fileoverview Create Pool Component - Production Ready
+ * @module components/dashboard/cooperative-savings/create-pool
+ * 
+ * Allows users to create new cooperative pools on Mezo Testnet
+ */
+
 "use client";
 
 import { useState } from "react";
@@ -12,19 +19,21 @@ import { Textarea } from "@/components/ui/textarea";
 import { Slider } from "@/components/ui/slider";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Switch } from "@/components/ui/switch";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
+import { useCreatePool } from "@/hooks/web3/use-cooperative-pools";
+import { useToast } from "@/hooks/use-toast";
+import { useAccount } from "wagmi";
+import { Loader2 } from "lucide-react";
 
 const formSchema = z.object({
   name: z.string().min(5, "Muy corto").max(50, "Muy largo"),
   minContribution: z.coerce.number().min(0.001, "Mínimo 0.001 BTC"),
   maxContribution: z.coerce.number(),
   maxMembers: z.number().min(3).max(50),
-  description: z.string().max(200, "Máximo 200 caracteres").optional(),
+  description: z.string().max(200, "Máximo 200 caracteres").optional().default(""),
   isPrivate: z.boolean().default(false),
   requireApproval: z.boolean().default(false),
-  lockupPeriod: z.string().optional(),
+  lockupPeriod: z.string().default("none"),
 }).refine(data => data.maxContribution > data.minContribution, {
     message: "Máximo debe ser mayor que mínimo",
     path: ["maxContribution"],
@@ -33,20 +42,55 @@ const formSchema = z.object({
 
 export function CreatePool() {
   const [maxMembers, setMaxMembers] = useState(10);
+  const { address } = useAccount();
+  const { createPool, isPending } = useCreatePool();
+  const { toast } = useToast();
   
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       minContribution: 0.001,
+      maxContribution: 0.01,
       maxMembers: 10,
+      description: "",
       isPrivate: false,
       requireApproval: false,
+      lockupPeriod: "none",
     },
   });
 
-  function onSubmit(values: z.infer<typeof formSchema>) {
-    console.log(values);
+  async function onSubmit(values: z.infer<typeof formSchema>) {
+    if (!address) {
+      toast({
+        title: "Wallet no conectada",
+        description: "Por favor conecta tu wallet para crear un pool",
+        variant: "destructive",
+      })
+      return
+    }
+
+    try {
+      await createPool(
+        values.name,
+        values.minContribution.toString(),
+        values.maxContribution.toString(),
+        values.maxMembers
+      )
+      
+      toast({
+        title: "¡Pool creado!",
+        description: `El pool "${values.name}" ha sido creado exitosamente`,
+      })
+      
+      form.reset()
+    } catch (error: any) {
+      toast({
+        title: "Error al crear pool",
+        description: error.message || "No se pudo crear el pool",
+        variant: "destructive",
+      })
+    }
   }
 
   return (
@@ -164,25 +208,26 @@ export function CreatePool() {
                                 </FormItem>
                             )}
                         />
-                         <FormField
+                        <FormField
                             control={form.control}
                             name="lockupPeriod"
                             render={({ field }) => (
                                 <FormItem>
-                                <FormLabel>Periodo de Bloqueo (Lockup)</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Opcional: define un tiempo mínimo de permanencia" />
-                                    </SelectTrigger>
-                                    </FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="none">Sin bloqueo</SelectItem>
-                                        <SelectItem value="30">30 días</SelectItem>
-                                        <SelectItem value="90">90 días</SelectItem>
-                                        <SelectItem value="180">180 días</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                    <FormLabel>Periodo de Bloqueo (Lockup)</FormLabel>
+                                    <Select onValueChange={field.onChange} value={field.value || "none"}>
+                                        <FormControl>
+                                            <SelectTrigger>
+                                                <SelectValue />
+                                            </SelectTrigger>
+                                        </FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="none">Sin bloqueo</SelectItem>
+                                            <SelectItem value="30">30 días</SelectItem>
+                                            <SelectItem value="90">90 días</SelectItem>
+                                            <SelectItem value="180">180 días</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
                                 </FormItem>
                             )}
                         />
@@ -196,8 +241,30 @@ export function CreatePool() {
             </div>
 
             <div className="flex gap-4 pt-4">
-              <Button type="submit" variant="secondary" className="w-full" disabled={!form.formState.isValid}>🚀 CREAR POOL</Button>
-              <Button type="button" variant="outline" className="w-full" onClick={() => form.reset()}>❌ CANCELAR</Button>
+              <Button 
+                type="submit" 
+                variant="secondary" 
+                className="w-full" 
+                disabled={!form.formState.isValid || isPending || !address}
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Creando...
+                  </>
+                ) : (
+                  <>🚀 CREAR POOL</>
+                )}
+              </Button>
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => form.reset()}
+                disabled={isPending}
+              >
+                ❌ CANCELAR
+              </Button>
             </div>
           </form>
         </Form>

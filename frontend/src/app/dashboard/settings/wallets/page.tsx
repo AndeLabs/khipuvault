@@ -1,3 +1,7 @@
+'use client'
+
+export const dynamic = 'force-dynamic'
+
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

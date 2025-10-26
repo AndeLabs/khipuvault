@@ -1,10 +1,10 @@
 "use client";
 
 import Link from 'next/link';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
+import { MezoWalletSelector } from '@/components/wallet/mezo-wallet-selector';
 
 const navLinks = [
   { href: '#features', label: 'Características' },
@@ -34,11 +34,7 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           <div className="hidden md:flex">
-            <ConnectButton 
-              chainStatus="icon"
-              showBalance={false}
-              label="Conectar Wallet"
-            />
+            <MezoWalletSelector />
           </div>
 
           <Sheet>
@@ -67,11 +63,7 @@ export function Header() {
                   ))}
                 </nav>
                 <div className="mt-auto w-full">
-                  <ConnectButton 
-                    chainStatus="full"
-                    showBalance={true}
-                    label="Conectar Wallet"
-                  />
+                  <MezoWalletSelector />
                 </div>
               </div>
             </SheetContent>

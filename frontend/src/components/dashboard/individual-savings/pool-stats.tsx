@@ -1,56 +1,93 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+'use client'
 
-const poolStats = {
-    totalDeposited: "10.5 BTC",
-    totalUsers: "125",
-    avgApr: "6.2%",
-};
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useIndividualPool, formatMUSD } from "@/hooks/web3/use-individual-pool";
+import { Skeleton } from "@/components/ui/skeleton";
 
-const recentActivities = [
-    { user: "0x12...34", action: "depositó 0.1 BTC", time: "hace 5 minutos" },
-    { user: "0xab...ef", action: "retiró 0.5 BTC", time: "hace 12 minutos" },
-    { user: "0x56...78", action: "reclamó 0.01 BTC", time: "hace 28 minutos" },
-    { user: "0xcd...gh", action: "depositó 0.25 BTC", time: "hace 1 hora" },
-    { user: "0x89...ab", action: "depositó 0.05 BTC", time: "hace 2 horas" },
-];
-
+/**
+ * Simplified PoolStats component without charts and progress bars
+ * Focus on essential text-based information only
+ */
 export function PoolStats() {
+  const { poolStats, isLoading } = useIndividualPool();
+  
+  if (isLoading) {
     return (
-        <Card className="sticky top-24 bg-card border-primary/20 shadow-custom">
-            <CardHeader>
-                <CardTitle>📊 Estadísticas del Pool</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-                <div className="space-y-2 text-sm">
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Total depositado</span>
-                        <span className="font-bold font-code">{poolStats.totalDeposited}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">Total usuarios</span>
-                        <span className="font-bold font-code">{poolStats.totalUsers}</span>
-                    </div>
-                    <div className="flex justify-between">
-                        <span className="text-muted-foreground">APR promedio</span>
-                        <span className="font-bold font-code text-secondary">{poolStats.avgApr}</span>
-                    </div>
-                </div>
+      <Card className="sticky top-24 bg-card border-primary/20">
+        <CardHeader>
+          <CardTitle className="text-lg">📊 Estadísticas del Pool</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="flex justify-between">
+                <Skeleton className="h-4 w-24" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
-                <Separator className="bg-primary/20" />
-                
-                <div>
-                    <h4 className="font-semibold mb-3">⚡ Últimas actividades</h4>
-                    <div className="space-y-3 text-xs">
-                        {recentActivities.map((activity, index) => (
-                            <div key={index}>
-                                <p><span className="font-bold text-primary">{activity.user}</span> {activity.action}</p>
-                                <p className="text-muted-foreground">{activity.time}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-    )
+  return (
+    <Card className="sticky top-24 bg-card border-primary/20">
+      <CardHeader>
+        <CardTitle className="text-lg">📊 Estadísticas del Pool</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        {/* Total MUSD Deposited */}
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground">
+            Total MUSD Depositado
+          </span>
+          <div className="text-right">
+            <p className="font-bold font-code">
+              {formatMUSD(poolStats?.totalMusdDeposited)} MUSD
+            </p>
+            <p className="text-xs text-muted-foreground">
+              = ${(Number(poolStats?.totalMusdDeposited || BigInt(0)) / 1e18).toLocaleString('en-US', { maximumFractionDigits: 2 })} USD
+            </p>
+          </div>
+        </div>
+
+        {/* Total Yields Generated */}
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground">Yields Total Generados</span>
+          <div className="text-right">
+            <p className="font-bold font-code text-green-500">
+              {formatMUSD(poolStats?.totalYields)} MUSD
+            </p>
+            <p className="text-xs text-muted-foreground">
+              = ${(Number(poolStats?.totalYields || BigInt(0)) / 1e18).toFixed(2)} USD
+            </p>
+          </div>
+        </div>
+
+        {/* APR */}
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground">
+            APR del Pool
+          </span>
+          <span className="font-bold font-code text-primary">
+            {poolStats?.poolAPR.toFixed(2)}%
+          </span>
+        </div>
+
+        {/* Member Count */}
+        <div className="flex justify-between">
+          <span className="text-sm text-muted-foreground">Miembros Activos</span>
+          <span className="font-bold font-code">{poolStats?.memberCount || 0}</span>
+        </div>
+
+        {/* Status Message */}
+        <div className="mt-4 p-3 bg-muted/50 rounded-lg">
+          <p className="text-xs text-center text-muted-foreground">
+            El pool está operando normalmente. Deposita MUSD para generar rendimientos.
+          </p>
+        </div>
+      </CardContent>
+    </Card>
+  );
 }

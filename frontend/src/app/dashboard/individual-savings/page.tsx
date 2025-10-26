@@ -1,12 +1,13 @@
+'use client'
+
+export const dynamic = 'force-dynamic'
+
 import Link from "next/link";
 import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { YourPosition } from "@/components/dashboard/individual-savings/your-position";
 import { Deposits } from "@/components/dashboard/individual-savings/deposits";
-import { YieldHistoryChart } from "@/components/dashboard/individual-savings/yield-history-chart";
 import { TransactionsTable } from "@/components/dashboard/individual-savings/transactions-table";
-import { ProjectionsCalculator } from "@/components/dashboard/individual-savings/projections-calculator";
-import { PoolStats } from "@/components/dashboard/individual-savings/pool-stats";
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 
 export default function IndividualSavingsPage() {
@@ -23,36 +24,16 @@ export default function IndividualSavingsPage() {
         </h1>
       </AnimateOnScroll>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 flex flex-col gap-8">
-          <AnimateOnScroll delay="100ms">
-            <YourPosition />
-          </AnimateOnScroll>
-          <AnimateOnScroll delay="200ms">
-            <Deposits />
-          </AnimateOnScroll>
-          <AnimateOnScroll delay="300ms">
-            <YieldHistoryChart />
-          </AnimateOnScroll>
-        </div>
-        <div className="lg:col-span-1">
-          <AnimateOnScroll delay="400ms">
-            <PoolStats />
-          </AnimateOnScroll>
-        </div>
-      </div>
-      
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
-            <AnimateOnScroll delay="500ms">
-                <TransactionsTable />
-            </AnimateOnScroll>
-        </div>
-        <div className="lg:col-span-1">
-            <AnimateOnScroll delay="600ms">
-                <ProjectionsCalculator />
-            </AnimateOnScroll>
-        </div>
+      <div className="flex flex-col gap-8">
+        <AnimateOnScroll delay="100ms">
+          <YourPosition />
+        </AnimateOnScroll>
+        <AnimateOnScroll delay="200ms">
+          <Deposits />
+        </AnimateOnScroll>
+        <AnimateOnScroll delay="300ms">
+          <TransactionsTable />
+        </AnimateOnScroll>
       </div>
 
       <Button

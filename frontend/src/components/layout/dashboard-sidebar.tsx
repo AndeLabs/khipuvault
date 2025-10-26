@@ -1,14 +1,13 @@
 
 import Link from "next/link";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Home, Settings, Handshake, Lightbulb, RotateCw, Trophy } from "lucide-react";
+import { Home, Settings, Handshake, Lightbulb, Trophy } from "lucide-react";
 
 export const navItems = [
     { href: "/dashboard", icon: Home, label: "Dashboard" },
     { href: "/dashboard/individual-savings", icon: Lightbulb, label: "Individual Savings" },
     { href: "/dashboard/cooperative-savings", icon: Handshake, label: "Cooperative Savings" },
     { href: "/dashboard/prize-pool", icon: Trophy, label: "Prize Pool" },
-    { href: "/dashboard/rotating-pool", icon: RotateCw, label: "Rotating Pool" },
 ];
 
 export function DashboardSidebar() {
