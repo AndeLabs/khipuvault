@@ -91,6 +91,7 @@ export function useIndividualPoolV3() {
     queryKey: ['individual-pool-v3', 'user-info', address],
     queryFn: async () => {
       if (!address) return null
+      console.log('🔄 [V3] Fetching user info for:', address)
       const result = await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
@@ -98,10 +99,13 @@ export function useIndividualPoolV3() {
         args: [address],
       })
       console.log('📊 [V3] User info fetched:', result)
+      console.log('  - Deposit:', result[0]?.toString(), 'wei')
+      console.log('  - Yields:', result[1]?.toString(), 'wei')
       return result as unknown as [bigint, bigint, bigint, bigint, bigint, boolean]
     },
     enabled: isConnected && !!address,
     staleTime: 5_000,
+    refetchInterval: 10_000,
   })
 
   // Parse getUserInfo result
