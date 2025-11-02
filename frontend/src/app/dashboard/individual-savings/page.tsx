@@ -7,6 +7,7 @@ import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { PositionSimple } from "@/components/dashboard/individual-savings/position-simple";
 import { Deposits } from "@/components/dashboard/individual-savings/deposits";
+import { Withdraw } from "@/components/dashboard/individual-savings/withdraw";
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { usePoolEvents } from "@/hooks/web3/use-pool-events";
 
@@ -31,9 +32,15 @@ export default function IndividualSavingsPage() {
         <AnimateOnScroll delay="100ms">
           <PositionSimple />
         </AnimateOnScroll>
-        <AnimateOnScroll delay="200ms">
-          <Deposits />
-        </AnimateOnScroll>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <AnimateOnScroll delay="200ms">
+            <Deposits />
+          </AnimateOnScroll>
+          <AnimateOnScroll delay="250ms">
+            <Withdraw />
+          </AnimateOnScroll>
+        </div>
       </div>
 
       <Button

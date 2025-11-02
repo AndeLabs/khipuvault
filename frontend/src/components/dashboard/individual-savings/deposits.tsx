@@ -240,17 +240,17 @@ export function Deposits() {
               </p>
               
               {depositTxHash && (
-                <div className="pt-2 border-t border-green-500/20">
-                  <p className="text-xs text-green-400/70 mb-2">
-                    Transaction hash:
-                  </p>
-                  <code className="text-xs text-green-300 bg-black/30 px-2 py-1 rounded block overflow-x-auto">
-                    {depositTxHash}
-                  </code>
-                  <p className="text-xs text-green-400/50 mt-2">
-                    Nota: El explorer puede tardar 30-60 segundos en indexar la transacción
-                  </p>
-                </div>
+                <a
+                  href={`https://explorer.mezo.org/tx/${depositTxHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-4 py-3 bg-primary/20 hover:bg-primary/30 border border-primary/50 rounded-lg transition-all hover:scale-105"
+                >
+                  <ExternalLink className="h-4 w-4 text-primary" />
+                  <span className="text-sm font-medium text-primary">
+                    Ver transacción en Mezo Explorer
+                  </span>
+                </a>
               )}
             </div>
             

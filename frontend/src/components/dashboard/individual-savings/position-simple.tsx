@@ -141,15 +141,32 @@ export function PositionSimple() {
           </div>
         </div>
 
-        {/* Auto-compound badge */}
-        {userInfo?.autoCompoundEnabled && (
-          <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
-            <Zap className="h-4 w-4 text-purple-500" />
-            <span className="text-sm text-purple-400 font-medium">
-              Auto-compound activado
+        {/* Info badges */}
+        <div className="flex flex-col gap-3">
+          {userInfo?.autoCompoundEnabled && (
+            <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
+              <Zap className="h-4 w-4 text-purple-500" />
+              <span className="text-sm text-purple-400 font-medium">
+                Auto-compound activado
+              </span>
+            </div>
+          )}
+          
+          <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
+            <TrendingUp className="h-4 w-4 text-blue-500" />
+            <span className="text-xs text-blue-300">
+              Rendimientos generados automáticamente por el protocolo{' '}
+              <a 
+                href="https://mezo.org" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline font-semibold"
+              >
+                Mezo
+              </a>
             </span>
           </div>
-        )}
+        </div>
       </CardContent>
     </Card>
   )
