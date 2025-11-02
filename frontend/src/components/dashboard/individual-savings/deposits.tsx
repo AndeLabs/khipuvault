@@ -24,6 +24,7 @@ import { useMusdApprovalV2, formatMUSD, formatMUSDShort } from '@/hooks/web3/use
 import { usePoolRealTimeSync } from '@/hooks/web3/use-pool-real-time-sync'
 import { useIndividualPool, formatBTC } from '@/hooks/web3/use-individual-pool'
 import { useToast } from '@/hooks/use-toast'
+import { TransactionStatus } from './transaction-status'
 import Link from 'next/link'
 
 export function Deposits() {
@@ -54,6 +55,7 @@ export function Deposits() {
   // Real blockchain transactions (V2 - Production Ready)
   const {
     deposit,
+    hash: depositHash,
     isDepositing,
     isConfirming: depositConfirming,
     isSuccess: depositSuccess,
@@ -62,6 +64,7 @@ export function Deposits() {
   
   const {
     withdraw,
+    hash: withdrawHash,
     isWithdrawing,
     isConfirming: withdrawConfirming,
     isSuccess: withdrawSuccess,
@@ -70,6 +73,7 @@ export function Deposits() {
   
   const {
     claimYield,
+    hash: claimHash,
     isClaimingYield,
     isConfirming: claimConfirming,
     isSuccess: claimSuccess,
@@ -209,7 +213,33 @@ export function Deposits() {
 
   return (
     <Card className="bg-card border border-primary/20 shadow-custom">
-      <CardContent className="p-6">
+      <CardContent className="p-6 space-y-6">
+        {/* Transaction Status Cards */}
+        {depositHash && (
+          <TransactionStatus
+            hash={depositHash}
+            isConfirming={depositConfirming}
+            isSuccess={depositSuccess}
+            type="deposit"
+          />
+        )}
+        {withdrawHash && (
+          <TransactionStatus
+            hash={withdrawHash}
+            isConfirming={withdrawConfirming}
+            isSuccess={withdrawSuccess}
+            type="withdraw"
+          />
+        )}
+        {claimHash && (
+          <TransactionStatus
+            hash={claimHash}
+            isConfirming={claimConfirming}
+            isSuccess={claimSuccess}
+            type="claim"
+          />
+        )}
+
         {/* Wallet Status Header */}
         <div className="mb-6 p-4 rounded-lg bg-primary/10 border border-primary/30">
           <div className="flex items-center justify-between mb-2">
