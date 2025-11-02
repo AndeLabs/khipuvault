@@ -24,13 +24,14 @@ import SortedTrovesABI from '@/contracts/mezo-abis/SortedTroves.json'
 import MUSDABI from '@/contracts/mezo-abis/MUSD.json'
 import StabilityPoolABI from '@/contracts/mezo-abis/StabilityPool.json'
 
-export const MEZO_BORROWER_OPERATIONS_ABI = BorrowerOperationsABI
-export const MEZO_TROVE_MANAGER_ABI = TroveManagerABI
-export const MEZO_PRICE_FEED_ABI = PriceFeedABI
-export const MEZO_HINT_HELPERS_ABI = HintHelpersABI
-export const MEZO_SORTED_TROVES_ABI = SortedTrovesABI
-export const MEZO_MUSD_ABI = MUSDABI
-export const MEZO_STABILITY_POOL_ABI = StabilityPoolABI
+// Ensure ABIs are arrays (some bundlers might wrap them in {default: ...})
+export const MEZO_BORROWER_OPERATIONS_ABI = Array.isArray(BorrowerOperationsABI) ? BorrowerOperationsABI : (BorrowerOperationsABI as any).default || BorrowerOperationsABI
+export const MEZO_TROVE_MANAGER_ABI = Array.isArray(TroveManagerABI) ? TroveManagerABI : (TroveManagerABI as any).default || TroveManagerABI
+export const MEZO_PRICE_FEED_ABI = Array.isArray(PriceFeedABI) ? PriceFeedABI : (PriceFeedABI as any).default || PriceFeedABI
+export const MEZO_HINT_HELPERS_ABI = Array.isArray(HintHelpersABI) ? HintHelpersABI : (HintHelpersABI as any).default || HintHelpersABI
+export const MEZO_SORTED_TROVES_ABI = Array.isArray(SortedTrovesABI) ? SortedTrovesABI : (SortedTrovesABI as any).default || SortedTrovesABI
+export const MEZO_MUSD_ABI = Array.isArray(MUSDABI) ? MUSDABI : (MUSDABI as any).default || MUSDABI
+export const MEZO_STABILITY_POOL_ABI = Array.isArray(StabilityPoolABI) ? StabilityPoolABI : (StabilityPoolABI as any).default || StabilityPoolABI
 
 // ============================================================================
 // MEZO TESTNET CONTRACT ADDRESSES
