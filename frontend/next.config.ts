@@ -29,6 +29,14 @@ const nextConfig: NextConfig = {
       tls: false,
     };
     
+    // Ignore React Native modules in browser build
+    if (!isServer) {
+      config.resolve.alias = {
+        ...config.resolve.alias,
+        '@react-native-async-storage/async-storage': false,
+      };
+    }
+    
     // External node modules for server-side
     if (isServer) {
       config.externals.push('pino-pretty', 'encoding');
