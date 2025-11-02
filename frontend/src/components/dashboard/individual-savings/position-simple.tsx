@@ -152,6 +152,19 @@ export function PositionSimple() {
             </div>
           )}
           
+          {/* Testnet yields info */}
+          {(userInfo?.yields || BigInt(0)) === BigInt(0) && (
+            <div className="flex items-start gap-3 p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
+              <Clock className="h-4 w-4 text-yellow-500 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <p className="text-xs text-yellow-300">
+                  <strong className="text-yellow-400">🧪 Testnet:</strong> Los rendimientos se activarán cuando se despliegue el StabilityPoolStrategy.
+                  Tu depósito está seguro y listo para generar yields reales de Mezo.
+                </p>
+              </div>
+            </div>
+          )}
+          
           <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-blue-500/10 border border-blue-500/30">
             <TrendingUp className="h-4 w-4 text-blue-500" />
             <span className="text-xs text-blue-300">
@@ -164,6 +177,7 @@ export function PositionSimple() {
               >
                 Mezo
               </a>
+              {' '}(APR estimado: 5-7%)
             </span>
           </div>
         </div>
