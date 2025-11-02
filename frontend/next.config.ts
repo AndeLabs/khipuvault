@@ -27,6 +27,16 @@ const nextConfig: NextConfig = {
       fs: false,
       net: false,
       tls: false,
+      crypto: false,
+      stream: false,
+      util: false,
+      url: false,
+      zlib: false,
+      http: false,
+      https: false,
+      assert: false,
+      os: false,
+      path: false,
     };
     
     // Ignore React Native modules in browser build
@@ -34,7 +44,15 @@ const nextConfig: NextConfig = {
       config.resolve.alias = {
         ...config.resolve.alias,
         '@react-native-async-storage/async-storage': false,
+        'react-native': false,
+        'react-native-safe-area-context': false,
+        'react-native-screens': false,
+        'react-native-gesture-handler': false,
+        'react-native-reanimated': false,
       };
+      
+      // Ignore React Native modules in webpack resolve
+      config.resolve.extensions = config.resolve.extensions.filter(ext => ext !== '.native.js');
     }
     
     // External node modules for server-side
