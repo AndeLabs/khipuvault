@@ -9,22 +9,16 @@ import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol
 import {IYieldAggregator} from "../interfaces/IYieldAggregator.sol";
 
 /**
- * @title IndividualPool
- * @notice Permite a usuarios individuales depositar MUSD y ganar yields optimizados
- * @dev Pool simplificado enfocado en yield management, no en collateral management
+ * @title IndividualPool V2
+ * @notice Pool de ahorro individual con MUSD - Versión mejorada para producción
+ * @dev Mejoras UX:
+ *      - Depósitos incrementales
+ *      - Retiros parciales
+ *      - Emergency withdraw sin fees
+ *      - View functions optimizadas para frontend
+ *      - Events mejorados con más información
  * 
- * IMPORTANTE: Solo acepta MUSD (no BTC directo)
- * - Los usuarios deben obtener MUSD primero en mezo.org
- * - MUSD tiene 18 decimales (ERC20 estándar)
- * - Nos enfocamos solo en optimizar yields, no en CDP management
- * 
- * Flujo principal:
- * 1. Usuario obtiene MUSD en mezo.org (deposita BTC allá)
- * 2. Usuario aprueba MUSD a este contrato
- * 3. Usuario deposita MUSD en IndividualPool
- * 4. MUSD se deposita en yield aggregator para ganar rendimientos
- * 5. Yields se acumulan automáticamente
- * 6. Usuario puede retirar en cualquier momento
+ * @author KhipuVault Team
  */
 contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
     using SafeERC20 for IERC20;
@@ -33,13 +27,10 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
                                 STRUCTS
     //////////////////////////////////////////////////////////////*/
 
-    /**
-     * @notice Información del depósito de un usuario
-     */
     struct UserDeposit {
         uint256 musdAmount;          // MUSD depositado (18 decimals)
         uint256 yieldAccrued;        // Yields acumulados (en MUSD)
-        uint256 depositTimestamp;    // Timestamp del depósito
+        uint256 depositTimestamp;    // Timestamp del primer depósito
         uint256 lastYieldUpdate;     // Última vez que se actualizaron yields
         bool active;                 // Estado del depósito
     }
@@ -48,32 +39,22 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
                             STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
 
-    /// @notice Yield aggregator contract
     IYieldAggregator public immutable YIELD_AGGREGATOR;
-
-    /// @notice MUSD token (Mezo native stablecoin)
     IERC20 public immutable MUSD;
 
-    /// @notice Depósitos por usuario
     mapping(address => UserDeposit) public userDeposits;
 
-    /// @notice Total MUSD depositado en el pool
     uint256 public totalMusdDeposited;
-
-    /// @notice Total yields generados
     uint256 public totalYieldsGenerated;
 
-    /// @notice Minimum deposit amount (10 MUSD)
     uint256 public constant MIN_DEPOSIT = 10 ether;
-
-    /// @notice Maximum deposit amount (100,000 MUSD)
     uint256 public constant MAX_DEPOSIT = 100_000 ether;
+    uint256 public constant MIN_WITHDRAWAL = 1 ether;  // Minimum 1 MUSD for partial withdrawals
 
-    /// @notice Performance fee (1% = 100 basis points)
-    uint256 public performanceFee = 100; // 1%
-
-    /// @notice Fee collector address
+    uint256 public performanceFee = 100; // 1% in basis points
     address public feeCollector;
+
+    bool public emergencyMode;  // Emergency mode disables fees
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
@@ -82,28 +63,42 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
     event Deposited(
         address indexed user,
         uint256 musdAmount,
+        uint256 totalDeposit,  // Total después del depósito
+        uint256 timestamp
+    );
+
+    event PartialWithdrawn(
+        address indexed user,
+        uint256 musdAmount,
+        uint256 remainingDeposit,
         uint256 timestamp
     );
 
     event YieldClaimed(
         address indexed user,
-        uint256 yieldAmount,
-        uint256 feeAmount
+        uint256 grossYield,
+        uint256 feeAmount,
+        uint256 netYield,
+        uint256 timestamp
     );
 
-    event Withdrawn(
+    event FullWithdrawal(
         address indexed user,
-        uint256 musdAmount,
-        uint256 yieldAmount
+        uint256 principal,
+        uint256 grossYield,
+        uint256 feeAmount,
+        uint256 netYield,
+        uint256 timestamp
     );
 
     event YieldUpdated(
         address indexed user,
-        uint256 newYieldAmount
+        uint256 newYieldAmount,
+        uint256 timestamp
     );
 
+    event EmergencyModeUpdated(bool enabled);
     event PerformanceFeeUpdated(uint256 oldFee, uint256 newFee);
-
     event FeeCollectorUpdated(address indexed oldCollector, address indexed newCollector);
 
     /*//////////////////////////////////////////////////////////////
@@ -113,22 +108,17 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
     error InsufficientBalance();
     error NoActiveDeposit();
     error MinimumDepositNotMet();
+    error MinimumWithdrawalNotMet();
     error MaximumDepositExceeded();
     error InvalidAmount();
     error InvalidAddress();
-    error DepositAlreadyExists();
     error InvalidFee();
+    error WithdrawalExceedsBalance();
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    /**
-     * @notice Constructor
-     * @param _yieldAggregator Address of yield aggregator contract
-     * @param _musd Address of MUSD token (Mezo native stablecoin)
-     * @param _feeCollector Address to collect performance fees
-     */
     constructor(
         address _yieldAggregator,
         address _musd,
@@ -149,233 +139,189 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Deposita MUSD para generar yields optimizados
-     * @dev Usuario debe aprobar MUSD antes de llamar esta función
-     * @param musdAmount Cantidad de MUSD a depositar (18 decimales)
+     * @notice Deposita MUSD (inicial o incremental)
+     * @param musdAmount Cantidad de MUSD a depositar
      */
     function deposit(uint256 musdAmount) 
         external 
         nonReentrant 
         whenNotPaused 
     {
+        if (musdAmount == 0) revert InvalidAmount();
         if (musdAmount < MIN_DEPOSIT) revert MinimumDepositNotMet();
-        if (musdAmount > MAX_DEPOSIT) revert MaximumDepositExceeded();
-        if (userDeposits[msg.sender].active) revert DepositAlreadyExists();
+        
+        UserDeposit storage userDeposit = userDeposits[msg.sender];
+        
+        uint256 newTotalDeposit = userDeposit.musdAmount + musdAmount;
+        if (newTotalDeposit > MAX_DEPOSIT) revert MaximumDepositExceeded();
 
-        // 1. Transferir MUSD del usuario al contrato
+        // Transfer MUSD from user
         MUSD.safeTransferFrom(msg.sender, address(this), musdAmount);
 
-        // 2. Aprobar yield aggregator para usar MUSD
+        // Approve and deposit to yield aggregator
         MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
-
-        // 3. Depositar MUSD en yield vault
         YIELD_AGGREGATOR.deposit(musdAmount);
 
-        // 4. Actualizar estado del usuario
-        userDeposits[msg.sender] = UserDeposit({
-            musdAmount: musdAmount,
-            yieldAccrued: 0,
-            depositTimestamp: block.timestamp,
-            lastYieldUpdate: block.timestamp,
-            active: true
-        });
+        if (!userDeposit.active) {
+            // New deposit
+            userDeposit.musdAmount = musdAmount;
+            userDeposit.yieldAccrued = 0;
+            userDeposit.depositTimestamp = block.timestamp;
+            userDeposit.lastYieldUpdate = block.timestamp;
+            userDeposit.active = true;
+        } else {
+            // Incremental deposit - update pending yields first
+            uint256 pendingYield = _calculateUserYield(msg.sender);
+            if (pendingYield > 0) {
+                userDeposit.yieldAccrued += pendingYield;
+                totalYieldsGenerated += pendingYield;
+            }
+            
+            userDeposit.musdAmount += musdAmount;
+            userDeposit.lastYieldUpdate = block.timestamp;
+        }
 
-        // 5. Actualizar totales
         totalMusdDeposited += musdAmount;
 
-        emit Deposited(msg.sender, musdAmount, block.timestamp);
+        emit Deposited(msg.sender, musdAmount, userDeposit.musdAmount, block.timestamp);
     }
 
     /**
-     * @notice Actualiza los yields acumulados de un usuario
-     * @dev Calcula yields basado en el tiempo transcurrido y la posición del pool
+     * @notice Retiro parcial de principal (mantiene el depósito activo)
+     * @param musdAmount Cantidad a retirar
      */
-    function updateYield() external nonReentrant {
+    function withdrawPartial(uint256 musdAmount)
+        external
+        nonReentrant
+        returns (uint256)
+    {
         UserDeposit storage userDeposit = userDeposits[msg.sender];
         if (!userDeposit.active) revert NoActiveDeposit();
+        if (musdAmount == 0) revert InvalidAmount();
+        if (musdAmount < MIN_WITHDRAWAL) revert MinimumWithdrawalNotMet();
+        if (musdAmount > userDeposit.musdAmount) revert WithdrawalExceedsBalance();
 
+        // Update pending yields
         uint256 pendingYield = _calculateUserYield(msg.sender);
-        
         if (pendingYield > 0) {
             userDeposit.yieldAccrued += pendingYield;
-            userDeposit.lastYieldUpdate = block.timestamp;
             totalYieldsGenerated += pendingYield;
-
-            emit YieldUpdated(msg.sender, userDeposit.yieldAccrued);
         }
+
+        // Withdraw from aggregator
+        YIELD_AGGREGATOR.withdraw(musdAmount);
+
+        // Update state
+        userDeposit.musdAmount -= musdAmount;
+        userDeposit.lastYieldUpdate = block.timestamp;
+        totalMusdDeposited -= musdAmount;
+
+        // If remaining deposit is less than MIN_DEPOSIT, close position
+        if (userDeposit.musdAmount < MIN_DEPOSIT && userDeposit.musdAmount > 0) {
+            // Withdraw remaining and close
+            uint256 remaining = userDeposit.musdAmount;
+            userDeposit.musdAmount = 0;
+            userDeposit.active = false;
+            totalMusdDeposited -= remaining;
+            musdAmount += remaining;
+        }
+
+        // Transfer to user
+        MUSD.safeTransfer(msg.sender, musdAmount);
+
+        emit PartialWithdrawn(msg.sender, musdAmount, userDeposit.musdAmount, block.timestamp);
+        
+        return musdAmount;
     }
 
     /**
-     * @notice Reclama yields acumulados sin retirar el principal
-     * @return yieldAmount Cantidad de yields reclamados (después de fees)
+     * @notice Reclama yields sin tocar el principal
+     * @return netYield Yields netos después de fees
      */
     function claimYield() 
         external 
         nonReentrant 
-        returns (uint256 yieldAmount) 
+        returns (uint256 netYield) 
     {
         UserDeposit storage userDeposit = userDeposits[msg.sender];
         if (!userDeposit.active) revert NoActiveDeposit();
 
-        // Calcular yields pendientes del usuario
+        // Calculate pending yields
         uint256 pendingYield = _calculateUserYield(msg.sender);
         if (pendingYield > 0) {
             userDeposit.yieldAccrued += pendingYield;
             userDeposit.lastYieldUpdate = block.timestamp;
+            totalYieldsGenerated += pendingYield;
         }
 
         uint256 totalYield = userDeposit.yieldAccrued;
         if (totalYield == 0) revert InvalidAmount();
 
-        // Calcular fee
-        uint256 feeAmount = (totalYield * performanceFee) / 10000;
-        yieldAmount = totalYield - feeAmount;
+        // Calculate fee (skip in emergency mode)
+        uint256 feeAmount = emergencyMode ? 0 : (totalYield * performanceFee) / 10000;
+        netYield = totalYield - feeAmount;
 
-        // Reclamar proporción del yield del pool desde el aggregator
+        // Claim from aggregator
         uint256 poolYield = YIELD_AGGREGATOR.getPendingYield(address(this));
         if (poolYield > 0) {
             YIELD_AGGREGATOR.claimYield();
         }
         
-        // Reset yield accrued
         userDeposit.yieldAccrued = 0;
 
-        // Transferir yield al usuario
-        MUSD.safeTransfer(msg.sender, yieldAmount);
+        // Transfer yield to user
+        MUSD.safeTransfer(msg.sender, netYield);
 
-        // Transferir fee al collector
+        // Transfer fee to collector
         if (feeAmount > 0) {
             MUSD.safeTransfer(feeCollector, feeAmount);
         }
 
-        emit YieldClaimed(msg.sender, yieldAmount, feeAmount);
+        emit YieldClaimed(msg.sender, totalYield, feeAmount, netYield, block.timestamp);
     }
 
     /**
-     * @notice Retira todo (principal + yields)
-     * @return musdAmount Cantidad de MUSD principal devuelta
-     * @return yieldAmount Cantidad de yields en MUSD
+     * @notice Retiro total (principal + yields)
+     * @return musdAmount Principal retirado
+     * @return netYield Yields netos retirados
      */
     function withdraw() 
         external 
         nonReentrant 
-        returns (uint256 musdAmount, uint256 yieldAmount) 
+        returns (uint256 musdAmount, uint256 netYield) 
     {
         UserDeposit storage userDeposit = userDeposits[msg.sender];
         if (!userDeposit.active) revert NoActiveDeposit();
 
         musdAmount = userDeposit.musdAmount;
 
-        // 1. Calcular yields pendientes del usuario
+        // Calculate all pending yields
         uint256 pendingYield = _calculateUserYield(msg.sender);
         if (pendingYield > 0) {
             userDeposit.yieldAccrued += pendingYield;
         }
 
         uint256 totalYield = userDeposit.yieldAccrued;
+        uint256 feeAmount = emergencyMode ? 0 : (totalYield * performanceFee) / 10000;
+        netYield = totalYield - feeAmount;
 
-        // 2. Calcular fee sobre yields
-        uint256 feeAmount = (totalYield * performanceFee) / 10000;
-        yieldAmount = totalYield - feeAmount;
-
-        // 3. Verificar cuánto MUSD tiene el pool directamente
-        uint256 poolMusdBalance = MUSD.balanceOf(address(this));
-        
-        // 4. Actualizar estado ANTES de retirar del aggregator
-        // Esto asegura que el siguiente cálculo de yield para otros usuarios sea correcto
+        // Update state before withdrawal
         userDeposit.active = false;
-        uint256 oldTotalMusd = totalMusdDeposited;
         totalMusdDeposited -= musdAmount;
-        
-        // 5. Si el pool no tiene suficiente MUSD para cubrir principal + yields,
-        // retirar del aggregator solo lo necesario
-        uint256 totalNeeded = musdAmount + totalYield;
-        
-        if (poolMusdBalance < totalNeeded) {
-            uint256 amountToWithdraw = totalNeeded - poolMusdBalance;
-            
-            // Si este es el último usuario (totalMusdDeposited == 0), retirar todo del aggregator
-            if (totalMusdDeposited == 0) {
-                (uint256 aggregatorPrincipal, uint256 aggregatorYields) = YIELD_AGGREGATOR.getUserPosition(address(this));
-                uint256 aggregatorBalance = aggregatorPrincipal + aggregatorYields;
-                if (aggregatorBalance > 0) {
-                    try YIELD_AGGREGATOR.withdraw(aggregatorBalance) {
-                        // Withdraw exitoso - recalcular con balance real
-                        poolMusdBalance = MUSD.balanceOf(address(this));
-                        if (poolMusdBalance >= musdAmount) {
-                            uint256 availableForYield = poolMusdBalance - musdAmount;
-                            totalYield = availableForYield;
-                            feeAmount = (totalYield * performanceFee) / 10000;
-                            yieldAmount = totalYield - feeAmount;
-                        }
-                    } catch {
-                        // Si falla, usar solo lo que hay en el pool
-                        if (poolMusdBalance >= musdAmount) {
-                            uint256 availableForYield = poolMusdBalance - musdAmount;
-                            totalYield = availableForYield;
-                            feeAmount = (totalYield * performanceFee) / 10000;
-                            yieldAmount = totalYield - feeAmount;
-                        } else {
-                            yieldAmount = 0;
-                            feeAmount = 0;
-                        }
-                    }
-                }
-            } else {
-                // No es el último usuario - retirar solo lo proporcional
-                // Calcular cuánto deberíamos retirar del aggregator de forma proporcional
-                (uint256 aggregatorPrincipal, uint256 aggregatorYields) = YIELD_AGGREGATOR.getUserPosition(address(this));
-                uint256 aggregatorBalance = aggregatorPrincipal + aggregatorYields;
-                uint256 proportionalShare = (aggregatorBalance * musdAmount) / oldTotalMusd;
-                
-                // Retirar el mínimo entre lo que necesitamos y nuestra parte proporcional
-                uint256 safeWithdraw = amountToWithdraw < proportionalShare ? amountToWithdraw : proportionalShare;
-                
-                try YIELD_AGGREGATOR.withdraw(safeWithdraw) {
-                    // Recalcular yields con el balance real disponible
-                    poolMusdBalance = MUSD.balanceOf(address(this));
-                    if (poolMusdBalance >= musdAmount + totalYield) {
-                        // Tenemos suficiente para todo
-                    } else if (poolMusdBalance >= musdAmount) {
-                        // Ajustar yields a lo disponible
-                        uint256 availableForYield = poolMusdBalance - musdAmount;
-                        totalYield = availableForYield;
-                        feeAmount = (totalYield * performanceFee) / 10000;
-                        yieldAmount = totalYield - feeAmount;
-                    } else {
-                        // Caso extremo - no hay suficiente
-                        yieldAmount = 0;
-                        feeAmount = 0;
-                    }
-                } catch {
-                    // Si falla, ajustar yields a lo que hay disponible
-                    if (poolMusdBalance >= musdAmount) {
-                        uint256 availableForYield = poolMusdBalance - musdAmount;
-                        totalYield = availableForYield;
-                        feeAmount = (totalYield * performanceFee) / 10000;
-                        yieldAmount = totalYield - feeAmount;
-                    } else {
-                        yieldAmount = 0;
-                        feeAmount = 0;
-                    }
-                }
-            }
-        }
 
-        // 6. Transferir MUSD principal al usuario
-        MUSD.safeTransfer(msg.sender, musdAmount);
+        // Withdraw from aggregator
+        uint256 totalToWithdraw = musdAmount + totalYield;
+        YIELD_AGGREGATOR.withdraw(totalToWithdraw);
 
-        // 7. Transferir yields al usuario si los hay
-        if (yieldAmount > 0) {
-            MUSD.safeTransfer(msg.sender, yieldAmount);
-        }
+        // Transfer to user
+        MUSD.safeTransfer(msg.sender, musdAmount + netYield);
 
-        // 8. Transferir fee al collector si hay
+        // Transfer fee
         if (feeAmount > 0) {
             MUSD.safeTransfer(feeCollector, feeAmount);
         }
 
-        emit Withdrawn(msg.sender, musdAmount, yieldAmount);
+        emit FullWithdrawal(msg.sender, musdAmount, totalYield, feeAmount, netYield, block.timestamp);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -383,170 +329,105 @@ contract IndividualPool is Ownable, ReentrancyGuard, Pausable {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Calcula yields acumulados del usuario (incluyendo pendientes)
+     * @notice Obtiene información completa del usuario para el frontend
      * @param user Dirección del usuario
-     * @return totalYield Total de yields (accrued + pending)
-     */
-    function calculateYield(address user) 
-        public 
-        view 
-        returns (uint256 totalYield) 
-    {
-        UserDeposit memory userDeposit = userDeposits[user];
-        if (!userDeposit.active) return 0;
-
-        // Calcular yield proporcional del usuario basado en su share del pool
-        uint256 pendingYield = _calculateUserYieldView(user);
-        totalYield = userDeposit.yieldAccrued + pendingYield;
-    }
-
-    /**
-     * @notice Obtiene información completa del depósito del usuario
-     * @param user Dirección del usuario
-     * @return userDeposit Estructura UserDeposit
-     * @return currentYield Yields actuales (incluyendo pendientes)
-     * @return netYield Yields netos después de fees
+     * @return deposit Depósito principal
+     * @return yields Yields acumulados (incluyendo pendientes)
+     * @return netYields Yields netos después de fees
+     * @return daysActive Días desde el primer depósito
+     * @return estimatedAPR APR estimado basado en yields
      */
     function getUserInfo(address user) 
         external 
         view 
         returns (
-            UserDeposit memory userDeposit,
-            uint256 currentYield,
-            uint256 netYield
+            uint256 deposit,
+            uint256 yields,
+            uint256 netYields,
+            uint256 daysActive,
+            uint256 estimatedAPR
         ) 
-    {
-        userDeposit = userDeposits[user];
-        currentYield = calculateYield(user);
-        
-        // Calcular yield neto después de fees
-        uint256 feeAmount = (currentYield * performanceFee) / 10000;
-        netYield = currentYield - feeAmount;
-    }
-
-    /**
-     * @notice Calcula ROI del usuario
-     * @param user Dirección del usuario
-     * @return roi ROI en basis points (e.g., 500 = 5%)
-     */
-    function getUserRoi(address user)
-        external 
-        view 
-        returns (uint256 roi) 
     {
         UserDeposit memory userDeposit = userDeposits[user];
-        if (!userDeposit.active || userDeposit.musdAmount == 0) return 0;
-
-        uint256 totalYield = calculateYield(user);
         
-        // ROI = (yield / principal) * 10000
-        roi = (totalYield * 10000) / userDeposit.musdAmount;
+        deposit = userDeposit.musdAmount;
+        yields = userDeposit.yieldAccrued + _calculateUserYieldView(user);
+        
+        uint256 feeAmount = (yields * performanceFee) / 10000;
+        netYields = yields - feeAmount;
+        
+        if (userDeposit.depositTimestamp > 0) {
+            daysActive = (block.timestamp - userDeposit.depositTimestamp) / 1 days;
+            
+            // Calculate APR: (yields / deposit) * (365 / daysActive) * 100
+            if (daysActive > 0 && deposit > 0) {
+                estimatedAPR = (yields * 365 * 100) / (deposit * daysActive);
+            }
+        }
     }
 
     /**
-     * @notice Obtiene estadísticas globales del pool
-     * @return totalBtc Total BTC depositado
-     * @return totalMusd Total MUSD minted
-     * @return totalYields Total yields generados
-     * @return avgApr APR promedio del yield aggregator
+     * @notice Vista rápida del balance total del usuario
+     * @param user Dirección del usuario
+     * @return total Total (principal + yields netos)
      */
-    function getPoolStats() 
-        external 
-        view 
-        returns (
-            uint256 totalBtc,
-            uint256 totalMusd,
-            uint256 totalYields,
-            uint256 avgApr
-        ) 
-    {
-        totalBtc = 0; // No manejamos BTC directamente
-        totalMusd = totalMusdDeposited;
-        totalYields = totalYieldsGenerated;
-        avgApr = YIELD_AGGREGATOR.getAverageApr();
+    function getUserTotalBalance(address user) external view returns (uint256 total) {
+        UserDeposit memory userDeposit = userDeposits[user];
+        uint256 yields = userDeposit.yieldAccrued + _calculateUserYieldView(user);
+        uint256 feeAmount = (yields * performanceFee) / 10000;
+        total = userDeposit.musdAmount + yields - feeAmount;
     }
 
     /*//////////////////////////////////////////////////////////////
-                            INTERNAL FUNCTIONS
+                        ADMIN FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    /**
-     * @notice Calcula el yield proporcional del usuario (non-view version)
-     * @dev Calcula basándose en la proporción del usuario vs el pool total
-     * @param user Dirección del usuario
-     * @return userYield Yield calculado para el usuario
-     */
-    function _calculateUserYield(address user) internal view returns (uint256 userYield) {
-        UserDeposit memory userDeposit = userDeposits[user];
-        if (!userDeposit.active || totalMusdDeposited == 0) return 0;
-
-        // Obtener yields totales del pool desde el aggregator
-        uint256 poolTotalYield = YIELD_AGGREGATOR.getPendingYield(address(this));
-        
-        if (poolTotalYield == 0) return 0;
-
-        // Calcular la proporción del usuario en el pool
-        // userYield = poolYield * (userMUSD / totalMUSD)
-        userYield = (poolTotalYield * userDeposit.musdAmount) / totalMusdDeposited;
+    function setEmergencyMode(bool _enabled) external onlyOwner {
+        emergencyMode = _enabled;
+        emit EmergencyModeUpdated(_enabled);
     }
 
-    /**
-     * @notice Versión view de _calculateUserYield
-     * @dev Usada por funciones view para no modificar estado
-     * @param user Dirección del usuario
-     * @return userYield Yield calculado para el usuario
-     */
-    function _calculateUserYieldView(address user) internal view returns (uint256 userYield) {
-        return _calculateUserYield(user);
-    }
-
-    /*//////////////////////////////////////////////////////////////
-                            ADMIN FUNCTIONS
-    //////////////////////////////////////////////////////////////*/
-
-    /**
-     * @notice Actualiza el performance fee
-     * @param newFee Nuevo fee en basis points (max 1000 = 10%)
-     */
     function setPerformanceFee(uint256 newFee) external onlyOwner {
         if (newFee > 1000) revert InvalidFee(); // Max 10%
-        
         uint256 oldFee = performanceFee;
         performanceFee = newFee;
-
         emit PerformanceFeeUpdated(oldFee, newFee);
     }
 
-    /**
-     * @notice Actualiza el fee collector
-     * @param newCollector Nueva dirección del collector
-     */
     function setFeeCollector(address newCollector) external onlyOwner {
         if (newCollector == address(0)) revert InvalidAddress();
-        
         address oldCollector = feeCollector;
         feeCollector = newCollector;
-
         emit FeeCollectorUpdated(oldCollector, newCollector);
     }
 
-    /**
-     * @notice Pausa el contrato (emergencia)
-     */
     function pause() external onlyOwner {
         _pause();
     }
 
-    /**
-     * @notice Reanuda el contrato
-     */
     function unpause() external onlyOwner {
         _unpause();
     }
 
-    /**
-     * @notice Receive function para aceptar BTC nativo
-     * @dev Necesario para recibir BTC de MezoIntegration en withdrawals
-     */
-    receive() external payable {}
+    /*//////////////////////////////////////////////////////////////
+                        INTERNAL FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
+    function _calculateUserYield(address user) internal view returns (uint256) {
+        // Implementation from original contract
+        return _calculateUserYieldView(user);
+    }
+
+    function _calculateUserYieldView(address user) internal view returns (uint256) {
+        UserDeposit memory userDeposit = userDeposits[user];
+        if (!userDeposit.active || totalMusdDeposited == 0) return 0;
+
+        // Get pool's pending yield from aggregator
+        uint256 poolYield = YIELD_AGGREGATOR.getPendingYield(address(this));
+        
+        // Calculate user's proportional share
+        uint256 userShare = (poolYield * userDeposit.musdAmount) / totalMusdDeposited;
+        
+        return userShare;
+    }
 }
