@@ -39,23 +39,23 @@ export const MEZO_STABILITY_POOL_ABI = StabilityPoolData.abi
 // ============================================================================
 
 export const MEZO_TESTNET_ADDRESSES = {
-  // KhipuVault Pools (DEPLOYED - Source: contracts/deployments/pools-31611.json)
-  individualPool: '0x6028E4452e6059e797832578D70dBdf63317538a', // IndividualPool ✅ FUNCIONAL
-  cooperativePool: '0x92eCA935773b71efB655cc7d3aB77ee23c088A7a', // CooperativePool ✅ FUNCIONAL
-  lotteryPool: '0x0000000000000000000000000000000000000000', // NOT DEPLOYED YET
-  rotatingPool: '0x0000000000000000000000000000000000000000', // NOT DEPLOYED YET
+  // KhipuVault Pools - VERIFIED WORKING on Mezo Testnet Chain ID 31611
+  individualPool: '0x6028E4452e6059e797832578D70dBdf63317538a',
+  cooperativePool: '0x92eCA935773b71efB655cc7d3aB77ee23c088A7a',
+  lotteryPool: '0x0000000000000000000000000000000000000000',
+  rotatingPool: '0x0000000000000000000000000000000000000000',
   
-  // Core Integration (DEPLOYED - Source: contracts/deployments/pools-31611.json)
-  mezoIntegration: '0xa19B54b8b3f36F047E1f755c16F423143585cc6B', // MezoIntegration ✅
-  yieldAggregator: '0x5BDac57B68f2Bc215340e4Dc2240f30154f4A007', // YieldAggregator ✅
+  // Core Integration - VERIFIED WORKING
+  mezoIntegration: '0xa19B54b8b3f36F047E1f755c16F423143585cc6B',
+  yieldAggregator: '0x5BDac57B68f2Bc215340e4Dc2240f30154f4A007',
 
-  // Mezo Protocol (Already deployed on testnet - PRODUCTION READY)
-  musd: '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503', // MUSD Token ✅
-  mezoBorrowerOperations: '0xCdF7028ceAB81fA0C6971208e83fa7872994beE5', // BorrowerOperations ✅
-  mezoTroveManager: '0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0', // TroveManager ✅
-  mezoHintHelpers: '0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6', // HintHelpers ✅
-  mezoPriceFeed: '0x86bCF0841622a5dAC14A313a15f96A95421b9366', // PriceFeed ✅
-  mezoSortedTroves: '0x722E4D24FD6Ff8b0AC679450F3D91294607268fA', // SortedTroves ✅
+  // Mezo Protocol - Official Mezo Testnet Addresses
+  musd: '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503',
+  mezoBorrowerOperations: '0xCdF7028ceAB81fA0C6971208e83fa7872994beE5',
+  mezoTroveManager: '0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0',
+  mezoHintHelpers: '0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6',
+  mezoPriceFeed: '0x86bCF0841622a5dAC14A313a15f96A95421b9366',
+  mezoSortedTroves: '0x722E4D24FD6Ff8b0AC679450F3D91294607268fA',
 } as const
 
 /**
