@@ -50,10 +50,13 @@ export const MEZO_V3_ADDRESSES = {
   // V3 Pools (Upgradeable Proxies) ⭐ USE THESE ⭐
   individualPoolV3: process.env.NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS || '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393',
   yieldAggregatorV3: process.env.NEXT_PUBLIC_YIELD_AGGREGATOR_ADDRESS || '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6',
-  cooperativePoolV3: process.env.NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS || '0x0000000000000000000000000000000000000000',
+  cooperativePoolV3: process.env.NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS || '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88',
   
   // Tokens
   musd: process.env.NEXT_PUBLIC_MUSD_ADDRESS || '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503',
+  
+  // Mezo Integration V3 (Upgradeable Proxy)
+  mezoIntegrationV3: process.env.NEXT_PUBLIC_MEZO_INTEGRATION_ADDRESS || '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6',
   
   // Mezo Protocol (External)
   borrowerOperations: '0xCdF7028ceAB81fA0C6971208e83fa7872994beE5',

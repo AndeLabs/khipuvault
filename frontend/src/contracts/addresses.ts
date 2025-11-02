@@ -92,9 +92,9 @@ export const CONTRACT_ADDRESSES = {
   /**
    * Mezo Integration Contract (V3)
    * Manages BTC deposits and MUSD minting
-   * Implementation: 0x3E1B2f96ED2359B1F32620cBef161108b15712c3
+   * Proxy: 0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6
    */
-  MEZO_INTEGRATION: getEnvAddress(ENV_KEYS.MEZO_INTEGRATION, '0x0000000000000000000000000000000000000000'),
+  MEZO_INTEGRATION: getEnvAddress(ENV_KEYS.MEZO_INTEGRATION, '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6'),
 
   /**
    * Yield Aggregator Contract (V3)
@@ -114,9 +114,9 @@ export const CONTRACT_ADDRESSES = {
   /**
    * Cooperative Savings Pool (V3)
    * Community pooled savings
-   * Implementation: 0x59D0c53365A34D565BF53f9734d32Ca23e01106f
+   * Proxy: 0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88
    */
-  COOPERATIVE_POOL: getEnvAddress(ENV_KEYS.COOPERATIVE_POOL, '0x0000000000000000000000000000000000000000'),
+  COOPERATIVE_POOL: getEnvAddress(ENV_KEYS.COOPERATIVE_POOL, '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88'),
 
   /**
    * Lottery Pool (Prize Savings)
