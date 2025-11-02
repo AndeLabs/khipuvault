@@ -1,11 +1,11 @@
 {
-  "buildCommand": "cd frontend && npm ci && npm run build",
-  "outputDirectory": "frontend/.next",
+  "rootDirectory": "frontend",
+  "buildCommand": "npm ci && npm run build",
+  "outputDirectory": ".next",
   "framework": "nextjs",
   "build": {
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1"
     }
-  },
-  "installCommand": "cd frontend && npm ci"
+  }
 }
