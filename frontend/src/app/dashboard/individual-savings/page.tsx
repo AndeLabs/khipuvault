@@ -9,6 +9,7 @@ import { YourPosition } from "@/components/dashboard/individual-savings/your-pos
 import { Deposits } from "@/components/dashboard/individual-savings/deposits";
 import { TransactionsTable } from "@/components/dashboard/individual-savings/transactions-table";
 import { DebugPanel } from "@/components/dashboard/individual-savings/debug-panel";
+import { MusdBalanceTester } from "@/components/dashboard/individual-savings/musd-balance-tester";
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { usePoolEvents } from "@/hooks/web3/use-pool-events";
 
@@ -31,6 +32,9 @@ export default function IndividualSavingsPage() {
 
       <div className="flex flex-col gap-8">
         <AnimateOnScroll delay="50ms">
+          <MusdBalanceTester />
+        </AnimateOnScroll>
+        <AnimateOnScroll delay="75ms">
           <DebugPanel />
         </AnimateOnScroll>
         <AnimateOnScroll delay="100ms">

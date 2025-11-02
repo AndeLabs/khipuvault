@@ -10,6 +10,7 @@
 import { createConfig, http } from 'wagmi'
 import { metaMask } from 'wagmi/connectors'
 import { mezoTestnet } from './chains'
+import { createPublicClient } from 'viem'
 
 
 
@@ -56,9 +57,33 @@ export const wagmiConfig = createConfig({
     }),
   ],
   transports: {
-    [mezoTestnet.id]: http('https://rpc.test.mezo.org'),
+    [mezoTestnet.id]: http('https://rpc.test.mezo.org', {
+      batch: {
+        wait: 100, // ms to wait before sending batch
+      },
+      retryCount: 5, // number of retries
+      retryDelay: 1000, // ms between retries
+      timeout: 10_000, // 10 second timeout
+    }),
   },
   ssr: false,
+  pollingInterval: 4_000, // poll every 4 seconds
+})
+
+/**
+ * Standalone public client for direct RPC calls
+ * Useful for debugging and direct contract interactions
+ */
+export const publicClient = createPublicClient({
+  chain: mezoTestnet,
+  transport: http('https://rpc.test.mezo.org', {
+    batch: {
+      wait: 100,
+    },
+    retryCount: 5,
+    retryDelay: 1000,
+    timeout: 10_000,
+  }),
 })
 
 /**
