@@ -233,23 +233,25 @@ export function Deposits() {
               </p>
             </div>
             
-            {depositTxHash && (
-              <a
-                href={`https://explorer.mezo.org/tx/${depositTxHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-primary hover:underline text-sm"
-              >
-                Ver transacción en explorer
-                <ExternalLink className="h-4 w-4" />
-              </a>
-            )}
-            
-            <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
+            <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30 space-y-3">
               <p className="text-sm text-green-300">
                 ✅ Tu MUSD ya está generando rendimientos automáticamente. 
                 Puedes ver tu posición actualizada arriba.
               </p>
+              
+              {depositTxHash && (
+                <div className="pt-2 border-t border-green-500/20">
+                  <p className="text-xs text-green-400/70 mb-2">
+                    Transaction hash:
+                  </p>
+                  <code className="text-xs text-green-300 bg-black/30 px-2 py-1 rounded block overflow-x-auto">
+                    {depositTxHash}
+                  </code>
+                  <p className="text-xs text-green-400/50 mt-2">
+                    Nota: El explorer puede tardar 30-60 segundos en indexar la transacción
+                  </p>
+                </div>
+              )}
             </div>
             
             <Button

@@ -121,7 +121,8 @@ export function useSimpleDeposit() {
   
   const {
     isLoading: isDepositPending,
-    isSuccess: isDepositSuccess
+    isSuccess: isDepositSuccess,
+    data: depositReceipt
   } = useWaitForTransactionReceipt({
     hash: depositTxHash,
   })
@@ -151,6 +152,7 @@ export function useSimpleDeposit() {
   useEffect(() => {
     if (isDepositSuccess && state === 'waitingDeposit') {
       console.log('✅ Deposit confirmed!')
+      console.log('📝 Transaction hash:', depositReceipt?.transactionHash)
       console.log('🔄 Refetching all queries...')
       
       // Invalidate and refetch all queries to update UI
@@ -159,7 +161,7 @@ export function useSimpleDeposit() {
       
       setState('success')
     }
-  }, [isDepositSuccess, state, queryClient])
+  }, [isDepositSuccess, state, queryClient, depositReceipt])
   
   // Effect: Update state when tx is pending
   useEffect(() => {
@@ -322,9 +324,9 @@ export function useSimpleDeposit() {
     progress: getProgress(),
     error,
     
-    // Transaction hashes for explorer links
+    // Transaction hashes for explorer links (use receipt hash if available, fallback to wagmi hash)
     approveTxHash,
-    depositTxHash,
+    depositTxHash: depositReceipt?.transactionHash || depositTxHash,
     
     // Balance
     musdBalance,
