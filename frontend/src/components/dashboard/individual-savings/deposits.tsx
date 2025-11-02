@@ -108,6 +108,19 @@ export function Deposits() {
 
   const handleDeposit = async () => {
     try {
+      // Check if approval is needed
+      if (depositNeedsApproval) {
+        console.log('🔑 Approval needed, requesting approval first...')
+        toast({
+          title: "Aprobando MUSD...",
+          description: "Se requiere aprobación de MUSD antes del depósito",
+        })
+        await approveUnlimited()
+        // Wait a bit for approval confirmation
+        await new Promise(resolve => setTimeout(resolve, 2000))
+      }
+      
+      console.log('💰 Iniciando depósito...')
       await deposit(amount)
       toast({
         title: "Depósito enviado",
