@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { YourPosition } from "@/components/dashboard/individual-savings/your-position";
 import { Deposits } from "@/components/dashboard/individual-savings/deposits";
 import { TransactionsTable } from "@/components/dashboard/individual-savings/transactions-table";
+import { DebugPanel } from "@/components/dashboard/individual-savings/debug-panel";
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { usePoolEvents } from "@/hooks/web3/use-pool-events";
 
@@ -29,6 +30,9 @@ export default function IndividualSavingsPage() {
       </AnimateOnScroll>
 
       <div className="flex flex-col gap-8">
+        <AnimateOnScroll delay="50ms">
+          <DebugPanel />
+        </AnimateOnScroll>
         <AnimateOnScroll delay="100ms">
           <YourPosition />
         </AnimateOnScroll>
