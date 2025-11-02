@@ -92,16 +92,20 @@ export function Deposits() {
 
   const handleApprove = async () => {
     try {
+      console.log('🔑 Starting approval process...')
+      
       // Use unlimited approval for better UX (one approval per session)
-      await approveUnlimited()
+      approveUnlimited() // Note: this is not async, it triggers writeContract
+      
       toast({
-        title: "Aprobando MUSD...",
-        description: `Aprobando MUSD ilimitado para usar en el pool`,
+        title: "📝 Aprobación iniciada",
+        description: `Confirma la transacción en tu wallet`,
       })
     } catch (error) {
+      console.error('❌ Approval error:', error)
       toast({
-        title: "Error en aprobación",
-        description: error instanceof Error ? error.message : "Ocurrió un error",
+        title: "❌ Error en aprobación",
+        description: error instanceof Error ? error.message : "La transacción fue rechazada",
         variant: "destructive",
       })
     }
@@ -109,32 +113,79 @@ export function Deposits() {
 
   const handleDeposit = async () => {
     try {
+      console.log('💰 Iniciando depósito V3...', { 
+        amount, 
+        needsApproval: depositNeedsApproval,
+        allowance: allowance?.toString(),
+        musdBalance: musdBalance?.toString()
+      })
+      
       // Check if approval is needed
       if (depositNeedsApproval) {
-        console.log('🔑 Approval needed, requesting approval first...')
+        console.log('🔑 Approval still needed, cannot deposit yet')
         toast({
-          title: "Aprobando MUSD...",
-          description: "Se requiere aprobación de MUSD antes del depósito",
+          title: "⚠️ Aprobación requerida",
+          description: "Primero debes aprobar MUSD. Haz clic en 'Aprobar MUSD'.",
+          variant: "destructive"
         })
-        await approveUnlimited()
-        // Wait a bit for approval confirmation
-        await new Promise(resolve => setTimeout(resolve, 2000))
+        return // Don't proceed with deposit, user must approve first
       }
       
-      console.log('💰 Iniciando depósito V3...')
-      await depositV3(parseEther(amount))
+      // Proceed with deposit
+      console.log('✅ Approval OK, calling depositV3...')
+      const amountWei = parseEther(amount)
+      console.log('Amount in wei:', amountWei.toString())
+      
+      depositV3(amountWei) // Note: not async, triggers writeContract
+      
       toast({
-        title: "Depósito enviado",
-        description: `Transacción enviada. Esperando confirmación...`,
+        title: "📤 Depósito iniciado",
+        description: `Confirma la transacción en tu wallet para depositar ${amount} MUSD`,
       })
     } catch (error) {
+      console.error('❌ Error en depósito:', error)
       toast({
-        title: "Error en depósito",
-        description: error instanceof Error ? error.message : "Ocurrió un error",
+        title: "❌ Error en depósito",
+        description: error instanceof Error ? error.message : "La transacción fue rechazada",
         variant: "destructive",
       })
     }
   }
+
+  // Log approval state changes
+  useEffect(() => {
+    console.log('📊 Approval state:', {
+      isApproving,
+      isApproveConfirming,
+      isApprovalConfirmed,
+      depositNeedsApproval,
+      allowance: allowance?.toString()
+    })
+  }, [isApproving, isApproveConfirming, isApprovalConfirmed, depositNeedsApproval, allowance])
+
+  // Log deposit state changes
+  useEffect(() => {
+    console.log('📊 Deposit state:', {
+      isDepositing,
+      depositConfirming,
+      depositSuccess,
+      depositHash,
+      depositError: depositError?.message
+    })
+  }, [isDepositing, depositConfirming, depositSuccess, depositHash, depositError])
+
+  // Auto-proceed with deposit after approval is confirmed
+  useEffect(() => {
+    if (isApprovalConfirmed && !depositNeedsApproval && !depositHash && !isDepositing) {
+      console.log('✅ Approval confirmed, auto-proceeding with deposit in 2 seconds...')
+      // Delay to ensure allowance is updated
+      const timer = setTimeout(() => {
+        console.log('🚀 Auto-calling handleDeposit...')
+        handleDeposit()
+      }, 2000)
+      return () => clearTimeout(timer)
+    }
+  }, [isApprovalConfirmed, depositNeedsApproval, depositHash, isDepositing])
 
   // Auto-refetch and show success when deposit is confirmed
   useEffect(() => {
@@ -280,10 +331,24 @@ export function Deposits() {
           {/* Left Column - Action Buttons */}
           <div className="flex flex-col gap-4">
             {/* Deposit Dialog */}
-            <AlertDialog>
+            <AlertDialog open={undefined}>
               <AlertDialogTrigger asChild>
-                <Button variant="secondary" size="lg" className="w-full" disabled={isDepositing || isApproving || !musdBalance}>
-                  <Plus className="mr-2 h-4 w-4" /> Añadir Fondos
+                <Button 
+                  variant="secondary" 
+                  size="lg" 
+                  className="w-full" 
+                  disabled={isDepositing || isApproving || !musdBalance || isApproveConfirming}
+                >
+                  {isDepositing || isApproving || isApproveConfirming ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> 
+                      {isApproving || isApproveConfirming ? 'Aprobando...' : 'Depositando...'}
+                    </>
+                  ) : (
+                    <>
+                      <Plus className="mr-2 h-4 w-4" /> Añadir Fondos
+                    </>
+                  )}
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
@@ -292,29 +357,152 @@ export function Deposits() {
                   <AlertDialogDescription>Deposita MUSD para generar yields automáticamente</AlertDialogDescription>
                 </AlertDialogHeader>
                 <div className="text-sm space-y-3">
-                  <p>
-                    Monto: {amount} MUSD (= ${(parseFloat(amount) * musdPrice).toLocaleString('en-US', { maximumFractionDigits: 2 })}) USD)
-                  </p>
-                  <p className="text-muted-foreground">Gas estimado: ~0.01 USD</p>
-                  <p className="text-xs text-muted-foreground">Tu saldo MUSD: {balanceFormatted} MUSD</p>
+                  <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
+                    <p className="font-semibold text-white mb-1">
+                      Monto: {amount} MUSD
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      ≈ ${(parseFloat(amount) * musdPrice).toLocaleString('en-US', { maximumFractionDigits: 2 })} USD
+                    </p>
+                  </div>
+
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Tu saldo MUSD:</span>
+                    <span className="font-mono font-semibold">{balanceFormatted} MUSD</span>
+                  </div>
+
+                  <div className="flex justify-between text-xs">
+                    <span className="text-muted-foreground">Gas estimado:</span>
+                    <span className="text-green-500">~0.01 USD</span>
+                  </div>
                   
-                  {/* Approval Status */}
-                  {depositNeedsApproval && (
-                    <div className="p-3 rounded-lg bg-yellow-500/10 border border-yellow-500/30">
-                      <p className="text-xs text-yellow-600 flex items-center gap-2">
-                        <Lock className="w-3 h-3" />
-                        Necesitas aprobar MUSD primero
-                      </p>
+                  {/* Transaction Status - Approval Stage */}
+                  {depositNeedsApproval && !isApproving && !isApproveConfirming && (
+                    <div className="p-4 rounded-lg bg-yellow-500/10 border-2 border-yellow-500/30 animate-pulse">
+                      <div className="flex items-start gap-3">
+                        <Lock className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold text-yellow-600 mb-1">Paso 1: Aprobar MUSD</p>
+                          <p className="text-xs text-yellow-600/80">
+                            Debes aprobar que el contrato use tu MUSD. Solo se hace una vez.
+                          </p>
+                        </div>
+                      </div>
                     </div>
                   )}
 
-                  {isDepositing && <p className="text-blue-500 animate-pulse">⏳ Enviando depósito...</p>}
-                  {depositConfirming && <p className="text-blue-500 animate-pulse">⏳ Confirmando en blockchain...</p>}
-                  {isApproving && <p className="text-blue-500 animate-pulse">⏳ Aprobando MUSD...</p>}
-                  {isApproveConfirming && <p className="text-blue-500 animate-pulse">⏳ Confirmando aprobación en blockchain...</p>}
-                  {isApprovalConfirmed && !depositNeedsApproval && <p className="text-green-500">✅ ¡MUSD aprobado! Puedes depositar ahora</p>}
-                  {depositError && <p className="text-red-500">❌ Error: {depositError.message || 'Error en depósito'}</p>}
-                  {depositSuccess && <p className="text-green-500">✅ ¡Depósito completado!</p>}
+                  {isApproving && (
+                    <div className="p-4 rounded-lg bg-blue-500/10 border-2 border-blue-500/30">
+                      <div className="flex items-start gap-3">
+                        <Loader2 className="w-5 h-5 text-blue-500 animate-spin flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold text-blue-500 mb-1">Esperando confirmación en wallet...</p>
+                          <p className="text-xs text-blue-500/80">
+                            Confirma la transacción de aprobación en tu wallet
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {isApproveConfirming && (
+                    <div className="p-4 rounded-lg bg-blue-500/10 border-2 border-blue-500/30">
+                      <div className="flex items-start gap-3">
+                        <Loader2 className="w-5 h-5 text-blue-500 animate-spin flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold text-blue-500 mb-1">Confirmando aprobación...</p>
+                          <p className="text-xs text-blue-500/80">
+                            Esperando confirmación en blockchain (1-2 bloques)
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {isApprovalConfirmed && !depositNeedsApproval && (
+                    <div className="p-4 rounded-lg bg-green-500/10 border-2 border-green-500/30">
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-green-500 mb-1">¡Aprobación completada!</p>
+                          <p className="text-xs text-green-500/80">
+                            Ahora puedes hacer el depósito
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Transaction Status - Deposit Stage */}
+                  {isDepositing && (
+                    <div className="p-4 rounded-lg bg-blue-500/10 border-2 border-blue-500/30">
+                      <div className="flex items-start gap-3">
+                        <Loader2 className="w-5 h-5 text-blue-500 animate-spin flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold text-blue-500 mb-1">Esperando confirmación en wallet...</p>
+                          <p className="text-xs text-blue-500/80">
+                            Confirma la transacción de depósito en tu wallet
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {depositConfirming && (
+                    <div className="p-4 rounded-lg bg-blue-500/10 border-2 border-blue-500/30">
+                      <div className="flex items-start gap-3">
+                        <Loader2 className="w-5 h-5 text-blue-500 animate-spin flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold text-blue-500 mb-1">Procesando depósito...</p>
+                          <p className="text-xs text-blue-500/80">
+                            Esperando confirmación en blockchain (1-2 bloques)
+                          </p>
+                          {depositHash && (
+                            <a 
+                              href={`https://explorer.mezo.org/tx/${depositHash}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-500 hover:underline mt-1 inline-block"
+                            >
+                              Ver en explorer →
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {depositError && (
+                    <div className="p-4 rounded-lg bg-red-500/10 border-2 border-red-500/30">
+                      <div className="flex items-start gap-3">
+                        <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <p className="font-semibold text-red-500 mb-1">Error en transacción</p>
+                          <p className="text-xs text-red-500/80">
+                            {depositError.message || 'La transacción fue rechazada'}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {depositSuccess && (
+                    <div className="p-4 rounded-lg bg-green-500/10 border-2 border-green-500/30">
+                      <div className="flex items-start gap-3">
+                        <div className="w-5 h-5 rounded-full bg-green-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                          <span className="text-white text-xs">✓</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-green-500 mb-1">¡Depósito exitoso!</p>
+                          <p className="text-xs text-green-500/80">
+                            Has depositado {amount} MUSD en el pool
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel disabled={isDepositing || isApproving || isApproveConfirming}>Cancelar</AlertDialogCancel>
