@@ -192,9 +192,13 @@ export class Web3ErrorBoundary extends React.Component<
       const isDev = process.env.NODE_ENV === 'development'
       const errorMessage = this.state.error?.message || 'Error desconocido'
       
-      // Check if it's a Wagmi provider error
+      // Check error types
       const isWagmiError = errorMessage.includes('WagmiProvider') || 
                           errorMessage.includes('useConfig')
+      
+      const isMultiWalletConflict = errorMessage.includes('Cannot redefine property: ethereum') ||
+                                    errorMessage.includes('Cannot set property ethereum') ||
+                                    errorMessage.toLowerCase().includes('allowance is not defined')
 
       return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -210,7 +214,13 @@ export class Web3ErrorBoundary extends React.Component<
                 </h2>
                 
                 <p className="text-foreground/80 mb-4">
-                  {isWagmiError ? (
+                  {isMultiWalletConflict ? (
+                    <>
+                      <strong className="text-destructive">Conflicto de múltiples wallets detectado.</strong><br/>
+                      Tienes varias extensiones de wallet activas (MetaMask, OKX, Yoroi, etc.) 
+                      que están compitiendo por el control de la conexión Web3.
+                    </>
+                  ) : isWagmiError ? (
                     <>
                       Ocurrió un error en la configuración de wallet. 
                       El componente está intentando usar hooks de Wagmi fuera del contexto del provider.
@@ -222,6 +232,31 @@ export class Web3ErrorBoundary extends React.Component<
                     </>
                   )}
                 </p>
+                
+                {isMultiWalletConflict && (
+                  <div className="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+                    <p className="text-sm font-semibold text-yellow-500 mb-2">
+                      🔧 Solución Recomendada:
+                    </p>
+                    <ol className="text-sm text-foreground/80 space-y-2 list-decimal list-inside">
+                      <li>
+                        <strong>Desactiva todas las wallets excepto una</strong> en las extensiones de tu navegador
+                      </li>
+                      <li>
+                        Recomendamos usar <strong>solo MetaMask</strong> o <strong>solo OKX Wallet</strong>
+                      </li>
+                      <li>
+                        Ve a <code className="text-xs bg-background/50 px-2 py-1 rounded">chrome://extensions/</code>
+                      </li>
+                      <li>
+                        Desactiva las wallets que no uses (Yoroi, Phantom, etc.)
+                      </li>
+                      <li>
+                        Recarga esta página
+                      </li>
+                    </ol>
+                  </div>
+                )}
 
                 <div className="flex gap-3 mb-4">
                   <button

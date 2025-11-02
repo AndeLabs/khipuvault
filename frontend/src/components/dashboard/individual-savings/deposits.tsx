@@ -44,6 +44,7 @@ export function Deposits() {
   const {
     musdBalance,
     balanceFormatted,
+    allowance,
     isApprovalNeeded,
     approveUnlimited,
     approveAmount,
@@ -574,6 +575,37 @@ export function Deposits() {
               <Gift className="mr-2 h-4 w-4" /> 
               {isClaimingYield ? 'Enviando...' : claimConfirming ? 'Confirmando...' : `Reclamar ${formatMUSD(userInfo?.yields)} MUSD`}
             </Button>
+
+            {/* Help: Transaction Troubleshooting */}
+            {(depositError || isDepositing || isApproving) && (
+              <div className="p-4 rounded-lg bg-purple-500/10 border border-purple-500/30">
+                <p className="text-sm font-semibold text-purple-400 mb-2">
+                  🔍 ¿Problemas con la transacción?
+                </p>
+                <div className="space-y-2 text-xs text-purple-300">
+                  <p className="font-medium">Abre la Consola del Navegador (F12) y busca:</p>
+                  <ul className="list-disc list-inside space-y-1 ml-2">
+                    <li>Mensajes que empiecen con 🔑 📊 ✅ ❌</li>
+                    <li>Errores en rojo</li>
+                    <li>El estado de "Approval" y "Deposit"</li>
+                  </ul>
+                  <div className="mt-2 pt-2 border-t border-purple-500/30">
+                    <p className="font-medium mb-1">Errores comunes:</p>
+                    <ul className="list-disc list-inside space-y-1 ml-2">
+                      <li>Usuario rechazó la transacción en wallet</li>
+                      <li>Gas insuficiente (necesitas ~0.001 BTC)</li>
+                      <li>Red incorrecta (debe ser Mezo Testnet 31611)</li>
+                    </ul>
+                  </div>
+                  <Link
+                    href="/DIAGNOSTICO_DEPOSITO.md"
+                    className="inline-flex items-center gap-1 text-purple-400 hover:text-purple-300 transition font-medium mt-2"
+                  >
+                    Ver guía completa de diagnóstico <ExternalLink className="w-3 h-3" />
+                  </Link>
+                </div>
+              </div>
+            )}
 
             {/* Info: Get MUSD */}
             {(!musdBalance || Number(musdBalance) === 0) && (
