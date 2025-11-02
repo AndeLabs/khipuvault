@@ -2,11 +2,14 @@
 
 import { useWatchContractEvent } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
-import { MEZO_TESTNET_ADDRESSES, INDIVIDUAL_POOL_ABI } from '@/lib/web3/contracts'
+import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts-v3'
 import { useAccount } from 'wagmi'
+import IndividualPoolV3ABI from '@/contracts/abis/IndividualPoolV3.json'
+
+const POOL_ABI = (IndividualPoolV3ABI as any).abi as const
 
 /**
- * Hook to watch for IndividualPool contract events and auto-refetch queries
+ * Hook to watch for IndividualPoolV3 contract events and auto-refetch queries
  * This replaces inefficient polling with event-driven updates
  * 
  * Best Practice: Use refetchQueries instead of invalidateQueries for immediate updates
@@ -15,15 +18,15 @@ import { useAccount } from 'wagmi'
 export function usePoolEvents() {
   const { address } = useAccount()
   const queryClient = useQueryClient()
-  const poolAddress = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
+  const poolAddress = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`
 
   // Watch for Deposited events
   useWatchContractEvent({
     address: poolAddress,
-    abi: INDIVIDUAL_POOL_ABI,
+    abi: POOL_ABI,
     eventName: 'Deposited',
     onLogs(logs) {
-      console.log('🔔 Deposited event detected:', logs)
+      console.log('🔔 [V3] Deposited event detected:', logs)
       // Refetch ALL active queries immediately (best practice for real-time updates)
       queryClient.refetchQueries({ 
         type: 'active',
@@ -35,10 +38,10 @@ export function usePoolEvents() {
   // Watch for Withdrawn events
   useWatchContractEvent({
     address: poolAddress,
-    abi: INDIVIDUAL_POOL_ABI,
+    abi: POOL_ABI,
     eventName: 'Withdrawn',
     onLogs(logs) {
-      console.log('🔔 Withdrawn event detected:', logs)
+      console.log('🔔 [V3] Withdrawn event detected:', logs)
       queryClient.refetchQueries({ 
         type: 'active',
         refetchType: 'all' 
@@ -49,10 +52,24 @@ export function usePoolEvents() {
   // Watch for YieldClaimed events
   useWatchContractEvent({
     address: poolAddress,
-    abi: INDIVIDUAL_POOL_ABI,
+    abi: POOL_ABI,
     eventName: 'YieldClaimed',
     onLogs(logs) {
-      console.log('🔔 YieldClaimed event detected:', logs)
+      console.log('🔔 [V3] YieldClaimed event detected:', logs)
+      queryClient.refetchQueries({ 
+        type: 'active',
+        refetchType: 'all' 
+      })
+    },
+  })
+  
+  // Watch for AutoCompound events (V3 feature)
+  useWatchContractEvent({
+    address: poolAddress,
+    abi: POOL_ABI,
+    eventName: 'YieldAutoCompounded',
+    onLogs(logs) {
+      console.log('🔔 [V3] YieldAutoCompounded event detected:', logs)
       queryClient.refetchQueries({ 
         type: 'active',
         refetchType: 'all' 

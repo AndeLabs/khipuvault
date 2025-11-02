@@ -9,7 +9,8 @@
  */
 
 import { PublicClient } from 'viem'
-import { MEZO_TESTNET_ADDRESSES, INDIVIDUAL_POOL_ABI, formatMUSD } from '@/lib/web3/contracts'
+import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts-v3'
+import { formatMUSD } from '@/lib/web3/contracts'
 
 export interface Transaction {
   hash: string
@@ -37,9 +38,9 @@ export async function fetchUserTransactions(
   publicClient: PublicClient,
   address: `0x${string}`
 ): Promise<Transaction[]> {
-  const poolAddress = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
+  const poolAddress = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`
 
-  console.log('🔄 Fetching transactions for', address)
+  console.log('🔄 [V3] Fetching transactions for', address)
 
   try {
     // Get current block number

@@ -13,11 +13,12 @@
 
 import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
+import { useQueryClient } from '@tanstack/react-query'
 import { parseEther, type Address } from 'viem'
-import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
+import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts-v3'
 
-const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as Address
-const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address
+const MUSD_ADDRESS = MEZO_V3_ADDRESSES.musd as Address
+const POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPoolV3 as Address
 
 // Minimal ABIs - only what we need
 const MUSD_ABI = [
@@ -72,6 +73,7 @@ type DepositState =
 
 export function useSimpleDeposit() {
   const { address } = useAccount()
+  const queryClient = useQueryClient()
   
   // State
   const [state, setState] = useState<DepositState>('idle')
@@ -149,9 +151,15 @@ export function useSimpleDeposit() {
   useEffect(() => {
     if (isDepositSuccess && state === 'waitingDeposit') {
       console.log('✅ Deposit confirmed!')
+      console.log('🔄 Refetching all queries...')
+      
+      // Invalidate and refetch all queries to update UI
+      queryClient.invalidateQueries()
+      queryClient.refetchQueries({ type: 'active' })
+      
       setState('success')
     }
-  }, [isDepositSuccess, state])
+  }, [isDepositSuccess, state, queryClient])
   
   // Effect: Update state when tx is pending
   useEffect(() => {
