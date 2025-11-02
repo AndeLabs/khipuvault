@@ -1,12 +1,12 @@
 {
   "framework": "nextjs",
-  "buildCommand": "npm install && npm run build",
+  "buildCommand": "npm run build",
+  "installCommand": "npm install",
   "outputDirectory": ".next",
   "build": {
     "env": {
       "NEXT_TELEMETRY_DISABLED": "1",
-      "NODE_OPTIONS": "--max-old-space-size=4096",
-      "NPM_CONFIG_PRODUCTION": "false"
+      "NODE_OPTIONS": "--max-old-space-size=4096"
     }
   }
 }
