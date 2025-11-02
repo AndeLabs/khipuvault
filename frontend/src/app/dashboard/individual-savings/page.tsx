@@ -5,11 +5,9 @@ export const dynamic = 'force-dynamic'
 import Link from "next/link";
 import { ChevronLeft, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { YourPosition } from "@/components/dashboard/individual-savings/your-position";
+import { PositionSimple } from "@/components/dashboard/individual-savings/position-simple";
 import { Deposits } from "@/components/dashboard/individual-savings/deposits";
 import { TransactionsTable } from "@/components/dashboard/individual-savings/transactions-table";
-import { DebugPanel } from "@/components/dashboard/individual-savings/debug-panel";
-import { MusdBalanceTester } from "@/components/dashboard/individual-savings/musd-balance-tester";
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { usePoolEvents } from "@/hooks/web3/use-pool-events";
 
@@ -31,14 +29,8 @@ export default function IndividualSavingsPage() {
       </AnimateOnScroll>
 
       <div className="flex flex-col gap-8">
-        <AnimateOnScroll delay="50ms">
-          <MusdBalanceTester />
-        </AnimateOnScroll>
-        <AnimateOnScroll delay="75ms">
-          <DebugPanel />
-        </AnimateOnScroll>
         <AnimateOnScroll delay="100ms">
-          <YourPosition />
+          <PositionSimple />
         </AnimateOnScroll>
         <AnimateOnScroll delay="200ms">
           <Deposits />
