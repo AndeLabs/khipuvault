@@ -65,6 +65,9 @@ interface Web3ProviderProps {
   
   /** Optional: Custom query client */
   customQueryClient?: QueryClient
+  
+  /** Optional: Theme (ignored, kept for backward compatibility) */
+  theme?: string
 }
 
 /**
@@ -87,6 +90,7 @@ interface Web3ProviderProps {
 export function Web3Provider({ 
   children, 
   customQueryClient,
+  theme,
 }: Web3ProviderProps) {
   const [isMounted, setIsMounted] = useState(false)
 

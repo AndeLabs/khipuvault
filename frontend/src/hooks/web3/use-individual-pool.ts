@@ -342,4 +342,6 @@ export function formatTimeSince(timestamp: number): string {
   return 'Menos de 1 hora'
 }
 
-export { useIndividualPool as useIndividualPoolData } from "./use-individual-pool"
+
+// Alias export for backward compatibility
+export { useIndividualPool as useIndividualPoolData }

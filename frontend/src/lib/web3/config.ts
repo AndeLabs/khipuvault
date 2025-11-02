@@ -9,97 +9,11 @@
 
 import { createConfig, http } from 'wagmi'
 import { metaMask } from 'wagmi/connectors'
-import { mezoTestnet } from 'wagmi/chains'
+import { mezoTestnet } from './chains'
 
-/**
- * Mezo Testnet configuration
- * Bitcoin-backed DeFi network with native BTC currency
- */
-const mezoTestnetConfig = {
-  id: 31611,
-  name: 'Mezo Testnet',
-  nativeCurrency: {
-    name: 'Bitcoin',
-    symbol: 'BTC',
-    decimals: 18,
-  },
-  rpcUrls: {
-    default: {
-      http: ['https://rpc.testnet.mezo.org'],
-    },
-    public: {
-      http: ['https://rpc.testnet.mezo.org'],
-    },
-  },
-  blockExplorers: {
-    default: {
-      name: 'Mezo Explorer',
-      url: 'https://explorer.testnet.mezo.org',
-    },
-  },
-  testnet: true,
-} as const
 
-/**
- * Custom Unisat connector for Bitcoin wallet support
- * Uses window.unisat global object when available
- */
-function unisatConnector() {
-  return {
-    id: 'unisat',
-    name: 'Unisat',
-    type: 'injected' as const,
-    async connect() {
-      if (typeof window === 'undefined' || !window.unisat) {
-        throw new Error('Unisat wallet not found. Please install Unisat extension.')
-      }
-      
-      try {
-        const accounts = await window.unisat.requestAccounts()
-        return { account: accounts[0] as `0x${string}` }
-      } catch (error) {
-        throw new Error('Failed to connect Unisat wallet')
-      }
-    },
-    async disconnect() {
-      if (window.unisat) {
-        // Unisat doesn't have a disconnect method, but we can clean up state
-        console.log('Unisat wallet disconnected')
-      }
-    },
-    async getAccounts() {
-      if (!window.unisat) return []
-      try {
-        const accounts = await window.unisat.requestAccounts()
-        return accounts as `0x${string}`[]
-      } catch {
-        return []
-      }
-    },
-    async getChainId() {
-      // Unisat works with Bitcoin networks, return Mezo Testnet ID
-      return 31611
-    },
-    async isAuthorized() {
-      if (!window.unisat) return false
-      try {
-        const accounts = await window.unisat.requestAccounts()
-        return accounts.length > 0
-      } catch {
-        return false
-      }
-    },
-    onAccountsChanged(accounts: string[]) {
-      console.log('Unisat accounts changed:', accounts)
-    },
-    onChainChanged(chainId: string | number) {
-      console.log('Unisat chain changed:', chainId)
-    },
-    onDisconnect(error: Error) {
-      console.log('Unisat disconnected:', error)
-    },
-  }
-}
+
+
 
 /**
  * Extend Window interface for Unisat
@@ -132,7 +46,7 @@ declare global {
  * - Production-ready with proper error handling
  */
 export const wagmiConfig = createConfig({
-  chains: [mezoTestnetConfig],
+  chains: [mezoTestnet],
   connectors: [
     metaMask({
       dappMetadata: {
@@ -140,12 +54,11 @@ export const wagmiConfig = createConfig({
         url: typeof window !== 'undefined' ? window.location.origin : 'https://khipuvault.vercel.app',
       },
     }),
-    unisatConnector(),
   ],
   transports: {
-    [mezoTestnetConfig.id]: http(),
+    [mezoTestnet.id]: http('https://rpc.test.mezo.org'),
   },
-  ssr: false, // Disable SSR for Web3
+  ssr: false,
 })
 
 /**
@@ -172,7 +85,7 @@ export const appMetadata = {
  * @returns true if on Mezo Testnet
  */
 export function isCorrectNetwork(chainId?: number): boolean {
-  return chainId === mezoTestnetConfig.id
+  return chainId === mezoTestnet.id
 }
 
 /**
