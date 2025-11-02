@@ -5,7 +5,6 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
-import { ConnectButton } from '@/components/wallet/connect-button';
 
 const navLinks = [
   { href: '#features', label: 'Características' },
@@ -43,7 +42,11 @@ export function Header() {
 
         <div className="flex items-center gap-4">
           <div className="hidden md:flex">
-            <ConnectButton />
+            <Link href="/dashboard">
+              <Button variant="secondary" size="default">
+                Ir al Dashboard
+              </Button>
+            </Link>
           </div>
 
           <Sheet>
@@ -79,7 +82,11 @@ export function Header() {
                   ))}
                 </nav>
                 <div className="mt-auto w-full">
-                  <ConnectButton />
+                  <Link href="/dashboard">
+                    <Button variant="secondary" size="lg" className="w-full">
+                      Ir al Dashboard
+                    </Button>
+                  </Link>
                 </div>
               </div>
             </SheetContent>
