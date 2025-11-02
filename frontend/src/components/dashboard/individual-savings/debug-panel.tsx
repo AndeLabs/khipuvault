@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useAccount, useChainId, useBalance } from 'wagmi'
-import { useIndividualPool } from '@/hooks/web3/use-individual-pool'
+import { useIndividualPoolV3 } from '@/hooks/web3/use-individual-pool-v3'
 import { useMusdApprovalV2 } from '@/hooks/web3/use-musd-approval-v2'
 import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 import { RefreshCw } from 'lucide-react'
@@ -14,12 +14,10 @@ export function DebugPanel() {
   const { data: nativeBalance } = useBalance({ address })
   
   const {
-    poolStats,
-    userDeposit,
-    walletBalances,
+    userInfo,
+    poolTVL,
     isLoading: poolLoading,
-    _debug,
-  } = useIndividualPool()
+  } = useIndividualPoolV3()
   
   const {
     musdBalance,
@@ -28,8 +26,7 @@ export function DebugPanel() {
   } = useMusdApprovalV2()
 
   const handleRefresh = () => {
-    _debug?.manualRefetch()
-    _debug?.logCurrentData()
+    window.location.reload()
   }
 
   if (!isConnected) return null
@@ -72,23 +69,18 @@ export function DebugPanel() {
         </div>
 
         <div>
-          <p className="text-muted-foreground mb-1">MUSD Balance (from useIndividualPool):</p>
-          <p className="text-white">Raw Wei: {walletBalances.musdBalance.toString()}</p>
-          <p className="text-white">As Number: {(Number(walletBalances.musdBalance) / 1e18).toFixed(2)} MUSD</p>
+          <p className="text-muted-foreground mb-1">User Deposit (V3):</p>
+          <p className="text-white">Active: {userInfo && userInfo.deposit > BigInt(0) ? '✅ Yes' : '❌ No'}</p>
+          <p className="text-white">MUSD Amount: {userInfo?.deposit.toString() || '0'} wei</p>
+          <p className="text-white">Yield Accrued: {userInfo?.yields.toString() || '0'} wei</p>
+          <p className="text-white">Days Active: {userInfo?.daysActive.toString() || '0'}</p>
+          <p className="text-white">Auto-Compound: {userInfo?.autoCompoundEnabled ? '✅ On' : '❌ Off'}</p>
         </div>
 
         <div>
-          <p className="text-muted-foreground mb-1">User Deposit:</p>
-          <p className="text-white">Active: {userDeposit?.active ? '✅ Yes' : '❌ No'}</p>
-          <p className="text-white">MUSD Amount: {userDeposit?.musdAmount.toString() || '0'} wei</p>
-          <p className="text-white">Yield Accrued: {userDeposit?.yieldAccrued.toString() || '0'} wei</p>
-        </div>
-
-        <div>
-          <p className="text-muted-foreground mb-1">Pool Stats:</p>
-          <p className="text-white">Total Deposited: {poolStats.totalMusdDeposited.toString()} wei</p>
-          <p className="text-white">Total Yields: {poolStats.totalYields.toString()} wei</p>
-          <p className="text-white">Pool APR: {poolStats.poolAPR}%</p>
+          <p className="text-muted-foreground mb-1">Pool Stats (V3):</p>
+          <p className="text-white">Pool TVL: {poolTVL?.toString() || '0'} wei</p>
+          <p className="text-white">TVL (formatted): {(Number(poolTVL || 0) / 1e18).toFixed(2)} MUSD</p>
         </div>
 
         <div>

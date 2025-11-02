@@ -19,10 +19,11 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { useDepositV2, useWithdrawV2, useClaimYieldV2 } from '@/hooks/web3/use-pool-transactions-v2'
+import { useDepositV3, useFullWithdrawV3, useClaimYieldV3 } from '@/hooks/web3/use-pool-transactions-v3'
 import { useMusdApprovalV2, formatMUSD, formatMUSDShort } from '@/hooks/web3/use-musd-approval-v2'
 import { usePoolRealTimeSync } from '@/hooks/web3/use-pool-real-time-sync'
-import { useIndividualPool, formatBTC } from '@/hooks/web3/use-individual-pool'
+import { useIndividualPoolV3 } from '@/hooks/web3/use-individual-pool-v3'
+import { parseEther } from 'viem'
 import { useToast } from '@/hooks/use-toast'
 import { TransactionStatus } from './transaction-status'
 import Link from 'next/link'
@@ -33,7 +34,7 @@ export function Deposits() {
   const musdPrice = 1 // MUSD is stablecoin, always $1
 
   const { address, isConnected, chainId } = useAccount()
-  const { walletBalances, userDeposit, isLoading: isPoolLoading } = useIndividualPool()
+  const { userInfo, isLoading: isPoolLoading } = useIndividualPoolV3()
   const { toast } = useToast()
   
   // Enable real-time sync for entire page
@@ -52,37 +53,37 @@ export function Deposits() {
     error: musdError,
   } = useMusdApprovalV2()
   
-  // Real blockchain transactions (V2 - Production Ready)
+  // Real blockchain transactions (V3 - Production Ready with UUPS)
   const {
-    deposit,
+    deposit: depositV3,
     hash: depositHash,
     isDepositing,
     isConfirming: depositConfirming,
     isSuccess: depositSuccess,
     error: depositError,
-  } = useDepositV2()
+  } = useDepositV3()
   
   const {
-    withdraw,
+    fullWithdraw,
     hash: withdrawHash,
     isWithdrawing,
     isConfirming: withdrawConfirming,
     isSuccess: withdrawSuccess,
     error: withdrawError,
-  } = useWithdrawV2()
+  } = useFullWithdrawV3()
   
   const {
     claimYield,
     hash: claimHash,
-    isClaimingYield,
+    isClaiming: isClaimingYield,
     isConfirming: claimConfirming,
     isSuccess: claimSuccess,
     error: claimError,
-  } = useClaimYieldV2()
+  } = useClaimYieldV3()
 
   // Calculate max amounts (MUSD-based)
   const maxDeposit = musdBalance ? Number(musdBalance) / 1e18 : 0
-  const maxWithdraw = userDeposit ? Number(userDeposit.musdAmount) / 1e18 : 0
+  const maxWithdraw = userInfo ? Number(userInfo.deposit) / 1e18 : 0
   
   // Check if approval is needed for current amount
   const depositNeedsApproval = isApprovalNeeded(
@@ -120,8 +121,8 @@ export function Deposits() {
         await new Promise(resolve => setTimeout(resolve, 2000))
       }
       
-      console.log('💰 Iniciando depósito...')
-      await deposit(amount)
+      console.log('💰 Iniciando depósito V3...')
+      await depositV3(parseEther(amount))
       toast({
         title: "Depósito enviado",
         description: `Transacción enviada. Esperando confirmación...`,
@@ -175,8 +176,8 @@ export function Deposits() {
 
   const handleWithdraw = async () => {
     try {
-      // withdraw() takes NO parameters - withdraws entire position
-      await withdraw()
+      // fullWithdraw() withdraws entire position (V3)
+      await fullWithdraw()
       toast({
         title: "Retiro enviado",
         description: "Transacción enviada. Esperando confirmación...",
@@ -312,7 +313,7 @@ export function Deposits() {
                   {isApproving && <p className="text-blue-500 animate-pulse">⏳ Aprobando MUSD...</p>}
                   {isApproveConfirming && <p className="text-blue-500 animate-pulse">⏳ Confirmando aprobación en blockchain...</p>}
                   {isApprovalConfirmed && !depositNeedsApproval && <p className="text-green-500">✅ ¡MUSD aprobado! Puedes depositar ahora</p>}
-                  {depositError && <p className="text-red-500">❌ Error: {depositError}</p>}
+                  {depositError && <p className="text-red-500">❌ Error: {depositError.message || 'Error en depósito'}</p>}
                   {depositSuccess && <p className="text-green-500">✅ ¡Depósito completado!</p>}
                 </div>
                 <AlertDialogFooter>
@@ -341,7 +342,7 @@ export function Deposits() {
             {/* Withdraw Dialog */}
             <AlertDialog>
               <AlertDialogTrigger asChild>
-                <Button variant="outline" size="lg" className="w-full border-primary text-primary hover:bg-primary/10 hover:text-primary" disabled={isWithdrawing || !userDeposit?.active}>
+                <Button variant="outline" size="lg" className="w-full border-primary text-primary hover:bg-primary/10 hover:text-primary" disabled={isWithdrawing || !userInfo || userInfo.deposit === BigInt(0)}>
                   <LogOut className="mr-2 h-4 w-4" /> Retirar
                 </Button>
               </AlertDialogTrigger>
@@ -352,21 +353,21 @@ export function Deposits() {
                 </AlertDialogHeader>
                 <div className="text-sm space-y-2">
                   <p>
-                    Monto MUSD: {withdrawAmount} MUSD (= ${(parseFloat(withdrawAmount) * musdPrice).toLocaleString('en-US', { maximumFractionDigits: 2 })}) USD)
+                    Retiro total: {maxWithdraw.toFixed(2)} MUSD (= ${(maxWithdraw * musdPrice).toLocaleString('en-US', { maximumFractionDigits: 2 })}) USD)
                   </p>
                   <p className="text-muted-foreground">Gas estimado: ~0.01 USD</p>
-                  <p className="text-xs text-muted-foreground">Saldo depositado: {formatMUSD(userDeposit?.musdAmount)} MUSD</p>
-                  <p className="text-xs text-green-500">Yields acumulados: {formatMUSD(userDeposit?.yieldAccrued)} MUSD</p>
+                  <p className="text-xs text-muted-foreground">Saldo depositado: {formatMUSD(userInfo?.deposit)} MUSD</p>
+                  <p className="text-xs text-green-500">Yields acumulados: {formatMUSD(userInfo?.yields)} MUSD</p>
                   {isWithdrawing && <p className="text-blue-500 animate-pulse">⏳ Enviando retiro...</p>}
                   {withdrawConfirming && <p className="text-blue-500 animate-pulse">⏳ Confirmando en blockchain...</p>}
-                  {withdrawError && <p className="text-red-500">❌ Error: {withdrawError}</p>}
+                  {withdrawError && <p className="text-red-500">❌ Error: {withdrawError.message || 'Error en retiro'}</p>}
                   {withdrawSuccess && <p className="text-green-500">✅ ¡Retiro completado!</p>}
                 </div>
                 <AlertDialogFooter>
                   <AlertDialogCancel disabled={isWithdrawing || withdrawConfirming}>Cancelar</AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={handleWithdraw} 
-                    disabled={isWithdrawing || withdrawConfirming || !withdrawAmount || parseFloat(withdrawAmount) <= 0 || parseFloat(withdrawAmount) > maxWithdraw}
+                    disabled={isWithdrawing || withdrawConfirming || maxWithdraw <= 0}
                   >
                     {isWithdrawing ? 'Enviando...' : withdrawConfirming ? 'Confirmando...' : 'Confirmar Retiro'}
                   </AlertDialogAction>
@@ -380,10 +381,10 @@ export function Deposits() {
               size="lg" 
               className="w-full bg-primary text-primary-foreground" 
               onClick={handleClaim} 
-              disabled={isClaimingYield || claimConfirming || !userDeposit?.yieldAccrued || userDeposit.yieldAccrued === BigInt(0) || !userDeposit?.active}
+              disabled={isClaimingYield || claimConfirming || !userInfo || userInfo.yields === BigInt(0)}
             >
               <Gift className="mr-2 h-4 w-4" /> 
-              {isClaimingYield ? 'Enviando...' : claimConfirming ? 'Confirmando...' : `Reclamar ${formatMUSD(userDeposit?.yieldAccrued)} MUSD`}
+              {isClaimingYield ? 'Enviando...' : claimConfirming ? 'Confirmando...' : `Reclamar ${formatMUSD(userInfo?.yields)} MUSD`}
             </Button>
 
             {/* Info: Get MUSD */}
@@ -427,7 +428,7 @@ export function Deposits() {
             )}
             {claimError && (
               <div className="p-3 rounded-lg bg-red-500/20 text-red-500 text-sm">
-                ❌ Error: {claimError}
+                ❌ Error: {claimError.message || 'Error al reclamar'}
               </div>
             )}
           </div>
@@ -488,7 +489,7 @@ export function Deposits() {
                   min="1"
                   max={maxWithdraw}
                   step="1"
-                  disabled={isWithdrawing || !userDeposit?.active}
+                  disabled={isWithdrawing || !userInfo || userInfo.deposit === BigInt(0)}
                 />
                 <span className="absolute inset-y-0 right-0 flex items-center pr-3 font-code text-muted-foreground">MUSD</span>
               </div>

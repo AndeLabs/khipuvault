@@ -89,12 +89,22 @@ export function useDepositV3() {
         throw new Error(`Maximum deposit is ${V3_FEATURES.individualPool.maxDeposit} MUSD`)
       }
 
-      writeContract({
-        address: INDIVIDUAL_POOL_ADDRESS,
-        abi: INDIVIDUAL_POOL_V3_ABI,
-        functionName: 'deposit',
-        args: [amount, referrer || '0x0000000000000000000000000000000000000000'],
-      })
+      // Use depositWithReferral if referrer is provided, otherwise use simple deposit
+      if (referrer && referrer !== '0x0000000000000000000000000000000000000000') {
+        writeContract({
+          address: INDIVIDUAL_POOL_ADDRESS,
+          abi: INDIVIDUAL_POOL_V3_ABI,
+          functionName: 'depositWithReferral',
+          args: [amount, referrer],
+        })
+      } else {
+        writeContract({
+          address: INDIVIDUAL_POOL_ADDRESS,
+          abi: INDIVIDUAL_POOL_V3_ABI,
+          functionName: 'deposit',
+          args: [amount],
+        })
+      }
 
     } catch (err) {
       setLocalState({ isProcessing: false, hash: null })

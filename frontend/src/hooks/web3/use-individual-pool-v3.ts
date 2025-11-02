@@ -43,6 +43,7 @@ export function useIndividualPoolV3() {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
         functionName: 'totalMusdDeposited',
+        args: [],
       })
     },
     enabled: isConnected,
@@ -56,6 +57,7 @@ export function useIndividualPoolV3() {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
         functionName: 'totalYieldsGenerated',
+        args: [],
       })
     },
     enabled: isConnected,
@@ -69,6 +71,7 @@ export function useIndividualPoolV3() {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
         functionName: 'totalReferralRewards',
+        args: [],
       })
     },
     enabled: isConnected,
@@ -183,6 +186,7 @@ export function useIndividualPoolV3() {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
         functionName: 'performanceFee',
+        args: [],
       })
     },
     enabled: isConnected,
@@ -196,6 +200,7 @@ export function useIndividualPoolV3() {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
         functionName: 'emergencyMode',
+        args: [],
       })
     },
     enabled: isConnected,
@@ -241,6 +246,7 @@ export function useIndividualPoolV3() {
   return {
     // Pool Statistics
     poolStats,
+    poolTVL: totalMusdDeposited as bigint || BigInt(0),
     
     // User Data
     userInfo,

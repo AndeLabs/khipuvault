@@ -3,8 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAccount } from "wagmi";
-import { useIndividualPool, formatMUSD } from "@/hooks/web3/use-individual-pool";
-import { useMUSDApproval, formatMUSDShort } from "@/hooks/web3/use-musd-approval";
+import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
+import { useMusdApprovalV2, formatMUSD, formatMUSDShort } from "@/hooks/web3/use-musd-approval-v2";
 
 /**
  * Simple SummaryCards component without charts
@@ -12,8 +12,8 @@ import { useMUSDApproval, formatMUSDShort } from "@/hooks/web3/use-musd-approval
  */
 export function SummaryCards() {
   const { isConnected } = useAccount();
-  const { userDeposit, isLoading: isPoolLoading } = useIndividualPool();
-  const { musdBalance } = useMUSDApproval();
+  const { userInfo, isLoading: isPoolLoading } = useIndividualPoolV3();
+  const { musdBalance } = useMusdApprovalV2();
 
   if (!isConnected) {
     return (
@@ -74,7 +74,7 @@ export function SummaryCards() {
               <Skeleton className="h-5 w-24" />
             ) : (
               <span className="font-mono">
-                {userDeposit?.musdAmount ? formatMUSD(userDeposit.musdAmount) : '0.00'} MUSD
+                {userInfo?.deposit ? formatMUSD(userInfo.deposit) : '0.00'} MUSD
               </span>
             )}
           </div>
@@ -84,7 +84,7 @@ export function SummaryCards() {
               <Skeleton className="h-5 w-24" />
             ) : (
               <span className="font-mono text-green-500">
-                {userDeposit?.yieldAccrued ? formatMUSD(userDeposit.yieldAccrued) : '0.00'} MUSD
+                {userInfo?.yields ? formatMUSD(userInfo.yields) : '0.00'} MUSD
               </span>
             )}
           </div>

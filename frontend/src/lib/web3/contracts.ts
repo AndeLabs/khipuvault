@@ -38,15 +38,15 @@ export const MEZO_STABILITY_POOL_ABI = Array.isArray(StabilityPoolABI) ? Stabili
 // ============================================================================
 
 export const MEZO_TESTNET_ADDRESSES = {
-  // KhipuVault Pools - VERIFIED WORKING on Mezo Testnet Chain ID 31611
-  individualPool: '0x6028E4452e6059e797832578D70dBdf63317538a',
-  cooperativePool: '0x92eCA935773b71efB655cc7d3aB77ee23c088A7a',
+  // KhipuVault V3 Pools (UUPS Upgradeable) - PRODUCTION
+  individualPool: '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393',
+  cooperativePool: '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88',
   lotteryPool: '0x0000000000000000000000000000000000000000',
   rotatingPool: '0x0000000000000000000000000000000000000000',
   
-  // Core Integration - VERIFIED WORKING
-  mezoIntegration: '0xa19B54b8b3f36F047E1f755c16F423143585cc6B',
-  yieldAggregator: '0x5BDac57B68f2Bc215340e4Dc2240f30154f4A007',
+  // Core Integration V3 - PRODUCTION
+  mezoIntegration: '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6',
+  yieldAggregator: '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6',
 
   // Mezo Protocol - Official Mezo Testnet Addresses
   musd: '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503',
@@ -80,112 +80,14 @@ export const ERC20_ABI = MEZO_MUSD_ABI
 export const MUSD_ABI = MEZO_MUSD_ABI
 
 // ============================================================================
-// INDIVIDUAL POOL ABI - MUSD-ONLY VERSION
+// INDIVIDUAL POOL ABI - V3 (UUPS Upgradeable)
 // ============================================================================
-// Updated: Oct 24, 2025 - MUSD-only deposit model
-// Users deposit MUSD (obtained at mezo.org first)
-// All amounts are in MUSD, yields in MUSD
+// Updated: Nov 2, 2025 - V3 with auto-compound, referrals, flash loan protection
+// Import V3 ABI from contracts/abis
 
-export const INDIVIDUAL_POOL_ABI = [
-  // Read Functions
-  {
-    inputs: [{ internalType: 'address', name: 'user', type: 'address' }],
-    name: 'userDeposits',
-    outputs: [
-      { internalType: 'uint256', name: 'musdAmount', type: 'uint256' },
-      { internalType: 'uint256', name: 'yieldAccrued', type: 'uint256' },
-      { internalType: 'uint256', name: 'depositTimestamp', type: 'uint256' },
-      { internalType: 'uint256', name: 'lastYieldUpdate', type: 'uint256' },
-      { internalType: 'bool', name: 'active', type: 'bool' },
-    ],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'totalMusdDeposited',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'totalYieldsGenerated',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'address', name: 'user', type: 'address' }],
-    name: 'calculateYield',
-    outputs: [{ internalType: 'uint256', name: 'totalYield', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'performanceFee',
-    outputs: [{ internalType: 'uint256', name: '', type: 'uint256' }],
-    stateMutability: 'view',
-    type: 'function',
-  },
-  // Write Functions - ERC20 MUSD (Non-Payable)
-  {
-    inputs: [{ internalType: 'uint256', name: 'musdAmount', type: 'uint256' }],
-    name: 'deposit',
-    outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [],
-    name: 'claimYield',
-    outputs: [{ internalType: 'uint256', name: 'yieldAmount', type: 'uint256' }],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  {
-    inputs: [{ internalType: 'uint256', name: 'musdAmount', type: 'uint256' }],
-    name: 'withdraw',
-    outputs: [
-      { internalType: 'uint256', name: 'musdAmount', type: 'uint256' },
-      { internalType: 'uint256', name: 'yieldAmount', type: 'uint256' },
-    ],
-    stateMutability: 'nonpayable',
-    type: 'function',
-  },
-  // Events
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: 'address', name: 'user', type: 'address' },
-      { indexed: false, internalType: 'uint256', name: 'musdAmount', type: 'uint256' },
-      { indexed: false, internalType: 'uint256', name: 'timestamp', type: 'uint256' },
-    ],
-    name: 'Deposited',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: 'address', name: 'user', type: 'address' },
-      { indexed: false, internalType: 'uint256', name: 'yieldAmount', type: 'uint256' },
-      { indexed: false, internalType: 'uint256', name: 'feeAmount', type: 'uint256' },
-    ],
-    name: 'YieldClaimed',
-    type: 'event',
-  },
-  {
-    anonymous: false,
-    inputs: [
-      { indexed: true, internalType: 'address', name: 'user', type: 'address' },
-      { indexed: false, internalType: 'uint256', name: 'musdAmount', type: 'uint256' },
-      { indexed: false, internalType: 'uint256', name: 'yieldAmount', type: 'uint256' },
-    ],
-    name: 'Withdrawn',
-    type: 'event',
-  },
-] as const
+import IndividualPoolV3ABI from '@/contracts/abis/IndividualPoolV3.json'
+
+export const INDIVIDUAL_POOL_ABI = (IndividualPoolV3ABI as any).abi as const
 
 // ============================================================================
 // HELPER FUNCTIONS

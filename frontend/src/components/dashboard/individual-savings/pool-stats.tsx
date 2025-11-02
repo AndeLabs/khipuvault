@@ -1,7 +1,8 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useIndividualPool, formatMUSD } from "@/hooks/web3/use-individual-pool";
+import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
+import { formatMUSD } from "@/hooks/web3/use-musd-approval-v2";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
@@ -9,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  * Focus on essential text-based information only
  */
 export function PoolStats() {
-  const { poolStats, isLoading } = useIndividualPool();
+  const { poolTVL, isLoading } = useIndividualPoolV3();
   
   if (isLoading) {
     return (
@@ -37,54 +38,36 @@ export function PoolStats() {
         <CardTitle className="text-lg">📊 Estadísticas del Pool</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {/* Total MUSD Deposited */}
+        {/* Total Value Locked */}
         <div className="flex justify-between">
           <span className="text-sm text-muted-foreground">
-            Total MUSD Depositado
+            Total Value Locked (TVL)
           </span>
           <div className="text-right">
             <p className="font-bold font-code">
-              {formatMUSD(poolStats?.totalMusdDeposited)} MUSD
+              {formatMUSD(poolTVL)} MUSD
             </p>
             <p className="text-xs text-muted-foreground">
-              = ${(Number(poolStats?.totalMusdDeposited || BigInt(0)) / 1e18).toLocaleString('en-US', { maximumFractionDigits: 2 })} USD
+              = ${(Number(poolTVL || BigInt(0)) / 1e18).toLocaleString('en-US', { maximumFractionDigits: 2 })} USD
             </p>
           </div>
         </div>
 
-        {/* Total Yields Generated */}
-        <div className="flex justify-between">
-          <span className="text-sm text-muted-foreground">Yields Total Generados</span>
-          <div className="text-right">
-            <p className="font-bold font-code text-green-500">
-              {formatMUSD(poolStats?.totalYields)} MUSD
-            </p>
-            <p className="text-xs text-muted-foreground">
-              = ${(Number(poolStats?.totalYields || BigInt(0)) / 1e18).toFixed(2)} USD
-            </p>
-          </div>
-        </div>
-
-        {/* APR */}
-        <div className="flex justify-between">
-          <span className="text-sm text-muted-foreground">
-            APR del Pool
-          </span>
-          <span className="font-bold font-code text-primary">
-            {poolStats?.poolAPR.toFixed(2)}%
-          </span>
-        </div>
-
-        {/* Member Count */}
-        <div className="flex justify-between">
-          <span className="text-sm text-muted-foreground">Miembros Activos</span>
-          <span className="font-bold font-code">{poolStats?.memberCount || 0}</span>
+        {/* V3 Features */}
+        <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/30">
+          <p className="text-xs font-semibold text-primary mb-2">✨ V3 Features Activas:</p>
+          <ul className="text-xs text-muted-foreground space-y-1">
+            <li>✅ Auto-Compound disponible</li>
+            <li>✅ Retiros parciales</li>
+            <li>✅ Sistema de referidos</li>
+            <li>✅ 60% menos gas</li>
+          </ul>
         </div>
 
         {/* Status Message */}
         <div className="mt-4 p-3 bg-muted/50 rounded-lg">
           <p className="text-xs text-center text-muted-foreground">
-            El pool está operando normalmente. Deposita MUSD para generar rendimientos.
+            Pool V3 (UUPS) operando normalmente. Deposita MUSD para generar rendimientos.
           </p>
         </div>
       </CardContent>

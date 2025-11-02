@@ -2,13 +2,26 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useIndividualPool, formatMUSD, formatMUSDDisplay, formatTimeSince } from '@/hooks/web3/use-individual-pool'
+import { useIndividualPoolV3 } from '@/hooks/web3/use-individual-pool-v3'
+import { formatMUSD } from '@/hooks/web3/use-musd-approval-v2'
 import { Clock } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
+// Helper function to format time since timestamp
+function formatTimeSince(timestamp: bigint | undefined): string {
+  if (!timestamp) return 'N/A'
+  const now = Date.now() / 1000
+  const diff = now - Number(timestamp)
+  const days = Math.floor(diff / 86400)
+  if (days === 0) return 'Hoy'
+  if (days === 1) return '1 día'
+  return `${days} días`
+}
+
 export function YourPosition() {
-  const { poolStats, userDeposit, isLoading, isConnected } = useIndividualPool()
+  const { userInfo, poolTVL, isLoading, address } = useIndividualPoolV3()
   const [timeLeft, setTimeLeft] = useState('23:59:59')
+  const isConnected = !!address
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -54,7 +67,7 @@ export function YourPosition() {
     )
   }
 
-  if (!userDeposit || !userDeposit.active) {
+  if (!userInfo || userInfo.deposit === BigInt(0)) {
     return (
       <Card className="bg-card border-2 border-primary/50">
         <CardContent className="p-6 text-center">
@@ -67,28 +80,29 @@ export function YourPosition() {
   }
 
   const musdPrice = 1 // MUSD is stablecoin, always $1
-  const timeActive = formatTimeSince(userDeposit.depositTimestamp)
+  const timeActive = formatTimeSince(userInfo.daysActive)
+  const aprValue = Number(userInfo.estimatedAPR) / 100 // APR is in basis points
 
   const positionData = [
     {
       label: 'Depositado',
-      value: `${formatMUSD(userDeposit.musdAmount)} MUSD`,
-      subValue: `(= $${(Number(userDeposit.musdAmount) / 1e18 * musdPrice).toLocaleString('en-US', { maximumFractionDigits: 2 })})`,
+      value: `${formatMUSD(userInfo.deposit)} MUSD`,
+      subValue: `(= $${(Number(userInfo.deposit) / 1e18 * musdPrice).toLocaleString('en-US', { maximumFractionDigits: 2 })})`,
       valueColor: 'text-primary',
     },
     {
       label: 'Rendimientos Acumulados',
-      value: `+${formatMUSD(userDeposit.yieldAccrued)} MUSD`,
+      value: `+${formatMUSD(userInfo.yields)} MUSD`,
       valueColor: 'text-secondary',
     },
     {
       label: 'Total Disponible',
-      value: `${formatMUSD(BigInt(Number(userDeposit.musdAmount) + Number(userDeposit.yieldAccrued)))} MUSD`,
+      value: `${formatMUSD(BigInt(Number(userInfo.deposit) + Number(userInfo.yields)))} MUSD`,
       valueColor: 'text-green-500',
     },
     {
-      label: 'APR Actual',
-      value: `${poolStats.poolAPR.toFixed(1)}%`,
+      label: 'APR Estimado',
+      value: `${aprValue.toFixed(1)}%`,
       valueColor: 'text-2xl font-bold text-primary',
     },
     {
