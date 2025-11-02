@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAccount, useSwitchChain, useWalletClient } from 'wagmi'
-import { mezoTestnet } from '@mezo-org/passport/dist/src/constants'
+import { mezoTestnet } from '@/lib/web3/chains'
 import { useToast } from '@/hooks/use-toast'
 
 /**

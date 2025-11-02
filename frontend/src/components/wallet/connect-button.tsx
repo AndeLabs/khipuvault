@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { useIndividualPoolData } from '@/hooks/web3/use-individual-pool-data-mock'
+import { useIndividualPoolData } from '@/hooks/web3/use-individual-pool'
 import { getWalletAvailability } from '@/lib/web3/config'
 import { Wallet, ChevronDown, Copy, ExternalLink } from 'lucide-react'
 

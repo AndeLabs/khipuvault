@@ -12,27 +12,25 @@
  */
 
 // ============================================================================
-// MEZO OFFICIAL ABIS (from @mezo-org/musd-contracts)
+// MEZO OFFICIAL ABIS (Local ABIs generated from Forge interfaces)
 // ============================================================================
-// These ABIs are imported from the official Mezo package and will automatically
-// update when Mezo publishes new versions. This is SCALABLE and FUTURE-PROOF.
+// These ABIs are generated from the Mezo protocol interfaces in contracts/src/interfaces
 
-import BorrowerOperationsData from '@mezo-org/musd-contracts/deployments/matsnet/BorrowerOperations.json'
-import TroveManagerData from '@mezo-org/musd-contracts/deployments/matsnet/TroveManager.json'
-import PriceFeedData from '@mezo-org/musd-contracts/deployments/matsnet/PriceFeed.json'
-import HintHelpersData from '@mezo-org/musd-contracts/deployments/matsnet/HintHelpers.json'
-import SortedTrovesData from '@mezo-org/musd-contracts/deployments/matsnet/SortedTroves.json'
-import MUSDData from '@mezo-org/musd-contracts/deployments/matsnet/MUSD.json'
-import StabilityPoolData from '@mezo-org/musd-contracts/deployments/matsnet/StabilityPool.json'
+import BorrowerOperationsABI from '@/contracts/mezo-abis/BorrowerOperations.json'
+import TroveManagerABI from '@/contracts/mezo-abis/TroveManager.json'
+import PriceFeedABI from '@/contracts/mezo-abis/PriceFeed.json'
+import HintHelpersABI from '@/contracts/mezo-abis/HintHelpers.json'
+import SortedTrovesABI from '@/contracts/mezo-abis/SortedTroves.json'
+import MUSDABI from '@/contracts/mezo-abis/MUSD.json'
+import StabilityPoolABI from '@/contracts/mezo-abis/StabilityPool.json'
 
-// Extract ABIs from Mezo artifacts
-export const MEZO_BORROWER_OPERATIONS_ABI = BorrowerOperationsData.abi
-export const MEZO_TROVE_MANAGER_ABI = TroveManagerData.abi
-export const MEZO_PRICE_FEED_ABI = PriceFeedData.abi
-export const MEZO_HINT_HELPERS_ABI = HintHelpersData.abi
-export const MEZO_SORTED_TROVES_ABI = SortedTrovesData.abi
-export const MEZO_MUSD_ABI = MUSDData.abi
-export const MEZO_STABILITY_POOL_ABI = StabilityPoolData.abi
+export const MEZO_BORROWER_OPERATIONS_ABI = BorrowerOperationsABI
+export const MEZO_TROVE_MANAGER_ABI = TroveManagerABI
+export const MEZO_PRICE_FEED_ABI = PriceFeedABI
+export const MEZO_HINT_HELPERS_ABI = HintHelpersABI
+export const MEZO_SORTED_TROVES_ABI = SortedTrovesABI
+export const MEZO_MUSD_ABI = MUSDABI
+export const MEZO_STABILITY_POOL_ABI = StabilityPoolABI
 
 // ============================================================================
 // MEZO TESTNET CONTRACT ADDRESSES
