@@ -97,14 +97,34 @@ export function DebugPanel() {
         </div>
 
         <div className="pt-2 border-t border-yellow-500/30">
-          <p className="text-yellow-500 text-xs">
-            💡 Si ves balance 0 pero tienes MUSD en Mezo, verifica:
+          <p className="text-yellow-500 text-xs font-semibold mb-2">
+            💡 Diagnóstico del Balance MUSD:
           </p>
-          <ul className="text-muted-foreground text-xs mt-1 space-y-1">
-            <li>• Estás en la red correcta (Chain ID 31611)</li>
-            <li>• La dirección del contrato MUSD es correcta</li>
-            <li>• El RPC de Mezo está respondiendo</li>
-          </ul>
+          {musdBalance && Number(musdBalance) > 0 ? (
+            <p className="text-green-500 text-xs">✅ Tienes MUSD en tu wallet. Puedes depositar!</p>
+          ) : (
+            <div className="space-y-2">
+              <p className="text-red-400 text-xs">❌ No tienes MUSD en tu wallet</p>
+              <div className="bg-blue-500/10 border border-blue-500/30 rounded p-2">
+                <p className="text-blue-400 text-xs font-semibold mb-1">Si tienes MUSD en Stability Pool de Mezo:</p>
+                <ol className="text-muted-foreground text-xs space-y-1 ml-3">
+                  <li>1. Ve a <a href="https://app.mezo.org" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">app.mezo.org</a></li>
+                  <li>2. Retira tu MUSD del Stability Pool</li>
+                  <li>3. El MUSD aparecerá en tu wallet</li>
+                  <li>4. Recarga esta página y podrás depositar</li>
+                </ol>
+              </div>
+              <div className="bg-green-500/10 border border-green-500/30 rounded p-2">
+                <p className="text-green-400 text-xs font-semibold mb-1">Si quieres obtener MUSD con tu BTC ({nativeBalance ? Number(nativeBalance.formatted).toFixed(6) : '0'} BTC):</p>
+                <ol className="text-muted-foreground text-xs space-y-1 ml-3">
+                  <li>1. Ve a <a href="https://app.mezo.org" target="_blank" rel="noopener noreferrer" className="text-green-500 hover:underline">app.mezo.org</a></li>
+                  <li>2. Deposita BTC para abrir un Trove</li>
+                  <li>3. Mintea MUSD contra tu BTC</li>
+                  <li>4. Usa ese MUSD en KhipuVault</li>
+                </ol>
+              </div>
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

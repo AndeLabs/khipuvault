@@ -346,17 +346,33 @@ export function Deposits() {
             {/* Info: Get MUSD */}
             {(!musdBalance || Number(musdBalance) === 0) && (
               <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
-                <p className="text-xs text-blue-600 mb-3">
-                  No tienes MUSD. Obtén MUSD en Mezo primero:
+                <p className="text-sm font-semibold text-blue-400 mb-2">
+                  ⚠️ No tienes MUSD en tu wallet
                 </p>
-                <Link
-                  href="https://mezo.org"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 text-xs text-blue-500 hover:text-blue-400 transition"
-                >
-                  Ir a mezo.org <ExternalLink className="w-3 h-3" />
-                </Link>
+                <p className="text-xs text-blue-300 mb-3">
+                  Si tienes MUSD en el Stability Pool de Mezo, necesitas retirarlo a tu wallet primero:
+                </p>
+                <div className="space-y-2">
+                  <Link
+                    href="https://app.mezo.org"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 text-xs text-blue-500 hover:text-blue-400 transition font-medium"
+                  >
+                    1. Ir a Mezo App <ExternalLink className="w-3 h-3" />
+                  </Link>
+                  <p className="text-xs text-blue-300">
+                    2. Retira tu MUSD del Stability Pool a tu wallet
+                  </p>
+                  <p className="text-xs text-blue-300">
+                    3. Vuelve aquí y podrás depositar en KhipuVault
+                  </p>
+                </div>
+                <div className="mt-3 pt-3 border-t border-blue-500/30">
+                  <p className="text-xs text-muted-foreground">
+                    💡 Si no tienes MUSD, puedes obtenerlo depositando BTC en Mezo Protocol
+                  </p>
+                </div>
               </div>
             )}
 
