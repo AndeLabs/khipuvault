@@ -1,12 +1,13 @@
 /**
- * @fileoverview Web3Provider with RainbowKit and Mezo Integration
+ * @fileoverview Simplified Web3Provider with Pure Wagmi
  * @module providers/web3-provider
  * 
  * Production-ready Web3 provider for KhipuVault
- * Integrates Mezo Network, RainbowKit, Wagmi, and React Query
+ * Pure Wagmi + React Query, no RainbowKit, no WalletConnect
  * 
  * Features:
  * - Mezo Testnet wallet connection
+ * - MetaMask + Unisat wallet support
  * - Automatic wallet reconnection
  * - Transaction state management
  * - Network validation
@@ -18,10 +19,7 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { RainbowKitProvider, darkTheme } from '@rainbow-me/rainbowkit'
-import { getWagmiConfig, rainbowKitTheme } from '@/lib/web3/config'
-import { mezoTestnet } from '@mezo-org/passport/dist/src/constants'
-import '@rainbow-me/rainbowkit/styles.css'
+import { wagmiConfig } from '@/lib/web3/config'
 
 /**
  * Query client configuration
@@ -67,21 +65,17 @@ interface Web3ProviderProps {
   
   /** Optional: Custom query client */
   customQueryClient?: QueryClient
-  
-  /** Optional: Force light/dark theme */
-  theme?: 'light' | 'dark' | 'auto'
 }
 
 /**
  * Web3Provider Component
  * 
  * Provides Web3 context to the entire application
- * Wraps children with WagmiProvider, QueryClientProvider, and RainbowKitProvider
+ * Wraps children with WagmiProvider and QueryClientProvider
  * 
- * IMPORTANT: Provider order must be:
+ * Provider order:
  * 1. WagmiProvider (outermost)
- * 2. QueryClientProvider (middle)
- * 3. RainbowKitProvider (innermost)
+ * 2. QueryClientProvider (innermost)
  * 
  * Usage:
  * ```tsx
@@ -93,30 +87,19 @@ interface Web3ProviderProps {
 export function Web3Provider({ 
   children, 
   customQueryClient,
-  theme = 'dark',
 }: Web3ProviderProps) {
   const [isMounted, setIsMounted] = useState(false)
-  const [config, setConfig] = useState<any>(null)
 
-  // Handle hydration and config creation
+  // Handle hydration
   useEffect(() => {
     setIsMounted(true)
     
-    // Create config only on client side
-    try {
-      const wagmiConfig = getWagmiConfig()
-      setConfig(wagmiConfig)
-      
-      // Log initialization
-      console.log('🔌 Web3Provider Initialized')
-      console.log('   Network: Mezo Testnet (Chain ID: 31611)')
-      console.log('   Currency: BTC (native)')
-      console.log('   Wallet Support: Mezo Passport + RainbowKit')
-      console.log('   Ethereum Wallets: MetaMask, WalletConnect, Rainbow, Coinbase')
-      console.log('   Bitcoin Wallets: Unisat, Xverse, OKX')
-    } catch (error) {
-      console.error('❌ Error initializing Web3Provider:', error)
-    }
+    // Log initialization
+    console.log('🔌 Web3Provider Initialized')
+    console.log('   Network: Mezo Testnet (Chain ID: 31611)')
+    console.log('   Currency: BTC (native)')
+    console.log('   Wallet Support: MetaMask + Unisat')
+    console.log('   No WalletConnect Project ID required')
     
     return () => {
       console.log('🔌 Web3Provider Unmounted')
@@ -126,8 +109,8 @@ export function Web3Provider({
 
   const finalQueryClient = customQueryClient || queryClient
 
-  // Show loading until config is ready
-  if (!isMounted || !config) {
+  // Show loading until mounted (prevents SSR hydration issues)
+  if (!isMounted) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
@@ -140,15 +123,9 @@ export function Web3Provider({
 
   // Render providers with config
   return (
-    <WagmiProvider config={config}>
+    <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={finalQueryClient}>
-        <RainbowKitProvider 
-          theme={darkTheme(rainbowKitTheme)}
-          initialChain={mezoTestnet}
-          modalSize="compact"
-        >
-          {children}
-        </RainbowKitProvider>
+        {children}
       </QueryClientProvider>
     </WagmiProvider>
   )

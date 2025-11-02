@@ -1,83 +1,155 @@
 /**
- * @fileoverview Wagmi and RainbowKit configuration for KhipuVault with Mezo Passport
+ * @fileoverview Pure Wagmi configuration for KhipuVault
  * @module lib/web3/config
  * 
- * Production-ready Web3 configuration with Mezo Network support
- * Implements best practices for wallet connection and state management
+ * Production-ready Web3 configuration with MetaMask + Unisat only
+ * No WalletConnect, no RainbowKit, no external dependencies
  * Configured for Mezo Testnet with Bitcoin native currency
- * 
- * IMPORTANT: Uses Mezo Passport's getConfig for dual wallet support:
- * - Ethereum wallets (MetaMask, WalletConnect, etc.)
- * - Bitcoin wallets (Unisat, Xverse, Leather via custom connectors)
- * 
- * This is REQUIRED for Mezo Hackathon compliance.
- * 
- * NOTE: We only import getConfig from @mezo-org/passport (not components)
- * to avoid React context issues. RainbowKit handles the UI.
  */
 
-// Import ONLY config functions and constants, NOT components to avoid React context issues
-import { getConfig } from '@mezo-org/passport/dist/src/config'
-import { mezoTestnet } from '@mezo-org/passport/dist/src/constants'
+import { createConfig, http } from 'wagmi'
+import { metaMask } from 'wagmi/connectors'
+import { mezoTestnet } from 'wagmi/chains'
 
 /**
- * Environment variables validation
- * Ensures required configuration is present
+ * Mezo Testnet configuration
+ * Bitcoin-backed DeFi network with native BTC currency
  */
-const WALLETCONNECT_PROJECT_ID = process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID
-
-if (!WALLETCONNECT_PROJECT_ID) {
-  console.warn(
-    'NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set. ' +
-    'Get your project ID at https://cloud.walletconnect.com'
-  )
-}
+const mezoTestnetConfig = {
+  id: 31611,
+  name: 'Mezo Testnet',
+  nativeCurrency: {
+    name: 'Bitcoin',
+    symbol: 'BTC',
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.testnet.mezo.org'],
+    },
+    public: {
+      http: ['https://rpc.testnet.mezo.org'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Mezo Explorer',
+      url: 'https://explorer.testnet.mezo.org',
+    },
+  },
+  testnet: true,
+} as const
 
 /**
- * Wagmi configuration for Mezo Testnet with Mezo Passport
- * 
- * This configuration includes:
- * - Mezo Testnet as the primary chain (Bitcoin-backed DeFi)
- * - Mezo Passport integration for dual wallet support
- * - Ethereum wallets: MetaMask, WalletConnect, Rainbow, Coinbase
- * - Bitcoin wallets: Unisat, Xverse, Leather
- * - Bitcoin as native currency (18 decimals)
- * - Lazy loaded to avoid SSR issues
- * - Connection persistence across page reloads
- * 
- * @see https://docs.mezo.org/developers/passport
+ * Custom Unisat connector for Bitcoin wallet support
+ * Uses window.unisat global object when available
  */
-
-// Lazy load config to avoid SSR issues with window object
-let _wagmiConfig: ReturnType<typeof getConfig> | null = null
-
-export function getWagmiConfig() {
-  if (_wagmiConfig) return _wagmiConfig
-  
-  // Only create config in browser environment
-  if (typeof window === 'undefined') {
-    throw new Error('Wagmi config can only be accessed in browser')
+function unisatConnector() {
+  return {
+    id: 'unisat',
+    name: 'Unisat',
+    type: 'injected' as const,
+    async connect() {
+      if (typeof window === 'undefined' || !window.unisat) {
+        throw new Error('Unisat wallet not found. Please install Unisat extension.')
+      }
+      
+      try {
+        const accounts = await window.unisat.requestAccounts()
+        return { account: accounts[0] as `0x${string}` }
+      } catch (error) {
+        throw new Error('Failed to connect Unisat wallet')
+      }
+    },
+    async disconnect() {
+      if (window.unisat) {
+        // Unisat doesn't have a disconnect method, but we can clean up state
+        console.log('Unisat wallet disconnected')
+      }
+    },
+    async getAccounts() {
+      if (!window.unisat) return []
+      try {
+        const accounts = await window.unisat.requestAccounts()
+        return accounts as `0x${string}`[]
+      } catch {
+        return []
+      }
+    },
+    async getChainId() {
+      // Unisat works with Bitcoin networks, return Mezo Testnet ID
+      return 31611
+    },
+    async isAuthorized() {
+      if (!window.unisat) return false
+      try {
+        const accounts = await window.unisat.requestAccounts()
+        return accounts.length > 0
+      } catch {
+        return false
+      }
+    },
+    onAccountsChanged(accounts: string[]) {
+      console.log('Unisat accounts changed:', accounts)
+    },
+    onChainChanged(chainId: string | number) {
+      console.log('Unisat chain changed:', chainId)
+    },
+    onDisconnect(error: Error) {
+      console.log('Unisat disconnected:', error)
+    },
   }
-  
-  _wagmiConfig = getConfig({
-    appName: 'KhipuVault - Bitcoin Savings for Latin America',
-    walletConnectProjectId: WALLETCONNECT_PROJECT_ID || 'khipuvault-default',
-    mezoNetwork: 'testnet',
-    appDescription: 'Ahorro Bitcoin para Latinoamérica con MUSD de Mezo',
-    appUrl: typeof window !== 'undefined' ? window.location.origin : undefined,
-  })
-  
-  return _wagmiConfig
 }
 
-// Export a getter instead of the config directly for SSR safety
-export const wagmiConfig = typeof window !== 'undefined' ? getWagmiConfig() : null as any
+/**
+ * Extend Window interface for Unisat
+ */
+declare global {
+  interface Window {
+    unisat?: {
+      requestAccounts: () => Promise<string[]>
+      getAccounts: () => Promise<string[]>
+      signMessage: (message: string) => Promise<string>
+      signPsbt: (psbt: string) => Promise<string>
+      pushPsbt: (psbt: string) => Promise<string>
+      switchNetwork: (network: string) => Promise<void>
+      getNetwork: () => Promise<{ name: string; chain: string }>
+      getBalance: () => Promise<{ confirmed: number; unconfirmed: number; total: number }>
+      sendBitcoin: (toAddress: string, satoshis: number) => Promise<string>
+      inscribeTransfer: (tick: string, amount: number) => Promise<string>
+    }
+  }
+}
 
-
+/**
+ * Pure Wagmi configuration for Mezo Testnet
+ * 
+ * Features:
+ * - MetaMask connector for Ethereum wallets
+ * - Unisat connector for Bitcoin wallets
+ * - Mezo Testnet with native BTC
+ * - No WalletConnect Project ID required
+ * - Production-ready with proper error handling
+ */
+export const wagmiConfig = createConfig({
+  chains: [mezoTestnetConfig],
+  connectors: [
+    metaMask({
+      dappMetadata: {
+        name: 'KhipuVault',
+        url: typeof window !== 'undefined' ? window.location.origin : 'https://khipuvault.vercel.app',
+      },
+    }),
+    unisatConnector(),
+  ],
+  transports: {
+    [mezoTestnetConfig.id]: http(),
+  },
+  ssr: false, // Disable SSR for Web3
+})
 
 /**
  * App metadata for wallet connection
- * Displayed in wallet connection modals
  */
 export const appMetadata = {
   name: 'KhipuVault',
@@ -91,33 +163,6 @@ export const appMetadata = {
 } as const
 
 /**
- * RainbowKit theme configuration
- * Matches KhipuVault brand colors
- */
-export const rainbowKitTheme = {
-  accentColor: '#0EA5E9', // Sky blue - primary brand color
-  accentColorForeground: 'white',
-  borderRadius: 'medium',
-  fontStack: 'system',
-  overlayBlur: 'small',
-} as const
-
-/**
- * Connection options
- * Configure wallet connection behavior
- */
-export const connectionConfig = {
-  // Auto-connect if previously connected
-  autoConnect: true,
-  
-  // Show recent transactions in wallet modal
-  showRecentTransactions: true,
-  
-  // Cool mode for fun animations (can be disabled for performance)
-  coolMode: false,
-} as const
-
-/**
  * Network validation helpers
  */
 
@@ -127,7 +172,7 @@ export const connectionConfig = {
  * @returns true if on Mezo Testnet
  */
 export function isCorrectNetwork(chainId?: number): boolean {
-  return chainId === mezoTestnet.id
+  return chainId === mezoTestnetConfig.id
 }
 
 /**
@@ -143,18 +188,33 @@ export function getNetworkMismatchMessage(currentChainId?: number): string {
 }
 
 /**
+ * Check if Unisat wallet is available
+ * @returns true if Unisat extension is installed
+ */
+export function isUnisatAvailable(): boolean {
+  return typeof window !== 'undefined' && !!window.unisat
+}
+
+/**
+ * Get wallet connection status
+ * @returns object with availability status for each wallet
+ */
+export function getWalletAvailability() {
+  return {
+    metaMask: typeof window !== 'undefined' && !!window.ethereum,
+    unisat: isUnisatAvailable(),
+  }
+}
+
+/**
  * Environment Configuration
- * Warnings for missing required environment variables
+ * No required environment variables for this simplified setup
  */
 export function validateEnvironment(): { valid: boolean; warnings: string[] } {
   const warnings: string[] = []
 
-  if (!process.env.NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID) {
-    warnings.push(
-      'NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID is not set. ' +
-      'Get one at https://cloud.walletconnect.com'
-    )
-  }
+  // No WalletConnect Project ID required anymore
+  // No external dependencies that need env vars
 
   return {
     valid: warnings.length === 0,

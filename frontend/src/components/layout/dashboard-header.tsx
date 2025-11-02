@@ -15,7 +15,7 @@ import { Sheet, SheetContent, SheetTrigger } from "../ui/sheet";
 import { Menu, Settings, LogOut } from "lucide-react";
 import Link from "next/link";
 import { navItems } from "./dashboard-sidebar";
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ConnectButton } from '@/components/wallet/connect-button';
 import { useAccount, useBalance, useDisconnect } from "wagmi";
 import { useState, useEffect } from "react";
 
@@ -89,12 +89,8 @@ export function DashboardHeader() {
           </div>
         )}
 
-        {/* RainbowKit Connect Button */}
-        <ConnectButton 
-          chainStatus="icon"
-          showBalance={false}
-          accountStatus="address"
-        />
+        {/* Custom Connect Button */}
+        <ConnectButton />
         
         {/* Botón de desconexión manual como respaldo */}
         {isConnected && (

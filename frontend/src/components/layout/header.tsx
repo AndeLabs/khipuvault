@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
+import { ConnectButton } from '@/components/wallet/connect-button';
 
 const navLinks = [
   { href: '#features', label: 'Características' },
