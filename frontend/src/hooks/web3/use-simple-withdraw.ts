@@ -8,7 +8,7 @@
 import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
-import { type Address } from 'viem'
+import { parseEther, type Address } from 'viem'
 
 const POOL_ADDRESS = '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as Address
 
@@ -22,6 +22,13 @@ const POOL_ABI = [
       { name: 'musdAmount', type: 'uint256' },
       { name: 'netYield', type: 'uint256' }
     ]
+  },
+  {
+    name: 'withdrawPartial',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'musdAmount', type: 'uint256' }],
+    outputs: [{ name: '', type: 'uint256' }]
   }
 ] as const
 
@@ -95,8 +102,8 @@ export function useSimpleWithdraw() {
     }
   }, [withdrawError])
 
-  // Main withdraw function
-  const withdraw = async () => {
+  // Main withdraw function (full or partial)
+  const withdraw = async (amountString?: string) => {
     if (!address) {
       setError('Conecta tu wallet primero')
       setState('error')
@@ -108,14 +115,37 @@ export function useSimpleWithdraw() {
       setError('')
       resetWithdraw()
 
-      console.log('💸 Starting full withdrawal...')
-      setState('confirming')
+      // If amount provided, do partial withdrawal
+      if (amountString) {
+        const amount = parseEther(amountString)
+        
+        // Validate minimum (1 MUSD)
+        if (amount < parseEther('1')) {
+          setError('El mínimo de retiro parcial es 1 MUSD')
+          setState('error')
+          return
+        }
 
-      withdrawWrite({
-        address: POOL_ADDRESS,
-        abi: POOL_ABI,
-        functionName: 'withdraw',
-      })
+        console.log('💸 Starting partial withdrawal:', amountString, 'MUSD')
+        setState('confirming')
+
+        withdrawWrite({
+          address: POOL_ADDRESS,
+          abi: POOL_ABI,
+          functionName: 'withdrawPartial',
+          args: [amount]
+        })
+      } else {
+        // Full withdrawal
+        console.log('💸 Starting full withdrawal...')
+        setState('confirming')
+
+        withdrawWrite({
+          address: POOL_ADDRESS,
+          abi: POOL_ABI,
+          functionName: 'withdraw',
+        })
+      }
     } catch (err) {
       console.error('❌ Error:', err)
       setState('error')
