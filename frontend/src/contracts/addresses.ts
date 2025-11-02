@@ -62,7 +62,15 @@ export function isValidAddress(address: string | undefined): address is Address 
 }
 
 /**
- * Contract addresses for all deployed contracts
+ * Contract addresses for all deployed contracts (V3 - Production-Ready)
+ * 
+ * V3 Features:
+ * - UUPS Upgradeable Pattern
+ * - Storage Packing (~40-60k gas saved)
+ * - Flash Loan Protection
+ * - Emergency Mode
+ * - Auto-Compound (Individual Pool)
+ * - Referral System (Individual Pool)
  * 
  * These addresses are loaded from environment variables and validated at runtime
  * Set them in .env.local for local development or in Vercel for production
@@ -71,6 +79,7 @@ export const CONTRACT_ADDRESSES = {
   /**
    * WBTC Token (Wrapped Bitcoin)
    * ERC20 token used as collateral
+   * NOTE: On Mezo testnet, BTC is native, not WBTC
    */
   WBTC: getEnvAddress(ENV_KEYS.WBTC, '0x0000000000000000000000000000000000000000'),
 
@@ -78,41 +87,48 @@ export const CONTRACT_ADDRESSES = {
    * MUSD Token (Mezo USD Stablecoin)
    * Bitcoin-backed stablecoin from Mezo
    */
-  MUSD: getEnvAddress(ENV_KEYS.MUSD, '0x0000000000000000000000000000000000000000'),
+  MUSD: getEnvAddress(ENV_KEYS.MUSD, '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503'),
 
   /**
-   * Mezo Integration Contract
+   * Mezo Integration Contract (V3)
    * Manages BTC deposits and MUSD minting
+   * Implementation: 0x3E1B2f96ED2359B1F32620cBef161108b15712c3
    */
   MEZO_INTEGRATION: getEnvAddress(ENV_KEYS.MEZO_INTEGRATION, '0x0000000000000000000000000000000000000000'),
 
   /**
-   * Yield Aggregator Contract
+   * Yield Aggregator Contract (V3)
    * Routes deposits to yield strategies
+   * Proxy: 0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6
    */
-  YIELD_AGGREGATOR: getEnvAddress(ENV_KEYS.YIELD_AGGREGATOR, '0x0000000000000000000000000000000000000000'),
+  YIELD_AGGREGATOR: getEnvAddress(ENV_KEYS.YIELD_AGGREGATOR, '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6'),
 
   /**
-   * Individual Savings Pool
+   * Individual Savings Pool (V3)
    * Personal savings with auto-yield optimization
+   * ✅ Proxy (USE THIS): 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
+   * Features: Auto-compound, Referrals, Incremental deposits
    */
-  INDIVIDUAL_POOL: getEnvAddress(ENV_KEYS.INDIVIDUAL_POOL, '0x0000000000000000000000000000000000000000'),
+  INDIVIDUAL_POOL: getEnvAddress(ENV_KEYS.INDIVIDUAL_POOL, '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393'),
 
   /**
-   * Cooperative Savings Pool
+   * Cooperative Savings Pool (V3)
    * Community pooled savings
+   * Implementation: 0x59D0c53365A34D565BF53f9734d32Ca23e01106f
    */
   COOPERATIVE_POOL: getEnvAddress(ENV_KEYS.COOPERATIVE_POOL, '0x0000000000000000000000000000000000000000'),
 
   /**
    * Lottery Pool (Prize Savings)
    * No-loss lottery with Chainlink VRF
+   * ⚠️ Not deployed yet
    */
   LOTTERY_POOL: getEnvAddress(ENV_KEYS.LOTTERY_POOL, '0x0000000000000000000000000000000000000000'),
 
   /**
    * Rotating Pool (ROSCA/Pasanaku)
    * Turn-based distribution system
+   * ⚠️ Not deployed yet
    */
   ROTATING_POOL: getEnvAddress(ENV_KEYS.ROTATING_POOL, '0x0000000000000000000000000000000000000000'),
 } as const
