@@ -7,6 +7,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SummaryCards } from "@/components/dashboard/summary-cards";
+import { ContractsInfo } from "@/components/dashboard/contracts-info";
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 
 export default function DashboardPage() {
@@ -73,6 +74,19 @@ export default function DashboardPage() {
               </div>
             </Link>
 
+            {/* Contracts Info */}
+            <div className="group relative overflow-hidden rounded-lg border border-primary/20 bg-card p-6 hover:border-primary/50 transition-all duration-300 cursor-pointer h-full">
+              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+              <div className="relative z-10">
+                <div className="text-4xl mb-3">📜</div>
+                <h3 className="text-xl font-bold text-white mb-2">Contratos Inteligentes</h3>
+                <p className="text-sm text-muted-foreground mb-4">Explora nuestra infraestructura de contratos</p>
+                <div className="flex items-center text-primary text-sm font-medium">
+                  Ver detalles abajo ↓
+                </div>
+              </div>
+            </div>
+
             {/* Settings */}
             <Link href="/dashboard/settings">
               <div className="group relative overflow-hidden rounded-lg border border-primary/20 bg-card p-6 hover:border-primary/50 transition-all duration-300 cursor-pointer h-full">
@@ -90,6 +104,11 @@ export default function DashboardPage() {
           </div>
         </AnimateOnScroll>
       )}
+
+      {/* Contracts Information Section */}
+      <AnimateOnScroll delay="300ms">
+        <ContractsInfo />
+      </AnimateOnScroll>
 
       {!isConnected && (
         <AnimateOnScroll delay="200ms">
