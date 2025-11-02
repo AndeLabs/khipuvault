@@ -39,21 +39,30 @@ const nextConfig: NextConfig = {
       path: false,
     };
     
-    // Ignore React Native modules in browser build
+    // Always ignore React Native modules (for both server and client)
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@react-native-async-storage/async-storage': false,
+      'react-native': false,
+      'react-native-safe-area-context': false,
+      'react-native-screens': false,
+      'react-native-gesture-handler': false,
+      'react-native-reanimated': false,
+    };
+    
+    // Ignore React Native modules in webpack resolve
     if (!isServer) {
-      config.resolve.alias = {
-        ...config.resolve.alias,
-        '@react-native-async-storage/async-storage': false,
-        'react-native': false,
-        'react-native-safe-area-context': false,
-        'react-native-screens': false,
-        'react-native-gesture-handler': false,
-        'react-native-reanimated': false,
-      };
-      
-      // Ignore React Native modules in webpack resolve
       config.resolve.extensions = config.resolve.extensions.filter(ext => ext !== '.native.js');
     }
+    
+    // Suppress MetaMask SDK warnings about missing React Native modules
+    config.ignoreWarnings = [
+      ...(config.ignoreWarnings || []),
+      {
+        module: /node_modules\/@metamask\/sdk/,
+        message: /Can't resolve '@react-native-async-storage\/async-storage'/,
+      },
+    ];
     
     // External node modules for server-side
     if (isServer) {
