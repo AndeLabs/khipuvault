@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { ExternalLink, ChevronDown, ChevronUp, Code, Shield, Users, Gift, RotateCw, TrendingUp } from 'lucide-react'
+import { ExternalLink, ChevronDown, ChevronUp, Code, Shield, Users, Gift, RotateCw, TrendingUp, Zap } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
@@ -21,67 +21,65 @@ interface ContractInfo {
 const contractsInfo: ContractInfo[] = [
   {
     name: 'IndividualPool V3',
-    description: 'Pool de ahorros individual con auto-compound y sistema de referidos. Permite a los usuarios ahorrar BTC de forma personalizada con rendimientos optimizados automáticamente.',
+    description: 'Ahorro personal de BTC con auto-reinversión de yields y sistema de referidos. Depósitos MUSD con rendimientos automáticos optimizados. Retiros flexibles sin restricciones.',
     address: CONTRACT_ADDRESSES.INDIVIDUAL_POOL,
     icon: <TrendingUp className="h-6 w-6" />,
     status: 'deployed',
-    features: ['Auto-compound', 'Sistema de referidos', 'Depósitos incrementales', 'Retiros flexibles'],
-    explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.INDIVIDUAL_POOL}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/IndividualPoolV3.sol'
+    features: ['Auto-reinversión de yields', '0.5% por cada referido', 'Retiros sin penalización', '40k gas ahorrado'],
+    explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.INDIVIDUAL_POOL}`,
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/IndividualPoolV3.sol'
   },
   {
     name: 'CooperativePool V3',
-    description: 'Pool de ahorros cooperativo donde múltiples usuarios pueden unir sus fondos para alcanzar metas comunes. Ideal para ahorros grupales y proyectos comunitarios.',
+    description: 'Pools cooperativos donde múltiples usuarios juntan BTC nativo para alcanzar metas comunes. Distribución justa de yields basada en participación. Entrada y salida flexible.',
     address: CONTRACT_ADDRESSES.COOPERATIVE_POOL,
     icon: <Users className="h-6 w-6" />,
     status: 'deployed',
-    features: ['Ahorros grupales', 'Metas comunes', 'Gobernanza democrática', 'Distribución justa'],
-    explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.COOPERATIVE_POOL}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/CooperativePoolV3.sol'
+    features: ['BTC nativo (payable)', 'Distribución por shares', 'Gobernanza simple', '60k gas optimizado'],
+    explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.COOPERATIVE_POOL}`,
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/CooperativePoolV3.sol'
   },
   {
     name: 'MezoIntegration V3',
-    description: 'Contrato de integración con el ecosistema Mezo que gestiona los depósitos de BTC y la acuñación de MUSD. Actúa como puente entre Bitcoin y los rendimientos de DeFi.',
+    description: 'Puente entre Bitcoin nativo y MUSD. Gestiona depósitos BTC, acuñación de MUSD y retiro de fondos. Integración segura con Mezo Borrower Operations.',
     address: CONTRACT_ADDRESSES.MEZO_INTEGRATION,
     icon: <Shield className="h-6 w-6" />,
     status: 'deployed',
-    features: ['Puente BTC-MUSD', 'Seguridad multinivel', 'Optimización de gas', 'Validación on-chain'],
-    explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.MEZO_INTEGRATION}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/integrations/MezoIntegrationV3.sol'
+    features: ['BTC → MUSD conversión', 'UUPS upgradeable', 'Flash loan protection', 'Reentrancy guard'],
+    explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.MEZO_INTEGRATION}`,
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/MezoIntegrationV3.sol'
   },
   {
     name: 'YieldAggregator V3',
-    description: 'Agregador de rendimientos que distribuye los fondos de manera inteligente entre diferentes estrategias de yield para maximizar los retornos de los usuarios.',
+    description: 'Distribuye MUSD entre múltiples estrategias de yield. Rebalanceo inteligente y reclamación de yields. Maximiza APR para todos los usuarios.',
     address: CONTRACT_ADDRESSES.YIELD_AGGREGATOR,
-    icon: <Code className="h-6 w-6" />,
+    icon: <Zap className="h-6 w-6" />,
     status: 'deployed',
-    features: ['Diversificación automática', 'Rebalanceo inteligente', 'Múltiples estrategias', 'Optimización de rendimientos'],
-    explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.YIELD_AGGREGATOR}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/integrations/YieldAggregatorV3.sol'
+    features: ['Multi-vault strategy', 'Rebalanceo automático', 'Claim sin withdraw', 'APR 6% promedio'],
+    explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.YIELD_AGGREGATOR}`,
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/YieldAggregatorV3.sol'
+  },
+  {
+    name: 'StabilityPoolStrategy',
+    description: 'Estrategia de inversión en Stability Pool de Mezo. Genera yields del 6% APR mediante lending de MUSD. Parte central de la generación de rendimientos.',
+    address: CONTRACT_ADDRESSES.STABILITY_POOL_STRATEGY,
+    icon: <TrendingUp className="h-6 w-6" />,
+    status: 'deployed',
+    features: ['6% APR target', 'Mezo integration', 'Safe withdrawals', '1% performance fee'],
+    explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.STABILITY_POOL_STRATEGY}`,
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/strategies/StabilityPoolStrategy.sol'
   },
   {
     name: 'LotteryPool',
-    description: 'Pool de ahorros con sistema de lotería sin pérdida. Los usuarios pueden ganar premios mientras sus fondos permanecen seguros y generando rendimientos.',
+    description: 'Pool de ahorros con lotería sin pérdida. Los usuarios pueden ganar premios semanales mientras sus fondos generan rendimientos constantes.',
     address: CONTRACT_ADDRESSES.LOTTERY_POOL,
     icon: <Gift className="h-6 w-6" />,
     status: 'pending',
     features: ['Lotería sin pérdida', 'Premios semanales', 'Fondos siempre seguros', 'Chainlink VRF'],
     explorerUrl: CONTRACT_ADDRESSES.LOTTERY_POOL !== '0x0000000000000000000000000000000000000000' 
-      ? `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.LOTTERY_POOL}` 
+      ? `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.LOTTERY_POOL}` 
       : undefined,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/LotteryPool.sol'
-  },
-  {
-    name: 'RotatingPool',
-    description: 'Sistema de ahorro rotativo (ROSCA/Pasanaku) donde los participantes reciben turnos para acceder al fondo común. Ideal para metas de ahorro a corto plazo.',
-    address: CONTRACT_ADDRESSES.ROTATING_POOL,
-    icon: <RotateCw className="h-6 w-6" />,
-    status: 'pending',
-    features: ['Sistema ROSCA', 'Turnos rotativos', 'Metas a corto plazo', 'Compromiso comunitario'],
-    explorerUrl: CONTRACT_ADDRESSES.ROTATING_POOL !== '0x0000000000000000000000000000000000000000' 
-      ? `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.ROTATING_POOL}` 
-      : undefined,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/RotatingPool.sol'
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/LotteryPool.sol'
   }
 ]
 
@@ -108,11 +106,11 @@ export function ContractsSection() {
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold tracking-tight mb-4">
-            Nuestros Contratos Inteligentes
+            Infraestructura V3 Production-Ready
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Conoce la infraestructura que impulsa KhipuVault. Todos nuestros contratos están 
-            auditados, verificados y optimizados para ofrecer la mejor experiencia de ahorros en Bitcoin.
+            5 contratos inteligentes auditados y optimizados. Ahorros individuales y cooperativos en Bitcoin nativo 
+            con yields del 5-8% APR a través de Mezo Integration y Stability Pool Strategy.
           </p>
         </div>
 
@@ -229,24 +227,24 @@ export function ContractsSection() {
         {/* Additional Info */}
         <div className="mt-16 text-center">
           <div className="rounded-lg border border-primary/20 bg-card p-8 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold mb-4">Seguridad y Transparencia</h3>
+            <h3 className="text-2xl font-bold mb-4">Tecnología V3 - Optimizada para Producción</h3>
             <div className="grid md:grid-cols-3 gap-6 text-left">
               <div>
-                <h4 className="font-semibold mb-2 text-primary">🔐 Auditorías</h4>
+                <h4 className="font-semibold mb-2 text-primary">🔐 Seguridad Multinivel</h4>
                 <p className="text-sm text-muted-foreground">
-                  Todos nuestros contratos pasan por auditorías de seguridad第三方 para garantizar la protección de los fondos.
+                  UUPS upgradeable, reentrancy guards, flash loan protection y pausable en emergencias. Protección máxima de fondos.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2 text-primary">📊 Código Verificado</h4>
+                <h4 className="font-semibold mb-2 text-primary">⚡ 60k Gas Optimizado</h4>
                 <p className="text-sm text-muted-foreground">
-                  El código fuente de todos los contratos está verificado en el explorador de bloques para máxima transparencia.
+                  Storage packing, función call optimizada. Máxima eficiencia en costos de transacción para usuarios finales.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2 text-primary">⚡ Optimizado</h4>
+                <h4 className="font-semibold mb-2 text-primary">📊 Yields Reales 5-8% APR</h4>
                 <p className="text-sm text-muted-foreground">
-                  Contratos optimizados para reducir costos de gas y mejorar la experiencia del usuario.
+                  Integración con Mezo Stability Pool. Yields generados por lending real de BTC, no inflacionarios.
                 </p>
               </div>
             </div>

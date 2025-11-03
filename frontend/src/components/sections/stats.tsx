@@ -4,23 +4,23 @@ import { AnimateOnScroll } from "@/components/animate-on-scroll";
 const statsData = [
   {
     emoji: "💰",
-    value: "12.5 BTC",
-    label: "Total Depositado",
-    subLabel: "≈ $750,000 USD",
-    colorClass: "text-primary",
-  },
-  {
-    emoji: "👥",
-    value: "1,247",
-    label: "Usuarios Activos",
-    subLabel: "+18% este mes",
-    colorClass: "text-primary",
-  },
-  {
-    emoji: "📈",
     value: "5-8%",
     label: "APR Promedio",
-    subLabel: "Rendimiento anual",
+    subLabel: "En Individual & Cooperative Pools",
+    colorClass: "text-primary",
+  },
+  {
+    emoji: "🔒",
+    value: "V3",
+    label: "Contratos Auditados",
+    subLabel: "Optimizados y seguros",
+    colorClass: "text-primary",
+  },
+  {
+    emoji: "⚡",
+    value: "Gas",
+    label: "Optimizado",
+    subLabel: "Reducción de costos",
     colorClass: "text-secondary",
   },
 ];

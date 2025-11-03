@@ -23,15 +23,16 @@ type ContractAddress = Address | `0x${string}`
  * Environment variable keys for contract addresses
  */
 const ENV_KEYS = {
-  WBTC: 'NEXT_PUBLIC_WBTC_ADDRESS',
-  MUSD: 'NEXT_PUBLIC_MUSD_ADDRESS',
-  MEZO_INTEGRATION: 'NEXT_PUBLIC_MEZO_INTEGRATION_ADDRESS',
-  YIELD_AGGREGATOR: 'NEXT_PUBLIC_YIELD_AGGREGATOR_ADDRESS',
-  INDIVIDUAL_POOL: 'NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS',
-  COOPERATIVE_POOL: 'NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS',
-  LOTTERY_POOL: 'NEXT_PUBLIC_LOTTERY_POOL_ADDRESS',
-  ROTATING_POOL: 'NEXT_PUBLIC_ROTATING_POOL_ADDRESS',
-} as const
+   WBTC: 'NEXT_PUBLIC_WBTC_ADDRESS',
+   MUSD: 'NEXT_PUBLIC_MUSD_ADDRESS',
+   MEZO_INTEGRATION: 'NEXT_PUBLIC_MEZO_INTEGRATION_ADDRESS',
+   YIELD_AGGREGATOR: 'NEXT_PUBLIC_YIELD_AGGREGATOR_ADDRESS',
+   STABILITY_POOL_STRATEGY: 'NEXT_PUBLIC_STABILITY_POOL_STRATEGY_ADDRESS',
+   INDIVIDUAL_POOL: 'NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS',
+   COOPERATIVE_POOL: 'NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS',
+   LOTTERY_POOL: 'NEXT_PUBLIC_LOTTERY_POOL_ADDRESS',
+   ROTATING_POOL: 'NEXT_PUBLIC_ROTATING_POOL_ADDRESS',
+ } as const
 
 /**
  * Get environment variable with optional fallback
@@ -96,27 +97,35 @@ export const CONTRACT_ADDRESSES = {
    */
   MEZO_INTEGRATION: getEnvAddress(ENV_KEYS.MEZO_INTEGRATION, '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6'),
 
-  /**
-   * Yield Aggregator Contract (V3)
-   * Routes deposits to yield strategies
-   * Proxy: 0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6
-   */
-  YIELD_AGGREGATOR: getEnvAddress(ENV_KEYS.YIELD_AGGREGATOR, '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6'),
+   /**
+    * Yield Aggregator Contract (V3)
+    * Routes deposits to yield strategies
+    * Proxy: 0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6
+    */
+   YIELD_AGGREGATOR: getEnvAddress(ENV_KEYS.YIELD_AGGREGATOR, '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6'),
 
-  /**
-   * Individual Savings Pool (V3)
-   * Personal savings with auto-yield optimization
-   * ✅ Proxy (USE THIS): 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
-   * Features: Auto-compound, Referrals, Incremental deposits
-   */
+   /**
+    * Stability Pool Strategy
+    * Strategy contract for Mezo Stability Pool
+    * Generates 6% APR through BTC lending
+    * Deployed: 0xe6e0608abEf8f31847C1c9367465DbF68A040Edc
+    */
+   STABILITY_POOL_STRATEGY: getEnvAddress(ENV_KEYS.STABILITY_POOL_STRATEGY, '0xe6e0608abEf8f31847C1c9367465DbF68A040Edc'),
+
+   /**
+    * Individual Savings Pool (V3)
+    * Personal savings with auto-yield optimization
+    * ✅ Proxy (USE THIS): 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
+    * Features: Auto-compound, Referrals, Incremental deposits
+    */
   INDIVIDUAL_POOL: getEnvAddress(ENV_KEYS.INDIVIDUAL_POOL, '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393'),
 
-  /**
-   * Cooperative Savings Pool (V3)
-   * Community pooled savings
-   * Proxy: 0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88
-   */
-  COOPERATIVE_POOL: getEnvAddress(ENV_KEYS.COOPERATIVE_POOL, '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88'),
+   /**
+    * Cooperative Savings Pool (V3)
+    * Community pooled savings with native BTC deposits
+    * Proxy: 0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65
+    */
+   COOPERATIVE_POOL: getEnvAddress(ENV_KEYS.COOPERATIVE_POOL, '0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65'),
 
   /**
    * Lottery Pool (Prize Savings)
@@ -229,11 +238,12 @@ export function getTokenAddresses(): ContractAddress[] {
  * @returns Array of integration contract addresses
  */
 export function getIntegrationAddresses(): ContractAddress[] {
-  return [
-    CONTRACT_ADDRESSES.MEZO_INTEGRATION,
-    CONTRACT_ADDRESSES.YIELD_AGGREGATOR,
-  ]
-}
+   return [
+     CONTRACT_ADDRESSES.MEZO_INTEGRATION,
+     CONTRACT_ADDRESSES.YIELD_AGGREGATOR,
+     CONTRACT_ADDRESSES.STABILITY_POOL_STRATEGY,
+   ]
+ }
 
 /**
  * Format address for display (shortened)
