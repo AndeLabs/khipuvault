@@ -162,7 +162,11 @@ function PoolCard({ poolId, searchQuery, filter, onJoinPool }: PoolCardProps) {
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              Pool #{poolId} · Creado por {poolInfo.creator ? `${poolInfo.creator.slice(0, 6)}...${poolInfo.creator.slice(-4)}` : 'Cargando...'}
+              Pool #{poolId} · Creado por {
+                poolInfo?.creator && typeof poolInfo.creator === 'string' 
+                  ? `${poolInfo.creator.slice(0, 6)}...${poolInfo.creator.slice(-4)}` 
+                  : 'Desconocido'
+              }
             </p>
           </div>
         </div>

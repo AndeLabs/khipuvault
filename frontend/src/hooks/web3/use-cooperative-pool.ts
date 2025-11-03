@@ -469,6 +469,27 @@ export function useCooperativePool() {
   }
 }
 
+// Type guard for pool info result
+function isValidPoolInfoResult(result: any): boolean {
+  if (!result || !Array.isArray(result) || result.length < 12) {
+    console.warn('⚠️ Invalid pool info result structure:', result)
+    return false
+  }
+  
+  // Validate critical fields
+  if (typeof result[7] !== 'string' || !result[7].startsWith('0x')) {
+    console.warn('⚠️ Invalid creator address:', result[7])
+    return false
+  }
+  
+  if (typeof result[8] !== 'string' || result[8].length === 0) {
+    console.warn('⚠️ Invalid pool name:', result[8])
+    return false
+  }
+  
+  return true
+}
+
 // Hook to fetch pool info
 export function usePoolInfo(poolId: number) {
   const config = useConfig()
@@ -479,6 +500,8 @@ export function usePoolInfo(poolId: number) {
       if (poolId <= 0) return null
       
       try {
+        console.log('🔄 [COOPERATIVE] Fetching pool info for pool:', poolId)
+        
         const result = await readContract(config, {
           address: COOPERATIVE_POOL_ADDRESS,
           abi: POOL_ABI,
@@ -486,34 +509,57 @@ export function usePoolInfo(poolId: number) {
           args: [BigInt(poolId)],
         })
 
-        if (!result) return null
+        console.log('📊 [COOPERATIVE] Raw pool info result:', result)
+
+        if (!isValidPoolInfoResult(result)) {
+          console.error('❌ [COOPERATIVE] Invalid pool info data')
+          return null
+        }
 
         const poolInfo: PoolInfo = {
-          minContribution: result[0],
-          maxContribution: result[1],
-          maxMembers: Number(result[2]),
-          currentMembers: Number(result[3]),
-          createdAt: Number(result[4]),
-          status: result[5] as PoolStatus,
-          allowNewMembers: result[6],
-          creator: result[7],
-          name: result[8],
-          totalBtcDeposited: result[9],
-          totalMusdMinted: result[10],
-          totalYieldGenerated: result[11]
+          minContribution: result[0] || BigInt(0),
+          maxContribution: result[1] || BigInt(0),
+          maxMembers: Number(result[2] || 0),
+          currentMembers: Number(result[3] || 0),
+          createdAt: Number(result[4] || 0),
+          status: (result[5] ?? 0) as PoolStatus,
+          allowNewMembers: result[6] ?? false,
+          creator: result[7] as Address,
+          name: result[8] || 'Unknown Pool',
+          totalBtcDeposited: result[9] || BigInt(0),
+          totalMusdMinted: result[10] || BigInt(0),
+          totalYieldGenerated: result[11] || BigInt(0)
         }
+
+        console.log('✅ [COOPERATIVE] Pool info parsed:', {
+          name: poolInfo.name,
+          creator: poolInfo.creator,
+          status: poolInfo.status,
+          members: `${poolInfo.currentMembers}/${poolInfo.maxMembers}`
+        })
 
         return poolInfo
       } catch (err) {
-        console.error('Error fetching pool info:', err)
+        console.error('❌ [COOPERATIVE] Error fetching pool info:', err)
         return null
       }
     },
     enabled: poolId > 0,
     refetchInterval: 30_000,
+    retry: 3,
+    retryDelay: 1000,
   })
 
   return { poolInfo: data, isLoading, error, refetch }
+}
+
+// Type guard for member info result
+function isValidMemberInfoResult(result: any): boolean {
+  if (!result || !Array.isArray(result) || result.length < 5) {
+    console.warn('⚠️ Invalid member info result structure:', result)
+    return false
+  }
+  return true
 }
 
 // Hook to fetch member info
@@ -528,6 +574,8 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
       if (poolId <= 0 || !userAddress) return null
       
       try {
+        console.log('🔄 [COOPERATIVE] Fetching member info for pool:', poolId, 'member:', userAddress)
+        
         const result = await readContract(config, {
           address: COOPERATIVE_POOL_ADDRESS,
           abi: POOL_ABI,
@@ -535,24 +583,37 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
           args: [BigInt(poolId), userAddress],
         })
 
-        if (!result) return null
+        console.log('📊 [COOPERATIVE] Raw member info result:', result)
+
+        if (!isValidMemberInfoResult(result)) {
+          console.error('❌ [COOPERATIVE] Invalid member info data')
+          return null
+        }
 
         const memberInfo: MemberInfo = {
-          btcContributed: result[0],
-          shares: result[1],
-          joinedAt: Number(result[2]),
-          active: result[3],
-          yieldClaimed: result[4]
+          btcContributed: result[0] || BigInt(0),
+          shares: result[1] || BigInt(0),
+          joinedAt: Number(result[2] || 0),
+          active: result[3] ?? false,
+          yieldClaimed: result[4] || BigInt(0)
         }
+
+        console.log('✅ [COOPERATIVE] Member info parsed:', {
+          btcContributed: memberInfo.btcContributed.toString(),
+          shares: memberInfo.shares.toString(),
+          active: memberInfo.active
+        })
 
         return memberInfo
       } catch (err) {
-        console.error('Error fetching member info:', err)
+        console.error('❌ [COOPERATIVE] Error fetching member info:', err)
         return null
       }
     },
     enabled: poolId > 0 && !!userAddress,
     refetchInterval: 30_000,
+    retry: 3,
+    retryDelay: 1000,
   })
 
   return { memberInfo: data, isLoading, error, refetch }

@@ -225,7 +225,7 @@ function MyPoolCard({ poolId, onClaimYield, onLeavePool, isProcessing }: MyPoolC
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
-              <CardTitle className="text-lg">{poolInfo.name}</CardTitle>
+              <CardTitle className="text-lg">{poolInfo?.name || `Pool #${poolId}`}</CardTitle>
               <Badge className={`${statusConfig.bgColor} ${statusConfig.textColor} border-0`}>
                 {statusConfig.label}
               </Badge>

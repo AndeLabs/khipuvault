@@ -25,22 +25,31 @@ import YieldAggregatorV3ABI from '@/contracts/abis/YieldAggregatorV3.json'
 import CooperativePoolV3ABI from '@/contracts/abis/CooperativePoolV3.json'
 import MUSDABI from '@/contracts/mezo-abis/MUSD.json'
 
-// Ensure ABIs are arrays
-export const INDIVIDUAL_POOL_V3_ABI = Array.isArray(IndividualPoolV3ABI) 
-  ? IndividualPoolV3ABI 
-  : (IndividualPoolV3ABI as any).default || IndividualPoolV3ABI
+// Extract ABIs safely - Foundry exports as {"abi": [...], "bytecode": {...}}
+function extractABI(abiModule: any): any[] {
+  // If it's already an array, return it
+  if (Array.isArray(abiModule)) {
+    return abiModule
+  }
+  
+  // If it has an 'abi' property, extract it
+  if (abiModule && typeof abiModule === 'object' && 'abi' in abiModule) {
+    return Array.isArray(abiModule.abi) ? abiModule.abi : []
+  }
+  
+  // Check for .default (webpack/vite bundling)
+  if (abiModule && typeof abiModule === 'object' && 'default' in abiModule) {
+    return extractABI(abiModule.default)
+  }
+  
+  console.error('❌ Invalid ABI module:', abiModule)
+  return []
+}
 
-export const YIELD_AGGREGATOR_V3_ABI = Array.isArray(YieldAggregatorV3ABI)
-  ? YieldAggregatorV3ABI
-  : (YieldAggregatorV3ABI as any).default || YieldAggregatorV3ABI
-
-export const COOPERATIVE_POOL_V3_ABI = Array.isArray(CooperativePoolV3ABI)
-  ? CooperativePoolV3ABI
-  : (CooperativePoolV3ABI as any).default || CooperativePoolV3ABI
-
-export const ERC20_ABI = Array.isArray(MUSDABI)
-  ? MUSDABI
-  : (MUSDABI as any).default || MUSDABI
+export const INDIVIDUAL_POOL_V3_ABI = extractABI(IndividualPoolV3ABI)
+export const YIELD_AGGREGATOR_V3_ABI = extractABI(YieldAggregatorV3ABI)
+export const COOPERATIVE_POOL_V3_ABI = extractABI(CooperativePoolV3ABI)
+export const ERC20_ABI = extractABI(MUSDABI)
 
 // ============================================================================
 // V3 CONTRACT ADDRESSES (MEZO TESTNET)
