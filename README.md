@@ -1,27 +1,21 @@
-   Creating an optimized production build ...
-Failed to compile.
-./src/app/dashboard/settings/layout.tsx
-Module not found: Can't resolve '../../lib/utils'
-https://nextjs.org/docs/messages/module-not-found
-./src/app/dashboard/settings/layout.tsx
-Module not found: Can't resolve '../../components/animate-on-scroll'
-https://nextjs.org/docs/messages/module-not-found
-./src/components/ui/button.tsx
-Module not found: Can't resolve '../lib/utils'
 # KhipuVault
+
+[![Build Status](https://img.shields.io/badge/build-passing-brightgreen)](https://github.com/AndeLabs/khipuvault)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Mezo Testnet](https://img.shields.io/badge/Network-Mezo%20Testnet-blue)](https://explorer.test.mezo.org)
 
 A decentralized Bitcoin savings platform built on Mezo, offering multiple savings strategies with automatic yield optimization through MUSD integration.
 
-## Overview
+## 🚀 Overview
 
 KhipuVault provides multiple savings pools designed to meet different financial goals and risk preferences, all powered by MUSD (Mezo's Bitcoin-backed stablecoin):
 
-- **Individual Pool**: Personal savings with auto-yield optimization ✅ DEPLOYED
-- **Cooperative Pool**: Community pooled savings with shared rewards ✅ DEPLOYED
-- **Lottery Pool**: Prize-based savings with no-loss lottery mechanics (Coming Soon)
-- **Rotating Pool**: Turn-based distribution system (ROSCA/Pasanaku) (Coming Soon)
+- **Individual Pool**: Personal savings with auto-yield optimization ✅ **DEPLOYED**
+- **Cooperative Pool**: Community pooled savings with shared rewards ✅ **DEPLOYED**
+- **Lottery Pool**: Prize-based savings with no-loss lottery mechanics 🚧 **COMING SOON**
+- **Rotating Pool**: Turn-based distribution system (ROSCA/Pasanaku) 🚧 **COMING SOON**
 
-## Features
+## ✨ Features
 
 - 🪙 **MUSD-First**: Uses MUSD, the Bitcoin-backed stablecoin from Mezo
 - ⚡ **Yield Optimization**: Automatic routing to best yield strategies
@@ -29,7 +23,7 @@ KhipuVault provides multiple savings pools designed to meet different financial 
 - 🛡️ **Security First**: Comprehensive testing and production-ready contracts
 - 🌐 **Mezo Testnet**: Deployed and functional on Chain ID 31611
 
-## Architecture
+## 🏗️ Architecture
 
 ### Smart Contracts
 - **MezoIntegration**: Manages BTC deposits and MUSD minting
@@ -43,7 +37,67 @@ KhipuVault provides multiple savings pools designed to meet different financial 
 - **Wagmi + RainbowKit**: Web3 connectivity and wallet management
 - **Tailwind CSS**: Responsive, accessible design system
 
-## Quick Start
+## 📋 Smart Contracts (Mezo Testnet - Chain ID: 31611)
+
+### 🏦 Savings Pools
+
+#### IndividualPool
+**Address**: `0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393`  
+**Description**: Personal savings with automatic yield optimization  
+**Explorer**: [View on Explorer](https://explorer.test.mezo.org/address/0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393)  
+**Status**: ✅ **FUNCTIONAL**
+
+#### CooperativePool
+**Address**: `0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88`  
+**Description**: Community savings pool with shared rewards  
+**Explorer**: [View on Explorer](https://explorer.test.mezo.org/address/0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88)  
+**Status**: ✅ **FUNCTIONAL**
+
+### 🔧 Core Integration
+
+#### MezoIntegration
+**Address**: `0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6`  
+**Description**: Integration with Mezo protocol for BTC and MUSD management  
+**Explorer**: [View on Explorer](https://explorer.test.mezo.org/address/0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6)  
+**Status**: ✅ **FUNCTIONAL**
+
+#### YieldAggregator
+**Address**: `0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6`  
+**Description**: Intelligent yield router for optimal strategy allocation  
+**Explorer**: [View on Explorer](https://explorer.test.mezo.org/address/0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6)  
+**Status**: ✅ **FUNCTIONAL**
+
+### 💰 Tokens
+
+#### MUSD
+**Address**: `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503`  
+**Description**: Mezo's official Bitcoin-backed stablecoin  
+**Explorer**: [View on Explorer](https://explorer.test.mezo.org/address/0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503)  
+**Status**: ✅ **PRODUCTION** (Official Mezo token)
+
+## 🛠️ Tech Stack
+
+### Frontend
+- **Next.js 15** - Modern React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first CSS framework
+- **shadcn/ui** - Modern UI component library
+- **Wagmi** - React hooks for Ethereum
+- **TanStack Query** - Server-state management
+- **Zustand** - Client-state management
+
+### Smart Contracts
+- **Solidity** - Smart contract development
+- **Foundry** - Development framework
+- **UUPS Pattern** - Upgradeable proxy pattern
+- **OpenZeppelin** - Secure contract libraries
+
+### Protocol
+- **Mezo** - Bitcoin Layer 2 network
+- **MUSD** - Bitcoin-backed stablecoin
+- **Stability Pool** - Yield generation mechanism
+
+## 🚀 Quick Start
 
 ### Prerequisites
 - Node.js 18+ and npm
@@ -52,13 +106,13 @@ KhipuVault provides multiple savings pools designed to meet different financial 
 
 ### Installation
 
-1. Clone the repository:
+1. **Clone the repository**
 ```bash
 git clone https://github.com/AndeLabs/khipuvault.git
 cd khipuvault
 ```
 
-2. Install dependencies:
+2. **Install dependencies**
 ```bash
 # Install frontend dependencies
 cd frontend && npm install
@@ -67,7 +121,7 @@ cd frontend && npm install
 cd ../contracts && forge install
 ```
 
-3. Set up environment variables:
+3. **Set up environment variables**
 ```bash
 # Copy environment template
 cp frontend/.env.mezo-testnet frontend/.env.local
@@ -76,146 +130,82 @@ cp frontend/.env.mezo-testnet frontend/.env.local
 nano frontend/.env.local
 ```
 
-4. Start development server:
+4. **Start development server**
 ```bash
 cd frontend && npm run dev
 ```
 
-## Smart Contracts (Mezo Testnet - Chain ID: 31611)
+## 💡 How to Use KhipuVault
 
-### 🏦 Savings Pools
-
-#### IndividualPool (`0x6028E4452e6059e797832578D70dBdf63317538a`)
-**Ahorro personal con optimización automática de rendimientos**
-- Deposita MUSD y gana yields automáticamente
-- Retira en cualquier momento sin penalización
-- Yields optimizados a través de estrategias DeFi
-- Performance fee: 1% sobre yields generados
-- **Status**: ✅ FUNCIONAL (200 MUSD depositados)
-
-**Funciones principales:**
-- `deposit(uint256 musdAmount)` - Depositar MUSD
-- `withdraw(uint256 musdAmount)` - Retirar MUSD + yields
-- `claimYield()` - Reclamar solo yields
-- `userDeposits(address)` - Ver tu depósito actual
-
-#### CooperativePool (`0x92eCA935773b71efB655cc7d3aB77ee23c088A7a`)
-**Ahorro comunitario con rendimientos compartidos**
-- Crea o únete a pools cooperativos
-- Rendimientos se distribuyen equitativamente entre miembros
-- Gobernanza simple por votación
-- Ideal para grupos de ahorro (ROSCAs/Pasanakus digitales)
-- **Status**: ✅ FUNCIONAL (listo para crear pools)
-
-**Funciones principales:**
-- `createPool(string name, uint256 minContribution)` - Crear pool
-- `joinPool(uint256 poolId)` - Unirse a un pool (enviar BTC)
-- `leavePool(uint256 poolId)` - Salir de un pool
-- `claimYield(uint256 poolId)` - Reclamar yields
-
-### 🔧 Core Integration
-
-#### MezoIntegration (`0xa19B54b8b3f36F047E1f755c16F423143585cc6B`)
-**Integración con protocolo Mezo para gestión de BTC y MUSD**
-- Gestiona depósitos de BTC nativo
-- Minting/burning de MUSD
-- Interacción con Trove Manager de Mezo
-- Control de ratios de colateralización
-- **Status**: ✅ FUNCIONAL
-
-#### YieldAggregator (`0x5BDac57B68f2Bc215340e4Dc2240f30154f4A007`)
-**Router inteligente de yields**
-- Enruta depósitos a las mejores estrategias
-- Actualmente integrado con Mezo Stability Pool
-- Optimización automática de rendimientos
-- Distribución de yields entre pools
-- **Status**: ✅ FUNCIONAL
-
-### 💰 Tokens
-
-#### MUSD (`0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503`)
-**Stablecoin oficial de Mezo respaldado por Bitcoin**
-- ERC20 estándar con 18 decimales
-- 1 MUSD ≈ 1 USD
-- Respaldado por BTC depositado en Mezo
-- Genera yields en Stability Pool
-- **Status**: ✅ PRODUCCIÓN (token oficial de Mezo)
-
-**Cómo obtener MUSD:**
-1. Visita [mezo.org](https://mezo.org)
-2. Deposita BTC
-3. Minta MUSD
-4. Usa MUSD en KhipuVault
-
-### 📊 Verificación de Contratos
-
-Todos los contratos pueden ser verificados en el Mezo Explorer:
-- **Explorer**: https://explorer.mezo.org
-- **RPC**: https://rpc.test.mezo.org
-- **Chain ID**: 31611
-
-**Verificación manual con Foundry:**
-```bash
-# Ver total depositado en IndividualPool
-cast call 0x6028E4452e6059e797832578D70dBdf63317538a \
-  "totalMusdDeposited()(uint256)" \
-  --rpc-url https://rpc.test.mezo.org
-
-# Ver pools en CooperativePool
-cast call 0x92eCA935773b71efB655cc7d3aB77ee23c088A7a \
-  "poolCounter()(uint256)" \
-  --rpc-url https://rpc.test.mezo.org
-```
-
-## 🚀 Cómo Usar KhipuVault
-
-### Paso 1: Configurar Wallet
-Agrega Mezo Testnet a tu MetaMask:
+### Step 1: Configure Wallet
+Add Mezo Testnet to your MetaMask:
 - **Network Name**: Mezo Testnet
 - **RPC URL**: `https://rpc.test.mezo.org`
 - **Chain ID**: `31611`
 - **Currency**: BTC
-- **Explorer**: `https://explorer.mezo.org`
+- **Explorer**: `https://explorer.test.mezo.org`
 
-### Paso 2: Obtener MUSD
-1. Visita [mezo.org](https://mezo.org)
-2. Deposita BTC (puedes obtener BTC de testnet en un faucet)
-3. Minta MUSD (stablecoin respaldado por Bitcoin)
+### Step 2: Get MUSD
+1. Visit [mezo.org](https://mezo.org)
+2. Deposit BTC (get testnet BTC from faucet)
+3. Mint MUSD (Bitcoin-backed stablecoin)
 
-### Paso 3: Conectar a KhipuVault
-1. Ve a [khipuvault.vercel.app](https://khipuvault.vercel.app)
-2. Click en "Connect Wallet"
-3. Selecciona MetaMask
-4. Asegúrate de estar en Mezo Testnet
+### Step 3: Connect to KhipuVault
+1. Go to [khipuvault.vercel.app](https://khipuvault.vercel.app)
+2. Click "Connect Wallet"
+3. Select MetaMask
+4. Ensure you're on Mezo Testnet
 
-### Paso 4: Depositar en un Pool
+### Step 4: Deposit in a Pool
 
-#### Opción A: Individual Savings Pool
-1. Ve a Dashboard > Individual Savings
-2. Ingresa cantidad de MUSD
-3. Click "Aprobar MUSD" (solo primera vez)
-4. Click "Depositar"
-5. Confirma transacción en MetaMask
-6. ✅ ¡Listo! Tus yields comienzan a acumularse automáticamente
+#### Option A: Individual Savings Pool
+1. Go to Dashboard > Individual Savings
+2. Enter MUSD amount
+3. Click "Approve MUSD" (first time only)
+4. Click "Deposit"
+5. Confirm transaction in MetaMask
+6. ✅ Done! Your yields start accumulating automatically
 
-#### Opción B: Cooperative Pool
-1. Ve a Dashboard > Cooperative Savings
-2. Opción 1: Crear tu propio pool
+#### Option B: Cooperative Pool
+1. Go to Dashboard > Cooperative Savings
+2. Option 1: Create your own pool
    - Click "Create Pool"
-   - Define nombre y contribución mínima
-   - Invita a otros usuarios
-3. Opción 2: Unirse a pool existente
-   - Explora pools disponibles
+   - Define name and minimum contribution
+   - Invite other users
+3. Option 2: Join existing pool
+   - Explore available pools
    - Click "Join Pool"
-   - Envía BTC según contribución requerida
+   - Send BTC according to required contribution
 
-### Paso 5: Gestionar tus Ahorros
-- **Ver yields**: Dashboard muestra rendimientos en tiempo real
-- **Reclamar yields**: Click "Claim Yields" para recibir ganancias
-- **Retirar**: Click "Withdraw" para sacar tu MUSD + yields
-- **Sin penalización**: Retira cuando quieras, no hay lock-up period
+### Step 5: Manage Your Savings
+- **View yields**: Dashboard shows real-time earnings
+- **Claim yields**: Click "Claim Yields" to receive earnings
+- **Withdraw**: Click "Withdraw" to get your MUSD + yields
+- **No penalties**: Withdraw anytime, no lock-up period
 
-## Contributing
+## 🛡️ Security
+
+- All contracts include comprehensive testing
+- Reentrancy protection on all external calls
+- Pausable functionality for emergency stops
+- Multi-signature governance for critical operations
+- Upgradeable contracts using UUPS pattern
+
+## 📊 Current Performance
+
+- **Individual Pool APR**: ~6.2% (via Mezo Stability Pool)
+- **Performance Fee**: 1% on generated yields
+- **Yields in**: MUSD
+- **Updates**: Automatic every 24 hours
+
+## 🔗 Important Links
+
+- **App**: [khipuvault.vercel.app](https://khipuvault.vercel.app)
+- **Mezo Testnet Explorer**: [explorer.mezo.org](https://explorer.mezo.org)
+- **Get MUSD**: [mezo.org](https://mezo.org)
+- **Technical Documentation**: [docs/](docs/)
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch: `git checkout -b feature/amazing-feature`
@@ -223,76 +213,16 @@ Agrega Mezo Testnet a tu MetaMask:
 4. Push to branch: `git push origin feature/amazing-feature`
 5. Open a Pull Request
 
-## Security
-
-- All contracts include comprehensive testing
-- Reentrancy protection on all external calls
-- Pausable functionality for emergency stops
-- Multi-signature governance for critical operations
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🔗 Links Importantes
-
-- **App**: [khipuvault.vercel.app](https://khipuvault.vercel.app)
-- **Mezo Testnet Explorer**: [explorer.mezo.org](https://explorer.mezo.org)
-- **Obtener MUSD**: [mezo.org](https://mezo.org)
-- **Documentación Técnica**: [docs/](docs/)
-
-## 📈 Rendimientos Actuales
-
-- **Individual Pool APR**: ~6.2% (vía Mezo Stability Pool)
-- **Performance Fee**: 1% sobre yields generados
-- **Yields en**: MUSD
-- **Actualización**: Automática cada 24 horas
-
-## 🛠️ Para Desarrolladores
-
-### Testing Local
-```bash
-# Clonar repositorio
-git clone https://github.com/AndeLabs/khipuvault.git
-cd khipuvault
-
-# Frontend
-cd frontend
-npm install
-npm run dev
-
-# Contratos
-cd contracts
-forge install
-forge build
-forge test
-```
-
-### Interactuar con Contratos
-```bash
-# Ver depósito de un usuario
-cast call 0x6028E4452e6059e797832578D70dBdf63317538a \
-  "userDeposits(address)(uint256,uint256,uint256,uint256,bool)" \
-  YOUR_WALLET_ADDRESS \
-  --rpc-url https://rpc.test.mezo.org
-
-# Depositar MUSD (necesitas aprobar primero)
-cast send 0x6028E4452e6059e797832578D70dBdf63317538a \
-  "deposit(uint256)" 1000000000000000000 \
-  --rpc-url https://rpc.test.mezo.org \
-  --private-key YOUR_PRIVATE_KEY
-```
-
 ## 📞 Support
 
-Para preguntas y soporte:
+For questions and support:
 - GitHub Issues: [github.com/AndeLabs/khipuvault/issues](https://github.com/AndeLabs/khipuvault/issues)
-- Discord: [Próximamente]
+- Discord: [Coming Soon]
 
 ## ⚠️ Disclaimer
 
-KhipuVault está actualmente en **Mezo Testnet**. Los fondos son para testing únicamente. No uses fondos reales. El proyecto está en desarrollo activo y puede contener bugs.
+KhipuVault is currently on **Mezo Testnet**. Funds are for testing purposes only. Do not use real funds. The project is in active development and may contain bugs.
 
 ---
 
-Construido con ❤️ para la comunidad Bitcoin en Mezo
+Built with ❤️ for the Bitcoin community on Mezo
