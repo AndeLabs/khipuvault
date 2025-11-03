@@ -10,9 +10,17 @@ export const metadata: Metadata = {
   title: 'KhipuVault | Ahorro Bitcoin con Rendimientos Reales',
   description: 'Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.',
   icons: {
-    icon: '/favicon.ico',
-    apple: '/logos/khipu-logo.png',
+    icon: [
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
+    apple: '/apple-touch-icon.png',
+    other: [
+      { rel: 'icon', url: '/icon-192.png', sizes: '192x192', type: 'image/png' },
+      { rel: 'icon', url: '/icon-512.png', sizes: '512x512', type: 'image/png' },
+    ],
   },
+  manifest: '/manifest.json',
   openGraph: {
     title: 'KhipuVault | Ahorro Bitcoin con Rendimientos Reales',
     description: 'Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.',
@@ -20,7 +28,7 @@ export const metadata: Metadata = {
     siteName: 'KhipuVault',
     images: [
       {
-        url: '/logos/khipu-logo.png',
+        url: '/icon-512.png',
         width: 512,
         height: 512,
         alt: 'KhipuVault Logo',
@@ -33,7 +41,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'KhipuVault | Ahorro Bitcoin con Rendimientos Reales',
     description: 'Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.',
-    images: ['/logos/khipu-logo.png'],
+    images: ['/icon-512.png'],
   },
 };
 
