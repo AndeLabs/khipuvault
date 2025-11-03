@@ -10,9 +10,10 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Loader2, CheckCircle2, XCircle, ExternalLink, ArrowLeft, AlertTriangle } from 'lucide-react'
+import { Loader2, CheckCircle2, XCircle, ArrowLeft, AlertTriangle } from 'lucide-react'
 import { useSimpleWithdraw } from '@/hooks/web3/use-simple-withdraw'
 import { useIndividualPoolSimple, formatMUSD } from '@/hooks/web3/use-individual-pool-simple'
+import { TransactionLink } from '@/components/ui/transaction-link'
 
 export function Withdraw() {
   const [partialAmount, setPartialAmount] = useState('')
@@ -230,15 +231,10 @@ export function Withdraw() {
             </div>
 
             {withdrawTxHash && state === 'processing' && (
-              <a
-                href={`https://explorer.mezo.org/tx/${withdrawTxHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-orange-400 hover:underline text-sm"
-              >
-                Ver transacción en explorer
-                <ExternalLink className="h-4 w-4" />
-              </a>
+              <TransactionLink 
+                txHash={withdrawTxHash}
+                label="Ver transacción en explorer"
+              />
             )}
           </div>
         </CardContent>
@@ -275,17 +271,11 @@ export function Withdraw() {
               </p>
               
               {withdrawTxHash && (
-                <a
-                  href={`https://explorer.mezo.org/tx/${withdrawTxHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-primary/20 hover:bg-primary/30 border border-primary/50 rounded-lg transition-all hover:scale-105"
-                >
-                  <ExternalLink className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">
-                    Ver transacción en Mezo Explorer
-                  </span>
-                </a>
+                <TransactionLink 
+                  txHash={withdrawTxHash}
+                  label="Ver transacción en Mezo Explorer"
+                  className="mt-4"
+                />
               )}
             </div>
 
