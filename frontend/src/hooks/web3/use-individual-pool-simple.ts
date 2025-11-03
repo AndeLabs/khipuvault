@@ -93,13 +93,18 @@ export function useIndividualPoolSimple() {
 
         console.log('✅ [SIMPLE] Raw result:', result)
 
+        if (!result || !Array.isArray(result) || result.length < 6) {
+          console.warn('⚠️ [SIMPLE] Invalid result, returning null')
+          return null
+        }
+
         const userInfo: UserInfo = {
-          deposit: result[0],
-          yields: result[1],
-          netYields: result[2],
-          daysActive: result[3],
-          estimatedAPR: result[4],
-          autoCompoundEnabled: result[5]
+          deposit: result[0] || BigInt(0),
+          yields: result[1] || BigInt(0),
+          netYields: result[2] || BigInt(0),
+          daysActive: result[3] || BigInt(0),
+          estimatedAPR: result[4] || BigInt(0),
+          autoCompoundEnabled: result[5] || false
         }
 
         console.log('📊 [SIMPLE] User info:', {
@@ -114,7 +119,7 @@ export function useIndividualPoolSimple() {
         return userInfo
       } catch (error) {
         console.error('❌ [SIMPLE] Error fetching user info:', error)
-        throw error
+        return null
       }
     },
     enabled: isConnected && !!address,

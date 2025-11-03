@@ -92,16 +92,25 @@ export function useIndividualPoolV3() {
     queryFn: async () => {
       if (!address) return null
       console.log('🔄 [V3] Fetching user info for:', address)
-      const result = await readContract(config, {
-        address: poolAddress,
-        abi: INDIVIDUAL_POOL_ABI,
-        functionName: 'getUserInfo',
-        args: [address],
-      })
-      console.log('📊 [V3] User info fetched:', result)
-      console.log('  - Deposit:', result[0]?.toString(), 'wei')
-      console.log('  - Yields:', result[1]?.toString(), 'wei')
-      return result as unknown as [bigint, bigint, bigint, bigint, bigint, boolean]
+      try {
+        const result = await readContract(config, {
+          address: poolAddress,
+          abi: INDIVIDUAL_POOL_ABI,
+          functionName: 'getUserInfo',
+          args: [address],
+        })
+        if (!result || !Array.isArray(result)) {
+          console.warn('⚠️ [V3] Invalid user info result:', result)
+          return null
+        }
+        console.log('📊 [V3] User info fetched:', result)
+        console.log('  - Deposit:', result[0]?.toString() || '0', 'wei')
+        console.log('  - Yields:', result[1]?.toString() || '0', 'wei')
+        return result as unknown as [bigint, bigint, bigint, bigint, bigint, boolean]
+      } catch (error) {
+        console.error('❌ [V3] Error fetching user info:', error)
+        return null
+      }
     },
     enabled: isConnected && !!address,
     staleTime: 5_000,
