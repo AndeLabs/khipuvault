@@ -19,7 +19,7 @@ contract DeployStabilityPoolStrategy is Script {
     uint256 constant PERFORMANCE_FEE = 100; // 1%
     
     function run() external {
-        uint256 deployerPrivateKey = vm.envUint("PRIVATE_KEY");
+        uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         address deployer = vm.addr(deployerPrivateKey);
         
         console2.log("===========================================");
