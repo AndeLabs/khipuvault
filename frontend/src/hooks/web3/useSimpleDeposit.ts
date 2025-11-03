@@ -119,9 +119,17 @@ export function useSimpleDeposit() {
     reset: resetDeposit
   } = useWriteContract()
   
+  useEffect(() => {
+    if (depositTxHash) {
+      console.log('🔗 Deposit transaction hash obtained:', depositTxHash)
+      console.log('🌐 Explorer link:', `https://explorer.mezo.org/tx/${depositTxHash}`)
+    }
+  }, [depositTxHash])
+  
   const {
     isLoading: isDepositPending,
     isSuccess: isDepositSuccess,
+    isError: isDepositError,
     data: depositReceipt
   } = useWaitForTransactionReceipt({
     hash: depositTxHash,
@@ -152,16 +160,18 @@ export function useSimpleDeposit() {
   useEffect(() => {
     if (isDepositSuccess && state === 'waitingDeposit') {
       console.log('✅ Deposit confirmed!')
-      console.log('📝 Transaction hash:', depositReceipt?.transactionHash)
+      console.log('📝 Transaction hash (direct):', depositTxHash)
+      console.log('📝 Transaction hash (receipt):', depositReceipt?.transactionHash)
+      console.log('📝 Block number:', depositReceipt?.blockNumber)
+      console.log('📝 Status:', depositReceipt?.status)
       console.log('🔄 Refetching all queries...')
       
-      // Invalidate and refetch all queries to update UI
       queryClient.invalidateQueries()
       queryClient.refetchQueries({ type: 'active' })
       
       setState('success')
     }
-  }, [isDepositSuccess, state, queryClient, depositReceipt])
+  }, [isDepositSuccess, state, queryClient, depositReceipt, depositTxHash])
   
   // Effect: Update state when tx is pending
   useEffect(() => {
@@ -212,6 +222,15 @@ export function useSimpleDeposit() {
       }
     }
   }, [depositError])
+  
+  useEffect(() => {
+    if (isDepositError && state === 'waitingDeposit') {
+      console.error('❌ Transaction failed on-chain')
+      console.log('📝 Failed transaction hash:', depositTxHash)
+      setState('error')
+      setError('La transacción falló en la blockchain. Revisa tu wallet o intenta nuevamente.')
+    }
+  }, [isDepositError, state, depositTxHash])
   
   // Main function - called by UI
   const deposit = async (amountString: string) => {
@@ -326,7 +345,7 @@ export function useSimpleDeposit() {
     
     // Transaction hashes for explorer links (use receipt hash if available, fallback to wagmi hash)
     approveTxHash,
-    depositTxHash: depositReceipt?.transactionHash || depositTxHash,
+    depositTxHash: depositTxHash,
     
     // Balance
     musdBalance,

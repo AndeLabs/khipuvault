@@ -192,15 +192,20 @@ export function Deposits() {
             </div>
             
             {depositTxHash && (
-              <a
-                href={`https://explorer.mezo.org/tx/${depositTxHash}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 text-primary hover:underline text-sm"
-              >
-                Ver transacción en explorer
-                <ExternalLink className="h-4 w-4" />
-              </a>
+              <div className="space-y-1">
+                <a
+                  href={`https://explorer.mezo.org/tx/${depositTxHash}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 text-primary hover:underline text-sm"
+                >
+                  Ver transacción en explorer
+                  <ExternalLink className="h-4 w-4" />
+                </a>
+                <p className="text-xs text-muted-foreground">
+                  (Puede tardar 30-60s en aparecer en el explorador)
+                </p>
+              </div>
             )}
             
             <div className="p-4 rounded-lg bg-blue-500/10 border border-blue-500/30">
@@ -240,17 +245,22 @@ export function Deposits() {
               </p>
               
               {depositTxHash && (
-                <a
-                  href={`https://explorer.mezo.org/tx/${depositTxHash}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 px-4 py-3 bg-primary/20 hover:bg-primary/30 border border-primary/50 rounded-lg transition-all hover:scale-105"
-                >
-                  <ExternalLink className="h-4 w-4 text-primary" />
-                  <span className="text-sm font-medium text-primary">
-                    Ver transacción en Mezo Explorer
-                  </span>
-                </a>
+                <div className="space-y-2">
+                  <a
+                    href={`https://explorer.mezo.org/tx/${depositTxHash}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-center gap-2 px-4 py-3 bg-primary/20 hover:bg-primary/30 border border-primary/50 rounded-lg transition-all hover:scale-105"
+                  >
+                    <ExternalLink className="h-4 w-4 text-primary" />
+                    <span className="text-sm font-medium text-primary">
+                      Ver transacción en Mezo Explorer
+                    </span>
+                  </a>
+                  <p className="text-xs text-center text-muted-foreground">
+                    Si el explorador muestra error, espera 30-60 segundos para que la transacción se indexe
+                  </p>
+                </div>
               )}
             </div>
             
