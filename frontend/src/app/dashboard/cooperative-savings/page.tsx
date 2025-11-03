@@ -2,16 +2,35 @@
 
 export const dynamic = 'force-dynamic'
 
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ExplorePools } from "@/components/dashboard/cooperative-savings/explore-pools";
-import { MyPools } from "@/components/dashboard/cooperative-savings/my-pools";
-import { CreatePool } from "@/components/dashboard/cooperative-savings/create-pool";
-import { AnimateOnScroll } from "@/components/animate-on-scroll";
-import { RecommendedPools } from "@/components/dashboard/cooperative-savings/recommended-pools";
+import { useState } from "react"
+import Link from "next/link"
+import { ChevronLeft } from "lucide-react"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { AnimateOnScroll } from "@/components/animate-on-scroll"
+import { CreatePoolV3 } from "@/components/dashboard/cooperative-savings/create-pool-v3"
+import { PoolsListV3 } from "@/components/dashboard/cooperative-savings/pools-list-v3"
+import { JoinPoolV3 } from "@/components/dashboard/cooperative-savings/join-pool-v3"
+import { MyPoolsV3 } from "@/components/dashboard/cooperative-savings/my-pools-v3"
 
 export default function CooperativeSavingsPage() {
+  const [activeTab, setActiveTab] = useState('explore')
+  const [selectedPoolId, setSelectedPoolId] = useState<number | null>(null)
+
+  const handleJoinPool = (poolId: number) => {
+    setSelectedPoolId(poolId)
+    setActiveTab('join')
+  }
+
+  const handleBackToExplore = () => {
+    setSelectedPoolId(null)
+    setActiveTab('explore')
+  }
+
+  const handleJoinSuccess = () => {
+    setSelectedPoolId(null)
+    setActiveTab('my-pools')
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <AnimateOnScroll>
@@ -21,39 +40,46 @@ export default function CooperativeSavingsPage() {
         </Link>
         <h1 className="text-3xl font-bold tracking-tight text-white mt-4 flex items-center gap-3">
           <span role="img" aria-label="handshake emoji" className="text-2xl">🤝</span>
-          Cooperative Savings Pool
+          Cooperative Savings Pool V3
         </h1>
+        <p className="text-muted-foreground mt-2">
+          Ahorra en grupo con BTC nativo · Yields compartidos · Sin fees de entrada
+        </p>
       </AnimateOnScroll>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-        <div className="lg:col-span-3">
-          <Tabs defaultValue="explore" className="w-full">
-            <AnimateOnScroll delay="100ms">
-              <TabsList className="grid w-full grid-cols-3 bg-card border-primary/20">
-                <TabsTrigger value="explore">Explorar Pools</TabsTrigger>
-                <TabsTrigger value="my-pools">Mis Pools</TabsTrigger>
-                <TabsTrigger value="create">Crear Pool</TabsTrigger>
-              </TabsList>
-            </AnimateOnScroll>
-            <AnimateOnScroll delay="200ms">
-              <TabsContent value="explore" className="mt-6">
-                <ExplorePools />
-              </TabsContent>
-              <TabsContent value="my-pools" className="mt-6">
-                <MyPools />
-              </TabsContent>
-              <TabsContent value="create" className="mt-6">
-                <CreatePool />
-              </TabsContent>
-            </AnimateOnScroll>
-          </Tabs>
-        </div>
-        <div className="lg:col-span-1">
-          <AnimateOnScroll delay="300ms">
-            <RecommendedPools />
-          </AnimateOnScroll>
-        </div>
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <AnimateOnScroll delay="100ms">
+          <TabsList className="grid w-full grid-cols-3 bg-card border-primary/20">
+            <TabsTrigger value="explore">Explorar Pools</TabsTrigger>
+            <TabsTrigger value="my-pools">Mis Pools</TabsTrigger>
+            <TabsTrigger value="create">Crear Pool</TabsTrigger>
+          </TabsList>
+        </AnimateOnScroll>
+
+        <AnimateOnScroll delay="200ms">
+          <TabsContent value="explore" className="mt-6">
+            <PoolsListV3 onJoinPool={handleJoinPool} />
+          </TabsContent>
+
+          <TabsContent value="my-pools" className="mt-6">
+            <MyPoolsV3 />
+          </TabsContent>
+
+          <TabsContent value="create" className="mt-6">
+            <CreatePoolV3 />
+          </TabsContent>
+
+          <TabsContent value="join" className="mt-6">
+            {selectedPoolId && (
+              <JoinPoolV3 
+                poolId={selectedPoolId}
+                onBack={handleBackToExplore}
+                onSuccess={handleJoinSuccess}
+              />
+            )}
+          </TabsContent>
+        </AnimateOnScroll>
+      </Tabs>
     </div>
-  );
+  )
 }
