@@ -18,6 +18,7 @@ import { TransactionLink } from '@/components/ui/transaction-link'
 export function Withdraw() {
   const [partialAmount, setPartialAmount] = useState('')
   const [withdrawType, setWithdrawType] = useState<'full' | 'partial'>('full')
+  const minWithdraw = Number(process.env.NEXT_PUBLIC_MIN_TRANSACTION_AMOUNT || '10000000000000000') / 1e18;
 
   const {
     withdraw,
@@ -151,7 +152,7 @@ export function Withdraw() {
                     value={partialAmount}
                     onChange={(e) => setPartialAmount(e.target.value)}
                     className="font-mono text-lg pr-16"
-                    min="1"
+                    min={minWithdraw}
                     max={maxPartial}
                     step="1"
                   />
@@ -160,7 +161,7 @@ export function Withdraw() {
                   </span>
                 </div>
                 <div className="flex justify-between text-xs text-muted-foreground">
-                  <span>Mínimo: 1 MUSD</span>
+                  <span>Mínimo: {minWithdraw} MUSD</span>
                   <span>Máximo: {principalFormatted} MUSD</span>
                 </div>
               </div>
@@ -184,7 +185,7 @@ export function Withdraw() {
 
               <Button
                 onClick={() => withdraw(partialAmount)}
-                disabled={isProcessing || !partialAmount || parseFloat(partialAmount) < 1 || parseFloat(partialAmount) > maxPartial}
+                disabled={isProcessing || !partialAmount || parseFloat(partialAmount) < minWithdraw || parseFloat(partialAmount) > maxPartial}
                 className="w-full"
                 size="lg"
               >
