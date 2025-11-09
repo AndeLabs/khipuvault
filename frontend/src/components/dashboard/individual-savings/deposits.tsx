@@ -16,6 +16,7 @@ import { TransactionLink } from '@/components/ui/transaction-link'
 
 export function Deposits() {
   const [amount, setAmount] = useState('')
+  const minDeposit = Number(process.env.NEXT_PUBLIC_MIN_TRANSACTION_AMOUNT || '10000000000000000') / 1e18;
   
   const {
     deposit,
@@ -31,7 +32,7 @@ export function Deposits() {
   } = useSimpleDeposit()
   
   const handleDeposit = () => {
-    if (!amount || parseFloat(amount) < 10) return
+    if (!amount || parseFloat(amount) < minDeposit) return
     deposit(amount)
   }
   
@@ -74,7 +75,7 @@ export function Deposits() {
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="font-mono text-lg pr-16"
-                min="10"
+                min={minDeposit}
                 step="1"
               />
               <span className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground font-mono">
@@ -82,7 +83,7 @@ export function Deposits() {
               </span>
             </div>
             <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Mínimo: 10 MUSD</span>
+              <span>Mínimo: {minDeposit} MUSD</span>
               <span>Máximo: {balanceFormatted} MUSD</span>
             </div>
           </div>
@@ -116,7 +117,7 @@ export function Deposits() {
           {/* Button */}
           <Button
             onClick={handleDeposit}
-            disabled={!amount || parseFloat(amount) < 10 || parseFloat(amount) > parseFloat(balanceFormatted)}
+            disabled={!amount || parseFloat(amount) < minDeposit || parseFloat(amount) > parseFloat(balanceFormatted)}
             className="w-full"
             size="lg"
           >
