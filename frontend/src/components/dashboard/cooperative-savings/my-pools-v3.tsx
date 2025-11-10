@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useCooperativePool, usePoolInfo, useMemberInfo, PoolStatus } from '@/hooks/web3/use-cooperative-pool'
+import { PoolCardSkeleton } from './pool-card-skeleton'
 import { Users, TrendingUp, LogOut, DollarSign, Info, Loader2, AlertTriangle, CheckCircle2, Clock } from 'lucide-react'
 import { formatEther } from 'viem'
 import { useAccount } from 'wagmi'
@@ -191,15 +192,7 @@ function MyPoolCard({ poolId, onClaimYield, onLeavePool, isProcessing }: MyPoolC
   const { memberInfo, isLoading: isLoadingMember } = useMemberInfo(poolId, address)
 
   if (isLoadingPool || isLoadingMember) {
-    return (
-      <Card className="bg-card border border-muted">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-32">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    )
+    return <PoolCardSkeleton />
   }
 
   if (!poolInfo || !memberInfo || !memberInfo.active) {

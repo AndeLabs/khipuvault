@@ -276,7 +276,21 @@ export function useCooperativePool() {
   useEffect(() => {
     if (isMainSuccess && state === 'processing') {
       console.log('✅ Transaction confirmed!')
-      queryClient.invalidateQueries()
+
+      // ✅ CRITICAL FIX: Invalidate specific queries instead of all queries
+      // This ensures poolCounter and all pool data are refetched
+      queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
+      queryClient.invalidateQueries({ queryKey: ['cooperative-pool'] })
+      queryClient.invalidateQueries({ queryKey: ['pool-info'] })
+      queryClient.invalidateQueries({ queryKey: ['member-info'] })
+
+      // Force immediate refetch
+      queryClient.refetchQueries({
+        type: 'all',
+        refetchType: 'all',
+      })
+
+      console.log('✅ All pool queries invalidated and refetching')
       setState('success')
     }
   }, [isMainSuccess, state, queryClient])

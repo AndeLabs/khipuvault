@@ -40,15 +40,37 @@ const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePool as `0x${string}`
 export function useCooperativePools() {
   const publicClient = usePublicClient()
 
-  // Get pool counter using wagmi's useReadContract (already optimized)
-  const { data: poolCounter } = useReadContract({
-    address: poolAddress,
-    abi: COOPERATIVE_POOL_ABI,
-    functionName: 'poolCounter',
+  // ✅ MIGRATED: Use TanStack Query for poolCounter instead of wagmi's useReadContract
+  // This allows proper invalidation and refetching via queryClient
+  const { data: poolCounter = 0n, isLoading: isLoadingCounter } = useQuery({
+    queryKey: ['cooperative-pool', 'counter'],
+    queryFn: async () => {
+      if (!publicClient) return 0n
+
+      try {
+        const result = await publicClient.readContract({
+          address: poolAddress,
+          abi: COOPERATIVE_POOL_ABI,
+          functionName: 'poolCounter',
+        })
+
+        console.log('🔢 Pool counter fetched:', Number(result || 0))
+        return result || 0n
+      } catch (err) {
+        console.error('❌ Error fetching poolCounter:', err)
+        return 0n
+      }
+    },
+    enabled: !!publicClient,
+    staleTime: 0, // Always considered stale for fresh data
+    gcTime: 5 * 60 * 1000, // 5 minutes
+    refetchInterval: 10000, // Auto-refetch every 10 seconds
+    retry: 3,
+    retryDelay: 1000,
   })
 
   // Fetch all pools using useQuery
-  const { data: pools = [], isLoading, error } = useQuery({
+  const { data: pools = [], isLoading: isLoadingPools, error } = useQuery({
     queryKey: ['cooperative-pool', 'all-pools', normalizeBigInt(poolCounter)],
     queryFn: () => {
       if (!publicClient) {
@@ -56,8 +78,8 @@ export function useCooperativePools() {
       }
       return fetchCooperativePools(publicClient, Number(poolCounter || 0))
     },
-    enabled: !!publicClient && !!poolCounter && Number(poolCounter) > 0,
-    staleTime: 30000, // 30 seconds
+    enabled: !!publicClient && Number(poolCounter) > 0,
+    staleTime: 0, // Always fresh
     gcTime: 5 * 60 * 1000, // 5 minutes
     retry: 2,
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
@@ -65,7 +87,7 @@ export function useCooperativePools() {
 
   return {
     pools,
-    isLoading,
+    isLoading: isLoadingCounter || isLoadingPools,
     error,
     poolCounter: Number(poolCounter || 0),
   }

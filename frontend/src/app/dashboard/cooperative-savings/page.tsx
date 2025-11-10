@@ -11,6 +11,7 @@ import { CreatePoolV3 } from "@/components/dashboard/cooperative-savings/create-
 import { PoolsListV3 } from "@/components/dashboard/cooperative-savings/pools-list-v3"
 import { JoinPoolV3 } from "@/components/dashboard/cooperative-savings/join-pool-v3"
 import { MyPoolsV3 } from "@/components/dashboard/cooperative-savings/my-pools-v3"
+import { FloatingSyncIndicator } from "@/components/dashboard/cooperative-savings/sync-indicator"
 import { useCooperativePoolEvents } from "@/hooks/web3/use-cooperative-pool-events"
 
 export default function CooperativeSavingsPage() {
@@ -41,6 +42,9 @@ export default function CooperativeSavingsPage() {
 
   return (
     <div className="flex flex-col gap-8">
+      {/* Floating sync indicator */}
+      <FloatingSyncIndicator />
+
       <AnimateOnScroll>
         <Link href="/dashboard" className="flex items-center gap-2 text-primary hover:underline">
           <ChevronLeft className="h-4 w-4" />

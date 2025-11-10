@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useCooperativePool, usePoolInfo, PoolStatus, type PoolInfo } from '@/hooks/web3/use-cooperative-pool'
+import { PoolCardSkeleton } from './pool-card-skeleton'
 import { Users, Search, TrendingUp, Shield, Info, Loader2, ArrowRight, Clock } from 'lucide-react'
 import { formatEther } from 'viem'
 
@@ -128,15 +129,7 @@ function PoolCard({ poolId, searchQuery, filter, onJoinPool }: PoolCardProps) {
   }, [poolInfo, filter])
 
   if (isLoading) {
-    return (
-      <Card className="bg-card border border-muted">
-        <CardContent className="p-6">
-          <div className="flex items-center justify-center h-32">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        </CardContent>
-      </Card>
-    )
+    return <PoolCardSkeleton />
   }
 
   if (!poolInfo || !matchesSearch || !matchesFilter) {

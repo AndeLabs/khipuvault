@@ -42,15 +42,23 @@ export function useCooperativePoolEvents() {
     eventName: 'PoolCreated',
     onLogs(logs) {
       console.log('🔔 PoolCreated event detected:', logs)
+
+      // ✅ CRITICAL FIX: Invalidate poolCounter first (this triggers all-pools refetch)
+      queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
+
       // Invalidate all pool-related queries
       queryClient.invalidateQueries({ queryKey: ['cooperative-pool'] })
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
-      // Also refetch active queries immediately
+
+      // ✅ CRITICAL FIX: Refetch ALL queries (not just active ones)
+      // This ensures background tabs also get updated data
       queryClient.refetchQueries({
-        type: 'active',
+        type: 'all', // Changed from 'active' to 'all'
         refetchType: 'all',
       })
+
+      console.log('✅ All queries invalidated and refetching after PoolCreated')
     },
   })
 
@@ -61,11 +69,13 @@ export function useCooperativePoolEvents() {
     eventName: 'PoolClosed',
     onLogs(logs) {
       console.log('🔔 PoolClosed event detected:', logs)
+      queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.refetchQueries({
-        type: 'active',
+        type: 'all',
         refetchType: 'all',
       })
+      console.log('✅ Queries refetched after PoolClosed')
     },
   })
 
@@ -76,12 +86,14 @@ export function useCooperativePoolEvents() {
     eventName: 'MemberJoined',
     onLogs(logs) {
       console.log('🔔 MemberJoined event detected:', logs)
+      queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
-        type: 'active',
+        type: 'all',
         refetchType: 'all',
       })
+      console.log('✅ Queries refetched after MemberJoined')
     },
   })
 
@@ -92,12 +104,14 @@ export function useCooperativePoolEvents() {
     eventName: 'MemberLeft',
     onLogs(logs) {
       console.log('🔔 MemberLeft event detected:', logs)
+      queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
-        type: 'active',
+        type: 'all',
         refetchType: 'all',
       })
+      console.log('✅ Queries refetched after MemberLeft')
     },
   })
 
@@ -111,9 +125,10 @@ export function useCooperativePoolEvents() {
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
-        type: 'active',
+        type: 'all',
         refetchType: 'all',
       })
+      console.log('✅ Queries refetched after YieldClaimed')
     },
   })
 }
