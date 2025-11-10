@@ -29,7 +29,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['Auto-compound', 'Referidos', 'Depósitos incrementales'],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.INDIVIDUAL_POOL}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/IndividualPoolV3.sol',
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/IndividualPoolV3.sol',
     category: 'pools'
   },
   {
@@ -40,7 +40,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['Ahorros grupales', 'Metas comunes', 'Gobernanza'],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.COOPERATIVE_POOL}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/CooperativePoolV3.sol',
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/CooperativePoolV3.sol',
     category: 'pools'
   },
   {
@@ -53,7 +53,7 @@ const contractsInfo: ContractInfo[] = [
     explorerUrl: CONTRACT_ADDRESSES.LOTTERY_POOL !== '0x0000000000000000000000000000000000000000' 
       ? `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.LOTTERY_POOL}` 
       : undefined,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/LotteryPool.sol',
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/LotteryPool.sol',
     category: 'pools'
   },
   {
@@ -66,7 +66,7 @@ const contractsInfo: ContractInfo[] = [
     explorerUrl: CONTRACT_ADDRESSES.ROTATING_POOL !== '0x0000000000000000000000000000000000000000' 
       ? `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.ROTATING_POOL}` 
       : undefined,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/RotatingPool.sol',
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/RotatingPool.sol',
     category: 'pools'
   },
   {
@@ -77,7 +77,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['Puente BTC-MUSD', 'Seguridad', 'Optimización'],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.MEZO_INTEGRATION}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/integrations/MezoIntegrationV3.sol',
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/MezoIntegrationV3.sol',
     category: 'integrations'
   },
   {
@@ -88,7 +88,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['Diversificación', 'Rebalanceo', 'Múltiples estrategias'],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.YIELD_AGGREGATOR}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/integrations/YieldAggregatorV3.sol',
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/YieldAggregatorV3.sol',
     category: 'integrations'
   }
 ]
