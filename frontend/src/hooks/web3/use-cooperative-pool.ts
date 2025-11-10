@@ -208,11 +208,12 @@ export function useCooperativePool() {
   const [error, setError] = useState<string>('')
 
   // Read pool counter
-  const { data: poolCounter } = useReadContract({
+  const { data: poolCounter, refetch: refetchPoolCounter } = useReadContract({
     address: COOPERATIVE_POOL_ADDRESS,
     abi: POOL_ABI,
     functionName: 'poolCounter',
     query: {
+      queryKey: ['cooperative-pool-counter'],
       refetchInterval: 30_000,
     }
   })
@@ -276,7 +277,8 @@ export function useCooperativePool() {
   useEffect(() => {
     if (isMainSuccess && state === 'processing') {
       console.log('✅ Transaction confirmed!')
-      queryClient.invalidateQueries()
+      queryClient.invalidateQueries({ queryKey: ['cooperative-pool-counter'] })
+      queryClient.invalidateQueries({ queryKey: ['cooperative-pool-info'] })
       setState('success')
     }
   }, [isMainSuccess, state, queryClient])
@@ -495,7 +497,7 @@ export function usePoolInfo(poolId: number) {
   const config = useConfig()
   
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: ['pool-info', poolId],
+    queryKey: ['cooperative-pool-info', poolId],
     queryFn: async () => {
       if (poolId <= 0) return null
       
