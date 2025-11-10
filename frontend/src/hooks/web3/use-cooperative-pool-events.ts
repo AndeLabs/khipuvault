@@ -42,7 +42,11 @@ export function useCooperativePoolEvents() {
     eventName: 'PoolCreated',
     onLogs(logs) {
       console.log('🔔 PoolCreated event detected:', logs)
-      // Refetch ALL active queries immediately
+      // Invalidate all pool-related queries
+      queryClient.invalidateQueries({ queryKey: ['cooperative-pool'] })
+      queryClient.invalidateQueries({ queryKey: ['pool-info'] })
+      queryClient.invalidateQueries({ queryKey: ['member-info'] })
+      // Also refetch active queries immediately
       queryClient.refetchQueries({
         type: 'active',
         refetchType: 'all',
@@ -57,6 +61,7 @@ export function useCooperativePoolEvents() {
     eventName: 'PoolClosed',
     onLogs(logs) {
       console.log('🔔 PoolClosed event detected:', logs)
+      queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.refetchQueries({
         type: 'active',
         refetchType: 'all',
@@ -71,6 +76,8 @@ export function useCooperativePoolEvents() {
     eventName: 'MemberJoined',
     onLogs(logs) {
       console.log('🔔 MemberJoined event detected:', logs)
+      queryClient.invalidateQueries({ queryKey: ['pool-info'] })
+      queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
         type: 'active',
         refetchType: 'all',
@@ -85,6 +92,8 @@ export function useCooperativePoolEvents() {
     eventName: 'MemberLeft',
     onLogs(logs) {
       console.log('🔔 MemberLeft event detected:', logs)
+      queryClient.invalidateQueries({ queryKey: ['pool-info'] })
+      queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
         type: 'active',
         refetchType: 'all',
@@ -99,6 +108,8 @@ export function useCooperativePoolEvents() {
     eventName: 'YieldClaimed',
     onLogs(logs) {
       console.log('🔔 YieldClaimed event detected:', logs)
+      queryClient.invalidateQueries({ queryKey: ['pool-info'] })
+      queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
         type: 'active',
         refetchType: 'all',

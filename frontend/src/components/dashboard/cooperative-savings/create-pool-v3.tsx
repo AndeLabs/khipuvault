@@ -16,7 +16,11 @@ import { useCooperativePool } from '@/hooks/web3/use-cooperative-pool'
 import { Users, TrendingUp, Shield, Info, Loader2, CheckCircle2 } from 'lucide-react'
 import { formatEther } from 'viem'
 
-export function CreatePoolV3() {
+interface CreatePoolV3Props {
+  onSuccess?: () => void
+}
+
+export function CreatePoolV3({ onSuccess }: CreatePoolV3Props = {}) {
   const { createPool, state, error, txHash, isProcessing } = useCooperativePool()
 
   const [formData, setFormData] = useState({
@@ -111,9 +115,14 @@ export function CreatePoolV3() {
               Ver transacción →
             </a>
           )}
-          <Button onClick={handleReset} variant="outline">
-            Crear Otro Pool
-          </Button>
+          <div className="flex gap-3">
+            <Button onClick={() => onSuccess?.()} className="flex-1">
+              Ver Mis Pools
+            </Button>
+            <Button onClick={handleReset} variant="outline">
+              Crear Otro Pool
+            </Button>
+          </div>
         </CardContent>
       </Card>
     )

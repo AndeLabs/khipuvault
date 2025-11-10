@@ -40,7 +40,7 @@ export const MEZO_STABILITY_POOL_ABI = Array.isArray(StabilityPoolABI) ? Stabili
 export const MEZO_TESTNET_ADDRESSES = {
   // KhipuVault V3 Pools (UUPS Upgradeable) - PRODUCTION
   individualPool: '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393',
-  cooperativePool: '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88',
+  cooperativePool: '0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65',
   lotteryPool: '0x0000000000000000000000000000000000000000',
   rotatingPool: '0x0000000000000000000000000000000000000000',
   

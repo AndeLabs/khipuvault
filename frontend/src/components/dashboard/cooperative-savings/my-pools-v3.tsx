@@ -62,9 +62,9 @@ export function MyPoolsV3() {
     setShowSuccessDialog(true)
   }
 
-  const myPools = poolIds.filter((poolId) => {
-    return true
-  })
+  // Note: Filtering is done at MyPoolCard level by checking memberInfo.active
+  // This ensures we only show pools where the user is an active member
+  const myPools = poolIds
 
   if (poolCounter === 0) {
     return (

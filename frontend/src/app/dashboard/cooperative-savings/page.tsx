@@ -11,8 +11,12 @@ import { CreatePoolV3 } from "@/components/dashboard/cooperative-savings/create-
 import { PoolsListV3 } from "@/components/dashboard/cooperative-savings/pools-list-v3"
 import { JoinPoolV3 } from "@/components/dashboard/cooperative-savings/join-pool-v3"
 import { MyPoolsV3 } from "@/components/dashboard/cooperative-savings/my-pools-v3"
+import { useCooperativePoolEvents } from "@/hooks/web3/use-cooperative-pool-events"
 
 export default function CooperativeSavingsPage() {
+  // Enable automatic refresh on blockchain events
+  useCooperativePoolEvents()
+
   const [activeTab, setActiveTab] = useState('explore')
   const [selectedPoolId, setSelectedPoolId] = useState<number | null>(null)
 
@@ -28,6 +32,10 @@ export default function CooperativeSavingsPage() {
 
   const handleJoinSuccess = () => {
     setSelectedPoolId(null)
+    setActiveTab('my-pools')
+  }
+
+  const handleCreateSuccess = () => {
     setActiveTab('my-pools')
   }
 
@@ -66,7 +74,7 @@ export default function CooperativeSavingsPage() {
           </TabsContent>
 
           <TabsContent value="create" className="mt-6">
-            <CreatePoolV3 />
+            <CreatePoolV3 onSuccess={handleCreateSuccess} />
           </TabsContent>
 
           <TabsContent value="join" className="mt-6">
