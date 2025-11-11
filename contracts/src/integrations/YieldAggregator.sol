@@ -96,7 +96,6 @@ contract YieldAggregator is
     error DepositsPaused();
     error TooManyVaults();
     error InvalidAddress();
-    error FlashLoanDetected();
 
     /*//////////////////////////////////////////////////////////////
                            INITIALIZATION
@@ -122,10 +121,6 @@ contract YieldAggregator is
                              MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
-    modifier noFlashLoan() {
-        if (!emergencyMode && !authorizedCallers[msg.sender] && tx.origin != msg.sender) revert FlashLoanDetected();
-        _;
-    }
 
     /*//////////////////////////////////////////////////////////////
                          DEPOSIT FUNCTIONS
@@ -136,7 +131,7 @@ contract YieldAggregator is
         override
         nonReentrant
         whenNotPaused
-        noFlashLoan
+
         returns (address vaultAddress, uint256 shares)
     {
         if (depositsPaused) revert DepositsPaused();
@@ -155,7 +150,7 @@ contract YieldAggregator is
         override
         nonReentrant
         whenNotPaused
-        noFlashLoan
+
         returns (uint256 shares)
     {
         if (depositsPaused) revert DepositsPaused();
@@ -177,7 +172,7 @@ contract YieldAggregator is
         external
         override
         nonReentrant
-        noFlashLoan
+
         returns (uint256 totalWithdrawn)
     {
         uint256 userTotal = userTotalDeposited[msg.sender];
@@ -208,7 +203,7 @@ contract YieldAggregator is
         external
         override
         nonReentrant
-        noFlashLoan
+
         returns (uint256 amount)
     {
         VaultInfoPacked storage vault = vaults[vaultAddress];
@@ -238,7 +233,7 @@ contract YieldAggregator is
         external
         override
         nonReentrant
-        noFlashLoan
+
         returns (uint256 yieldAmount)
     {
         if (userTotalDeposited[msg.sender] == 0) revert NoDeposit();
@@ -268,7 +263,7 @@ contract YieldAggregator is
         external
         override
         nonReentrant
-        noFlashLoan
+
         returns (uint256 compoundedAmount)
     {
         if (userTotalDeposited[msg.sender] == 0) revert NoDeposit();

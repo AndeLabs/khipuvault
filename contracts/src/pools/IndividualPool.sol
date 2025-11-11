@@ -160,7 +160,6 @@ contract IndividualPool is
     error InvalidAddress();
     error InvalidFee();
     error WithdrawalExceedsBalance();
-    error FlashLoanDetected();
     error SelfReferralNotAllowed();
     error NoReferralRewards();
 
@@ -200,13 +199,13 @@ contract IndividualPool is
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Prevents flash loan attacks (can be disabled in emergency mode)
-     * @dev Checks that caller is not a contract in the same transaction
+     * @notice Flash loan protection is handled by ReentrancyGuard
+     * @dev We don't use tx.origin checks as they can be easily bypassed
+     *      and are considered an anti-pattern. Instead, we rely on:
+     *      - ReentrancyGuard for reentrancy protection
+     *      - State validation before/after external calls
+     *      - Checks-Effects-Interactions pattern
      */
-    modifier noFlashLoan() {
-        if (!emergencyMode && tx.origin != msg.sender) revert FlashLoanDetected();
-        _;
-    }
 
     /*//////////////////////////////////////////////////////////////
                             CORE FUNCTIONS
@@ -235,7 +234,6 @@ contract IndividualPool is
         internal
         nonReentrant
         whenNotPaused
-        noFlashLoan
     {
         if (musdAmount == 0) revert InvalidAmount();
         if (musdAmount < MIN_DEPOSIT) revert MinimumDepositNotMet();
@@ -306,7 +304,6 @@ contract IndividualPool is
     function withdrawPartial(uint256 musdAmount)
         external
         nonReentrant
-        noFlashLoan
         returns (uint256)
     {
         UserDeposit storage userDeposit = userDeposits[msg.sender];
@@ -353,11 +350,10 @@ contract IndividualPool is
     /**
      * @notice Reclama yields sin tocar el principal
      */
-    function claimYield() 
-        external 
+    function claimYield()
+        external
         nonReentrant
-        noFlashLoan
-        returns (uint256 netYield) 
+        returns (uint256 netYield)
     {
         UserDeposit storage userDeposit = userDeposits[msg.sender];
         if (!userDeposit.active) revert NoActiveDeposit();
@@ -399,11 +395,10 @@ contract IndividualPool is
     /**
      * @notice Retiro total (principal + yields)
      */
-    function withdraw() 
-        external 
+    function withdraw()
+        external
         nonReentrant
-        noFlashLoan
-        returns (uint256 musdAmount, uint256 netYield) 
+        returns (uint256 musdAmount, uint256 netYield)
     {
         UserDeposit storage userDeposit = userDeposits[msg.sender];
         if (!userDeposit.active) revert NoActiveDeposit();

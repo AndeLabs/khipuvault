@@ -89,7 +89,6 @@ contract MezoIntegration is
     error TroveNotExists();
     error PriceFeedFailure();
     error ExcessiveFee();
-    error FlashLoanDetected();
 
     /*//////////////////////////////////////////////////////////////
                            INITIALIZATION
@@ -134,10 +133,6 @@ contract MezoIntegration is
                              MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
-    modifier noFlashLoan() {
-        if (tx.origin != msg.sender) revert FlashLoanDetected();
-        _;
-    }
 
     /*//////////////////////////////////////////////////////////////
                          CORE FUNCTIONS
@@ -149,7 +144,7 @@ contract MezoIntegration is
         override
         nonReentrant
         whenNotPaused
-        noFlashLoan
+
         returns (uint256 musdAmount)
     {
         uint256 btcAmount = msg.value;
@@ -194,7 +189,7 @@ contract MezoIntegration is
         override
         nonReentrant
         whenNotPaused
-        noFlashLoan
+
         returns (uint256 btcAmount)
     {
         if (musdAmount == 0) revert InvalidAmount();

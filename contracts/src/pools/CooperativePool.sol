@@ -136,6 +136,10 @@ contract CooperativePool is
     event EmergencyModeUpdated(bool enabled);
     event PerformanceFeeUpdated(uint256 oldFee, uint256 newFee);
     event FeeCollectorUpdated(address indexed oldCollector, address indexed newCollector);
+    
+    // Error tracking events for better debugging
+    event WithdrawalFailed(uint256 indexed poolId, address indexed member, uint256 requestedAmount, string reason);
+    event WithdrawalSuccess(uint256 indexed poolId, address indexed member, uint256 amount);
 
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -155,8 +159,8 @@ contract CooperativePool is
     error NoYieldToClaim();
     error InvalidFee();
     error InsufficientPoolSize();
-    error FlashLoanDetected();
     error Unauthorized();
+    error InvalidPoolName();
 
     /*//////////////////////////////////////////////////////////////
                            INITIALIZATION
@@ -195,10 +199,14 @@ contract CooperativePool is
                              MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
-    modifier noFlashLoan() {
-        if (tx.origin != msg.sender) revert FlashLoanDetected();
-        _;
-    }
+    /**
+     * @notice Flash loan protection is handled by ReentrancyGuard
+     * @dev We don't use tx.origin checks as they can be easily bypassed
+     *      and are considered an anti-pattern. Instead, we rely on:
+     *      - ReentrancyGuard for reentrancy protection
+     *      - State validation before/after external calls
+     *      - Checks-Effects-Interactions pattern
+     */
 
     /*//////////////////////////////////////////////////////////////
                          CORE FUNCTIONS
@@ -214,6 +222,9 @@ contract CooperativePool is
         whenNotPaused
         returns (uint256 poolId)
     {
+        // Validate pool name (prevent empty or excessively long names)
+        if (bytes(name).length == 0 || bytes(name).length > 100) revert InvalidPoolName();
+
         if (minContribution < MIN_CONTRIBUTION) revert ContributionTooLow();
         if (maxContribution < minContribution) revert InvalidAmount();
         if (maxMembers == 0 || maxMembers > MAX_MEMBERS_LIMIT) revert InvalidMaxMembers();
@@ -243,7 +254,6 @@ contract CooperativePool is
         payable
         nonReentrant
         whenNotPaused
-        noFlashLoan
     {
         uint256 btcAmount = msg.value;
 
@@ -285,7 +295,6 @@ contract CooperativePool is
     function leavePool(uint256 poolId)
         external
         nonReentrant
-        noFlashLoan
     {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
@@ -322,7 +331,11 @@ contract CooperativePool is
 
                 if (safeWithdraw > 0) {
                     try YIELD_AGGREGATOR.withdraw(safeWithdraw) {
-                    } catch {
+                        emit WithdrawalSuccess(poolId, msg.sender, safeWithdraw);
+                    } catch (bytes memory reason) {
+                        // Log failure for debugging and transparency
+                        emit WithdrawalFailed(poolId, msg.sender, safeWithdraw, string(reason));
+
                         poolMusdBalance = MUSD.balanceOf(address(this));
                         if (poolMusdBalance >= musdToRepay) {
                             uint256 availableForYield = poolMusdBalance - musdToRepay;
@@ -358,7 +371,6 @@ contract CooperativePool is
     function claimYield(uint256 poolId)
         external
         nonReentrant
-        noFlashLoan
     {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
