@@ -9,7 +9,7 @@
  */
 
 import { PublicClient } from 'viem'
-import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts-v3'
+import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts'
 import { formatMUSD } from '@/lib/web3/contracts'
 
 export interface Transaction {
@@ -38,7 +38,7 @@ export async function fetchUserTransactions(
   publicClient: PublicClient,
   address: `0x${string}`
 ): Promise<Transaction[]> {
-  const poolAddress = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`
+  const poolAddress = MEZO_V3_ADDRESSES.individualPool as `0x${string}`
 
   console.log('🔄 [V3] Fetching transactions for', address)
 

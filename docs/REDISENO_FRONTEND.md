@@ -7,7 +7,7 @@ Crear una experiencia de usuario **simple, clara y robusta** para depositar MUSD
 
 ## 📋 Análisis de Requisitos
 
-### Contrato V3 - Lo que realmente necesitamos:
+### Contrato - Lo que realmente necesitamos:
 
 ```solidity
 // FUNCIÓN SIMPLE
@@ -43,7 +43,7 @@ function deposit(uint256 musdAmount) external
 - `r.filter is not a function` - ABI mal pasado
 - Estados no sincronizados
 - Aprobación no espera confirmación
-- Hooks V2 y V3 mezclados
+- Hooks V2 y mezclados
 
 ---
 

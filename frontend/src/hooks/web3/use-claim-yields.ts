@@ -1,5 +1,5 @@
 /**
- * @fileoverview Claim Yields Hook - IndividualPoolV3 Feature
+ * @fileoverview Claim Yields Hook - IndividualPool Feature
  * 
  * Allows users to claim their accumulated yields without withdrawing principal
  * Production-ready with proper error handling

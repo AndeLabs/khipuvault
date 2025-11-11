@@ -27,7 +27,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['Auto-reinversión de yields', '0.5% por cada referido', 'Retiros sin penalización', 'Optimizado en gas'],
     explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.INDIVIDUAL_POOL}`,
-    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/IndividualPoolV3.sol'
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/IndividualPool.sol'
   },
   {
     name: 'Cooperative Pool',
@@ -37,7 +37,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['BTC nativo', 'Distribución por shares', 'Gobernanza simple', 'Seguridad multinivel'],
     explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.COOPERATIVE_POOL}`,
-    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/CooperativePoolV3.sol'
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/CooperativePool.sol'
   },
   {
     name: 'Mezo Integration',
@@ -47,7 +47,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['BTC → MUSD conversión', 'Flash loan protection', 'Reentrancy guard', 'Upgradeable'],
     explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.MEZO_INTEGRATION}`,
-    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/MezoIntegrationV3.sol'
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/MezoIntegration.sol'
   },
   {
     name: 'Yield Aggregator',
@@ -57,7 +57,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['Multi-estrategia', 'Rebalanceo automático', 'Claim flexible', 'APR optimizado'],
     explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.YIELD_AGGREGATOR}`,
-    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/YieldAggregatorV3.sol'
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/YieldAggregator.sol'
   },
   {
     name: 'Stability Pool Strategy',

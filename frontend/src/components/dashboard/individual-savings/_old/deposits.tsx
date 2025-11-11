@@ -19,10 +19,10 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog'
-import { useDepositV3, useFullWithdrawV3, useClaimYieldV3 } from '@/hooks/web3/use-pool-transactions-v3'
-import { useMusdApprovalV2, formatMUSD, formatMUSDShort } from '@/hooks/web3/use-musd-approval-v2'
+import { useDepositV3, useFullWithdrawV3, useClaimYieldV3 } from '@/hooks/web3/use-pool-transactions'
+import { useMusdApprovalV2, formatMUSD, formatMUSDShort } from '@/hooks/web3/use-musd-approval'
 import { usePoolRealTimeSync } from '@/hooks/web3/use-pool-real-time-sync'
-import { useIndividualPoolV3 } from '@/hooks/web3/use-individual-pool-v3'
+import { useIndividualPool } from '@/hooks/web3/use-individual-pool'
 import { parseEther } from 'viem'
 import { useToast } from '@/hooks/use-toast'
 import { TransactionStatus } from './transaction-status'
@@ -34,7 +34,7 @@ export function Deposits() {
   const musdPrice = 1 // MUSD is stablecoin, always $1
 
   const { address, isConnected, chainId } = useAccount()
-  const { userInfo, isLoading: isPoolLoading } = useIndividualPoolV3()
+  const { userInfo, isLoading: isPoolLoading } = useIndividualPool()
   const { toast } = useToast()
   
   // Enable real-time sync for entire page

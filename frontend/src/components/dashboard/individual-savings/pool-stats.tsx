@@ -1,8 +1,8 @@
 'use client'
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
-import { formatMUSD } from "@/hooks/web3/use-musd-approval-v2";
+import { useIndividualPool } from "@/hooks/web3/use-individual-pool";
+import { formatMUSD } from "@/hooks/web3/use-musd-approval";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**
@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  * Focus on essential text-based information only
  */
 export function PoolStats() {
-  const { poolTVL, isLoading } = useIndividualPoolV3();
+  const { poolTVL, isLoading } = useIndividualPool();
   
   if (isLoading) {
     return (

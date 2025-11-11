@@ -2,14 +2,14 @@
 
 import { useWatchContractEvent } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
-import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts-v3'
+import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts'
 import { useAccount } from 'wagmi'
-import IndividualPoolV3ABI from '@/contracts/abis/IndividualPoolV3.json'
+import IndividualPoolABI from '@/contracts/abis/IndividualPool.json'
 
-const POOL_ABI = (IndividualPoolV3ABI as any).abi as const
+const POOL_ABI = (IndividualPoolABI as any).abi as const
 
 /**
- * Hook to watch for IndividualPoolV3 contract events and auto-refetch queries
+ * Hook to watch for IndividualPool contract events and auto-refetch queries
  * This replaces inefficient polling with event-driven updates
  * 
  * Best Practice: Use refetchQueries instead of invalidateQueries for immediate updates
@@ -18,7 +18,7 @@ const POOL_ABI = (IndividualPoolV3ABI as any).abi as const
 export function usePoolEvents() {
   const { address } = useAccount()
   const queryClient = useQueryClient()
-  const poolAddress = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`
+  const poolAddress = MEZO_V3_ADDRESSES.individualPool as `0x${string}`
 
   // Watch for Deposited events
   useWatchContractEvent({
