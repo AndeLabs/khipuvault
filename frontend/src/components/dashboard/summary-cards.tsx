@@ -3,8 +3,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAccount } from "wagmi";
-import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
-import { useMusdApprovalV2, formatMUSD, formatMUSDShort } from "@/hooks/web3/use-musd-approval-v2";
+import { useIndividualPool } from "@/hooks/web3/use-individual-pool";
+import { useMusdApprovalV2, formatMUSD, formatMUSDShort } from "@/hooks/web3/use-musd-approval";
 
 /**
  * Simple SummaryCards component without charts
@@ -12,7 +12,7 @@ import { useMusdApprovalV2, formatMUSD, formatMUSDShort } from "@/hooks/web3/use
  */
 export function SummaryCards() {
   const { isConnected } = useAccount();
-  const { userInfo, isLoading: isPoolLoading } = useIndividualPoolV3();
+  const { userInfo, isLoading: isPoolLoading } = useIndividualPool();
   const { musdBalance } = useMusdApprovalV2();
 
   if (!isConnected) {

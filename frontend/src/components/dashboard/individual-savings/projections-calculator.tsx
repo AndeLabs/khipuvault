@@ -5,12 +5,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3"
+import { useIndividualPool } from "@/hooks/web3/use-individual-pool"
 
 export function ProjectionsCalculator() {
   const [deposit, setDeposit] = useState(100) // MUSD amount
   const [period, setPeriod] = useState("12") // in months
-  const { userInfo } = useIndividualPoolV3()
+  const { userInfo } = useIndividualPool()
   
   // Use estimated APR from user's position or default to 5%
   const apr = userInfo && userInfo.estimatedAPR > BigInt(0) 

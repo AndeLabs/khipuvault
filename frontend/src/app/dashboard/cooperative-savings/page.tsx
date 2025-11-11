@@ -7,10 +7,10 @@ import Link from "next/link"
 import { ChevronLeft } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnimateOnScroll } from "@/components/animate-on-scroll"
-import { CreatePoolV3 } from "@/components/dashboard/cooperative-savings/create-pool-v3"
-import { PoolsListV3 } from "@/components/dashboard/cooperative-savings/pools-list-v3"
-import { JoinPoolV3 } from "@/components/dashboard/cooperative-savings/join-pool-v3"
-import { MyPoolsV3 } from "@/components/dashboard/cooperative-savings/my-pools-v3"
+import { CreatePool } from "@/components/dashboard/cooperative-savings/create-pool"
+import { PoolsList } from "@/components/dashboard/cooperative-savings/pools-list"
+import { JoinPool } from "@/components/dashboard/cooperative-savings/join-pool"
+import { MyPools } from "@/components/dashboard/cooperative-savings/my-pools"
 import { FloatingSyncIndicator } from "@/components/dashboard/cooperative-savings/sync-indicator"
 import { useCooperativePoolEvents } from "@/hooks/web3/use-cooperative-pool-events"
 
@@ -70,20 +70,20 @@ export default function CooperativeSavingsPage() {
 
         <AnimateOnScroll delay="200ms">
           <TabsContent value="explore" className="mt-6">
-            <PoolsListV3 onJoinPool={handleJoinPool} />
+            <PoolsList onJoinPool={handleJoinPool} />
           </TabsContent>
 
           <TabsContent value="my-pools" className="mt-6">
-            <MyPoolsV3 />
+            <MyPools />
           </TabsContent>
 
           <TabsContent value="create" className="mt-6">
-            <CreatePoolV3 onSuccess={handleCreateSuccess} />
+            <CreatePool onSuccess={handleCreateSuccess} />
           </TabsContent>
 
           <TabsContent value="join" className="mt-6">
             {selectedPoolId && (
-              <JoinPoolV3 
+              <JoinPool
                 poolId={selectedPoolId}
                 onBack={handleBackToExplore}
                 onSuccess={handleJoinSuccess}

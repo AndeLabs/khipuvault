@@ -85,9 +85,9 @@ export const MUSD_ABI = MEZO_MUSD_ABI
 // Updated: Nov 2, 2025 - V3 with auto-compound, referrals, flash loan protection
 // Import V3 ABI from contracts/abis
 
-import IndividualPoolV3ABI from '@/contracts/abis/IndividualPoolV3.json'
+import IndividualPoolABI from '@/contracts/abis/IndividualPool.json'
 
-export const INDIVIDUAL_POOL_ABI = (IndividualPoolV3ABI as any).abi as const
+export const INDIVIDUAL_POOL_ABI = (IndividualPoolABI as any).abi as const
 
 // ============================================================================
 // HELPER FUNCTIONS

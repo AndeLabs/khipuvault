@@ -1,210 +1,689 @@
+/**
+ * @fileoverview V3 Pool Transactions Hook - Production Ready
+ * @module hooks/web3/use-pool-transactions
+ * 
+ * Handles all V3 pool transactions with new features:
+ * - Auto-compound toggle
+ * - Referral system
+ * - Incremental deposits
+ * - Partial withdrawals
+ * - Emergency mode support
+ * 
+ * V3 Features:
+ * ✅ UUPS Upgradeable Pattern
+ * ✅ Storage Packing (~40-60k gas saved)
+ * ✅ Flash Loan Protection
+ * ✅ Emergency Mode
+ * ✅ Auto-Compound
+ * ✅ Referral System
+ * ✅ Incremental Deposits
+ * ✅ Partial Withdrawals
+ */
+
 'use client'
 
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { useState, useCallback } from 'react'
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { useQueryClient } from '@tanstack/react-query'
+import { useEffect, useCallback, useState } from 'react'
 import { parseEther } from 'viem'
-import { MEZO_TESTNET_ADDRESSES, INDIVIDUAL_POOL_ABI, ERC20_ABI } from '@/lib/web3/contracts'
+import { 
+  MEZO_V3_ADDRESSES, 
+  INDIVIDUAL_POOL_ABI, 
+  YIELD_AGGREGATOR_ABI,
+  V3_FEATURES 
+} from '@/lib/web3/contracts'
+
+const INDIVIDUAL_POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPool as `0x${string}`
+const YIELD_AGGREGATOR_ADDRESS = MEZO_V3_ADDRESSES.yieldAggregator as `0x${string}`
+
+// ============================================================================
+// INDIVIDUAL POOL V3 TRANSACTIONS
+// ============================================================================
 
 /**
- * Hook for depositing MUSD to Individual Pool
+ * Hook to handle V3 pool deposit with referral support
  * 
- * IMPORTANT: MUSD-only model (simplified)
- * - Users obtain MUSD first at mezo.org
- * - Approve MUSD to IndividualPool
- * - Deposit MUSD amount
- * - Yields are generated automatically
+ * Usage:
+ * ```tsx
+ * const { 
+ *   deposit, 
+ *   isDepositing, 
+ *   isConfirming, 
+ *   isSuccess, 
+ *   error 
+ * } = useDepositV3()
+ * 
+ * await deposit(parseEther('100'), '0xreferrer...') // Deposit 100 MUSD with referral
+ * ```
  */
-export function useDepositToPool() {
-  const { address } = useAccount()
-  const [error, setError] = useState<string | null>(null)
-
-  const poolAddress = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
-  const musdAddress = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`
-
-  const {
-    writeContract: deposit,
-    isPending,
-    data: txHash,
-  } = useWriteContract()
-
-  const { data: receipt, isLoading: isWaiting } = useWaitForTransactionReceipt({
-    hash: txHash,
+export function useDepositV3() {
+  const queryClient = useQueryClient()
+  const [localState, setLocalState] = useState<{
+    isProcessing: boolean
+    hash: string | null
+  }>({
+    isProcessing: false,
+    hash: null,
   })
 
-  const handleDeposit = useCallback(
-    async (musdAmount: string) => {
-      try {
-        setError(null)
+  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
 
-        if (!address) {
-          setError('Wallet not connected')
-          return
-        }
+  const deposit = useCallback(async (
+    amount: bigint, 
+    referrer?: string
+  ) => {
+    try {
+      setLocalState({ isProcessing: true, hash: null })
 
-        // Parse MUSD amount (18 decimals, standard ERC20)
-        const amount = parseEther(musdAmount)
-        if (amount <= 0n) {
-          setError('Amount must be greater than 0')
-          return
-        }
+      // Validate minimum deposit
+      if (amount < BigInt(V3_FEATURES.individualPool.minDeposit)) {
+        throw new Error(`Minimum deposit is ${V3_FEATURES.individualPool.minDeposit} MUSD`)
+      }
 
-        // Validate amount is within limits (10 - 100,000 MUSD)
-        const minDeposit = parseEther('10')
-        const maxDeposit = parseEther('100000')
-        
-        if (amount < minDeposit) {
-          setError('Minimum deposit is 10 MUSD')
-          return
-        }
-        
-        if (amount > maxDeposit) {
-          setError('Maximum deposit is 100,000 MUSD')
-          return
-        }
+      // Validate maximum deposit
+      if (amount > BigInt(V3_FEATURES.individualPool.maxDeposit)) {
+        throw new Error(`Maximum deposit is ${V3_FEATURES.individualPool.maxDeposit} MUSD`)
+      }
 
-        // Deposit MUSD to pool
-        // User must approve MUSD first (see useMUSDApproval hook)
-        deposit({
-          address: poolAddress,
+      // Use depositWithReferral if referrer is provided, otherwise use simple deposit
+      if (referrer && referrer !== '0x0000000000000000000000000000000000000000') {
+        writeContract({
+          address: INDIVIDUAL_POOL_ADDRESS,
+          abi: INDIVIDUAL_POOL_ABI,
+          functionName: 'depositWithReferral',
+          args: [amount, referrer],
+        })
+      } else {
+        writeContract({
+          address: INDIVIDUAL_POOL_ADDRESS,
           abi: INDIVIDUAL_POOL_ABI,
           functionName: 'deposit',
-          args: [amount], // Pass MUSD amount as argument
-          account: address,
+          args: [amount],
         })
-      } catch (err) {
-        const errorMsg = err instanceof Error ? err.message : 'Unknown error occurred'
-        setError(errorMsg)
-        console.error('Deposit error:', err)
       }
-    },
-    [deposit, poolAddress, address]
-  )
+
+    } catch (err) {
+      setLocalState({ isProcessing: false, hash: null })
+      throw err
+    }
+  }, [writeContract])
+
+  // Update local state when hash changes
+  useEffect(() => {
+    if (hash) {
+      setLocalState({ isProcessing: false, hash })
+    }
+  }, [hash])
+
+  // Refetch data on success
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+      queryClient.invalidateQueries({ queryKey: ['balance'] })
+    }
+  }, [isSuccess, queryClient])
 
   return {
-    deposit: handleDeposit,
-    isPending,
-    isWaiting,
-    txHash,
-    receipt,
+    deposit,
+    isDepositing: isPending || localState.isProcessing,
+    isConfirming,
+    isSuccess,
     error,
-    isSuccess: !!receipt?.blockHash,
+    hash,
   }
 }
 
 /**
- * Hook for claiming yields from Individual Pool
+ * Hook to handle V3 partial withdrawal
  */
-export function useClaimYield() {
-  const { address } = useAccount()
-  const [error, setError] = useState<string | null>(null)
-
-  const poolAddress = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
-
-  const {
-    writeContract: claimYield,
-    isPending,
-    data: txHash,
-  } = useWriteContract()
-
-  const { data: receipt, isLoading: isWaiting } = useWaitForTransactionReceipt({
-    hash: txHash,
+export function usePartialWithdrawV3() {
+  const queryClient = useQueryClient()
+  const [localState, setLocalState] = useState<{
+    isProcessing: boolean
+    hash: string | null
+  }>({
+    isProcessing: false,
+    hash: null,
   })
 
-  const handleClaimYield = useCallback(async () => {
-    try {
-      setError(null)
+  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
 
-      // ClaimYield takes no arguments - claims all available yields
-      claimYield({
-        address: poolAddress,
+  const partialWithdraw = useCallback(async (amount: bigint) => {
+    try {
+      setLocalState({ isProcessing: true, hash: null })
+
+      // Validate minimum withdrawal
+      if (amount < BigInt(V3_FEATURES.individualPool.minWithdrawal)) {
+        throw new Error(`Minimum withdrawal is ${V3_FEATURES.individualPool.minWithdrawal} MUSD`)
+      }
+
+      writeContract({
+        address: INDIVIDUAL_POOL_ADDRESS,
+        abi: INDIVIDUAL_POOL_ABI,
+        functionName: 'partialWithdraw',
+        args: [amount],
+      })
+
+    } catch (err) {
+      setLocalState({ isProcessing: false, hash: null })
+      throw err
+    }
+  }, [writeContract])
+
+  // Update local state when hash changes
+  useEffect(() => {
+    if (hash) {
+      setLocalState({ isProcessing: false, hash })
+    }
+  }, [hash])
+
+  // Refetch data on success
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+      queryClient.invalidateQueries({ queryKey: ['balance'] })
+    }
+  }, [isSuccess, queryClient])
+
+  return {
+    partialWithdraw,
+    isWithdrawing: isPending || localState.isProcessing,
+    isConfirming,
+    isSuccess,
+    error,
+    hash,
+  }
+}
+
+/**
+ * Hook to handle V3 full withdrawal
+ */
+export function useFullWithdrawV3() {
+  const queryClient = useQueryClient()
+  const [localState, setLocalState] = useState<{
+    isProcessing: boolean
+    hash: string | null
+  }>({
+    isProcessing: false,
+    hash: null,
+  })
+
+  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
+
+  const fullWithdraw = useCallback(async () => {
+    try {
+      setLocalState({ isProcessing: true, hash: null })
+
+      writeContract({
+        address: INDIVIDUAL_POOL_ADDRESS,
+        abi: INDIVIDUAL_POOL_ABI,
+        functionName: 'fullWithdraw',
+      })
+
+    } catch (err) {
+      setLocalState({ isProcessing: false, hash: null })
+      throw err
+    }
+  }, [writeContract])
+
+  // Update local state when hash changes
+  useEffect(() => {
+    if (hash) {
+      setLocalState({ isProcessing: false, hash })
+    }
+  }, [hash])
+
+  // Refetch data on success
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+      queryClient.invalidateQueries({ queryKey: ['balance'] })
+    }
+  }, [isSuccess, queryClient])
+
+  return {
+    fullWithdraw,
+    isWithdrawing: isPending || localState.isProcessing,
+    isConfirming,
+    isSuccess,
+    error,
+    hash,
+  }
+}
+
+/**
+ * Hook to handle auto-compound toggle
+ */
+export function useToggleAutoCompoundV3() {
+  const queryClient = useQueryClient()
+  const [localState, setLocalState] = useState<{
+    isProcessing: boolean
+    hash: string | null
+  }>({
+    isProcessing: false,
+    hash: null,
+  })
+
+  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
+
+  const toggleAutoCompound = useCallback(async (enabled: boolean) => {
+    try {
+      setLocalState({ isProcessing: true, hash: null })
+
+      writeContract({
+        address: INDIVIDUAL_POOL_ADDRESS,
+        abi: INDIVIDUAL_POOL_ABI,
+        functionName: 'toggleAutoCompound',
+        args: [enabled],
+      })
+
+    } catch (err) {
+      setLocalState({ isProcessing: false, hash: null })
+      throw err
+    }
+  }, [writeContract])
+
+  // Update local state when hash changes
+  useEffect(() => {
+    if (hash) {
+      setLocalState({ isProcessing: false, hash })
+    }
+  }, [hash])
+
+  // Refetch data on success
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+    }
+  }, [isSuccess, queryClient])
+
+  return {
+    toggleAutoCompound,
+    isToggling: isPending || localState.isProcessing,
+    isConfirming,
+    isSuccess,
+    error,
+    hash,
+  }
+}
+
+/**
+ * Hook to handle claim yield
+ */
+export function useClaimYieldV3() {
+  const queryClient = useQueryClient()
+  const [localState, setLocalState] = useState<{
+    isProcessing: boolean
+    hash: string | null
+  }>({
+    isProcessing: false,
+    hash: null,
+  })
+
+  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
+
+  const claimYield = useCallback(async () => {
+    try {
+      setLocalState({ isProcessing: true, hash: null })
+
+      writeContract({
+        address: INDIVIDUAL_POOL_ADDRESS,
         abi: INDIVIDUAL_POOL_ABI,
         functionName: 'claimYield',
-        args: [],
-        account: address,
       })
+
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Unknown error occurred')
+      setLocalState({ isProcessing: false, hash: null })
+      throw err
     }
-  }, [claimYield, poolAddress, address])
+  }, [writeContract])
+
+  // Update local state when hash changes
+  useEffect(() => {
+    if (hash) {
+      setLocalState({ isProcessing: false, hash })
+    }
+  }, [hash])
+
+  // Refetch data on success
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+      queryClient.invalidateQueries({ queryKey: ['balance'] })
+    }
+  }, [isSuccess, queryClient])
 
   return {
-    claimYield: handleClaimYield,
-    isPending,
-    isWaiting,
-    txHash,
-    receipt,
+    claimYield,
+    isClaiming: isPending || localState.isProcessing,
+    isConfirming,
+    isSuccess,
     error,
-    isSuccess: !!receipt?.blockHash,
+    hash,
   }
 }
 
 /**
- * Hook for withdrawing ALL MUSD from Individual Pool
- * IMPORTANT: withdraw() takes NO parameters - withdraws entire user deposit + yields
- * Returns both principal MUSD + accumulated yields in MUSD
+ * Hook to handle claim referral rewards
  */
-export function useWithdrawFromPool() {
-  const { address } = useAccount()
-  const [error, setError] = useState<string | null>(null)
-
-  const poolAddress = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
-
-  const {
-    writeContract: withdraw,
-    isPending,
-    data: txHash,
-  } = useWriteContract()
-
-  const { data: receipt, isLoading: isWaiting } = useWaitForTransactionReceipt({
-    hash: txHash,
+export function useClaimReferralRewardsV3() {
+  const queryClient = useQueryClient()
+  const [localState, setLocalState] = useState<{
+    isProcessing: boolean
+    hash: string | null
+  }>({
+    isProcessing: false,
+    hash: null,
   })
 
-  const handleWithdraw = useCallback(
-    async () => {
-      try {
-        setError(null)
+  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
 
-        if (!address) {
-          setError('Wallet not connected')
-          return
-        }
+  const claimReferralRewards = useCallback(async () => {
+    try {
+      setLocalState({ isProcessing: true, hash: null })
 
-        // Withdraw ALL MUSD from pool (principal + yields)
-        // NO parameters needed - contract withdraws entire user position
-        withdraw({
-          address: poolAddress,
-          abi: INDIVIDUAL_POOL_ABI,
-          functionName: 'withdraw',
-          args: [], // NO args - withdraw() takes no parameters
-          account: address,
-        })
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Unknown error occurred')
-      }
-    },
-    [withdraw, poolAddress, address]
-  )
+      writeContract({
+        address: INDIVIDUAL_POOL_ADDRESS,
+        abi: INDIVIDUAL_POOL_ABI,
+        functionName: 'claimReferralRewards',
+      })
+
+    } catch (err) {
+      setLocalState({ isProcessing: false, hash: null })
+      throw err
+    }
+  }, [writeContract])
+
+  // Update local state when hash changes
+  useEffect(() => {
+    if (hash) {
+      setLocalState({ isProcessing: false, hash })
+    }
+  }, [hash])
+
+  // Refetch data on success
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+      queryClient.invalidateQueries({ queryKey: ['balance'] })
+    }
+  }, [isSuccess, queryClient])
 
   return {
-    withdraw: handleWithdraw,
-    isPending,
-    isWaiting,
-    txHash,
-    receipt,
+    claimReferralRewards,
+    isClaiming: isPending || localState.isProcessing,
+    isConfirming,
+    isSuccess,
     error,
-    isSuccess: !!receipt?.blockHash,
+    hash,
+  }
+}
+
+// ============================================================================
+// YIELD AGGREGATOR V3 TRANSACTIONS
+// ============================================================================
+
+/**
+ * Hook to handle yield aggregator deposit
+ */
+export function useYieldAggregatorDepositV3() {
+  const queryClient = useQueryClient()
+  const [localState, setLocalState] = useState<{
+    isProcessing: boolean
+    hash: string | null
+  }>({
+    isProcessing: false,
+    hash: null,
+  })
+
+  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
+
+  const deposit = useCallback(async (amount: bigint) => {
+    try {
+      setLocalState({ isProcessing: true, hash: null })
+
+      // Validate minimum deposit
+      if (amount < BigInt(V3_FEATURES.yieldAggregator.minDeposit)) {
+        throw new Error(`Minimum deposit is ${V3_FEATURES.yieldAggregator.minDeposit} MUSD`)
+      }
+
+      writeContract({
+        address: YIELD_AGGREGATOR_ADDRESS,
+        abi: YIELD_AGGREGATOR_ABI,
+        functionName: 'deposit',
+        args: [amount],
+      })
+
+    } catch (err) {
+      setLocalState({ isProcessing: false, hash: null })
+      throw err
+    }
+  }, [writeContract])
+
+  // Update local state when hash changes
+  useEffect(() => {
+    if (hash) {
+      setLocalState({ isProcessing: false, hash })
+    }
+  }, [hash])
+
+  // Refetch data on success
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ['yield-aggregator-v3'] })
+      queryClient.invalidateQueries({ queryKey: ['balance'] })
+    }
+  }, [isSuccess, queryClient])
+
+  return {
+    deposit,
+    isDepositing: isPending || localState.isProcessing,
+    isConfirming,
+    isSuccess,
+    error,
+    hash,
   }
 }
 
 /**
- * Hook to check if user needs to approve MUSD (for future features)
- * Note: BTC doesn't need approval (it's native)
+ * Hook to handle yield aggregator withdrawal
  */
-export function useCheckMUSDAllowance() {
-  // MUSD approval might be needed for some operations
-  // but NOT for deposits (BTC is native)
+export function useYieldAggregatorWithdrawV3() {
+  const queryClient = useQueryClient()
+  const [localState, setLocalState] = useState<{
+    isProcessing: boolean
+    hash: string | null
+  }>({
+    isProcessing: false,
+    hash: null,
+  })
+
+  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
+
+  const withdraw = useCallback(async (amount: bigint) => {
+    try {
+      setLocalState({ isProcessing: true, hash: null })
+
+      writeContract({
+        address: YIELD_AGGREGATOR_ADDRESS,
+        abi: YIELD_AGGREGATOR_ABI,
+        functionName: 'withdraw',
+        args: [amount],
+      })
+
+    } catch (err) {
+      setLocalState({ isProcessing: false, hash: null })
+      throw err
+    }
+  }, [writeContract])
+
+  // Update local state when hash changes
+  useEffect(() => {
+    if (hash) {
+      setLocalState({ isProcessing: false, hash })
+    }
+  }, [hash])
+
+  // Refetch data on success
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ['yield-aggregator-v3'] })
+      queryClient.invalidateQueries({ queryKey: ['balance'] })
+    }
+  }, [isSuccess, queryClient])
+
   return {
-    needsApproval: false, // For deposits, always false
-    checkAllowance: () => Promise.resolve(false),
+    withdraw,
+    isWithdrawing: isPending || localState.isProcessing,
+    isConfirming,
+    isSuccess,
+    error,
+    hash,
+  }
+}
+
+/**
+ * Hook to handle compound yields
+ */
+export function useCompoundYieldsV3() {
+  const queryClient = useQueryClient()
+  const [localState, setLocalState] = useState<{
+    isProcessing: boolean
+    hash: string | null
+  }>({
+    isProcessing: false,
+    hash: null,
+  })
+
+  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
+
+  const compoundYields = useCallback(async () => {
+    try {
+      setLocalState({ isProcessing: true, hash: null })
+
+      writeContract({
+        address: YIELD_AGGREGATOR_ADDRESS,
+        abi: YIELD_AGGREGATOR_ABI,
+        functionName: 'compoundYields',
+      })
+
+    } catch (err) {
+      setLocalState({ isProcessing: false, hash: null })
+      throw err
+    }
+  }, [writeContract])
+
+  // Update local state when hash changes
+  useEffect(() => {
+    if (hash) {
+      setLocalState({ isProcessing: false, hash })
+    }
+  }, [hash])
+
+  // Refetch data on success
+  useEffect(() => {
+    if (isSuccess) {
+      queryClient.invalidateQueries({ queryKey: ['yield-aggregator-v3'] })
+    }
+  }, [isSuccess, queryClient])
+
+  return {
+    compoundYields,
+    isCompounding: isPending || localState.isProcessing,
+    isConfirming,
+    isSuccess,
+    error,
+    hash,
+  }
+}
+
+// ============================================================================
+// COMBINED HOOKS
+// ============================================================================
+
+/**
+ * Combined hook for all V3 individual pool transactions
+ */
+export function useIndividualPoolTransactionsV3() {
+  const deposit = useDepositV3()
+  const partialWithdraw = usePartialWithdrawV3()
+  const fullWithdraw = useFullWithdrawV3()
+  const toggleAutoCompound = useToggleAutoCompoundV3()
+  const claimYield = useClaimYieldV3()
+  const claimReferralRewards = useClaimReferralRewardsV3()
+
+  return {
+    deposit,
+    partialWithdraw,
+    fullWithdraw,
+    toggleAutoCompound,
+    claimYield,
+    claimReferralRewards,
+    
+    // Combined loading states
+    isAnyTransactionPending: 
+      deposit.isDepositing || 
+      partialWithdraw.isWithdrawing || 
+      fullWithdraw.isWithdrawing || 
+      toggleAutoCompound.isToggling || 
+      claimYield.isClaiming || 
+      claimReferralRewards.isClaiming,
+  }
+}
+
+/**
+ * Combined hook for all V3 yield aggregator transactions
+ */
+export function useYieldAggregatorTransactionsV3() {
+  const deposit = useYieldAggregatorDepositV3()
+  const withdraw = useYieldAggregatorWithdrawV3()
+  const compoundYields = useCompoundYieldsV3()
+
+  return {
+    deposit,
+    withdraw,
+    compoundYields,
+    
+    // Combined loading states
+    isAnyTransactionPending: 
+      deposit.isDepositing || 
+      withdraw.isWithdrawing || 
+      compoundYields.isCompounding,
   }
 }

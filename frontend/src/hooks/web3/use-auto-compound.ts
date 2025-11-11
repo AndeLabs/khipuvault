@@ -1,5 +1,5 @@
 /**
- * @fileoverview Auto-Compound Hook - IndividualPoolV3 Feature
+ * @fileoverview Auto-Compound Hook - IndividualPool Feature
  * 
  * Allows users to toggle auto-compounding of yields
  * When enabled, yields are automatically reinvested into principal

@@ -3,9 +3,9 @@ pragma solidity 0.8.25;
 
 import {Script, console} from "forge-std/Script.sol";
 import {UUPSProxy} from "../src/proxy/UUPSProxy.sol";
-import {CooperativePoolV3} from "../src/pools/CooperativePoolV3.sol";
+import {CooperativePool} from "../src/pools/CooperativePool.sol";
 
-contract DeployCooperativePoolV3 is Script {
+contract DeployCooperativePool is Script {
     // Mezo Testnet addresses
     address constant MEZO_INTEGRATION_V3 = 0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6;
     address constant YIELD_AGGREGATOR_V3 = 0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6;
@@ -16,20 +16,20 @@ contract DeployCooperativePoolV3 is Script {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIVATE_KEY");
         
         console.log("===========================================");
-        console.log("Deploying CooperativePoolV3 to Mezo Testnet");
+        console.log("Deploying CooperativePool to Mezo Testnet");
         console.log("===========================================");
         
         vm.startBroadcast(deployerPrivateKey);
         
         // Deploy Implementation
-        console.log("\n=== Deploying CooperativePoolV3 Implementation ===");
-        CooperativePoolV3 impl = new CooperativePoolV3();
+        console.log("\n=== Deploying CooperativePool Implementation ===");
+        CooperativePool impl = new CooperativePool();
         console.log("Implementation:", address(impl));
         
         // Deploy Proxy with initialization
         console.log("\n=== Deploying UUPS Proxy ===");
         bytes memory initData = abi.encodeWithSelector(
-            CooperativePoolV3.initialize.selector,
+            CooperativePool.initialize.selector,
             MEZO_INTEGRATION_V3,
             YIELD_AGGREGATOR_V3,
             MUSD_TOKEN,
@@ -46,8 +46,8 @@ contract DeployCooperativePoolV3 is Script {
         console.log("===========================================");
         console.log("DEPLOYMENT SUCCESSFUL!");
         console.log("===========================================");
-        console.log("CooperativePoolV3 Implementation:", address(impl));
-        console.log("CooperativePoolV3 Proxy:", address(proxy));
+        console.log("CooperativePool Implementation:", address(impl));
+        console.log("CooperativePool Proxy:", address(proxy));
         console.log("");
         console.log("FRONTEND CONFIGURATION:");
         console.log("NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS=", address(proxy));

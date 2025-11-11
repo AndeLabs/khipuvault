@@ -1,274 +1,430 @@
 /**
- * @fileoverview Create Pool Component - Production Ready
- * @module components/dashboard/cooperative-savings/create-pool
- * 
- * Allows users to create new cooperative pools on Mezo Testnet
+ * @fileoverview Create Cooperative Pool V3 - Production Ready
+ * Modern UI for creating saving pools with native BTC deposits
  */
 
-"use client";
+'use client'
 
-import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Slider } from "@/components/ui/slider";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useCreatePool } from "@/hooks/web3/use-cooperative-pools";
-import { useToast } from "@/hooks/use-toast";
-import { useAccount } from "wagmi";
-import { Loader2 } from "lucide-react";
+import { useState, useEffect } from 'react'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+import { useCooperativePool } from '@/hooks/web3/use-cooperative-pool'
+import { useIsFetching } from '@tanstack/react-query'
+import { Users, TrendingUp, Shield, Info, Loader2, CheckCircle2, Sparkles } from 'lucide-react'
+import { formatEther } from 'viem'
 
-const formSchema = z.object({
-  name: z.string().min(5, "Muy corto").max(50, "Muy largo"),
-  minContribution: z.coerce.number().min(0.001, "Mínimo 0.001 BTC"),
-  maxContribution: z.coerce.number(),
-  maxMembers: z.number().min(3).max(50),
-  description: z.string().max(200, "Máximo 200 caracteres").optional().default(""),
-  isPrivate: z.boolean().default(false),
-  requireApproval: z.boolean().default(false),
-  lockupPeriod: z.string().default("none"),
-}).refine(data => data.maxContribution > data.minContribution, {
-    message: "Máximo debe ser mayor que mínimo",
-    path: ["maxContribution"],
-});
+interface CreatePoolV3Props {
+  onSuccess?: () => void
+}
 
+export function CreatePoolV3({ onSuccess }: CreatePoolV3Props = {}) {
+  const { createPool, state, error, txHash, isProcessing } = useCooperativePool()
+  const isSyncing = useIsFetching({ queryKey: ['cooperative-pool'] }) > 0
+  const [countdown, setCountdown] = useState(0)
+  const [isTransitioning, setIsTransitioning] = useState(false)
 
-export function CreatePool() {
-  const [maxMembers, setMaxMembers] = useState(10);
-  const { address } = useAccount();
-  const { createPool, isPending } = useCreatePool();
-  const { toast } = useToast();
-  
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      name: "",
-      minContribution: 0.001,
-      maxContribution: 0.01,
-      maxMembers: 10,
-      description: "",
-      isPrivate: false,
-      requireApproval: false,
-      lockupPeriod: "none",
-    },
-  });
+  const [formData, setFormData] = useState({
+    name: '',
+    minContribution: '0.001',
+    maxContribution: '1',
+    maxMembers: '10',
+    description: ''
+  })
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    if (!address) {
-      toast({
-        title: "Wallet no conectada",
-        description: "Por favor conecta tu wallet para crear un pool",
-        variant: "destructive",
-      })
-      return
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+
+  // ✅ Smart transition: Wait for sync to complete before navigating
+  useEffect(() => {
+    if (state === 'success' && !isSyncing && !isTransitioning) {
+      console.log('🎯 Pool created successfully, starting transition countdown')
+      setIsTransitioning(true)
+      setCountdown(3)
+    }
+  }, [state, isSyncing, isTransitioning])
+
+  // ✅ Countdown timer for smooth UX
+  useEffect(() => {
+    if (countdown > 0) {
+      const timer = setTimeout(() => {
+        setCountdown(countdown - 1)
+      }, 1000)
+      return () => clearTimeout(timer)
+    } else if (countdown === 0 && isTransitioning) {
+      console.log('🚀 Navigating to My Pools')
+      onSuccess?.()
+    }
+  }, [countdown, isTransitioning, onSuccess])
+
+  const validateForm = (): boolean => {
+    const errors: Record<string, string> = {}
+
+    if (!formData.name.trim()) {
+      errors.name = 'El nombre es requerido'
+    } else if (formData.name.length < 3) {
+      errors.name = 'Mínimo 3 caracteres'
+    } else if (formData.name.length > 50) {
+      errors.name = 'Máximo 50 caracteres'
     }
 
-    try {
-      await createPool(
-        values.name,
-        values.minContribution.toString(),
-        values.maxContribution.toString(),
-        values.maxMembers
-      )
-      
-      toast({
-        title: "¡Pool creado!",
-        description: `El pool "${values.name}" ha sido creado exitosamente`,
-      })
-      
-      form.reset()
-    } catch (error: any) {
-      toast({
-        title: "Error al crear pool",
-        description: error.message || "No se pudo crear el pool",
-        variant: "destructive",
-      })
+    const min = parseFloat(formData.minContribution)
+    const max = parseFloat(formData.maxContribution)
+    const members = parseInt(formData.maxMembers)
+
+    if (isNaN(min) || min < 0.001) {
+      errors.minContribution = 'Mínimo 0.001 BTC'
     }
+
+    if (isNaN(max) || max < min) {
+      errors.maxContribution = 'Debe ser mayor que el mínimo'
+    }
+
+    if (max > 100) {
+      errors.maxContribution = 'Máximo 100 BTC'
+    }
+
+    if (isNaN(members) || members < 2) {
+      errors.maxMembers = 'Mínimo 2 miembros'
+    }
+
+    if (members > 100) {
+      errors.maxMembers = 'Máximo 100 miembros'
+    }
+
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (!validateForm()) return
+
+    await createPool(
+      formData.name,
+      formData.minContribution,
+      formData.maxContribution,
+      parseInt(formData.maxMembers)
+    )
+  }
+
+  const handleReset = () => {
+    setFormData({
+      name: '',
+      minContribution: '0.001',
+      maxContribution: '1',
+      maxMembers: '10',
+      description: ''
+    })
+    setValidationErrors({})
+  }
+
+  if (state === 'success') {
+    return (
+      <Card className="bg-gradient-to-br from-green-500/10 via-card to-card border-2 border-green-500/50 animate-in fade-in zoom-in-95 duration-500">
+        <CardContent className="p-6 text-center">
+          <div className="relative">
+            <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4 animate-in zoom-in duration-700" />
+            <Sparkles className="h-6 w-6 text-yellow-400 absolute top-0 left-1/2 -translate-x-8 animate-pulse" />
+            <Sparkles className="h-5 w-5 text-yellow-300 absolute top-2 right-1/2 translate-x-8 animate-pulse delay-150" />
+          </div>
+
+          <h2 className="text-2xl font-bold text-green-500 mb-2">
+            ¡Pool Creado Exitosamente!
+          </h2>
+
+          <p className="text-muted-foreground mb-4">
+            Tu pool cooperativo ha sido creado. Los miembros ya pueden unirse.
+          </p>
+
+          {txHash && (
+            <a
+              href={`https://explorer.test.mezo.org/tx/${txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline text-sm block mb-4"
+            >
+              Ver transacción en el explorer →
+            </a>
+          )}
+
+          {/* Sync Status */}
+          {isSyncing ? (
+            <Alert className="bg-blue-500/10 border-blue-500/30 mb-4">
+              <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />
+              <AlertDescription className="text-blue-200 text-sm">
+                <strong>Sincronizando datos...</strong>
+                <br />
+                Actualizando la lista de pools desde blockchain
+              </AlertDescription>
+            </Alert>
+          ) : countdown > 0 ? (
+            <Alert className="bg-green-500/10 border-green-500/30 mb-4">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <AlertDescription className="text-green-200 text-sm">
+                <strong>Datos sincronizados</strong>
+                <br />
+                Redirigiendo a "Mis Pools" en {countdown}...
+              </AlertDescription>
+            </Alert>
+          ) : (
+            <Alert className="bg-green-500/10 border-green-500/30 mb-4">
+              <CheckCircle2 className="h-4 w-4 text-green-500" />
+              <AlertDescription className="text-green-200 text-sm">
+                ¡Listo! Tus datos están actualizados
+              </AlertDescription>
+            </Alert>
+          )}
+
+          <div className="flex gap-3">
+            <Button
+              onClick={() => {
+                setCountdown(0)
+                setIsTransitioning(true)
+                onSuccess?.()
+              }}
+              className="flex-1 bg-green-600 hover:bg-green-700"
+              disabled={isSyncing}
+            >
+              {isSyncing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Sincronizando...
+                </>
+              ) : (
+                'Ver Mis Pools Ahora'
+              )}
+            </Button>
+            <Button
+              onClick={handleReset}
+              variant="outline"
+              disabled={isSyncing}
+            >
+              Crear Otro Pool
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    )
   }
 
   return (
-    <Card className="bg-card border-primary/20 shadow-custom">
+    <Card className="bg-card border-2 border-primary/50">
       <CardHeader>
-        <CardTitle>Crear Nuevo Pool Cooperativo</CardTitle>
-        <CardDescription>Define las reglas y el propósito de tu grupo de ahorro.</CardDescription>
+        <CardTitle className="flex items-center gap-2">
+          <Users className="h-5 w-5 text-primary" />
+          Crear Nuevo Pool Cooperativo
+        </CardTitle>
+        <CardDescription>
+          Define las reglas y el propósito de tu grupo de ahorro colaborativo
+        </CardDescription>
       </CardHeader>
+
       <CardContent>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Nombre del Pool</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Ej: Ahorro Familiar García" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Pool Name */}
+          <div className="space-y-2">
+            <Label htmlFor="name">
+              Nombre del Pool <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="name"
+              placeholder="Ej: Ahorro Familiar 2025"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              disabled={isProcessing}
+              className={validationErrors.name ? 'border-red-500' : ''}
             />
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                control={form.control}
-                name="minContribution"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Contribución Mínima</FormLabel>
-                    <FormControl>
-                        <div className="relative">
-                            <Input type="number" step="0.001" {...field} className="font-code pr-12"/>
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 font-code text-muted-foreground">BTC</span>
-                        </div>
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-                <FormField
-                control={form.control}
-                name="maxContribution"
-                render={({ field }) => (
-                    <FormItem>
-                    <FormLabel>Contribución Máxima</FormLabel>
-                    <FormControl>
-                        <div className="relative">
-                            <Input type="number" step="0.001" {...field} className="font-code pr-12"/>
-                            <span className="absolute inset-y-0 right-0 flex items-center pr-3 font-code text-muted-foreground">BTC</span>
-                        </div>
-                    </FormControl>
-                    <FormMessage />
-                    </FormItem>
-                )}
-                />
-            </div>
-            
-            <FormField
-                control={form.control}
-                name="maxMembers"
-                render={({ field }) => (
-                    <FormItem>
-                        <div className="flex justify-between items-center">
-                            <FormLabel>Máximo de Miembros</FormLabel>
-                            <span className="font-code text-primary font-bold">{maxMembers}</span>
-                        </div>
-                        <FormControl>
-                            <Slider
-                                min={3}
-                                max={50}
-                                step={1}
-                                value={[maxMembers]}
-                                onValueChange={(value) => {
-                                    setMaxMembers(value[0]);
-                                    field.onChange(value[0]);
-                                }}
-                            />
-                        </FormControl>
-                    </FormItem>
-                )}
-            />
+            {validationErrors.name && (
+              <p className="text-sm text-red-500">{validationErrors.name}</p>
+            )}
+          </div>
 
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Descripción</FormLabel>
-                  <FormControl>
-                    <Textarea placeholder="Describe el propósito de tu pool..." {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
+          {/* Contribution Limits */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="minContribution">
+                Contribución Mínima (BTC) <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="minContribution"
+                  type="number"
+                  step="0.001"
+                  min="0.001"
+                  placeholder="0.001"
+                  value={formData.minContribution}
+                  onChange={(e) => setFormData({ ...formData, minContribution: e.target.value })}
+                  disabled={isProcessing}
+                  className={validationErrors.minContribution ? 'border-red-500' : ''}
+                />
+                <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">BTC</span>
+              </div>
+              {validationErrors.minContribution && (
+                <p className="text-sm text-red-500">{validationErrors.minContribution}</p>
               )}
-            />
-
-            <Accordion type="single" collapsible>
-                <AccordionItem value="item-1" className="border-primary/20">
-                    <AccordionTrigger>Configuración Avanzada</AccordionTrigger>
-                    <AccordionContent className="space-y-4 pt-4">
-                        <FormField
-                            control={form.control}
-                            name="isPrivate"
-                            render={({ field }) => (
-                                <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm bg-background/50">
-                                    <div className="space-y-0.5">
-                                        <FormLabel>Hacer pool privado</FormLabel>
-                                        <p className="text-xs text-muted-foreground">Solo visible para quienes tengan el enlace.</p>
-                                    </div>
-                                    <FormControl>
-                                        <Switch checked={field.value} onCheckedChange={field.onChange} />
-                                    </FormControl>
-                                </FormItem>
-                            )}
-                        />
-                        <FormField
-                            control={form.control}
-                            name="lockupPeriod"
-                            render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Periodo de Bloqueo (Lockup)</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value || "none"}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="none">Sin bloqueo</SelectItem>
-                                            <SelectItem value="30">30 días</SelectItem>
-                                            <SelectItem value="90">90 días</SelectItem>
-                                            <SelectItem value="180">180 días</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <FormMessage />
-                                </FormItem>
-                            )}
-                        />
-                    </AccordionContent>
-                </AccordionItem>
-            </Accordion>
-            
-            <div className="rounded-lg bg-background/50 p-4 border border-primary/20 space-y-2">
-                <p className="font-bold text-center">💰 Costo de creación: 0.0001 BTC</p>
-                <p className="text-xs text-muted-foreground text-center">Este pequeño fee se usa para prevenir el spam en la red.</p>
             </div>
 
-            <div className="flex gap-4 pt-4">
-              <Button 
-                type="submit" 
-                variant="secondary" 
-                className="w-full" 
-                disabled={!form.formState.isValid || isPending || !address}
-              >
-                {isPending ? (
+            <div className="space-y-2">
+              <Label htmlFor="maxContribution">
+                Contribución Máxima (BTC) <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="maxContribution"
+                  type="number"
+                  step="0.01"
+                  min="0.001"
+                  placeholder="1"
+                  value={formData.maxContribution}
+                  onChange={(e) => setFormData({ ...formData, maxContribution: e.target.value })}
+                  disabled={isProcessing}
+                  className={validationErrors.maxContribution ? 'border-red-500' : ''}
+                />
+                <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">BTC</span>
+              </div>
+              {validationErrors.maxContribution && (
+                <p className="text-sm text-red-500">{validationErrors.maxContribution}</p>
+              )}
+            </div>
+          </div>
+
+          {/* Max Members */}
+          <div className="space-y-2">
+            <Label htmlFor="maxMembers">
+              Máximo de Miembros <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              id="maxMembers"
+              type="number"
+              min="2"
+              max="100"
+              placeholder="10"
+              value={formData.maxMembers}
+              onChange={(e) => setFormData({ ...formData, maxMembers: e.target.value })}
+              disabled={isProcessing}
+              className={validationErrors.maxMembers ? 'border-red-500' : ''}
+            />
+            {validationErrors.maxMembers && (
+              <p className="text-sm text-red-500">{validationErrors.maxMembers}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              Número máximo de personas que pueden unirse al pool
+            </p>
+          </div>
+
+          {/* Description (Optional) */}
+          <div className="space-y-2">
+            <Label htmlFor="description">
+              Descripción <span className="text-muted-foreground">(Opcional)</span>
+            </Label>
+            <Textarea
+              id="description"
+              placeholder="Describe el propósito del pool, reglas del grupo, objetivos de ahorro..."
+              value={formData.description}
+              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              disabled={isProcessing}
+              rows={4}
+              maxLength={500}
+            />
+            <p className="text-xs text-muted-foreground text-right">
+              {formData.description.length}/500 caracteres
+            </p>
+          </div>
+
+          {/* Info Banner */}
+          <Alert className="bg-blue-500/10 border-blue-500/30">
+            <Info className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="text-blue-200 text-sm">
+              <strong className="text-blue-400">Sin costo de creación</strong>
+              <br />
+              Solo pagas el gas de la transacción. El pool se activa cuando el primer miembro deposita.
+            </AlertDescription>
+          </Alert>
+
+          {/* Features Info */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
+              <TrendingUp className="h-4 w-4 text-primary mb-1" />
+              <p className="text-xs font-medium text-primary">Yields Compartidos</p>
+              <p className="text-xs text-muted-foreground">5-7% APR del pool</p>
+            </div>
+            <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+              <Shield className="h-4 w-4 text-green-500 mb-1" />
+              <p className="text-xs font-medium text-green-500">Totalmente Seguro</p>
+              <p className="text-xs text-muted-foreground">Smart contracts auditados</p>
+            </div>
+            <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
+              <Users className="h-4 w-4 text-purple-500 mb-1" />
+              <p className="text-xs font-medium text-purple-500">Flexible</p>
+              <p className="text-xs text-muted-foreground">Entra y sal cuando quieras</p>
+            </div>
+          </div>
+
+          {/* Error Display */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {/* Transaction Status */}
+          {isProcessing && (
+            <Alert className="bg-yellow-500/10 border-yellow-500/30 animate-pulse">
+              <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
+              <AlertDescription className="text-yellow-200">
+                {state === 'executing' && (
                   <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Creando...
+                    <strong>Paso 1 de 2:</strong> Confirma la transacción en tu wallet...
                   </>
-                ) : (
-                  <>🚀 CREAR POOL</>
                 )}
-              </Button>
-              <Button 
-                type="button" 
-                variant="outline" 
-                className="w-full" 
-                onClick={() => form.reset()}
-                disabled={isPending}
-              >
-                ❌ CANCELAR
-              </Button>
-            </div>
-          </form>
-        </Form>
+                {state === 'processing' && (
+                  <>
+                    <strong>Paso 2 de 2:</strong> Creando pool en la blockchain...
+                    <br />
+                    <span className="text-xs">Esto puede tomar 10-30 segundos</span>
+                  </>
+                )}
+              </AlertDescription>
+            </Alert>
+          )}
+
+          {/* Action Buttons */}
+          <div className="flex gap-3">
+            <Button
+              type="submit"
+              disabled={isProcessing}
+              className="flex-1 bg-primary hover:bg-primary/90"
+              size="lg"
+            >
+              {isProcessing ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Creando...
+                </>
+              ) : (
+                <>
+                  <Users className="h-4 w-4 mr-2" />
+                  Crear Pool
+                </>
+              )}
+            </Button>
+
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleReset}
+              disabled={isProcessing}
+              size="lg"
+            >
+              Cancelar
+            </Button>
+          </div>
+        </form>
       </CardContent>
     </Card>
-  );
+  )
 }

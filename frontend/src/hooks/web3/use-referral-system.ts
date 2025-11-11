@@ -1,5 +1,5 @@
 /**
- * @fileoverview Referral System Hook - IndividualPoolV3 Feature
+ * @fileoverview Referral System Hook - IndividualPool Feature
  * 
  * Features:
  * - Get referral stats (count, rewards, referrer)

@@ -2,8 +2,8 @@
 
 import { Card, CardContent } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useIndividualPoolV3 } from '@/hooks/web3/use-individual-pool-v3'
-import { formatMUSD } from '@/hooks/web3/use-musd-approval-v2'
+import { useIndividualPool } from '@/hooks/web3/use-individual-pool'
+import { formatMUSD } from '@/hooks/web3/use-musd-approval'
 import { Clock } from 'lucide-react'
 import { useEffect, useState } from 'react'
 
@@ -19,7 +19,7 @@ function formatTimeSince(timestamp: bigint | undefined): string {
 }
 
 export function YourPosition() {
-  const { userInfo, poolTVL, isLoading, address } = useIndividualPoolV3()
+  const { userInfo, poolTVL, isLoading, address } = useIndividualPool()
   const [timeLeft, setTimeLeft] = useState('23:59:59')
   const isConnected = !!address
 

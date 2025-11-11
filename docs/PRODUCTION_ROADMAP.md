@@ -3,7 +3,7 @@
 ## 📊 Current Status
 
 ### ✅ Completed (Production-Ready)
-- [x] IndividualPoolV3 deployed and working
+- [x] IndividualPool deployed and working
 - [x] Deposit functionality (with approval flow)
 - [x] Full withdrawal (principal + yields)
 - [x] Partial withdrawal (keep position active)
@@ -72,7 +72,7 @@ function claimYields() external nonReentrant returns (uint256 netYield)
 - Updates balance immediately
 
 ##### 2.2 Auto-Compound Toggle
-**Why:** V3 feature already in contract, needs UI
+**Why:** feature already in contract, needs UI
 
 **Implementation:**
 ```typescript
@@ -90,7 +90,7 @@ function toggleAutoCompound() external
 - Threshold: 1 MUSD
 
 ##### 2.3 Referral System UI
-**Why:** V3 feature ready, drives growth
+**Why:** feature ready, drives growth
 
 **Implementation:**
 ```typescript
@@ -240,7 +240,7 @@ const { poolAPR, userAPR, last24hYields } = usePoolAnalytics()
 **Risk:** LOW - contract function exists
 
 ### 3. Auto-Compound Toggle (1 hour)
-**Impact:** HIGH - V3 differentiator  
+**Impact:** HIGH - differentiator  
 **Effort:** LOW - just a switch  
 **Risk:** NONE - already in contract
 

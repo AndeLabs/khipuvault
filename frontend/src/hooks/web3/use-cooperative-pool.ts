@@ -19,7 +19,7 @@ import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { parseEther, formatEther, type Address } from 'viem'
 import { readContract } from '@wagmi/core'
 
-// ✅ Production address - CooperativePoolV3 Proxy
+// ✅ Production address - CooperativePool Proxy
 const COOPERATIVE_POOL_ADDRESS = '0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65' as Address
 const MUSD_ADDRESS = '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503' as Address
 
@@ -287,7 +287,6 @@ export function useCooperativePool() {
       // Force immediate refetch
       queryClient.refetchQueries({
         type: 'all',
-        refetchType: 'all',
       })
 
       console.log('✅ All pool queries invalidated and refetching')

@@ -3,8 +3,8 @@
 ## 🔍 Current Status
 
 ### ✅ What's Working:
-- Individual Pool V3 deployed: `0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393`
-- Yield Aggregator V3 deployed: `0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6`
+- Individual Pool deployed: `0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393`
+- Yield Aggregator deployed: `0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6`
 - Deposits and withdrawals working perfectly
 - Smart yield calculation logic in place
 
@@ -18,9 +18,9 @@
 ```
 User Deposits MUSD
     ↓
-IndividualPoolV3
+IndividualPool
     ↓
-YieldAggregatorV3
+YieldAggregator
     ↓
 StabilityPoolStrategy  ← NOT DEPLOYED YET
     ↓

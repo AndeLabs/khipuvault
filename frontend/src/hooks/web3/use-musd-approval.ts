@@ -1,161 +1,218 @@
+/**
+ * @fileoverview MUSD Approval Hook - Production Ready
+ * @module hooks/web3/use-musd-approval
+ * 
+ * Handles ERC20 MUSD token approval flow with proper state management
+ * Uses Wagmi v2 patterns: useWriteContract + useWaitForTransactionReceipt
+ * 
+ * Features:
+ * - Tracks approval state (pending, confirmed, etc.)
+ * - Caches approval checks to reduce RPC calls
+ * - Auto-refetch on block changes
+ * - Proper error handling
+ * - Production-grade TypeScript
+ */
+
 'use client'
 
-import { useAccount, useWriteContract, useReadContract, useWaitForTransactionReceipt } from 'wagmi'
-import { useState, useCallback, useEffect } from 'react'
-import { parseEther, maxUint256 } from 'viem'
-import { MEZO_TESTNET_ADDRESSES, ERC20_ABI } from '@/lib/web3/contracts'
+import { useAccount, usePublicClient, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useBlockNumber } from 'wagmi'
+import { useEffect } from 'react'
+import { parseEther } from 'viem'
+import { MEZO_TESTNET_ADDRESSES, MUSD_ABI } from '@/lib/web3/contracts'
+import { normalizeBigInt } from '@/lib/query-utils'
+
+const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`
+const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
 
 /**
- * Hook to manage MUSD approval for IndividualPool
+ * Hook to manage MUSD approval flow
  * 
- * MUSD is an ERC20 token, so users must approve the pool to spend their MUSD
- * This hook handles checking allowance and approving MUSD
+ * Usage:
+ * ```tsx
+ * const {
+ *   musdBalance,
+ *   isApprovalNeeded,
+ *   approve,
+ *   isApproving,
+ *   isApprovalConfirmed,
+ *   error
+ * } = useMusdApprovalV2()
+ * 
+ * // Check if amount needs approval
+ * const needsApproval = isApprovalNeeded(parseEther('100'))
+ * 
+ * // Approve
+ * await approve(parseEther('100'))
+ * ```
  */
-export function useMUSDApproval() {
+export function useMusdApprovalV2() {
   const { address, isConnected } = useAccount()
-  const [error, setError] = useState<string | null>(null)
-  const [isRefetching, setIsRefetching] = useState(false)
-
-  const musdAddress = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`
-  const poolAddress = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
-
-  // Check current allowance
-  const { data: allowance, refetch: refetchAllowance } = useReadContract({
-    address: musdAddress,
-    abi: ERC20_ABI,
-    functionName: 'allowance',
-    args: address ? [address, poolAddress] : undefined,
-    query: {
-      enabled: isConnected && !!address,
-    },
-  })
+  const publicClient = usePublicClient()
+  const queryClient = useQueryClient()
+  
+  // Watch block number for real-time updates
+  const { data: blockNumber } = useBlockNumber({ watch: true })
 
   // Get MUSD balance
-  const { data: musdBalance, refetch: refetchBalance } = useReadContract({
-    address: musdAddress,
-    abi: ERC20_ABI,
+  const { data: musdBalance, isLoading: balanceLoading } = useReadContract({
+    address: MUSD_ADDRESS,
+    abi: MUSD_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
     query: {
-      enabled: isConnected && !!address,
+      enabled: !!address && isConnected,
+      staleTime: 10 * 1000, // 10 seconds
     },
   })
 
-  // Approve transaction
-  const {
-    writeContract: approve,
-    isPending: isApproving,
-    data: approveTxHash,
-  } = useWriteContract()
-
-  const { data: approveReceipt, isLoading: isWaitingApproval } = useWaitForTransactionReceipt({
-    hash: approveTxHash,
+  // Get current approval amount
+  const { data: allowance, refetch: refetchAllowance } = useReadContract({
+    address: MUSD_ADDRESS,
+    abi: MUSD_ABI,
+    functionName: 'allowance',
+    args: address ? [address, POOL_ADDRESS] : undefined,
+    query: {
+      enabled: !!address && isConnected,
+      staleTime: 10 * 1000,
+    },
   })
 
-  // Auto-refetch allowance when approval completes
-  const isApprovalComplete = !!approveReceipt?.blockHash
-  
-  // Use effect to refetch when approval completes
-  const handleApprovalComplete = useCallback(async () => {
-    if (isApprovalComplete && !isRefetching) {
-      setIsRefetching(true)
-      try {
-        // Small delay to ensure blockchain state is updated
-        await new Promise(resolve => setTimeout(resolve, 1000))
-        await refetchAllowance()
-        await refetchBalance()
-      } catch (err) {
-        console.error('Error refetching after approval:', err)
-      } finally {
-        setIsRefetching(false)
-      }
-    }
-  }, [isApprovalComplete, isRefetching, refetchAllowance, refetchBalance])
-
-  // Auto-refetch when approval completes
+  // Refetch allowance on block changes
   useEffect(() => {
-    handleApprovalComplete()
-  }, [handleApprovalComplete])
+    if (blockNumber) {
+      refetchAllowance()
+    }
+  }, [blockNumber, refetchAllowance])
 
-  // Check if approval is needed
-  const needsApproval = (amount: string): boolean => {
+  // Write contract: approve
+  const { writeContract, data: approveTxHash, error: approveError, isPending: isApprovePending } = useWriteContract()
+
+  // Wait for approval transaction
+  const { isLoading: isApproveConfirming, isSuccess: isApproveConfirmed } = useWaitForTransactionReceipt({
+    hash: approveTxHash,
+    pollingInterval: 1000, // Check every second
+  })
+
+  /**
+   * Check if a given amount needs approval
+   * Returns true if current allowance < amount
+   */
+  function isApprovalNeeded(amountWei: bigint): boolean {
     if (!allowance) return true
-    const requiredAmount = parseEther(amount)
-    return allowance < requiredAmount
+    return allowance < amountWei
   }
 
-  // Handle approval
-  const handleApprove = useCallback(
-    async (amount?: string) => {
-      try {
-        setError(null)
+  /**
+   * Approve unlimited MUSD spending
+   * Best practice: approve unlimited to avoid repeated approvals
+   */
+  async function approveUnlimited(): Promise<void> {
+    if (!address) {
+      throw new Error('Wallet not connected')
+    }
 
-        if (!address) {
-          setError('Wallet not connected')
-          return
-        }
+    // Approve unlimited (max uint256)
+    const MAX_UINT256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
 
-        // If no amount specified, approve infinite (unlimited)
-        const approvalAmount = amount ? parseEther(amount) : maxUint256
+    writeContract({
+      address: MUSD_ADDRESS,
+      abi: MUSD_ABI,
+      functionName: 'approve',
+      args: [POOL_ADDRESS, MAX_UINT256],
+    })
+  }
 
-        approve({
-          address: musdAddress,
-          abi: ERC20_ABI,
-          functionName: 'approve',
-          args: [poolAddress, approvalAmount],
-          account: address,
+  /**
+   * Approve specific amount
+   * Less gas efficient but more secure
+   */
+  async function approveAmount(amount: string | bigint): Promise<void> {
+    if (!address) {
+      throw new Error('Wallet not connected')
+    }
+
+    const amountWei = typeof amount === 'string' ? parseEther(amount) : amount
+
+    writeContract({
+      address: MUSD_ADDRESS,
+      abi: MUSD_ABI,
+      functionName: 'approve',
+      args: [POOL_ADDRESS, amountWei],
+    })
+  }
+
+  /**
+   * Auto-refetch allowance when approval is confirmed
+   */
+  useEffect(() => {
+    if (isApproveConfirmed) {
+      // Small delay to ensure blockchain state is updated
+      const timer = setTimeout(() => {
+        refetchAllowance()
+        // Invalidate all relevant queries
+        queryClient.invalidateQueries({
+          queryKey: ['individual-pool'],
         })
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Approval failed')
-      }
-    },
-    [approve, musdAddress, poolAddress, address]
-  )
+      }, 2000)
 
-  // Format balance for display
-  const formattedBalance = musdBalance ? (Number(musdBalance) / 1e18).toFixed(6) : '0.000000'
-  const formattedAllowance = allowance ? (Number(allowance) / 1e18).toFixed(6) : '0.000000'
+      return () => clearTimeout(timer)
+    }
+  }, [isApproveConfirmed, refetchAllowance, queryClient])
 
   return {
     // Balance info
-    musdBalance,
-    formattedBalance,
-
+    musdBalance: musdBalance as bigint | undefined,
+    balanceFormatted: musdBalance ? formatMUSDFromWei(musdBalance) : '0.00',
+    
     // Allowance info
-    allowance,
-    formattedAllowance,
-    needsApproval,
-
+    allowance: allowance as bigint | undefined,
+    isApprovalNeeded,
+    
     // Approval actions
-    approve: handleApprove,
-    isApproving,
-    isWaitingApproval,
-    approveTxHash,
-    approveReceipt,
-    isApprovalComplete,
-
-    // Utilities
-    refetchAllowance,
-    refetchBalance,
-    error,
+    approveUnlimited,
+    approveAmount,
+    
+    // Approval states
+    isApproving: isApprovePending,
+    isApproveConfirming,
+    isApprovalConfirmed: isApproveConfirmed,
+    isApprovePending: isApprovePending || isApproveConfirming,
+    
+    // Errors and states
+    error: approveError?.message || null,
+    isLoading: balanceLoading,
+    isConnected: isConnected && !!address,
   }
 }
 
 /**
- * Format MUSD amount with proper decimals
+ * Helper: Format MUSD from wei
+ * MUSD has 18 decimals
  */
-export function formatMUSD(value: bigint | undefined): string {
-  if (!value) return '0.000000'
-  return (Number(value) / 1e18).toFixed(6)
+export function formatMUSDFromWei(amount: bigint | number | undefined): string {
+  if (!amount) return '0.00'
+  const musd = Number(amount) / 1e18
+  return musd.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
 }
 
 /**
- * Format MUSD for display (shorter format)
+ * Helper: Format MUSD (short version)
  */
-export function formatMUSDShort(value: bigint | undefined): string {
-  if (!value) return '0'
-  const amount = Number(value) / 1e18
-  if (amount >= 1000) return (amount / 1000).toFixed(2) + 'k'
-  if (amount >= 1) return amount.toFixed(2)
-  return amount.toFixed(6)
+export function formatMUSDShort(amount: bigint | number | undefined): string {
+  if (!amount) return '0'
+  const musd = Number(amount) / 1e18
+  if (musd >= 1000) {
+    return (musd / 1000).toFixed(1) + 'k'
+  }
+  return musd.toFixed(0)
+}
+
+/**
+ * Helper: Format full MUSD amount
+ */
+export function formatMUSD(amount: bigint | number | undefined): string {
+  if (!amount) return '0.00 MUSD'
+  return formatMUSDFromWei(amount) + ' MUSD'
 }

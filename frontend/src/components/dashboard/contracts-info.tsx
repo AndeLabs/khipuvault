@@ -29,7 +29,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['Auto-compound', 'Referidos', 'Depósitos incrementales'],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.INDIVIDUAL_POOL}`,
-    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/IndividualPoolV3.sol',
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/IndividualPool.sol',
     category: 'pools'
   },
   {
@@ -40,7 +40,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['Ahorros grupales', 'Metas comunes', 'Gobernanza'],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.COOPERATIVE_POOL}`,
-    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/CooperativePoolV3.sol',
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/pools/CooperativePool.sol',
     category: 'pools'
   },
   {
@@ -77,7 +77,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['Puente BTC-MUSD', 'Seguridad', 'Optimización'],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.MEZO_INTEGRATION}`,
-    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/MezoIntegrationV3.sol',
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/MezoIntegration.sol',
     category: 'integrations'
   },
   {
@@ -88,7 +88,7 @@ const contractsInfo: ContractInfo[] = [
     status: 'deployed',
     features: ['Diversificación', 'Rebalanceo', 'Múltiples estrategias'],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.YIELD_AGGREGATOR}`,
-    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/YieldAggregatorV3.sol',
+    docsUrl: 'https://github.com/AndeLabs/khipuvault/blob/main/contracts/src/integrations/YieldAggregator.sol',
     category: 'integrations'
   }
 ]
