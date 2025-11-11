@@ -287,7 +287,6 @@ export function useCooperativePool() {
       // Force immediate refetch
       queryClient.refetchQueries({
         type: 'all',
-        refetchType: 'all',
       })
 
       console.log('✅ All pool queries invalidated and refetching')

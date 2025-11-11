@@ -55,7 +55,6 @@ export function useCooperativePoolEvents() {
       // This ensures background tabs also get updated data
       queryClient.refetchQueries({
         type: 'all', // Changed from 'active' to 'all'
-        refetchType: 'all',
       })
 
       console.log('✅ All queries invalidated and refetching after PoolCreated')
@@ -73,7 +72,6 @@ export function useCooperativePoolEvents() {
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.refetchQueries({
         type: 'all',
-        refetchType: 'all',
       })
       console.log('✅ Queries refetched after PoolClosed')
     },
@@ -91,7 +89,6 @@ export function useCooperativePoolEvents() {
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
         type: 'all',
-        refetchType: 'all',
       })
       console.log('✅ Queries refetched after MemberJoined')
     },
@@ -109,7 +106,6 @@ export function useCooperativePoolEvents() {
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
         type: 'all',
-        refetchType: 'all',
       })
       console.log('✅ Queries refetched after MemberLeft')
     },
@@ -126,7 +122,6 @@ export function useCooperativePoolEvents() {
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
         type: 'all',
-        refetchType: 'all',
       })
       console.log('✅ Queries refetched after YieldClaimed')
     },
