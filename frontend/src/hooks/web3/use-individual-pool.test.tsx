@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { renderHook, waitFor } from '@testing-library/react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { useIndividualPool } from './use-individual-pool'
+import { useIndividualPool, formatMUSD, formatMUSDCompact, formatAPR, formatDays } from './use-individual-pool'
 import { MOCK_USER_INFO, MOCK_POOL_STATS, MOCK_BALANCE, MOCK_ADDRESSES } from '@/test/mocks/contracts'
 
 // Mock wagmi hooks
@@ -233,8 +233,6 @@ describe('useIndividualPool', () => {
 })
 
 describe('Formatting Helpers', () => {
-  const { formatMUSD, formatMUSDCompact, formatAPR, formatDays } = await import('./use-individual-pool')
-
   describe('formatMUSD', () => {
     it('should format zero correctly', () => {
       expect(formatMUSD(BigInt(0))).toBe('0.00')
