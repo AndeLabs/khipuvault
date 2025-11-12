@@ -1,6 +1,11 @@
 /**
- * Cooperative Savings Pool Page
+ * Cooperative Savings Pool Page V3 - Production Ready
  * All component exports have been fixed to support both V3 and non-V3 naming
+ *
+ * MAJOR UPDATE: Hybrid Event Indexing System
+ * - Historical scanning: Detects pools created before page load
+ * - Real-time events: Watches for new pools while page is open
+ * - Complete coverage: Never miss a pool again!
  */
 'use client'
 
@@ -16,10 +21,19 @@ import { PoolsList } from "@/components/dashboard/cooperative-savings/pools-list
 import { JoinPool } from "@/components/dashboard/cooperative-savings/join-pool"
 import { MyPools } from "@/components/dashboard/cooperative-savings/my-pools"
 import { FloatingSyncIndicator } from "@/components/dashboard/cooperative-savings/sync-indicator"
+import { HistoricalScanIndicator } from "@/components/dashboard/cooperative-savings/historical-scan-indicator"
 import { useCooperativePoolEvents } from "@/hooks/web3/use-cooperative-pool-events"
+import { useHistoricalPoolEvents } from "@/hooks/web3/use-historical-pool-events"
 
 export default function CooperativeSavingsPage() {
-  // Enable automatic refresh on blockchain events
+  // 🔥 NEW: Scan historical events (pools created before page load)
+  const historicalScan = useHistoricalPoolEvents({
+    enabled: true,
+    scanOnMount: true,
+    verbose: true,
+  })
+
+  // ✅ EXISTING: Listen for real-time events (pools created while page is open)
   useCooperativePoolEvents()
 
   const [activeTab, setActiveTab] = useState('explore')
@@ -62,6 +76,13 @@ export default function CooperativeSavingsPage() {
           Ahorra en grupo con BTC nativo · Yields compartidos · Sin fees de entrada
         </p>
       </AnimateOnScroll>
+
+      {/* 🔥 NEW: Historical scan indicator - Shows when indexing past events */}
+      {(historicalScan.isScanning || historicalScan.error) && (
+        <AnimateOnScroll delay="50ms">
+          <HistoricalScanIndicator />
+        </AnimateOnScroll>
+      )}
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <AnimateOnScroll delay="100ms">
