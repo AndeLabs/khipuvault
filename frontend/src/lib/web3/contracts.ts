@@ -90,6 +90,47 @@ import IndividualPoolABI from '@/contracts/abis/IndividualPool.json'
 export const INDIVIDUAL_POOL_ABI = (IndividualPoolABI as any).abi as const
 
 // ============================================================================
+// TYPE DEFINITIONS FOR V3 POOLS
+// ============================================================================
+
+/**
+ * User information from Individual Pool V3
+ */
+export interface UserInfoV3 {
+  deposit: bigint
+  yields: bigint
+  hasAutoCompound: boolean
+  referralCode: string
+  referrer: string
+  referralCount: bigint
+  referralRewards: bigint
+}
+
+/**
+ * Referral statistics for a user
+ */
+export interface ReferralStats {
+  referralCode: string
+  referralCount: bigint
+  totalRewards: bigint
+  isActive: boolean
+}
+
+/**
+ * V3 Feature flags for Individual Pool
+ */
+export const V3_FEATURES = {
+  AUTO_COMPOUND: true,
+  REFERRALS: true,
+  INCREMENTAL_DEPOSITS: true,
+  PARTIAL_WITHDRAWALS: true,
+  ENHANCED_VIEWS: true,
+} as const
+
+// Export alias for backward compatibility with old cleanup
+export const MEZO_V3_ADDRESSES = MEZO_TESTNET_ADDRESSES
+
+// ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
