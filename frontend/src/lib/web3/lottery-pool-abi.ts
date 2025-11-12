@@ -1,9 +1,11 @@
 /**
  * @fileoverview ABI for SimpleLotteryPool contract
  * @module lib/web3/lottery-pool-abi
- * 
+ *
  * SimpleLotteryPool deployed on Mezo Testnet at:
- * 0x100c3DA636C8E25b5e1661a97fa2fc4fDb35cEB7
+ * 0x3e5d272321e28731844c20e0a0c725a97301f83a
+ *
+ * Deployed: Nov 2024
  */
 
 export const LOTTERY_POOL_ABI = [
