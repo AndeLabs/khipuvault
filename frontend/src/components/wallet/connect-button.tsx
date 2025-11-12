@@ -96,7 +96,7 @@ export function ConnectButton() {
             
             <DropdownMenuItem asChild>
               <a
-                href={`https://explorer.testnet.mezo.org/address/${address}`}
+                href={`https://explorer.test.mezo.org/address/${address}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
