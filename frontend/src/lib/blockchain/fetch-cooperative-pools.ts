@@ -54,7 +54,7 @@ export async function fetchCooperativePools(
     return []
   }
 
-  console.log(`🔄 Fetching ${poolCounter} cooperative pools`)
+  // console.log(`🔄 Fetching ${poolCounter} cooperative pools`) // Commented to reduce log spam
 
   try {
     const poolsData: PoolInfo[] = []
@@ -84,7 +84,7 @@ export async function fetchCooperativePools(
       }
     }
 
-    console.log(`✅ Fetched ${poolsData.length} cooperative pools`)
+    // console.log(`✅ Fetched ${poolsData.length} cooperative pools`) // Commented to reduce log spam
     return poolsData
   } catch (error) {
     console.error('Error fetching cooperative pools:', error)

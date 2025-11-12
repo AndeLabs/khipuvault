@@ -51,10 +51,10 @@ export function useCooperativePoolEvents() {
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
 
-      // ✅ CRITICAL FIX: Refetch ALL queries (not just active ones)
-      // This ensures background tabs also get updated data
+      // ✅ CRITICAL FIX: Refetch only active queries to prevent log spam
+      // Only queries currently in use will be refetched
       queryClient.refetchQueries({
-        type: 'all', // Changed from 'active' to 'all'
+        type: 'active',
       })
 
       console.log('✅ All queries invalidated and refetching after PoolCreated')
@@ -71,7 +71,7 @@ export function useCooperativePoolEvents() {
       queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.refetchQueries({
-        type: 'all',
+        type: 'active',
       })
       console.log('✅ Queries refetched after PoolClosed')
     },
@@ -88,7 +88,7 @@ export function useCooperativePoolEvents() {
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
-        type: 'all',
+        type: 'active',
       })
       console.log('✅ Queries refetched after MemberJoined')
     },
@@ -105,7 +105,7 @@ export function useCooperativePoolEvents() {
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
-        type: 'all',
+        type: 'active',
       })
       console.log('✅ Queries refetched after MemberLeft')
     },
@@ -121,7 +121,7 @@ export function useCooperativePoolEvents() {
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
-        type: 'all',
+        type: 'active',
       })
       console.log('✅ Queries refetched after YieldClaimed')
     },
