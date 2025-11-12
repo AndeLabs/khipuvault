@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog'
-import { useCooperativePool, usePoolInfo, useMemberInfo, PoolStatus } from '@/hooks/web3/use-cooperative-pool'
+import { useCooperativePool, usePoolInfo, useMemberInfo, PoolStatus, type PoolInfo } from '@/hooks/web3/use-cooperative-pool'
 import { PoolCardSkeleton } from './pool-card-skeleton'
 import { Users, TrendingUp, LogOut, DollarSign, Info, Loader2, AlertTriangle, CheckCircle2, Clock } from 'lucide-react'
 import { formatEther } from 'viem'
@@ -63,8 +63,8 @@ export function MyPoolsV3() {
     setShowSuccessDialog(true)
   }
 
-  // Note: Filtering is done at MyPoolCard level by checking memberInfo.active
-  // This ensures we only show pools where the user is an active member
+  // Note: Filtering is done at MyPoolCard level
+  // Shows pools where user is an active member OR the creator
   const myPools = poolIds
 
   if (poolCounter === 0) {
@@ -179,6 +179,115 @@ export function MyPoolsV3() {
   )
 }
 
+interface CreatedPoolCardProps {
+  poolId: number
+  poolInfo: PoolInfo
+}
+
+function CreatedPoolCard({ poolId, poolInfo }: CreatedPoolCardProps) {
+  const statusConfig = getStatusConfig(poolInfo.status)
+  const occupancyPercentage = (poolInfo.currentMembers / poolInfo.maxMembers) * 100
+
+  return (
+    <Card className="bg-card border-2 border-purple-500/50 hover:shadow-lg transition-shadow">
+      <CardHeader>
+        <div className="flex items-start justify-between">
+          <div className="flex-1">
+            <div className="flex items-center gap-2 mb-1">
+              <CardTitle className="text-lg">{poolInfo.name}</CardTitle>
+              <Badge className="bg-purple-500/20 text-purple-400 border-0">
+                Creador
+              </Badge>
+              <Badge className={`${statusConfig.bgColor} ${statusConfig.textColor} border-0`}>
+                {statusConfig.label}
+              </Badge>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Pool #{poolId} · Creado por ti
+            </p>
+          </div>
+        </div>
+      </CardHeader>
+
+      <CardContent className="space-y-4">
+        <Alert className="bg-yellow-500/10 border-yellow-500/30">
+          <AlertTriangle className="h-4 w-4 text-yellow-500" />
+          <AlertDescription className="text-yellow-200 text-sm">
+            <strong className="text-yellow-400">Pool creado - Únete para activarlo</strong>
+            <br />
+            Has creado este pool exitosamente. Para participar y empezar a generar yields, únete depositando BTC.
+          </AlertDescription>
+        </Alert>
+
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
+            <div className="flex items-center gap-2 mb-1">
+              <Users className="h-3.5 w-3.5 text-primary" />
+              <span className="text-xs font-medium text-primary">Miembros</span>
+            </div>
+            <p className="text-sm font-bold text-foreground">
+              {poolInfo.currentMembers} / {poolInfo.maxMembers}
+            </p>
+            <div className="mt-2 h-1.5 bg-primary/20 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all"
+                style={{ width: `${occupancyPercentage}%` }}
+              />
+            </div>
+          </div>
+
+          <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
+            <div className="flex items-center gap-2 mb-1">
+              <TrendingUp className="h-3.5 w-3.5 text-green-500" />
+              <span className="text-xs font-medium text-green-500">Total BTC</span>
+            </div>
+            <p className="text-sm font-bold text-foreground">
+              {parseFloat(formatEther(poolInfo.totalBtcDeposited)).toFixed(4)}
+            </p>
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Contribución mínima</span>
+            <span className="font-medium">{formatEther(poolInfo.minContribution)} BTC</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Contribución máxima</span>
+            <span className="font-medium">{formatEther(poolInfo.maxContribution)} BTC</span>
+          </div>
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">MUSD generado</span>
+            <span className="font-medium">{parseFloat(formatEther(poolInfo.totalMusdMinted)).toFixed(2)}</span>
+          </div>
+        </div>
+
+        <Button
+          onClick={() => {
+            // Navigate to join pool - we'll need to add onJoinPool callback
+            const joinPoolSection = document.querySelector('[data-tab="join-pool"]')
+            if (joinPoolSection instanceof HTMLElement) {
+              joinPoolSection.click()
+            }
+          }}
+          className="w-full bg-purple-600 hover:bg-purple-700"
+          size="lg"
+        >
+          <Users className="h-4 w-4 mr-2" />
+          Unirse a mi Pool
+        </Button>
+
+        <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t border-muted">
+          <Info className="h-3 w-3" />
+          <span>
+            Como creador, puedes unirte en cualquier momento depositando BTC entre el mínimo y máximo establecido.
+          </span>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
 interface MyPoolCardProps {
   poolId: number
   onClaimYield: (poolId: number) => void
@@ -195,8 +304,25 @@ function MyPoolCard({ poolId, onClaimYield, onLeavePool, isProcessing }: MyPoolC
     return <PoolCardSkeleton />
   }
 
-  if (!poolInfo || !memberInfo || !memberInfo.active) {
+  // Skip if pool doesn't exist
+  if (!poolInfo) {
     return null
+  }
+
+  // Check if user is the creator
+  const isCreator = address && poolInfo.creator.toLowerCase() === address.toLowerCase()
+
+  // Check if user is an active member
+  const isActiveMember = memberInfo && memberInfo.active
+
+  // Only show if user is creator OR active member
+  if (!isCreator && !isActiveMember) {
+    return null
+  }
+
+  // If user is creator but not member yet, show special card
+  if (isCreator && !isActiveMember) {
+    return <CreatedPoolCard poolId={poolId} poolInfo={poolInfo} />
   }
 
   const statusConfig = getStatusConfig(poolInfo.status)
@@ -219,6 +345,11 @@ function MyPoolCard({ poolId, onClaimYield, onLeavePool, isProcessing }: MyPoolC
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-1">
               <CardTitle className="text-lg">{poolInfo?.name || `Pool #${poolId}`}</CardTitle>
+              {isCreator && (
+                <Badge className="bg-purple-500/20 text-purple-400 border-0">
+                  Creador
+                </Badge>
+              )}
               <Badge className={`${statusConfig.bgColor} ${statusConfig.textColor} border-0`}>
                 {statusConfig.label}
               </Badge>

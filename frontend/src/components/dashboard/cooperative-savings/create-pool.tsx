@@ -137,7 +137,7 @@ export function CreatePoolV3({ onSuccess }: CreatePoolV3Props = {}) {
           </h2>
 
           <p className="text-muted-foreground mb-4">
-            Tu pool cooperativo ha sido creado. Los miembros ya pueden unirse.
+            Tu pool cooperativo ha sido creado exitosamente. Ahora únete para activarlo y empezar a generar yields.
           </p>
 
           {txHash && (
@@ -150,6 +150,14 @@ export function CreatePoolV3({ onSuccess }: CreatePoolV3Props = {}) {
               Ver transacción en el explorer →
             </a>
           )}
+
+          {/* Info about joining the pool */}
+          <Alert className="bg-purple-500/10 border-purple-500/30 mb-4">
+            <Info className="h-4 w-4 text-purple-500" />
+            <AlertDescription className="text-purple-200 text-sm">
+              <strong className="text-purple-400">Próximo paso:</strong> Únete a tu pool depositando BTC para activarlo y empezar a generar yields.
+            </AlertDescription>
+          </Alert>
 
           {/* Sync Status */}
           {isSyncing ? (
