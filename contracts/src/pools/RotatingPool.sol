@@ -110,9 +110,6 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     /// @notice Yield aggregator
     IYieldAggregator public immutable YIELD_AGGREGATOR;
 
-    /// @notice WBTC token
-    IERC20 public immutable WBTC;
-
     /// @notice MUSD token
     IERC20 public immutable MUSD;
 
@@ -237,27 +234,23 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @notice Constructor
      * @param _mezoIntegration Mezo integration address
      * @param _yieldAggregator Yield aggregator address
-     * @param _wbtc WBTC token address
      * @param _musd MUSD token address
      * @param _feeCollector Fee collector address
      */
     constructor(
         address _mezoIntegration,
         address _yieldAggregator,
-        address _wbtc,
         address _musd,
         address _feeCollector
     ) Ownable(msg.sender) {
         if (_mezoIntegration == address(0) ||
             _yieldAggregator == address(0) ||
-            _wbtc == address(0) ||
             _musd == address(0) ||
             _feeCollector == address(0)
         ) revert InvalidAddress();
 
         MEZO_INTEGRATION = IMezoIntegration(_mezoIntegration);
         YIELD_AGGREGATOR = IYieldAggregator(_yieldAggregator);
-        WBTC = IERC20(_wbtc);
         MUSD = IERC20(_musd);
         feeCollector = _feeCollector;
     }
@@ -362,10 +355,11 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @notice Make contribution for current period
      * @param poolId Pool ID
      */
-    function makeContribution(uint256 poolId) 
-        external 
-        nonReentrant 
-        whenNotPaused 
+    function makeContribution(uint256 poolId)
+        external
+        payable
+        nonReentrant
+        whenNotPaused
     {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
@@ -376,9 +370,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         if (member.contributionsMade >= pool.totalPeriods) revert ContributionAlreadyMade();
 
         uint256 amount = pool.contributionAmount;
-
-        // Transfer BTC from member
-        WBTC.safeTransferFrom(msg.sender, address(this), amount);
+        if (msg.value != amount) revert InvalidContribution();
 
         // Update member info
         member.contributionsMade++;
@@ -455,8 +447,9 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         // Update period info
         period.paid = true;
 
-        // Transfer payout (in BTC)
-        WBTC.safeTransfer(msg.sender, payoutAmount);
+        // Transfer payout (in native BTC)
+        (bool success, ) = msg.sender.call{value: payoutAmount}("");
+        if (!success) revert InvalidAddress();
 
         // Transfer yield (in MUSD)
         if (netYield > 0) {
@@ -641,11 +634,8 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     function _depositToMezo(uint256 poolId, uint256 btcAmount) internal {
         PoolInfo storage pool = pools[poolId];
 
-        // Approve Mezo
-        WBTC.forceApprove(address(MEZO_INTEGRATION), btcAmount);
-
-        // Deposit and mint MUSD
-        uint256 musdAmount = MEZO_INTEGRATION.depositAndMint(btcAmount);
+        // Deposit native BTC and mint MUSD
+        uint256 musdAmount = MEZO_INTEGRATION.depositAndMint{value: btcAmount}(btcAmount);
 
         // Approve yield aggregator
         MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
@@ -811,4 +801,9 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     function unpause() external onlyOwner {
         _unpause();
     }
+
+    /**
+     * @notice Allow contract to receive native BTC
+     */
+    receive() external payable {}
 }
