@@ -1,6 +1,5 @@
 /**
  * Cooperative Savings Pool Page
- * All component exports have been fixed to support both V3 and non-V3 naming
  */
 'use client'
 
@@ -56,7 +55,7 @@ export default function CooperativeSavingsPage() {
         </Link>
         <h1 className="text-3xl font-bold tracking-tight text-white mt-4 flex items-center gap-3">
           <span role="img" aria-label="handshake emoji" className="text-2xl">🤝</span>
-          Cooperative Savings Pool V3
+          Cooperative Savings Pool
         </h1>
         <p className="text-muted-foreground mt-2">
           Ahorra en grupo con BTC nativo · Yields compartidos · Sin fees de entrada

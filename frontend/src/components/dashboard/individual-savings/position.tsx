@@ -1,6 +1,6 @@
 /**
- * @fileoverview V3 Position Display with Auto-Compound & Referrals
- * Production-ready component with all V3 features
+ * @fileoverview Position Display with Auto-Compound & Referrals
+ * Production-ready component with all features
  */
 
 'use client'
@@ -18,7 +18,7 @@ import { TrendingUp, Wallet, Clock, Zap, Users, Gift, Sparkles } from 'lucide-re
 import { useState } from 'react'
 import { formatUnits } from 'viem'
 
-export function PositionV3() {
+export function Position() {
   const { 
     userInfo, 
     hasActiveDeposit, 
@@ -111,7 +111,7 @@ export function PositionV3() {
             <div>
               <h2 className="text-2xl font-bold text-white flex items-center gap-2">
                 <TrendingUp className="h-6 w-6 text-primary" />
-                Tu Posición V3
+                Tu Posición
               </h2>
               <p className="text-sm text-muted-foreground mt-1">
                 Pool TVL: {formatMUSD(poolTVL)} MUSD

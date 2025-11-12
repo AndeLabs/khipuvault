@@ -1,5 +1,5 @@
 /**
- * @fileoverview Cooperative Pool Hook - V3 Production Ready
+ * @fileoverview Cooperative Pool Hook - Production Ready
  * 
  * Features:
  * - Create cooperative pools

@@ -38,13 +38,13 @@ export const MEZO_STABILITY_POOL_ABI = Array.isArray(StabilityPoolABI) ? Stabili
 // ============================================================================
 
 export const MEZO_TESTNET_ADDRESSES = {
-  // KhipuVault V3 Pools (UUPS Upgradeable) - PRODUCTION
+  // KhipuVault Pools (UUPS Upgradeable) - PRODUCTION
   individualPool: '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393',
   cooperativePool: '0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65',
   lotteryPool: '0x0000000000000000000000000000000000000000',
   rotatingPool: '0x0000000000000000000000000000000000000000',
-  
-  // Core Integration V3 - PRODUCTION
+
+  // Core Integration - PRODUCTION
   mezoIntegration: '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6',
   yieldAggregator: '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6',
 
@@ -93,13 +93,13 @@ export const COOPERATIVE_POOL_ABI = (CooperativePoolABI as any).abi as const
 export const YIELD_AGGREGATOR_ABI = (YieldAggregatorABI as any).abi as const
 
 // ============================================================================
-// TYPE DEFINITIONS FOR V3 POOLS
+// TYPE DEFINITIONS FOR POOLS
 // ============================================================================
 
 /**
- * User information from Individual Pool V3
+ * User information from Individual Pool
  */
-export interface UserInfoV3 {
+export interface UserInfo {
   deposit: bigint
   yields: bigint
   netYields: bigint
@@ -118,9 +118,9 @@ export interface ReferralStats {
 }
 
 /**
- * Features and Configuration (testnet - no version suffix needed)
+ * Features and Configuration
  */
-export const V3_FEATURES = {
+export const FEATURES = {
   // Global feature flags
   AUTO_COMPOUND: true,
   REFERRALS: true,
@@ -149,8 +149,10 @@ export const V3_FEATURES = {
   },
 } as const
 
-// Export alias for backward compatibility with old cleanup
+// Export aliases for backward compatibility
 export const MEZO_V3_ADDRESSES = MEZO_TESTNET_ADDRESSES
+export const V3_FEATURES = FEATURES
+export type UserInfoV3 = UserInfo
 
 // ============================================================================
 // HELPER FUNCTIONS

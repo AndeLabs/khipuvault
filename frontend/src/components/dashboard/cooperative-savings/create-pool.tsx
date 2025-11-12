@@ -1,5 +1,5 @@
 /**
- * @fileoverview Create Cooperative Pool V3 - Production Ready
+ * @fileoverview Create Cooperative Pool - Production Ready
  * Modern UI for creating saving pools with native BTC deposits
  */
 
@@ -17,11 +17,11 @@ import { useIsFetching } from '@tanstack/react-query'
 import { Users, TrendingUp, Shield, Info, Loader2, CheckCircle2, Sparkles } from 'lucide-react'
 import { formatEther } from 'viem'
 
-interface CreatePoolV3Props {
+interface CreatePoolProps {
   onSuccess?: () => void
 }
 
-export function CreatePoolV3({ onSuccess }: CreatePoolV3Props = {}) {
+export function CreatePool({ onSuccess }: CreatePoolProps = {}) {
   const { createPool, state, error, txHash, isProcessing } = useCooperativePool()
   const isSyncing = useIsFetching({ queryKey: ['cooperative-pool'] }) > 0
   const [countdown, setCountdown] = useState(0)
@@ -430,4 +430,4 @@ export function CreatePoolV3({ onSuccess }: CreatePoolV3Props = {}) {
 }
 
 // Export alias for backward compatibility
-export { CreatePoolV3 as CreatePool }
+// Export already done above
