@@ -20,6 +20,14 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { wagmiConfig } from '@/lib/web3/config'
+import {
+  isMobile,
+  isMetaMaskMobile,
+  isInAppBrowser,
+  waitForWallet,
+  logDeviceInfo,
+  getDeviceMessage
+} from '@/lib/web3/mobile-utils'
 
 /**
  * Query client configuration
@@ -87,27 +95,60 @@ interface Web3ProviderProps {
  * </Web3Provider>
  * ```
  */
-export function Web3Provider({ 
-  children, 
+export function Web3Provider({
+  children,
   customQueryClient,
   theme,
 }: Web3ProviderProps) {
   const [isMounted, setIsMounted] = useState(false)
+  const [walletReady, setWalletReady] = useState(false)
+  const [mobileError, setMobileError] = useState<string | null>(null)
 
-  // Handle hydration
+  // Handle hydration and mobile wallet injection
   useEffect(() => {
-    setIsMounted(true)
-    
-    // Log initialization
-    console.log('🔌 Web3Provider Initialized')
-    console.log('   Network: Mezo Testnet (Chain ID: 31611)')
-    console.log('   Currency: BTC (native)')
-    console.log('   Wallet Support: MetaMask + Unisat')
-    console.log('   No WalletConnect Project ID required')
-    
+    const initializeProvider = async () => {
+      // Log device info for debugging
+      logDeviceInfo()
+
+      console.log('🔌 Web3Provider Initializing...')
+      console.log('   Network: Mezo Testnet (Chain ID: 31611)')
+      console.log('   Currency: BTC (native)')
+      console.log('   Wallet Support: MetaMask + Unisat')
+      console.log('   No WalletConnect Project ID required')
+      console.log('   Device:', getDeviceMessage())
+
+      // For mobile devices, wait for wallet injection
+      if (isMobile() || isInAppBrowser()) {
+        console.log('📱 Mobile/In-app browser detected, waiting for wallet injection...')
+
+        // Give mobile browsers more time (3-5 seconds)
+        const walletAvailable = await waitForWallet(5000)
+
+        if (walletAvailable) {
+          console.log('✅ Wallet injection detected on mobile')
+          setWalletReady(true)
+          setIsMounted(true)
+        } else {
+          console.warn('⚠️ Wallet not detected after 5 seconds on mobile')
+          // Still mount but show warning
+          setMobileError('No se detectó wallet después de 5 segundos')
+          setWalletReady(false)
+          setIsMounted(true)
+        }
+      } else {
+        // Desktop - no waiting needed
+        console.log('💻 Desktop browser detected')
+        setWalletReady(true)
+        setIsMounted(true)
+      }
+    }
+
+    initializeProvider()
+
     return () => {
       console.log('🔌 Web3Provider Unmounted')
       setIsMounted(false)
+      setWalletReady(false)
     }
   }, [])
 
@@ -115,11 +156,53 @@ export function Web3Provider({
 
   // Show loading until mounted (prevents SSR hydration issues)
   if (!isMounted) {
+    const deviceMsg = typeof window !== 'undefined' ? getDeviceMessage() : '💻 Navegador desktop'
+    const isMobileDevice = typeof window !== 'undefined' ? (isMobile() || isInAppBrowser()) : false
+
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
+        <div className="text-center max-w-md px-4">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Inicializando Web3...</p>
+          <p className="text-muted-foreground mb-2">Inicializando Web3...</p>
+          <p className="text-xs text-muted-foreground/60">{deviceMsg}</p>
+          {isMobileDevice && (
+            <p className="text-xs text-yellow-500 mt-3">
+              ⏳ Esperando a que MetaMask se active (esto puede tomar unos segundos en mobile)
+            </p>
+          )}
+        </div>
+      </div>
+    )
+  }
+
+  // Show warning if mobile wallet not detected
+  if (isMounted && mobileError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="max-w-md mx-auto p-6 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
+          <div className="text-center">
+            <span className="text-4xl mb-4 block">⚠️</span>
+            <h3 className="text-lg font-semibold text-yellow-500 mb-2">
+              Wallet No Detectada en Mobile
+            </h3>
+            <p className="text-sm text-foreground/80 mb-4">
+              {mobileError}
+            </p>
+            <div className="text-left text-sm text-foreground/70 space-y-2 mb-4">
+              <p className="font-semibold">💡 Sugerencias:</p>
+              <ul className="list-disc list-inside space-y-1 ml-2">
+                <li>Asegúrate de estar usando MetaMask Mobile Browser</li>
+                <li>Abre esta URL desde la app de MetaMask</li>
+                <li>Verifica que tengas la última versión de MetaMask</li>
+              </ul>
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              className="w-full px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+            >
+              Reintentar
+            </button>
+          </div>
         </div>
       </div>
     )
@@ -166,12 +249,29 @@ export class Web3ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('❌ Web3 Error Caught by Boundary:', {
-      error: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-      timestamp: new Date().toISOString(),
-    })
+    // Log device info if on mobile
+    if (typeof window !== 'undefined') {
+      const deviceInfo = {
+        isMobile: isMobile(),
+        isMetaMaskMobile: isMetaMaskMobile(),
+        isInAppBrowser: isInAppBrowser(),
+      }
+
+      console.error('❌ Web3 Error Caught by Boundary:', {
+        error: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+        timestamp: new Date().toISOString(),
+        deviceInfo,
+      })
+    } else {
+      console.error('❌ Web3 Error Caught by Boundary:', {
+        error: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+        timestamp: new Date().toISOString(),
+      })
+    }
 
     // Store error info for display
     this.setState({
@@ -191,14 +291,28 @@ export class Web3ErrorBoundary extends React.Component<
     if (this.state.hasError) {
       const isDev = process.env.NODE_ENV === 'development'
       const errorMessage = this.state.error?.message || 'Error desconocido'
-      
+
+      // Check device type
+      const isMobileDevice = typeof window !== 'undefined' ? isMobile() : false
+      const isInAppBrowserDevice = typeof window !== 'undefined' ? isInAppBrowser() : false
+      const isMobileMetaMask = typeof window !== 'undefined' ? isMetaMaskMobile() : false
+
       // Check error types
-      const isWagmiError = errorMessage.includes('WagmiProvider') || 
+      const isWagmiError = errorMessage.includes('WagmiProvider') ||
                           errorMessage.includes('useConfig')
-      
+
       const isMultiWalletConflict = errorMessage.includes('Cannot redefine property: ethereum') ||
                                     errorMessage.includes('Cannot set property ethereum') ||
                                     errorMessage.toLowerCase().includes('allowance is not defined')
+
+      const isHydrationError = errorMessage.toLowerCase().includes('hydration') ||
+                              errorMessage.toLowerCase().includes('text content does not match') ||
+                              errorMessage.toLowerCase().includes('server-rendered html')
+
+      const isMobileWalletError = (isMobileDevice || isInAppBrowserDevice) &&
+                                  (errorMessage.toLowerCase().includes('ethereum') ||
+                                   errorMessage.toLowerCase().includes('wallet') ||
+                                   errorMessage.toLowerCase().includes('provider'))
 
       return (
         <div className="min-h-screen flex items-center justify-center bg-background p-4">
@@ -214,25 +328,76 @@ export class Web3ErrorBoundary extends React.Component<
                 </h2>
                 
                 <p className="text-foreground/80 mb-4">
-                  {isMultiWalletConflict ? (
+                  {isMobileWalletError ? (
+                    <>
+                      <strong className="text-destructive">Error de Web3 en Mobile detectado.</strong><br/>
+                      {isMobileMetaMask ? (
+                        <>
+                          Estás usando MetaMask Mobile, pero la wallet no se inicializó correctamente.
+                          Esto puede pasar cuando la página carga muy rápido y MetaMask no tuvo tiempo de inyectar Web3.
+                        </>
+                      ) : isInAppBrowserDevice ? (
+                        <>
+                          Estás usando un navegador in-app. Los navegadores dentro de apps de wallets
+                          a veces tienen problemas de inicialización. Intenta abrir desde el navegador de MetaMask.
+                        </>
+                      ) : (
+                        <>
+                          Estás en un dispositivo móvil. Para usar esta dapp necesitas
+                          acceder desde el navegador interno de MetaMask Mobile.
+                        </>
+                      )}
+                    </>
+                  ) : isHydrationError ? (
+                    <>
+                      <strong className="text-destructive">Error de hidratación detectado.</strong><br/>
+                      El contenido generado en el servidor no coincide con el renderizado en el cliente.
+                      Esto es común en mobile. Recarga la página para resolverlo.
+                    </>
+                  ) : isMultiWalletConflict ? (
                     <>
                       <strong className="text-destructive">Conflicto de múltiples wallets detectado.</strong><br/>
-                      Tienes varias extensiones de wallet activas (MetaMask, OKX, Yoroi, etc.) 
+                      Tienes varias extensiones de wallet activas (MetaMask, OKX, Yoroi, etc.)
                       que están compitiendo por el control de la conexión Web3.
                     </>
                   ) : isWagmiError ? (
                     <>
-                      Ocurrió un error en la configuración de wallet. 
+                      Ocurrió un error en la configuración de wallet.
                       El componente está intentando usar hooks de Wagmi fuera del contexto del provider.
                     </>
                   ) : (
                     <>
-                      Ocurrió un error en la conexión de wallet. 
+                      Ocurrió un error en la conexión de wallet.
                       Por favor recarga la página para intentar nuevamente.
                     </>
                   )}
                 </p>
                 
+                {isMobileWalletError && (
+                  <div className="mb-4 p-4 bg-blue-500/10 border border-blue-500/30 rounded-lg">
+                    <p className="text-sm font-semibold text-blue-500 mb-2">
+                      📱 Solución para Mobile:
+                    </p>
+                    <ol className="text-sm text-foreground/80 space-y-2 list-decimal list-inside">
+                      <li>
+                        <strong>Abre MetaMask Mobile</strong> en tu teléfono
+                      </li>
+                      <li>
+                        Toca el ícono del <strong>navegador</strong> (🔍 Search) en la parte inferior
+                      </li>
+                      <li>
+                        Ingresa la URL: <code className="text-xs bg-background/50 px-2 py-1 rounded">khipuvault.vercel.app</code>
+                      </li>
+                      <li>
+                        <strong>NO</strong> uses el navegador Safari/Chrome del teléfono, usa el de MetaMask
+                      </li>
+                      <li>
+                        Si ya estás en MetaMask Browser, <strong>recarga la página</strong> (pull down para refrescar)
+                      </li>
+                    </ol>
+                  </div>
+                )}
+
                 {isMultiWalletConflict && (
                   <div className="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
                     <p className="text-sm font-semibold text-yellow-500 mb-2">
@@ -253,6 +418,28 @@ export class Web3ErrorBoundary extends React.Component<
                       </li>
                       <li>
                         Recarga esta página
+                      </li>
+                    </ol>
+                  </div>
+                )}
+
+                {isHydrationError && (
+                  <div className="mb-4 p-4 bg-orange-500/10 border border-orange-500/30 rounded-lg">
+                    <p className="text-sm font-semibold text-orange-500 mb-2">
+                      🔄 Solución para Hydration Error:
+                    </p>
+                    <ol className="text-sm text-foreground/80 space-y-2 list-decimal list-inside">
+                      <li>
+                        <strong>Recarga la página</strong> (pull down en mobile)
+                      </li>
+                      <li>
+                        Si persiste, <strong>limpia el cache</strong> de la app
+                      </li>
+                      <li>
+                        En MetaMask: Settings → Advanced → Clear Browser Cache
+                      </li>
+                      <li>
+                        Intenta nuevamente
                       </li>
                     </ol>
                   </div>

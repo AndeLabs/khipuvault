@@ -12,12 +12,39 @@
 
 ### 1. Preparar tu Wallet
 
+#### Desktop (Computadora):
+
 **Instalar MetaMask:**
 ```
 1. Ve a https://metamask.io/download/
 2. Instala la extensión en tu navegador
 3. Crea una nueva wallet o importa una existente
 4. IMPORTANTE: Guarda tu seed phrase de forma segura
+```
+
+#### 📱 Mobile (Teléfono):
+
+**Instalar MetaMask Mobile:**
+```
+iOS:
+1. Ve al App Store
+2. Busca "MetaMask - Blockchain Wallet"
+3. Instala la app oficial de MetaMask
+4. Abre la app y crea/importa tu wallet
+5. Guarda tu seed phrase de forma segura
+
+Android:
+1. Ve a Google Play Store
+2. Busca "MetaMask - Blockchain Wallet"
+3. Instala la app oficial de MetaMask
+4. Abre la app y crea/importa tu wallet
+5. Guarda tu seed phrase de forma segura
+```
+
+**⚠️ IMPORTANTE para usuarios Mobile:**
+- DEBES usar el navegador interno de MetaMask Mobile
+- NO uses Safari, Chrome, o Firefox en tu teléfono
+- Abre URLs desde el navegador de MetaMask (🔍 Search)
 ```
 
 **Configurar Mezo Testnet:**
@@ -48,12 +75,39 @@ Block Explorer: https://explorer.test.mezo.org
 
 ### 3. Conectar tu Wallet
 
+#### Desktop:
 ```
 1. Ve a https://khipuvault.vercel.app
 2. Haz clic en "Conectar Wallet"
 3. Selecciona MetaMask
 4. Aprueba la conexión en la ventana emergente
 5. La app cambiará automáticamente a Mezo Testnet si es necesario
+```
+
+#### 📱 Mobile:
+```
+PASO 1: Abrir desde MetaMask Mobile Browser
+1. Abre la app MetaMask Mobile en tu teléfono
+2. Toca el ícono de navegador (🔍 Search) en la parte inferior
+3. En la barra de búsqueda, escribe: khipuvault.vercel.app
+4. Presiona Enter o Go
+
+PASO 2: Esperar a que la página cargue
+- Verás "Inicializando Web3..."
+- En mobile puede tomar 5-10 segundos
+- Verás el mensaje: "Esperando a que MetaMask se active"
+- ¡Ten paciencia! Esto es normal en mobile
+
+PASO 3: Conectar Wallet
+1. Una vez cargada la página, toca "Conectar Wallet"
+2. La conexión debe ser automática (ya estás en MetaMask)
+3. Si te pide aprobación, acepta
+4. La app cambiará automáticamente a Mezo Testnet
+
+⚠️ Si después de 10 segundos no carga:
+- Cierra completamente MetaMask (swipe up en iOS / recientes en Android)
+- Abre MetaMask nuevamente
+- Repite desde PASO 1
 ```
 
 ---
