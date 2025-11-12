@@ -1,3 +1,7 @@
+/**
+ * Cooperative Savings Pool Page
+ * All component exports have been fixed to support both V3 and non-V3 naming
+ */
 'use client'
 
 export const dynamic = 'force-dynamic'

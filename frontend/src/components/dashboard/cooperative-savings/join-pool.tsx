@@ -409,3 +409,6 @@ function getStatusBadge(status: PoolStatus) {
       }
   }
 }
+
+// Export alias for backward compatibility
+export { JoinPoolV3 as JoinPool }

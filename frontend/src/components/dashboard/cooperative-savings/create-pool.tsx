@@ -428,3 +428,6 @@ export function CreatePoolV3({ onSuccess }: CreatePoolV3Props = {}) {
     </Card>
   )
 }
+
+// Export alias for backward compatibility
+export { CreatePoolV3 as CreatePool }

@@ -358,3 +358,6 @@ function getStatusConfig(status: PoolStatus) {
       }
   }
 }
+
+// Export alias for backward compatibility
+export { MyPoolsV3 as MyPools }
