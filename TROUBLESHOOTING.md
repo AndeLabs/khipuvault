@@ -2,7 +2,65 @@
 
 ## 📱 Problemas Comunes y Soluciones
 
-### 1. No puedo conectar mi wallet / "Connect Wallet" no funciona
+### 1. Error Web3 en MetaMask Mobile Browser
+
+#### Síntomas:
+- Obtienes "Error Web3" al abrir la app en MetaMask Mobile
+- La página dice "Wallet No Detectada en Mobile"
+- La app no carga completamente en el teléfono
+- Pantalla se queda en "Inicializando Web3..."
+
+#### Causa:
+Los navegadores in-app como MetaMask Mobile inyectan `window.ethereum` más lentamente que en desktop. La app ahora espera hasta 5 segundos para que la wallet se inyecte.
+
+#### Soluciones:
+
+**A. Asegúrate de usar MetaMask Mobile Browser (NO Safari/Chrome)**
+```
+INCORRECTO ❌:
+1. Abrir Safari o Chrome en tu teléfono
+2. Ir a khipuvault.vercel.app
+3. Intentar conectar → No funcionará
+
+CORRECTO ✅:
+1. Abrir la app de MetaMask Mobile
+2. Tocar el ícono de navegador (🔍 Search) en la parte inferior
+3. Ingresar la URL: khipuvault.vercel.app
+4. La wallet se conecta automáticamente
+```
+
+**B. Si ya estás en MetaMask Browser pero sigue el error**
+```
+1. Pull down para refrescar la página
+2. Espera 5-10 segundos a que aparezca el mensaje:
+   "Esperando a que MetaMask se active (esto puede tomar unos segundos en mobile)"
+3. Si después de 10 segundos sigue sin funcionar:
+   - Cierra completamente la app MetaMask (swipe up en iOS, recent apps en Android)
+   - Abre MetaMask nuevamente
+   - Navega a la URL desde el navegador de MetaMask
+```
+
+**C. Verifica que tengas la última versión de MetaMask Mobile**
+```
+iOS: App Store > MetaMask > Actualizar
+Android: Google Play > MetaMask > Actualizar
+
+Versión mínima recomendada: 7.x o superior
+```
+
+**D. Limpia el cache del navegador de MetaMask**
+```
+En MetaMask Mobile:
+1. Ve a Settings (⚙️)
+2. Advanced
+3. Clear Browser Cache
+4. Confirma
+5. Vuelve a abrir la URL
+```
+
+---
+
+### 2. No puedo conectar mi wallet / "Connect Wallet" no funciona (Desktop)
 
 #### Síntomas:
 - El botón "Conectar Wallet" no responde
@@ -380,6 +438,16 @@ NEXT_PUBLIC_ENABLE_TESTNETS=true
    - 0 errores de compilación
    - Todas las rutas generadas
    - Bundle optimizado
+
+6. ✅ **Soporte completo para Mobile Web3** (NUEVO)
+   - Mobile detection utilities (`mobile-utils.ts`)
+   - Espera inteligente para inyección de wallet en mobile (hasta 5 segundos)
+   - Mensajes de carga específicos para mobile
+   - Detección de MetaMask Mobile, in-app browsers, iOS, Android
+   - Error handling específico para mobile con soluciones paso a paso
+   - Mensajes de error mejorados para hydration issues
+   - Logging de device info para debugging
+   - Soluciona "Error Web3" en MetaMask Mobile Browser
 
 ---
 
