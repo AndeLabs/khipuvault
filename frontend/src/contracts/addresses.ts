@@ -123,16 +123,17 @@ export const CONTRACT_ADDRESSES = {
    /**
     * Cooperative Savings Pool (V3)
     * Community pooled savings with native BTC deposits
-    * Proxy: 0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65
+    * ✅ Proxy (USE THIS): 0x323fca9b377fe29b8fc95ddbd9fe54cea1655f88
+    * Updated: Nov 12, 2024
     */
-   COOPERATIVE_POOL: getEnvAddress(ENV_KEYS.COOPERATIVE_POOL, '0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65'),
+   COOPERATIVE_POOL: getEnvAddress(ENV_KEYS.COOPERATIVE_POOL, '0x323fca9b377fe29b8fc95ddbd9fe54cea1655f88'),
 
   /**
    * Lottery Pool (Prize Savings)
-   * No-loss lottery with Chainlink VRF
-   * ⚠️ Not deployed yet
+   * No-loss lottery with yield distribution
+   * ✅ Deployed: 0x3e5d272321e28731844c20e0a0c725a97301f83a
    */
-  LOTTERY_POOL: getEnvAddress(ENV_KEYS.LOTTERY_POOL, '0x0000000000000000000000000000000000000000'),
+  LOTTERY_POOL: getEnvAddress(ENV_KEYS.LOTTERY_POOL, '0x3e5d272321e28731844c20e0a0c725a97301f83a'),
 
   /**
    * Rotating Pool (ROSCA/Pasanaku)

@@ -19,8 +19,8 @@ import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { parseEther, formatEther, type Address } from 'viem'
 import { readContract } from '@wagmi/core'
 
-// ✅ Production address - CooperativePool Proxy
-const COOPERATIVE_POOL_ADDRESS = '0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65' as Address
+// ✅ Production address - CooperativePool V3 Proxy (UUPS) - Updated Nov 12, 2024
+const COOPERATIVE_POOL_ADDRESS = '0x323fca9b377fe29b8fc95ddbd9fe54cea1655f88' as Address
 const MUSD_ADDRESS = '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503' as Address
 
 const POOL_ABI = [
