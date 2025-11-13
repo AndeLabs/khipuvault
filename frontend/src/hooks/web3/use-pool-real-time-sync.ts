@@ -46,7 +46,7 @@ export function usePoolRealTimeSync() {
   // Set to true to enable automatic polling
   const { data: blockNumber, isLoading } = useBlockNumber({
     watch: {
-      pollingInterval: 4000, // Poll every 4 seconds (faster updates)
+      pollingInterval: 30000, // Poll every 30 seconds (reduced from 4s to prevent log spam)
     },
   })
 
@@ -63,7 +63,7 @@ export function usePoolRealTimeSync() {
       type: 'active',
     })
 
-    console.log(`🔄 Block ${blockNumber}: Syncing pool data...`)
+    // console.log(`🔄 Block ${blockNumber}: Syncing pool data...`) // Commented to reduce log spam
   }, [blockNumber, queryClient, isLoading])
 }
 

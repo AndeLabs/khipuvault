@@ -54,7 +54,7 @@ export function useCooperativePools() {
           functionName: 'poolCounter',
         })
 
-        console.log('🔢 Pool counter fetched:', Number(result || 0))
+        // console.log('🔢 Pool counter fetched:', Number(result || 0)) // Commented to reduce log spam
         return result || 0n
       } catch (err) {
         console.error('❌ Error fetching poolCounter:', err)
@@ -62,9 +62,9 @@ export function useCooperativePools() {
       }
     },
     enabled: !!publicClient,
-    staleTime: 0, // Always considered stale for fresh data
+    staleTime: 30000, // Consider data fresh for 30 seconds
     gcTime: 5 * 60 * 1000, // 5 minutes
-    refetchInterval: 10000, // Auto-refetch every 10 seconds
+    // refetchInterval removed - events will trigger updates when needed
     retry: 3,
     retryDelay: 1000,
   })

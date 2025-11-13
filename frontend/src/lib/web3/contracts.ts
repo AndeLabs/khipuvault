@@ -40,9 +40,9 @@ export const MEZO_STABILITY_POOL_ABI = Array.isArray(StabilityPoolABI) ? Stabili
 export const MEZO_TESTNET_ADDRESSES = {
   // KhipuVault V3 Pools (UUPS Upgradeable) - PRODUCTION
   individualPool: '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393',
-  cooperativePool: '0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65',
-  lotteryPool: '0x0000000000000000000000000000000000000000',
-  rotatingPool: '0x0000000000000000000000000000000000000000',
+  cooperativePool: '0x323fca9b377fe29b8fc95ddbd9fe54cea1655f88', // Updated: V3 Proxy deployed Nov 12, 2024
+  lotteryPool: '0x3e5d272321e28731844c20e0a0c725a97301f83a', // SimpleLotteryPool deployed
+  rotatingPool: '0x0000000000000000000000000000000000000000', // Not deployed yet
   
   // Core Integration V3 - PRODUCTION
   mezoIntegration: '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6',
@@ -80,14 +80,17 @@ export const ERC20_ABI = MEZO_MUSD_ABI
 export const MUSD_ABI = MEZO_MUSD_ABI
 
 // ============================================================================
-// INDIVIDUAL POOL ABI - V3 (UUPS Upgradeable)
+// KHIPUVAULT POOL ABIs (UUPS Upgradeable)
 // ============================================================================
-// Updated: Nov 2, 2025 - V3 with auto-compound, referrals, flash loan protection
-// Import V3 ABI from contracts/abis
+// Import ABIs from contracts/abis
 
 import IndividualPoolABI from '@/contracts/abis/IndividualPool.json'
+import CooperativePoolABI from '@/contracts/abis/CooperativePool.json'
+import YieldAggregatorABI from '@/contracts/abis/YieldAggregator.json'
 
 export const INDIVIDUAL_POOL_ABI = (IndividualPoolABI as any).abi as const
+export const COOPERATIVE_POOL_ABI = (CooperativePoolABI as any).abi as const
+export const YIELD_AGGREGATOR_ABI = (YieldAggregatorABI as any).abi as const
 
 // ============================================================================
 // TYPE DEFINITIONS FOR V3 POOLS
@@ -99,32 +102,51 @@ export const INDIVIDUAL_POOL_ABI = (IndividualPoolABI as any).abi as const
 export interface UserInfoV3 {
   deposit: bigint
   yields: bigint
-  hasAutoCompound: boolean
-  referralCode: string
-  referrer: string
-  referralCount: bigint
-  referralRewards: bigint
+  netYields: bigint
+  daysActive: bigint
+  estimatedAPR: bigint
+  autoCompoundEnabled: boolean
 }
 
 /**
  * Referral statistics for a user
  */
 export interface ReferralStats {
-  referralCode: string
-  referralCount: bigint
-  totalRewards: bigint
-  isActive: boolean
+  count: bigint
+  rewards: bigint
+  referrer: string
 }
 
 /**
- * V3 Feature flags for Individual Pool
+ * Features and Configuration (testnet - no version suffix needed)
  */
 export const V3_FEATURES = {
+  // Global feature flags
   AUTO_COMPOUND: true,
   REFERRALS: true,
   INCREMENTAL_DEPOSITS: true,
   PARTIAL_WITHDRAWALS: true,
   ENHANCED_VIEWS: true,
+
+  // Individual Pool Configuration
+  individualPool: {
+    // Contract constants (from IndividualPool.sol)
+    minDeposit: '10000000000000000000',        // 10 MUSD (10 ether in wei)
+    maxDeposit: '100000000000000000000000',    // 100,000 MUSD (100_000 ether in wei)
+    minWithdrawal: '1000000000000000000',      // 1 MUSD (1 ether in wei)
+    autoCompoundThreshold: '1000000000000000000', // 1 MUSD (1 ether in wei)
+
+    // Configurable parameters (initialized values)
+    performanceFee: 100,    // 1% (100 basis points)
+    referralBonus: 50,      // 0.5% (50 basis points)
+  },
+
+  // Yield Aggregator Configuration
+  yieldAggregator: {
+    // Contract constants (from YieldAggregator.sol)
+    minDeposit: '1000000000000000000',         // 1 MUSD (1 ether in wei)
+    maxVaults: 10,                             // Maximum number of vaults
+  },
 } as const
 
 // Export alias for backward compatibility with old cleanup

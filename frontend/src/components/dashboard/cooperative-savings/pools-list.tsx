@@ -291,3 +291,6 @@ function getTimeAgo(timestamp: number): string {
   if (diff < 2592000) return `${Math.floor(diff / 86400)} días`
   return `${Math.floor(diff / 2592000)} meses`
 }
+
+// Export alias for backward compatibility
+export { PoolsListV3 as PoolsList }

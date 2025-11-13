@@ -19,8 +19,8 @@ import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { parseEther, formatEther, type Address } from 'viem'
 import { readContract } from '@wagmi/core'
 
-// ✅ Production address - CooperativePool Proxy
-const COOPERATIVE_POOL_ADDRESS = '0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65' as Address
+// ✅ Production address - CooperativePool V3 Proxy (UUPS) - Updated Nov 12, 2024
+const COOPERATIVE_POOL_ADDRESS = '0x323fca9b377fe29b8fc95ddbd9fe54cea1655f88' as Address
 const MUSD_ADDRESS = '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503' as Address
 
 const POOL_ABI = [
@@ -279,17 +279,13 @@ export function useCooperativePool() {
 
       // ✅ CRITICAL FIX: Invalidate specific queries instead of all queries
       // This ensures poolCounter and all pool data are refetched
+      // Invalidations automatically trigger refetch of active queries
       queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
       queryClient.invalidateQueries({ queryKey: ['cooperative-pool'] })
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
 
-      // Force immediate refetch
-      queryClient.refetchQueries({
-        type: 'all',
-      })
-
-      console.log('✅ All pool queries invalidated and refetching')
+      console.log('✅ All pool queries invalidated')
       setState('success')
     }
   }, [isMainSuccess, state, queryClient])
@@ -511,10 +507,10 @@ export function usePoolInfo(poolId: number) {
     queryKey: ['pool-info', poolId],
     queryFn: async () => {
       if (poolId <= 0) return null
-      
+
       try {
-        console.log('🔄 [COOPERATIVE] Fetching pool info for pool:', poolId)
-        
+        // console.log('🔄 [COOPERATIVE] Fetching pool info for pool:', poolId) // Commented to reduce log spam
+
         const result = await readContract(config, {
           address: COOPERATIVE_POOL_ADDRESS,
           abi: POOL_ABI,
@@ -522,7 +518,7 @@ export function usePoolInfo(poolId: number) {
           args: [BigInt(poolId)],
         })
 
-        console.log('📊 [COOPERATIVE] Raw pool info result:', result)
+        // console.log('📊 [COOPERATIVE] Raw pool info result:', result) // Commented to reduce log spam
 
         if (!isValidPoolInfoResult(result)) {
           console.error('❌ [COOPERATIVE] Invalid pool info data')
@@ -558,7 +554,6 @@ export function usePoolInfo(poolId: number) {
       }
     },
     enabled: poolId > 0,
-    refetchInterval: 30_000,
     retry: 3,
     retryDelay: 1000,
   })
@@ -585,10 +580,10 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
     queryKey: ['member-info', poolId, userAddress],
     queryFn: async () => {
       if (poolId <= 0 || !userAddress) return null
-      
+
       try {
-        console.log('🔄 [COOPERATIVE] Fetching member info for pool:', poolId, 'member:', userAddress)
-        
+        // console.log('🔄 [COOPERATIVE] Fetching member info for pool:', poolId, 'member:', userAddress) // Commented to reduce log spam
+
         const result = await readContract(config, {
           address: COOPERATIVE_POOL_ADDRESS,
           abi: POOL_ABI,
@@ -596,7 +591,7 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
           args: [BigInt(poolId), userAddress],
         })
 
-        console.log('📊 [COOPERATIVE] Raw member info result:', result)
+        // console.log('📊 [COOPERATIVE] Raw member info result:', result) // Commented to reduce log spam
 
         if (!isValidMemberInfoResult(result)) {
           console.error('❌ [COOPERATIVE] Invalid member info data')
@@ -611,11 +606,11 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
           yieldClaimed: result[4] || BigInt(0)
         }
 
-        console.log('✅ [COOPERATIVE] Member info parsed:', {
-          btcContributed: memberInfo.btcContributed.toString(),
-          shares: memberInfo.shares.toString(),
-          active: memberInfo.active
-        })
+        // console.log('✅ [COOPERATIVE] Member info parsed:', {
+        //   btcContributed: memberInfo.btcContributed.toString(),
+        //   shares: memberInfo.shares.toString(),
+        //   active: memberInfo.active
+        // }) // Commented to reduce log spam
 
         return memberInfo
       } catch (err) {
@@ -624,7 +619,6 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
       }
     },
     enabled: poolId > 0 && !!userAddress,
-    refetchInterval: 30_000,
     retry: 3,
     retryDelay: 1000,
   })

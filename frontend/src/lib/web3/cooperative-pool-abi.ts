@@ -1,9 +1,12 @@
 /**
  * @fileoverview CooperativePool Contract ABI
  * @module lib/web3/cooperative-pool-abi
- * 
- * ABI for CooperativePool smart contract on Mezo Testnet
- * Deployed at: 0xDDe8c75271E454075BD2f348213A66B142BB8906
+ *
+ * CooperativePool V3 deployed on Mezo Testnet (Nov 12, 2024)
+ * Implementation: 0xde2649bda9a0db84079cac3b15d93f1de5ceb7f7
+ * Proxy (UUPS): 0x323fca9b377fe29b8fc95ddbd9fe54cea1655f88
+ *
+ * Use the Proxy address for all interactions
  */
 
 export const COOPERATIVE_POOL_ABI = [
