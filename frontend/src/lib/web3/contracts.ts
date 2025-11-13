@@ -149,10 +149,8 @@ export const FEATURES = {
   },
 } as const
 
-// Export aliases for backward compatibility
-export const MEZO_V3_ADDRESSES = MEZO_TESTNET_ADDRESSES
-export const V3_FEATURES = FEATURES
-export type UserInfoV3 = UserInfo
+// Export standard types
+export type { UserInfo }
 
 // ============================================================================
 // HELPER FUNCTIONS

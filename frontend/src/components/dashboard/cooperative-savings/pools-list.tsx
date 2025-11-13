@@ -1,5 +1,5 @@
 /**
- * @fileoverview Pools List V3 - Explore Available Cooperative Pools
+ * @fileoverview Pools List - Explore Available Cooperative Pools
  * Displays all pools with filters and search functionality
  */
 
@@ -17,13 +17,13 @@ import { PoolCardSkeleton } from './pool-card-skeleton'
 import { Users, Search, TrendingUp, Shield, Info, Loader2, ArrowRight, Clock } from 'lucide-react'
 import { formatEther } from 'viem'
 
-interface PoolsListV3Props {
+interface PoolsListProps {
   onJoinPool?: (poolId: number) => void
 }
 
 type FilterType = 'all' | 'accepting' | 'active' | 'closed'
 
-export function PoolsListV3({ onJoinPool }: PoolsListV3Props) {
+export function PoolsList({ onJoinPool }: PoolsListProps) {
   const { pools, poolCounter, isLoading } = useCooperativePools()
   const [searchQuery, setSearchQuery] = useState('')
   const [filter, setFilter] = useState<FilterType>('all')
@@ -329,6 +329,3 @@ function getTimeAgo(timestamp: number): string {
   if (diff < 2592000) return `${Math.floor(diff / 86400)} días`
   return `${Math.floor(diff / 2592000)} meses`
 }
-
-// Export alias for backward compatibility
-export { PoolsListV3 as PoolsList }

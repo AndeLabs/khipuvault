@@ -2,7 +2,7 @@
 
 import { useWatchContractEvent } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
-import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts'
+import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 import { useAccount } from 'wagmi'
 import IndividualPoolABI from '@/contracts/abis/IndividualPool.json'
 
@@ -18,7 +18,7 @@ const POOL_ABI = (IndividualPoolABI as any).abi as const
 export function usePoolEvents() {
   const { address } = useAccount()
   const queryClient = useQueryClient()
-  const poolAddress = MEZO_V3_ADDRESSES.individualPool as `0x${string}`
+  const poolAddress = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
 
   // Watch for Deposited events
   useWatchContractEvent({

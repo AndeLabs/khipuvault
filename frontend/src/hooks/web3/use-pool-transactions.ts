@@ -1,15 +1,15 @@
 /**
- * @fileoverview V3 Pool Transactions Hook - Production Ready
+ * @fileoverview Pool Transactions Hook - Production Ready
  * @module hooks/web3/use-pool-transactions
- * 
- * Handles all V3 pool transactions with new features:
+ *
+ * Handles all pool transactions with features:
  * - Auto-compound toggle
  * - Referral system
  * - Incremental deposits
  * - Partial withdrawals
  * - Emergency mode support
- * 
- * V3 Features:
+ *
+ * Features:
  * ✅ UUPS Upgradeable Pattern
  * ✅ Storage Packing (~40-60k gas saved)
  * ✅ Flash Loan Protection
@@ -26,15 +26,15 @@ import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useCallback, useState } from 'react'
 import { parseEther } from 'viem'
-import { 
-  MEZO_V3_ADDRESSES, 
-  INDIVIDUAL_POOL_ABI, 
+import {
+  MEZO_TESTNET_ADDRESSES,
+  INDIVIDUAL_POOL_ABI,
   YIELD_AGGREGATOR_ABI,
-  V3_FEATURES 
+  FEATURES
 } from '@/lib/web3/contracts'
 
-const INDIVIDUAL_POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPool as `0x${string}`
-const YIELD_AGGREGATOR_ADDRESS = MEZO_V3_ADDRESSES.yieldAggregator as `0x${string}`
+const INDIVIDUAL_POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
+const YIELD_AGGREGATOR_ADDRESS = MEZO_TESTNET_ADDRESSES.yieldAggregator as `0x${string}`
 
 // ============================================================================
 // INDIVIDUAL POOL V3 TRANSACTIONS
@@ -80,13 +80,13 @@ export function useDepositV3() {
       setLocalState({ isProcessing: true, hash: null })
 
       // Validate minimum deposit
-      if (amount < BigInt(V3_FEATURES.individualPool.minDeposit)) {
-        throw new Error(`Minimum deposit is ${V3_FEATURES.individualPool.minDeposit} MUSD`)
+      if (amount < BigInt(FEATURES.individualPool.minDeposit)) {
+        throw new Error(`Minimum deposit is ${FEATURES.individualPool.minDeposit} MUSD`)
       }
 
       // Validate maximum deposit
-      if (amount > BigInt(V3_FEATURES.individualPool.maxDeposit)) {
-        throw new Error(`Maximum deposit is ${V3_FEATURES.individualPool.maxDeposit} MUSD`)
+      if (amount > BigInt(FEATURES.individualPool.maxDeposit)) {
+        throw new Error(`Maximum deposit is ${FEATURES.individualPool.maxDeposit} MUSD`)
       }
 
       // Use depositWithReferral if referrer is provided, otherwise use simple deposit
@@ -161,8 +161,8 @@ export function usePartialWithdrawV3() {
       setLocalState({ isProcessing: true, hash: null })
 
       // Validate minimum withdrawal
-      if (amount < BigInt(V3_FEATURES.individualPool.minWithdrawal)) {
-        throw new Error(`Minimum withdrawal is ${V3_FEATURES.individualPool.minWithdrawal} MUSD`)
+      if (amount < BigInt(FEATURES.individualPool.minWithdrawal)) {
+        throw new Error(`Minimum withdrawal is ${FEATURES.individualPool.minWithdrawal} MUSD`)
       }
 
       writeContract({
@@ -471,8 +471,8 @@ export function useYieldAggregatorDepositV3() {
       setLocalState({ isProcessing: true, hash: null })
 
       // Validate minimum deposit
-      if (amount < BigInt(V3_FEATURES.yieldAggregator.minDeposit)) {
-        throw new Error(`Minimum deposit is ${V3_FEATURES.yieldAggregator.minDeposit} MUSD`)
+      if (amount < BigInt(FEATURES.yieldAggregator.minDeposit)) {
+        throw new Error(`Minimum deposit is ${FEATURES.yieldAggregator.minDeposit} MUSD`)
       }
 
       writeContract({

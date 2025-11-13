@@ -9,7 +9,7 @@ import {
   MEZO_TESTNET_ADDRESSES, 
   INDIVIDUAL_POOL_ABI, 
   ERC20_ABI,
-  V3_FEATURES,
+  FEATURES,
   type UserInfoV3,
   type ReferralStats,
 } from '@/lib/web3/contracts'
@@ -238,9 +238,9 @@ export function useIndividualPool() {
 
   const hasActiveDeposit = userInfo ? userInfo.deposit > BigInt(0) : false
   const canWithdrawPartial = hasActiveDeposit && userInfo ? 
-    userInfo.deposit >= BigInt(V3_FEATURES.individualPool.minWithdrawal) : false
+    userInfo.deposit >= BigInt(FEATURES.individualPool.minWithdrawal) : false
   const shouldShowAutoCompound = hasActiveDeposit && userInfo ?
-    userInfo.yields >= BigInt(V3_FEATURES.individualPool.autoCompoundThreshold) : false
+    userInfo.yields >= BigInt(FEATURES.individualPool.autoCompoundThreshold) : false
 
   // ========================================================================
   // HELPER FUNCTIONS
@@ -275,7 +275,7 @@ export function useIndividualPool() {
     walletBalances,
     
     // Contract Config
-    performanceFee: Number(performanceFee as bigint) || V3_FEATURES.individualPool.performanceFee,
+    performanceFee: Number(performanceFee as bigint) || FEATURES.individualPool.performanceFee,
     emergencyMode: poolStats.emergencyMode,
     
     // UI Helpers
@@ -284,7 +284,7 @@ export function useIndividualPool() {
     autoCompoundEnabled: userInfo?.autoCompoundEnabled || false,
     
     // V3 Features Info
-    features: V3_FEATURES.individualPool,
+    features: FEATURES.individualPool,
     
     // Loading States
     isLoading: loadingUserInfo,
@@ -338,7 +338,7 @@ export function formatDays(days: bigint | number): string {
 }
 
 export function formatReferralBonus(): string {
-  return `${(V3_FEATURES.individualPool.referralBonus / 100).toFixed(2)}%`
+  return `${(FEATURES.individualPool.referralBonus / 100).toFixed(2)}%`
 }
 
 export function calculateFee(amount: bigint, feeBps: number): bigint {

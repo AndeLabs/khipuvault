@@ -15,10 +15,10 @@ import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
 import { parseEther, type Address } from 'viem'
-import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts'
+import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 
-const MUSD_ADDRESS = MEZO_V3_ADDRESSES.musd as Address
-const POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPool as Address
+const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as Address
+const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address
 
 // Minimal ABIs - only what we need
 const MUSD_ABI = [
