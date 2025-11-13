@@ -53,9 +53,9 @@ export function PoolStats() {
           </div>
         </div>
 
-        {/* V3 Features */}
+        {/* Features */}
         <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/30">
-          <p className="text-xs font-semibold text-primary mb-2">✨ V3 Features Activas:</p>
+          <p className="text-xs font-semibold text-primary mb-2">✨ Features Activas:</p>
           <ul className="text-xs text-muted-foreground space-y-1">
             <li>✅ Auto-Compound disponible</li>
             <li>✅ Retiros parciales</li>
@@ -67,7 +67,7 @@ export function PoolStats() {
         {/* Status Message */}
         <div className="mt-4 p-3 bg-muted/50 rounded-lg">
           <p className="text-xs text-center text-muted-foreground">
-            Pool V3 (UUPS) operando normalmente. Deposita MUSD para generar rendimientos.
+            Pool (UUPS) operando normalmente. Deposita MUSD para generar rendimientos.
           </p>
         </div>
       </CardContent>

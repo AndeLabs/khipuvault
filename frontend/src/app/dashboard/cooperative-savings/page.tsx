@@ -1,21 +1,5 @@
 /**
- * Cooperative Savings Pool Page V3 - ENTERPRISE EDITION
- * All component exports have been fixed to support both V3 and non-V3 naming
- *
- * 🚀 ENTERPRISE FEATURES:
- * - Historical scanning: Complete event history from deployment
- * - Real-time WebSocket: Instant updates, zero polling
- * - Push notifications: Desktop alerts for new pools
- * - Analytics dashboard: Live statistics and trends
- * - Optimistic updates: Instant UI feedback
- * - Premium UI/UX: Animations, gradients, smooth transitions
- *
- * ARCHITECTURE:
- * ┌─────────────────────────────────────────┐
- * │ Historical Scan (Past Events)           │
- * │ + Real-Time Stream (New Events)         │
- * │ = COMPLETE EVENT COVERAGE               │
- * └─────────────────────────────────────────┘
+ * Cooperative Savings Pool Page
  */
 'use client'
 
@@ -93,36 +77,13 @@ export default function CooperativeSavingsPage() {
           <ChevronLeft className="h-4 w-4" />
           Volver al Dashboard
         </Link>
-        <div className="mt-4 flex items-start justify-between flex-wrap gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
-              <span role="img" aria-label="handshake emoji" className="text-2xl">🤝</span>
-              Cooperative Savings Pool
-              <span className="text-sm font-normal px-2 py-1 rounded-full bg-primary/10 text-primary">
-                ENTERPRISE
-              </span>
-            </h1>
-            <p className="text-muted-foreground mt-2">
-              Ahorra en grupo con BTC nativo · Yields compartidos · Sin fees de entrada
-            </p>
-          </div>
-          {/* Real-time status badge */}
-          <div className="flex items-center gap-2">
-            <RealtimeStatusBadge showStats showNotificationButton />
-          </div>
-        </div>
-      </AnimateOnScroll>
-
-      {/* 🔥 Historical scan indicator - Shows when indexing past events */}
-      {(historicalScan.isScanning || historicalScan.error) && (
-        <AnimateOnScroll delay="50ms">
-          <HistoricalScanIndicator />
-        </AnimateOnScroll>
-      )}
-
-      {/* 📊 Real-Time Analytics Dashboard */}
-      <AnimateOnScroll delay="100ms">
-        <RealtimeAnalyticsDashboard mini />
+        <h1 className="text-3xl font-bold tracking-tight text-white mt-4 flex items-center gap-3">
+          <span role="img" aria-label="handshake emoji" className="text-2xl">🤝</span>
+          Cooperative Savings Pool
+        </h1>
+        <p className="text-muted-foreground mt-2">
+          Ahorra en grupo con BTC nativo · Yields compartidos · Sin fees de entrada
+        </p>
       </AnimateOnScroll>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
