@@ -283,7 +283,7 @@ export function useIndividualPool() {
     shouldShowAutoCompound,
     autoCompoundEnabled: userInfo?.autoCompoundEnabled || false,
     
-    // V3 Features Info
+    // Features Info
     features: FEATURES.individualPool,
     
     // Loading States

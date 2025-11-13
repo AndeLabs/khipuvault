@@ -21,7 +21,6 @@ import { RealtimeAnalyticsDashboard } from "@/components/dashboard/cooperative-s
 import { useCooperativePoolEvents } from "@/hooks/web3/use-cooperative-pool-events"
 import { useHistoricalPoolEvents } from "@/hooks/web3/use-historical-pool-events"
 import { useRealtimePoolEvents } from "@/hooks/web3/use-realtime-pool-events"
-import { PoolDebug } from "@/components/debug/pool-debug"
 
 export default function CooperativeSavingsPage() {
   // 🔥 HISTORICAL: Scan past events (one-time on mount, cached)
@@ -98,14 +97,9 @@ export default function CooperativeSavingsPage() {
         </div>
       </AnimateOnScroll>
 
-      {/* 🔍 DEBUG COMPONENT - Remove after fixing */}
-      <AnimateOnScroll delay="50ms">
-        <PoolDebug />
-      </AnimateOnScroll>
-
       {/* 🔥 Historical scan indicator - Shows when indexing past events */}
       {(historicalScan.isScanning || historicalScan.error) && (
-        <AnimateOnScroll delay="75ms">
+        <AnimateOnScroll delay="50ms">
           <HistoricalScanIndicator />
         </AnimateOnScroll>
       )}
