@@ -21,6 +21,7 @@ import { RealtimeAnalyticsDashboard } from "@/components/dashboard/cooperative-s
 import { useCooperativePoolEvents } from "@/hooks/web3/use-cooperative-pool-events"
 import { useHistoricalPoolEvents } from "@/hooks/web3/use-historical-pool-events"
 import { useRealtimePoolEvents } from "@/hooks/web3/use-realtime-pool-events"
+import { PoolDebug } from "@/components/debug/pool-debug"
 
 export default function CooperativeSavingsPage() {
   // 🔥 HISTORICAL: Scan past events (one-time on mount, cached)
@@ -77,13 +78,41 @@ export default function CooperativeSavingsPage() {
           <ChevronLeft className="h-4 w-4" />
           Volver al Dashboard
         </Link>
-        <h1 className="text-3xl font-bold tracking-tight text-white mt-4 flex items-center gap-3">
-          <span role="img" aria-label="handshake emoji" className="text-2xl">🤝</span>
-          Cooperative Savings Pool
-        </h1>
-        <p className="text-muted-foreground mt-2">
-          Ahorra en grupo con BTC nativo · Yields compartidos · Sin fees de entrada
-        </p>
+        <div className="mt-4 flex items-start justify-between flex-wrap gap-4">
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight text-white flex items-center gap-3">
+              <span role="img" aria-label="handshake emoji" className="text-2xl">🤝</span>
+              Cooperative Savings Pool
+              <span className="text-sm font-normal px-2 py-1 rounded-full bg-primary/10 text-primary">
+                ENTERPRISE
+              </span>
+            </h1>
+            <p className="text-muted-foreground mt-2">
+              Ahorra en grupo con BTC nativo · Yields compartidos · Sin fees de entrada
+            </p>
+          </div>
+          {/* Real-time status badge */}
+          <div className="flex items-center gap-2">
+            <RealtimeStatusBadge showStats showNotificationButton />
+          </div>
+        </div>
+      </AnimateOnScroll>
+
+      {/* 🔍 DEBUG COMPONENT - Remove after fixing */}
+      <AnimateOnScroll delay="50ms">
+        <PoolDebug />
+      </AnimateOnScroll>
+
+      {/* 🔥 Historical scan indicator - Shows when indexing past events */}
+      {(historicalScan.isScanning || historicalScan.error) && (
+        <AnimateOnScroll delay="75ms">
+          <HistoricalScanIndicator />
+        </AnimateOnScroll>
+      )}
+
+      {/* 📊 Real-Time Analytics Dashboard */}
+      <AnimateOnScroll delay="100ms">
+        <RealtimeAnalyticsDashboard mini />
       </AnimateOnScroll>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
