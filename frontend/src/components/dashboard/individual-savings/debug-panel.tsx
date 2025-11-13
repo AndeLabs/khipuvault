@@ -69,7 +69,7 @@ export function DebugPanel() {
         </div>
 
         <div>
-          <p className="text-muted-foreground mb-1">User Deposit (V3):</p>
+          <p className="text-muted-foreground mb-1">User Deposit:</p>
           <p className="text-white">Active: {userInfo && userInfo.deposit > BigInt(0) ? '✅ Yes' : '❌ No'}</p>
           <p className="text-white">MUSD Amount: {userInfo?.deposit.toString() || '0'} wei</p>
           <p className="text-white">Yield Accrued: {userInfo?.yields.toString() || '0'} wei</p>
@@ -78,7 +78,7 @@ export function DebugPanel() {
         </div>
 
         <div>
-          <p className="text-muted-foreground mb-1">Pool Stats (V3):</p>
+          <p className="text-muted-foreground mb-1">Pool Stats:</p>
           <p className="text-white">Pool TVL: {poolTVL?.toString() || '0'} wei</p>
           <p className="text-white">TVL (formatted): {(Number(poolTVL || 0) / 1e18).toFixed(2)} MUSD</p>
         </div>

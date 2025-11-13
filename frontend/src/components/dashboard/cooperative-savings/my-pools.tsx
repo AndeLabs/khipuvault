@@ -1,5 +1,5 @@
 /**
- * @fileoverview My Pools V3 - Manage Pool Memberships
+ * @fileoverview My Pools - Manage Pool Memberships
  * View and manage all pools where user is a member
  */
 
@@ -25,7 +25,7 @@ import { Users, TrendingUp, LogOut, DollarSign, Info, Loader2, AlertTriangle, Ch
 import { formatEther } from 'viem'
 import { useAccount } from 'wagmi'
 
-export function MyPoolsV3() {
+export function MyPools() {
   const { address } = useAccount()
   const { claimYield, leavePool, state, error, txHash, isProcessing, reset } = useCooperativePool()
   const { pools, poolCounter, isLoading } = useCooperativePools()
@@ -490,4 +490,4 @@ function getStatusConfig(status: PoolStatus) {
 }
 
 // Export alias for backward compatibility
-export { MyPoolsV3 as MyPools }
+// Export already done above

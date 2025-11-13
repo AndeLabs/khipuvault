@@ -1,21 +1,5 @@
 /**
- * Cooperative Savings Pool Page V3 - ENTERPRISE EDITION
- * All component exports have been fixed to support both V3 and non-V3 naming
- *
- * 🚀 ENTERPRISE FEATURES:
- * - Historical scanning: Complete event history from deployment
- * - Real-time WebSocket: Instant updates, zero polling
- * - Push notifications: Desktop alerts for new pools
- * - Analytics dashboard: Live statistics and trends
- * - Optimistic updates: Instant UI feedback
- * - Premium UI/UX: Animations, gradients, smooth transitions
- *
- * ARCHITECTURE:
- * ┌─────────────────────────────────────────┐
- * │ Historical Scan (Past Events)           │
- * │ + Real-Time Stream (New Events)         │
- * │ = COMPLETE EVENT COVERAGE               │
- * └─────────────────────────────────────────┘
+ * Cooperative Savings Pool Page
  */
 'use client'
 
