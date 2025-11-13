@@ -1,5 +1,5 @@
 /**
- * @fileoverview Join Pool V3 - Join Cooperative Pools with Native BTC
+ * @fileoverview Join Pool - Join Cooperative Pools with Native BTC
  * Form for contributing to existing pools
  */
 
@@ -17,13 +17,13 @@ import { Users, TrendingUp, AlertTriangle, Info, Loader2, CheckCircle2, ArrowLef
 import { formatEther, parseEther } from 'viem'
 import { useAccount, useBalance } from 'wagmi'
 
-interface JoinPoolV3Props {
+interface JoinPoolProps {
   poolId: number
   onBack?: () => void
   onSuccess?: () => void
 }
 
-export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
+export function JoinPool({ poolId, onBack, onSuccess }: JoinPoolProps) {
   const { address } = useAccount()
   const { joinPool, state, error, txHash, isProcessing, reset } = useCooperativePool()
   const { poolInfo, isLoading: isLoadingPool } = usePoolInfo(poolId)
@@ -411,4 +411,4 @@ function getStatusBadge(status: PoolStatus) {
 }
 
 // Export alias for backward compatibility
-export { JoinPoolV3 as JoinPool }
+// Export already done above
