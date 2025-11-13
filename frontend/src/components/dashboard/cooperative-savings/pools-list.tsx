@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { useCooperativePool, usePoolInfo, PoolStatus, type PoolInfo } from '@/hooks/web3/use-cooperative-pool'
+import { useCooperativePools } from '@/hooks/web3/use-cooperative-pools'
 import { PoolCardSkeleton } from './pool-card-skeleton'
 import { Users, Search, TrendingUp, Shield, Info, Loader2, ArrowRight, Clock } from 'lucide-react'
 import { formatEther } from 'viem'
@@ -23,18 +24,28 @@ interface PoolsListV3Props {
 type FilterType = 'all' | 'accepting' | 'active' | 'closed'
 
 export function PoolsListV3({ onJoinPool }: PoolsListV3Props) {
-  const { poolCounter } = useCooperativePool()
+  const { pools, poolCounter, isLoading } = useCooperativePools()
   const [searchQuery, setSearchQuery] = useState('')
   const [filter, setFilter] = useState<FilterType>('all')
 
   const poolIds = useMemo(() => {
-    const ids: number[] = []
-    for (let i = 1; i <= poolCounter; i++) {
-      ids.push(i)
-    }
-    return ids
-  }, [poolCounter])
+    // Use actual pool IDs from loaded pools instead of counter
+    return pools.map(pool => Number(pool.poolId))
+  }, [pools])
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <PoolCardSkeleton />
+        <PoolCardSkeleton />
+        <PoolCardSkeleton />
+        <PoolCardSkeleton />
+      </div>
+    )
+  }
+
+  // Show empty state if no pools exist
   if (poolCounter === 0) {
     return (
       <Card className="bg-card border-2 border-muted">
@@ -49,8 +60,35 @@ export function PoolsListV3({ onJoinPool }: PoolsListV3Props) {
     )
   }
 
+  // Show error state if pools exist but none loaded
+  if (poolCounter > 0 && pools.length === 0) {
+    return (
+      <Card className="bg-red-500/10 border-red-500/50">
+        <CardContent className="p-12 text-center">
+          <Info className="h-16 w-16 text-red-500 mx-auto mb-4" />
+          <h3 className="text-xl font-bold text-foreground mb-2">Error al cargar pools</h3>
+          <p className="text-muted-foreground mb-4">
+            Se detectaron {poolCounter} pools pero todos tienen datos corruptos.
+            Por favor contacta al equipo de soporte.
+          </p>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <div className="space-y-4">
+      {/* Warning if some pools failed to load */}
+      {poolCounter > poolIds.length && poolIds.length > 0 && (
+        <Alert className="bg-yellow-500/10 border-yellow-500/50">
+          <Info className="h-4 w-4 text-yellow-500" />
+          <AlertDescription className="text-sm">
+            <strong>Atención:</strong> Se cargaron {poolIds.length} de {poolCounter} pools detectados.
+            Algunos pools tienen datos corruptos y no se pueden mostrar.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="flex flex-col md:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />

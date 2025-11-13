@@ -75,16 +75,29 @@ export async function fetchCooperativePools(
       const result = results[i]
       if (result.status === 'fulfilled') {
         try {
-          poolsData.push(result.value as PoolInfo)
+          const poolInfo = result.value as PoolInfo
+          // Validate pool data before adding
+          if (poolInfo && typeof poolInfo.poolId !== 'undefined') {
+            poolsData.push(poolInfo)
+          } else {
+            console.warn(`⚠️ Pool ${i + 1} has invalid data structure`)
+          }
         } catch (error) {
           console.warn(`⚠️ Failed to parse pool ${i + 1}:`, error)
         }
       } else {
-        console.warn(`⚠️ Failed to fetch pool ${i + 1}:`, result.reason)
+        // Only log error message, not full stack trace
+        const errorMsg = result.reason?.message || result.reason?.toString() || 'Unknown error'
+        if (!errorMsg.includes('Position') && !errorMsg.includes('out of bounds')) {
+          console.warn(`⚠️ Failed to fetch pool ${i + 1}:`, errorMsg.substring(0, 100))
+        }
       }
     }
 
-    // console.log(`✅ Fetched ${poolsData.length} cooperative pools`) // Commented to reduce log spam
+    console.log(`✅ Successfully loaded ${poolsData.length}/${poolCounter} pools`)
+    if (poolsData.length < poolCounter) {
+      console.warn(`⚠️ ${poolCounter - poolsData.length} pools failed to load (possibly corrupted data)`)
+    }
     return poolsData
   } catch (error) {
     console.error('Error fetching cooperative pools:', error)

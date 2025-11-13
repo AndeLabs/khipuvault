@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog'
 import { useCooperativePool, usePoolInfo, useMemberInfo, PoolStatus, type PoolInfo } from '@/hooks/web3/use-cooperative-pool'
+import { useCooperativePools } from '@/hooks/web3/use-cooperative-pools'
 import { PoolCardSkeleton } from './pool-card-skeleton'
 import { Users, TrendingUp, LogOut, DollarSign, Info, Loader2, AlertTriangle, CheckCircle2, Clock } from 'lucide-react'
 import { formatEther } from 'viem'
@@ -26,18 +27,16 @@ import { useAccount } from 'wagmi'
 
 export function MyPoolsV3() {
   const { address } = useAccount()
-  const { poolCounter, claimYield, leavePool, state, error, txHash, isProcessing, reset } = useCooperativePool()
+  const { claimYield, leavePool, state, error, txHash, isProcessing, reset } = useCooperativePool()
+  const { pools, poolCounter, isLoading } = useCooperativePools()
 
   const [selectedAction, setSelectedAction] = useState<{ poolId: number; type: 'claim' | 'leave' } | null>(null)
   const [showSuccessDialog, setShowSuccessDialog] = useState(false)
 
   const poolIds = useMemo(() => {
-    const ids: number[] = []
-    for (let i = 1; i <= poolCounter; i++) {
-      ids.push(i)
-    }
-    return ids
-  }, [poolCounter])
+    // Use actual pool IDs from loaded pools
+    return pools.map(pool => Number(pool.poolId))
+  }, [pools])
 
   const handleClaimYield = async (poolId: number) => {
     setSelectedAction({ poolId, type: 'claim' })
