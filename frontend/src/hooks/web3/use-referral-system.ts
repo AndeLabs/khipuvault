@@ -15,6 +15,7 @@ import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
 import { parseEther, type Address } from 'viem'
+import { logger } from '@/lib/logger'
 
 const POOL_ADDRESS = '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as Address
 const MUSD_ADDRESS = '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503' as Address
@@ -155,8 +156,8 @@ export function useReferralSystem() {
   // Handle approval flow
   useEffect(() => {
     if (isApproveSuccess && state === 'waitingApproval') {
-      console.log('✅ Approval confirmed! Proceeding with referral deposit...')
-      
+      logger.log('✅ Approval confirmed! Proceeding with referral deposit...')
+
       refetchAllowance().then(() => {
         setState('claiming')
         
@@ -173,12 +174,12 @@ export function useReferralSystem() {
   // Handle success
   useEffect(() => {
     if (isClaimSuccess && state === 'processing') {
-      console.log('✅ Transaction confirmed!')
-      console.log('📝 Transaction hash:', claimReceipt?.transactionHash)
-      
+      logger.log('✅ Transaction confirmed!')
+      logger.log('📝 Transaction hash:', claimReceipt?.transactionHash)
+
       queryClient.invalidateQueries()
       refetchStats()
-      
+
       setState('success')
     }
   }, [isClaimSuccess, state, queryClient, claimReceipt, refetchStats])
@@ -229,7 +230,7 @@ export function useReferralSystem() {
       setError('')
       resetClaim()
 
-      console.log('💰 Claiming referral rewards...')
+      logger.log('💰 Claiming referral rewards...')
       setState('claiming')
 
       claimWrite({
@@ -275,14 +276,14 @@ export function useReferralSystem() {
         return
       }
 
-      console.log('🎁 Depositing with referral:', {
+      logger.log('🎁 Depositing with referral:', {
         amount: amountString,
         referrer
       })
 
       // Check if need approval
       if (!allowance || allowance < amount) {
-        console.log('🔑 Need approval...')
+        logger.log('🔑 Need approval...')
         setState('approving')
         
         const MAX_UINT256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
@@ -294,7 +295,7 @@ export function useReferralSystem() {
           args: [POOL_ADDRESS, MAX_UINT256]
         })
       } else {
-        console.log('✅ Already approved, depositing...')
+        logger.log('✅ Already approved, depositing...')
         setState('claiming')
         
         claimWrite({

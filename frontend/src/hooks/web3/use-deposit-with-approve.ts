@@ -14,6 +14,7 @@ import { useEffect, useCallback, useState } from 'react'
 import { parseEther, MaxUint256, Address } from 'viem'
 import { readContract } from 'wagmi/actions'
 import { useConfig } from 'wagmi'
+import { logger } from '@/lib/logger'
 import { MEZO_TESTNET_ADDRESSES, INDIVIDUAL_POOL_ABI } from '@/lib/web3/contracts'
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
@@ -78,9 +79,9 @@ export function useDepositWithApprove() {
   // After approve succeeds, do deposit
   useEffect(() => {
     if (isApproveSuccess && pendingAmount && localState.step === 'approving') {
-      console.log('✅ Approval confirmed! Now depositing...')
+      logger.log('✅ Approval confirmed! Now depositing...')
       setLocalState(prev => ({ ...prev, step: 'depositing' }))
-      
+
       writeDeposit(
         {
           address: POOL_ADDRESS,
@@ -90,7 +91,7 @@ export function useDepositWithApprove() {
         },
         {
           onSuccess: (hash) => {
-            console.log('✅ Deposit tx sent:', hash)
+            logger.log('✅ Deposit tx sent:', hash)
             setLocalState(prev => ({ ...prev, depositHash: hash }))
           },
           onError: (error) => {
@@ -110,7 +111,7 @@ export function useDepositWithApprove() {
   // After deposit succeeds, refetch data
   useEffect(() => {
     if (isDepositSuccess && depositHash) {
-      console.log('✅ Deposit confirmed!')
+      logger.log('✅ Deposit confirmed!')
       const timer = setTimeout(() => {
         queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
         setLocalState(prev => ({
@@ -135,7 +136,7 @@ export function useDepositWithApprove() {
         setPendingAmount(amountWei)
 
         // Check current allowance
-        console.log('🔍 Checking MUSD allowance...')
+        logger.log('🔍 Checking MUSD allowance...')
         setLocalState(prev => ({ ...prev, step: 'checking', isProcessing: true }))
 
         const allowance = await readContract(config, {
@@ -145,14 +146,14 @@ export function useDepositWithApprove() {
           args: [address, POOL_ADDRESS],
         }) as bigint
 
-        console.log('Current allowance:', allowance.toString())
-        console.log('Required amount:', amountWei.toString())
+        logger.log('Current allowance:', allowance.toString())
+        logger.log('Required amount:', amountWei.toString())
 
         if (allowance >= amountWei) {
           // Already approved, just deposit
-          console.log('✅ Already approved! Depositing directly...')
+          logger.log('✅ Already approved! Depositing directly...')
           setLocalState(prev => ({ ...prev, step: 'depositing' }))
-          
+
           writeDeposit(
             {
               address: POOL_ADDRESS,
@@ -162,7 +163,7 @@ export function useDepositWithApprove() {
             },
             {
               onSuccess: (hash) => {
-                console.log('✅ Deposit tx sent:', hash)
+                logger.log('✅ Deposit tx sent:', hash)
                 setLocalState(prev => ({ ...prev, depositHash: hash }))
               },
               onError: (error) => {
@@ -178,9 +179,9 @@ export function useDepositWithApprove() {
           )
         } else {
           // Need to approve first
-          console.log('1️⃣ Requesting MUSD approval for unlimited amount...')
+          logger.log('1️⃣ Requesting MUSD approval for unlimited amount...')
           setLocalState(prev => ({ ...prev, step: 'approving' }))
-          
+
           writeApprove(
             {
               address: MUSD_ADDRESS,
@@ -190,7 +191,7 @@ export function useDepositWithApprove() {
             },
             {
               onSuccess: (hash) => {
-                console.log('✅ Approve tx sent:', hash)
+                logger.log('✅ Approve tx sent:', hash)
                 setLocalState(prev => ({ ...prev, approveHash: hash }))
               },
               onError: (error) => {

@@ -35,11 +35,9 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { usePublicClient, useWatchContractEvent } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
 import { Log } from 'viem'
+import { logger } from '@/lib/logger'
 import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
-
-// Import Lottery Pool ABI (will be available when contract is deployed)
-// For now, we'll use a placeholder structure
-const LOTTERY_POOL_ABI = [] as const // TODO: Update when contract is deployed
+import { LOTTERY_POOL_ABI } from '@/lib/web3/lottery-pool-abi'
 
 /**
  * Lottery Pool event types
@@ -331,14 +329,14 @@ export function useRealtimeLotteryEvents(
     if (enableConfetti && typeof window !== 'undefined') {
       // Trigger confetti animation
       // This would integrate with a confetti library
-      console.log('🎉 CONFETTI! Winner:', winner.winner)
+      logger.log('🎉 CONFETTI! Winner:', winner.winner)
     }
 
     // Sound effect
     if (enableSoundEffects && typeof window !== 'undefined') {
       // Play winner sound
       // This would integrate with an audio library
-      console.log('🔊 WINNER SOUND!')
+      logger.log('🔊 WINNER SOUND!')
     }
   }
 
@@ -367,7 +365,7 @@ export function useRealtimeLotteryEvents(
             blockNumber: log.blockNumber || 0n,
           }
 
-          verbose && console.log('🎫 TICKET PURCHASED:', event)
+          verbose && logger.log('🎫 TICKET PURCHASED:', event)
 
           addActivity({ type: 'ticketPurchased', data: event })
 
@@ -412,7 +410,7 @@ export function useRealtimeLotteryEvents(
             blockNumber: log.blockNumber || 0n,
           }
 
-          verbose && console.log('🎲 DRAW EXECUTED:', event)
+          verbose && logger.log('🎲 DRAW EXECUTED:', event)
 
           addActivity({ type: 'drawExecuted', data: event })
 
@@ -460,7 +458,7 @@ export function useRealtimeLotteryEvents(
             blockNumber: log.blockNumber || 0n,
           }
 
-          verbose && console.log('🏆 WINNER DECLARED:', event)
+          verbose && logger.log('🏆 WINNER DECLARED:', event)
 
           addActivity({ type: 'winnerDeclared', data: event })
 
@@ -519,7 +517,7 @@ export function useRealtimeLotteryEvents(
   useEffect(() => {
     if (enabled && publicClient) {
       setIsLive(true)
-      verbose && console.log('🔴 Lottery Pool streaming: LIVE (Ready for contract)')
+      verbose && logger.log('🔴 Lottery Pool streaming: LIVE (Ready for contract)')
     } else {
       setIsLive(false)
     }
@@ -557,7 +555,7 @@ export function useRealtimeLotteryEvents(
    * Manual refresh
    */
   const refresh = async () => {
-    verbose && console.log('🔄 Manual refresh triggered')
+    verbose && logger.log('🔄 Manual refresh triggered')
     await queryClient.invalidateQueries({ queryKey: ['lottery-pool'] })
     await queryClient.refetchQueries({ type: 'active' })
   }

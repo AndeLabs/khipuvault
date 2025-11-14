@@ -16,6 +16,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadCont
 import { useQueryClient } from '@tanstack/react-query'
 import { parseEther, type Address } from 'viem'
 import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts'
+import { logger } from '@/lib/logger'
 
 const MUSD_ADDRESS = MEZO_V3_ADDRESSES.musd as Address
 const POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPool as Address
@@ -121,8 +122,8 @@ export function useSimpleDeposit() {
   
   useEffect(() => {
     if (depositTxHash) {
-      console.log('🔗 Deposit transaction hash obtained:', depositTxHash)
-      console.log('🌐 Explorer link:', `https://explorer.mezo.org/tx/${depositTxHash}`)
+      logger.log('🔗 Deposit transaction hash obtained:', depositTxHash)
+      logger.log('🌐 Explorer link:', `https://explorer.mezo.org/tx/${depositTxHash}`)
     }
   }, [depositTxHash])
   
@@ -138,11 +139,11 @@ export function useSimpleDeposit() {
   // Effect: Handle approval confirmation
   useEffect(() => {
     if (isApproveSuccess && state === 'waitingApproval') {
-      console.log('✅ Approval confirmed! Refetching allowance...')
-      
+      logger.log('✅ Approval confirmed! Refetching allowance...')
+
       // Refetch allowance to get updated value
       refetchAllowance().then(() => {
-        console.log('🚀 Proceeding with deposit...')
+        logger.log('🚀 Proceeding with deposit...')
         setState('depositing')
         
         // Now call deposit
@@ -159,12 +160,12 @@ export function useSimpleDeposit() {
   // Effect: Handle deposit confirmation
   useEffect(() => {
     if (isDepositSuccess && state === 'waitingDeposit') {
-      console.log('✅ Deposit confirmed!')
-      console.log('📝 Transaction hash (direct):', depositTxHash)
-      console.log('📝 Transaction hash (receipt):', depositReceipt?.transactionHash)
-      console.log('📝 Block number:', depositReceipt?.blockNumber)
-      console.log('📝 Status:', depositReceipt?.status)
-      console.log('🔄 Refetching all queries...')
+      logger.log('✅ Deposit confirmed!')
+      logger.log('📝 Transaction hash (direct):', depositTxHash)
+      logger.log('📝 Transaction hash (receipt):', depositReceipt?.transactionHash)
+      logger.log('📝 Block number:', depositReceipt?.blockNumber)
+      logger.log('📝 Status:', depositReceipt?.status)
+      logger.log('🔄 Refetching all queries...')
       
       queryClient.invalidateQueries()
       queryClient.refetchQueries({ type: 'active' })
@@ -226,7 +227,7 @@ export function useSimpleDeposit() {
   useEffect(() => {
     if (isDepositError && state === 'waitingDeposit') {
       console.error('❌ Transaction failed on-chain')
-      console.log('📝 Failed transaction hash:', depositTxHash)
+      logger.log('📝 Failed transaction hash:', depositTxHash)
       setState('error')
       setError('La transacción falló en la blockchain. Revisa tu wallet o intenta nuevamente.')
     }
@@ -264,16 +265,16 @@ export function useSimpleDeposit() {
         return
       }
       
-      console.log('💰 Starting deposit:', {
+      logger.log('💰 Starting deposit:', {
         amount: amountString,
         wei: amount.toString(),
         allowance: allowance?.toString(),
         balance: musdBalance?.toString()
       })
-      
+
       // Check if need approval
       if (!allowance || allowance < amount) {
-        console.log('🔑 Need approval...')
+        logger.log('🔑 Need approval...')
         setState('approving')
         
         // Approve unlimited for better UX
@@ -286,7 +287,7 @@ export function useSimpleDeposit() {
           args: [POOL_ADDRESS, MAX_UINT256]
         })
       } else {
-        console.log('✅ Already approved, depositing directly...')
+        logger.log('✅ Already approved, depositing directly...')
         setState('depositing')
         
         depositWrite({

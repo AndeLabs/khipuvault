@@ -20,6 +20,7 @@ import React, { ReactNode, useEffect, useState } from 'react'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { wagmiConfig } from '@/lib/web3/config'
+import { logger } from '@/lib/logger'
 import {
   isMobile,
   isMetaMaskMobile,
@@ -110,22 +111,22 @@ export function Web3Provider({
       // Log device info for debugging
       logDeviceInfo()
 
-      console.log('🔌 Web3Provider Initializing...')
-      console.log('   Network: Mezo Testnet (Chain ID: 31611)')
-      console.log('   Currency: BTC (native)')
-      console.log('   Wallet Support: MetaMask + Unisat')
-      console.log('   No WalletConnect Project ID required')
-      console.log('   Device:', getDeviceMessage())
+      logger.log('🔌 Web3Provider Initializing...')
+      logger.log('   Network: Mezo Testnet (Chain ID: 31611)')
+      logger.log('   Currency: BTC (native)')
+      logger.log('   Wallet Support: MetaMask + Unisat')
+      logger.log('   No WalletConnect Project ID required')
+      logger.log('   Device:', getDeviceMessage())
 
       // For mobile devices, wait for wallet injection
       if (isMobile() || isInAppBrowser()) {
-        console.log('📱 Mobile/In-app browser detected, waiting for wallet injection...')
+        logger.log('📱 Mobile/In-app browser detected, waiting for wallet injection...')
 
         // Give mobile browsers more time (3-5 seconds)
         const walletAvailable = await waitForWallet(5000)
 
         if (walletAvailable) {
-          console.log('✅ Wallet injection detected on mobile')
+          logger.log('✅ Wallet injection detected on mobile')
           setWalletReady(true)
           setIsMounted(true)
         } else {
@@ -137,7 +138,7 @@ export function Web3Provider({
         }
       } else {
         // Desktop - no waiting needed
-        console.log('💻 Desktop browser detected')
+        logger.log('💻 Desktop browser detected')
         setWalletReady(true)
         setIsMounted(true)
       }
@@ -146,7 +147,7 @@ export function Web3Provider({
     initializeProvider()
 
     return () => {
-      console.log('🔌 Web3Provider Unmounted')
+      logger.log('🔌 Web3Provider Unmounted')
       setIsMounted(false)
       setWalletReady(false)
     }

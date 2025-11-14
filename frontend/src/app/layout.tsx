@@ -1,28 +1,10 @@
 import type {Metadata} from 'next';
-import { Inter, Roboto_Mono } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { Web3Provider, Web3ErrorBoundary } from "@/providers/web3-provider";
 import { NetworkSwitcher } from "@/components/web3/network-switcher";
 import { ReactQueryProvider } from "@/providers/react-query-provider";
 import { SpeedInsights } from '@vercel/speed-insights/next';
-
-// Optimized font loading with Next.js
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-  weight: ['400', '500', '600', '700', '800'],
-  preload: true,
-});
-
-const robotoMono = Roboto_Mono({
-  subsets: ['latin'],
-  variable: '--font-roboto-mono',
-  weight: '700',
-  display: 'swap',
-  preload: true,
-});
 
 // Enable caching for 1 hour (3600 seconds)
 export const revalidate = 3600
@@ -72,8 +54,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es" className={`dark ${inter.variable} ${robotoMono.variable}`}>
-      <body className={`${inter.className} antialiased`}>
+    <html lang="es" className="dark">
+      <body className="font-sans antialiased">
         <ReactQueryProvider>
           <Web3ErrorBoundary>
             <Web3Provider theme="dark">

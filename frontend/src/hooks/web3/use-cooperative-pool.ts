@@ -18,6 +18,7 @@ import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadCont
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { parseEther, formatEther, type Address } from 'viem'
 import { readContract } from '@wagmi/core'
+import { logger } from '@/lib/logger'
 
 // ✅ Production address - CooperativePool V3 Proxy (UUPS) - Updated Nov 12, 2024
 const COOPERATIVE_POOL_ADDRESS = '0x323fca9b377fe29b8fc95ddbd9fe54cea1655f88' as Address
@@ -267,7 +268,7 @@ export function useCooperativePool() {
   // Handle approval flow
   useEffect(() => {
     if (isApproveSuccess && state === 'waitingApproval') {
-      console.log('✅ Approval confirmed!')
+      logger.log('✅ Approval confirmed!')
       setState('success')
     }
   }, [isApproveSuccess, state])
@@ -275,7 +276,7 @@ export function useCooperativePool() {
   // Handle main transaction success
   useEffect(() => {
     if (isMainSuccess && state === 'processing') {
-      console.log('✅ Transaction confirmed!')
+      logger.log('✅ Transaction confirmed!')
 
       // ✅ CRITICAL FIX: Invalidate specific queries instead of all queries
       // This ensures poolCounter and all pool data are refetched
@@ -285,7 +286,7 @@ export function useCooperativePool() {
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
 
-      console.log('✅ All pool queries invalidated')
+      logger.log('✅ All pool queries invalidated')
       setState('success')
     }
   }, [isMainSuccess, state, queryClient])
@@ -340,7 +341,7 @@ export function useCooperativePool() {
       const min = parseEther(minContribution)
       const max = parseEther(maxContribution)
 
-      console.log('🏗️ Creating pool:', { name, minContribution, maxContribution, maxMembers })
+      logger.log('🏗️ Creating pool:', { name, minContribution, maxContribution, maxMembers })
       setState('executing')
 
       mainWrite({
@@ -371,7 +372,7 @@ export function useCooperativePool() {
 
       const amount = parseEther(btcAmount)
 
-      console.log('🤝 Joining pool:', poolId, 'with', btcAmount, 'BTC')
+      logger.log('🤝 Joining pool:', poolId, 'with', btcAmount, 'BTC')
       setState('executing')
 
       mainWrite({
@@ -401,7 +402,7 @@ export function useCooperativePool() {
       setError('')
       resetMain()
 
-      console.log('👋 Leaving pool:', poolId)
+      logger.log('👋 Leaving pool:', poolId)
       setState('executing')
 
       mainWrite({
@@ -430,7 +431,7 @@ export function useCooperativePool() {
       setError('')
       resetMain()
 
-      console.log('💰 Claiming yields from pool:', poolId)
+      logger.log('💰 Claiming yields from pool:', poolId)
       setState('executing')
 
       mainWrite({
@@ -540,7 +541,7 @@ export function usePoolInfo(poolId: number) {
           totalYieldGenerated: result[11] || BigInt(0)
         }
 
-        console.log('✅ [COOPERATIVE] Pool info parsed:', {
+        logger.log('✅ [COOPERATIVE] Pool info parsed:', {
           name: poolInfo.name,
           creator: poolInfo.creator,
           status: poolInfo.status,

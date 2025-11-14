@@ -9,6 +9,7 @@ import { useAccount, usePublicClient, useConfig } from 'wagmi'
 import { useQuery } from '@tanstack/react-query'
 import { readContract } from 'wagmi/actions'
 import { formatUnits, type Address } from 'viem'
+import { logger } from '@/lib/logger'
 
 // Contract addresses
 const POOL_ADDRESS = '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as Address
@@ -81,8 +82,8 @@ export function useIndividualPoolSimple() {
       if (!address) return null
 
       try {
-        console.log('🔄 [SIMPLE] Fetching user info for:', address)
-        console.log('🔄 [SIMPLE] Pool address:', POOL_ADDRESS)
+        logger.log('🔄 [SIMPLE] Fetching user info for:', address)
+        logger.log('🔄 [SIMPLE] Pool address:', POOL_ADDRESS)
 
         const result = await readContract(config, {
           address: POOL_ADDRESS,
@@ -91,7 +92,7 @@ export function useIndividualPoolSimple() {
           args: [address],
         })
 
-        console.log('✅ [SIMPLE] Raw result:', result)
+        logger.log('✅ [SIMPLE] Raw result:', result)
 
         if (!result || !Array.isArray(result) || result.length < 6) {
           console.warn('⚠️ [SIMPLE] Invalid result, returning null')
@@ -107,7 +108,7 @@ export function useIndividualPoolSimple() {
           autoCompoundEnabled: result[5] || false
         }
 
-        console.log('📊 [SIMPLE] User info:', {
+        logger.log('📊 [SIMPLE] User info:', {
           deposit: formatUnits(userInfo.deposit, 18),
           yields: formatUnits(userInfo.yields, 18),
           netYields: formatUnits(userInfo.netYields, 18),
@@ -138,7 +139,7 @@ export function useIndividualPoolSimple() {
           abi: POOL_ABI,
           functionName: 'totalMusdDeposited',
         })
-        console.log('💰 [SIMPLE] Pool TVL:', formatUnits(result, 18), 'MUSD')
+        logger.log('💰 [SIMPLE] Pool TVL:', formatUnits(result, 18), 'MUSD')
         return result
       } catch (error) {
         console.error('❌ [SIMPLE] Error fetching TVL:', error)
@@ -159,7 +160,7 @@ export function useIndividualPoolSimple() {
           abi: POOL_ABI,
           functionName: 'totalYieldsGenerated',
         })
-        console.log('📈 [SIMPLE] Total yields:', formatUnits(result, 18), 'MUSD')
+        logger.log('📈 [SIMPLE] Total yields:', formatUnits(result, 18), 'MUSD')
         return result
       } catch (error) {
         console.error('❌ [SIMPLE] Error fetching yields:', error)
@@ -182,7 +183,7 @@ export function useIndividualPoolSimple() {
           functionName: 'balanceOf',
           args: [address],
         })
-        console.log('💵 [SIMPLE] MUSD balance:', formatUnits(result, 18), 'MUSD')
+        logger.log('💵 [SIMPLE] MUSD balance:', formatUnits(result, 18), 'MUSD')
         return result
       } catch (error) {
         console.error('❌ [SIMPLE] Error fetching balance:', error)
