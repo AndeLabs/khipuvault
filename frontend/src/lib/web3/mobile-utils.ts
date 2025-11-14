@@ -6,6 +6,8 @@
  * and optimizing Web3 experience for mobile devices
  */
 
+import { logger } from '@/lib/logger'
+
 /**
  * Detect if user is on mobile device
  */
@@ -166,12 +168,12 @@ export function logDeviceInfo(): void {
   const info = getDeviceInfo()
 
   console.group('📱 Device Information')
-  console.log('Mobile:', info.isMobile)
-  console.log('MetaMask Mobile:', info.isMetaMaskMobile)
-  console.log('In-App Browser:', info.isInAppBrowser)
-  console.log('iOS:', info.isIOS)
-  console.log('Android:', info.isAndroid)
-  console.log('Wallet Available:', isWalletAvailable())
-  console.log('User Agent:', info.userAgent)
+  logger.log('Mobile:', info.isMobile)
+  logger.log('MetaMask Mobile:', info.isMetaMaskMobile)
+  logger.log('In-App Browser:', info.isInAppBrowser)
+  logger.log('iOS:', info.isIOS)
+  logger.log('Android:', info.isAndroid)
+  logger.log('Wallet Available:', isWalletAvailable())
+  logger.log('User Agent:', info.userAgent)
   console.groupEnd()
 }

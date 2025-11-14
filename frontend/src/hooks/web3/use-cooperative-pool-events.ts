@@ -13,6 +13,7 @@
 
 import { useWatchContractEvent } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
+import { logger } from '@/lib/logger'
 import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 import { COOPERATIVE_POOL_ABI } from '@/lib/web3/cooperative-pool-abi'
 
@@ -41,7 +42,7 @@ export function useCooperativePoolEvents() {
     abi: COOPERATIVE_POOL_ABI,
     eventName: 'PoolCreated',
     onLogs(logs) {
-      console.log('🔔 PoolCreated event detected:', logs)
+      logger.log('🔔 PoolCreated event detected:', logs)
 
       // ✅ CRITICAL FIX: Invalidate poolCounter first (this triggers all-pools refetch)
       queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
@@ -57,7 +58,7 @@ export function useCooperativePoolEvents() {
         type: 'active',
       })
 
-      console.log('✅ All queries invalidated and refetching after PoolCreated')
+      logger.log('✅ All queries invalidated and refetching after PoolCreated')
     },
   })
 
@@ -67,13 +68,13 @@ export function useCooperativePoolEvents() {
     abi: COOPERATIVE_POOL_ABI,
     eventName: 'PoolClosed',
     onLogs(logs) {
-      console.log('🔔 PoolClosed event detected:', logs)
+      logger.log('🔔 PoolClosed event detected:', logs)
       queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.refetchQueries({
         type: 'active',
       })
-      console.log('✅ Queries refetched after PoolClosed')
+      logger.log('✅ Queries refetched after PoolClosed')
     },
   })
 
@@ -83,14 +84,14 @@ export function useCooperativePoolEvents() {
     abi: COOPERATIVE_POOL_ABI,
     eventName: 'MemberJoined',
     onLogs(logs) {
-      console.log('🔔 MemberJoined event detected:', logs)
+      logger.log('🔔 MemberJoined event detected:', logs)
       queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
         type: 'active',
       })
-      console.log('✅ Queries refetched after MemberJoined')
+      logger.log('✅ Queries refetched after MemberJoined')
     },
   })
 
@@ -100,14 +101,14 @@ export function useCooperativePoolEvents() {
     abi: COOPERATIVE_POOL_ABI,
     eventName: 'MemberLeft',
     onLogs(logs) {
-      console.log('🔔 MemberLeft event detected:', logs)
+      logger.log('🔔 MemberLeft event detected:', logs)
       queryClient.invalidateQueries({ queryKey: ['cooperative-pool', 'counter'] })
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
         type: 'active',
       })
-      console.log('✅ Queries refetched after MemberLeft')
+      logger.log('✅ Queries refetched after MemberLeft')
     },
   })
 
@@ -117,13 +118,13 @@ export function useCooperativePoolEvents() {
     abi: COOPERATIVE_POOL_ABI,
     eventName: 'YieldClaimed',
     onLogs(logs) {
-      console.log('🔔 YieldClaimed event detected:', logs)
+      logger.log('🔔 YieldClaimed event detected:', logs)
       queryClient.invalidateQueries({ queryKey: ['pool-info'] })
       queryClient.invalidateQueries({ queryKey: ['member-info'] })
       queryClient.refetchQueries({
         type: 'active',
       })
-      console.log('✅ Queries refetched after YieldClaimed')
+      logger.log('✅ Queries refetched after YieldClaimed')
     },
   })
 }
