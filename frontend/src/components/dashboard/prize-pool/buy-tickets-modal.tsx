@@ -18,6 +18,7 @@ import { Minus, Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useCurrentRound, useBuyTickets, formatBTC } from "@/hooks/web3/use-lottery-pool";
 import { useToast } from "@/hooks/use-toast";
+import { useBTCPrice } from "@/hooks/use-btc-price";
 
 export function BuyTicketsModal({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -32,6 +33,7 @@ export function BuyTicketsModal({ children }: { children: React.ReactNode }) {
   const { currentRoundId, roundInfo } = useCurrentRound();
   const { buyTickets, isPending } = useBuyTickets();
   const { toast } = useToast();
+  const { data: btcPriceData } = useBTCPrice();
 
   const allConfirmed = Object.values(confirmations).every(Boolean);
 
@@ -46,7 +48,7 @@ export function BuyTicketsModal({ children }: { children: React.ReactNode }) {
   const discountRate = ticketCount >= 20 ? 0.15 : ticketCount >= 10 ? 0.1 : ticketCount >= 5 ? 0.05 : 0;
   const discountAmount = subtotal * discountRate;
   const total = subtotal - discountAmount;
-  const btcPrice = 60000; // TODO: Get from price oracle
+  const btcPrice = btcPriceData?.price ?? 60000;
 
   const handleBuyTickets = async () => {
     try {

@@ -1,27 +1,101 @@
 /**
  * Cooperative Savings Pool Page
+ * Optimized with code splitting and lazy loading for better performance
  */
 'use client'
 
 export const dynamic = 'force-dynamic'
 
-import { useState } from "react"
+import { useState, Suspense } from "react"
+import dynamic from "next/dynamic"
 import Link from "next/link"
-import { ChevronLeft, BarChart3 } from "lucide-react"
+import { ChevronLeft, BarChart3, Loader2 } from "lucide-react"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { AnimateOnScroll } from "@/components/animate-on-scroll"
-import { CreatePool } from "@/components/dashboard/cooperative-savings/create-pool"
-import { PoolsList } from "@/components/dashboard/cooperative-savings/pools-list"
-import { JoinPool } from "@/components/dashboard/cooperative-savings/join-pool"
-import { MyPools } from "@/components/dashboard/cooperative-savings/my-pools"
-import { FloatingSyncIndicator } from "@/components/dashboard/cooperative-savings/sync-indicator"
-import { HistoricalScanIndicator } from "@/components/dashboard/cooperative-savings/historical-scan-indicator"
-import { RealtimeStatusBadge } from "@/components/dashboard/cooperative-savings/realtime-status-badge"
-import { RealtimeAnalyticsDashboard } from "@/components/dashboard/cooperative-savings/realtime-analytics-dashboard"
 import { useCooperativePoolEvents } from "@/hooks/web3/use-cooperative-pool-events"
 import { useHistoricalPoolEvents } from "@/hooks/web3/use-historical-pool-events"
 import { useRealtimePoolEvents } from "@/hooks/web3/use-realtime-pool-events"
-import { PoolDebug } from "@/components/debug/pool-debug"
+
+// Lazy load heavy components with loading states
+const PoolsList = dynamic(
+  () => import("@/components/dashboard/cooperative-savings/pools-list").then(mod => ({ default: mod.PoolsList })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    ),
+    ssr: false,
+  }
+)
+
+const MyPools = dynamic(
+  () => import("@/components/dashboard/cooperative-savings/my-pools").then(mod => ({ default: mod.MyPools })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    ),
+    ssr: false,
+  }
+)
+
+const CreatePool = dynamic(
+  () => import("@/components/dashboard/cooperative-savings/create-pool").then(mod => ({ default: mod.CreatePool })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    ),
+    ssr: false,
+  }
+)
+
+const JoinPool = dynamic(
+  () => import("@/components/dashboard/cooperative-savings/join-pool").then(mod => ({ default: mod.JoinPool })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center h-64">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    ),
+    ssr: false,
+  }
+)
+
+const RealtimeAnalyticsDashboard = dynamic(
+  () => import("@/components/dashboard/cooperative-savings/realtime-analytics-dashboard").then(mod => ({ default: mod.RealtimeAnalyticsDashboard })),
+  {
+    loading: () => (
+      <div className="flex items-center justify-center h-96">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    ),
+    ssr: false,
+  }
+)
+
+const FloatingSyncIndicator = dynamic(
+  () => import("@/components/dashboard/cooperative-savings/sync-indicator").then(mod => ({ default: mod.FloatingSyncIndicator })),
+  { ssr: false }
+)
+
+const HistoricalScanIndicator = dynamic(
+  () => import("@/components/dashboard/cooperative-savings/historical-scan-indicator").then(mod => ({ default: mod.HistoricalScanIndicator })),
+  { ssr: false }
+)
+
+const RealtimeStatusBadge = dynamic(
+  () => import("@/components/dashboard/cooperative-savings/realtime-status-badge").then(mod => ({ default: mod.RealtimeStatusBadge })),
+  { ssr: false }
+)
+
+const PoolDebug = dynamic(
+  () => import("@/components/debug/pool-debug").then(mod => ({ default: mod.PoolDebug })),
+  { ssr: false }
+)
 
 export default function CooperativeSavingsPage() {
   // 🔥 HISTORICAL: Scan past events (one-time on mount, cached)
@@ -70,7 +144,9 @@ export default function CooperativeSavingsPage() {
   return (
     <div className="flex flex-col gap-8">
       {/* Floating sync indicator */}
-      <FloatingSyncIndicator />
+      <Suspense fallback={null}>
+        <FloatingSyncIndicator />
+      </Suspense>
 
       {/* Header Section */}
       <AnimateOnScroll>
@@ -93,26 +169,40 @@ export default function CooperativeSavingsPage() {
           </div>
           {/* Real-time status badge */}
           <div className="flex items-center gap-2">
-            <RealtimeStatusBadge showStats showNotificationButton />
+            <Suspense fallback={null}>
+              <RealtimeStatusBadge showStats showNotificationButton />
+            </Suspense>
           </div>
         </div>
       </AnimateOnScroll>
 
-      {/* 🔍 DEBUG COMPONENT - Remove after fixing */}
-      <AnimateOnScroll delay="50ms">
-        <PoolDebug />
-      </AnimateOnScroll>
+      {/* 🔍 DEBUG COMPONENT - Only in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <AnimateOnScroll delay="50ms">
+          <Suspense fallback={null}>
+            <PoolDebug />
+          </Suspense>
+        </AnimateOnScroll>
+      )}
 
       {/* 🔥 Historical scan indicator - Shows when indexing past events */}
       {(historicalScan.isScanning || historicalScan.error) && (
         <AnimateOnScroll delay="75ms">
-          <HistoricalScanIndicator />
+          <Suspense fallback={null}>
+            <HistoricalScanIndicator />
+          </Suspense>
         </AnimateOnScroll>
       )}
 
       {/* 📊 Real-Time Analytics Dashboard */}
       <AnimateOnScroll delay="100ms">
-        <RealtimeAnalyticsDashboard mini />
+        <Suspense fallback={
+          <div className="flex items-center justify-center h-32">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          </div>
+        }>
+          <RealtimeAnalyticsDashboard mini />
+        </Suspense>
       </AnimateOnScroll>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -130,30 +220,60 @@ export default function CooperativeSavingsPage() {
 
         <AnimateOnScroll delay="200ms">
           <TabsContent value="explore" className="mt-6">
-            <PoolsList onJoinPool={handleJoinPool} />
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }>
+              <PoolsList onJoinPool={handleJoinPool} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="my-pools" className="mt-6">
-            <MyPools />
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }>
+              <MyPools />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="create" className="mt-6">
-            <CreatePool onSuccess={handleCreateSuccess} />
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }>
+              <CreatePool onSuccess={handleCreateSuccess} />
+            </Suspense>
           </TabsContent>
 
           <TabsContent value="join" className="mt-6">
             {selectedPoolId && (
-              <JoinPool
-                poolId={selectedPoolId}
-                onBack={handleBackToExplore}
-                onSuccess={handleJoinSuccess}
-              />
+              <Suspense fallback={
+                <div className="flex items-center justify-center h-64">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              }>
+                <JoinPool
+                  poolId={selectedPoolId}
+                  onBack={handleBackToExplore}
+                  onSuccess={handleJoinSuccess}
+                />
+              </Suspense>
             )}
           </TabsContent>
 
           {/* 📊 Analytics Tab - Full Dashboard */}
           <TabsContent value="analytics" className="mt-6">
-            <RealtimeAnalyticsDashboard />
+            <Suspense fallback={
+              <div className="flex items-center justify-center h-96">
+                <Loader2 className="h-8 w-8 animate-spin text-primary" />
+              </div>
+            }>
+              <RealtimeAnalyticsDashboard />
+            </Suspense>
           </TabsContent>
         </AnimateOnScroll>
       </Tabs>

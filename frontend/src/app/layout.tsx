@@ -3,8 +3,11 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { Web3Provider, Web3ErrorBoundary } from "@/providers/web3-provider";
 import { NetworkSwitcher } from "@/components/web3/network-switcher";
+import { ReactQueryProvider } from "@/providers/react-query-provider";
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
-export const revalidate = 0
+// Enable caching for 1 hour (3600 seconds)
+export const revalidate = 3600
 
 export const metadata: Metadata = {
   title: 'KhipuVault | Ahorro Bitcoin con Rendimientos Reales',
@@ -52,19 +55,17 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet" />
-      </head>
-      <body className="font-body antialiased">
-        <Web3ErrorBoundary>
-          <Web3Provider theme="dark">
-            <NetworkSwitcher />
-            {children}
-            <Toaster />
-          </Web3Provider>
-        </Web3ErrorBoundary>
+      <body className="font-sans antialiased">
+        <ReactQueryProvider>
+          <Web3ErrorBoundary>
+            <Web3Provider theme="dark">
+              <NetworkSwitcher />
+              {children}
+              <Toaster />
+              <SpeedInsights />
+            </Web3Provider>
+          </Web3ErrorBoundary>
+        </ReactQueryProvider>
       </body>
     </html>
   );

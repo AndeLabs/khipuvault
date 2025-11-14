@@ -9,6 +9,7 @@
  */
 
 import { PublicClient } from 'viem'
+import { logger } from '@/lib/logger'
 import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts'
 import { formatMUSD } from '@/lib/web3/contracts'
 
@@ -40,7 +41,7 @@ export async function fetchUserTransactions(
 ): Promise<Transaction[]> {
   const poolAddress = MEZO_V3_ADDRESSES.individualPool as `0x${string}`
 
-  console.log('🔄 [V3] Fetching transactions for', address)
+  logger.log('🔄 [V3] Fetching transactions for', address)
 
   try {
     // Get current block number
@@ -54,7 +55,7 @@ export async function fetchUserTransactions(
       ? currentBlock - lookbackBlocks
       : BigInt(0)
 
-    console.log(`📊 Fetching transactions from block ${fromBlock} to ${currentBlock}`)
+    logger.log(`📊 Fetching transactions from block ${fromBlock} to ${currentBlock}`)
 
     // Helper function to fetch logs with proper error handling
     const fetchLogs = async (eventName: string, eventInputs: any[]) => {
@@ -120,7 +121,7 @@ export async function fetchUserTransactions(
     }
 
     // Process deposits (MUSD-only)
-    console.log(`✅ Found ${depositLogs.length} deposit events`)
+    logger.log(`✅ Found ${depositLogs.length} deposit events`)
     for (const log of depositLogs) {
       try {
         const args = log.args as any
@@ -139,7 +140,7 @@ export async function fetchUserTransactions(
     }
 
     // Process withdrawals (MUSD-only)
-    console.log(`✅ Found ${withdrawalLogs.length} withdrawal events`)
+    logger.log(`✅ Found ${withdrawalLogs.length} withdrawal events`)
     for (const log of withdrawalLogs) {
       try {
         const args = log.args as any
@@ -159,7 +160,7 @@ export async function fetchUserTransactions(
     }
 
     // Process yield claims (MUSD-only)
-    console.log(`✅ Found ${yieldLogs.length} yield claim events`)
+    logger.log(`✅ Found ${yieldLogs.length} yield claim events`)
     for (const log of yieldLogs) {
       try {
         const args = log.args as any
@@ -181,7 +182,7 @@ export async function fetchUserTransactions(
     // Sort by block number (most recent first)
     allTransactions.sort((a, b) => Number(b.blockNumber) - Number(a.blockNumber))
 
-    console.log(`✅ Total transactions fetched: ${allTransactions.length}`)
+    logger.log(`✅ Total transactions fetched: ${allTransactions.length}`)
     return allTransactions
   } catch (error) {
     console.error('Error fetching transactions:', error)
