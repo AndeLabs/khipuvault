@@ -176,12 +176,14 @@ export default function CooperativeSavingsPage() {
         </div>
       </AnimateOnScroll>
 
-      {/* 🔍 DEBUG COMPONENT - Remove after fixing */}
-      <AnimateOnScroll delay="50ms">
-        <Suspense fallback={null}>
-          <PoolDebug />
-        </Suspense>
-      </AnimateOnScroll>
+      {/* 🔍 DEBUG COMPONENT - Only in development */}
+      {process.env.NODE_ENV === 'development' && (
+        <AnimateOnScroll delay="50ms">
+          <Suspense fallback={null}>
+            <PoolDebug />
+          </Suspense>
+        </AnimateOnScroll>
+      )}
 
       {/* 🔥 Historical scan indicator - Shows when indexing past events */}
       {(historicalScan.isScanning || historicalScan.error) && (
