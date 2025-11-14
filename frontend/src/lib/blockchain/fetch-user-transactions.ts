@@ -9,8 +9,7 @@
  */
 
 import { PublicClient } from 'viem'
-import { logger } from '@/lib/logger'
-import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts'
+import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 import { formatMUSD } from '@/lib/web3/contracts'
 
 export interface Transaction {
@@ -39,7 +38,7 @@ export async function fetchUserTransactions(
   publicClient: PublicClient,
   address: `0x${string}`
 ): Promise<Transaction[]> {
-  const poolAddress = MEZO_V3_ADDRESSES.individualPool as `0x${string}`
+  const poolAddress = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
 
   logger.log('🔄 [V3] Fetching transactions for', address)
 

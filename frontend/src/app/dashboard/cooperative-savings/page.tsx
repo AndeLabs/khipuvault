@@ -16,87 +16,6 @@ import { useCooperativePoolEvents } from "@/hooks/web3/use-cooperative-pool-even
 import { useHistoricalPoolEvents } from "@/hooks/web3/use-historical-pool-events"
 import { useRealtimePoolEvents } from "@/hooks/web3/use-realtime-pool-events"
 
-// Lazy load heavy components with loading states
-const PoolsList = dynamic(
-  () => import("@/components/dashboard/cooperative-savings/pools-list").then(mod => ({ default: mod.PoolsList })),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    ),
-    ssr: false,
-  }
-)
-
-const MyPools = dynamic(
-  () => import("@/components/dashboard/cooperative-savings/my-pools").then(mod => ({ default: mod.MyPools })),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    ),
-    ssr: false,
-  }
-)
-
-const CreatePool = dynamic(
-  () => import("@/components/dashboard/cooperative-savings/create-pool").then(mod => ({ default: mod.CreatePool })),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    ),
-    ssr: false,
-  }
-)
-
-const JoinPool = dynamic(
-  () => import("@/components/dashboard/cooperative-savings/join-pool").then(mod => ({ default: mod.JoinPool })),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center h-64">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    ),
-    ssr: false,
-  }
-)
-
-const RealtimeAnalyticsDashboard = dynamic(
-  () => import("@/components/dashboard/cooperative-savings/realtime-analytics-dashboard").then(mod => ({ default: mod.RealtimeAnalyticsDashboard })),
-  {
-    loading: () => (
-      <div className="flex items-center justify-center h-96">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
-      </div>
-    ),
-    ssr: false,
-  }
-)
-
-const FloatingSyncIndicator = dynamic(
-  () => import("@/components/dashboard/cooperative-savings/sync-indicator").then(mod => ({ default: mod.FloatingSyncIndicator })),
-  { ssr: false }
-)
-
-const HistoricalScanIndicator = dynamic(
-  () => import("@/components/dashboard/cooperative-savings/historical-scan-indicator").then(mod => ({ default: mod.HistoricalScanIndicator })),
-  { ssr: false }
-)
-
-const RealtimeStatusBadge = dynamic(
-  () => import("@/components/dashboard/cooperative-savings/realtime-status-badge").then(mod => ({ default: mod.RealtimeStatusBadge })),
-  { ssr: false }
-)
-
-const PoolDebug = dynamic(
-  () => import("@/components/debug/pool-debug").then(mod => ({ default: mod.PoolDebug })),
-  { ssr: false }
-)
-
 export default function CooperativeSavingsPage() {
   // 🔥 HISTORICAL: Scan past events (one-time on mount, cached)
   const historicalScan = useHistoricalPoolEvents({
@@ -176,21 +95,10 @@ export default function CooperativeSavingsPage() {
         </div>
       </AnimateOnScroll>
 
-      {/* 🔍 DEBUG COMPONENT - Only in development */}
-      {process.env.NODE_ENV === 'development' && (
-        <AnimateOnScroll delay="50ms">
-          <Suspense fallback={null}>
-            <PoolDebug />
-          </Suspense>
-        </AnimateOnScroll>
-      )}
-
       {/* 🔥 Historical scan indicator - Shows when indexing past events */}
       {(historicalScan.isScanning || historicalScan.error) && (
-        <AnimateOnScroll delay="75ms">
-          <Suspense fallback={null}>
-            <HistoricalScanIndicator />
-          </Suspense>
+        <AnimateOnScroll delay="50ms">
+          <HistoricalScanIndicator />
         </AnimateOnScroll>
       )}
 
