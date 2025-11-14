@@ -1,11 +1,12 @@
 /**
  * @fileoverview Pools List V3 - Explore Available Cooperative Pools
  * Displays all pools with filters and search functionality
+ * Optimized with React.memo and useCallback for performance
  */
 
 'use client'
 
-import { useState, useMemo } from 'react'
+import { useState, useMemo, memo, useCallback } from 'react'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -141,7 +142,8 @@ interface PoolCardProps {
   onJoinPool?: (poolId: number) => void
 }
 
-function PoolCard({ poolId, searchQuery, filter, onJoinPool }: PoolCardProps) {
+// Memoized PoolCard component to prevent unnecessary re-renders
+const PoolCard = memo(function PoolCard({ poolId, searchQuery, filter, onJoinPool }: PoolCardProps) {
   const { poolInfo, isLoading } = usePoolInfo(poolId)
 
   const matchesSearch = useMemo(() => {
@@ -153,7 +155,7 @@ function PoolCard({ poolId, searchQuery, filter, onJoinPool }: PoolCardProps) {
   const matchesFilter = useMemo(() => {
     if (filter === 'all') return true
     if (!poolInfo) return false
-    
+
     switch (filter) {
       case 'accepting':
         return poolInfo.status === PoolStatus.ACCEPTING
@@ -174,12 +176,25 @@ function PoolCard({ poolId, searchQuery, filter, onJoinPool }: PoolCardProps) {
     return null
   }
 
-  const statusConfig = getStatusConfig(poolInfo.status)
-  const canJoin = poolInfo.allowNewMembers && 
-                  poolInfo.currentMembers < poolInfo.maxMembers &&
-                  poolInfo.status === PoolStatus.ACCEPTING
+  // Memoize expensive calculations
+  const statusConfig = useMemo(() => getStatusConfig(poolInfo.status), [poolInfo.status])
 
-  const occupancyPercentage = (poolInfo.currentMembers / poolInfo.maxMembers) * 100
+  const canJoin = useMemo(() =>
+    poolInfo.allowNewMembers &&
+    poolInfo.currentMembers < poolInfo.maxMembers &&
+    poolInfo.status === PoolStatus.ACCEPTING,
+    [poolInfo.allowNewMembers, poolInfo.currentMembers, poolInfo.maxMembers, poolInfo.status]
+  )
+
+  const occupancyPercentage = useMemo(() =>
+    (poolInfo.currentMembers / poolInfo.maxMembers) * 100,
+    [poolInfo.currentMembers, poolInfo.maxMembers]
+  )
+
+  // Memoize join handler
+  const handleJoin = useCallback(() => {
+    onJoinPool?.(poolId)
+  }, [onJoinPool, poolId])
 
   return (
     <Card className={`bg-card border-2 ${statusConfig.borderColor} hover:shadow-lg transition-shadow`}>
@@ -263,7 +278,7 @@ function PoolCard({ poolId, searchQuery, filter, onJoinPool }: PoolCardProps) {
         </div>
 
         <Button
-          onClick={() => onJoinPool?.(poolId)}
+          onClick={handleJoin}
           disabled={!canJoin}
           className="w-full"
           variant={canJoin ? 'default' : 'outline'}
@@ -284,7 +299,7 @@ function PoolCard({ poolId, searchQuery, filter, onJoinPool }: PoolCardProps) {
       </CardContent>
     </Card>
   )
-}
+})
 
 function getStatusConfig(status: PoolStatus) {
   switch (status) {
