@@ -1,5 +1,38 @@
 {
+  "name": "khipu-vault",
+  "version": "3.0.0",
+  "private": true,
+  "description": "Bitcoin savings platform on Mezo - Complete monorepo",
+  "scripts": {
+    "dev": "turbo run dev",
+    "dev:web": "turbo run dev --filter=@khipu/web",
+    "dev:api": "turbo run dev --filter=@khipu/api",
+    "build": "turbo run build",
+    "build:web": "turbo run build --filter=@khipu/web",
+    "build:api": "turbo run build --filter=@khipu/api",
+    "test": "turbo run test",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "clean": "turbo run clean && rm -rf node_modules",
+    "db:generate": "turbo run db:generate",
+    "db:push": "turbo run db:push",
+    "db:migrate": "turbo run db:migrate",
+    "contracts:build": "cd packages/contracts && forge build",
+    "contracts:test": "cd packages/contracts && forge test",
+    "contracts:deploy": "cd packages/contracts && forge script script/Deploy.s.sol",
+    "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
+    "prepare": "husky install || true"
+  },
   "devDependencies": {
-    "autoprefixer": "^10.4.21"
+    "@types/node": "^20.10.0",
+    "autoprefixer": "^10.4.21",
+    "prettier": "^3.1.0",
+    "turbo": "^2.3.0",
+    "typescript": "^5.3.3"
+  },
+  "packageManager": "pnpm@9.0.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
   }
 }

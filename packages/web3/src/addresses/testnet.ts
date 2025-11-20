@@ -1,0 +1,23 @@
+/**
+ * Mezo Testnet Contract Addresses
+ * Chain ID: 31611
+ * Last Updated: V3 Production Deployment
+ */
+
+export const TESTNET_ADDRESSES = {
+  // V3 Production Contracts
+  INDIVIDUAL_POOL: '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as const,
+  COOPERATIVE_POOL: '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88' as const,
+  YIELD_AGGREGATOR: '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6' as const,
+  MEZO_INTEGRATION: '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6' as const,
+
+  // Official Mezo Contracts
+  MUSD: '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503' as const,
+  BORROWER_OPERATIONS: '0xCdF7028ceAB81fA0C6971208e83fa7872994beE5' as const,
+  TROVE_MANAGER: '0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0' as const,
+  PRICE_FEED: '0x86bCF0841622a5dAC14A313a15f96A95421b9366' as const,
+  HINT_HELPERS: '0x4e4cba3779d56386ed43631b4dcd6d8eacecbcf6' as const,
+  SORTED_TROVES: '0x722E4D24FD6Ff8b0AC679450F3D91294607268fA' as const,
+} as const
+
+export type ContractName = keyof typeof TESTNET_ADDRESSES

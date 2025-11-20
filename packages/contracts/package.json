@@ -1,0 +1,19 @@
+{
+  "name": "@khipu/contracts",
+  "version": "3.0.0",
+  "private": true,
+  "description": "KhipuVault smart contracts (Solidity + Foundry)",
+  "scripts": {
+    "build": "forge build",
+    "test": "forge test",
+    "test:verbose": "forge test -vvv",
+    "test:gas": "forge test --gas-report",
+    "coverage": "forge coverage",
+    "clean": "forge clean",
+    "deploy:testnet": "forge script script/Deploy.s.sol --rpc-url $MEZO_TESTNET_RPC --broadcast",
+    "deploy:mainnet": "forge script script/Deploy.s.sol --rpc-url $MEZO_MAINNET_RPC --broadcast --verify",
+    "verify": "forge verify-contract",
+    "generate:abis": "node scripts/generate-abis.js"
+  },
+  "keywords": ["solidity", "smart-contracts", "defi", "bitcoin", "mezo"]
+}

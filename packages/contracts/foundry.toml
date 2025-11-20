@@ -1,0 +1,104 @@
+[profile.default]
+src = "src"
+out = "out"
+libs = ["lib"]
+solc = "0.8.25"
+evm_version = "london"
+optimizer = true
+optimizer_runs = 20000
+via_ir = true
+
+# Testing
+test = "test"
+verbosity = 3
+
+# Exclude disabled test directories
+fs_permissions = [
+    { access = "read", path = "./" },
+    { access = "read-write", path = "./deployments" }
+]
+exclude = ["test/fuzz.disabled/**", "test/integration.disabled/**"]
+
+# Gas reporting
+gas_reports = ["*"]
+
+# Remappings
+remappings = [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "chainlink-brownie-contracts/=lib/chainlink-brownie-contracts/",
+    "forge-std/=lib/forge-std/src/",
+]
+
+# RPC endpoints for different networks
+[rpc_endpoints]
+# Mezo Testnet - Official testnet for MUSD
+mezotestnet = "https://rpc.test.mezo.org"
+
+# Standard networks for comparison
+sepolia = "${SEPOLIA_RPC_URL}"
+mainnet = "${MAINNET_RPC_URL}"
+localhost = "http://localhost:8545"
+
+# Mezo Testnet profile - Official Mezo testnet configuration
+[profile.mezotestnet]
+src = "src"
+test = "test"
+libs = ["lib"]
+solc = "0.8.25"
+evm_version = "london"
+optimizer = true
+optimizer_runs = 20000
+via_ir = true
+chain_id = 31611
+
+# Enable detailed traces for mezo testnet debugging
+verbosity = 3
+gas_reports = ["*"]
+
+remappings = [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "chainlink-brownie-contracts/=lib/chainlink-brownie-contracts/",
+    "forge-std/=lib/forge-std/src/",
+]
+
+# Sepolia profile (for comparison/fallback)
+[profile.sepolia]
+src = "src"
+test = "test"
+libs = ["lib"]
+solc = "0.8.25"
+evm_version = "london"
+optimizer = true
+optimizer_runs = 20000
+via_ir = true
+chain_id = 11155111
+verbosity = 2
+
+remappings = [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "chainlink-brownie-contracts/=lib/chainlink-brownie-contracts/",
+    "forge-std/=lib/forge-std/src/",
+]
+
+# Mainnet production profile
+[profile.mainnet]
+src = "src"
+test = "test"
+libs = ["lib"]
+solc = "0.8.25"
+evm_version = "london"
+optimizer = true
+optimizer_runs = 20000
+via_ir = true
+chain_id = 1
+verbosity = 1
+
+remappings = [
+    "@openzeppelin/contracts/=lib/openzeppelin-contracts/contracts/",
+    "chainlink-brownie-contracts/=lib/chainlink-brownie-contracts/",
+    "forge-std/=lib/forge-std/src/",
+]
+
+# See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options[profile.default.fs_permissions]
+read = ["./", "./deployments"]
+write = ["./deployments"]

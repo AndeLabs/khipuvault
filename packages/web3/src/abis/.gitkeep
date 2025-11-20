@@ -1,0 +1,2 @@
+# ABIs will be generated from contracts
+# Run: pnpm contracts:generate-abis

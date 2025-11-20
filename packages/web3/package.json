@@ -1,0 +1,50 @@
+{
+  "name": "@khipu/web3",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./abis": {
+      "types": "./dist/abis/index.d.ts",
+      "import": "./dist/abis/index.js"
+    },
+    "./addresses": {
+      "types": "./dist/addresses/index.d.ts",
+      "import": "./dist/addresses/index.js"
+    },
+    "./hooks": {
+      "types": "./dist/hooks/index.d.ts",
+      "import": "./dist/hooks/index.js"
+    },
+    "./client": {
+      "types": "./dist/client/index.d.ts",
+      "import": "./dist/client/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --dts",
+    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@khipu/shared": "workspace:*",
+    "viem": "^2.21.52",
+    "wagmi": "^2.13.8"
+  },
+  "devDependencies": {
+    "@types/react": "^18",
+    "react": "^18",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "react": "^18",
+    "wagmi": "^2",
+    "viem": "^2"
+  }
+}
