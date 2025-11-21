@@ -8,8 +8,8 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IMezoIntegration} from "../interfaces/IMezoIntegration.sol";
-import {IYieldAggregator} from "../interfaces/IYieldAggregator.sol";
+import {IMezoIntegration} from "../../interfaces/IMezoIntegration.sol";
+import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
 
 /**
  * @title CooperativePoolV3 - Production Grade with UUPS Proxy
@@ -122,6 +122,14 @@ contract CooperativePoolV3 is
         uint256 timestamp
     );
 
+    event PartialWithdrawal(
+        uint256 indexed poolId,
+        address indexed member,
+        uint256 btcAmount,
+        uint256 remainingContribution,
+        uint256 timestamp
+    );
+
     event YieldClaimed(
         uint256 indexed poolId,
         address indexed member,
@@ -195,7 +203,7 @@ contract CooperativePoolV3 is
                              MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
-    modifier noFlashLoan() {
+    modifier noFlashLoan() virtual {
         if (tx.origin != msg.sender) revert FlashLoanDetected();
         _;
     }
@@ -353,6 +361,66 @@ contract CooperativePoolV3 is
         }
 
         emit MemberLeft(poolId, msg.sender, btcAmount, memberYield, block.timestamp);
+    }
+
+    function withdrawPartial(uint256 poolId, uint256 withdrawAmount)
+        external
+        nonReentrant
+        noFlashLoan
+    {
+        if (withdrawAmount == 0) revert InvalidAmount();
+
+        PoolInfo storage pool = pools[poolId];
+        MemberInfo storage member = poolMembers[poolId][msg.sender];
+
+        if (pool.createdAt == 0) revert InvalidPoolId();
+        if (!member.active) revert NotMember();
+
+        uint256 currentContribution = member.btcContributed;
+        if (withdrawAmount >= currentContribution) revert InvalidAmount();
+
+        uint256 remainingContribution = currentContribution - withdrawAmount;
+        if (remainingContribution < pool.minContribution) revert ContributionTooLow();
+
+        uint256 oldTotalShares = _getTotalShares(poolId);
+        uint256 withdrawShare = (withdrawAmount * 1e18) / currentContribution;
+        uint256 sharesToBurn = (uint256(member.shares) * withdrawShare) / 1e18;
+
+        member.btcContributed = uint128(remainingContribution);
+        member.shares = uint128(uint256(member.shares) - sharesToBurn);
+        pool.totalBtcDeposited -= withdrawAmount;
+
+        uint256 btcAmount = withdrawAmount;
+
+        if (pool.totalMusdMinted > 0) {
+            uint256 musdToRepay = (pool.totalMusdMinted * withdrawShare) / 1e18;
+            pool.totalMusdMinted -= musdToRepay;
+
+            uint256 poolMusdBalance = MUSD.balanceOf(address(this));
+
+            if (poolMusdBalance < musdToRepay) {
+                (uint256 aggregatorPrincipal, uint256 aggregatorYields) = YIELD_AGGREGATOR.getUserPosition(address(this));
+                uint256 aggregatorBalance = aggregatorPrincipal + aggregatorYields;
+                uint256 proportionalShare = (aggregatorBalance * withdrawShare) / 1e18;
+                uint256 amountToWithdraw = musdToRepay - poolMusdBalance;
+                uint256 safeWithdraw = amountToWithdraw < proportionalShare ? amountToWithdraw : proportionalShare;
+
+                if (safeWithdraw > 0) {
+                    try YIELD_AGGREGATOR.withdraw(safeWithdraw) {
+                    } catch {
+                    }
+                }
+            }
+
+            MUSD.forceApprove(address(MEZO_INTEGRATION), musdToRepay);
+            uint256 btcReturned = MEZO_INTEGRATION.burnAndWithdraw(musdToRepay);
+            btcAmount = btcReturned;
+        }
+
+        (bool success, ) = msg.sender.call{value: btcAmount}("");
+        require(success, "BTC transfer failed");
+
+        emit PartialWithdrawal(poolId, msg.sender, btcAmount, remainingContribution, block.timestamp);
     }
 
     function claimYield(uint256 poolId)
@@ -544,7 +612,7 @@ contract CooperativePoolV3 is
     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     function version() external pure returns (string memory) {
-        return "3.0.0";
+        return "3.1.0";
     }
 
     receive() external payable {}
