@@ -8,7 +8,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
-import {IYieldAggregator} from "../interfaces/IYieldAggregator.sol";
+import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
 
 /**
  * @title IndividualPool V3 - Production Grade with UUPS Proxy

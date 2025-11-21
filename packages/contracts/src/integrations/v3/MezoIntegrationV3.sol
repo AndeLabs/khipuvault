@@ -7,11 +7,11 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
-import {IMezoIntegration} from "../interfaces/IMezoIntegration.sol";
-import {IMezoBorrowerOperations} from "../interfaces/IMezoBorrowerOperations.sol";
-import {IMezoPriceFeed} from "../interfaces/IMezoPriceFeed.sol";
-import {IMezoHintHelpers} from "../interfaces/IMezoHintHelpers.sol";
-import {IMezoTroveManager} from "../interfaces/IMezoTroveManager.sol";
+import {IMezoIntegration} from "../../interfaces/IMezoIntegration.sol";
+import {IMezoBorrowerOperations} from "../../interfaces/IMezoBorrowerOperations.sol";
+import {IMezoPriceFeed} from "../../interfaces/IMezoPriceFeed.sol";
+import {IMezoHintHelpers} from "../../interfaces/IMezoHintHelpers.sol";
+import {IMezoTroveManager} from "../../interfaces/IMezoTroveManager.sol";
 
 /**
  * @title MezoIntegrationV3 - Production Grade with UUPS Proxy

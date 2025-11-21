@@ -8,8 +8,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {VRFCoordinatorV2Interface} from "chainlink-brownie-contracts/contracts/src/v0.8/vrf/interfaces/VRFCoordinatorV2Interface.sol";
 import {VRFConsumerBaseV2} from "chainlink-brownie-contracts/contracts/src/v0.8/vrf/VRFConsumerBaseV2.sol";
-import {IMezoIntegration} from "../interfaces/IMezoIntegration.sol";
-import {IYieldAggregator} from "../interfaces/IYieldAggregator.sol";
+import {IMezoIntegration} from "../../interfaces/IMezoIntegration.sol";
+import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
 
 /**
  * @title LotteryPool
