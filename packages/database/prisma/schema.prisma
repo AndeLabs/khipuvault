@@ -1,0 +1,262 @@
+// Prisma Schema for KhipuVault
+// PostgreSQL database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// Enums for type safety
+enum PoolType {
+  INDIVIDUAL
+  COOPERATIVE
+  LOTTERY
+  ROTATING
+}
+
+enum TransactionType {
+  DEPOSIT
+  WITHDRAW
+  YIELD_CLAIM
+  COMPOUND
+}
+
+enum TransactionStatus {
+  PENDING
+  CONFIRMED
+  FAILED
+}
+
+enum PoolStatus {
+  ACTIVE
+  PAUSED
+  EMERGENCY
+  CLOSED
+}
+
+// User model
+model User {
+  id           String   @id @default(cuid())
+  address      String   @unique
+  ensName      String?
+  avatar       String?
+  createdAt    DateTime @default(now())
+  lastActiveAt DateTime @updatedAt
+
+  deposits      Deposit[]
+  notifications Notification[]
+
+  @@index([address])
+  @@index([lastActiveAt])
+}
+
+// Deposit/Transaction model - Optimized
+model Deposit {
+  id String @id @default(cuid())
+
+  // User info - denormalized for performance
+  userId      String
+  user        User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userAddress String // Denormalized for fast queries
+
+  // Pool info - denormalized for performance
+  poolType    PoolType
+  poolId      String? // For cooperative/lottery/rotating pools
+  poolAddress String // Denormalized for fast queries
+
+  // Transaction details
+  type        TransactionType
+  amount      String // BigInt as string (wei) - using String for precision
+  txHash      String            @unique
+  blockNumber Int
+  blockHash   String? // For reorg detection
+  logIndex    Int // For uniqueness within block
+  timestamp   DateTime
+  status      TransactionStatus @default(PENDING)
+
+  // Additional metadata
+  gasUsed  String?
+  gasPrice String?
+  error    String?
+  metadata Json? // Flexible field for additional data
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([txHash, logIndex])
+  @@index([userId])
+  @@index([userAddress])
+  @@index([poolAddress])
+  @@index([poolType])
+  @@index([type])
+  @@index([status])
+  @@index([blockNumber])
+  @@index([timestamp])
+  @@index([userAddress, poolAddress])
+  @@index([poolAddress, status])
+}
+
+// Pool model - Enhanced
+model Pool {
+  id              String   @id @default(cuid())
+  contractAddress String   @unique
+  poolType        PoolType
+  name            String
+  description     String?
+
+  // Financial metrics
+  tvl              String @default("0") // Total Value Locked (BigInt as string)
+  apr              Float  @default(0) // Annual Percentage Rate
+  apy              Float? // Annual Percentage Yield (compounded)
+  totalUsers       Int    @default(0)
+  totalDeposits    Int    @default(0)
+  totalWithdrawals Int    @default(0)
+
+  // Pool configuration
+  minDeposit  String? // Minimum deposit amount
+  maxDeposit  String? // Maximum deposit amount
+  depositFee  Float   @default(0)
+  withdrawFee Float   @default(0)
+
+  // Status and health
+  status      PoolStatus @default(ACTIVE)
+  isPaused    Boolean    @default(false)
+  lastYieldAt DateTime? // Last yield distribution
+  lastSyncAt  DateTime? // Last sync with blockchain
+
+  // Version control for upgrades
+  version String @default("1.0.0")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  analytics PoolAnalytics[]
+
+  @@index([poolType])
+  @@index([status])
+  @@index([isPaused])
+  @@index([contractAddress, status])
+  @@index([lastSyncAt])
+}
+
+// Pool Analytics (historical data) - Enhanced
+model PoolAnalytics {
+  id     String @id @default(cuid())
+  poolId String
+  pool   Pool   @relation(fields: [poolId], references: [id], onDelete: Cascade)
+
+  // Snapshot data
+  timestamp        DateTime @default(now())
+  date             DateTime // Day aggregation
+  tvl              String // BigInt as string
+  apr              Float
+  apy              Float?
+  totalDeposits    Int
+  totalWithdrawals Int
+  totalUsers       Int
+  activeUsers      Int      @default(0) // Users with balance > 0
+
+  // Volume metrics
+  volumeIn  String  @default("0") // BigInt as string
+  volumeOut String  @default("0") // BigInt as string
+  netFlow   String? // volumeIn - volumeOut
+
+  // Yield metrics
+  yieldGenerated   String? // Total yield in period
+  yieldDistributed String? // Yield distributed to users
+
+  createdAt DateTime @default(now())
+
+  @@unique([poolId, timestamp])
+  @@index([poolId])
+  @@index([date])
+  @@index([poolId, date])
+  @@index([timestamp])
+}
+
+// Notifications model
+model Notification {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type    String // "deposit", "withdraw", "yield_claimed", "pool_created", etc.
+  title   String
+  message String
+  data    Json? // Additional data as JSON
+
+  read      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
+}
+
+// Event Log (for blockchain events) - Enhanced for reorg handling
+model EventLog {
+  id               String @id @default(cuid())
+  contractAddress  String
+  eventName        String
+  txHash           String
+  blockNumber      Int
+  blockHash        String // For reorg detection
+  logIndex         Int
+  transactionIndex Int? // Position in block
+
+  args      Json // Event arguments as JSON
+  timestamp DateTime
+  processed Boolean  @default(false)
+
+  // Reorg handling
+  removed     Boolean @default(false) // Marked true if block is reorganized
+  confirmedAt Int? // Block number when considered confirmed
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([txHash, logIndex])
+  @@unique([blockHash, logIndex])
+  @@index([contractAddress])
+  @@index([eventName])
+  @@index([blockNumber])
+  @@index([blockHash])
+  @@index([processed])
+  @@index([removed])
+  @@index([contractAddress, blockNumber])
+  @@index([processed, removed])
+}
+
+// Indexer State - Track indexing progress and health
+model IndexerState {
+  id              String @id @default(cuid())
+  contractAddress String @unique
+  contractName    String
+
+  // Indexing progress
+  lastIndexedBlock Int       @default(0)
+  lastIndexedHash  String?
+  lastIndexedAt    DateTime?
+
+  // Health metrics
+  isHealthy   Boolean   @default(true)
+  lastError   String?
+  lastErrorAt DateTime?
+  errorCount  Int       @default(0)
+
+  // Statistics
+  totalEvents     Int @default(0)
+  eventsProcessed Int @default(0)
+  eventsFailed    Int @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([contractAddress])
+  @@index([isHealthy])
+  @@index([lastIndexedBlock])
+}

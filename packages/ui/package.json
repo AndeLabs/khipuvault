@@ -1,0 +1,40 @@
+{
+  "name": "@khipu/ui",
+  "version": "1.0.0",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./styles": "./dist/styles.css"
+  },
+  "scripts": {
+    "build": "tsup src/index.tsx --format esm --dts --external react",
+    "dev": "tsup src/index.tsx --format esm --dts --watch --external react",
+    "clean": "rm -rf dist",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@radix-ui/react-slot": "^1.2.3",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "tailwind-merge": "^2.6.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "autoprefixer": "^10.4.21",
+    "postcss": "^8",
+    "react": "^18",
+    "react-dom": "^18",
+    "tailwindcss": "^3.4.1",
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.3"
+  },
+  "peerDependencies": {
+    "react": "^18",
+    "react-dom": "^18"
+  }
+}
