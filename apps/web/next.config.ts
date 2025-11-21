@@ -1,6 +1,21 @@
 import type { NextConfig } from 'next';
 import path from 'path';
 
+// CRITICAL: Polyfill localStorage for SSR before any other imports
+// MetaMask SDK and some dependencies try to access localStorage during module initialization
+if (typeof globalThis.localStorage === 'undefined') {
+  const storage = new Map<string, string>();
+  (globalThis as any).localStorage = {
+    getItem: (key: string) => storage.get(key) || null,
+    setItem: (key: string, value: string) => storage.set(key, value),
+    removeItem: (key: string) => storage.delete(key),
+    clear: () => storage.clear(),
+    get length() { return storage.size; },
+    key: (index: number) => Array.from(storage.keys())[index] || null,
+  };
+  (globalThis as any).sessionStorage = (globalThis as any).localStorage;
+}
+
 const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
@@ -20,7 +35,7 @@ const nextConfig: NextConfig = {
       ...config.resolve.alias,
       '@': path.resolve(__dirname, './src'),
     };
-    
+
     // Fix for Mezo Passport modules
     config.resolve.fallback = {
       ...config.resolve.fallback,
