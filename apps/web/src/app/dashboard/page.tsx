@@ -1,125 +1,195 @@
-'use client'
+"use client"
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic"
 
-import { useAccount } from "wagmi";
-import Link from "next/link";
-import { ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { SummaryCards } from "@/components/dashboard/summary-cards";
-import { ContractsInfo } from "@/components/dashboard/contracts-info";
-import { AnimateOnScroll } from "@/components/animate-on-scroll";
+import * as React from "react"
+import { useAccount } from "wagmi"
+import Link from "next/link"
+import { PageHeader } from "@/components/layout"
+import { PortfolioOverview, AllocationChart, RecentActivity } from "@/features/portfolio"
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import { Wallet, Users, Trophy, ArrowRight } from "lucide-react"
+import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3"
+import { useCooperativePools } from "@/hooks/web3/use-cooperative-pools"
+import { formatUnits } from "viem"
 
+/**
+ * Dashboard Page - V4 Redesign
+ *
+ * Features:
+ * - Portfolio overview with total value
+ * - Asset allocation chart
+ * - Recent activity feed
+ * - Quick access to features
+ */
 export default function DashboardPage() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount()
+
+  // Fetch REAL blockchain data
+  const { userInfo, isLoading: isLoadingIndividual } = useIndividualPoolV3()
+  const { pools, isLoading: isLoadingPools } = useCooperativePools()
+
+  // Calculate real portfolio data
+  const individualSavings = userInfo?.deposit
+    ? Number(formatUnits(userInfo.deposit, 18))
+    : 0
+
+  const totalYields = userInfo?.yields
+    ? Number(formatUnits(userInfo.yields, 18))
+    : 0
+
+  // Calculate cooperative pools total (user's participation)
+  const cooperativeSavings = pools
+    ?.filter(pool => pool.participants?.includes(address as string))
+    ?.reduce((acc, pool) => acc + Number(formatUnits(pool.userBalance || 0n, 18)), 0) || 0
+
+  const totalValue = individualSavings + cooperativeSavings
+
+  const portfolioData = {
+    totalValue: totalValue.toFixed(2),
+    individualSavings: individualSavings.toFixed(2),
+    cooperativeSavings: cooperativeSavings.toFixed(2),
+    totalYields: totalYields.toFixed(6),
+    change24h: 0, // TODO: Implement 24h change calculation
+    change7d: 0, // TODO: Implement 7d change calculation
+    recentActivities: [], // TODO: Fetch from user transactions
+  }
+
+  if (!isConnected) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Dashboard"
+          description="Welcome to KhipuVault"
+        />
+        <Card variant="glass" className="text-center py-12">
+          <CardContent>
+            <Wallet className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-heading font-bold mb-2">Connect Your Wallet</h2>
+            <p className="text-muted-foreground mb-6">
+              Connect your wallet to access your portfolio and start saving
+            </p>
+            <p className="text-sm text-muted-foreground">
+              Use the Connect Wallet button in the header
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Show loading state while fetching blockchain data
+  if (isLoadingIndividual || isLoadingPools) {
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Dashboard"
+          description="Loading your portfolio..."
+        />
+        <Card variant="glass" className="text-center py-12">
+          <CardContent>
+            <div className="animate-pulse space-y-4">
+              <div className="h-8 bg-muted rounded w-1/2 mx-auto" />
+              <div className="h-4 bg-muted rounded w-1/3 mx-auto" />
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
 
   return (
-    <div className="flex flex-col gap-8">
-      <AnimateOnScroll>
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight text-white">Dashboard</h1>
-          <p className="text-muted-foreground mt-2">Bienvenido a KhipuVault - Tu plataforma de ahorros BTC</p>
+    <div className="space-y-6 animate-slide-up">
+      {/* Page Header */}
+      <PageHeader
+        title="Dashboard"
+        description="Welcome to KhipuVault - Your Bitcoin Savings Platform"
+      />
+
+      {/* Portfolio Overview - REAL DATA */}
+      <PortfolioOverview
+        totalValue={portfolioData.totalValue}
+        individualSavings={portfolioData.individualSavings}
+        cooperativeSavings={portfolioData.cooperativeSavings}
+        totalYields={portfolioData.totalYields}
+        change24h={portfolioData.change24h}
+        change7d={portfolioData.change7d}
+      />
+
+      {/* Charts & Activity */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Allocation Chart - REAL DATA */}
+        <AllocationChart
+          individualSavings={Number(portfolioData.individualSavings)}
+          cooperativeSavings={Number(portfolioData.cooperativeSavings)}
+        />
+
+        {/* Recent Activity */}
+        <div className="lg:col-span-2">
+          <RecentActivity activities={portfolioData.recentActivities} />
         </div>
-      </AnimateOnScroll>
+      </div>
 
-      <AnimateOnScroll delay="100ms">
-        <SummaryCards />
-      </AnimateOnScroll>
-
-      {isConnected && (
-        <AnimateOnScroll delay="200ms">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Individual Savings Pool */}
-            <Link href="/dashboard/individual-savings">
-              <div className="group relative overflow-hidden rounded-lg border border-primary/20 bg-card p-6 hover:border-primary/50 transition-all duration-300 cursor-pointer h-full">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10">
-                  <div className="text-4xl mb-3">💡</div>
-                  <h3 className="text-xl font-bold text-white mb-2">Individual Savings Pool</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Ahorra en BTC de forma individual y gana rendimientos</p>
-                  <div className="flex items-center text-primary text-sm font-medium group-hover:gap-3 gap-2 transition-all duration-300">
-                    Explorar <ArrowRight className="h-4 w-4" />
-                  </div>
-                </div>
+      {/* Quick Access Cards */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <Link href="/dashboard/individual-savings">
+          <Card variant="surface" hover="glow-lavanda" className="h-full cursor-pointer group">
+            <CardContent className="pt-6">
+              <div className="h-12 w-12 rounded-full bg-lavanda/20 flex items-center justify-center mb-4">
+                <Wallet className="h-6 w-6 text-lavanda" />
               </div>
-            </Link>
-
-            {/* Cooperative Savings Pool */}
-            <Link href="/dashboard/cooperative-savings">
-              <div className="group relative overflow-hidden rounded-lg border border-primary/20 bg-card p-6 hover:border-primary/50 transition-all duration-300 cursor-pointer h-full">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10">
-                  <div className="text-4xl mb-3">🤝</div>
-                  <h3 className="text-xl font-bold text-white mb-2">Cooperative Savings Pool</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Crea o únete a pools cooperativos con otros usuarios</p>
-                  <div className="flex items-center text-primary text-sm font-medium group-hover:gap-3 gap-2 transition-all duration-300">
-                    Explorar <ArrowRight className="h-4 w-4" />
-                  </div>
-                </div>
+              <h3 className="text-xl font-heading font-semibold mb-2">
+                Individual Savings
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Save individually and earn automatic yields
+              </p>
+              <div className="flex items-center gap-2 text-lavanda text-sm font-medium group-hover:gap-3 transition-all">
+                Open <ArrowRight className="h-4 w-4" />
               </div>
-            </Link>
+            </CardContent>
+          </Card>
+        </Link>
 
-            {/* Prize Pool */}
-            <Link href="/dashboard/prize-pool">
-              <div className="group relative overflow-hidden rounded-lg border border-primary/20 bg-card p-6 hover:border-primary/50 transition-all duration-300 cursor-pointer h-full">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10">
-                  <div className="text-4xl mb-3">🎁</div>
-                  <h3 className="text-xl font-bold text-white mb-2">Prize Pool</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Participa en pools con premios y gana dinero extra</p>
-                  <div className="flex items-center text-primary text-sm font-medium group-hover:gap-3 gap-2 transition-all duration-300">
-                    Explorar <ArrowRight className="h-4 w-4" />
-                  </div>
-                </div>
+        <Link href="/dashboard/cooperative-savings">
+          <Card variant="surface" hover="glow-orange" className="h-full cursor-pointer group">
+            <CardContent className="pt-6">
+              <div className="h-12 w-12 rounded-full bg-accent/20 flex items-center justify-center mb-4">
+                <Users className="h-6 w-6 text-accent" />
               </div>
-            </Link>
-
-            {/* Contracts Info */}
-            <div className="group relative overflow-hidden rounded-lg border border-primary/20 bg-card p-6 hover:border-primary/50 transition-all duration-300 cursor-pointer h-full">
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-              <div className="relative z-10">
-                <div className="text-4xl mb-3">📜</div>
-                <h3 className="text-xl font-bold text-white mb-2">Contratos Inteligentes</h3>
-                <p className="text-sm text-muted-foreground mb-4">Explora nuestra infraestructura de contratos</p>
-                <div className="flex items-center text-primary text-sm font-medium">
-                  Ver detalles abajo ↓
-                </div>
+              <h3 className="text-xl font-heading font-semibold mb-2">
+                Cooperative Pools
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Join or create savings groups with friends
+              </p>
+              <div className="flex items-center gap-2 text-accent text-sm font-medium group-hover:gap-3 transition-all">
+                Explore <ArrowRight className="h-4 w-4" />
               </div>
-            </div>
+            </CardContent>
+          </Card>
+        </Link>
 
-            {/* Settings */}
-            <Link href="/dashboard/settings">
-              <div className="group relative overflow-hidden rounded-lg border border-primary/20 bg-card p-6 hover:border-primary/50 transition-all duration-300 cursor-pointer h-full">
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative z-10">
-                  <div className="text-4xl mb-3">⚙️</div>
-                  <h3 className="text-xl font-bold text-white mb-2">Configuración</h3>
-                  <p className="text-sm text-muted-foreground mb-4">Personaliza tu experiencia en KhipuVault</p>
-                  <div className="flex items-center text-primary text-sm font-medium group-hover:gap-3 gap-2 transition-all duration-300">
-                    Ir <ArrowRight className="h-4 w-4" />
-                  </div>
-                </div>
+        <Link href="/dashboard/prize-pool">
+          <Card variant="surface" hover="glow-success" className="h-full cursor-pointer group">
+            <CardContent className="pt-6">
+              <div className="h-12 w-12 rounded-full bg-success/20 flex items-center justify-center mb-4">
+                <Trophy className="h-6 w-6 text-success" />
               </div>
-            </Link>
-          </div>
-        </AnimateOnScroll>
-      )}
-
-      {/* Contracts Information Section */}
-      <AnimateOnScroll delay="300ms">
-        <ContractsInfo />
-      </AnimateOnScroll>
-
-      {!isConnected && (
-        <AnimateOnScroll delay="200ms">
-          <div className="rounded-lg border border-primary/20 bg-card p-8 text-center">
-            <div className="text-5xl mb-4">🔐</div>
-            <h2 className="text-2xl font-bold text-white mb-2">Conecta tu Wallet</h2>
-            <p className="text-muted-foreground mb-6">Para acceder a KhipuVault, necesitas conectar tu wallet de Bitcoin</p>
-            <p className="text-sm text-muted-foreground">Usa el botón de arriba para conectar tu wallet y comenzar a ahorrar</p>
-          </div>
-        </AnimateOnScroll>
-      )}
+              <h3 className="text-xl font-heading font-semibold mb-2">
+                Prize Pool
+              </h3>
+              <p className="text-sm text-muted-foreground mb-4">
+                Participate in prize pools and win rewards
+              </p>
+              <div className="flex items-center gap-2 text-success text-sm font-medium group-hover:gap-3 transition-all">
+                Join <ArrowRight className="h-4 w-4" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
     </div>
-  );
+  )
 }

@@ -9,7 +9,7 @@
 
 import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { useQueryClient } from '@tanstack:react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { type Address } from 'viem'
 
 const POOL_ADDRESS = '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as Address

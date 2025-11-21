@@ -2,11 +2,12 @@
 
 import { useState } from 'react'
 import { ExternalLink, Code, Shield, Users, Gift, RotateCw, TrendingUp, Copy, Check } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { CONTRACT_ADDRESSES, formatAddress } from '@/contracts/addresses'
+import { cn } from '@/lib/utils'
 
 interface ContractInfo {
   name: string
@@ -215,28 +216,26 @@ export function ContractsInfo() {
                     {/* Actions */}
                     <div className="flex gap-2 pt-2">
                       {contract.docsUrl && (
-                        <Button variant="outline" size="sm" className="flex-1" asChild>
-                          <a
-                            href={contract.docsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Code className="h-4 w-4 mr-2" />
-                            Código
-                          </a>
-                        </Button>
+                        <a
+                          href={contract.docsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}
+                        >
+                          <Code className="h-4 w-4 mr-2" />
+                          Código
+                        </a>
                       )}
                       {contract.explorerUrl && contract.status === 'deployed' && (
-                        <Button variant="outline" size="sm" className="flex-1" asChild>
-                          <a
-                            href={contract.explorerUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Explorador
-                          </a>
-                        </Button>
+                        <a
+                          href={contract.explorerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Explorador
+                        </a>
                       )}
                     </div>
                   </div>
@@ -310,28 +309,26 @@ export function ContractsInfo() {
                     {/* Actions */}
                     <div className="flex gap-2 pt-2">
                       {contract.docsUrl && (
-                        <Button variant="outline" size="sm" className="flex-1" asChild>
-                          <a
-                            href={contract.docsUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Code className="h-4 w-4 mr-2" />
-                            Código
-                          </a>
-                        </Button>
+                        <a
+                          href={contract.docsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}
+                        >
+                          <Code className="h-4 w-4 mr-2" />
+                          Código
+                        </a>
                       )}
                       {contract.explorerUrl && contract.status === 'deployed' && (
-                        <Button variant="outline" size="sm" className="flex-1" asChild>
-                          <a
-                            href={contract.explorerUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <ExternalLink className="h-4 w-4 mr-2" />
-                            Explorador
-                          </a>
-                        </Button>
+                        <a
+                          href={contract.explorerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}
+                        >
+                          <ExternalLink className="h-4 w-4 mr-2" />
+                          Explorador
+                        </a>
                       )}
                     </div>
                   </div>

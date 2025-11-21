@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from "react"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
 import { AnimateOnScroll } from "@/components/animate-on-scroll"
 import {
   Dialog,
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/dialog"
 import { X } from "lucide-react"
 import Link from "next/link"
+import { cn } from "@/lib/utils"
 
 export function Hero() {
   const [showVideoModal, setShowVideoModal] = useState(false)
@@ -31,14 +32,15 @@ export function Hero() {
               Digitalizamos tradiciones financieras latinoamericanas. Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
-              <Button asChild size="lg" variant="secondary" className="transform transition-transform duration-300 hover:scale-105">
-                <Link href="/dashboard">
-                  🚀 Empezar Ahora
-                </Link>
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
+              <Link
+                href="/dashboard"
+                className={cn(buttonVariants({ size: "lg", variant: "secondary" }), "transform transition-transform duration-300 hover:scale-105")}
+              >
+                🚀 Empezar Ahora
+              </Link>
+              <Button
+                size="lg"
+                variant="outline"
                 className="border-primary text-primary transform transition-transform duration-300 hover:scale-105 hover:bg-primary/10 hover:text-primary"
                 onClick={() => setShowVideoModal(true)}
               >

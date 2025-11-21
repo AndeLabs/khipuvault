@@ -7,7 +7,8 @@ import { Hero } from "@/components/sections/hero";
 import { Stats } from "@/components/sections/stats";
 import { Features } from "@/components/sections/features";
 import { ContractsSection } from "@/components/sections/contracts-section";
-import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 export const dynamic = 'force-dynamic'
 
@@ -21,8 +22,8 @@ export default function Home() {
         <Features />
         <ContractsSection />
         <div className="text-center py-20">
-          <Link href="/dashboard">
-            <Button size="lg" variant="secondary">Ir al Dashboard</Button>
+          <Link href="/dashboard" className={cn(buttonVariants({ size: "lg", variant: "secondary" }))}>
+            Ir al Dashboard
           </Link>
         </div>
       </main>

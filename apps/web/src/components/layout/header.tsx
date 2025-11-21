@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
+import { ConnectButton } from '@/components/wallet/connect-button';
+import { useState, useEffect } from 'react';
 
 const navLinks = [
   { href: '#features', label: 'Características' },
@@ -13,6 +15,12 @@ const navLinks = [
 ];
 
 export function Header() {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 w-full border-b border-primary/20 bg-background/90 backdrop-blur-sm">
       <div className="container mx-auto flex h-20 items-center justify-between px-4 sm:px-6 lg:px-8">
@@ -27,7 +35,7 @@ export function Header() {
           />
           <span className="text-2xl font-bold hidden sm:inline">KhipuVault</span>
         </Link>
-        
+
         <nav className="hidden items-center gap-8 md:flex">
           {navLinks.map((link) => (
             <Link
@@ -40,11 +48,14 @@ export function Header() {
           ))}
         </nav>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {/* Connect Wallet Button */}
+          {mounted && <ConnectButton />}
+
           <div className="hidden md:flex">
             <Link href="/dashboard">
               <Button variant="secondary" size="default">
-                Ir al Dashboard
+                Dashboard
               </Button>
             </Link>
           </div>
@@ -81,10 +92,16 @@ export function Header() {
                     </Link>
                   ))}
                 </nav>
-                <div className="mt-auto w-full">
+                <div className="mt-auto w-full space-y-4">
+                  {/* Connect Wallet Button en mobile */}
+                  {mounted && (
+                    <div className="w-full">
+                      <ConnectButton />
+                    </div>
+                  )}
                   <Link href="/dashboard">
                     <Button variant="secondary" size="lg" className="w-full">
-                      Ir al Dashboard
+                      Dashboard
                     </Button>
                   </Link>
                 </div>

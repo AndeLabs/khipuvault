@@ -2,10 +2,11 @@
 
 import { useState } from 'react'
 import { ExternalLink, ChevronDown, ChevronUp, Code, Shield, Users, Gift, RotateCw, TrendingUp, Zap } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { CONTRACT_ADDRESSES, formatAddress } from '@/contracts/addresses'
+import { cn } from '@/lib/utils'
 
 interface ContractInfo {
   name: string
@@ -132,21 +133,15 @@ export function ContractsSection() {
                         {formatAddress(contract.address)}
                       </code>
                       {contract.explorerUrl && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="h-6 w-6 p-0"
-                          asChild
+                        <a
+                          href={contract.explorerUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          title="Ver en explorador"
+                          className={cn(buttonVariants({ variant: "ghost", size: "sm" }), "h-6 w-6 p-0")}
                         >
-                          <a
-                            href={contract.explorerUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            title="Ver en explorador"
-                          >
-                            <ExternalLink className="h-3 w-3" />
-                          </a>
-                        </Button>
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
                       )}
                     </div>
                   </div>
@@ -182,28 +177,26 @@ export function ContractsSection() {
                   {/* Action Buttons */}
                   <div className="flex gap-2 pt-2">
                     {contract.docsUrl && (
-                      <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <a
-                          href={contract.docsUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <Code className="h-4 w-4 mr-2" />
-                          Código
-                        </a>
-                      </Button>
+                      <a
+                        href={contract.docsUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}
+                      >
+                        <Code className="h-4 w-4 mr-2" />
+                        Código
+                      </a>
                     )}
                     {contract.explorerUrl && contract.status === 'deployed' && (
-                      <Button variant="outline" size="sm" className="flex-1" asChild>
-                        <a
-                          href={contract.explorerUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          Explorador
-                        </a>
-                      </Button>
+                      <a
+                        href={contract.explorerUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}
+                      >
+                        <ExternalLink className="h-4 w-4 mr-2" />
+                        Explorador
+                      </a>
                     )}
                   </div>
                 </div>

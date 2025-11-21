@@ -19,7 +19,7 @@
 import React, { ReactNode, useEffect, useState } from 'react'
 import { WagmiProvider } from 'wagmi'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { wagmiConfig } from '@/lib/web3/config'
+import { getWagmiConfig } from '@/lib/web3/config'
 
 /**
  * Query client configuration
@@ -62,72 +62,63 @@ const queryClient = new QueryClient({
 interface Web3ProviderProps {
   /** Child components to wrap */
   children: ReactNode
-  
+
   /** Optional: Custom query client */
   customQueryClient?: QueryClient
-  
+
   /** Optional: Theme (ignored, kept for backward compatibility) */
   theme?: string
+
+  /** Optional: Initial state from cookies for SSR hydration */
+  initialState?: any
 }
 
 /**
  * Web3Provider Component
- * 
+ *
  * Provides Web3 context to the entire application
  * Wraps children with WagmiProvider and QueryClientProvider
- * 
+ *
+ * SSR-Compatible Pattern:
+ * - Accepts initialState from parent (hydrated from cookies)
+ * - No hydration check needed with cookieStorage
+ * - Proper SSR/CSR consistency
+ *
  * Provider order:
  * 1. WagmiProvider (outermost)
  * 2. QueryClientProvider (innermost)
- * 
+ *
  * Usage:
  * ```tsx
- * <Web3Provider>
+ * <Web3Provider initialState={initialState}>
  *   <App />
  * </Web3Provider>
  * ```
  */
-export function Web3Provider({ 
-  children, 
+export function Web3Provider({
+  children,
   customQueryClient,
   theme,
+  initialState,
 }: Web3ProviderProps) {
-  const [isMounted, setIsMounted] = useState(false)
+  // Get wagmi config
+  const [config] = useState(() => getWagmiConfig())
 
-  // Handle hydration
+  const finalQueryClient = customQueryClient || queryClient
+
+  // Log initialization on mount
   useEffect(() => {
-    setIsMounted(true)
-    
-    // Log initialization
     console.log('🔌 Web3Provider Initialized')
     console.log('   Network: Mezo Testnet (Chain ID: 31611)')
     console.log('   Currency: BTC (native)')
     console.log('   Wallet Support: MetaMask + Unisat')
-    console.log('   No WalletConnect Project ID required')
-    
-    return () => {
-      console.log('🔌 Web3Provider Unmounted')
-      setIsMounted(false)
-    }
-  }, [])
+    console.log('   SSR: Enabled with cookieStorage')
+    console.log('   Initial State:', initialState ? 'Hydrated from cookies' : 'No initial state')
+  }, [initialState])
 
-  const finalQueryClient = customQueryClient || queryClient
-
-  // Show loading until mounted (prevents SSR hydration issues)
-  if (!isMounted) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-background">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Inicializando Web3...</p>
-        </div>
-      </div>
-    )
-  }
-
-  // Render providers with config
+  // Render providers with config and initialState for SSR hydration
   return (
-    <WagmiProvider config={wagmiConfig}>
+    <WagmiProvider config={config} initialState={initialState}>
       <QueryClientProvider client={finalQueryClient}>
         {children}
       </QueryClientProvider>

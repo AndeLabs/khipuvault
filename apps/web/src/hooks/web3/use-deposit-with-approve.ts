@@ -11,7 +11,7 @@
 import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useCallback, useState } from 'react'
-import { parseEther, MaxUint256, Address } from 'viem'
+import { parseEther, maxUint256, Address } from 'viem'
 import { readContract } from 'wagmi/actions'
 import { useConfig } from 'wagmi'
 import { MEZO_TESTNET_ADDRESSES, INDIVIDUAL_POOL_ABI } from '@/lib/web3/contracts'
@@ -186,7 +186,7 @@ export function useDepositWithApprove() {
               address: MUSD_ADDRESS,
               abi: ERC20_ABI,
               functionName: 'approve',
-              args: [POOL_ADDRESS, MaxUint256],
+              args: [POOL_ADDRESS, maxUint256],
             },
             {
               onSuccess: (hash) => {

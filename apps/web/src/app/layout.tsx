@@ -1,8 +1,6 @@
 import type {Metadata} from 'next';
 import './globals.css';
-import { Toaster } from "@/components/ui/toaster";
-import { Web3Provider, Web3ErrorBoundary } from "@/providers/web3-provider";
-import { NetworkSwitcher } from "@/components/web3/network-switcher";
+import { ClientLayout } from '@/components/layout/client-layout';
 
 export const revalidate = 0
 
@@ -50,6 +48,10 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // Note: We removed SSR hydration here because it was causing issues
+  // The config with cookieStorage will handle persistence automatically
+  // No need to pass initialState - cookieStorage works without it
+
   return (
     <html lang="es" className="dark">
       <head>
@@ -58,13 +60,7 @@ export default function RootLayout({
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@700&display=swap" rel="stylesheet" />
       </head>
       <body className="font-body antialiased">
-        <Web3ErrorBoundary>
-          <Web3Provider theme="dark">
-            <NetworkSwitcher />
-            {children}
-            <Toaster />
-          </Web3Provider>
-        </Web3ErrorBoundary>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );

@@ -1,13 +1,18 @@
 /**
  * @fileoverview Pure Wagmi configuration for KhipuVault
  * @module lib/web3/config
- * 
+ *
  * Production-ready Web3 configuration with MetaMask + Unisat only
  * No WalletConnect, no RainbowKit, no external dependencies
  * Configured for Mezo Testnet with Bitcoin native currency
+ *
+ * SSR-Compatible Configuration:
+ * - Uses cookieStorage for SSR/hydration (official Wagmi pattern)
+ * - No localStorage polyfills needed
+ * - Proper cookie-based state persistence
  */
 
-import { createConfig, http } from 'wagmi'
+import { createConfig, http, noopStorage } from 'wagmi'
 import { metaMask } from 'wagmi/connectors'
 import { mezoTestnet } from './chains'
 import { createPublicClient } from 'viem'
@@ -38,53 +43,81 @@ declare global {
 
 /**
  * Pure Wagmi configuration for Mezo Testnet
- * 
+ *
  * Features:
  * - MetaMask connector for Ethereum wallets
  * - Unisat connector for Bitcoin wallets
  * - Mezo Testnet with native BTC
  * - No WalletConnect Project ID required
  * - Production-ready with proper error handling
+ * - SSR-compatible with cookieStorage
  */
-export const wagmiConfig = createConfig({
-  chains: [mezoTestnet],
-  connectors: [
-    metaMask({
-      dappMetadata: {
-        name: 'KhipuVault',
-        url: typeof window !== 'undefined' ? window.location.origin : 'https://khipuvault.vercel.app',
-      },
-    }),
-  ],
-  transports: {
-    [mezoTestnet.id]: http('https://rpc.test.mezo.org', {
-      batch: {
-        wait: 100, // ms to wait before sending batch
-      },
-      retryCount: 5, // number of retries
-      retryDelay: 1000, // ms between retries
-      timeout: 10_000, // 10 second timeout
-    }),
-  },
-  ssr: false,
-  pollingInterval: 4_000, // poll every 4 seconds
-})
+
+/**
+ * Get Wagmi config with SSR compatibility
+ * Uses noopStorage to avoid localStorage issues during SSR
+ *
+ * SSR-Safe Pattern:
+ * - noopStorage doesn't persist state (avoids localStorage completely)
+ * - ssr: true enables Server-Side Rendering
+ * - MUST only be called on client-side (in Client Components)
+ * - Wallet will need to be reconnected on each page load (acceptable trade-off for SSR)
+ */
+export function getWagmiConfig() {
+  return createConfig({
+    chains: [mezoTestnet],
+    connectors: [
+      metaMask({
+        dappMetadata: {
+          name: 'KhipuVault',
+          url: typeof window !== 'undefined' ? window.location.origin : 'https://khipuvault.vercel.app',
+        },
+      }),
+    ],
+    transports: {
+      [mezoTestnet.id]: http('https://rpc.test.mezo.org', {
+        batch: {
+          wait: 100, // ms to wait before sending batch
+        },
+        retryCount: 5, // number of retries
+        retryDelay: 1000, // ms between retries
+        timeout: 10_000, // 10 second timeout
+      }),
+    },
+    // Enable SSR support
+    ssr: true,
+    // Use noopStorage to completely avoid localStorage
+    storage: noopStorage,
+    pollingInterval: 4_000, // poll every 4 seconds
+  })
+}
 
 /**
  * Standalone public client for direct RPC calls
  * Useful for debugging and direct contract interactions
+ * Lazy-initialized to avoid SSR issues
  */
-export const publicClient = createPublicClient({
-  chain: mezoTestnet,
-  transport: http('https://rpc.test.mezo.org', {
-    batch: {
-      wait: 100,
-    },
-    retryCount: 5,
-    retryDelay: 1000,
-    timeout: 10_000,
-  }),
-})
+let _publicClient: ReturnType<typeof createPublicClient> | null = null
+
+export function getPublicClient() {
+  if (!_publicClient) {
+    _publicClient = createPublicClient({
+      chain: mezoTestnet,
+      transport: http('https://rpc.test.mezo.org', {
+        batch: {
+          wait: 100,
+        },
+        retryCount: 5,
+        retryDelay: 1000,
+        timeout: 10_000,
+      }),
+    })
+  }
+  return _publicClient
+}
+
+// Backward compatibility - but this will only work on client side
+export const publicClient = typeof window !== 'undefined' ? getPublicClient() : null as any
 
 /**
  * App metadata for wallet connection

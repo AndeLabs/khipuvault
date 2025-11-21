@@ -6,8 +6,9 @@
 'use client'
 
 import { ExternalLink, CheckCircle2, AlertCircle, Loader2 } from 'lucide-react'
-import { Button } from './button'
+import { buttonVariants } from './button'
 import { useTransactionVerification } from '@/hooks/web3/use-transaction-verification'
+import { cn } from '@/lib/utils'
 
 interface TransactionLinkProps {
   txHash: string
@@ -49,24 +50,20 @@ export function TransactionLink({
 
   return (
     <div className={`space-y-2 ${className}`}>
-      <Button
-        variant="outline"
-        size="sm"
-        className="w-full"
-        asChild
-        disabled={verification.status !== 'verified'}
+      <a
+        href={`${process.env.NEXT_PUBLIC_EXPLORER_URL || 'https://explorer.mezo.org'}/tx/${txHash}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(
+          buttonVariants({ variant: "outline", size: "sm" }),
+          "w-full flex items-center gap-2",
+          verification.status !== 'verified' && "pointer-events-none opacity-50"
+        )}
       >
-        <a
-          href={`${process.env.NEXT_PUBLIC_EXPLORER_URL || 'https://explorer.mezo.org'}/tx/${txHash}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex items-center gap-2"
-        >
-          {getStatusIcon()}
-          <span>{label}</span>
-          <ExternalLink className="h-4 w-4" />
-        </a>
-      </Button>
+        {getStatusIcon()}
+        <span>{label}</span>
+        <ExternalLink className="h-4 w-4" />
+      </a>
 
       <div className="flex items-center justify-between text-xs">
         <span className="text-muted-foreground">
