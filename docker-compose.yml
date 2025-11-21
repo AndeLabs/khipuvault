@@ -1,0 +1,85 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:16-alpine
+    container_name: khipuvault-postgres
+    environment:
+      POSTGRES_USER: khipu
+      POSTGRES_PASSWORD: khipu_dev_password
+      POSTGRES_DB: khipuvault
+    ports:
+      - '5432:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U khipu']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # API Backend
+  api:
+    build:
+      context: .
+      dockerfile: apps/api/Dockerfile
+    container_name: khipuvault-api
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://khipu:khipu_dev_password@postgres:5432/khipuvault?schema=public
+      - PORT=3001
+      - CORS_ORIGIN=http://localhost:3000
+    ports:
+      - '3001:3001'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./apps/api:/app/apps/api
+      - ./packages:/app/packages
+      - /app/node_modules
+      - /app/apps/api/node_modules
+    command: pnpm --filter @khipu/api dev
+
+  # Blockchain Indexer
+  indexer:
+    build:
+      context: .
+      dockerfile: packages/blockchain/Dockerfile
+    container_name: khipuvault-indexer
+    environment:
+      - NODE_ENV=development
+      - DATABASE_URL=postgresql://khipu:khipu_dev_password@postgres:5432/khipuvault?schema=public
+      - RPC_URL=https://rpc.test.mezo.org
+      - INDIVIDUAL_POOL_ADDRESS=0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
+      - COOPERATIVE_POOL_ADDRESS=0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./packages/blockchain:/app/packages/blockchain
+      - ./packages/database:/app/packages/database
+      - /app/node_modules
+      - /app/packages/blockchain/node_modules
+    command: pnpm --filter @khipu/blockchain dev
+    restart: unless-stopped
+
+  # Web Frontend (Optional - usually run locally for HMR)
+  # web:
+  #   build:
+  #     context: .
+  #     dockerfile: apps/web/Dockerfile
+  #   container_name: khipuvault-web
+  #   environment:
+  #     - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+  #   ports:
+  #     - '3000:3000'
+  #   volumes:
+  #     - ./apps/web:/app/apps/web
+  #     - /app/node_modules
+  #   command: pnpm --filter @khipu/web dev
+
+volumes:
+  postgres_data:
+    driver: local

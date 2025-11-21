@@ -50,7 +50,7 @@ cache/
 out/
 broadcast/
 deployments/
-contracts/lib/
+**/contracts/lib/
 
 # Hardhat specific
 artifacts/
@@ -100,28 +100,19 @@ temp/
 # dotenv environment variables file
 .env.test
 
-# parcel-bundler cache (https://parceljs.org/)
+# parcel-bundler cache
 .cache
 .parcel-cache
 
 # Next.js build output
 .next
-out
 
 # Nuxt.js build / generate output
 .nuxt
-dist
-
-# Gatsby files
-.cache/
 
 # Storybook build outputs
 .out
 .storybook-out
-
-# Temporary folders
-tmp/
-temp/
 
 # Editor directories and files
 .idea
@@ -134,11 +125,6 @@ temp/
 # MacOS
 .AppleDouble
 .LSOverride
-
-# Thumbnails
-._*
-
-# Files that might appear in the root of a volume
 .DocumentRevisions-V100
 .fseventsd
 .Spotlight-V100
@@ -184,8 +170,5 @@ nyc_output
 keystore/
 secrets/
 
-# Documentation files (only keep README.md)
-*.md
-!README.md
-!docs/**/*.md
-*.txt
+# Prisma
+**/prisma/migrations/

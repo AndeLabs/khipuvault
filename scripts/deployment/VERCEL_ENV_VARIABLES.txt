@@ -1,0 +1,53 @@
+================================================
+KHIPUVAULT - VERCEL ENVIRONMENT VARIABLES
+================================================
+Copiar estas variables en Vercel Dashboard
+Settings > Environment Variables
+================================================
+
+NEXT_PUBLIC_CHAIN_ID=31611
+NEXT_PUBLIC_NETWORK_NAME=Mezo Testnet
+NEXT_PUBLIC_RPC_URL=https://rpc.test.mezo.org
+NEXT_PUBLIC_EXPLORER_URL=https://explorer.mezo.org
+
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=your_project_id_here
+
+NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS=0x6028E4452e6059e797832578D70dBdf63317538a
+NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS=0x92eCA935773b71efB655cc7d3aB77ee23c088A7a
+NEXT_PUBLIC_LOTTERY_POOL_ADDRESS=0x0000000000000000000000000000000000000000
+NEXT_PUBLIC_ROTATING_POOL_ADDRESS=0x0000000000000000000000000000000000000000
+
+NEXT_PUBLIC_MEZO_INTEGRATION_ADDRESS=0xa19B54b8b3f36F047E1f755c16F423143585cc6B
+NEXT_PUBLIC_YIELD_AGGREGATOR_ADDRESS=0x5BDac57B68f2Bc215340e4Dc2240f30154f4A007
+
+NEXT_PUBLIC_MUSD_ADDRESS=0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503
+
+NEXT_PUBLIC_ENABLE_INDIVIDUAL_POOL=true
+NEXT_PUBLIC_ENABLE_COOPERATIVE_POOL=true
+NEXT_PUBLIC_ENABLE_LOTTERY_POOL=false
+NEXT_PUBLIC_ENABLE_ROTATING_POOL=false
+
+NODE_ENV=production
+NEXT_PUBLIC_DEBUG=false
+
+================================================
+NOTAS IMPORTANTES:
+================================================
+1. Obtener WALLETCONNECT_PROJECT_ID en:
+   https://cloud.walletconnect.com
+
+2. Todos los contratos están en Mezo Testnet (Chain ID: 31611)
+
+3. Los contratos han sido VERIFICADOS como funcionales:
+   - IndividualPool: ✅ 200 MUSD depositados
+   - CooperativePool: ✅ 0 pools creados (listo para usar)
+   - MUSD Token: ✅ Supply total verificado
+
+4. Para deploy en Vercel:
+   - Ir a Project Settings
+   - Environment Variables
+   - Copiar y pegar cada variable
+   - Aplicar a: Production, Preview, Development
+   - Redeploy después de agregar variables
+
+================================================
