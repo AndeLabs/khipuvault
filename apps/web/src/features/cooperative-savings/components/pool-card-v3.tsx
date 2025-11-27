@@ -20,8 +20,8 @@ import { Progress } from '@/components/ui/progress'
 import { Separator } from '@/components/ui/separator'
 import { Users, Bitcoin, Coins, TrendingUp, Calendar, Shield } from 'lucide-react'
 import { type PoolWithMembership } from '@/hooks/web3/use-all-cooperative-pools'
-import { formatBTCCompact, formatMUSD, getPoolStatusBadge, formatDate } from '@/hooks/web3/use-cooperative-pool-v3'
-import { PoolStatus } from '@/hooks/web3/use-cooperative-pool-v3'
+import { formatBTCCompact, formatMUSD, getPoolStatusBadge, formatDate } from '@/hooks/web3/use-cooperative-pool'
+import { PoolStatus } from '@/hooks/web3/use-cooperative-pool'
 
 interface PoolCardV3Props {
   pool: PoolWithMembership
@@ -30,7 +30,8 @@ interface PoolCardV3Props {
   onManage?: (poolId: number) => void
 }
 
-export function PoolCardV3({ pool, onJoin, onViewDetails, onManage }: PoolCardV3Props) {
+// Memoized to prevent unnecessary re-renders when parent re-renders
+export const PoolCardV3 = React.memo(function PoolCardV3({ pool, onJoin, onViewDetails, onManage }: PoolCardV3Props) {
   const statusBadge = getPoolStatusBadge(pool.status)
   const memberProgress = (pool.currentMembers / pool.maxMembers) * 100
 
@@ -202,4 +203,7 @@ export function PoolCardV3({ pool, onJoin, onViewDetails, onManage }: PoolCardV3
       </CardFooter>
     </Card>
   )
-}
+})
+
+// Display name for React DevTools
+PoolCardV3.displayName = 'PoolCardV3'

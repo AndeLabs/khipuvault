@@ -19,7 +19,7 @@ import {
   MEZO_TESTNET_ADDRESSES,
   COOPERATIVE_POOL_V3_ABI as POOL_ABI,
 } from '@/lib/web3/contracts-v3'
-import { PoolStatus, type PoolInfo } from './use-cooperative-pool-v3'
+import { PoolStatus, type PoolInfo } from './use-cooperative-pool'
 
 export interface PoolWithMembership extends PoolInfo {
   poolId: number
@@ -48,8 +48,6 @@ export function useAllCooperativePools() {
     queryKey: ['cooperative-pool-v3', 'all-pools', address],
     queryFn: async () => {
       try {
-        console.log('🔄 Fetching all cooperative pools...')
-
         // Get pool counter
         const poolCounter = await readContract(config, {
           address: poolAddress,
@@ -59,7 +57,6 @@ export function useAllCooperativePools() {
         })
 
         const totalPools = Number(poolCounter || 0n)
-        console.log('📊 Total pools:', totalPools)
 
         if (totalPools === 0) {
           return {
@@ -89,7 +86,6 @@ export function useAllCooperativePools() {
 
             // Contract returns an object, not an array
             if (!poolInfoResult) {
-              console.warn(`⚠️ Invalid pool info for pool ${poolId}`)
               return null
             }
 
@@ -126,12 +122,10 @@ export function useAllCooperativePools() {
 
                 // Contract returns object, not array
                 if (memberInfoResult) {
-                  console.log(`📦 Pool ${poolId} member info raw:`, memberInfoResult)
                   // Contract uses 'active' not 'isMember', and 'btcContributed' not 'contribution'
                   isMember = (memberInfoResult as any).active ?? false
                   userContribution = (memberInfoResult as any).btcContributed || BigInt(0)
                   userShares = (memberInfoResult as any).shares || BigInt(0)
-                  console.log(`👤 Pool ${poolId} parsed: isMember=${isMember}, contribution=${userContribution}`)
                 }
 
                 // Get pending yield if member
@@ -146,7 +140,6 @@ export function useAllCooperativePools() {
                 }
               } catch (err) {
                 // Member info not available, user not a member
-                console.log(`Member info not available for pool ${poolId}`)
               }
             }
 
@@ -161,15 +154,13 @@ export function useAllCooperativePools() {
 
             return pool
           } catch (err) {
-            console.error(`❌ Error fetching pool ${poolId}:`, err)
+            // Pool fetch failed, skip this pool
             return null
           }
         })
 
         const poolsResults = await Promise.all(poolPromises)
         const pools = poolsResults.filter((p): p is PoolWithMembership => p !== null)
-
-        console.log('✅ Fetched pools:', pools.length)
 
         // Calculate statistics
         const statistics: PoolsStatistics = {
@@ -182,11 +173,8 @@ export function useAllCooperativePools() {
           userMemberships: pools.filter(p => p.isMember).length,
         }
 
-        console.log('📊 Pool statistics:', statistics)
-
         return { pools, statistics }
       } catch (err) {
-        console.error('❌ Error fetching all pools:', err)
         throw err
       }
     },

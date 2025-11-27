@@ -69,42 +69,34 @@ export class TransactionsService {
   }
 
   async getTransactionStats() {
-    const [totalTransactions, totalDeposits, totalWithdrawals, totalYieldClaims] =
-      await Promise.all([
-        prisma.deposit.count(),
-        prisma.deposit.count({ where: { type: 'DEPOSIT' } }),
-        prisma.deposit.count({ where: { type: 'WITHDRAW' } }),
-        prisma.deposit.count({ where: { type: 'YIELD_CLAIM' } }),
-      ])
+    // OPTIMIZED: Single query using raw SQL aggregation
+    // Reduced from 6 queries to 1 query
+    const stats = await prisma.$queryRaw<Array<{
+      type: string
+      count: bigint
+      volume: string
+    }>>`
+      SELECT
+        type,
+        COUNT(*)::BIGINT as count,
+        COALESCE(SUM(CAST(amount AS DECIMAL(78,0))), 0)::TEXT as volume
+      FROM "Deposit"
+      GROUP BY type
+    `
 
-    // Calculate volumes manually since amount is String type
-    const depositsData = await prisma.deposit.findMany({
-      where: { type: 'DEPOSIT' },
-      select: { amount: true },
-    })
+    // Also get total count
+    const totalTransactions = await prisma.deposit.count()
 
-    const withdrawalsData = await prisma.deposit.findMany({
-      where: { type: 'WITHDRAW' },
-      select: { amount: true },
-    })
-
-    const totalVolumeDeposit = depositsData.reduce(
-      (sum, d) => sum + BigInt(d.amount),
-      BigInt(0)
-    )
-
-    const totalVolumeWithdraw = withdrawalsData.reduce(
-      (sum, d) => sum + BigInt(d.amount),
-      BigInt(0)
-    )
+    // Parse results into structured response
+    const typeStats = new Map(stats.map(s => [s.type, { count: Number(s.count), volume: s.volume }]))
 
     return {
       totalTransactions,
-      totalDeposits,
-      totalWithdrawals,
-      totalYieldClaims,
-      totalVolumeDeposit: totalVolumeDeposit.toString(),
-      totalVolumeWithdraw: totalVolumeWithdraw.toString(),
+      totalDeposits: typeStats.get('DEPOSIT')?.count || 0,
+      totalWithdrawals: typeStats.get('WITHDRAW')?.count || 0,
+      totalYieldClaims: typeStats.get('YIELD_CLAIM')?.count || 0,
+      totalVolumeDeposit: typeStats.get('DEPOSIT')?.volume || '0',
+      totalVolumeWithdraw: typeStats.get('WITHDRAW')?.volume || '0',
     }
   }
 }

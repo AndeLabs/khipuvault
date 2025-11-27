@@ -86,12 +86,34 @@ export function useTransactionVerification(txHash?: string) {
       }
     }
 
-    verifyTransaction()
+    // Use AbortController to prevent state updates on unmounted component
+    const abortController = new AbortController()
+    let intervalId: NodeJS.Timeout | null = null
 
-    // Set up polling for pending transactions
-    const interval = setInterval(verifyTransaction, 5000) // Check every 5 seconds
+    const verifyWithAbort = async () => {
+      if (abortController.signal.aborted) return
+      await verifyTransaction()
+    }
 
-    return () => clearInterval(interval)
+    verifyWithAbort()
+
+    // Set up polling for pending transactions - stops when verified
+    intervalId = setInterval(() => {
+      // Check current state - stop polling if already verified or errored
+      setVerification(prev => {
+        if (prev.status === 'verified' || prev.status === 'error' || prev.status === 'not_found') {
+          if (intervalId) clearInterval(intervalId)
+          return prev
+        }
+        verifyWithAbort()
+        return prev
+      })
+    }, 5000)
+
+    return () => {
+      abortController.abort()
+      if (intervalId) clearInterval(intervalId)
+    }
   }, [txHash])
 
   return verification
