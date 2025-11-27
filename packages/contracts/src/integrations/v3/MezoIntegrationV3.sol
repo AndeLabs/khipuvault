@@ -7,6 +7,7 @@ import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/Own
 import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
+import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IMezoIntegration} from "../../interfaces/IMezoIntegration.sol";
 import {IMezoBorrowerOperations} from "../../interfaces/IMezoBorrowerOperations.sol";
 import {IMezoPriceFeed} from "../../interfaces/IMezoPriceFeed.sol";
@@ -34,6 +35,7 @@ contract MezoIntegrationV3 is
     PausableUpgradeable,
     IMezoIntegration
 {
+    using SafeERC20 for IERC20;
     /*//////////////////////////////////////////////////////////////
                           STRUCTS (OPTIMIZED)
     //////////////////////////////////////////////////////////////*/
@@ -173,7 +175,8 @@ contract MezoIntegrationV3 is
         totalBtcDeposited += btcAmount;
         totalMusdMinted += musdAmount;
 
-        require(MUSD_TOKEN.transfer(msg.sender, musdAmount), "MUSD transfer failed");
+        // Use SafeERC20 for safe transfers (handles non-standard ERC20 tokens)
+        MUSD_TOKEN.safeTransfer(msg.sender, musdAmount);
 
         if (!isPositionHealthy(msg.sender)) revert UnhealthyPosition();
 
@@ -202,14 +205,16 @@ contract MezoIntegrationV3 is
         UserPosition storage position = userPositions[msg.sender];
         if (position.musdDebt < musdAmount) revert InsufficientBalance();
 
-        require(MUSD_TOKEN.transferFrom(msg.sender, address(this), musdAmount), "MUSD transfer failed");
+        // Use SafeERC20 for safe transfers
+        MUSD_TOKEN.safeTransferFrom(msg.sender, address(this), musdAmount);
 
         uint256 debtReductionRatio = (musdAmount * 1e18) / uint256(position.musdDebt);
         btcAmount = (uint256(position.btcCollateral) * debtReductionRatio) / 1e18;
 
         uint256 currentPrice = _getCurrentPrice();
 
-        require(MUSD_TOKEN.approve(address(BORROWER_OPERATIONS), musdAmount), "MUSD approve failed");
+        // Use forceApprove to handle tokens that require approval to be reset to 0 first
+        MUSD_TOKEN.forceApprove(address(BORROWER_OPERATIONS), musdAmount);
 
         if (musdAmount >= position.musdDebt) {
             BORROWER_OPERATIONS.closeTrove();

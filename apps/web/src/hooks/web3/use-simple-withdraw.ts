@@ -71,14 +71,11 @@ export function useSimpleWithdraw() {
 
   useEffect(() => {
     if (isWithdrawSuccess && state === 'processing') {
-      console.log('✅ Withdraw confirmed!')
-      console.log('📝 Transaction hash:', withdrawReceipt?.transactionHash)
-      console.log('🔄 Refetching all queries...')
-      
-      // Invalidate all queries to update UI
-      queryClient.invalidateQueries()
-      queryClient.refetchQueries({ type: 'active' })
-      
+      // Invalidate specific queries to update UI (not all queries)
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+      queryClient.invalidateQueries({ queryKey: ['user-deposit'] })
+      queryClient.invalidateQueries({ queryKey: ['musd-balance'] })
+
       setState('success')
     }
   }, [isWithdrawSuccess, state, queryClient, withdrawReceipt])
@@ -86,7 +83,6 @@ export function useSimpleWithdraw() {
   // Handle errors
   useEffect(() => {
     if (withdrawError) {
-      console.error('❌ Withdraw error:', withdrawError)
       setState('error')
       
       const msg = withdrawError.message || ''
@@ -126,7 +122,6 @@ export function useSimpleWithdraw() {
           return
         }
 
-        console.log('💸 Starting partial withdrawal:', amountString, 'MUSD')
         setState('confirming')
 
         withdrawWrite({
@@ -137,7 +132,6 @@ export function useSimpleWithdraw() {
         })
       } else {
         // Full withdrawal
-        console.log('💸 Starting full withdrawal...')
         setState('confirming')
 
         withdrawWrite({
@@ -147,7 +141,6 @@ export function useSimpleWithdraw() {
         })
       }
     } catch (err) {
-      console.error('❌ Error:', err)
       setState('error')
       setError(err instanceof Error ? err.message : 'Error desconocido')
     }

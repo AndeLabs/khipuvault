@@ -81,56 +81,78 @@ export class UsersService {
   }
 
   async getUserPositions(address: string) {
-    // Get unique pools user has interacted with
-    const deposits = await prisma.deposit.findMany({
-      where: {
-        userAddress: address.toLowerCase(),
-      },
-      distinct: ['poolAddress'],
+    // OPTIMIZED: Single query with groupBy to avoid N+1 problem
+    const normalizedAddress = address.toLowerCase()
+
+    // Get all deposits in one query
+    const allDeposits = await prisma.deposit.findMany({
+      where: { userAddress: normalizedAddress },
       select: {
         poolAddress: true,
+        type: true,
+        amount: true,
       },
     })
 
-    const positions = await Promise.all(
-      deposits.map(async (d) => {
-        const poolDeposits = await prisma.deposit.findMany({
-          where: {
-            userAddress: address.toLowerCase(),
-            poolAddress: d.poolAddress,
-          },
+    // Get unique pool addresses
+    const poolAddresses = [...new Set(allDeposits.map(d => d.poolAddress))]
+
+    // Get all pools in one query
+    const pools = await prisma.pool.findMany({
+      where: { contractAddress: { in: poolAddresses } },
+      select: {
+        contractAddress: true,
+        name: true,
+        poolType: true,
+      },
+    })
+
+    // Create pool lookup map for O(1) access
+    const poolMap = new Map(pools.map(p => [p.contractAddress, p]))
+
+    // Group deposits by pool and calculate totals in memory (much faster than N queries)
+    const positionMap = new Map<string, {
+      deposited: bigint
+      withdrawn: bigint
+      yieldClaimed: bigint
+    }>()
+
+    for (const deposit of allDeposits) {
+      if (!positionMap.has(deposit.poolAddress)) {
+        positionMap.set(deposit.poolAddress, {
+          deposited: BigInt(0),
+          withdrawn: BigInt(0),
+          yieldClaimed: BigInt(0),
         })
+      }
 
-        const deposited = poolDeposits
-          .filter(p => p.type === 'DEPOSIT')
-          .reduce((sum, p) => sum + BigInt(p.amount), BigInt(0))
+      const position = positionMap.get(deposit.poolAddress)!
+      const amount = BigInt(deposit.amount)
 
-        const withdrawn = poolDeposits
-          .filter(p => p.type === 'WITHDRAW')
-          .reduce((sum, p) => sum + BigInt(p.amount), BigInt(0))
+      if (deposit.type === 'DEPOSIT') {
+        position.deposited += amount
+      } else if (deposit.type === 'WITHDRAW') {
+        position.withdrawn += amount
+      } else if (deposit.type === 'YIELD_CLAIM') {
+        position.yieldClaimed += amount
+      }
+    }
 
-        const yieldClaimed = poolDeposits
-          .filter(p => p.type === 'YIELD_CLAIM')
-          .reduce((sum, p) => sum + BigInt(p.amount), BigInt(0))
+    // Build result array
+    const positions = Array.from(positionMap.entries()).map(([poolAddress, totals]) => {
+      const pool = poolMap.get(poolAddress)
+      const balance = totals.deposited - totals.withdrawn
 
-        const balance = deposited - withdrawn
-
-        // Get pool info
-        const pool = await prisma.pool.findUnique({
-          where: { contractAddress: d.poolAddress },
-        })
-
-        return {
-          poolAddress: d.poolAddress,
-          poolName: pool?.name || 'Unknown Pool',
-          poolType: pool?.poolType || 'unknown',
-          balance: balance.toString(),
-          totalDeposited: deposited.toString(),
-          totalWithdrawn: withdrawn.toString(),
-          totalYieldClaimed: yieldClaimed.toString(),
-        }
-      })
-    )
+      return {
+        poolAddress,
+        poolName: pool?.name || 'Unknown Pool',
+        poolType: pool?.poolType || 'unknown',
+        balance: balance.toString(),
+        totalDeposited: totals.deposited.toString(),
+        totalWithdrawn: totals.withdrawn.toString(),
+        totalYieldClaimed: totals.yieldClaimed.toString(),
+      }
+    })
 
     return positions.filter(p => BigInt(p.balance) > 0)
   }

@@ -1,32 +1,40 @@
 import { prisma } from '@khipu/database'
 import type { EventLog } from '@prisma/client'
+import { cache, CACHE_TTL, CACHE_KEYS } from '../lib/cache'
 
 export class AnalyticsService {
   async getGlobalStats() {
-    const [totalUsers, activePools, totalTransactions] = await Promise.all([
-      prisma.user.count(),
-      prisma.pool.count({ where: { status: 'ACTIVE' } }),
-      prisma.deposit.count(),
-    ])
+    // Use cache to avoid recalculating on every request
+    return cache.getOrSet(
+      CACHE_KEYS.globalStats(),
+      async () => {
+        const [totalUsers, activePools, totalTransactions] = await Promise.all([
+          prisma.user.count(),
+          prisma.pool.count({ where: { status: 'ACTIVE' } }),
+          prisma.deposit.count(),
+        ])
 
-    // Calculate total TVL across all pools
-    const pools = await prisma.pool.findMany({
-      where: { status: 'ACTIVE' },
-    })
+        // Calculate total TVL across all pools
+        const pools = await prisma.pool.findMany({
+          where: { status: 'ACTIVE' },
+        })
 
-    const totalTVL = pools.reduce((sum, pool) => sum + BigInt(pool.tvl), BigInt(0))
+        const totalTVL = pools.reduce((sum, pool) => sum + BigInt(pool.tvl), BigInt(0))
 
-    // Get average APR
-    const avgAPR =
-      pools.reduce((sum, pool) => sum + pool.apr, 0) / (pools.length || 1)
+        // Get average APR
+        const avgAPR =
+          pools.reduce((sum, pool) => sum + pool.apr, 0) / (pools.length || 1)
 
-    return {
-      totalUsers,
-      activePools,
-      totalTransactions,
-      totalTVL: totalTVL.toString(),
-      avgAPR: avgAPR.toFixed(2),
-    }
+        return {
+          totalUsers,
+          activePools,
+          totalTransactions,
+          totalTVL: totalTVL.toString(),
+          avgAPR: avgAPR.toFixed(2),
+        }
+      },
+      CACHE_TTL.GLOBAL_STATS
+    )
   }
 
   async getActivityTimeline(days: number = 30) {
@@ -75,48 +83,57 @@ export class AnalyticsService {
   }
 
   async getTopPools(limit: number = 10) {
-    const pools = await prisma.pool.findMany({
-      where: { status: 'ACTIVE' },
-      orderBy: { tvl: 'desc' },
-      take: limit,
-    })
-
-    return pools
+    // Cache top pools for 10 minutes
+    return cache.getOrSet(
+      CACHE_KEYS.topPools(limit),
+      async () => {
+        const pools = await prisma.pool.findMany({
+          where: { status: 'ACTIVE' },
+          orderBy: { tvl: 'desc' },
+          take: limit,
+        })
+        return pools
+      },
+      CACHE_TTL.TOP_POOLS
+    )
   }
 
   async getTopUsers(limit: number = 10) {
-    const users = await prisma.user.findMany({
-      include: {
-        deposits: true,
-      },
-    })
+    // OPTIMIZED: Use raw SQL aggregation instead of loading all users into memory
+    // This scales from O(n*m) to O(n) where n=users, m=deposits per user
 
-    // Calculate total deposited for each user
-    const usersWithTotals = users.map(user => {
-      const totalDeposited = user.deposits
-        .filter(d => d.type === 'DEPOSIT')
-        .reduce((sum, d) => sum + BigInt(d.amount), BigInt(0))
+    const topUsers = await prisma.$queryRaw<Array<{
+      address: string
+      ensName: string | null
+      avatar: string | null
+      totalDeposited: string
+      totalWithdrawn: string
+    }>>`
+      SELECT
+        u.address,
+        u."ensName",
+        u.avatar,
+        COALESCE(SUM(CASE WHEN d.type = 'DEPOSIT' THEN CAST(d.amount AS DECIMAL(78,0)) ELSE 0 END), 0)::TEXT as "totalDeposited",
+        COALESCE(SUM(CASE WHEN d.type = 'WITHDRAW' THEN CAST(d.amount AS DECIMAL(78,0)) ELSE 0 END), 0)::TEXT as "totalWithdrawn"
+      FROM "User" u
+      LEFT JOIN "Deposit" d ON d."userAddress" = u.address
+      GROUP BY u.address, u."ensName", u.avatar
+      HAVING COALESCE(SUM(CASE WHEN d.type = 'DEPOSIT' THEN CAST(d.amount AS DECIMAL(78,0)) ELSE 0 END), 0) -
+             COALESCE(SUM(CASE WHEN d.type = 'WITHDRAW' THEN CAST(d.amount AS DECIMAL(78,0)) ELSE 0 END), 0) > 0
+      ORDER BY (
+        COALESCE(SUM(CASE WHEN d.type = 'DEPOSIT' THEN CAST(d.amount AS DECIMAL(78,0)) ELSE 0 END), 0) -
+        COALESCE(SUM(CASE WHEN d.type = 'WITHDRAW' THEN CAST(d.amount AS DECIMAL(78,0)) ELSE 0 END), 0)
+      ) DESC
+      LIMIT ${limit}
+    `
 
-      const totalWithdrawn = user.deposits
-        .filter(d => d.type === 'WITHDRAW')
-        .reduce((sum, d) => sum + BigInt(d.amount), BigInt(0))
-
-      const currentBalance = totalDeposited - totalWithdrawn
-
-      return {
-        address: user.address,
-        ensName: user.ensName,
-        avatar: user.avatar,
-        totalDeposited: totalDeposited.toString(),
-        currentBalance: currentBalance.toString(),
-      }
-    })
-
-    // Sort by current balance and return top users
-    return usersWithTotals
-      .filter(u => BigInt(u.currentBalance) > 0)
-      .sort((a, b) => (BigInt(b.currentBalance) > BigInt(a.currentBalance) ? 1 : -1))
-      .slice(0, limit)
+    return topUsers.map(u => ({
+      address: u.address,
+      ensName: u.ensName,
+      avatar: u.avatar,
+      totalDeposited: u.totalDeposited,
+      currentBalance: (BigInt(u.totalDeposited) - BigInt(u.totalWithdrawn)).toString(),
+    }))
   }
 
   async getEventLogs(limit: number = 100, offset: number = 0): Promise<{

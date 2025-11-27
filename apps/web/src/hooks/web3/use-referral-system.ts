@@ -155,11 +155,9 @@ export function useReferralSystem() {
   // Handle approval flow
   useEffect(() => {
     if (isApproveSuccess && state === 'waitingApproval') {
-      console.log('✅ Approval confirmed! Proceeding with referral deposit...')
-      
       refetchAllowance().then(() => {
         setState('claiming')
-        
+
         claimWrite({
           address: POOL_ADDRESS,
           abi: POOL_ABI,
@@ -173,12 +171,12 @@ export function useReferralSystem() {
   // Handle success
   useEffect(() => {
     if (isClaimSuccess && state === 'processing') {
-      console.log('✅ Transaction confirmed!')
-      console.log('📝 Transaction hash:', claimReceipt?.transactionHash)
-      
-      queryClient.invalidateQueries()
+      // Invalidate specific queries instead of all
+      queryClient.invalidateQueries({ queryKey: ['referral-stats'] })
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+      queryClient.invalidateQueries({ queryKey: ['user-deposit'] })
       refetchStats()
-      
+
       setState('success')
     }
   }, [isClaimSuccess, state, queryClient, claimReceipt, refetchStats])
@@ -200,7 +198,6 @@ export function useReferralSystem() {
   useEffect(() => {
     if (approveError || claimError) {
       const err = approveError || claimError
-      console.error('❌ Referral error:', err)
       setState('error')
       
       const msg = err?.message || ''
@@ -229,7 +226,6 @@ export function useReferralSystem() {
       setError('')
       resetClaim()
 
-      console.log('💰 Claiming referral rewards...')
       setState('claiming')
 
       claimWrite({
@@ -275,14 +271,8 @@ export function useReferralSystem() {
         return
       }
 
-      console.log('🎁 Depositing with referral:', {
-        amount: amountString,
-        referrer
-      })
-
       // Check if need approval
       if (!allowance || allowance < amount) {
-        console.log('🔑 Need approval...')
         setState('approving')
         
         const MAX_UINT256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
@@ -294,7 +284,6 @@ export function useReferralSystem() {
           args: [POOL_ADDRESS, MAX_UINT256]
         })
       } else {
-        console.log('✅ Already approved, depositing...')
         setState('claiming')
         
         claimWrite({
@@ -305,7 +294,6 @@ export function useReferralSystem() {
         })
       }
     } catch (err) {
-      console.error('❌ Error:', err)
       setState('error')
       setError(err instanceof Error ? err.message : 'Error desconocido')
     }
