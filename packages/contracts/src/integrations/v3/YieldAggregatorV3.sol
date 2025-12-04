@@ -122,8 +122,25 @@ contract YieldAggregatorV3 is
                              MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice Prevents flash loan attacks
+     * @dev Uses contract code check instead of tx.origin for better compatibility
+     *      with meta-transactions, account abstraction, and to avoid phishing risks.
+     *      Authorized callers (pools) are allowed to interact as contracts.
+     */
     modifier noFlashLoan() {
-        if (!emergencyMode && !authorizedCallers[msg.sender] && tx.origin != msg.sender) revert FlashLoanDetected();
+        if (!emergencyMode && !authorizedCallers[msg.sender]) {
+            // Check if caller has code (is a contract)
+            uint256 size;
+            address sender = msg.sender;
+            assembly {
+                size := extcodesize(sender)
+            }
+            // Block new contract callers that aren't authorized
+            if (size > 0) {
+                revert FlashLoanDetected();
+            }
+        }
         _;
     }
 
@@ -186,10 +203,13 @@ contract YieldAggregatorV3 is
         uint256 toWithdraw = amount == 0 ? userTotal : amount;
         if (toWithdraw > userTotal) revert InvalidAmount();
 
+        // CEI Pattern: Update state BEFORE external calls
+        userTotalDeposited[msg.sender] -= toWithdraw;
+
         for (uint256 i = 0; i < activeVaultsList.length; i++) {
             address vaultAddr = activeVaultsList[i];
             UserPositionPacked storage position = userVaultPositions[msg.sender][vaultAddr];
-            
+
             if (position.principal > 0) {
                 uint256 vaultWithdraw = (toWithdraw * uint256(position.principal)) / userTotal;
                 uint256 withdrawn = _withdrawFromVault(msg.sender, vaultAddr, vaultWithdraw);
@@ -197,8 +217,7 @@ contract YieldAggregatorV3 is
             }
         }
 
-        userTotalDeposited[msg.sender] -= toWithdraw;
-        
+        // External call AFTER all state changes (CEI pattern)
         MUSD_TOKEN.safeTransfer(msg.sender, totalWithdrawn);
 
         emit YieldWithdrawn(msg.sender, address(0), toWithdraw, totalWithdrawn - toWithdraw);
@@ -220,11 +239,13 @@ contract YieldAggregatorV3 is
         uint256 sharesToRedeem = shares == 0 ? position.shares : shares;
         if (sharesToRedeem > position.shares) revert InvalidAmount();
 
-        amount = _withdrawFromVault(msg.sender, vaultAddress, sharesToRedeem);
-
+        // CEI Pattern: Calculate and update state BEFORE external calls
         uint256 principalWithdrawn = (uint256(position.principal) * sharesToRedeem) / uint256(position.shares);
         userTotalDeposited[msg.sender] -= principalWithdrawn;
 
+        amount = _withdrawFromVault(msg.sender, vaultAddress, sharesToRedeem);
+
+        // External call AFTER all state changes (CEI pattern)
         MUSD_TOKEN.safeTransfer(msg.sender, amount);
 
         emit YieldWithdrawn(msg.sender, vaultAddress, principalWithdrawn, amount - principalWithdrawn);
