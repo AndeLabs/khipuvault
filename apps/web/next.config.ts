@@ -18,10 +18,82 @@ if (typeof globalThis.localStorage === 'undefined') {
 
 const nextConfig: NextConfig = {
   typescript: {
-    ignoreBuildErrors: true,
+    // Enable type checking during builds for production safety
+    ignoreBuildErrors: process.env.NODE_ENV !== 'production',
   },
   eslint: {
-    ignoreDuringBuilds: true,
+    // Enable linting during builds for code quality
+    ignoreDuringBuilds: process.env.NODE_ENV !== 'production',
+  },
+  // Security headers for production
+  headers: async () => {
+    return [
+      {
+        // Apply to all routes
+        source: '/:path*',
+        headers: [
+          // Prevent clickjacking attacks
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          // Prevent MIME type sniffing
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          // Control referrer information
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+          // DNS prefetch control
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
+          // Enable HSTS (HTTP Strict Transport Security)
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=31536000; includeSubDomains; preload',
+          },
+          // Permissions Policy (disable unused features)
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+          },
+          // Content Security Policy - Allow wallet connections and essential resources
+          {
+            key: 'Content-Security-Policy',
+            value: [
+              "default-src 'self'",
+              // Scripts: self, inline (needed for Next.js), and eval (needed for wagmi/viem)
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              // Styles: self and inline (needed for Tailwind)
+              "style-src 'self' 'unsafe-inline'",
+              // Images: self, data URIs, and common image hosts
+              "img-src 'self' data: blob: https: http:",
+              // Fonts: self and data URIs
+              "font-src 'self' data:",
+              // Connect: Allow RPC, API, and wallet connections
+              "connect-src 'self' https://rpc.test.mezo.org https://rpc.mezo.org wss://rpc.test.mezo.org wss://rpc.mezo.org https://explorer.test.mezo.org https://api.coingecko.com https://*.infura.io https://*.alchemy.com https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org",
+              // Frame: Allow wallet popups
+              "frame-src 'self' https://*.walletconnect.com https://*.walletconnect.org",
+              // Object: Disallow plugins
+              "object-src 'none'",
+              // Base: self
+              "base-uri 'self'",
+              // Form action: self
+              "form-action 'self'",
+              // Frame ancestors: none (prevent framing)
+              "frame-ancestors 'none'",
+              // Upgrade insecure requests in production
+              "upgrade-insecure-requests",
+            ].join('; '),
+          },
+        ],
+      },
+    ];
   },
   // Transpile Mezo Passport and dependencies for Next.js 15
   transpilePackages: [
@@ -67,7 +139,7 @@ const nextConfig: NextConfig = {
     
     // Ignore React Native modules in webpack resolve
     if (!isServer) {
-      config.resolve.extensions = config.resolve.extensions.filter(ext => ext !== '.native.js');
+      config.resolve.extensions = config.resolve.extensions.filter((ext: string) => ext !== '.native.js');
     }
     
     // Suppress MetaMask SDK warnings about missing React Native modules
