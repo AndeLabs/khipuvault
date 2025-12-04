@@ -105,7 +105,7 @@ export class PoolsService {
   async getPoolUsers(poolAddress: string) {
     const normalizedAddress = poolAddress.toLowerCase()
 
-    // Get all deposits for this pool in ONE query
+    // Get deposits for this pool in ONE query (limited for performance)
     const allDeposits = await prisma.deposit.findMany({
       where: {
         poolAddress: normalizedAddress,
@@ -120,6 +120,8 @@ export class PoolsService {
           },
         },
       },
+      take: 5000, // Limit to prevent memory issues on large pools
+      orderBy: { timestamp: 'desc' },
     })
 
     // Group deposits by user address and calculate balances
@@ -188,70 +190,61 @@ export class PoolsService {
 
   /**
    * Update pool statistics
-   * OPTIMIZED: Single query and efficient aggregation
+   * OPTIMIZED: Uses database aggregation instead of loading all records
    */
   async updatePoolStats(poolAddress: string) {
     const normalizedAddress = poolAddress.toLowerCase()
 
-    // Get all deposits for this pool in ONE query
-    const deposits = await prisma.deposit.findMany({
-      where: { poolAddress: normalizedAddress },
-      select: {
-        userAddress: true,
-        type: true,
-        amount: true,
-        status: true,
-      },
-    })
+    // Use database aggregation for efficient stats calculation
+    // This scales O(1) regardless of transaction count
+    const stats = await prisma.$queryRaw<Array<{
+      total_deposited: string
+      total_withdrawn: string
+      deposit_count: bigint
+      withdrawal_count: bigint
+      active_users: bigint
+    }>>`
+      WITH user_balances AS (
+        SELECT
+          "userAddress",
+          SUM(CASE WHEN type = 'DEPOSIT' THEN CAST(amount AS DECIMAL(78,0)) ELSE 0 END) -
+          SUM(CASE WHEN type = 'WITHDRAW' THEN CAST(amount AS DECIMAL(78,0)) ELSE 0 END) as balance
+        FROM "Deposit"
+        WHERE "poolAddress" = ${normalizedAddress}
+          AND status = 'CONFIRMED'
+        GROUP BY "userAddress"
+      )
+      SELECT
+        COALESCE(SUM(CASE WHEN type = 'DEPOSIT' THEN CAST(amount AS DECIMAL(78,0)) ELSE 0 END), 0)::TEXT as total_deposited,
+        COALESCE(SUM(CASE WHEN type = 'WITHDRAW' THEN CAST(amount AS DECIMAL(78,0)) ELSE 0 END), 0)::TEXT as total_withdrawn,
+        COUNT(CASE WHEN type = 'DEPOSIT' THEN 1 END) as deposit_count,
+        COUNT(CASE WHEN type = 'WITHDRAW' THEN 1 END) as withdrawal_count,
+        (SELECT COUNT(*) FROM user_balances WHERE balance > 0) as active_users
+      FROM "Deposit"
+      WHERE "poolAddress" = ${normalizedAddress}
+        AND status = 'CONFIRMED'
+    `
 
-    // Aggregate stats in a single pass
-    let totalDeposited = BigInt(0)
-    let totalWithdrawn = BigInt(0)
-    let totalYieldClaimed = BigInt(0)
-    let depositCount = 0
-    let withdrawalCount = 0
-
-    const userBalances = new Map<string, bigint>()
-
-    for (const deposit of deposits) {
-      // Only count confirmed transactions
-      if (deposit.status !== 'CONFIRMED') continue
-
-      const amount = BigInt(deposit.amount)
-
-      if (deposit.type === 'DEPOSIT') {
-        totalDeposited += amount
-        depositCount++
-
-        const currentBalance = userBalances.get(deposit.userAddress) || BigInt(0)
-        userBalances.set(deposit.userAddress, currentBalance + amount)
-      } else if (deposit.type === 'WITHDRAW') {
-        totalWithdrawn += amount
-        withdrawalCount++
-
-        const currentBalance = userBalances.get(deposit.userAddress) || BigInt(0)
-        userBalances.set(deposit.userAddress, currentBalance - amount)
-      } else if (deposit.type === 'YIELD_CLAIM') {
-        totalYieldClaimed += amount
-      }
+    const result = stats[0]
+    if (!result) {
+      // No transactions yet, just update lastSyncAt
+      return await prisma.pool.update({
+        where: { contractAddress: normalizedAddress },
+        data: { lastSyncAt: new Date() },
+      })
     }
 
-    // Calculate TVL
+    const totalDeposited = BigInt(result.total_deposited)
+    const totalWithdrawn = BigInt(result.total_withdrawn)
     const tvl = totalDeposited - totalWithdrawn
 
-    // Count active users (balance > 0)
-    const activeUsers = Array.from(userBalances.values())
-      .filter(balance => balance > BigInt(0))
-      .length
-
-    // Update pool with aggregated data
     return await prisma.pool.update({
       where: { contractAddress: normalizedAddress },
       data: {
         tvl: tvl.toString(),
-        totalUsers: activeUsers,
-        totalDeposits: depositCount,
-        totalWithdrawals: withdrawalCount,
+        totalUsers: Number(result.active_users),
+        totalDeposits: Number(result.deposit_count),
+        totalWithdrawals: Number(result.withdrawal_count),
         lastSyncAt: new Date(),
       },
     })

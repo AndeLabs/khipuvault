@@ -1,11 +1,38 @@
 import { prisma } from '@khipu/database'
 import { AppError } from '../middleware/error-handler'
-import type { User, Deposit } from '@prisma/client'
+import { cache, CACHE_TTL, CACHE_KEYS } from '../lib/cache'
+import type { User, Deposit, PoolType } from '@prisma/client'
+
+// Ethereum address validation regex
+const ETH_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/
+
+// Type for user positions (poolType can be any valid PoolType or the string 'unknown')
+interface UserPosition {
+  poolAddress: string
+  poolName: string
+  poolType: PoolType | string
+  balance: string
+  totalDeposited: string
+  totalWithdrawn: string
+  totalYieldClaimed: string
+}
+
+/**
+ * Validates and normalizes an Ethereum address
+ * @throws AppError if address is invalid
+ */
+function validateAndNormalizeAddress(address: string): string {
+  if (!ETH_ADDRESS_REGEX.test(address)) {
+    throw new AppError(400, 'Invalid Ethereum address format')
+  }
+  return address.toLowerCase()
+}
 
 export class UsersService {
   async getUserByAddress(address: string): Promise<User & { deposits: Deposit[] }> {
+    const normalizedAddress = validateAndNormalizeAddress(address)
     const user = await prisma.user.findUnique({
-      where: { address: address.toLowerCase() },
+      where: { address: normalizedAddress },
       include: {
         deposits: {
           orderBy: { timestamp: 'desc' },
@@ -31,58 +58,79 @@ export class UsersService {
       totalYieldClaimed: string
       currentBalance: string
     }
-    positions: any[]
+    positions: UserPosition[]
     recentActivity: Deposit[]
   }> {
-    const user = await prisma.user.findUnique({
-      where: { address: address.toLowerCase() },
-      include: {
-        deposits: true,
+    // Validate address before any operations (defense in depth)
+    const normalizedAddress = validateAndNormalizeAddress(address)
+
+    // Use cache to reduce database load
+    return cache.getOrSet(
+      CACHE_KEYS.userPortfolio(normalizedAddress),
+      async () => {
+
+        // Get user info without loading all deposits
+        const user = await prisma.user.findUnique({
+          where: { address: normalizedAddress },
+        })
+
+        if (!user) {
+          throw new AppError(404, 'User not found')
+        }
+
+        // Use raw SQL for efficient BigInt string aggregation
+        // This scales to millions of transactions without memory issues
+        type SumResult = { total: string | null }[]
+
+        const [depositResult, withdrawResult, yieldResult, recentDeposits] = await Promise.all([
+          prisma.$queryRaw<SumResult>`
+            SELECT COALESCE(SUM(CAST(amount AS DECIMAL(78,0))), 0)::text as total
+            FROM "Deposit"
+            WHERE "userAddress" = ${normalizedAddress} AND type = 'DEPOSIT'
+          `,
+          prisma.$queryRaw<SumResult>`
+            SELECT COALESCE(SUM(CAST(amount AS DECIMAL(78,0))), 0)::text as total
+            FROM "Deposit"
+            WHERE "userAddress" = ${normalizedAddress} AND type = 'WITHDRAW'
+          `,
+          prisma.$queryRaw<SumResult>`
+            SELECT COALESCE(SUM(CAST(amount AS DECIMAL(78,0))), 0)::text as total
+            FROM "Deposit"
+            WHERE "userAddress" = ${normalizedAddress} AND type = 'YIELD_CLAIM'
+          `,
+          prisma.deposit.findMany({
+            where: { userAddress: normalizedAddress },
+            orderBy: { timestamp: 'desc' },
+            take: 5,
+          }),
+        ])
+
+        const totalDeposited = BigInt(depositResult[0]?.total || '0')
+        const totalWithdrawn = BigInt(withdrawResult[0]?.total || '0')
+        const totalYieldClaimed = BigInt(yieldResult[0]?.total || '0')
+        const currentBalance = totalDeposited - totalWithdrawn
+
+        return {
+          address: user.address,
+          ensName: user.ensName,
+          avatar: user.avatar,
+          portfolio: {
+            totalDeposited: totalDeposited.toString(),
+            totalWithdrawn: totalWithdrawn.toString(),
+            totalYieldClaimed: totalYieldClaimed.toString(),
+            currentBalance: currentBalance.toString(),
+          },
+          positions: await this.getUserPositions(address),
+          recentActivity: recentDeposits,
+        }
       },
-    })
-
-    if (!user) {
-      throw new AppError(404, 'User not found')
-    }
-
-    // Calculate portfolio metrics
-    const deposits = user.deposits.filter(d => d.type === 'DEPOSIT')
-    const withdrawals = user.deposits.filter(d => d.type === 'WITHDRAW')
-    const yieldClaims = user.deposits.filter(d => d.type === 'YIELD_CLAIM')
-
-    const totalDeposited = deposits.reduce(
-      (sum, d) => sum + BigInt(d.amount),
-      BigInt(0)
+      CACHE_TTL.USER_PORTFOLIO
     )
-    const totalWithdrawn = withdrawals.reduce(
-      (sum, d) => sum + BigInt(d.amount),
-      BigInt(0)
-    )
-    const totalYieldClaimed = yieldClaims.reduce(
-      (sum, d) => sum + BigInt(d.amount),
-      BigInt(0)
-    )
-
-    const currentBalance = totalDeposited - totalWithdrawn
-
-    return {
-      address: user.address,
-      ensName: user.ensName,
-      avatar: user.avatar,
-      portfolio: {
-        totalDeposited: totalDeposited.toString(),
-        totalWithdrawn: totalWithdrawn.toString(),
-        totalYieldClaimed: totalYieldClaimed.toString(),
-        currentBalance: currentBalance.toString(),
-      },
-      positions: await this.getUserPositions(address),
-      recentActivity: user.deposits.slice(0, 5),
-    }
   }
 
-  async getUserPositions(address: string) {
-    // OPTIMIZED: Single query with groupBy to avoid N+1 problem
-    const normalizedAddress = address.toLowerCase()
+  async getUserPositions(address: string): Promise<UserPosition[]> {
+    // Validate and normalize address (defense in depth)
+    const normalizedAddress = validateAndNormalizeAddress(address)
 
     // Get all deposits in one query
     const allDeposits = await prisma.deposit.findMany({
@@ -161,9 +209,11 @@ export class UsersService {
     transactions: Deposit[]
     pagination: { total: number; limit: number; offset: number; hasMore: boolean }
   }> {
+    // Validate address before query
+    const normalizedAddress = validateAndNormalizeAddress(address)
     const transactions = await prisma.deposit.findMany({
       where: {
-        userAddress: address.toLowerCase(),
+        userAddress: normalizedAddress,
       },
       orderBy: { timestamp: 'desc' },
       take: limit,
@@ -172,7 +222,7 @@ export class UsersService {
 
     const total = await prisma.deposit.count({
       where: {
-        userAddress: address.toLowerCase(),
+        userAddress: normalizedAddress,
       },
     })
 
@@ -188,14 +238,16 @@ export class UsersService {
   }
 
   async createOrUpdateUser(address: string, data?: { ensName?: string; avatar?: string }) {
+    // Validate address before database operation
+    const normalizedAddress = validateAndNormalizeAddress(address)
     return await prisma.user.upsert({
-      where: { address: address.toLowerCase() },
+      where: { address: normalizedAddress },
       update: {
         ...data,
         lastActiveAt: new Date(),
       },
       create: {
-        address: address.toLowerCase(),
+        address: normalizedAddress,
         ...data,
       },
     })
