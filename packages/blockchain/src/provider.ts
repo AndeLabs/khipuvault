@@ -241,8 +241,46 @@ export async function getCurrentBlock(): Promise<number> {
   }, MAX_RETRY_ATTEMPTS)
 }
 
+// Block timestamp cache to reduce RPC calls
+// Key: blockNumber, Value: { timestamp, cachedAt }
+const blockTimestampCache = new Map<number, { timestamp: number; cachedAt: number }>()
+const CACHE_MAX_SIZE = 10000
+const CACHE_TTL_MS = 5 * 60 * 1000 // 5 minutes
+
 /**
- * Get block timestamp with retry logic
+ * Clean up old entries from timestamp cache
+ */
+function cleanTimestampCache(): void {
+  if (blockTimestampCache.size < CACHE_MAX_SIZE) return
+
+  const now = Date.now()
+  let cleaned = 0
+
+  for (const [blockNumber, entry] of blockTimestampCache.entries()) {
+    if (now - entry.cachedAt > CACHE_TTL_MS) {
+      blockTimestampCache.delete(blockNumber)
+      cleaned++
+    }
+  }
+
+  // If still at capacity after TTL cleanup, remove oldest 10%
+  if (blockTimestampCache.size >= CACHE_MAX_SIZE) {
+    const entries = Array.from(blockTimestampCache.entries())
+      .sort((a, b) => a[1].cachedAt - b[1].cachedAt)
+    const toDelete = Math.floor(entries.length * 0.1)
+    for (let i = 0; i < toDelete; i++) {
+      blockTimestampCache.delete(entries[i][0])
+    }
+    cleaned += toDelete
+  }
+
+  if (cleaned > 0) {
+    console.log(`🧹 Cleaned ${cleaned} entries from timestamp cache`)
+  }
+}
+
+/**
+ * Get block timestamp with retry logic (no cache)
  */
 export async function getBlockTimestamp(blockNumber: number): Promise<number> {
   return retryWithBackoff(async () => {
@@ -253,6 +291,30 @@ export async function getBlockTimestamp(blockNumber: number): Promise<number> {
 }
 
 /**
+ * Get block timestamp with caching to reduce RPC calls
+ * Use this for batch operations where same block is queried multiple times
+ */
+export async function getBlockTimestampCached(blockNumber: number): Promise<number> {
+  // Check cache first
+  const cached = blockTimestampCache.get(blockNumber)
+  if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
+    return cached.timestamp
+  }
+
+  // Fetch from RPC
+  const timestamp = await getBlockTimestamp(blockNumber)
+
+  // Cache cleanup and store
+  cleanTimestampCache()
+  blockTimestampCache.set(blockNumber, {
+    timestamp,
+    cachedAt: Date.now(),
+  })
+
+  return timestamp
+}
+
+/**
  * Get block with full details and retry logic
  */
 export async function getBlock(blockNumber: number): Promise<ethers.Block | null> {
@@ -260,4 +322,14 @@ export async function getBlock(blockNumber: number): Promise<ethers.Block | null
     const provider = getProvider()
     return await provider.getBlock(blockNumber)
   }, MAX_RETRY_ATTEMPTS)
+}
+
+/**
+ * Get timestamp cache statistics
+ */
+export function getTimestampCacheStats(): { size: number; maxSize: number } {
+  return {
+    size: blockTimestampCache.size,
+    maxSize: CACHE_MAX_SIZE,
+  }
 }
