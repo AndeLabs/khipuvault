@@ -1,8 +1,10 @@
 /**
- * @fileoverview In-Memory Cache with TTL support
+ * @fileoverview In-Memory LRU Cache with TTL support
  *
- * Production-ready caching layer that can be easily swapped for Redis
- * Uses Map-based storage with automatic TTL expiration
+ * Production-ready caching layer with:
+ * - LRU eviction when max size reached
+ * - TTL-based expiration
+ * - Memory-safe with bounded size
  *
  * For production with Redis, install ioredis and update implementation
  */
@@ -12,18 +14,44 @@ import { logger } from './logger'
 interface CacheEntry<T> {
   value: T
   expiresAt: number
+  lastAccessed: number
 }
+
+// Maximum cache entries to prevent memory exhaustion
+const MAX_CACHE_SIZE = 5000
+// When at max, evict this percentage of least recently used entries
+const EVICTION_PERCENTAGE = 0.1
 
 class CacheService {
   private cache = new Map<string, CacheEntry<unknown>>()
   private cleanupInterval: NodeJS.Timeout | null = null
+  private isShuttingDown = false
 
   constructor() {
     // Cleanup expired entries every minute
     this.cleanupInterval = setInterval(() => {
-      this.cleanup()
+      if (!this.isShuttingDown) {
+        this.cleanup()
+      }
     }, 60 * 1000)
     this.cleanupInterval.unref()
+  }
+
+  /**
+   * Evict least recently used entries when at capacity
+   */
+  private evictLRU(): void {
+    if (this.cache.size < MAX_CACHE_SIZE) return
+
+    const entries = Array.from(this.cache.entries())
+      .sort((a, b) => a[1].lastAccessed - b[1].lastAccessed)
+
+    const toEvict = Math.ceil(entries.length * EVICTION_PERCENTAGE)
+    for (let i = 0; i < toEvict; i++) {
+      this.cache.delete(entries[i][0])
+    }
+
+    logger.debug({ evicted: toEvict, remaining: this.cache.size }, 'LRU cache eviction completed')
   }
 
   /**
@@ -36,11 +64,16 @@ class CacheService {
       return null
     }
 
+    const now = Date.now()
+
     // Check if expired
-    if (Date.now() > entry.expiresAt) {
+    if (now > entry.expiresAt) {
       this.cache.delete(key)
       return null
     }
+
+    // Update last accessed for LRU
+    entry.lastAccessed = now
 
     return entry.value as T
   }
@@ -52,11 +85,16 @@ class CacheService {
    * @param ttlSeconds Time to live in seconds
    */
   async set<T>(key: string, value: T, ttlSeconds: number): Promise<void> {
-    const expiresAt = Date.now() + ttlSeconds * 1000
+    // Evict LRU entries if at capacity
+    this.evictLRU()
+
+    const now = Date.now()
+    const expiresAt = now + ttlSeconds * 1000
 
     this.cache.set(key, {
       value,
       expiresAt,
+      lastAccessed: now,
     })
   }
 
@@ -146,11 +184,31 @@ class CacheService {
    * Shutdown cache service
    */
   shutdown(): void {
+    this.isShuttingDown = true
     if (this.cleanupInterval) {
       clearInterval(this.cleanupInterval)
       this.cleanupInterval = null
     }
     this.cache.clear()
+    logger.info('Cache service shut down')
+  }
+
+  /**
+   * Check if cache is at capacity
+   */
+  isAtCapacity(): boolean {
+    return this.cache.size >= MAX_CACHE_SIZE
+  }
+
+  /**
+   * Get memory usage estimate (rough)
+   */
+  getMemoryUsage(): { entries: number; maxEntries: number; utilization: number } {
+    return {
+      entries: this.cache.size,
+      maxEntries: MAX_CACHE_SIZE,
+      utilization: Math.round((this.cache.size / MAX_CACHE_SIZE) * 100),
+    }
   }
 }
 
@@ -166,6 +224,7 @@ export const CACHE_TTL = {
   ACTIVITY_TIMELINE: 10 * 60,  // 10 minutes
   POOL_INFO: 2 * 60,           // 2 minutes
   USER_PORTFOLIO: 1 * 60,      // 1 minute
+  TOKEN_BLACKLIST: 2 * 60 * 60, // 2 hours (match JWT expiration)
 } as const
 
 // Cache key generators
@@ -177,4 +236,42 @@ export const CACHE_KEYS = {
   activityTimeline: (days: number) => `analytics:timeline:${days}`,
   poolInfo: (address: string) => `pool:${address.toLowerCase()}`,
   userPortfolio: (address: string) => `user:portfolio:${address.toLowerCase()}`,
+  tokenBlacklist: (jti: string) => `auth:blacklist:${jti}`,
 } as const
+
+/**
+ * Token Blacklist Service
+ * Used to invalidate JWTs on logout before their natural expiration
+ */
+export const tokenBlacklist = {
+  /**
+   * Add a token to the blacklist
+   * @param jti JWT ID or token hash
+   * @param expiresInSeconds Time until token naturally expires
+   */
+  async add(jti: string, expiresInSeconds: number = CACHE_TTL.TOKEN_BLACKLIST): Promise<void> {
+    const key = CACHE_KEYS.tokenBlacklist(jti)
+    await cache.set(key, true, expiresInSeconds)
+    logger.debug({ jti }, 'Token added to blacklist')
+  },
+
+  /**
+   * Check if a token is blacklisted
+   * @param jti JWT ID or token hash
+   * @returns true if token is blacklisted (should be rejected)
+   */
+  async isBlacklisted(jti: string): Promise<boolean> {
+    const key = CACHE_KEYS.tokenBlacklist(jti)
+    const result = await cache.get<boolean>(key)
+    return result === true
+  },
+
+  /**
+   * Remove a token from blacklist (for testing or admin purposes)
+   * @param jti JWT ID or token hash
+   */
+  async remove(jti: string): Promise<void> {
+    const key = CACHE_KEYS.tokenBlacklist(jti)
+    await cache.delete(key)
+  },
+}
