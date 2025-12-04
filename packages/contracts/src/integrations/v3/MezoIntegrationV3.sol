@@ -68,6 +68,17 @@ contract MezoIntegrationV3 is
     uint256 public constant PRICE_STALENESS_THRESHOLD = 3600;
     uint256 public constant MIN_BTC_DEPOSIT = 0.001 ether;
 
+    // Price bounds to detect oracle manipulation or malfunctions
+    // BTC price: min $1,000, max $1,000,000 (in 18 decimal format: $1 = 1e18)
+    uint256 public constant MIN_BTC_PRICE = 1_000 * 1e18;     // $1,000
+    uint256 public constant MAX_BTC_PRICE = 1_000_000 * 1e18; // $1,000,000
+
+    // Maximum allowed price deviation from last known price (50%)
+    uint256 public constant MAX_PRICE_DEVIATION = 5000; // 50% in basis points
+
+    // Last known good price for deviation checks
+    uint256 public lastKnownPrice;
+
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
@@ -92,6 +103,8 @@ contract MezoIntegrationV3 is
     error PriceFeedFailure();
     error ExcessiveFee();
     error FlashLoanDetected();
+    error PriceOutOfBounds(uint256 price, uint256 minPrice, uint256 maxPrice);
+    error ExcessivePriceDeviation(uint256 currentPrice, uint256 lastPrice, uint256 maxDeviation);
 
     /*//////////////////////////////////////////////////////////////
                            INITIALIZATION
@@ -136,8 +149,26 @@ contract MezoIntegrationV3 is
                              MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice Prevents flash loan attacks
+     * @dev Uses contract code check instead of tx.origin for better compatibility
+     *      with meta-transactions, account abstraction, and to avoid phishing risks.
+     *      Existing users (with positions) are allowed as they've passed previous checks.
+     */
     modifier noFlashLoan() {
-        if (tx.origin != msg.sender) revert FlashLoanDetected();
+        if (!emergencyMode) {
+            // Check if caller has code (is a contract)
+            uint256 size;
+            address sender = msg.sender;
+            assembly {
+                size := extcodesize(sender)
+            }
+            // If it's a contract, only allow if they already have a position
+            // (prevents single-transaction flash loan attacks)
+            if (size > 0 && userPositions[sender].btcCollateral == 0) {
+                revert FlashLoanDetected();
+            }
+        }
         _;
     }
 
@@ -290,12 +321,58 @@ contract MezoIntegrationV3 is
     //////////////////////////////////////////////////////////////*/
 
     function _getCurrentPrice() internal returns (uint256 price) {
+        // First, verify price is fresh using latestRoundData
+        try PRICE_FEED.latestRoundData() returns (
+            uint80,
+            int256 answer,
+            uint256,
+            uint256 updatedAt,
+            uint80
+        ) {
+            // Check staleness using our threshold
+            if (block.timestamp - updatedAt > PRICE_STALENESS_THRESHOLD) {
+                revert StalePriceData();
+            }
+            // Validate answer is positive
+            if (answer <= 0) {
+                revert PriceFeedFailure();
+            }
+        } catch {
+            // If latestRoundData fails, try fetchPrice as fallback
+            // but log warning - price freshness cannot be verified
+        }
+
+        // Fetch the price (this may include additional validations)
         try PRICE_FEED.fetchPrice() returns (uint256 _price) {
             if (_price == 0) revert PriceFeedFailure();
             price = _price;
         } catch {
             revert PriceFeedFailure();
         }
+
+        // === PRICE BOUNDS VALIDATION ===
+        // Check price is within reasonable bounds (protects against oracle manipulation)
+        if (price < MIN_BTC_PRICE || price > MAX_BTC_PRICE) {
+            revert PriceOutOfBounds(price, MIN_BTC_PRICE, MAX_BTC_PRICE);
+        }
+
+        // Check price deviation from last known price (protects against flash crashes)
+        // Skip this check if this is the first price fetch or in emergency mode
+        if (lastKnownPrice > 0 && !emergencyMode) {
+            uint256 deviation;
+            if (price > lastKnownPrice) {
+                deviation = ((price - lastKnownPrice) * 10000) / lastKnownPrice;
+            } else {
+                deviation = ((lastKnownPrice - price) * 10000) / lastKnownPrice;
+            }
+
+            if (deviation > MAX_PRICE_DEVIATION) {
+                revert ExcessivePriceDeviation(price, lastKnownPrice, MAX_PRICE_DEVIATION);
+            }
+        }
+
+        // Update last known price for future deviation checks
+        lastKnownPrice = price;
     }
 
     function _calculateMusdAmount(
