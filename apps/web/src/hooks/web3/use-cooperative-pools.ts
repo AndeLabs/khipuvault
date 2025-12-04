@@ -379,6 +379,73 @@ export function calculatePoolAPR(totalYield: bigint, totalBtc: bigint, daysActiv
 }
 
 /**
+ * Hook to get user's total contribution across all cooperative pools
+ *
+ * This aggregates the user's participation in all pools to show
+ * total cooperative savings on the dashboard.
+ *
+ * @param userAddress - Address of the user
+ * @returns Object with total contribution, pools participated, and loading state
+ */
+export function useUserCooperativeTotal(userAddress?: `0x${string}`) {
+  const publicClient = usePublicClient()
+
+  // Get pool counter
+  const { data: poolCounter } = useReadContract({
+    address: poolAddress,
+    abi: COOPERATIVE_POOL_ABI,
+    functionName: 'poolCounter',
+  })
+
+  const { data, isLoading, error } = useQuery({
+    queryKey: ['cooperative-pool', 'user-total', userAddress || 'none', normalizeBigInt(poolCounter)],
+    queryFn: async () => {
+      if (!publicClient || !userAddress || !poolCounter) {
+        return { totalContribution: 0n, poolsParticipated: 0, memberInfos: [] }
+      }
+
+      const count = Number(poolCounter)
+      let totalContribution = 0n
+      let poolsParticipated = 0
+      const memberInfos: Array<{ poolId: number; contribution: bigint; active: boolean }> = []
+
+      // Check membership in each pool
+      for (let i = 1; i <= count; i++) {
+        try {
+          const memberInfo = await fetchMemberInfo(publicClient, i, userAddress)
+          if (memberInfo && memberInfo.active && memberInfo.btcContributed > 0n) {
+            totalContribution += memberInfo.btcContributed
+            poolsParticipated++
+            memberInfos.push({
+              poolId: i,
+              contribution: memberInfo.btcContributed,
+              active: memberInfo.active,
+            })
+          }
+        } catch (err) {
+          // Silently skip pools where user is not a member
+          console.debug(`User not member of pool ${i}`)
+        }
+      }
+
+      return { totalContribution, poolsParticipated, memberInfos }
+    },
+    enabled: !!publicClient && !!userAddress && !!poolCounter && Number(poolCounter) > 0,
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
+    retry: 1,
+  })
+
+  return {
+    totalContribution: data?.totalContribution || 0n,
+    poolsParticipated: data?.poolsParticipated || 0,
+    memberInfos: data?.memberInfos || [],
+    isLoading,
+    error,
+  }
+}
+
+/**
  * Re-export types for consumers
  */
 export type { PoolInfo, MemberInfo }

@@ -11,7 +11,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { Button } from "@/components/ui/button"
 import { Wallet, Users, Trophy, ArrowRight } from "lucide-react"
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3"
-import { useCooperativePools } from "@/hooks/web3/use-cooperative-pools"
+import { useCooperativePools, useUserCooperativeTotal } from "@/hooks/web3/use-cooperative-pools"
 import { formatUnits } from "viem"
 
 /**
@@ -29,6 +29,11 @@ export default function DashboardPage() {
   // Fetch REAL blockchain data
   const { userInfo, isLoading: isLoadingIndividual } = useIndividualPoolV3()
   const { pools, isLoading: isLoadingPools } = useCooperativePools()
+  const {
+    totalContribution: cooperativeContribution,
+    poolsParticipated,
+    isLoading: isLoadingCoopTotal
+  } = useUserCooperativeTotal(address as `0x${string}` | undefined)
 
   // Calculate real portfolio data
   const individualSavings = userInfo?.deposit
@@ -39,10 +44,10 @@ export default function DashboardPage() {
     ? Number(formatUnits(userInfo.yields, 18))
     : 0
 
-  // Calculate cooperative pools total (user's participation)
-  const cooperativeSavings = pools
-    ?.filter(pool => pool.participants?.includes(address as string))
-    ?.reduce((acc, pool) => acc + Number(formatUnits(pool.userBalance || 0n, 18)), 0) || 0
+  // Calculate cooperative pools total from user's contributions across all pools
+  const cooperativeSavings = cooperativeContribution
+    ? Number(formatUnits(cooperativeContribution, 18))
+    : 0
 
   const totalValue = individualSavings + cooperativeSavings
 
@@ -80,7 +85,7 @@ export default function DashboardPage() {
   }
 
   // Show loading state while fetching blockchain data
-  if (isLoadingIndividual || isLoadingPools) {
+  if (isLoadingIndividual || isLoadingPools || isLoadingCoopTotal) {
     return (
       <div className="space-y-6">
         <PageHeader
