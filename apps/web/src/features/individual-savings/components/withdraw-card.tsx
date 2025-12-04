@@ -10,11 +10,21 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { AmountDisplay } from "@/components/common"
 import { useTransactionExecute } from "@/features/transactions"
-import { ArrowUp, AlertCircle, Info, TrendingDown } from "lucide-react"
+import { ArrowUp, AlertCircle, Info, TrendingDown, AlertTriangle } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { formatUnits } from "viem"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 const withdrawSchema = z.object({
   amount: z.string().min(1, "Amount is required").refine(
@@ -39,6 +49,8 @@ export function WithdrawCard({
   className,
 }: WithdrawCardProps) {
   const { execute } = useTransactionExecute({ type: "Withdraw mUSD" })
+  const [showFullWithdrawConfirm, setShowFullWithdrawConfirm] = React.useState(false)
+  const [pendingWithdrawAmount, setPendingWithdrawAmount] = React.useState<string | null>(null)
 
   const {
     register,
@@ -68,10 +80,35 @@ export function WithdrawCard({
     setValue("amount", formattedBalance)
   }
 
-  const onSubmit = async (data: WithdrawFormData) => {
+  // Check if this is a full withdrawal (withdrawing all or >95% of balance)
+  const isFullWithdrawal = (withdrawAmount: string) => {
+    const withdrawNum = Number(withdrawAmount)
+    const balanceNum = Number(formattedBalance)
+    return withdrawNum >= balanceNum * 0.95
+  }
+
+  const executeWithdraw = async (withdrawAmount: string) => {
     await execute(async () => {
-      return await onWithdraw(data.amount)
+      return await onWithdraw(withdrawAmount)
     })
+    setPendingWithdrawAmount(null)
+  }
+
+  const onSubmit = async (data: WithdrawFormData) => {
+    // Show confirmation for full withdrawals
+    if (isFullWithdrawal(data.amount)) {
+      setPendingWithdrawAmount(data.amount)
+      setShowFullWithdrawConfirm(true)
+      return
+    }
+    await executeWithdraw(data.amount)
+  }
+
+  const handleConfirmFullWithdraw = async () => {
+    setShowFullWithdrawConfirm(false)
+    if (pendingWithdrawAmount) {
+      await executeWithdraw(pendingWithdrawAmount)
+    }
   }
 
   const hasBalance = Number(formattedBalance) > 0
@@ -208,6 +245,45 @@ export function WithdrawCard({
           </form>
         )}
       </CardContent>
+
+      {/* Full Withdrawal Confirmation Dialog */}
+      <AlertDialog open={showFullWithdrawConfirm} onOpenChange={setShowFullWithdrawConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-warning" />
+              Confirm Full Withdrawal
+            </AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p>
+                You are about to withdraw <strong>{pendingWithdrawAmount} mUSD</strong>, which is your entire balance.
+              </p>
+              <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-sm">
+                <p className="font-medium text-foreground mb-1">This will:</p>
+                <ul className="list-disc list-inside text-muted-foreground space-y-1">
+                  <li>Close your position in this pool</li>
+                  <li>Stop all yield accumulation</li>
+                  <li>Require a new deposit to rejoin</li>
+                </ul>
+              </div>
+              <p className="text-sm">
+                Are you sure you want to proceed?
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setPendingWithdrawAmount(null)}>
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleConfirmFullWithdraw}
+              className="bg-warning text-warning-foreground hover:bg-warning/90"
+            >
+              Yes, Withdraw All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   )
 }
