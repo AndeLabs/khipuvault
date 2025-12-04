@@ -4,6 +4,7 @@ export const dynamic = "force-dynamic"
 
 import * as React from "react"
 import { PageHeader, PageSection } from "@/components/layout"
+import { Web3ErrorBoundary } from "@/components/web3-error-boundary"
 import {
   DepositCard,
   WithdrawCard,
@@ -20,6 +21,7 @@ import { useSimpleWithdraw } from "@/hooks/web3/use-simple-withdraw"
 import { useClaimYields } from "@/hooks/web3/use-claim-yields"
 import { useAutoCompound } from "@/hooks/web3/use-auto-compound"
 import { useUserTransactionHistory } from "@/hooks/web3/use-user-transaction-history"
+import { usePoolEvents } from "@/hooks/web3/use-pool-events"
 import { useAccount } from "wagmi"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { ArrowDownCircle, ArrowUpCircle, BarChart3, Users, Gift, Database } from "lucide-react"
@@ -45,6 +47,9 @@ export default function IndividualSavingsPage() {
   const { isConnected } = useAccount()
   const poolData = useIndividualPoolV3()
 
+  // Subscribe to pool events for automatic data refresh on blockchain changes
+  usePoolEvents()
+
   // Real contract interaction hooks
   const { deposit, isProcessing: isDepositing, step: depositStep } = useDepositWithApprove()
   const { withdraw, isProcessing: isWithdrawing } = useSimpleWithdraw()
@@ -58,16 +63,10 @@ export default function IndividualSavingsPage() {
   const handleDeposit = async (amount: string, referralCode?: string) => {
     try {
       console.log("💰 Depositing:", amount, "mUSD", referralCode ? `with referral: ${referralCode}` : "")
-
-      // For now, just deposit without referral
-      // TODO: Update useDepositWithApprove to support referral codes
       await deposit(amount)
-
       console.log("✅ Deposit successful!")
-      // Refetch data after deposit
-      setTimeout(() => {
-        poolData.refetchAll()
-      }, 3000)
+      // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
+      // and by the deposit hook's onSuccess callback - no setTimeout needed
     } catch (error) {
       console.error("❌ Deposit error:", error)
       throw error
@@ -80,10 +79,7 @@ export default function IndividualSavingsPage() {
       console.log("💸 Withdrawing:", amount, "mUSD")
       await withdraw(amount)
       console.log("✅ Withdraw successful!")
-      // Refetch data after withdraw
-      setTimeout(() => {
-        poolData.refetchAll()
-      }, 3000)
+      // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
     } catch (error) {
       console.error("❌ Withdraw error:", error)
       throw error
@@ -96,10 +92,7 @@ export default function IndividualSavingsPage() {
       console.log("🎁 Claiming yields...")
       await claimYields()
       console.log("✅ Yields claimed!")
-      // Refetch data after claim
-      setTimeout(() => {
-        poolData.refetchAll()
-      }, 3000)
+      // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
     } catch (error) {
       console.error("❌ Claim error:", error)
       throw error
@@ -113,10 +106,7 @@ export default function IndividualSavingsPage() {
       console.log("🔄 Toggling auto-compound to:", newState)
       await setAutoCompound(newState)
       console.log("✅ Auto-compound toggled!")
-      // Refetch data after toggle
-      setTimeout(() => {
-        poolData.refetchAll()
-      }, 3000)
+      // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
     } catch (error) {
       console.error("❌ Auto-compound toggle error:", error)
       throw error
@@ -158,12 +148,17 @@ export default function IndividualSavingsPage() {
     : "0.00"
 
   return (
-    <div className="space-y-8 animate-slide-up">
-      {/* Page Header */}
-      <PageHeader
-        title="Individual Savings"
-        description="Deposit mUSD and earn yields automatically through Mezo's Stability Pool with V3 features"
-      />
+    <Web3ErrorBoundary
+      onError={(error, errorInfo) => {
+        console.error('Individual Savings Error:', error, errorInfo);
+      }}
+    >
+      <div className="space-y-8 animate-slide-up">
+        {/* Page Header */}
+        <PageHeader
+          title="Individual Savings"
+          description="Deposit mUSD and earn yields automatically through Mezo's Stability Pool with V3 features"
+        />
 
       {/* Position Overview - Real Data */}
       <PageSection>
@@ -352,6 +347,7 @@ export default function IndividualSavingsPage() {
           </ul>
         </div>
       </div>
-    </div>
+      </div>
+    </Web3ErrorBoundary>
   )
 }

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { YourTickets } from "./your-tickets";
 import { useCurrentRound, formatBTC, formatUSD, getRoundStatus } from "@/hooks/web3/use-lottery-pool";
+import { useBTCPrice } from "@/hooks/use-btc-price";
 
 interface CountdownTimerProps {
   endTime: bigint;
@@ -57,6 +58,7 @@ const CountdownTimer = ({ endTime }: CountdownTimerProps) => {
 
 export function ActiveRound() {
   const { currentRoundId, roundInfo, isLoading } = useCurrentRound();
+  const { price: btcPrice } = useBTCPrice();
 
   if (isLoading) {
     return (
@@ -83,7 +85,6 @@ export function ActiveRound() {
     ? (Number(roundInfo.totalTicketsSold) / Number(roundInfo.maxTickets)) * 100 
     : 0;
 
-  const btcPrice = 60000; // TODO: Get from price oracle
   const totalPrizeUSD = Number(roundInfo.totalPrize) * btcPrice / 1e18;
   const ticketPriceUSD = Number(roundInfo.ticketPrice) * btcPrice / 1e18;
 

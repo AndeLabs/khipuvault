@@ -98,6 +98,12 @@ model Deposit {
   @@index([timestamp])
   @@index([userAddress, poolAddress])
   @@index([poolAddress, status])
+  // Composite indexes for common query patterns
+  @@index([poolAddress, timestamp]) // For time-series queries per pool
+  @@index([userAddress, timestamp]) // For user transaction history
+  @@index([poolAddress, type, timestamp]) // For filtered pool queries
+  @@index([userAddress, type, status]) // For user transaction filtering
+  @@index([status, timestamp]) // For pending transaction monitoring
 }
 
 // Pool model - Enhanced

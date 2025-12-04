@@ -28,15 +28,30 @@ import {
   Info,
 } from 'lucide-react'
 import { SkeletonCard } from '@/components/ui/skeleton'
-import { useUserPools, useCreatedPools } from '@/hooks/web3/use-all-cooperative-pools'
+import { useUserPools, useCreatedPools, type PoolWithMembership } from '@/hooks/web3/use-all-cooperative-pools'
 import {
   formatBTCCompact,
   formatMUSD,
   getPoolStatusBadge,
   formatDate,
   formatPercentage,
-} from '@/hooks/web3/use-cooperative-pool-v3'
-import { usePoolMembers } from '@/hooks/web3/use-cooperative-pool-v3'
+  type PoolInfo,
+} from '@/hooks/web3/use-cooperative-pool'
+import { usePoolMembers } from '@/hooks/web3/use-cooperative-pool'
+
+// Type definitions for sub-components
+interface CreatedPoolCardProps {
+  pool: PoolInfo & { poolId: number }
+  onViewDetails?: (poolId: number) => void
+  onManagePool?: (poolId: number) => void
+}
+
+interface MembershipCardProps {
+  pool: PoolWithMembership
+  onViewDetails?: (poolId: number) => void
+  onClaimYield?: (poolId: number) => void
+  onLeavePool?: (poolId: number) => void
+}
 
 interface MyPoolsDashboardProps {
   onViewDetails?: (poolId: number) => void
@@ -200,10 +215,10 @@ export function MyPoolsDashboard({
 }
 
 // ============================================================================
-// SUB-COMPONENTS
+// SUB-COMPONENTS (Memoized for performance)
 // ============================================================================
 
-function CreatedPoolCard({ pool, onViewDetails, onManagePool }: any) {
+const CreatedPoolCard = React.memo(function CreatedPoolCard({ pool, onViewDetails, onManagePool }: CreatedPoolCardProps) {
   const statusBadge = getPoolStatusBadge(pool.status)
   const memberProgress = (pool.currentMembers / pool.maxMembers) * 100
 
@@ -284,9 +299,9 @@ function CreatedPoolCard({ pool, onViewDetails, onManagePool }: any) {
       </CardContent>
     </Card>
   )
-}
+})
 
-function MembershipCard({ pool, onViewDetails, onClaimYield, onLeavePool }: any) {
+const MembershipCard = React.memo(function MembershipCard({ pool, onViewDetails, onClaimYield, onLeavePool }: MembershipCardProps) {
   const { members } = usePoolMembers(pool.poolId)
   const totalShares = members.reduce((sum, m) => sum + m.shares, BigInt(0))
   const sharePercentage = formatPercentage(pool.userShares, totalShares)
@@ -399,4 +414,4 @@ function MembershipCard({ pool, onViewDetails, onClaimYield, onLeavePool }: any)
       </CardContent>
     </Card>
   )
-}
+})

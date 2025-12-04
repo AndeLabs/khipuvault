@@ -20,30 +20,41 @@
 // V3 CONTRACT ABIS
 // ============================================================================
 
+import type { Address } from 'viem'
 import IndividualPoolV3ABI from '@/contracts/abis/IndividualPoolV3.json'
 import YieldAggregatorV3ABI from '@/contracts/abis/YieldAggregatorV3.json'
 import CooperativePoolV3ABI from '@/contracts/abis/CooperativePoolV3.json'
 import MUSDABI from '@/contracts/mezo-abis/MUSD.json'
 
 // Extract ABIs safely - Foundry exports as {"abi": [...], "bytecode": {...}}
-function extractABI(abiModule: any): any[] {
+// CRITICAL: Throws error instead of returning empty array to fail fast on invalid ABIs
+function extractABI(abiModule: unknown): readonly unknown[] {
   // If it's already an array, return it
   if (Array.isArray(abiModule)) {
+    if (abiModule.length === 0) {
+      throw new Error('ABI module is an empty array - contract ABI may not be generated')
+    }
     return abiModule
   }
-  
+
   // If it has an 'abi' property, extract it
   if (abiModule && typeof abiModule === 'object' && 'abi' in abiModule) {
-    return Array.isArray(abiModule.abi) ? abiModule.abi : []
+    const abi = (abiModule as { abi: unknown }).abi
+    if (Array.isArray(abi)) {
+      if (abi.length === 0) {
+        throw new Error('ABI property is an empty array - contract ABI may not be generated')
+      }
+      return abi
+    }
+    throw new Error('ABI property is not an array')
   }
-  
+
   // Check for .default (webpack/vite bundling)
   if (abiModule && typeof abiModule === 'object' && 'default' in abiModule) {
-    return extractABI(abiModule.default)
+    return extractABI((abiModule as { default: unknown }).default)
   }
-  
-  console.error('❌ Invalid ABI module:', abiModule)
-  return []
+
+  throw new Error(`Invalid ABI module: expected array or object with 'abi' property, got ${typeof abiModule}`)
 }
 
 export const INDIVIDUAL_POOL_V3_ABI = extractABI(IndividualPoolV3ABI)
@@ -55,23 +66,45 @@ export const ERC20_ABI = extractABI(MUSDABI)
 // V3 CONTRACT ADDRESSES (MEZO TESTNET)
 // ============================================================================
 
+// Ethereum address validation regex (used at module load time for env vars)
+const ETH_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/
+
+/**
+ * Validates and returns an address, throwing if invalid
+ * This ensures we fail fast at module load time if env vars are misconfigured
+ */
+function validateAddress(address: string, name: string): Address {
+  if (!ETH_ADDRESS_REGEX.test(address)) {
+    throw new Error(`Invalid ${name} address: ${address}. Must be a valid Ethereum address (0x + 40 hex chars)`)
+  }
+  return address as Address
+}
+
+/**
+ * Gets address from env var with validation, falling back to default
+ */
+function getAddress(envKey: string, defaultAddress: string, name: string): Address {
+  const address = process.env[envKey] || defaultAddress
+  return validateAddress(address, name)
+}
+
 export const MEZO_V3_ADDRESSES = {
   // V3 Pools (Upgradeable Proxies) ⭐ USE THESE ⭐
-  individualPoolV3: process.env.NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS || '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393',
-  yieldAggregatorV3: process.env.NEXT_PUBLIC_YIELD_AGGREGATOR_ADDRESS || '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6',
-  cooperativePoolV3: process.env.NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS || '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88',
-  
+  individualPoolV3: getAddress('NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS', '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393', 'IndividualPoolV3'),
+  yieldAggregatorV3: getAddress('NEXT_PUBLIC_YIELD_AGGREGATOR_ADDRESS', '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6', 'YieldAggregatorV3'),
+  cooperativePoolV3: getAddress('NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS', '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88', 'CooperativePoolV3'),
+
   // Tokens
-  musd: process.env.NEXT_PUBLIC_MUSD_ADDRESS || '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503',
-  
+  musd: getAddress('NEXT_PUBLIC_MUSD_ADDRESS', '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503', 'MUSD'),
+
   // Mezo Integration V3 (Upgradeable Proxy)
-  mezoIntegrationV3: process.env.NEXT_PUBLIC_MEZO_INTEGRATION_ADDRESS || '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6',
-  
-  // Mezo Protocol (External)
-  borrowerOperations: '0xCdF7028ceAB81fA0C6971208e83fa7872994beE5',
-  troveManager: '0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0',
-  priceFeed: '0x86bCF0841622a5dAC14A313a15f96A95421b9366',
-  hintHelpers: '0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6',
+  mezoIntegrationV3: getAddress('NEXT_PUBLIC_MEZO_INTEGRATION_ADDRESS', '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6', 'MezoIntegrationV3'),
+
+  // Mezo Protocol (External) - These are hardcoded as they don't change
+  borrowerOperations: '0xCdF7028ceAB81fA0C6971208e83fa7872994beE5' as Address,
+  troveManager: '0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0' as Address,
+  priceFeed: '0x86bCF0841622a5dAC14A313a15f96A95421b9366' as Address,
+  hintHelpers: '0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6' as Address,
 } as const
 
 // ============================================================================

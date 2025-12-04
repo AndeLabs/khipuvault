@@ -43,10 +43,7 @@ export function useCooperativePoolEvents() {
     onLogs(logs) {
       console.log('🔔 PoolCreated event detected:', logs)
       // Refetch ALL active queries immediately
-      queryClient.refetchQueries({
-        type: 'active',
-        refetchType: 'all',
-      })
+      queryClient.refetchQueries({ type: 'active' })
     },
   })
 
@@ -57,10 +54,7 @@ export function useCooperativePoolEvents() {
     eventName: 'PoolClosed',
     onLogs(logs) {
       console.log('🔔 PoolClosed event detected:', logs)
-      queryClient.refetchQueries({
-        type: 'active',
-        refetchType: 'all',
-      })
+      queryClient.refetchQueries({ type: 'active' })
     },
   })
 
@@ -71,10 +65,7 @@ export function useCooperativePoolEvents() {
     eventName: 'MemberJoined',
     onLogs(logs) {
       console.log('🔔 MemberJoined event detected:', logs)
-      queryClient.refetchQueries({
-        type: 'active',
-        refetchType: 'all',
-      })
+      queryClient.refetchQueries({ type: 'active' })
     },
   })
 
@@ -85,10 +76,7 @@ export function useCooperativePoolEvents() {
     eventName: 'MemberLeft',
     onLogs(logs) {
       console.log('🔔 MemberLeft event detected:', logs)
-      queryClient.refetchQueries({
-        type: 'active',
-        refetchType: 'all',
-      })
+      queryClient.refetchQueries({ type: 'active' })
     },
   })
 
@@ -99,10 +87,7 @@ export function useCooperativePoolEvents() {
     eventName: 'YieldClaimed',
     onLogs(logs) {
       console.log('🔔 YieldClaimed event detected:', logs)
-      queryClient.refetchQueries({
-        type: 'active',
-        refetchType: 'all',
-      })
+      queryClient.refetchQueries({ type: 'active' })
     },
   })
 }

@@ -233,7 +233,7 @@ export function DepositCard({
             className="w-full"
             size="lg"
             loading={isLoading}
-            disabled={!amount || Number(amount) <= 0 || (referralCode && !isValidReferral)}
+            disabled={!amount || Number(amount) <= 0 || Boolean(referralCode && !isValidReferral)}
           >
             {!amount || Number(amount) <= 0 ? "Enter amount" : `Deposit ${amount} mUSD`}
           </Button>

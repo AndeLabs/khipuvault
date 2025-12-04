@@ -212,12 +212,12 @@ export function WalletInfo() {
         </div>
       )}
 
-      {/* MUSD Minted */}
-      {userDeposit?.musdMinted && (
+      {/* MUSD Amount */}
+      {userDeposit?.musdAmount && (
         <div className="flex flex-col items-end border-l border-primary/20 pl-4">
           <div className="text-sm text-muted-foreground">MUSD Generado</div>
           <div className="text-lg font-semibold font-code text-primary">
-            {Number(userDeposit.musdMinted / BigInt(1e18)).toLocaleString()}
+            {Number(userDeposit.musdAmount / BigInt(1e18)).toLocaleString()}
           </div>
         </div>
       )}

@@ -119,12 +119,6 @@ export function useSimpleDeposit() {
     reset: resetDeposit
   } = useWriteContract()
   
-  useEffect(() => {
-    if (depositTxHash) {
-      console.log('🔗 Deposit transaction hash obtained:', depositTxHash)
-      console.log('🌐 Explorer link:', `https://explorer.mezo.org/tx/${depositTxHash}`)
-    }
-  }, [depositTxHash])
   
   const {
     isLoading: isDepositPending,
@@ -136,42 +130,50 @@ export function useSimpleDeposit() {
   })
   
   // Effect: Handle approval confirmation
+  // After approval succeeds, proceed with deposit immediately
   useEffect(() => {
     if (isApproveSuccess && state === 'waitingApproval') {
-      console.log('✅ Approval confirmed! Refetching allowance...')
-      
-      // Refetch allowance to get updated value
-      refetchAllowance().then(() => {
-        console.log('🚀 Proceeding with deposit...')
-        setState('depositing')
-        
-        // Now call deposit
-        depositWrite({
-          address: POOL_ADDRESS,
-          abi: POOL_ABI,
-          functionName: 'deposit',
-          args: [amountToDeposit]
-        })
-      })
+      // Use async IIFE to properly sequence operations
+      const proceedWithDeposit = async () => {
+        try {
+          // Refetch allowance to confirm approval
+          await refetchAllowance()
+
+          setState('depositing')
+
+          // Now call deposit
+          depositWrite({
+            address: POOL_ADDRESS,
+            abi: POOL_ABI,
+            functionName: 'deposit',
+            args: [amountToDeposit]
+          })
+        } catch (err) {
+          console.error('Error proceeding with deposit after approval:', err)
+          setState('error')
+        }
+      }
+
+      proceedWithDeposit()
     }
   }, [isApproveSuccess, state, amountToDeposit, depositWrite, refetchAllowance])
   
   // Effect: Handle deposit confirmation
   useEffect(() => {
     if (isDepositSuccess && state === 'waitingDeposit') {
-      console.log('✅ Deposit confirmed!')
-      console.log('📝 Transaction hash (direct):', depositTxHash)
-      console.log('📝 Transaction hash (receipt):', depositReceipt?.transactionHash)
-      console.log('📝 Block number:', depositReceipt?.blockNumber)
-      console.log('📝 Status:', depositReceipt?.status)
-      console.log('🔄 Refetching all queries...')
-      
-      queryClient.invalidateQueries()
-      queryClient.refetchQueries({ type: 'active' })
-      
+      // Invalidate all pool-related queries to ensure UI updates
+      queryClient.invalidateQueries({ queryKey: ['individual-pool-v3'] })
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+      // Also invalidate MUSD balance queries
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          Array.isArray(query.queryKey) &&
+          query.queryKey.some(k => typeof k === 'string' && k.includes('musd'))
+      })
+
       setState('success')
     }
-  }, [isDepositSuccess, state, queryClient, depositReceipt, depositTxHash])
+  }, [isDepositSuccess, state, queryClient])
   
   // Effect: Update state when tx is pending
   useEffect(() => {
@@ -189,9 +191,8 @@ export function useSimpleDeposit() {
   // Effect: Handle errors
   useEffect(() => {
     if (approveError) {
-      console.error('❌ Approve error:', approveError)
       setState('error')
-      
+
       const msg = approveError.message || ''
       if (msg.includes('User rejected') || msg.includes('user rejected')) {
         setError('Rechazaste la transacción en tu wallet')
@@ -205,9 +206,8 @@ export function useSimpleDeposit() {
   
   useEffect(() => {
     if (depositError) {
-      console.error('❌ Deposit error:', depositError)
       setState('error')
-      
+
       const msg = depositError.message || ''
       if (msg.includes('User rejected') || msg.includes('user rejected')) {
         setError('Rechazaste la transacción en tu wallet')
@@ -225,12 +225,10 @@ export function useSimpleDeposit() {
   
   useEffect(() => {
     if (isDepositError && state === 'waitingDeposit') {
-      console.error('❌ Transaction failed on-chain')
-      console.log('📝 Failed transaction hash:', depositTxHash)
       setState('error')
       setError('La transacción falló en la blockchain. Revisa tu wallet o intenta nuevamente.')
     }
-  }, [isDepositError, state, depositTxHash])
+  }, [isDepositError, state])
   
   // Main function - called by UI
   const deposit = async (amountString: string) => {
@@ -263,22 +261,14 @@ export function useSimpleDeposit() {
         setState('error')
         return
       }
-      
-      console.log('💰 Starting deposit:', {
-        amount: amountString,
-        wei: amount.toString(),
-        allowance: allowance?.toString(),
-        balance: musdBalance?.toString()
-      })
-      
+
       // Check if need approval
       if (!allowance || allowance < amount) {
-        console.log('🔑 Need approval...')
         setState('approving')
-        
+
         // Approve unlimited for better UX
         const MAX_UINT256 = BigInt('0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff')
-        
+
         approveWrite({
           address: MUSD_ADDRESS,
           abi: MUSD_ABI,
@@ -286,9 +276,8 @@ export function useSimpleDeposit() {
           args: [POOL_ADDRESS, MAX_UINT256]
         })
       } else {
-        console.log('✅ Already approved, depositing directly...')
         setState('depositing')
-        
+
         depositWrite({
           address: POOL_ADDRESS,
           abi: POOL_ABI,
@@ -296,9 +285,8 @@ export function useSimpleDeposit() {
           args: [amount]
         })
       }
-      
+
     } catch (err) {
-      console.error('❌ Error:', err)
       setState('error')
       setError(err instanceof Error ? err.message : 'Error desconocido')
     }

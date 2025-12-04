@@ -27,8 +27,8 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { Loader2, Bitcoin, Users, Shield, AlertTriangle, TrendingUp } from 'lucide-react'
-import { useCooperativePoolV3, formatBTCCompact } from '@/hooks/web3/use-cooperative-pool-v3'
-import { usePoolInfo } from '@/hooks/web3/use-cooperative-pool-v3'
+import { useCooperativePool, formatBTCCompact } from '@/hooks/web3/use-cooperative-pool'
+import { usePoolInfo } from '@/hooks/web3/use-cooperative-pool'
 import { useToast } from '@/hooks/use-toast'
 import { parseEther, formatEther } from 'viem'
 
@@ -41,7 +41,7 @@ interface JoinPoolModalV3Props {
 
 export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolModalV3Props) {
   const { toast } = useToast()
-  const { joinPool, state, error, reset } = useCooperativePoolV3()
+  const { joinPool, state, error, reset } = useCooperativePool()
   const { poolInfo, isLoading: loadingPool } = usePoolInfo(poolId || 0)
 
   const [btcAmount, setBtcAmount] = React.useState('')
@@ -83,6 +83,11 @@ export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolMo
       await joinPool(poolId, btcAmount)
     } catch (err) {
       console.error('Join pool error:', err)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'Failed to join pool. Please try again.',
+      })
     }
   }
 

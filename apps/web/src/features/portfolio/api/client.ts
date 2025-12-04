@@ -13,12 +13,12 @@ export async function getUserPortfolio(address: string) {
   }
 }
 
-export async function getUserTransactions(address: string, limit = 50, offset = 0) {
+export async function getUserTransactions(address: string) {
   try {
-    return await apiClient.getUserTransactions(address, limit, offset)
+    return await apiClient.getUserTransactions(address)
   } catch (error) {
     console.error('Error fetching transactions:', error)
-    return { transactions: [], pagination: { total: 0, limit, offset, hasMore: false } }
+    return []
   }
 }
 

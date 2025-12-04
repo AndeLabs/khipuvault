@@ -10,9 +10,10 @@
 
 import { PublicClient } from 'viem'
 import { LOTTERY_POOL_ABI } from '@/lib/web3/lottery-pool-abi'
+import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 
-// SimpleLotteryPool deployed on Mezo Testnet
-const LOTTERY_POOL_ADDRESS = '0x3e5d272321e28731844c20e0a0c725a97301f83a' as `0x${string}`
+// Use centralized contract addresses - falls back to zero address if not deployed
+const LOTTERY_POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.lotteryPool as `0x${string}`
 
 // Types matching SimpleLotteryPool contract
 export interface LotteryRound {

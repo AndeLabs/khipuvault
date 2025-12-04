@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
-import { formatMUSD } from "@/hooks/web3/use-musd-approval-v2";
+import { formatMUSD } from "@/hooks/web3/use-musd-approval";
 import { Skeleton } from "@/components/ui/skeleton";
 
 /**

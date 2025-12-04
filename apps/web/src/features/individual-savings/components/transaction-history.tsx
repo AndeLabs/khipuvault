@@ -30,8 +30,10 @@ import {
 export type TransactionType =
   | 'deposit'
   | 'withdraw'
+  | 'claim'
   | 'claim_yield'
   | 'claim_referral'
+  | 'compound'
   | 'auto_compound'
   | 'toggle_auto_compound'
 
@@ -63,6 +65,11 @@ const TRANSACTION_LABELS: Record<TransactionType, { label: string; icon: React.R
     icon: <ArrowUpCircle className="h-4 w-4" />,
     color: 'text-error'
   },
+  claim: {
+    label: 'Claim Yield',
+    icon: <Award className="h-4 w-4" />,
+    color: 'text-lavanda'
+  },
   claim_yield: {
     label: 'Claim Yield',
     icon: <Award className="h-4 w-4" />,
@@ -72,6 +79,11 @@ const TRANSACTION_LABELS: Record<TransactionType, { label: string; icon: React.R
     label: 'Claim Referral',
     icon: <Award className="h-4 w-4" />,
     color: 'text-accent'
+  },
+  compound: {
+    label: 'Compound',
+    icon: <RefreshCw className="h-4 w-4" />,
+    color: 'text-lavanda'
   },
   auto_compound: {
     label: 'Auto-Compound',
@@ -271,7 +283,7 @@ export function TransactionHistory({
                               variant={
                                 tx.status === 'success' ? 'success' :
                                 tx.status === 'pending' ? 'secondary' :
-                                'destructive'
+                                'error'
                               }
                               className="text-xs"
                             >
@@ -279,7 +291,7 @@ export function TransactionHistory({
                             </Badge>
                           </TableCell>
                           <TableCell className="text-right">
-                            <TransactionLink hash={tx.hash} />
+                            <TransactionLink txHash={tx.hash} />
                           </TableCell>
                         </TableRow>
                       )
@@ -321,7 +333,7 @@ export function TransactionHistory({
                           variant={
                             tx.status === 'success' ? 'success' :
                             tx.status === 'pending' ? 'secondary' :
-                            'destructive'
+                            'error'
                           }
                           className="text-xs"
                         >
@@ -343,7 +355,7 @@ export function TransactionHistory({
                       )}
 
                       <div className="pt-2 border-t border-border">
-                        <TransactionLink hash={tx.hash} />
+                        <TransactionLink txHash={tx.hash} />
                       </div>
                     </div>
                   )

@@ -13,8 +13,9 @@ import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
 import { type Address } from 'viem'
+import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 
-const POOL_ADDRESS = '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as Address
+const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address
 
 const POOL_ABI = [
   {
@@ -66,10 +67,12 @@ export function useAutoCompound() {
     if (isSuccess && state === 'processing') {
       console.log('✅ Auto-compound setting updated!')
       console.log('📝 Transaction hash:', receipt?.transactionHash)
-      
-      // Refetch user info to update autoCompoundEnabled flag
-      queryClient.invalidateQueries({ queryKey: ['pool-simple', 'user-info'] })
-      
+
+      // Immediately invalidate pool queries to update UI
+      // The usePoolEvents hook also listens for AutoCompounded events
+      queryClient.invalidateQueries({ queryKey: ['individual-pool-v3'] })
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+
       setState('success')
     }
   }, [isSuccess, state, queryClient, receipt])

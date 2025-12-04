@@ -87,7 +87,7 @@ export function TransactionStatus({
   if (variant === "badge") {
     return (
       <Badge variant={config.variant} className={cn("gap-1.5", className)}>
-        <Icon className={cn("h-3 w-3", config.animate && "animate-spin")} />
+        <Icon className={cn("h-3 w-3", 'animate' in config && 'animate' in config && config.animate && "animate-spin")} />
         {config.label}
       </Badge>
     )
@@ -97,7 +97,7 @@ export function TransactionStatus({
     return (
       <div className={cn("flex items-center gap-2", className)}>
         <Icon
-          className={cn("h-4 w-4", config.color, config.animate && "animate-spin")}
+          className={cn("h-4 w-4", config.color, 'animate' in config && config.animate && "animate-spin")}
         />
         <span className={cn("text-sm font-medium", config.color)}>
           {message || config.label}
@@ -111,7 +111,7 @@ export function TransactionStatus({
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center gap-2">
         <Icon
-          className={cn("h-5 w-5", config.color, config.animate && "animate-spin")}
+          className={cn("h-5 w-5", config.color, 'animate' in config && config.animate && "animate-spin")}
         />
         <span className={cn("text-base font-semibold", config.color)}>
           {config.label}

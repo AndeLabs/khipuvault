@@ -41,7 +41,7 @@ export const MEZO_TESTNET_ADDRESSES = {
   // KhipuVault V3 Pools (UUPS Upgradeable) - PRODUCTION
   individualPool: '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393',
   cooperativePool: '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88',
-  lotteryPool: '0x0000000000000000000000000000000000000000',
+  lotteryPool: '0x3e5d272321e28731844c20e0a0c725a97301f83a',
   rotatingPool: '0x0000000000000000000000000000000000000000',
   
   // Core Integration V3 - PRODUCTION
@@ -87,7 +87,7 @@ export const MUSD_ABI = MEZO_MUSD_ABI
 
 import IndividualPoolV3ABI from '@/contracts/abis/IndividualPoolV3.json'
 
-export const INDIVIDUAL_POOL_ABI = (IndividualPoolV3ABI as any).abi as const
+export const INDIVIDUAL_POOL_ABI = (IndividualPoolV3ABI as any).abi
 
 // ============================================================================
 // HELPER FUNCTIONS

@@ -11,8 +11,10 @@
  */
 
 import { queryOptions } from '@tanstack/react-query'
-import { PublicClient } from 'viem'
 import { normalizeBigInt } from '@/lib/query-utils'
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type PublicClient = any
 import {
   fetchCurrentRoundId,
   fetchRoundCounter,

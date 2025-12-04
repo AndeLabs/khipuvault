@@ -23,8 +23,8 @@ import {
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { Loader2, AlertTriangle, Bitcoin, TrendingUp } from 'lucide-react'
-import { useCooperativePoolV3, formatBTCCompact, formatMUSD, calculateNetYield } from '@/hooks/web3/use-cooperative-pool-v3'
-import { useMemberInfo, useMemberYield, usePoolInfo } from '@/hooks/web3/use-cooperative-pool-v3'
+import { useCooperativePool, formatBTCCompact, formatMUSD, calculateNetYield } from '@/hooks/web3/use-cooperative-pool'
+import { useMemberInfo, useMemberYield, usePoolInfo } from '@/hooks/web3/use-cooperative-pool'
 import { useToast } from '@/hooks/use-toast'
 
 interface LeavePoolDialogProps {
@@ -36,7 +36,7 @@ interface LeavePoolDialogProps {
 
 export function LeavePoolDialog({ poolId, open, onClose, onSuccess }: LeavePoolDialogProps) {
   const { toast } = useToast()
-  const { leavePool, state, error, reset, performanceFee } = useCooperativePoolV3()
+  const { leavePool, state, error, reset, performanceFee } = useCooperativePool()
   const { poolInfo } = usePoolInfo(poolId || 0)
   const { memberInfo } = useMemberInfo(poolId || 0)
   const { pendingYield } = useMemberYield(poolId || 0)
@@ -49,6 +49,11 @@ export function LeavePoolDialog({ poolId, open, onClose, onSuccess }: LeavePoolD
       await leavePool(poolId)
     } catch (err) {
       console.error('Leave pool error:', err)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'Failed to leave pool. Please try again.',
+      })
     }
   }
 

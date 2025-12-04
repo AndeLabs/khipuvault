@@ -73,93 +73,103 @@ export function useAllCooperativePools() {
           }
         }
 
-        // Fetch all pools (pool IDs start from 1)
-        const poolPromises = Array.from({ length: totalPools }, (_, i) => i + 1).map(async (poolId) => {
-          try {
-            // Get pool info
-            const poolInfoResult = await readContract(config, {
-              address: poolAddress,
-              abi: POOL_ABI,
-              functionName: 'getPoolInfo',
-              args: [BigInt(poolId)],
-            })
+        // Fetch pools with CONCURRENCY CONTROL to prevent RPC rate limiting
+        // With 100 pools and no limit, we'd send 300+ simultaneous RPC calls
+        const CONCURRENCY_LIMIT = 5 // Max 5 concurrent pool fetches
+        const poolIds = Array.from({ length: totalPools }, (_, i) => i + 1)
+        const poolsResults: (PoolWithMembership | null)[] = []
 
-            // Contract returns an object, not an array
-            if (!poolInfoResult) {
-              return null
-            }
+        // Process pools in batches
+        for (let i = 0; i < poolIds.length; i += CONCURRENCY_LIMIT) {
+          const batch = poolIds.slice(i, i + CONCURRENCY_LIMIT)
+          const batchPromises = batch.map(async (poolId) => {
+            try {
+              // Get pool info
+              const poolInfoResult = await readContract(config, {
+                address: poolAddress,
+                abi: POOL_ABI,
+                functionName: 'getPoolInfo',
+                args: [BigInt(poolId)],
+              })
 
-            // Access as object properties (viem returns struct as object)
-            const poolInfo: PoolInfo = {
-              minContribution: (poolInfoResult as any).minContribution || BigInt(0),
-              maxContribution: (poolInfoResult as any).maxContribution || BigInt(0),
-              maxMembers: Number((poolInfoResult as any).maxMembers || 0),
-              currentMembers: Number((poolInfoResult as any).currentMembers || 0),
-              createdAt: Number((poolInfoResult as any).createdAt || 0),
-              status: ((poolInfoResult as any).status ?? 0) as PoolStatus,
-              allowNewMembers: (poolInfoResult as any).allowNewMembers ?? false,
-              creator: (poolInfoResult as any).creator as Address,
-              name: (poolInfoResult as any).name || `Pool #${poolId}`,
-              totalBtcDeposited: (poolInfoResult as any).totalBtcDeposited || BigInt(0),
-              totalMusdMinted: (poolInfoResult as any).totalMusdMinted || BigInt(0),
-              totalYieldGenerated: (poolInfoResult as any).totalYieldGenerated || BigInt(0)
-            }
+              // Contract returns an object, not an array
+              if (!poolInfoResult) {
+                return null
+              }
 
-            // Get user membership info if connected
-            let isMember = false
-            let userContribution = BigInt(0)
-            let userShares = BigInt(0)
-            let userPendingYield = BigInt(0)
+              // Access as object properties (viem returns struct as object)
+              const poolInfo: PoolInfo = {
+                minContribution: (poolInfoResult as any).minContribution || BigInt(0),
+                maxContribution: (poolInfoResult as any).maxContribution || BigInt(0),
+                maxMembers: Number((poolInfoResult as any).maxMembers || 0),
+                currentMembers: Number((poolInfoResult as any).currentMembers || 0),
+                createdAt: Number((poolInfoResult as any).createdAt || 0),
+                status: ((poolInfoResult as any).status ?? 0) as PoolStatus,
+                allowNewMembers: (poolInfoResult as any).allowNewMembers ?? false,
+                creator: (poolInfoResult as any).creator as Address,
+                name: (poolInfoResult as any).name || `Pool #${poolId}`,
+                totalBtcDeposited: (poolInfoResult as any).totalBtcDeposited || BigInt(0),
+                totalMusdMinted: (poolInfoResult as any).totalMusdMinted || BigInt(0),
+                totalYieldGenerated: (poolInfoResult as any).totalYieldGenerated || BigInt(0)
+              }
 
-            if (address) {
-              try {
-                const memberInfoResult = await readContract(config, {
-                  address: poolAddress,
-                  abi: POOL_ABI,
-                  functionName: 'getMemberInfo',
-                  args: [BigInt(poolId), address],
-                })
+              // Get user membership info if connected
+              let isMember = false
+              let userContribution = BigInt(0)
+              let userShares = BigInt(0)
+              let userPendingYield = BigInt(0)
 
-                // Contract returns object, not array
-                if (memberInfoResult) {
-                  // Contract uses 'active' not 'isMember', and 'btcContributed' not 'contribution'
-                  isMember = (memberInfoResult as any).active ?? false
-                  userContribution = (memberInfoResult as any).btcContributed || BigInt(0)
-                  userShares = (memberInfoResult as any).shares || BigInt(0)
-                }
-
-                // Get pending yield if member
-                if (isMember) {
-                  const yieldResult = await readContract(config, {
+              if (address) {
+                try {
+                  const memberInfoResult = await readContract(config, {
                     address: poolAddress,
                     abi: POOL_ABI,
-                    functionName: 'calculateMemberYield',
+                    functionName: 'getMemberInfo',
                     args: [BigInt(poolId), address],
                   })
-                  userPendingYield = (yieldResult as bigint) || BigInt(0)
+
+                  // Contract returns object, not array
+                  if (memberInfoResult) {
+                    // Contract uses 'active' not 'isMember', and 'btcContributed' not 'contribution'
+                    isMember = (memberInfoResult as any).active ?? false
+                    userContribution = (memberInfoResult as any).btcContributed || BigInt(0)
+                    userShares = (memberInfoResult as any).shares || BigInt(0)
+                  }
+
+                  // Get pending yield if member
+                  if (isMember) {
+                    const yieldResult = await readContract(config, {
+                      address: poolAddress,
+                      abi: POOL_ABI,
+                      functionName: 'calculateMemberYield',
+                      args: [BigInt(poolId), address],
+                    })
+                    userPendingYield = BigInt(yieldResult as unknown as bigint || 0n)
+                  }
+                } catch (err) {
+                  // Member info not available, user not a member
                 }
-              } catch (err) {
-                // Member info not available, user not a member
               }
+
+              const pool: PoolWithMembership = {
+                ...poolInfo,
+                poolId,
+                isMember,
+                userContribution,
+                userShares,
+                userPendingYield,
+              }
+
+              return pool
+            } catch (err) {
+              // Pool fetch failed, skip this pool
+              return null
             }
+          })
 
-            const pool: PoolWithMembership = {
-              ...poolInfo,
-              poolId,
-              isMember,
-              userContribution,
-              userShares,
-              userPendingYield,
-            }
-
-            return pool
-          } catch (err) {
-            // Pool fetch failed, skip this pool
-            return null
-          }
-        })
-
-        const poolsResults = await Promise.all(poolPromises)
+          const batchResults = await Promise.all(batchPromises)
+          poolsResults.push(...batchResults)
+        }
         const pools = poolsResults.filter((p): p is PoolWithMembership => p !== null)
 
         // Calculate statistics
@@ -179,8 +189,8 @@ export function useAllCooperativePools() {
       }
     },
     enabled: isConnected,
-    staleTime: 30_000,
-    refetchInterval: 60_000,
+    staleTime: 60_000,        // 1 min - pool data doesn't change frequently
+    refetchInterval: 120_000, // 2 min - conservative to reduce RPC load
     retry: 2,
   })
 
@@ -262,6 +272,13 @@ export type FilterStatus = 'all' | 'accepting' | 'active' | 'closed'
 export function sortPools(pools: PoolWithMembership[], sortBy: SortBy): PoolWithMembership[] {
   const sorted = [...pools]
 
+  // Helper for safe BigInt comparison (avoids Number() precision loss)
+  const compareBigInt = (a: bigint, b: bigint): number => {
+    if (a > b) return 1
+    if (a < b) return -1
+    return 0
+  }
+
   switch (sortBy) {
     case 'newest':
       return sorted.sort((a, b) => b.createdAt - a.createdAt)
@@ -270,9 +287,11 @@ export function sortPools(pools: PoolWithMembership[], sortBy: SortBy): PoolWith
     case 'members':
       return sorted.sort((a, b) => b.currentMembers - a.currentMembers)
     case 'deposits':
-      return sorted.sort((a, b) => Number(b.totalBtcDeposited - a.totalBtcDeposited))
+      // Use BigInt comparison to avoid precision loss with large deposits
+      return sorted.sort((a, b) => compareBigInt(b.totalBtcDeposited, a.totalBtcDeposited))
     case 'yields':
-      return sorted.sort((a, b) => Number(b.totalYieldGenerated - a.totalYieldGenerated))
+      // Use BigInt comparison to avoid precision loss with large yields
+      return sorted.sort((a, b) => compareBigInt(b.totalYieldGenerated, a.totalYieldGenerated))
     default:
       return sorted
   }

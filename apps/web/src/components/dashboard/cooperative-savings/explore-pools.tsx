@@ -143,8 +143,8 @@ export function ExplorePools() {
                       </Badge>
                     </div>
                   </div>
-                  <Badge 
-                    variant={isOpen ? "default" : "destructive"} 
+                  <Badge
+                    variant={isOpen ? "default" : "error"} 
                     className={`text-xs ${
                       isOpen 
                         ? 'bg-green-600/20 text-green-400 border-green-600/30' 

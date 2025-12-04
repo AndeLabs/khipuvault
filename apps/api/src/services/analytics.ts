@@ -38,47 +38,38 @@ export class AnalyticsService {
   }
 
   async getActivityTimeline(days: number = 30) {
+    // Validate days parameter (max 365 days)
+    const safeDays = Math.min(Math.max(1, days), 365)
     const startDate = new Date()
-    startDate.setDate(startDate.getDate() - days)
+    startDate.setDate(startDate.getDate() - safeDays)
 
-    const deposits = await prisma.deposit.findMany({
-      where: {
-        timestamp: {
-          gte: startDate,
-        },
-      },
-      orderBy: { timestamp: 'asc' },
-    })
+    // OPTIMIZED: Use database aggregation instead of loading all records
+    // This scales efficiently regardless of transaction volume
+    const dailyStats = await prisma.$queryRaw<Array<{
+      date: string
+      deposits: bigint
+      withdrawals: bigint
+      deposit_volume: string
+      withdraw_volume: string
+    }>>`
+      SELECT
+        DATE(timestamp) as date,
+        COUNT(CASE WHEN type = 'DEPOSIT' THEN 1 END) as deposits,
+        COUNT(CASE WHEN type = 'WITHDRAW' THEN 1 END) as withdrawals,
+        COALESCE(SUM(CASE WHEN type = 'DEPOSIT' THEN CAST(amount AS DECIMAL(78,0)) ELSE 0 END), 0)::TEXT as deposit_volume,
+        COALESCE(SUM(CASE WHEN type = 'WITHDRAW' THEN CAST(amount AS DECIMAL(78,0)) ELSE 0 END), 0)::TEXT as withdraw_volume
+      FROM "Deposit"
+      WHERE timestamp >= ${startDate}
+        AND status = 'CONFIRMED'
+      GROUP BY DATE(timestamp)
+      ORDER BY DATE(timestamp) ASC
+    `
 
-    // Group by day
-    const timeline = new Map<string, { date: string; deposits: number; withdrawals: number; volume: bigint }>()
-
-    for (const deposit of deposits) {
-      const dateKey = deposit.timestamp.toISOString().split('T')[0]
-
-      if (!timeline.has(dateKey)) {
-        timeline.set(dateKey, {
-          date: dateKey,
-          deposits: 0,
-          withdrawals: 0,
-          volume: BigInt(0),
-        })
-      }
-
-      const day = timeline.get(dateKey)!
-
-      if (deposit.type === 'DEPOSIT') {
-        day.deposits++
-        day.volume += BigInt(deposit.amount)
-      } else if (deposit.type === 'WITHDRAW') {
-        day.withdrawals++
-        day.volume += BigInt(deposit.amount)
-      }
-    }
-
-    return Array.from(timeline.values()).map(day => ({
-      ...day,
-      volume: day.volume.toString(),
+    return dailyStats.map(day => ({
+      date: day.date,
+      deposits: Number(day.deposits),
+      withdrawals: Number(day.withdrawals),
+      volume: (BigInt(day.deposit_volume) + BigInt(day.withdraw_volume)).toString(),
     }))
   }
 
@@ -99,6 +90,10 @@ export class AnalyticsService {
   }
 
   async getTopUsers(limit: number = 10) {
+    // Defense in depth: validate limit even though routes already validate
+    // This prevents issues if service is called from other contexts
+    const safeLimit = Math.min(Math.max(1, Math.floor(limit)), 100)
+
     // OPTIMIZED: Use raw SQL aggregation instead of loading all users into memory
     // This scales from O(n*m) to O(n) where n=users, m=deposits per user
 
@@ -124,7 +119,7 @@ export class AnalyticsService {
         COALESCE(SUM(CASE WHEN d.type = 'DEPOSIT' THEN CAST(d.amount AS DECIMAL(78,0)) ELSE 0 END), 0) -
         COALESCE(SUM(CASE WHEN d.type = 'WITHDRAW' THEN CAST(d.amount AS DECIMAL(78,0)) ELSE 0 END), 0)
       ) DESC
-      LIMIT ${limit}
+      LIMIT ${safeLimit}
     `
 
     return topUsers.map(u => ({

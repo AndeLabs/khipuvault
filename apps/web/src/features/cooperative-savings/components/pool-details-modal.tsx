@@ -46,14 +46,14 @@ import {
   ExternalLink,
   Shield,
 } from 'lucide-react'
-import { usePoolInfo, usePoolMembers, useMemberInfo, useMemberYield } from '@/hooks/web3/use-cooperative-pool-v3'
+import { usePoolInfo, usePoolMembers, useMemberInfo, useMemberYield } from '@/hooks/web3/use-cooperative-pool'
 import {
   formatBTCCompact,
   formatMUSD,
   getPoolStatusBadge,
   formatDate,
   formatPercentage,
-} from '@/hooks/web3/use-cooperative-pool-v3'
+} from '@/hooks/web3/use-cooperative-pool'
 import { useToast } from '@/hooks/use-toast'
 import { SkeletonCard } from '@/components/ui/skeleton'
 
@@ -145,6 +145,7 @@ export function PoolDetailsModal({
                     size="sm"
                     className="h-6 w-6 p-0"
                     onClick={() => copyAddress(poolInfo.creator)}
+                    aria-label="Copy creator address"
                   >
                     <Copy className="h-3 w-3" />
                   </Button>
@@ -334,7 +335,7 @@ export function PoolDetailsModal({
                       </div>
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Accepting New Members</span>
-                        <Badge variant={poolInfo.allowNewMembers ? 'success' : 'destructive'}>
+                        <Badge variant={poolInfo.allowNewMembers ? 'success' : 'error'}>
                           {poolInfo.allowNewMembers ? 'Yes' : 'No'}
                         </Badge>
                       </div>
@@ -388,6 +389,7 @@ export function PoolDetailsModal({
                                       size="sm"
                                       className="h-6 w-6 p-0"
                                       onClick={() => copyAddress(member.address)}
+                                      aria-label="Copy member address"
                                     >
                                       <Copy className="h-3 w-3" />
                                     </Button>

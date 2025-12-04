@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import mongoSanitize from 'express-mongo-sanitize'
+import DOMPurify from 'isomorphic-dompurify'
+import { logger } from '../lib/logger'
 
 /**
  * MongoDB query sanitization middleware
@@ -8,7 +10,16 @@ import mongoSanitize from 'express-mongo-sanitize'
 export const sanitizeMongoQueries = mongoSanitize({
   replaceWith: '_',
   onSanitize: ({ req, key }) => {
-    console.warn('⚠️  Sanitized potentially malicious input:', { path: req.path, key })
+    logger.warn({
+      security: {
+        type: 'nosql_injection_attempt',
+        sanitizedKey: key,
+        path: req.path,
+        method: req.method,
+        ip: req.ip,
+        requestId: req.headers['x-request-id'],
+      },
+    }, 'Sanitized potentially malicious NoSQL query input')
   },
 })
 
@@ -98,17 +109,20 @@ export function validateEthAddress(param: string = 'address') {
 }
 
 /**
- * XSS protection middleware
- * Sanitizes user inputs to prevent XSS attacks
+ * XSS protection middleware using DOMPurify
+ * Sanitizes user inputs to prevent XSS attacks with industry-standard library
+ * @see https://github.com/cure53/DOMPurify
  */
 export function xssProtection(req: Request, res: Response, next: NextFunction) {
-  const sanitize = (obj: any): any => {
+  const sanitize = (obj: unknown): unknown => {
     if (typeof obj === 'string') {
-      // Remove dangerous characters and tags
-      return obj
-        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
-        .replace(/javascript:/gi, '')
-        .replace(/on\w+\s*=/gi, '')
+      // Use DOMPurify for robust XSS sanitization
+      // Strip all HTML tags for API inputs (we only want plain text)
+      return DOMPurify.sanitize(obj, {
+        ALLOWED_TAGS: [], // No HTML tags allowed
+        ALLOWED_ATTR: [], // No attributes allowed
+        KEEP_CONTENT: true, // Keep text content
+      })
     }
 
     if (Array.isArray(obj)) {
@@ -116,9 +130,11 @@ export function xssProtection(req: Request, res: Response, next: NextFunction) {
     }
 
     if (typeof obj === 'object' && obj !== null) {
-      const sanitized: any = {}
+      const sanitized: Record<string, unknown> = {}
       for (const key in obj) {
-        sanitized[key] = sanitize(obj[key])
+        if (Object.prototype.hasOwnProperty.call(obj, key)) {
+          sanitized[key] = sanitize((obj as Record<string, unknown>)[key])
+        }
       }
       return sanitized
     }
@@ -131,11 +147,11 @@ export function xssProtection(req: Request, res: Response, next: NextFunction) {
   }
 
   if (req.query) {
-    req.query = sanitize(req.query)
+    req.query = sanitize(req.query) as typeof req.query
   }
 
   if (req.params) {
-    req.params = sanitize(req.params)
+    req.params = sanitize(req.params) as typeof req.params
   }
 
   next()

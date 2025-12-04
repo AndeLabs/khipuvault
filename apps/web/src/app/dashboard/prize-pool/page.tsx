@@ -124,11 +124,7 @@ export default function PrizePoolPage() {
         title: 'Prize Claimed!',
         description: 'Your prize has been transferred to your wallet',
       })
-
-      // Refetch data
-      setTimeout(() => {
-        queryClient.refetchQueries({ type: 'active' })
-      }, 3000)
+      // Refetch is handled by useLotteryPoolEvents hook and useEffect below
     } catch (error) {
       console.error('Claim error:', error)
       toast({
@@ -149,11 +145,7 @@ export default function PrizePoolPage() {
         title: 'Capital Withdrawn!',
         description: 'Your capital has been returned to your wallet',
       })
-
-      // Refetch data
-      setTimeout(() => {
-        queryClient.refetchQueries({ type: 'active' })
-      }, 3000)
+      // Refetch is handled by useLotteryPoolEvents hook and useEffect below
     } catch (error) {
       console.error('Withdraw error:', error)
       toast({
@@ -223,12 +215,13 @@ export default function PrizePoolPage() {
       <PageHeader
         title="Prize Pool"
         description="Join the no-loss lottery powered by Mezo's yield generation"
-      >
-        <Button variant="outline" size="sm" onClick={handleRefresh}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
-        </Button>
-      </PageHeader>
+        actions={
+          <Button variant="outline" size="sm" onClick={handleRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Refresh
+          </Button>
+        }
+      />
 
       {/* Winner/Claim Alert */}
       {canClaim && isWinner && !hasClaimedOrWithdrawn && (
@@ -272,8 +265,8 @@ export default function PrizePoolPage() {
       {/* Active Lottery Hero */}
       <PageSection>
         <ActiveLotteryHero
-          roundInfo={currentRound}
-          userTicketCount={ticketCount}
+          roundInfo={currentRound ?? null}
+          userTicketCount={ticketCount ?? undefined}
           isLoading={isLoadingRound}
           onBuyTickets={() => setIsBuyModalOpen(true)}
         />
@@ -281,7 +274,7 @@ export default function PrizePoolPage() {
 
       {/* Statistics Cards */}
       <PageSection>
-        <LotteryStats roundInfo={currentRound} isLoading={isLoadingRound} />
+        <LotteryStats roundInfo={currentRound ?? null} isLoading={isLoadingRound} />
       </PageSection>
 
       {/* Main Content - Tabs */}
@@ -310,14 +303,14 @@ export default function PrizePoolPage() {
           <TabsContent value="overview" className="mt-6 space-y-8">
             <div className="grid gap-8 lg:grid-cols-2">
               <YourTickets
-                ticketCount={ticketCount}
-                investment={investment}
-                probability={probability}
+                ticketCount={ticketCount ?? undefined}
+                investment={investment ?? undefined}
+                probability={probability ?? undefined}
                 isWinner={isWinner}
                 isLoading={isLoadingTickets || isLoadingInvestment || isLoadingProbability}
               />
 
-              <ProbabilityCalculator roundInfo={currentRound} />
+              <ProbabilityCalculator roundInfo={currentRound ?? null} />
             </div>
 
             {/* User Stats */}
@@ -355,14 +348,14 @@ export default function PrizePoolPage() {
           <TabsContent value="tickets" className="mt-6">
             <div className="grid gap-8 lg:grid-cols-2">
               <YourTickets
-                ticketCount={ticketCount}
-                investment={investment}
-                probability={probability}
+                ticketCount={ticketCount ?? undefined}
+                investment={investment ?? undefined}
+                probability={probability ?? undefined}
                 isWinner={isWinner}
                 isLoading={isLoadingTickets || isLoadingInvestment || isLoadingProbability}
               />
 
-              <ProbabilityCalculator roundInfo={currentRound} />
+              <ProbabilityCalculator roundInfo={currentRound ?? null} />
             </div>
           </TabsContent>
 
@@ -386,8 +379,8 @@ export default function PrizePoolPage() {
       <BuyTicketsModal
         open={isBuyModalOpen}
         onOpenChange={setIsBuyModalOpen}
-        roundInfo={currentRound}
-        currentUserTickets={ticketCount}
+        roundInfo={currentRound ?? null}
+        currentUserTickets={ticketCount ?? undefined}
       />
     </div>
   )
