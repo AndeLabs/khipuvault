@@ -1,28 +1,12 @@
 {
   "name": "@khipu/web3",
   "version": "1.0.0",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "main": "./dist/index.mjs",
+  "types": "./dist/index.d.mts",
   "exports": {
     ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
-    },
-    "./abis": {
-      "types": "./dist/abis/index.d.ts",
-      "import": "./dist/abis/index.js"
-    },
-    "./addresses": {
-      "types": "./dist/addresses/index.d.ts",
-      "import": "./dist/addresses/index.js"
-    },
-    "./hooks": {
-      "types": "./dist/hooks/index.d.ts",
-      "import": "./dist/hooks/index.js"
-    },
-    "./client": {
-      "types": "./dist/client/index.d.ts",
-      "import": "./dist/client/index.js"
+      "types": "./dist/index.d.mts",
+      "import": "./dist/index.mjs"
     }
   },
   "scripts": {
@@ -32,7 +16,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@khipu/shared": "workspace:*",
     "viem": "^2.21.52",
     "wagmi": "^2.13.8"
   },

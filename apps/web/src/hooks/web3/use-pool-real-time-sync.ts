@@ -46,7 +46,7 @@ export function usePoolRealTimeSync() {
   // Set to true to enable automatic polling
   const { data: blockNumber, isLoading } = useBlockNumber({
     watch: {
-      pollingInterval: 4000, // Poll every 4 seconds (faster updates)
+      pollingInterval: 12000, // Poll every 12 seconds (balanced updates vs RPC load)
     },
   })
 
@@ -59,7 +59,7 @@ export function usePoolRealTimeSync() {
 
     // Refetch all active pool queries
     queryClient.refetchQueries({
-      queryKey: ['individual-pool'],
+      queryKey: ['individual-pool-v3'],
       type: 'active',
     })
 

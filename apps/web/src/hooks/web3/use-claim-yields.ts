@@ -11,8 +11,9 @@ import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
 import { type Address } from 'viem'
+import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 
-const POOL_ADDRESS = '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as Address
+const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address
 
 const POOL_ABI = [
   {
@@ -64,11 +65,12 @@ export function useClaimYields() {
     if (isSuccess && state === 'processing') {
       console.log('✅ Yields claimed successfully!')
       console.log('📝 Transaction hash:', receipt?.transactionHash)
-      
-      // Refetch user info to update yields
-      queryClient.invalidateQueries({ queryKey: ['pool-simple'] })
-      queryClient.refetchQueries({ type: 'active' })
-      
+
+      // Immediately invalidate pool queries to update UI
+      // The usePoolEvents hook also listens for YieldClaimed events
+      queryClient.invalidateQueries({ queryKey: ['individual-pool-v3'] })
+      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+
       setState('success')
     }
   }, [isSuccess, state, queryClient, receipt])

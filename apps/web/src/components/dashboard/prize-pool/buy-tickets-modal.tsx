@@ -17,6 +17,7 @@ import { Label } from "@/components/ui/label";
 import { Minus, Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useCurrentRound, useBuyTickets, formatBTC } from "@/hooks/web3/use-lottery-pool";
+import { useBTCPrice } from "@/hooks/use-btc-price";
 import { useToast } from "@/hooks/use-toast";
 
 export function BuyTicketsModal({ children }: { children: React.ReactNode }) {
@@ -31,6 +32,7 @@ export function BuyTicketsModal({ children }: { children: React.ReactNode }) {
 
   const { currentRoundId, roundInfo } = useCurrentRound();
   const { buyTickets, isPending } = useBuyTickets();
+  const { price: btcPrice } = useBTCPrice();
   const { toast } = useToast();
 
   const allConfirmed = Object.values(confirmations).every(Boolean);
@@ -46,7 +48,6 @@ export function BuyTicketsModal({ children }: { children: React.ReactNode }) {
   const discountRate = ticketCount >= 20 ? 0.15 : ticketCount >= 10 ? 0.1 : ticketCount >= 5 ? 0.05 : 0;
   const discountAmount = subtotal * discountRate;
   const total = subtotal - discountAmount;
-  const btcPrice = 60000; // TODO: Get from price oracle
 
   const handleBuyTickets = async () => {
     try {
@@ -97,16 +98,16 @@ export function BuyTicketsModal({ children }: { children: React.ReactNode }) {
                  <div className="space-y-2">
                     <Label htmlFor="ticket-count">Cantidad de tickets</Label>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="icon" onClick={() => setTicketCount(p => Math.max(1, p - 1))} disabled={isPending}><Minus/></Button>
-                        <Input 
-                          id="ticket-count" 
-                          type="number" 
-                          value={ticketCount} 
-                          onChange={e => setTicketCount(Math.max(1, parseInt(e.target.value) || 1))} 
+                        <Button variant="outline" size="icon" onClick={() => setTicketCount(p => Math.max(1, p - 1))} disabled={isPending} aria-label="Decrease ticket count"><Minus/></Button>
+                        <Input
+                          id="ticket-count"
+                          type="number"
+                          value={ticketCount}
+                          onChange={e => setTicketCount(Math.max(1, parseInt(e.target.value) || 1))}
                           className="text-center font-bold text-lg"
                           disabled={isPending}
                         />
-                        <Button variant="outline" size="icon" onClick={() => setTicketCount(p => Math.min(50, p + 1))} disabled={isPending}><Plus/></Button>
+                        <Button variant="outline" size="icon" onClick={() => setTicketCount(p => Math.min(50, p + 1))} disabled={isPending} aria-label="Increase ticket count"><Plus/></Button>
                     </div>
                      <div className="flex justify-center gap-2 pt-2">
                         {[1, 5, 10, 25].map(q => 

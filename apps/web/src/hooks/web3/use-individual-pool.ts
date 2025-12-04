@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { readContract } from 'wagmi/actions'
 import { useState, useEffect } from 'react'
 import { MEZO_TESTNET_ADDRESSES, INDIVIDUAL_POOL_ABI, ERC20_ABI } from '@/lib/web3/contracts'
+import { ZERO_ADDRESS } from '@/contracts/addresses'
 
 /**
  * Production hook for Individual Pool data on Mezo Testnet
@@ -28,9 +29,10 @@ export function useIndividualPool() {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
         functionName: 'totalMusdDeposited',
+        args: [],
       })
     },
-    enabled: isConnected && poolAddress !== '0x0000000000000000000000000000000000000000',
+    enabled: isConnected && poolAddress !== ZERO_ADDRESS,
     staleTime: 10 * 1000, // 10 seconds
   })
 
@@ -41,87 +43,52 @@ export function useIndividualPool() {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
         functionName: 'totalYieldsGenerated',
+        args: [],
       })
     },
-    enabled: isConnected && poolAddress !== '0x0000000000000000000000000000000000000000',
+    enabled: isConnected && poolAddress !== ZERO_ADDRESS,
     staleTime: 10 * 1000,
   })
 
   // Read user's specific deposit - MIGRATED TO TANSTACK QUERY
-  const { 
-    data: userDepositData, 
+  const {
+    data: userDepositData,
     isLoading: loadingUserDeposit,
-    dataUpdatedAt: userDepositUpdatedAt,
-    isRefetching: userDepositRefetching,
   } = useQuery({
     queryKey: ['individual-pool', 'user-deposit', address || 'none'],
     queryFn: async () => {
-      console.log('🔍 [QUERY] Fetching user deposit for:', address)
       if (!address) return null
-      const result = await readContract(config, {
+      return await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
         functionName: 'userDeposits',
         args: [address],
       })
-      console.log('📊 [QUERY] User deposit result:', {
-        musdAmount: result ? (result as any)[0].toString() : 'null',
-        yieldAccrued: result ? (result as any)[1].toString() : 'null',
-        timestamp: new Date().toISOString(),
-      })
-      return result
     },
-    enabled: isConnected && !!address && poolAddress !== '0x0000000000000000000000000000000000000000',
+    enabled: isConnected && !!address && poolAddress !== ZERO_ADDRESS,
     staleTime: 10 * 1000,
   })
 
-  // Debug logging for user deposit updates
-  useEffect(() => {
-    if (userDepositData) {
-      console.log('🔄 [UPDATE] User deposit data changed:', {
-        musdAmount: (userDepositData as any)[0]?.toString(),
-        yieldAccrued: (userDepositData as any)[1]?.toString(),
-        dataUpdatedAt: new Date(userDepositUpdatedAt).toISOString(),
-        isRefetching: userDepositRefetching,
-      })
-    }
-  }, [userDepositUpdatedAt, userDepositData, userDepositRefetching])
 
   // Get user's MUSD balance - MIGRATED TO TANSTACK QUERY
-  const { 
-    data: musdBalanceData, 
+  const {
+    data: musdBalanceData,
     isLoading: loadingMusdBalance,
-    dataUpdatedAt: musdBalanceUpdatedAt,
   } = useQuery({
     queryKey: ['individual-pool', 'musd-balance', address || 'none'],
     queryFn: async () => {
-      console.log('🔍 [QUERY] Fetching MUSD balance for:', address)
       if (!address) return null
-      const result = await readContract(config, {
+      return await readContract(config, {
         address: musdAddress,
         abi: ERC20_ABI,
         functionName: 'balanceOf',
         args: [address],
       })
-      console.log('💰 [QUERY] MUSD balance result:', {
-        balance: result?.toString(),
-        timestamp: new Date().toISOString(),
-      })
-      return result
     },
-    enabled: isConnected && !!address && musdAddress !== '0x0000000000000000000000000000000000000000',
+    enabled: isConnected && !!address && musdAddress !== ZERO_ADDRESS,
     staleTime: 10 * 1000,
   })
 
-  // Debug logging for MUSD balance updates
-  useEffect(() => {
-    if (musdBalanceData !== undefined) {
-      console.log('🔄 [UPDATE] MUSD balance changed:', {
-        balance: musdBalanceData?.toString(),
-        dataUpdatedAt: new Date(musdBalanceUpdatedAt).toISOString(),
-      })
-    }
-  }, [musdBalanceUpdatedAt, musdBalanceData])
 
   // Get performance fee - MIGRATED TO TANSTACK QUERY
   const { data: performanceFeeData, isLoading: loadingPerformanceFee } = useQuery({
@@ -131,9 +98,10 @@ export function useIndividualPool() {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
         functionName: 'performanceFee',
+        args: [],
       })
     },
-    enabled: isConnected && poolAddress !== '0x0000000000000000000000000000000000000000',
+    enabled: isConnected && poolAddress !== ZERO_ADDRESS,
     staleTime: 60 * 1000, // 60 seconds - performance fee rarely changes
   })
 
@@ -157,8 +125,8 @@ export function useIndividualPool() {
 
   // Format pool stats
   const poolStats = {
-    totalMusdDeposited: (totalMusdDepositedData as bigint) || BigInt(0),
-    totalYields: (totalYieldsData as bigint) || BigInt(0),
+    totalMusdDeposited: BigInt(totalMusdDepositedData as unknown as bigint || 0n),
+    totalYields: BigInt(totalYieldsData as unknown as bigint || 0n),
     poolAPR: 6.2, // MUSD protocol APR on Mezo
     memberCount: 0, // Would need separate counter
     isRecoveryMode: false,
@@ -178,48 +146,28 @@ export function useIndividualPool() {
 
   // Format wallet balances (MUSD only for deposits)
   const walletBalances = {
-    musdBalance: (musdBalanceData as bigint) || BigInt(0),
+    musdBalance: BigInt(musdBalanceData as unknown as bigint || 0n),
   }
 
   // Performance fee (in basis points, 100 = 1%)
-  const performanceFee = Number(performanceFeeData as bigint) || 100
+  const performanceFee = Number(performanceFeeData as unknown as bigint || 0n) || 100
 
-  // Debug tools for troubleshooting
+  // Debug tools for troubleshooting (no-op in production)
   const debugTools = {
-    manualRefetch: () => {
-      console.log('🔧 [DEBUG] Manual refetch triggered')
-      return queryClient.refetchQueries({ queryKey: ['individual-pool'] })
-    },
-    invalidateAll: () => {
-      console.log('🔧 [DEBUG] Manual invalidate triggered')
-      return queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
-    },
-    getQueryState: () => {
-      const allQueries = queryClient.getQueryCache().findAll({ queryKey: ['individual-pool'] })
-      console.log('🔧 [DEBUG] Query state:', {
-        totalQueries: allQueries.length,
-        queries: allQueries.map(q => ({
-          key: q.queryKey,
-          state: q.state.status,
-          dataUpdatedAt: new Date(q.state.dataUpdatedAt).toISOString(),
-          isFetching: q.state.isFetching,
-        }))
-      })
-      return allQueries
-    },
-    logCurrentData: () => {
-      console.log('🔧 [DEBUG] Current data snapshot:', {
-        userDeposit: {
-          musdAmount: userDeposit?.musdAmount.toString(),
-          yieldAccrued: userDeposit?.yieldAccrued.toString(),
-        },
-        musdBalance: walletBalances.musdBalance.toString(),
-        poolStats: {
-          totalMusdDeposited: poolStats.totalMusdDeposited.toString(),
-          totalYields: poolStats.totalYields.toString(),
-        }
-      })
-    }
+    manualRefetch: () => queryClient.refetchQueries({ queryKey: ['individual-pool'] }),
+    invalidateAll: () => queryClient.invalidateQueries({ queryKey: ['individual-pool'] }),
+    getQueryState: () => queryClient.getQueryCache().findAll({ queryKey: ['individual-pool'] }),
+    getCurrentData: () => ({
+      userDeposit: userDeposit ? {
+        musdAmount: userDeposit.musdAmount.toString(),
+        yieldAccrued: userDeposit.yieldAccrued.toString(),
+      } : null,
+      musdBalance: walletBalances.musdBalance.toString(),
+      poolStats: {
+        totalMusdDeposited: poolStats.totalMusdDeposited.toString(),
+        totalYields: poolStats.totalYields.toString(),
+      }
+    }),
   }
 
   return {
@@ -231,8 +179,8 @@ export function useIndividualPool() {
     isConnected,
     address,
     contractsConfigured: {
-      pool: poolAddress !== '0x0000000000000000000000000000000000000000',
-      musd: musdAddress !== '0x0000000000000000000000000000000000000000',
+      pool: poolAddress !== ZERO_ADDRESS,
+      musd: musdAddress !== ZERO_ADDRESS,
     },
     _debug: debugTools, // Debug tools (prefix with _ to indicate internal use)
   }
@@ -288,8 +236,9 @@ export function formatMUSDDisplay(value: bigint | undefined): string {
 
 /**
  * Calculate USD value (rough estimate)
+ * Note: For real-time prices, use useBTCPrice hook instead
  */
-export function calculateUSD(btcAmount: bigint, btcPrice: number = 60000): string {
+export function calculateUSD(btcAmount: bigint, btcPrice: number = 95000): string {
   const btc = Number(btcAmount) / 1e18
   const usd = btc * btcPrice
   return usd.toLocaleString('en-US', {

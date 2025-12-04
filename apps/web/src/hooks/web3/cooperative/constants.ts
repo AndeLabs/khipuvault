@@ -70,23 +70,24 @@ export const QUERY_KEYS = {
     ['cooperative-pool-v3', 'member-yield', poolId, address] as const,
 } as const
 
-// OPTIMIZED: Increased stale times to reduce RPC load
-// Previous values were too aggressive (5-10s) causing excessive RPC calls
+// PRODUCTION OPTIMIZED: Conservative stale times to minimize RPC load
+// Goal: Reduce RPC calls by 60-70% while maintaining acceptable UX
+// With 100 users viewing 10 pools each, aggressive intervals cause 1000+ RPC calls/minute
 export const STALE_TIMES = {
-  POOL_COUNTER: 60_000,     // 1 min (was 30s) - counter rarely changes
-  PERFORMANCE_FEE: 300_000, // 5 min (was 60s) - config rarely changes
-  EMERGENCY_MODE: 60_000,   // 1 min (was 30s) - check less frequently
-  POOL_INFO: 30_000,        // 30s (was 10s) - pool info doesn't change often
-  MEMBER_INFO: 30_000,      // 30s (was 10s) - member info doesn't change often
-  POOL_MEMBERS: 60_000,     // 1 min (was 30s) - member list rarely changes
-  MEMBER_YIELD: 30_000,     // 30s (was 5s) - yield accrues slowly
+  POOL_COUNTER: 120_000,    // 2 min - counter only changes when pools created (rare)
+  PERFORMANCE_FEE: 600_000, // 10 min - admin config, almost never changes
+  EMERGENCY_MODE: 120_000,  // 2 min - check less frequently, alert system handles emergencies
+  POOL_INFO: 60_000,        // 1 min - pool info rarely changes during session
+  MEMBER_INFO: 60_000,      // 1 min - member info rarely changes
+  POOL_MEMBERS: 120_000,    // 2 min - member list changes slowly
+  MEMBER_YIELD: 120_000,    // 2 min - yield accrues slowly, expensive RPC call
 } as const
 
-// OPTIMIZED: Increased refetch intervals to reduce RPC load
-// With 10 users viewing 5 pools each, previous values caused 100+ RPC calls/minute
+// PRODUCTION OPTIMIZED: Conservative refetch intervals
+// These control automatic background refreshes - users can always manually refresh
 export const REFETCH_INTERVALS = {
-  POOL_INFO: 60_000,        // 1 min (was 30s)
-  MEMBER_INFO: 60_000,      // 1 min (was 30s)
-  POOL_MEMBERS: 120_000,    // 2 min (was 60s)
-  MEMBER_YIELD: 60_000,     // 1 min (was 15s) - yield calc is expensive
+  POOL_INFO: 120_000,       // 2 min - pool state changes slowly
+  MEMBER_INFO: 120_000,     // 2 min - member state rarely changes
+  POOL_MEMBERS: 300_000,    // 5 min - member list rarely changes
+  MEMBER_YIELD: 300_000,    // 5 min - yield calculation is expensive, accrues slowly
 } as const

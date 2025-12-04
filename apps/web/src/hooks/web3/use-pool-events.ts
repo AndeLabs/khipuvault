@@ -6,7 +6,7 @@ import { MEZO_V3_ADDRESSES } from '@/lib/web3/contracts-v3'
 import { useAccount } from 'wagmi'
 import IndividualPoolV3ABI from '@/contracts/abis/IndividualPoolV3.json'
 
-const POOL_ABI = (IndividualPoolV3ABI as any).abi as const
+const POOL_ABI = (IndividualPoolV3ABI as any).abi
 
 /**
  * Hook to watch for IndividualPoolV3 contract events and auto-refetch queries
@@ -27,25 +27,30 @@ export function usePoolEvents() {
     eventName: 'Deposited',
     onLogs(logs) {
       console.log('🔔 [V3] Deposited event detected:', logs)
-      // Refetch ALL active queries immediately (best practice for real-time updates)
-      queryClient.refetchQueries({ 
-        type: 'active',
-        refetchType: 'all' 
-      })
+      // Only refetch individual pool queries to reduce RPC load
+      queryClient.refetchQueries({ queryKey: ['individual-pool-v3'] })
     },
   })
 
-  // Watch for Withdrawn events
+  // Watch for PartialWithdrawn events (V3: renamed from Withdrawn)
   useWatchContractEvent({
     address: poolAddress,
     abi: POOL_ABI,
-    eventName: 'Withdrawn',
+    eventName: 'PartialWithdrawn',
     onLogs(logs) {
-      console.log('🔔 [V3] Withdrawn event detected:', logs)
-      queryClient.refetchQueries({ 
-        type: 'active',
-        refetchType: 'all' 
-      })
+      console.log('🔔 [V3] PartialWithdrawn event detected:', logs)
+      queryClient.refetchQueries({ queryKey: ['individual-pool-v3'] })
+    },
+  })
+
+  // Watch for FullWithdrawal events (V3: new event for full withdrawals)
+  useWatchContractEvent({
+    address: poolAddress,
+    abi: POOL_ABI,
+    eventName: 'FullWithdrawal',
+    onLogs(logs) {
+      console.log('🔔 [V3] FullWithdrawal event detected:', logs)
+      queryClient.refetchQueries({ queryKey: ['individual-pool-v3'] })
     },
   })
 
@@ -56,24 +61,18 @@ export function usePoolEvents() {
     eventName: 'YieldClaimed',
     onLogs(logs) {
       console.log('🔔 [V3] YieldClaimed event detected:', logs)
-      queryClient.refetchQueries({ 
-        type: 'active',
-        refetchType: 'all' 
-      })
+      queryClient.refetchQueries({ queryKey: ['individual-pool-v3'] })
     },
   })
-  
-  // Watch for AutoCompound events (V3 feature)
+
+  // Watch for AutoCompound events (V3: AutoCompounded not YieldAutoCompounded)
   useWatchContractEvent({
     address: poolAddress,
     abi: POOL_ABI,
-    eventName: 'YieldAutoCompounded',
+    eventName: 'AutoCompounded',
     onLogs(logs) {
-      console.log('🔔 [V3] YieldAutoCompounded event detected:', logs)
-      queryClient.refetchQueries({ 
-        type: 'active',
-        refetchType: 'all' 
-      })
+      console.log('🔔 [V3] AutoCompounded event detected:', logs)
+      queryClient.refetchQueries({ queryKey: ['individual-pool-v3'] })
     },
   })
 }

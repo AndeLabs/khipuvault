@@ -6,7 +6,11 @@
  * Following viem Chain interface standards
  */
 
-import { Chain } from 'viem'
+import { defineChain } from 'viem'
+
+// Chain type is inferred from defineChain
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+type Chain = ReturnType<typeof defineChain>
 
 /**
  * Mezo Testnet Chain Configuration

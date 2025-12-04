@@ -1,0 +1,96 @@
+version: 2
+
+updates:
+  # Enable version updates for npm packages
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Lima"
+
+    # Allow up to 10 open pull requests for npm dependencies
+    open-pull-requests-limit: 10
+
+    # Group all minor and patch updates together
+    groups:
+      # Group all non-major development dependency updates
+      dev-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+        dependency-type: "development"
+
+      # Group all non-major production dependency updates
+      production-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+        dependency-type: "production"
+        exclude-patterns:
+          - "wagmi"
+          - "viem"
+          - "@wagmi/*"
+
+    # Ignore specific major version updates that require manual review
+    ignore:
+      # Ignore major updates for wagmi - requires careful migration
+      - dependency-name: "wagmi"
+        update-types: ["version-update:semver-major"]
+
+      # Ignore major updates for viem - requires careful migration
+      - dependency-name: "viem"
+        update-types: ["version-update:semver-major"]
+
+      # Ignore major updates for @wagmi/* packages
+      - dependency-name: "@wagmi/*"
+        update-types: ["version-update:semver-major"]
+
+    # Add labels to PRs
+    labels:
+      - "dependencies"
+      - "automated"
+
+    # Set commit message prefix
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+
+    # Set PR title prefix
+    pull-request-branch-name:
+      separator: "/"
+
+    # Assignees and reviewers (optional - uncomment and customize)
+    # assignees:
+    #   - "your-username"
+    # reviewers:
+    #   - "your-username"
+
+    # Allow Dependabot to rebase automatically
+    rebase-strategy: "auto"
+
+    # Enable version updates for GitHub Actions
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 5
+
+    labels:
+      - "dependencies"
+      - "github-actions"
+      - "automated"
+
+    commit-message:
+      prefix: "ci"
+      include: "scope"

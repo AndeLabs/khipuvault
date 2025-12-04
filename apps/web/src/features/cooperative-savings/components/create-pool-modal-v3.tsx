@@ -28,7 +28,7 @@ import { Slider } from '@/components/ui/slider'
 import { Card, CardContent } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Loader2, Users, Bitcoin, Shield, AlertTriangle } from 'lucide-react'
-import { useCooperativePoolV3 } from '@/hooks/web3/use-cooperative-pool-v3'
+import { useCooperativePool } from '@/hooks/web3/use-cooperative-pool'
 import { useToast } from '@/hooks/use-toast'
 import { parseEther } from 'viem'
 
@@ -40,7 +40,7 @@ interface CreatePoolModalV3Props {
 
 export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV3Props) {
   const { toast } = useToast()
-  const { createPool, state, error, reset } = useCooperativePoolV3()
+  const { createPool, state, error, reset } = useCooperativePool()
 
   const [poolName, setPoolName] = React.useState('')
   const [minContribution, setMinContribution] = React.useState('0.001')
@@ -96,6 +96,11 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
       await createPool(poolName.trim(), minContribution, maxContribution, maxMembers[0])
     } catch (err) {
       console.error('Create pool error:', err)
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: err instanceof Error ? err.message : 'Failed to create pool. Please try again.',
+      })
     }
   }
 
@@ -205,6 +210,7 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
               step={1}
               disabled={isProcessing}
               className="py-4"
+              aria-label="Maximum pool members"
             />
             <p className="text-xs text-muted-foreground">
               The maximum number of members who can join this pool

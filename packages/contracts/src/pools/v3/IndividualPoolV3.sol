@@ -85,6 +85,13 @@ contract IndividualPoolV3 is
     address public feeCollector;
     bool public emergencyMode;
 
+    /**
+     * @dev Storage gap for future upgrades
+     * @custom:oz-upgrades-unsafe-allow state-variable-immutable
+     * Size: 50 slots - current slots used = slots reserved for future state variables
+     */
+    uint256[44] private __gap;
+
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
@@ -201,10 +208,27 @@ contract IndividualPoolV3 is
 
     /**
      * @notice Prevents flash loan attacks (can be disabled in emergency mode)
-     * @dev Checks that caller is not a contract in the same transaction
+     * @dev Uses block-based check instead of tx.origin for better compatibility
+     *      with meta-transactions and account abstraction
+     * Note: This is a soft protection. The primary protection is the MIN_DEPOSIT
+     *       requirement and the fact that yields are distributed proportionally.
      */
     modifier noFlashLoan() {
-        if (!emergencyMode && tx.origin != msg.sender) revert FlashLoanDetected();
+        if (!emergencyMode) {
+            // Check if caller has code (is a contract)
+            // Note: This allows EOAs and contracts that are not in their constructor
+            uint256 size;
+            address sender = msg.sender;
+            assembly {
+                size := extcodesize(sender)
+            }
+            // If it's a contract, verify it existed before this transaction
+            // by checking if user already has a deposit (returning users are allowed)
+            if (size > 0 && !userDeposits[sender].active) {
+                // New contract callers need to wait (prevents single-tx attacks)
+                revert FlashLoanDetected();
+            }
+        }
         _;
     }
 

@@ -110,7 +110,7 @@ export function PoolStatistics({
           </div>
 
           {emergencyMode ? (
-            <Badge variant="destructive" className="gap-1.5">
+            <Badge variant="error" className="gap-1.5">
               <Activity className="h-3 w-3" />
               Emergency Mode
             </Badge>

@@ -7,15 +7,62 @@
  * Configured for Mezo Testnet with Bitcoin native currency
  *
  * SSR-Compatible Configuration:
- * - Uses cookieStorage for SSR/hydration (official Wagmi pattern)
- * - No localStorage polyfills needed
- * - Proper cookie-based state persistence
+ * - Uses custom localStorage wrapper with SSR fallback
+ * - Proper wallet state persistence across page reloads
+ * - Graceful degradation when localStorage unavailable
  */
 
-import { createConfig, http, noopStorage } from 'wagmi'
+import { createConfig, http, createStorage } from 'wagmi'
 import { metaMask } from 'wagmi/connectors'
 import { mezoTestnet } from './chains'
 import { createPublicClient } from 'viem'
+
+/**
+ * SSR-safe localStorage wrapper
+ * Uses localStorage on client, no-op storage on server
+ */
+function createSsrSafeStorage() {
+  // Check if we're on the server
+  const isServer = typeof window === 'undefined'
+
+  if (isServer) {
+    // Return no-op storage for SSR
+    return createStorage({
+      storage: {
+        getItem: () => null,
+        setItem: () => {},
+        removeItem: () => {},
+      },
+    })
+  }
+
+  // On client, use localStorage with try-catch for safety
+  return createStorage({
+    storage: {
+      getItem: (key: string) => {
+        try {
+          return window.localStorage.getItem(key)
+        } catch {
+          return null
+        }
+      },
+      setItem: (key: string, value: string) => {
+        try {
+          window.localStorage.setItem(key, value)
+        } catch {
+          // Silently fail if localStorage is full or blocked
+        }
+      },
+      removeItem: (key: string) => {
+        try {
+          window.localStorage.removeItem(key)
+        } catch {
+          // Silently fail
+        }
+      },
+    },
+  })
+}
 
 
 
@@ -55,13 +102,13 @@ declare global {
 
 /**
  * Get Wagmi config with SSR compatibility
- * Uses noopStorage to avoid localStorage issues during SSR
+ * Uses localStorage for wallet persistence with SSR-safe fallback
  *
  * SSR-Safe Pattern:
- * - noopStorage doesn't persist state (avoids localStorage completely)
+ * - Uses SSR-safe storage wrapper (no-op on server, localStorage on client)
  * - ssr: true enables Server-Side Rendering
- * - MUST only be called on client-side (in Client Components)
- * - Wallet will need to be reconnected on each page load (acceptable trade-off for SSR)
+ * - Wallet connection persists across page reloads on client
+ * - Reconnects automatically when available
  */
 export function getWagmiConfig() {
   return createConfig({
@@ -86,8 +133,8 @@ export function getWagmiConfig() {
     },
     // Enable SSR support
     ssr: true,
-    // Use noopStorage to completely avoid localStorage
-    storage: noopStorage,
+    // Use SSR-safe localStorage wrapper for wallet persistence
+    storage: createSsrSafeStorage(),
     pollingInterval: 4_000, // poll every 4 seconds
   })
 }

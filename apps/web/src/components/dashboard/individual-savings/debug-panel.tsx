@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { useAccount, useChainId, useBalance } from 'wagmi'
 import { useIndividualPoolV3 } from '@/hooks/web3/use-individual-pool-v3'
-import { useMusdApprovalV2 } from '@/hooks/web3/use-musd-approval-v2'
+import { useMusdApproval } from '@/hooks/web3/use-musd-approval'
 import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 import { RefreshCw } from 'lucide-react'
 
@@ -23,7 +23,7 @@ export function DebugPanel() {
     musdBalance,
     balanceFormatted,
     allowance,
-  } = useMusdApprovalV2()
+  } = useMusdApproval()
 
   const handleRefresh = () => {
     window.location.reload()
@@ -62,7 +62,7 @@ export function DebugPanel() {
         </div>
 
         <div>
-          <p className="text-muted-foreground mb-1">MUSD Balance (from useMusdApprovalV2):</p>
+          <p className="text-muted-foreground mb-1">MUSD Balance (from useMusdApproval):</p>
           <p className="text-white">Raw Wei: {musdBalance?.toString() || '0'}</p>
           <p className="text-white">Formatted: {balanceFormatted} MUSD</p>
           <p className="text-white">Allowance: {allowance?.toString() || '0'} wei</p>

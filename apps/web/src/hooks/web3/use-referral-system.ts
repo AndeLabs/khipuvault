@@ -15,9 +15,10 @@ import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
 import { parseEther, type Address } from 'viem'
+import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 
-const POOL_ADDRESS = '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as Address
-const MUSD_ADDRESS = '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503' as Address
+const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address
+const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as Address
 
 const POOL_ABI = [
   {
@@ -172,9 +173,7 @@ export function useReferralSystem() {
   useEffect(() => {
     if (isClaimSuccess && state === 'processing') {
       // Invalidate specific queries instead of all
-      queryClient.invalidateQueries({ queryKey: ['referral-stats'] })
-      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
-      queryClient.invalidateQueries({ queryKey: ['user-deposit'] })
+      queryClient.invalidateQueries({ queryKey: ['individual-pool-v3'] })
       refetchStats()
 
       setState('success')

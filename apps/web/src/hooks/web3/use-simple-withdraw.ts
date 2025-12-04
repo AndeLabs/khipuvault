@@ -9,12 +9,14 @@ import { useState, useEffect } from 'react'
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useQueryClient } from '@tanstack/react-query'
 import { parseEther, type Address } from 'viem'
+import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
 
-const POOL_ADDRESS = '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as Address
+const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address
 
+// V3 contract function names - must match actual contract ABI
 const POOL_ABI = [
   {
-    name: 'withdraw',
+    name: 'fullWithdraw',
     type: 'function',
     stateMutability: 'nonpayable',
     inputs: [],
@@ -24,7 +26,7 @@ const POOL_ABI = [
     ]
   },
   {
-    name: 'withdrawPartial',
+    name: 'partialWithdraw',
     type: 'function',
     stateMutability: 'nonpayable',
     inputs: [{ name: 'musdAmount', type: 'uint256' }],
@@ -71,10 +73,15 @@ export function useSimpleWithdraw() {
 
   useEffect(() => {
     if (isWithdrawSuccess && state === 'processing') {
-      // Invalidate specific queries to update UI (not all queries)
+      // Invalidate all pool-related queries to update UI
+      queryClient.invalidateQueries({ queryKey: ['individual-pool-v3'] })
       queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
-      queryClient.invalidateQueries({ queryKey: ['user-deposit'] })
-      queryClient.invalidateQueries({ queryKey: ['musd-balance'] })
+      // Also invalidate MUSD balance queries
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          Array.isArray(query.queryKey) &&
+          query.queryKey.some(k => typeof k === 'string' && k.includes('musd'))
+      })
 
       setState('success')
     }
@@ -127,7 +134,7 @@ export function useSimpleWithdraw() {
         withdrawWrite({
           address: POOL_ADDRESS,
           abi: POOL_ABI,
-          functionName: 'withdrawPartial',
+          functionName: 'partialWithdraw',
           args: [amount]
         })
       } else {
@@ -137,7 +144,7 @@ export function useSimpleWithdraw() {
         withdrawWrite({
           address: POOL_ADDRESS,
           abi: POOL_ABI,
-          functionName: 'withdraw',
+          functionName: 'fullWithdraw',
         })
       }
     } catch (err) {

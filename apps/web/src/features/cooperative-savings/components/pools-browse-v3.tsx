@@ -34,7 +34,7 @@ import {
   type SortBy,
   type FilterStatus,
 } from '@/hooks/web3/use-all-cooperative-pools'
-import { formatBTCCompact } from '@/hooks/web3/use-cooperative-pool-v3'
+import { formatBTCCompact } from '@/hooks/web3/use-cooperative-pool'
 
 interface PoolsBrowseV3Props {
   onJoinPool?: (poolId: number) => void

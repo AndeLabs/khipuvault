@@ -14,8 +14,8 @@ const txHashSchema = z.object({
 
 const querySchema = z.object({
   query: z.object({
-    limit: z.string().optional().transform(Number),
-    offset: z.string().optional().transform(Number),
+    limit: z.coerce.number().min(1).max(1000).optional().default(50),
+    offset: z.coerce.number().min(0).max(100000).optional().default(0),
   }),
 })
 
@@ -24,8 +24,8 @@ const poolAddressSchema = z.object({
     poolAddress: z.string().regex(/^0x[a-fA-F0-9]{40}$/),
   }),
   query: z.object({
-    limit: z.string().optional().transform(Number),
-    offset: z.string().optional().transform(Number),
+    limit: z.coerce.number().min(1).max(1000).optional().default(50),
+    offset: z.coerce.number().min(0).max(100000).optional().default(0),
   }),
 })
 

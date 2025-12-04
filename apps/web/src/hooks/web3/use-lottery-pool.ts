@@ -12,7 +12,8 @@
 import { useAccount, usePublicClient, useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
 import { useQuery } from '@tanstack/react-query'
 import { LOTTERY_POOL_ABI } from '@/lib/web3/lottery-pool-abi'
-import { parseEther, formatEther } from 'viem'
+import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
+import { parseEther, formatEther, type Address } from 'viem'
 import { normalizeBigInt } from '@/lib/query-utils'
 import {
   fetchCurrentRoundId,
@@ -27,8 +28,8 @@ import {
   type UserLotteryStats,
 } from '@/lib/blockchain/fetch-lottery-pools'
 
-// SimpleLotteryPool deployed on Mezo Testnet
-const LOTTERY_POOL_ADDRESS = '0x3e5d272321e28731844c20e0a0c725a97301f83a' as `0x${string}`
+// Use centralized contract address config
+const LOTTERY_POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.lotteryPool as Address
 
 /**
  * Hook to get current round
@@ -133,7 +134,7 @@ export function useUserTickets(roundId?: number, userAddress?: `0x${string}`) {
   const publicClient = usePublicClient()
   const targetAddress = userAddress || address
 
-  const { data: ticketCount, isLoading, error } = useQuery({
+  const { data: ticketCount, isLoading, error, refetch } = useQuery({
     queryKey: ['lottery-pool', 'user-tickets', roundId, targetAddress || 'none'],
     queryFn: () => {
       if (!publicClient || !roundId || !targetAddress) {
@@ -154,6 +155,7 @@ export function useUserTickets(roundId?: number, userAddress?: `0x${string}`) {
     ticketCount: ticketCount as bigint | null | undefined,
     isLoading,
     error,
+    refetch,
   }
 }
 

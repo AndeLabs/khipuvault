@@ -17,6 +17,7 @@
 
 import * as React from "react"
 import { PageHeader } from "@/components/layout"
+import { Web3ErrorBoundary } from "@/components/web3-error-boundary"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
@@ -31,14 +32,14 @@ import {
   LeavePoolDialog,
 } from "@/features/cooperative-savings"
 import { useAllCooperativePools } from "@/hooks/web3/use-all-cooperative-pools"
-import { useCooperativePoolV3 } from "@/hooks/web3/use-cooperative-pool-v3"
+import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool"
 import { useToast } from "@/hooks/use-toast"
 
 export default function CooperativeSavingsPage() {
   const { isConnected } = useAccount()
   const { toast } = useToast()
   const { statistics, refetch } = useAllCooperativePools()
-  const { claimYield, state: claimState } = useCooperativePoolV3()
+  const { claimYield, state: claimState } = useCooperativePool()
 
   // Modal states
   const [createModalOpen, setCreateModalOpen] = React.useState(false)
@@ -92,12 +93,13 @@ export default function CooperativeSavingsPage() {
   }
 
   // Handle modal success callbacks
+  // Note: Refetch is handled immediately - event listeners in hooks provide additional reliability
   const handleCreateSuccess = () => {
     toast({
       title: "Pool Created!",
       description: "Your cooperative pool has been created successfully.",
     })
-    setTimeout(() => refetch(), 2000)
+    refetch()
   }
 
   const handleJoinSuccess = () => {
@@ -105,7 +107,7 @@ export default function CooperativeSavingsPage() {
       title: "Joined Pool!",
       description: "You have successfully joined the cooperative pool.",
     })
-    setTimeout(() => refetch(), 2000)
+    refetch()
     setActiveTab("my-pools")
   }
 
@@ -114,7 +116,7 @@ export default function CooperativeSavingsPage() {
       title: "Left Pool",
       description: "You have successfully left the pool and withdrawn your funds.",
     })
-    setTimeout(() => refetch(), 2000)
+    refetch()
   }
 
   // Handle claim success
@@ -124,9 +126,9 @@ export default function CooperativeSavingsPage() {
         title: "Yield Claimed!",
         description: "Your yields have been successfully claimed.",
       })
-      setTimeout(() => refetch(), 2000)
+      refetch()
     }
-  }, [claimState])
+  }, [claimState, refetch, toast])
 
   if (!isConnected) {
     return (
@@ -149,12 +151,17 @@ export default function CooperativeSavingsPage() {
   }
 
   return (
-    <div className="space-y-6 animate-slide-up">
-      {/* Page Header */}
-      <PageHeader
-        title="Cooperative Pools"
-        description="Save together with friends and earn rotating payouts plus yields"
-      />
+    <Web3ErrorBoundary
+      onError={(error, errorInfo) => {
+        console.error('Cooperative Savings Error:', error, errorInfo);
+      }}
+    >
+      <div className="space-y-6 animate-slide-up">
+        {/* Page Header */}
+        <PageHeader
+          title="Cooperative Pools"
+          description="Save together with friends and earn rotating payouts plus yields"
+        />
 
       {/* Info Alert */}
       <Alert>
@@ -180,7 +187,7 @@ export default function CooperativeSavingsPage() {
           <TabsTrigger value="my-pools" className="gap-2">
             My Pools
             {statistics.userMemberships > 0 && (
-              <Badge variant="accent" className="ml-1">
+              <Badge variant="secondary" className="ml-1">
                 {statistics.userMemberships}
               </Badge>
             )}
@@ -246,6 +253,7 @@ export default function CooperativeSavingsPage() {
         onLeave={handleLeavePool}
         onClaim={handleClaimYield}
       />
-    </div>
+      </div>
+    </Web3ErrorBoundary>
   )
 }

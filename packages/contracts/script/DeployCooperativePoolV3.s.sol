@@ -3,7 +3,7 @@ pragma solidity 0.8.25;
 
 import {Script, console} from "forge-std/Script.sol";
 import {UUPSProxy} from "../src/proxy/UUPSProxy.sol";
-import {CooperativePoolV3} from "../src/pools/CooperativePoolV3.sol";
+import {CooperativePoolV3} from "../src/pools/v3/CooperativePoolV3.sol";
 
 contract DeployCooperativePoolV3 is Script {
     // Mezo Testnet addresses

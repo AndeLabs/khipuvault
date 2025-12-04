@@ -225,15 +225,15 @@ export function useIndividualPoolV3() {
   // ========================================================================
 
   const poolStats = {
-    totalMusdDeposited: (totalMusdDeposited as bigint) || BigInt(0),
-    totalYields: (totalYieldsGenerated as bigint) || BigInt(0),
-    totalReferralRewards: (totalReferralRewards as bigint) || BigInt(0),
+    totalMusdDeposited: BigInt(totalMusdDeposited as unknown as bigint || 0n),
+    totalYields: BigInt(totalYieldsGenerated as unknown as bigint || 0n),
+    totalReferralRewards: BigInt(totalReferralRewards as unknown as bigint || 0n),
     poolAPR: userInfo?.estimatedAPR ? Number(userInfo.estimatedAPR) / 100 : 6.2,
-    emergencyMode: emergencyMode as boolean || false,
+    emergencyMode: Boolean(emergencyMode),
   }
 
   const walletBalances = {
-    musdBalance: (musdBalance as bigint) || BigInt(0),
+    musdBalance: BigInt(musdBalance as unknown as bigint || 0n),
   }
 
   const hasActiveDeposit = userInfo ? userInfo.deposit > BigInt(0) : false
@@ -259,23 +259,23 @@ export function useIndividualPoolV3() {
   return {
     // Pool Statistics
     poolStats,
-    poolTVL: totalMusdDeposited as bigint || BigInt(0),
-    
+    poolTVL: BigInt(totalMusdDeposited as unknown as bigint || 0n),
+
     // User Data
     userInfo,
-    userTotalBalance: (userTotalBalance as bigint) || BigInt(0),
+    userTotalBalance: BigInt(userTotalBalance as unknown as bigint || 0n),
     hasActiveDeposit,
-    
+
     // Referral System
     referralStats,
     hasReferralRewards: referralStats ? referralStats.rewards > BigInt(0) : false,
     referralCount: referralStats?.count || BigInt(0),
-    
+
     // Wallet
     walletBalances,
-    
+
     // Contract Config
-    performanceFee: Number(performanceFee as bigint) || V3_FEATURES.individualPool.performanceFee,
+    performanceFee: Number(performanceFee as unknown as bigint || 0n) || V3_FEATURES.individualPool.performanceFee,
     emergencyMode: poolStats.emergencyMode,
     
     // UI Helpers

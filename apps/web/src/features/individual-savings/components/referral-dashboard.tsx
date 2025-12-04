@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { AmountDisplay } from "@/components/common"
 import { useAccount } from "wagmi"
 import { formatUnits } from "viem"
-import { useClaimReferralRewardsV3 } from "@/hooks/web3/use-pool-transactions-v3"
+import { useClaimReferralRewards } from "@/hooks/web3/use-pool-transactions"
 import { Copy, Check, Gift, Users, Award, Share2, ExternalLink } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
@@ -33,7 +33,7 @@ export function ReferralDashboard({
 }: ReferralDashboardProps) {
   const { address } = useAccount()
   const [copied, setCopied] = React.useState(false)
-  const { claimReferralRewards, isClaiming, isConfirming, isSuccess } = useClaimReferralRewardsV3()
+  const { claimReferralRewards, isClaiming, isConfirming, isSuccess } = useClaimReferralRewards()
 
   // Generate referral link
   const referralLink = address
@@ -100,7 +100,7 @@ export function ReferralDashboard({
   const hasReferrals = Number(referralCount) > 0
 
   return (
-    <Card variant="surface" hover="glow-accent" className={className}>
+    <Card variant="surface" hover="glow-orange" className={className}>
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
