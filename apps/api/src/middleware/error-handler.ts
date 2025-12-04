@@ -1,13 +1,14 @@
 import { Request, Response, NextFunction } from 'express'
 import { ZodError } from 'zod'
 import { Prisma } from '@prisma/client'
+import { logger } from '../lib/logger'
 
 export class AppError extends Error {
   constructor(
     public statusCode: number,
     public message: string,
     public isOperational = true,
-    public details?: any
+    public details?: Record<string, unknown> | string | string[]
   ) {
     super(message)
     Object.setPrototypeOf(this, AppError.prototype)
@@ -27,14 +28,36 @@ export function errorHandler(
   res: Response,
   next: NextFunction
 ) {
-  // Log error with context
-  console.error('❌ Error occurred:', {
-    message: err.message,
-    path: req.path,
-    method: req.method,
-    timestamp: new Date().toISOString(),
-    stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
-  })
+  // Log error with context using structured logging
+  const errorContext = {
+    error: {
+      name: err.name,
+      message: err.message,
+      stack: process.env.NODE_ENV === 'development' ? err.stack : undefined,
+      ...(err instanceof AppError && { statusCode: err.statusCode, details: err.details }),
+      ...(err instanceof ZodError && { validationErrors: err.errors }),
+      ...(err instanceof Prisma.PrismaClientKnownRequestError && {
+        code: err.code,
+        meta: err.meta,
+      }),
+    },
+    request: {
+      method: req.method,
+      path: req.path,
+      url: req.url,
+      requestId: req.headers['x-request-id'],
+      ip: req.ip,
+    },
+  }
+
+  // Log at appropriate level
+  if (err instanceof AppError && err.statusCode < 500) {
+    // Client errors (4xx) - log as warn
+    logger.warn(errorContext, `Client error: ${err.message}`)
+  } else {
+    // Server errors (5xx) or unknown errors - log as error
+    logger.error(errorContext, `Server error: ${err.message}`)
+  }
 
   // Zod validation errors
   if (err instanceof ZodError) {
@@ -109,12 +132,20 @@ export function errorHandler(
  * Handle Prisma Known Request Errors with specific error codes
  * See: https://www.prisma.io/docs/reference/api-reference/error-reference
  */
+interface PrismaErrorMeta {
+  target?: string[]
+  field_name?: string
+  cause?: string
+  relation_name?: string
+  constraint?: string
+}
+
 function handlePrismaKnownError(
   err: Prisma.PrismaClientKnownRequestError,
   res: Response
 ) {
   const errorCode = err.code
-  const meta = err.meta as any
+  const meta = err.meta as PrismaErrorMeta | undefined
 
   switch (errorCode) {
     // Unique constraint violation
@@ -202,8 +233,14 @@ function handlePrismaKnownError(
  * Async handler wrapper to catch promise rejections
  * Usage: asyncHandler(async (req, res, next) => { ... })
  */
-export const asyncHandler = (fn: Function) => {
-  return (req: Request, res: Response, next: NextFunction) => {
+type AsyncRequestHandler = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => Promise<void> | void
+
+export const asyncHandler = (fn: AsyncRequestHandler) => {
+  return (req: Request, res: Response, next: NextFunction): void => {
     Promise.resolve(fn(req, res, next)).catch(next)
   }
 }
