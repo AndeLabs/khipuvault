@@ -4,6 +4,7 @@ import { SiweMessage } from 'siwe'
 import { verifyMessage } from 'viem'
 import * as crypto from 'crypto'
 import { logger } from '../lib/logger'
+import { tokenBlacklist } from '../lib/cache'
 
 // Extend Express Request type to include auth data
 declare global {
@@ -13,7 +14,9 @@ declare global {
         address: string
         iat: number
         exp: number
+        jti?: string // JWT ID for blacklist
       }
+      rawToken?: string // Original token for blacklisting
     }
   }
 }
@@ -122,8 +125,10 @@ export async function verifySiweMessage(
       }
     }
 
-    // Verify nonce exists and hasn't been used
+    // Atomically check and consume nonce (prevents TOCTOU race condition)
+    // We delete the nonce immediately to prevent concurrent requests from using it
     const nonceData = nonceStore.get(siweMessage.nonce)
+    nonceStore.delete(siweMessage.nonce) // Delete immediately for atomicity
 
     if (!nonceData) {
       return {
@@ -142,7 +147,6 @@ export async function verifySiweMessage(
     // Check nonce expiration
     const now = Date.now()
     if (now - nonceData.timestamp > NONCE_EXPIRATION_MS) {
-      nonceStore.delete(siweMessage.nonce)
       return {
         valid: false,
         error: 'Invalid nonce: nonce expired',
@@ -185,9 +189,7 @@ export async function verifySiweMessage(
       }
     }
 
-    // Mark nonce as used
-    nonceData.used = true
-    nonceStore.set(siweMessage.nonce, nonceData)
+    // Nonce already deleted above for atomicity - no need to mark as used
 
     // Return success with address
     return {
@@ -209,8 +211,12 @@ export async function verifySiweMessage(
  * @returns {string} JWT token
  */
 export function generateJWT(address: string): string {
+  // Generate unique JWT ID for blacklisting
+  const jti = crypto.randomBytes(16).toString('hex')
+
   const payload = {
     address: address.toLowerCase(), // Normalize address to lowercase
+    jti, // JWT ID for token revocation
   }
 
   const token = jwt.sign(payload, EFFECTIVE_JWT_SECRET, {
@@ -231,6 +237,7 @@ export function verifyJWT(token: string): {
   address: string
   iat: number
   exp: number
+  jti?: string
 } | null {
   try {
     const decoded = jwt.verify(token, EFFECTIVE_JWT_SECRET, {
@@ -240,6 +247,7 @@ export function verifyJWT(token: string): {
       address: string
       iat: number
       exp: number
+      jti?: string
     }
 
     return decoded
@@ -252,12 +260,13 @@ export function verifyJWT(token: string): {
 /**
  * Express middleware to require authentication
  * Validates JWT token from Authorization header
+ * Checks token blacklist for revoked tokens
  */
-export function requireAuth(
+export async function requireAuth(
   req: Request,
   res: Response,
   next: NextFunction
-): void {
+): Promise<void> {
   try {
     // Get token from Authorization header
     const authHeader = req.headers.authorization
@@ -294,8 +303,21 @@ export function requireAuth(
       return
     }
 
-    // Attach user data to request
+    // Check if token is blacklisted (revoked on logout)
+    if (decoded.jti) {
+      const isRevoked = await tokenBlacklist.isBlacklisted(decoded.jti)
+      if (isRevoked) {
+        res.status(401).json({
+          error: 'Unauthorized',
+          message: 'Token has been revoked. Please log in again.',
+        })
+        return
+      }
+    }
+
+    // Attach user data and raw token to request
     req.user = decoded
+    req.rawToken = token
 
     next()
   } catch (error) {
@@ -377,3 +399,21 @@ export function getNonceStats(): {
     expired,
   }
 }
+
+/**
+ * Invalidate a JWT token by adding it to the blacklist
+ * @param jti JWT ID from the token
+ * @param expiresAt Token expiration timestamp
+ */
+export async function invalidateToken(jti: string, expiresAt: number): Promise<void> {
+  // Calculate remaining time until token expires
+  const now = Math.floor(Date.now() / 1000)
+  const remainingSeconds = Math.max(0, expiresAt - now)
+
+  // Add to blacklist (only keep until token would naturally expire)
+  await tokenBlacklist.add(jti, remainingSeconds)
+  logger.info({ jti }, 'Token invalidated on logout')
+}
+
+// Re-export tokenBlacklist for routes that need direct access
+export { tokenBlacklist }
