@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { ReactNode } from "react";
+import { ErrorBoundary } from "@/components/error-boundary";
 
 // Dynamically import ClientProviders with ssr: false to avoid MetaMask SDK localStorage issues
 const ClientProviders = dynamic(
@@ -25,16 +26,27 @@ const ClientProviders = dynamic(
 interface ClientLayoutProps {
   children: ReactNode;
   /** Initial Wagmi state from cookies for SSR hydration */
-  initialState?: any;
+  initialState?: unknown;
 }
 
 /**
  * Client-side layout wrapper
  * Uses dynamic import with ssr:false to completely avoid SSR for Web3 providers
  * This prevents MetaMask SDK from trying to access localStorage during SSR
+ *
+ * Includes ErrorBoundary to catch and display errors gracefully
  */
 export function ClientLayout({ children, initialState }: ClientLayoutProps) {
   return (
-    <ClientProviders initialState={initialState}>{children}</ClientProviders>
+    <ErrorBoundary
+      onError={(error, errorInfo) => {
+        // Log to error reporting service in production
+        if (process.env.NODE_ENV === "production") {
+          console.error("Application Error:", error, errorInfo);
+        }
+      }}
+    >
+      <ClientProviders initialState={initialState}>{children}</ClientProviders>
+    </ErrorBoundary>
   );
 }
