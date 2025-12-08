@@ -49,7 +49,7 @@ interface Breadcrumb {
 // Flag to check if Sentry is available
 const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
-const IS_SENTRY_ENABLED = !!SENTRY_DSN;
+const IS_SENTRY_ENABLED = false; // Disabled - Sentry not installed
 
 // Simple in-memory breadcrumbs for non-Sentry mode (limited to 50)
 const breadcrumbs: Breadcrumb[] = [];
@@ -62,71 +62,11 @@ const MAX_BREADCRUMBS = 50;
 export async function initErrorTracking(): Promise<void> {
   if (!IS_SENTRY_ENABLED) {
     console.info(
-      "[ErrorTracking] Sentry DSN not configured. Errors will be logged to console.",
+      "[ErrorTracking] Sentry not installed. Errors will be logged to console.",
     );
     return;
   }
-
-  try {
-    // Dynamic import to avoid bundling Sentry if not used
-    const Sentry = await import("@sentry/nextjs");
-
-    Sentry.init({
-      dsn: SENTRY_DSN,
-      environment: IS_PRODUCTION ? "production" : "development",
-
-      // Performance monitoring
-      tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
-
-      // Session replay for debugging UI issues
-      replaysSessionSampleRate: IS_PRODUCTION ? 0.1 : 0,
-      replaysOnErrorSampleRate: 1.0,
-
-      // Filter out noisy errors
-      ignoreErrors: [
-        // Ignore benign browser/extension errors
-        "ResizeObserver loop limit exceeded",
-        "ResizeObserver loop completed with undelivered notifications",
-        "Non-Error promise rejection captured",
-        // Ignore wallet connection errors (expected during normal usage)
-        "User rejected the request",
-        "User denied transaction signature",
-        "The user rejected the request",
-        // Ignore network errors that are expected
-        "Network request failed",
-        "Failed to fetch",
-      ],
-
-      // Sanitize sensitive data
-      beforeSend(event) {
-        // Remove wallet addresses from error messages if needed
-        if (event.exception?.values) {
-          for (const exception of event.exception.values) {
-            if (exception.value) {
-              // Partially redact Ethereum addresses
-              exception.value = exception.value.replace(
-                /0x[a-fA-F0-9]{40}/g,
-                (match) => `${match.slice(0, 6)}...${match.slice(-4)}`,
-              );
-            }
-          }
-        }
-        return event;
-      },
-
-      // Integration options
-      integrations: (integrations) => {
-        return integrations.filter((integration) => {
-          // Disable integrations that might cause issues
-          return integration.name !== "GlobalHandlers" || IS_PRODUCTION;
-        });
-      },
-    });
-
-    console.info("[ErrorTracking] Sentry initialized successfully");
-  } catch (error) {
-    console.error("[ErrorTracking] Failed to initialize Sentry:", error);
-  }
+  // Sentry initialization would go here if installed
 }
 
 /**
@@ -143,31 +83,13 @@ export async function captureError(
     console.error("[ErrorTracking] Captured error:", errorObj, context);
   }
 
-  if (!IS_SENTRY_ENABLED) {
-    // Store error info for potential debugging
-    addBreadcrumb({
-      category: "error",
-      message: errorObj.message,
-      level: "error",
-      data: { stack: errorObj.stack, ...context?.extra },
-    });
-    return;
-  }
-
-  try {
-    const Sentry = await import("@sentry/nextjs");
-    Sentry.captureException(errorObj, {
-      tags: context?.tags,
-      extra: context?.extra,
-      level: context?.level,
-      fingerprint: context?.fingerprint,
-    });
-  } catch (sentryError) {
-    console.error(
-      "[ErrorTracking] Failed to send error to Sentry:",
-      sentryError,
-    );
-  }
+  // Store error info for potential debugging
+  addBreadcrumb({
+    category: "error",
+    message: errorObj.message,
+    level: "error",
+    data: { stack: errorObj.stack, ...context?.extra },
+  });
 }
 
 /**
@@ -181,29 +103,12 @@ export async function captureMessage(
     console.info("[ErrorTracking] Captured message:", message, context);
   }
 
-  if (!IS_SENTRY_ENABLED) {
-    addBreadcrumb({
-      category: "message",
-      message,
-      level: context?.level || "info",
-      data: context?.extra,
-    });
-    return;
-  }
-
-  try {
-    const Sentry = await import("@sentry/nextjs");
-    Sentry.captureMessage(message, {
-      tags: context?.tags,
-      extra: context?.extra,
-      level: context?.level || "info",
-    });
-  } catch (sentryError) {
-    console.error(
-      "[ErrorTracking] Failed to send message to Sentry:",
-      sentryError,
-    );
-  }
+  addBreadcrumb({
+    category: "message",
+    message,
+    level: context?.level || "info",
+    data: context?.extra,
+  });
 }
 
 /**
@@ -211,25 +116,7 @@ export async function captureMessage(
  * Call this when user connects their wallet
  */
 export async function setUser(user: UserContext | null): Promise<void> {
-  if (!IS_SENTRY_ENABLED) {
-    console.debug("[ErrorTracking] Set user:", user?.address || "null");
-    return;
-  }
-
-  try {
-    const Sentry = await import("@sentry/nextjs");
-    if (user) {
-      Sentry.setUser({
-        id: user.id || user.address,
-        email: user.email,
-        username: user.username || user.address,
-      });
-    } else {
-      Sentry.setUser(null);
-    }
-  } catch (sentryError) {
-    console.error("[ErrorTracking] Failed to set user:", sentryError);
-  }
+  console.debug("[ErrorTracking] Set user:", user?.address || "null");
 }
 
 /**
@@ -247,41 +134,13 @@ export function addBreadcrumb(breadcrumb: Breadcrumb): void {
   if (breadcrumbs.length > MAX_BREADCRUMBS) {
     breadcrumbs.shift();
   }
-
-  if (!IS_SENTRY_ENABLED) {
-    return;
-  }
-
-  // Async add to Sentry
-  import("@sentry/nextjs")
-    .then((Sentry) => {
-      Sentry.addBreadcrumb({
-        category: breadcrumb.category,
-        message: breadcrumb.message,
-        level: breadcrumb.level,
-        data: breadcrumb.data,
-      });
-    })
-    .catch(() => {
-      // Silently fail - breadcrumbs are not critical
-    });
 }
 
 /**
  * Set a tag that will be sent with all future errors
  */
 export async function setTag(key: string, value: string): Promise<void> {
-  if (!IS_SENTRY_ENABLED) {
-    console.debug("[ErrorTracking] Set tag:", key, "=", value);
-    return;
-  }
-
-  try {
-    const Sentry = await import("@sentry/nextjs");
-    Sentry.setTag(key, value);
-  } catch (sentryError) {
-    console.error("[ErrorTracking] Failed to set tag:", sentryError);
-  }
+  console.debug("[ErrorTracking] Set tag:", key, "=", value);
 }
 
 /**
