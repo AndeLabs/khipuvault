@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { ClientLayout } from "@/components/layout/client-layout";
-import { ErrorBoundary } from "@/components/error-boundary";
 
 export const revalidate = 0;
 
@@ -81,14 +80,7 @@ export default function RootLayout({
         />
       </head>
       <body className="font-body antialiased">
-        <ErrorBoundary
-          onError={(error, errorInfo) => {
-            // Log to error reporting service in production
-            console.error("Application Error:", error, errorInfo);
-          }}
-        >
-          <ClientLayout>{children}</ClientLayout>
-        </ErrorBoundary>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
