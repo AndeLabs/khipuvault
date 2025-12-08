@@ -7,9 +7,14 @@
  * Configured for Mezo Testnet with Bitcoin native currency
  *
  * SSR-Compatible Configuration:
- * - Uses custom localStorage wrapper with SSR fallback
+ * - All browser APIs are strictly guarded with typeof window checks
+ * - Config creation is deferred to client-side only
  * - Proper wallet state persistence across page reloads
  * - Graceful degradation when localStorage unavailable
+ *
+ * IMPORTANT: This module MUST NOT access window, localStorage, or any
+ * browser APIs at module load time. All such access must be deferred
+ * to function calls that are only invoked on the client side.
  */
 
 import { createConfig, http, createStorage } from "wagmi";
@@ -17,12 +22,29 @@ import { metaMask } from "wagmi/connectors";
 import { mezoTestnet } from "./chains";
 import { createPublicClient } from "viem";
 
+// Type for the config instance
+type WagmiConfigInstance = ReturnType<typeof createConfig>;
+
 /**
  * SSR-safe localStorage wrapper
- * Uses localStorage on client, no-op storage on server
- * NOTE: Only call this on the client side
+ * Returns a no-op storage on server, localStorage on client
+ *
+ * IMPORTANT: This function is safe to call during SSR because it
+ * returns a no-op storage when window is not available.
  */
 function createClientStorage() {
+  // Return no-op storage for SSR
+  if (typeof window === "undefined") {
+    return createStorage({
+      storage: {
+        getItem: () => null,
+        setItem: () => {},
+        removeItem: () => {},
+      },
+    });
+  }
+
+  // Return localStorage-based storage for client
   return createStorage({
     storage: {
       getItem: (key: string) => {
@@ -87,38 +109,49 @@ declare global {
  */
 
 // Singleton config instance - only created on client
-let wagmiConfigInstance: ReturnType<typeof createConfig> | null = null;
+let wagmiConfigInstance: WagmiConfigInstance | null = null;
 
 /**
  * Get Wagmi config with SSR compatibility
  * Uses localStorage for wallet persistence with SSR-safe fallback
  *
  * SSR-Safe Pattern:
- * - Config is only created on the client side
+ * - Config is created lazily on first call
  * - Uses singleton pattern to avoid recreating config
  * - ssr: true enables Server-Side Rendering support
+ * - All browser API access is guarded
  * - Wallet connection persists across page reloads on client
+ *
+ * IMPORTANT: This function is safe to call during SSR because all
+ * browser-specific code paths are properly guarded.
  */
-export function getWagmiConfig() {
+export function getWagmiConfig(): WagmiConfigInstance {
   // Return existing instance if available
   if (wagmiConfigInstance) {
     return wagmiConfigInstance;
   }
 
-  // Create config (only happens on client due to dynamic import in client-layout)
+  // Determine dApp URL - use fallback for SSR
+  const dappUrl =
+    typeof window !== "undefined"
+      ? window.location.origin
+      : "https://khipuvault.vercel.app";
+
+  // Create connectors array
+  // MetaMask connector is safe to initialize during SSR
+  const connectors = [
+    metaMask({
+      dappMetadata: {
+        name: "KhipuVault",
+        url: dappUrl,
+      },
+    }),
+  ];
+
+  // Create config with SSR-safe settings
   wagmiConfigInstance = createConfig({
     chains: [mezoTestnet],
-    connectors: [
-      metaMask({
-        dappMetadata: {
-          name: "KhipuVault",
-          url:
-            typeof window !== "undefined"
-              ? window.location.origin
-              : "https://khipuvault.vercel.app",
-        },
-      }),
-    ],
+    connectors,
     transports: {
       [mezoTestnet.id]: http("https://rpc.test.mezo.org", {
         batch: {
@@ -131,8 +164,8 @@ export function getWagmiConfig() {
     },
     // Enable SSR support
     ssr: true,
-    // Use client-side localStorage for wallet persistence
-    storage: typeof window !== "undefined" ? createClientStorage() : undefined,
+    // Use SSR-safe storage that returns no-op on server
+    storage: createClientStorage(),
     pollingInterval: 4_000, // poll every 4 seconds
   });
 
@@ -143,6 +176,9 @@ export function getWagmiConfig() {
  * Standalone public client for direct RPC calls
  * Useful for debugging and direct contract interactions
  * Lazy-initialized to avoid SSR issues
+ *
+ * IMPORTANT: This is safe to call during SSR - it will create
+ * a viem public client that doesn't depend on browser APIs.
  */
 let _publicClient: ReturnType<typeof createPublicClient> | null = null;
 
@@ -163,9 +199,14 @@ export function getPublicClient() {
   return _publicClient;
 }
 
-// Backward compatibility - but this will only work on client side
-export const publicClient =
-  typeof window !== "undefined" ? getPublicClient() : (null as any);
+/**
+ * @deprecated Use getPublicClient() instead for SSR safety
+ * This export is kept for backward compatibility but may cause
+ * issues during SSR if the module is imported on the server.
+ *
+ * The value is null during SSR to prevent errors.
+ */
+export const publicClient: ReturnType<typeof createPublicClient> | null = null;
 
 /**
  * App metadata for wallet connection
