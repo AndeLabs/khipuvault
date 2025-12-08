@@ -1,0 +1,108 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  claude-review:
+    # Run on PR events or when someone comments @claude on an issue/PR
+    if: |
+      github.event_name == 'pull_request' ||
+      (github.event_name == 'issue_comment' && contains(github.event.comment.body, '@claude'))
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude Code Review
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            You are reviewing code for KhipuVault, a decentralized Bitcoin savings platform on Mezo blockchain.
+
+            ## Project Context
+            - Frontend: Next.js 15 with Wagmi/Viem for Web3
+            - Backend: Express.js with Prisma/PostgreSQL
+            - Smart Contracts: Solidity with Foundry
+            - Network: Mezo Testnet (Chain ID 31611)
+
+            ## Review Focus Areas
+
+            ### 1. Security (CRITICAL for DeFi)
+            - No exposed secrets or private keys
+            - Smart contract vulnerabilities (reentrancy, access control)
+            - Input validation and sanitization
+            - Authentication/authorization checks
+
+            ### 2. Code Quality
+            - TypeScript strict mode compliance
+            - No `any` types
+            - Proper error handling
+            - No console.log (use Pino logger)
+
+            ### 3. Web3 Best Practices
+            - Transaction error handling
+            - BigInt handling (no Number for wei)
+            - Proper loading states
+            - Event emission in contracts
+
+            ### 4. Testing
+            - New code should have tests
+            - Edge cases covered
+
+            ## Output Format
+            Provide feedback as:
+            1. **Critical Issues** - Must fix before merge
+            2. **Warnings** - Should fix
+            3. **Suggestions** - Nice to have
+            4. **Positive Notes** - What was done well
+
+            Be specific with file names and line numbers.
+
+  # Auto-label PRs based on files changed
+  label-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/labeler@v5
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Run on @claude mention in issues
+  claude-assist:
+    if: |
+      github.event_name == 'issue_comment' &&
+      contains(github.event.comment.body, '@claude') &&
+      !github.event.issue.pull_request
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Claude Issue Assistant
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          prompt: |
+            Help with this GitHub issue for KhipuVault.
+
+            Context:
+            - DeFi savings platform on Mezo blockchain
+            - Monorepo with Next.js, Express, Solidity
+
+            Provide helpful, actionable responses.
+            If it's a bug report, suggest debugging steps.
+            If it's a feature request, outline implementation approach.

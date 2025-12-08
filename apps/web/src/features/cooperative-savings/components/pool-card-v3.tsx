@@ -10,35 +10,58 @@
  * - Actions based on membership status
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Separator } from '@/components/ui/separator'
-import { Users, Bitcoin, Coins, TrendingUp, Calendar, Shield } from 'lucide-react'
-import { type PoolWithMembership } from '@/hooks/web3/use-all-cooperative-pools'
-import { formatBTCCompact, formatMUSD, getPoolStatusBadge, formatDate } from '@/hooks/web3/use-cooperative-pool'
-import { PoolStatus } from '@/hooks/web3/use-cooperative-pool'
+import * as React from "react";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import {
+  Users,
+  Bitcoin,
+  Coins,
+  TrendingUp,
+  Calendar,
+  Shield,
+} from "lucide-react";
+import { type PoolWithMembership } from "@/hooks/web3/use-all-cooperative-pools";
+import {
+  formatBTCCompact,
+  formatMUSD,
+  getPoolStatusBadge,
+  formatDate,
+} from "@/hooks/web3/use-cooperative-pool";
+import { PoolStatus } from "@/hooks/web3/use-cooperative-pool";
 
 interface PoolCardV3Props {
-  pool: PoolWithMembership
-  onJoin?: (poolId: number) => void
-  onViewDetails?: (poolId: number) => void
-  onManage?: (poolId: number) => void
+  pool: PoolWithMembership;
+  onJoin?: (poolId: number) => void;
+  onViewDetails?: (poolId: number) => void;
+  onManage?: (poolId: number) => void;
 }
 
 // Memoized to prevent unnecessary re-renders when parent re-renders
-export const PoolCardV3 = React.memo(function PoolCardV3({ pool, onJoin, onViewDetails, onManage }: PoolCardV3Props) {
-  const statusBadge = getPoolStatusBadge(pool.status)
-  const memberProgress = (pool.currentMembers / pool.maxMembers) * 100
+export const PoolCardV3 = React.memo(function PoolCardV3({
+  pool,
+  onJoin,
+  onViewDetails,
+  onManage,
+}: PoolCardV3Props) {
+  const statusBadge = getPoolStatusBadge(pool.status);
+  const memberProgress = (pool.currentMembers / pool.maxMembers) * 100;
 
-  const canJoin = pool.status === PoolStatus.ACCEPTING &&
-                  pool.allowNewMembers &&
-                  pool.currentMembers < pool.maxMembers &&
-                  !pool.isMember
+  const canJoin =
+    pool.status === PoolStatus.ACCEPTING &&
+    pool.allowNewMembers &&
+    pool.currentMembers < pool.maxMembers &&
+    !pool.isMember;
 
   return (
     <Card className="group hover:shadow-lg transition-all duration-300 hover:border-accent/50">
@@ -115,9 +138,7 @@ export const PoolCardV3 = React.memo(function PoolCardV3({ pool, onJoin, onViewD
               <Calendar className="h-3.5 w-3.5" />
               <span>Created</span>
             </div>
-            <p className="text-xs">
-              {formatDate(pool.createdAt)}
-            </p>
+            <p className="text-xs">{formatDate(pool.createdAt)}</p>
           </div>
         </div>
 
@@ -130,7 +151,8 @@ export const PoolCardV3 = React.memo(function PoolCardV3({ pool, onJoin, onViewD
             Contribution Range
           </p>
           <p className="font-mono text-sm">
-            {formatBTCCompact(pool.minContribution)} - {formatBTCCompact(pool.maxContribution)} BTC
+            {formatBTCCompact(pool.minContribution)} -{" "}
+            {formatBTCCompact(pool.maxContribution)} BTC
           </p>
         </div>
 
@@ -191,19 +213,14 @@ export const PoolCardV3 = React.memo(function PoolCardV3({ pool, onJoin, onViewD
             Join Pool
           </Button>
         ) : (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="flex-1"
-            disabled
-          >
-            {pool.currentMembers >= pool.maxMembers ? 'Full' : 'Closed'}
+          <Button variant="ghost" size="sm" className="flex-1" disabled>
+            {pool.currentMembers >= pool.maxMembers ? "Full" : "Closed"}
           </Button>
         )}
       </CardFooter>
     </Card>
-  )
-})
+  );
+});
 
 // Display name for React DevTools
-PoolCardV3.displayName = 'PoolCardV3'
+PoolCardV3.displayName = "PoolCardV3";

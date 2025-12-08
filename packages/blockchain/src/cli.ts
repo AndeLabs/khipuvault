@@ -1,18 +1,18 @@
 #!/usr/bin/env node
-import 'dotenv/config'
-import { startIndexer } from './index'
+import "dotenv/config";
+import { startIndexer } from "./index";
 
-const command = process.argv[2]
+const command = process.argv[2];
 
 async function main() {
   switch (command) {
-    case 'start':
-      await startIndexer()
-      break
+    case "start":
+      await startIndexer();
+      break;
 
-    case 'help':
-    case '--help':
-    case '-h':
+    case "help":
+    case "--help":
+    case "-h":
       console.log(`
 🌐 KhipuVault Blockchain Indexer CLI
 
@@ -32,17 +32,17 @@ Examples:
 
   # Start with custom RPC
   RPC_URL=https://custom-rpc.com pnpm index start
-      `)
-      break
+      `);
+      break;
 
     default:
-      console.error(`❌ Unknown command: ${command}`)
-      console.log('Run "pnpm index help" for usage information')
-      process.exit(1)
+      console.error(`❌ Unknown command: ${command}`);
+      console.log('Run "pnpm index help" for usage information');
+      process.exit(1);
   }
 }
 
 main().catch((error) => {
-  console.error('❌ Fatal error:', error)
-  process.exit(1)
-})
+  console.error("❌ Fatal error:", error);
+  process.exit(1);
+});

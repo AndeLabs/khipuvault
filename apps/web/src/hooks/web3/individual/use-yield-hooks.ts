@@ -3,15 +3,19 @@
  * @module hooks/web3/individual/use-yield-hooks
  */
 
-'use client'
+"use client";
 
-import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useCallback, useState } from 'react'
-import { MEZO_V3_ADDRESSES, INDIVIDUAL_POOL_V3_ABI } from '@/lib/web3/contracts-v3'
-import { QUERY_KEYS, INITIAL_TX_STATE, TransactionState } from './constants'
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useCallback, useState } from "react";
+import {
+  MEZO_V3_ADDRESSES,
+  INDIVIDUAL_POOL_V3_ABI,
+} from "@/lib/web3/contracts-v3";
+import { QUERY_KEYS, INITIAL_TX_STATE, TransactionState } from "./constants";
 
-const INDIVIDUAL_POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`
+const INDIVIDUAL_POOL_ADDRESS =
+  MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
 
 // ============================================================================
 // YIELD CLAIM HOOKS
@@ -21,46 +25,46 @@ const INDIVIDUAL_POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${strin
  * Hook to handle claim yield
  */
 export function useClaimYield() {
-  const queryClient = useQueryClient()
-  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE)
+  const queryClient = useQueryClient();
+  const [localState, setLocalState] =
+    useState<TransactionState>(INITIAL_TX_STATE);
 
-  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
-  })
+  });
 
   const claimYield = useCallback(async () => {
     try {
-      setLocalState({ isProcessing: true, hash: null })
+      setLocalState({ isProcessing: true, hash: null });
 
       writeContract({
         address: INDIVIDUAL_POOL_ADDRESS,
         abi: INDIVIDUAL_POOL_V3_ABI,
-        functionName: 'claimYield',
+        functionName: "claimYield",
         args: [],
-      })
-
+      });
     } catch (err) {
-      setLocalState({ isProcessing: false, hash: null })
-      throw err
+      setLocalState({ isProcessing: false, hash: null });
+      throw err;
     }
-  }, [writeContract])
+  }, [writeContract]);
 
   // Update local state when hash changes
   useEffect(() => {
     if (hash) {
-      setLocalState({ isProcessing: false, hash })
+      setLocalState({ isProcessing: false, hash });
     }
-  }, [hash])
+  }, [hash]);
 
   // Refetch data on success
   useEffect(() => {
     if (isSuccess) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.INDIVIDUAL_POOL })
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.INDIVIDUAL_POOL });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
     }
-  }, [isSuccess, queryClient])
+  }, [isSuccess, queryClient]);
 
   return {
     claimYield,
@@ -69,53 +73,53 @@ export function useClaimYield() {
     isSuccess,
     error,
     hash,
-  }
+  };
 }
 
 /**
  * Hook to handle claim referral rewards
  */
 export function useClaimReferralRewards() {
-  const queryClient = useQueryClient()
-  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE)
+  const queryClient = useQueryClient();
+  const [localState, setLocalState] =
+    useState<TransactionState>(INITIAL_TX_STATE);
 
-  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
-  })
+  });
 
   const claimReferralRewards = useCallback(async () => {
     try {
-      setLocalState({ isProcessing: true, hash: null })
+      setLocalState({ isProcessing: true, hash: null });
 
       writeContract({
         address: INDIVIDUAL_POOL_ADDRESS,
         abi: INDIVIDUAL_POOL_V3_ABI,
-        functionName: 'claimReferralRewards',
+        functionName: "claimReferralRewards",
         args: [],
-      })
-
+      });
     } catch (err) {
-      setLocalState({ isProcessing: false, hash: null })
-      throw err
+      setLocalState({ isProcessing: false, hash: null });
+      throw err;
     }
-  }, [writeContract])
+  }, [writeContract]);
 
   // Update local state when hash changes
   useEffect(() => {
     if (hash) {
-      setLocalState({ isProcessing: false, hash })
+      setLocalState({ isProcessing: false, hash });
     }
-  }, [hash])
+  }, [hash]);
 
   // Refetch data on success
   useEffect(() => {
     if (isSuccess) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.INDIVIDUAL_POOL })
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.INDIVIDUAL_POOL });
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
     }
-  }, [isSuccess, queryClient])
+  }, [isSuccess, queryClient]);
 
   return {
     claimReferralRewards,
@@ -124,7 +128,7 @@ export function useClaimReferralRewards() {
     isSuccess,
     error,
     hash,
-  }
+  };
 }
 
 // ============================================================================
@@ -135,45 +139,48 @@ export function useClaimReferralRewards() {
  * Hook to handle auto-compound toggle
  */
 export function useToggleAutoCompound() {
-  const queryClient = useQueryClient()
-  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE)
+  const queryClient = useQueryClient();
+  const [localState, setLocalState] =
+    useState<TransactionState>(INITIAL_TX_STATE);
 
-  const { writeContract, data: hash, isPending, error } = useWriteContract()
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
 
   const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
     hash,
-  })
+  });
 
-  const toggleAutoCompound = useCallback(async (enabled: boolean) => {
-    try {
-      setLocalState({ isProcessing: true, hash: null })
+  const toggleAutoCompound = useCallback(
+    async (enabled: boolean) => {
+      try {
+        setLocalState({ isProcessing: true, hash: null });
 
-      writeContract({
-        address: INDIVIDUAL_POOL_ADDRESS,
-        abi: INDIVIDUAL_POOL_V3_ABI,
-        functionName: 'toggleAutoCompound',
-        args: [enabled],
-      })
-
-    } catch (err) {
-      setLocalState({ isProcessing: false, hash: null })
-      throw err
-    }
-  }, [writeContract])
+        writeContract({
+          address: INDIVIDUAL_POOL_ADDRESS,
+          abi: INDIVIDUAL_POOL_V3_ABI,
+          functionName: "toggleAutoCompound",
+          args: [enabled],
+        });
+      } catch (err) {
+        setLocalState({ isProcessing: false, hash: null });
+        throw err;
+      }
+    },
+    [writeContract],
+  );
 
   // Update local state when hash changes
   useEffect(() => {
     if (hash) {
-      setLocalState({ isProcessing: false, hash })
+      setLocalState({ isProcessing: false, hash });
     }
-  }, [hash])
+  }, [hash]);
 
   // Refetch data on success
   useEffect(() => {
     if (isSuccess) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.INDIVIDUAL_POOL })
+      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.INDIVIDUAL_POOL });
     }
-  }, [isSuccess, queryClient])
+  }, [isSuccess, queryClient]);
 
   return {
     toggleAutoCompound,
@@ -182,7 +189,7 @@ export function useToggleAutoCompound() {
     isSuccess,
     error,
     hash,
-  }
+  };
 }
 
 // Note: useCompoundYields is exported from use-aggregator-hooks.ts

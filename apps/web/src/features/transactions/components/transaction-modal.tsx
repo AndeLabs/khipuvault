@@ -1,18 +1,18 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { TransactionStatus, TransactionSteps } from "@/components/common"
-import { useTransaction } from "../context/transaction-context"
-import { X } from "lucide-react"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dialog";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { TransactionStatus, TransactionSteps } from "@/components/common";
+import { useTransaction } from "../context/transaction-context";
+import { X } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /**
  * Transaction Modal
@@ -25,14 +25,14 @@ import { cn } from "@/lib/utils"
  */
 
 interface TransactionModalProps {
-  open?: boolean
-  onClose?: () => void
+  open?: boolean;
+  onClose?: () => void;
 }
 
 export function TransactionModal({ open, onClose }: TransactionModalProps) {
-  const { activeTransaction } = useTransaction()
+  const { activeTransaction } = useTransaction();
 
-  const isOpen = open ?? !!activeTransaction
+  const isOpen = open ?? !!activeTransaction;
 
   const handleClose = () => {
     if (
@@ -40,16 +40,19 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
       activeTransaction?.status === "error" ||
       activeTransaction?.status === "rejected"
     ) {
-      onClose?.()
+      onClose?.();
     }
-  }
+  };
 
-  if (!activeTransaction) return null
+  if (!activeTransaction) return null;
 
-  type StepStatus = "pending" | "active" | "complete" | "error"
+  type StepStatus = "pending" | "active" | "complete" | "error";
 
-  const getStepStatus = (condition: boolean, active: StepStatus, fallback: StepStatus): StepStatus =>
-    condition ? active : fallback
+  const getStepStatus = (
+    condition: boolean,
+    active: StepStatus,
+    fallback: StepStatus,
+  ): StepStatus => (condition ? active : fallback);
 
   const steps: Array<{ label: string; status: StepStatus }> = [
     {
@@ -58,9 +61,9 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
         activeTransaction.status === "idle"
           ? "active"
           : activeTransaction.status === "error" ||
-            activeTransaction.status === "rejected"
-          ? "error"
-          : "complete",
+              activeTransaction.status === "rejected"
+            ? "error"
+            : "complete",
     },
     {
       label: "Sign with Wallet",
@@ -68,12 +71,12 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
         activeTransaction.status === "signing"
           ? "active"
           : activeTransaction.status === "error" ||
-            activeTransaction.status === "rejected"
-          ? "error"
-          : activeTransaction.status === "idle" ||
-            activeTransaction.status === "pending"
-          ? "pending"
-          : "complete",
+              activeTransaction.status === "rejected"
+            ? "error"
+            : activeTransaction.status === "idle" ||
+                activeTransaction.status === "pending"
+              ? "pending"
+              : "complete",
     },
     {
       label: "Confirm on Blockchain",
@@ -81,10 +84,10 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
         activeTransaction.status === "confirming"
           ? "active"
           : activeTransaction.status === "error"
-          ? "error"
-          : activeTransaction.status === "success"
-          ? "complete"
-          : "pending",
+            ? "error"
+            : activeTransaction.status === "success"
+              ? "complete"
+              : "pending",
     },
     {
       label: "Transaction Complete",
@@ -92,10 +95,10 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
         activeTransaction.status === "success"
           ? "complete"
           : activeTransaction.status === "error"
-          ? "error"
-          : "pending",
+            ? "error"
+            : "pending",
     },
-  ]
+  ];
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -148,7 +151,10 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
                   href={`https://explorer.mezo.org/tx/${activeTransaction.txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={cn(buttonVariants({ variant: "outline" }), "flex-1")}
+                  className={cn(
+                    buttonVariants({ variant: "outline" }),
+                    "flex-1",
+                  )}
                 >
                   View on Explorer
                 </a>
@@ -168,7 +174,7 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
 
 /**
@@ -176,8 +182,8 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
  * Shows past transactions
  */
 export function TransactionHistoryModal() {
-  const [open, setOpen] = React.useState(false)
-  const { transactions } = useTransaction()
+  const [open, setOpen] = React.useState(false);
+  const { transactions } = useTransaction();
 
   return (
     <>
@@ -219,5 +225,5 @@ export function TransactionHistoryModal() {
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

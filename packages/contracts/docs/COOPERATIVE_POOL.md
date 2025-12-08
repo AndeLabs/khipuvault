@@ -103,20 +103,20 @@ uint256 public constant MAX_MEMBERS_LIMIT = 100;          // Max members per poo
 
 ### Mappings
 
-| Variable | Type | Purpose |
-|----------|------|---------|
-| `pools` | `mapping(uint256 => PoolInfo)` | Pool ID → Pool data |
-| `poolMembers` | `mapping(uint256 => mapping(address => MemberInfo))` | Pool members |
-| `poolMembersList` | `mapping(uint256 => address[])` | Member list arrays |
+| Variable          | Type                                                 | Purpose             |
+| ----------------- | ---------------------------------------------------- | ------------------- |
+| `pools`           | `mapping(uint256 => PoolInfo)`                       | Pool ID → Pool data |
+| `poolMembers`     | `mapping(uint256 => mapping(address => MemberInfo))` | Pool members        |
+| `poolMembersList` | `mapping(uint256 => address[])`                      | Member list arrays  |
 
 ### Global State
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `poolCounter` | `uint256` | Incrementing pool ID counter |
-| `performanceFee` | `uint256` | Fee on yields (100 = 1%) |
-| `feeCollector` | `address` | Fee recipient |
-| `emergencyMode` | `bool` | Emergency bypass flag |
+| Variable         | Type      | Description                  |
+| ---------------- | --------- | ---------------------------- |
+| `poolCounter`    | `uint256` | Incrementing pool ID counter |
+| `performanceFee` | `uint256` | Fee on yields (100 = 1%)     |
+| `feeCollector`   | `address` | Fee recipient                |
+| `emergencyMode`  | `bool`    | Emergency bypass flag        |
 
 ---
 
@@ -129,12 +129,14 @@ uint256 public constant MAX_MEMBERS_LIMIT = 100;          // Max members per poo
 Creates a new cooperative savings pool.
 
 **Parameters:**
+
 - `name`: Human-readable pool name
 - `minContribution`: Minimum BTC contribution per member
 - `maxContribution`: Maximum BTC contribution per member
 - `maxMembers`: Pool member limit (1-100)
 
 **Requirements:**
+
 - `minContribution >= MIN_CONTRIBUTION` (0.001 BTC)
 - `maxContribution >= minContribution`
 - `maxMembers > 0 && <= MAX_MEMBERS_LIMIT`
@@ -142,6 +144,7 @@ Creates a new cooperative savings pool.
 **Returns:** `poolId` - Unique pool identifier
 
 **Effects:**
+
 - Increments `poolCounter`
 - Creates new `PoolInfo` entry
 - Sets status to `ACCEPTING`
@@ -168,11 +171,13 @@ uint256 poolId = pool.createPool(
 Join an existing pool by contributing BTC.
 
 **Parameters:**
+
 - `poolId`: Target pool ID
 
 **Payment:** `msg.value` - BTC amount to contribute
 
 **Requirements:**
+
 - Pool status is `ACCEPTING`
 - Pool not full (`currentMembers < maxMembers`)
 - `msg.value >= minContribution`
@@ -180,6 +185,7 @@ Join an existing pool by contributing BTC.
 - Sender not already a member
 
 **Effects:**
+
 - Transfers BTC from sender (via `msg.value`)
 - Adds member to pool
 - Increments `currentMembers`
@@ -191,6 +197,7 @@ Join an existing pool by contributing BTC.
 - Emits `MemberJoined` event
 
 **Share Calculation:**
+
 ```solidity
 // Initial shares equal to BTC contributed
 member.shares = btcAmount;
@@ -213,15 +220,18 @@ pool.joinPool{value: 0.5 ether}(poolId);
 Leave pool and withdraw BTC + proportional yields.
 
 **Parameters:**
+
 - `poolId`: Pool to leave
 
 **Requirements:**
+
 - Sender is active member
 - Pool exists
 
 **Withdrawal Logic:**
 
 1. **Calculate Member Share:**
+
 ```solidity
 uint256 totalShares = _getTotalShares(poolId);
 uint256 memberShare = (member.shares * 1e18) / totalShares;
@@ -229,18 +239,21 @@ uint256 memberShare = (member.shares * 1e18) / totalShares;
 ```
 
 2. **Calculate MUSD to Repay:**
+
 ```solidity
 uint256 musdToRepay = (pool.totalMusdMinted * memberShare) / 1e18;
 // Burn this amount to reclaim BTC
 ```
 
 3. **Calculate Yields:**
+
 ```solidity
 uint256 memberYield = _calculateMemberYield(poolId, msg.sender);
 // Proportional share of pool yields
 ```
 
 4. **Withdraw from Aggregator (if needed):**
+
 ```solidity
 if (poolMusdBalance < totalNeeded) {
     YIELD_AGGREGATOR.withdraw(safeWithdraw);
@@ -248,12 +261,14 @@ if (poolMusdBalance < totalNeeded) {
 ```
 
 5. **Burn MUSD, Receive BTC:**
+
 ```solidity
 MEZO_INTEGRATION.burnAndWithdraw(musdToRepay);
 // Returns BTC to contract
 ```
 
 6. **Transfer BTC + Net Yields:**
+
 ```solidity
 // BTC to member
 (bool success, ) = msg.sender.call{value: btcAmount}("");
@@ -263,6 +278,7 @@ MUSD.safeTransfer(msg.sender, netYield);
 ```
 
 **Fee Deduction:**
+
 ```solidity
 feeAmount = (memberYield * performanceFee) / 10000; // 1% default
 netYield = memberYield - feeAmount;
@@ -282,21 +298,25 @@ pool.leavePool(poolId);
 Partially withdraw from pool without fully leaving.
 
 **Parameters:**
+
 - `poolId`: Target pool
 - `withdrawAmount`: BTC amount to withdraw
 
 **Requirements:**
+
 - Sender is active member
 - `withdrawAmount < member.btcContributed`
 - Remaining contribution >= `minContribution`
 
 **Effects:**
+
 - Reduces member's contribution and shares proportionally
 - Burns proportional MUSD
 - Returns BTC to member
 - Maintains membership status
 
 **Share Reduction:**
+
 ```solidity
 uint256 withdrawShare = (withdrawAmount * 1e18) / currentContribution;
 uint256 sharesToBurn = (member.shares * withdrawShare) / 1e18;
@@ -318,13 +338,16 @@ pool.withdrawPartial(poolId, 0.2 ether);
 Claim accumulated yields without withdrawing principal.
 
 **Parameters:**
+
 - `poolId`: Target pool
 
 **Requirements:**
+
 - Sender is active member
 - Member has pending yields
 
 **Yield Calculation:**
+
 ```solidity
 function _calculateMemberYield(uint256 poolId, address member)
     internal view returns (uint256)
@@ -347,6 +370,7 @@ function _calculateMemberYield(uint256 poolId, address member)
 ```
 
 **Effects:**
+
 - Claims yields from YieldAggregator
 - Deducts performance fee
 - Transfers net yield to member
@@ -429,6 +453,7 @@ function _getTotalShares(uint256 poolId) internal view returns (uint256 total) {
 Returns pool statistics.
 
 **Returns:**
+
 - `totalBtc` - Total BTC deposited
 - `totalMusd` - Total MUSD minted
 - `totalYield` - Cumulative yields
@@ -460,6 +485,7 @@ Enables emergency mode (bypasses flash loan check, waives fees).
 **Access:** Owner only
 
 **Requirements:**
+
 - `newFee <= 1000` (max 10%)
 
 ---
@@ -469,6 +495,7 @@ Enables emergency mode (bypasses flash loan check, waives fees).
 **Access:** Pool creator or owner
 
 **Effects:**
+
 - Sets `allowNewMembers = false`
 - Sets status to `CLOSED`
 - Members can still withdraw
@@ -552,6 +579,7 @@ Carol's yield: (3 / 6) * 0.6 = 0.3 MUSD
 ```
 
 **Code Implementation:**
+
 ```solidity
 uint256 totalShares = _getTotalShares(poolId); // 6
 uint256 aliceShares = poolMembers[poolId][alice].shares; // 1
@@ -571,6 +599,7 @@ uint256 aliceYield = (totalYield * aliceShare) / 1e18;
 **Fee Rate:** 1% of yields (default)
 
 **Calculation:**
+
 ```solidity
 uint256 grossYield = 100 ether;
 uint256 feeAmount = (grossYield * performanceFee) / 10000;
@@ -581,6 +610,7 @@ uint256 netYield = grossYield - feeAmount;
 ```
 
 **Distribution:**
+
 - Net yield → Member
 - Fee → `feeCollector` address
 
@@ -595,6 +625,7 @@ uint256 netYield = grossYield - feeAmount;
 **Scenario:** Pool's MUSD balance < required for withdrawal
 
 **Handling:**
+
 ```solidity
 uint256 poolMusdBalance = MUSD.balanceOf(address(this));
 
@@ -626,6 +657,7 @@ if (poolMusdBalance < totalNeeded) {
 **Scenario:** Member leaves before yields accumulate
 
 **Behavior:**
+
 ```solidity
 uint256 memberYield = _calculateMemberYield(poolId, msg.sender);
 // Returns 0 if no yields
@@ -646,6 +678,7 @@ MEZO_INTEGRATION.burnAndWithdraw(musdToRepay);
 **Scenario:** Only one active member remains
 
 **Behavior:**
+
 ```solidity
 uint256 totalShares = _getTotalShares(poolId); // member.shares
 uint256 memberShare = (member.shares * 1e18) / totalShares;
@@ -661,6 +694,7 @@ uint256 memberShare = (member.shares * 1e18) / totalShares;
 **Scenario:** Member adds more BTC after pool starts earning
 
 **Handling:**
+
 ```solidity
 if (!member.active) {
     // New member
@@ -687,6 +721,7 @@ if (!member.active) {
 **Current Behavior:** Transaction fails, member cannot leave
 
 **Recommendation:**
+
 ```solidity
 // Future improvement: emergency withdrawal path
 if (emergencyMode) {
@@ -703,6 +738,7 @@ if (emergencyMode) {
 ### 1. Storage Packing
 
 **PoolInfo Packing:**
+
 ```solidity
 struct PoolInfo {
     uint128 minContribution;     // Slot 0
@@ -723,6 +759,7 @@ struct PoolInfo {
 ### 2. Minimal External Calls
 
 **Batching Aggregator Queries:**
+
 ```solidity
 // Bad: Multiple calls
 uint256 yield1 = YIELD_AGGREGATOR.getPendingYield(pool1);
@@ -753,42 +790,45 @@ for (uint256 i = 0; i < length; i++) {
 ### Critical Invariants
 
 1. **Share Conservation:**
+
 ```solidity
 sum(member.shares for all active members) == totalShares
 ```
 
 2. **BTC Conservation:**
+
 ```solidity
 pool.totalBtcDeposited == sum(member.btcContributed for all active members)
 ```
 
 3. **MUSD Backing:**
+
 ```solidity
 pool.totalMusdMinted <= mezoProtocol.getTotalDebt(address(this))
 ```
 
 ### Attack Vectors
 
-| Attack | Mitigation | Status |
-|--------|------------|--------|
-| Reentrancy | `nonReentrant` modifier | PROTECTED |
-| Flash loans | `noFlashLoan` modifier | PROTECTED |
-| Front-running yields | Share-based distribution | MITIGATED |
-| Griefing (dust contributions) | `MIN_CONTRIBUTION` check | PROTECTED |
-| Sybil attack (multiple identities) | Irrelevant (shares are proportional) | N/A |
+| Attack                             | Mitigation                           | Status    |
+| ---------------------------------- | ------------------------------------ | --------- |
+| Reentrancy                         | `nonReentrant` modifier              | PROTECTED |
+| Flash loans                        | `noFlashLoan` modifier               | PROTECTED |
+| Front-running yields               | Share-based distribution             | MITIGATED |
+| Griefing (dust contributions)      | `MIN_CONTRIBUTION` check             | PROTECTED |
+| Sybil attack (multiple identities) | Irrelevant (shares are proportional) | N/A       |
 
 ### Access Control Matrix
 
-| Function | Creator | Owner | Members | Public |
-|----------|---------|-------|---------|--------|
-| `createPool` | - | - | - | ✓ |
-| `joinPool` | - | - | - | ✓ |
-| `leavePool` | - | - | ✓ | - |
-| `withdrawPartial` | - | - | ✓ | - |
-| `claimYield` | - | - | ✓ | - |
-| `closePool` | ✓ | ✓ | - | - |
-| `setPerformanceFee` | - | ✓ | - | - |
-| `setEmergencyMode` | - | ✓ | - | - |
+| Function            | Creator | Owner | Members | Public |
+| ------------------- | ------- | ----- | ------- | ------ |
+| `createPool`        | -       | -     | -       | ✓      |
+| `joinPool`          | -       | -     | -       | ✓      |
+| `leavePool`         | -       | -     | ✓       | -      |
+| `withdrawPartial`   | -       | -     | ✓       | -      |
+| `claimYield`        | -       | -     | ✓       | -      |
+| `closePool`         | ✓       | ✓     | -       | -      |
+| `setPerformanceFee` | -       | ✓     | -       | -      |
+| `setEmergencyMode`  | -       | ✓     | -       | -      |
 
 ---
 

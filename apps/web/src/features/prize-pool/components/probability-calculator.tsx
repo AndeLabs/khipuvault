@@ -5,24 +5,32 @@
  * Interactive tool to calculate win probability based on ticket count
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
-import { Badge } from '@/components/ui/badge'
-import { Calculator, TrendingUp, DollarSign, Percent } from 'lucide-react'
-import { formatEther } from 'viem'
-import type { LotteryRound } from '@/lib/blockchain/fetch-lottery-pools'
+import * as React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Badge } from "@/components/ui/badge";
+import { Calculator, TrendingUp, DollarSign, Percent } from "lucide-react";
+import { formatEther } from "viem";
+import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
 interface ProbabilityCalculatorProps {
-  roundInfo: LotteryRound | null
+  roundInfo: LotteryRound | null;
 }
 
-export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps) {
-  const [ticketCount, setTicketCount] = React.useState(1)
+export function ProbabilityCalculator({
+  roundInfo,
+}: ProbabilityCalculatorProps) {
+  const [ticketCount, setTicketCount] = React.useState(1);
 
   if (!roundInfo) {
     return (
@@ -34,35 +42,36 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const maxTickets = 10 // MAX_TICKETS_PER_USER
-  const ticketPrice = roundInfo.ticketPrice
-  const totalPrize = roundInfo.totalPrize
+  const maxTickets = 10; // MAX_TICKETS_PER_USER
+  const ticketPrice = roundInfo.ticketPrice;
+  const totalPrize = roundInfo.totalPrize;
 
   // Calculate metrics
-  const totalCost = ticketPrice * BigInt(ticketCount)
-  const estimatedTotalTickets = Number(roundInfo.totalTicketsSold) + ticketCount
-  const probability = estimatedTotalTickets > 0
-    ? (ticketCount / estimatedTotalTickets) * 100
-    : 0
+  const totalCost = ticketPrice * BigInt(ticketCount);
+  const estimatedTotalTickets =
+    Number(roundInfo.totalTicketsSold) + ticketCount;
+  const probability =
+    estimatedTotalTickets > 0 ? (ticketCount / estimatedTotalTickets) * 100 : 0;
 
   // Expected value calculation (simplified)
-  const expectedWinnings = totalPrize
-  const expectedValue = (probability / 100) * Number(formatEther(expectedWinnings))
-  const costInEther = Number(formatEther(totalCost))
-  const netExpectedValue = expectedValue - costInEther
-  const roi = costInEther > 0 ? ((netExpectedValue / costInEther) * 100) : 0
+  const expectedWinnings = totalPrize;
+  const expectedValue =
+    (probability / 100) * Number(formatEther(expectedWinnings));
+  const costInEther = Number(formatEther(totalCost));
+  const netExpectedValue = expectedValue - costInEther;
+  const roi = costInEther > 0 ? (netExpectedValue / costInEther) * 100 : 0;
 
   const handleSliderChange = (value: number[]) => {
-    setTicketCount(value[0])
-  }
+    setTicketCount(value[0]);
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const value = parseInt(e.target.value) || 1
-    setTicketCount(Math.max(1, Math.min(maxTickets, value)))
-  }
+    const value = parseInt(e.target.value) || 1;
+    setTicketCount(Math.max(1, Math.min(maxTickets, value)));
+  };
 
   return (
     <Card>
@@ -90,7 +99,10 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
               onChange={handleInputChange}
               className="flex-1"
             />
-            <Badge variant="secondary" className="px-4 flex items-center justify-center">
+            <Badge
+              variant="secondary"
+              className="px-4 flex items-center justify-center"
+            >
               {ticketCount} / {maxTickets}
             </Badge>
           </div>
@@ -116,8 +128,12 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
                   <Percent className="h-5 w-5 text-lavanda" />
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground mb-1">Win Probability</div>
-                  <div className="text-2xl font-bold text-lavanda">{probability.toFixed(2)}%</div>
+                  <div className="text-xs text-muted-foreground mb-1">
+                    Win Probability
+                  </div>
+                  <div className="text-2xl font-bold text-lavanda">
+                    {probability.toFixed(2)}%
+                  </div>
                 </div>
               </div>
             </div>
@@ -131,8 +147,12 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
                   <DollarSign className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground mb-1">Total Cost</div>
-                  <div className="text-xl font-bold">{formatEther(totalCost)} BTC</div>
+                  <div className="text-xs text-muted-foreground mb-1">
+                    Total Cost
+                  </div>
+                  <div className="text-xl font-bold">
+                    {formatEther(totalCost)} BTC
+                  </div>
                 </div>
               </div>
             </div>
@@ -146,9 +166,14 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
                   <TrendingUp className="h-5 w-5 text-success" />
                 </div>
                 <div>
-                  <div className="text-xs text-muted-foreground mb-1">Expected Value</div>
-                  <div className={`text-xl font-bold ${netExpectedValue >= 0 ? 'text-success' : 'text-destructive'}`}>
-                    {netExpectedValue >= 0 ? '+' : ''}{netExpectedValue.toFixed(4)} BTC
+                  <div className="text-xs text-muted-foreground mb-1">
+                    Expected Value
+                  </div>
+                  <div
+                    className={`text-xl font-bold ${netExpectedValue >= 0 ? "text-success" : "text-destructive"}`}
+                  >
+                    {netExpectedValue >= 0 ? "+" : ""}
+                    {netExpectedValue.toFixed(4)} BTC
                   </div>
                 </div>
               </div>
@@ -159,9 +184,14 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
           <div className="p-4 rounded-lg bg-surface-elevated border border-border">
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <div className="text-xs text-muted-foreground mb-1">Return on Investment</div>
-                <div className={`text-xl font-bold ${roi >= 0 ? 'text-success' : 'text-destructive'}`}>
-                  {roi >= 0 ? '+' : ''}{roi.toFixed(2)}%
+                <div className="text-xs text-muted-foreground mb-1">
+                  Return on Investment
+                </div>
+                <div
+                  className={`text-xl font-bold ${roi >= 0 ? "text-success" : "text-destructive"}`}
+                >
+                  {roi >= 0 ? "+" : ""}
+                  {roi.toFixed(2)}%
                 </div>
               </div>
             </div>
@@ -171,7 +201,9 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
         {/* Info */}
         <div className="p-3 rounded-lg bg-info/10 border border-info/20">
           <p className="text-xs text-info-foreground">
-            <strong>Note:</strong> These are estimates. Actual probability depends on total tickets sold. Expected value assumes ticket prices contribute to prize pool.
+            <strong>Note:</strong> These are estimates. Actual probability
+            depends on total tickets sold. Expected value assumes ticket prices
+            contribute to prize pool.
           </p>
         </div>
 
@@ -180,22 +212,29 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
           <div className="text-sm font-medium">Probability Comparison</div>
           <div className="space-y-1">
             {[1, 3, 5, 10].map((count) => {
-              const prob = ((count / (Number(roundInfo.totalTicketsSold) + count)) * 100).toFixed(2)
+              const prob = (
+                (count / (Number(roundInfo.totalTicketsSold) + count)) *
+                100
+              ).toFixed(2);
               return (
                 <div
                   key={count}
                   className={`flex justify-between p-2 rounded text-sm ${
-                    count === ticketCount ? 'bg-lavanda/10 border border-lavanda/20' : 'bg-surface-elevated'
+                    count === ticketCount
+                      ? "bg-lavanda/10 border border-lavanda/20"
+                      : "bg-surface-elevated"
                   }`}
                 >
-                  <span className="text-muted-foreground">{count} ticket{count > 1 ? 's' : ''}</span>
+                  <span className="text-muted-foreground">
+                    {count} ticket{count > 1 ? "s" : ""}
+                  </span>
                   <span className="font-medium">{prob}%</span>
                 </div>
-              )
+              );
             })}
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

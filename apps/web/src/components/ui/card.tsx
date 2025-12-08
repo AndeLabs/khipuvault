@@ -1,7 +1,7 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 const cardVariants = cva(
   "rounded-lg border text-card-foreground shadow-sm transition-all duration-base",
@@ -26,8 +26,8 @@ const cardVariants = cva(
       variant: "default",
       hover: "none",
     },
-  }
-)
+  },
+);
 
 export interface CardProps
   extends React.HTMLAttributes<HTMLDivElement>,
@@ -40,9 +40,9 @@ const Card = React.forwardRef<HTMLDivElement, CardProps>(
       className={cn(cardVariants({ variant, hover }), className)}
       {...props}
     />
-  )
-)
-Card.displayName = "Card"
+  ),
+);
+Card.displayName = "Card";
 
 const CardHeader = React.forwardRef<
   HTMLDivElement,
@@ -53,8 +53,8 @@ const CardHeader = React.forwardRef<
     className={cn("flex flex-col space-y-1.5 p-6", className)}
     {...props}
   />
-))
-CardHeader.displayName = "CardHeader"
+));
+CardHeader.displayName = "CardHeader";
 
 const CardTitle = React.forwardRef<
   HTMLDivElement,
@@ -64,12 +64,12 @@ const CardTitle = React.forwardRef<
     ref={ref}
     className={cn(
       "text-2xl font-heading font-semibold leading-none tracking-tight",
-      className
+      className,
     )}
     {...props}
   />
-))
-CardTitle.displayName = "CardTitle"
+));
+CardTitle.displayName = "CardTitle";
 
 const CardDescription = React.forwardRef<
   HTMLDivElement,
@@ -80,16 +80,16 @@ const CardDescription = React.forwardRef<
     className={cn("text-sm text-muted-foreground", className)}
     {...props}
   />
-))
-CardDescription.displayName = "CardDescription"
+));
+CardDescription.displayName = "CardDescription";
 
 const CardContent = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={cn("p-6 pt-0", className)} {...props} />
-))
-CardContent.displayName = "CardContent"
+));
+CardContent.displayName = "CardContent";
 
 const CardFooter = React.forwardRef<
   HTMLDivElement,
@@ -100,8 +100,8 @@ const CardFooter = React.forwardRef<
     className={cn("flex items-center p-6 pt-0", className)}
     {...props}
   />
-))
-CardFooter.displayName = "CardFooter"
+));
+CardFooter.displayName = "CardFooter";
 
 // Stat Card - specialized variant for displaying metrics
 const StatCard = React.forwardRef<
@@ -117,8 +117,8 @@ const StatCard = React.forwardRef<
   >
     {children}
   </Card>
-))
-StatCard.displayName = "StatCard"
+));
+StatCard.displayName = "StatCard";
 
 const StatValue = React.forwardRef<
   HTMLDivElement,
@@ -131,20 +131,20 @@ const StatValue = React.forwardRef<
       trend === "up" && "text-success",
       trend === "down" && "text-error",
       trend === "neutral" && "text-foreground",
-      className
+      className,
     )}
     {...props}
   />
-))
-StatValue.displayName = "StatValue"
+));
+StatValue.displayName = "StatValue";
 
 const StatLabel = React.forwardRef<
   HTMLDivElement,
   React.HTMLAttributes<HTMLDivElement>
 >(({ className, ...props }, ref) => (
   <div ref={ref} className={cn("label", className)} {...props} />
-))
-StatLabel.displayName = "StatLabel"
+));
+StatLabel.displayName = "StatLabel";
 
 export {
   Card,
@@ -157,4 +157,4 @@ export {
   StatValue,
   StatLabel,
   cardVariants,
-}
+};

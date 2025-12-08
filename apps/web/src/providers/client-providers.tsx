@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
-import { ReactNode } from 'react'
-import { Web3Provider, Web3ErrorBoundary } from './web3-provider'
-import { NetworkSwitcher } from '@/components/web3/network-switcher'
-import { Toaster } from '@/components/ui/toaster'
+import { ReactNode } from "react";
+import { Web3Provider, Web3ErrorBoundary } from "./web3-provider";
+import { NetworkSwitcher } from "@/components/web3/network-switcher";
+import { Toaster } from "@/components/ui/toaster";
 
 interface ClientProvidersProps {
-  children: ReactNode
+  children: ReactNode;
   /** Initial Wagmi state from cookies for SSR hydration */
-  initialState?: any
+  initialState?: any;
 }
 
 /**
@@ -16,7 +16,10 @@ interface ClientProvidersProps {
  * Accepts initialState from parent Server Component for SSR hydration
  * This component ensures all client-side providers are only rendered on the client
  */
-export function ClientProviders({ children, initialState }: ClientProvidersProps) {
+export function ClientProviders({
+  children,
+  initialState,
+}: ClientProvidersProps) {
   return (
     <Web3ErrorBoundary>
       <Web3Provider theme="dark" initialState={initialState}>
@@ -25,5 +28,5 @@ export function ClientProviders({ children, initialState }: ClientProvidersProps
         <Toaster />
       </Web3Provider>
     </Web3ErrorBoundary>
-  )
+  );
 }

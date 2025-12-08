@@ -5,24 +5,27 @@
  * Large hero card showcasing the current active lottery round
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Progress } from '@/components/ui/progress'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Trophy, Ticket, Users, Clock, TrendingUp } from 'lucide-react'
-import { formatEther } from 'viem'
-import type { LotteryRound } from '@/lib/blockchain/fetch-lottery-pools'
-import { getTimeRemaining, getRoundStatus } from '@/hooks/web3/use-lottery-pool'
+import * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Trophy, Ticket, Users, Clock, TrendingUp } from "lucide-react";
+import { formatEther } from "viem";
+import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
+import {
+  getTimeRemaining,
+  getRoundStatus,
+} from "@/hooks/web3/use-lottery-pool";
 
 interface ActiveLotteryHeroProps {
-  roundInfo: LotteryRound | null | undefined
-  userTicketCount?: bigint
-  isLoading?: boolean
-  onBuyTickets: () => void
+  roundInfo: LotteryRound | null | undefined;
+  userTicketCount?: bigint;
+  isLoading?: boolean;
+  onBuyTickets: () => void;
 }
 
 export function ActiveLotteryHero({
@@ -32,19 +35,21 @@ export function ActiveLotteryHero({
   onBuyTickets,
 }: ActiveLotteryHeroProps) {
   const [timeRemaining, setTimeRemaining] = React.useState(
-    roundInfo ? getTimeRemaining(roundInfo.endTime) : { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 }
-  )
+    roundInfo
+      ? getTimeRemaining(roundInfo.endTime)
+      : { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 },
+  );
 
   // Update countdown every second
   React.useEffect(() => {
-    if (!roundInfo) return
+    if (!roundInfo) return;
 
     const interval = setInterval(() => {
-      setTimeRemaining(getTimeRemaining(roundInfo.endTime))
-    }, 1000)
+      setTimeRemaining(getTimeRemaining(roundInfo.endTime));
+    }, 1000);
 
-    return () => clearInterval(interval)
-  }, [roundInfo])
+    return () => clearInterval(interval);
+  }, [roundInfo]);
 
   if (isLoading) {
     return (
@@ -58,7 +63,7 @@ export function ActiveLotteryHero({
           <Skeleton className="h-12 w-full" />
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (!roundInfo) {
@@ -72,15 +77,17 @@ export function ActiveLotteryHero({
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const ticketsSoldPercentage = Number(roundInfo.maxTickets) > 0
-    ? (Number(roundInfo.totalTicketsSold) / Number(roundInfo.maxTickets)) * 100
-    : 0
+  const ticketsSoldPercentage =
+    Number(roundInfo.maxTickets) > 0
+      ? (Number(roundInfo.totalTicketsSold) / Number(roundInfo.maxTickets)) *
+        100
+      : 0;
 
-  const isExpired = timeRemaining.total <= 0
-  const statusText = getRoundStatus(roundInfo.status)
+  const isExpired = timeRemaining.total <= 0;
+  const statusText = getRoundStatus(roundInfo.status);
 
   return (
     <Card className="border-lavanda/20 bg-gradient-to-br from-lavanda/5 via-lavanda/10 to-lavanda/5 overflow-hidden">
@@ -91,9 +98,19 @@ export function ActiveLotteryHero({
           <div>
             <div className="flex items-center gap-3 mb-2">
               <Trophy className="h-8 w-8 text-lavanda" />
-              <CardTitle className="text-3xl">Prize Pool Round #{roundInfo.roundId.toString()}</CardTitle>
+              <CardTitle className="text-3xl">
+                Prize Pool Round #{roundInfo.roundId.toString()}
+              </CardTitle>
             </div>
-            <Badge variant={roundInfo.status === 0 ? 'default' : roundInfo.status === 1 ? 'secondary' : 'outline'}>
+            <Badge
+              variant={
+                roundInfo.status === 0
+                  ? "default"
+                  : roundInfo.status === 1
+                    ? "secondary"
+                    : "outline"
+              }
+            >
               {statusText}
             </Badge>
           </div>
@@ -101,7 +118,7 @@ export function ActiveLotteryHero({
           {/* Countdown */}
           <div className="text-right">
             <div className="text-sm text-muted-foreground mb-1">
-              {isExpired ? 'Ended' : 'Time Remaining'}
+              {isExpired ? "Ended" : "Time Remaining"}
             </div>
             <div className="flex items-center gap-2 text-2xl font-bold">
               <Clock className="h-5 w-5 text-lavanda" />
@@ -110,9 +127,9 @@ export function ActiveLotteryHero({
               ) : (
                 <span>
                   {timeRemaining.days > 0 && `${timeRemaining.days}d `}
-                  {String(timeRemaining.hours).padStart(2, '0')}:
-                  {String(timeRemaining.minutes).padStart(2, '0')}:
-                  {String(timeRemaining.seconds).padStart(2, '0')}
+                  {String(timeRemaining.hours).padStart(2, "0")}:
+                  {String(timeRemaining.minutes).padStart(2, "0")}:
+                  {String(timeRemaining.seconds).padStart(2, "0")}
                 </span>
               )}
             </div>
@@ -123,12 +140,19 @@ export function ActiveLotteryHero({
       <CardContent className="space-y-6">
         {/* Prize Pool Amount */}
         <div className="text-center p-6 rounded-lg bg-gradient-to-br from-lavanda/20 to-lavanda/10 border border-lavanda/20">
-          <div className="text-sm text-muted-foreground mb-2">Total Prize Pool</div>
+          <div className="text-sm text-muted-foreground mb-2">
+            Total Prize Pool
+          </div>
           <div className="text-5xl font-bold text-lavanda mb-1">
             {formatEther(roundInfo.totalPrize)} BTC
           </div>
           <div className="text-sm text-muted-foreground">
-            ≈ ${(Number(formatEther(roundInfo.totalPrize)) * 95000).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} USD
+            ≈ $
+            {(Number(formatEther(roundInfo.totalPrize)) * 95000).toLocaleString(
+              "en-US",
+              { minimumFractionDigits: 2, maximumFractionDigits: 2 },
+            )}{" "}
+            USD
           </div>
         </div>
 
@@ -136,19 +160,25 @@ export function ActiveLotteryHero({
         <div className="grid grid-cols-3 gap-4">
           <div className="text-center p-4 rounded-lg bg-surface-elevated border border-border">
             <Ticket className="h-5 w-5 text-lavanda mx-auto mb-2" />
-            <div className="text-2xl font-bold">{roundInfo.totalTicketsSold.toString()}</div>
+            <div className="text-2xl font-bold">
+              {roundInfo.totalTicketsSold.toString()}
+            </div>
             <div className="text-xs text-muted-foreground">Tickets Sold</div>
           </div>
 
           <div className="text-center p-4 rounded-lg bg-surface-elevated border border-border">
             <Users className="h-5 w-5 text-accent mx-auto mb-2" />
-            <div className="text-2xl font-bold">{userTicketCount.toString()}</div>
+            <div className="text-2xl font-bold">
+              {userTicketCount.toString()}
+            </div>
             <div className="text-xs text-muted-foreground">Your Tickets</div>
           </div>
 
           <div className="text-center p-4 rounded-lg bg-surface-elevated border border-border">
             <TrendingUp className="h-5 w-5 text-success mx-auto mb-2" />
-            <div className="text-2xl font-bold">{formatEther(roundInfo.ticketPrice)}</div>
+            <div className="text-2xl font-bold">
+              {formatEther(roundInfo.ticketPrice)}
+            </div>
             <div className="text-xs text-muted-foreground">BTC per Ticket</div>
           </div>
         </div>
@@ -157,7 +187,9 @@ export function ActiveLotteryHero({
         <div className="space-y-2">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Tickets Progress</span>
-            <span className="font-medium">{ticketsSoldPercentage.toFixed(1)}%</span>
+            <span className="font-medium">
+              {ticketsSoldPercentage.toFixed(1)}%
+            </span>
           </div>
           <Progress value={ticketsSoldPercentage} className="h-3" />
           <div className="flex justify-between text-xs text-muted-foreground">
@@ -193,14 +225,16 @@ export function ActiveLotteryHero({
           </div>
         )}
 
-        {roundInfo.status === 2 && roundInfo.winner !== '0x0000000000000000000000000000000000000000' && (
-          <div className="text-center p-4 rounded-lg bg-success/10 border border-success/20">
-            <p className="text-sm text-success-foreground font-medium">
-              Winner: {roundInfo.winner.slice(0, 6)}...{roundInfo.winner.slice(-4)}
-            </p>
-          </div>
-        )}
+        {roundInfo.status === 2 &&
+          roundInfo.winner !== "0x0000000000000000000000000000000000000000" && (
+            <div className="text-center p-4 rounded-lg bg-success/10 border border-success/20">
+              <p className="text-sm text-success-foreground font-medium">
+                Winner: {roundInfo.winner.slice(0, 6)}...
+                {roundInfo.winner.slice(-4)}
+              </p>
+            </div>
+          )}
       </CardContent>
     </Card>
-  )
+  );
 }

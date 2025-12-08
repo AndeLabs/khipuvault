@@ -5,22 +5,28 @@
  * Display user's purchased tickets for current round
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Ticket, TrendingUp, Trophy, Wallet } from 'lucide-react'
-import { formatEther } from 'viem'
-import { formatProbability } from '@/hooks/web3/use-lottery-pool'
+import * as React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Ticket, TrendingUp, Trophy, Wallet } from "lucide-react";
+import { formatEther } from "viem";
+import { formatProbability } from "@/hooks/web3/use-lottery-pool";
 
 interface YourTicketsProps {
-  ticketCount?: bigint
-  investment?: bigint
-  probability?: bigint
-  isWinner?: boolean
-  isLoading?: boolean
+  ticketCount?: bigint;
+  investment?: bigint;
+  probability?: bigint;
+  isWinner?: boolean;
+  isLoading?: boolean;
 }
 
 export function YourTickets({
@@ -30,7 +36,7 @@ export function YourTickets({
   isWinner = false,
   isLoading,
 }: YourTicketsProps) {
-  const hasTickets = ticketCount > BigInt(0)
+  const hasTickets = ticketCount > BigInt(0);
 
   if (isLoading) {
     return (
@@ -44,11 +50,11 @@ export function YourTickets({
           <Skeleton className="h-16 w-full" />
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
-    <Card className={isWinner ? 'border-success/50 bg-success/5' : ''}>
+    <Card className={isWinner ? "border-success/50 bg-success/5" : ""}>
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -60,7 +66,10 @@ export function YourTickets({
           </div>
 
           {isWinner && (
-            <Badge variant="default" className="bg-success text-success-foreground">
+            <Badge
+              variant="default"
+              className="bg-success text-success-foreground"
+            >
               <Trophy className="h-3 w-3 mr-1" />
               Winner!
             </Badge>
@@ -89,8 +98,12 @@ export function YourTickets({
                     <Ticket className="h-5 w-5 text-lavanda" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold">{ticketCount.toString()}</div>
-                    <div className="text-xs text-muted-foreground">Tickets Purchased</div>
+                    <div className="text-2xl font-bold">
+                      {ticketCount.toString()}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Tickets Purchased
+                    </div>
                   </div>
                 </div>
               </div>
@@ -104,8 +117,12 @@ export function YourTickets({
                     <Wallet className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <div className="text-xl font-bold">{formatEther(investment)} BTC</div>
-                    <div className="text-xs text-muted-foreground">Total Invested</div>
+                    <div className="text-xl font-bold">
+                      {formatEther(investment)} BTC
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Total Invested
+                    </div>
                   </div>
                 </div>
               </div>
@@ -119,8 +136,12 @@ export function YourTickets({
                     <TrendingUp className="h-5 w-5 text-success" />
                   </div>
                   <div>
-                    <div className="text-xl font-bold text-success">{formatProbability(probability)}</div>
-                    <div className="text-xs text-muted-foreground">Win Probability</div>
+                    <div className="text-xl font-bold text-success">
+                      {formatProbability(probability)}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      Win Probability
+                    </div>
                   </div>
                 </div>
               </div>
@@ -129,12 +150,13 @@ export function YourTickets({
             {/* Info */}
             <div className="p-3 rounded-lg bg-info/10 border border-info/20">
               <p className="text-xs text-info-foreground">
-                <strong>Remember:</strong> You never lose your capital! If you don't win, you get your BTC back.
+                <strong>Remember:</strong> You never lose your capital! If you
+                don't win, you get your BTC back.
               </p>
             </div>
           </div>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

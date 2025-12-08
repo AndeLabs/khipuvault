@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import Link from "next/link"
-import { usePathname } from "next/navigation"
+import * as React from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Wallet,
@@ -12,25 +12,25 @@ import {
   ChevronDown,
   TrendingUp,
   DollarSign,
-} from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
-} from "@/components/ui/collapsible"
+} from "@/components/ui/collapsible";
 
 interface NavItem {
-  title: string
-  href: string
-  icon: React.ComponentType<{ className?: string }>
-  badge?: string
+  title: string;
+  href: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: string;
   children?: {
-    title: string
-    href: string
-    icon?: React.ComponentType<{ className?: string }>
-  }[]
+    title: string;
+    href: string;
+    icon?: React.ComponentType<{ className?: string }>;
+  }[];
 }
 
 const navItems: NavItem[] = [
@@ -78,32 +78,32 @@ const navItems: NavItem[] = [
       },
     ],
   },
-]
+];
 
 interface SidebarProps {
-  open?: boolean
-  onClose?: () => void
-  className?: string
+  open?: boolean;
+  onClose?: () => void;
+  className?: string;
 }
 
 export function Sidebar({ open = true, onClose, className }: SidebarProps) {
-  const pathname = usePathname()
-  const [expandedItems, setExpandedItems] = React.useState<string[]>([])
+  const pathname = usePathname();
+  const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) =>
       prev.includes(title)
         ? prev.filter((item) => item !== title)
-        : [...prev, title]
-    )
-  }
+        : [...prev, title],
+    );
+  };
 
   const isActiveRoute = (href: string) => {
     if (href === "/dashboard") {
-      return pathname === href
+      return pathname === href;
     }
-    return pathname?.startsWith(href)
-  }
+    return pathname?.startsWith(href);
+  };
 
   return (
     <>
@@ -120,17 +120,17 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
         className={cn(
           "fixed inset-y-0 left-0 z-50 w-64 border-r border-border bg-surface transition-transform duration-base md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:translate-x-0",
           !open && "-translate-x-full",
-          className
+          className,
         )}
       >
         <nav className="flex flex-col gap-2 p-4 h-full overflow-y-auto">
           {/* Navigation Items */}
           <div className="space-y-1 flex-1">
             {navItems.map((item) => {
-              const Icon = item.icon
-              const isActive = isActiveRoute(item.href)
-              const isExpanded = expandedItems.includes(item.title)
-              const hasChildren = item.children && item.children.length > 0
+              const Icon = item.icon;
+              const isActive = isActiveRoute(item.href);
+              const isExpanded = expandedItems.includes(item.title);
+              const hasChildren = item.children && item.children.length > 0;
 
               if (hasChildren) {
                 return (
@@ -144,7 +144,7 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                         variant="ghost"
                         className={cn(
                           "w-full justify-between",
-                          isActive && "bg-surface-elevated text-lavanda"
+                          isActive && "bg-surface-elevated text-lavanda",
                         )}
                       >
                         <div className="flex items-center gap-3">
@@ -154,14 +154,14 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                         <ChevronDown
                           className={cn(
                             "h-4 w-4 transition-transform duration-fast",
-                            (isExpanded || isActive) && "rotate-180"
+                            (isExpanded || isActive) && "rotate-180",
                           )}
                         />
                       </Button>
                     </CollapsibleTrigger>
                     <CollapsibleContent className="pl-4 mt-1 space-y-1">
                       {item.children?.map((child) => {
-                        const isChildActive = pathname === child.href
+                        const isChildActive = pathname === child.href;
                         return (
                           <Link key={child.href} href={child.href}>
                             <Button
@@ -170,17 +170,17 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                               className={cn(
                                 "w-full justify-start",
                                 isChildActive &&
-                                  "bg-surface-elevated text-lavanda"
+                                  "bg-surface-elevated text-lavanda",
                               )}
                             >
                               {child.title}
                             </Button>
                           </Link>
-                        )
+                        );
                       })}
                     </CollapsibleContent>
                   </Collapsible>
-                )
+                );
               }
 
               return (
@@ -189,7 +189,7 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                     variant="ghost"
                     className={cn(
                       "w-full justify-start gap-3",
-                      isActive && "bg-surface-elevated text-lavanda"
+                      isActive && "bg-surface-elevated text-lavanda",
                     )}
                     onClick={onClose}
                   >
@@ -204,7 +204,7 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                     )}
                   </Button>
                 </Link>
-              )
+              );
             })}
           </div>
 
@@ -228,5 +228,5 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
         </nav>
       </aside>
     </>
-  )
+  );
 }

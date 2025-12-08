@@ -7,9 +7,9 @@
  * - Confirmation required
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
+import * as React from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -19,70 +19,89 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from '@/components/ui/alert-dialog'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
-import { Loader2, AlertTriangle, Bitcoin, TrendingUp } from 'lucide-react'
-import { useCooperativePool, formatBTCCompact, formatMUSD, calculateNetYield } from '@/hooks/web3/use-cooperative-pool'
-import { useMemberInfo, useMemberYield, usePoolInfo } from '@/hooks/web3/use-cooperative-pool'
-import { useToast } from '@/hooks/use-toast'
+} from "@/components/ui/alert-dialog";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import { Loader2, AlertTriangle, Bitcoin, TrendingUp } from "lucide-react";
+import {
+  useCooperativePool,
+  formatBTCCompact,
+  formatMUSD,
+  calculateNetYield,
+} from "@/hooks/web3/use-cooperative-pool";
+import {
+  useMemberInfo,
+  useMemberYield,
+  usePoolInfo,
+} from "@/hooks/web3/use-cooperative-pool";
+import { useToast } from "@/hooks/use-toast";
 
 interface LeavePoolDialogProps {
-  poolId: number | null
-  open: boolean
-  onClose: () => void
-  onSuccess?: () => void
+  poolId: number | null;
+  open: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export function LeavePoolDialog({ poolId, open, onClose, onSuccess }: LeavePoolDialogProps) {
-  const { toast } = useToast()
-  const { leavePool, state, error, reset, performanceFee } = useCooperativePool()
-  const { poolInfo } = usePoolInfo(poolId || 0)
-  const { memberInfo } = useMemberInfo(poolId || 0)
-  const { pendingYield } = useMemberYield(poolId || 0)
+export function LeavePoolDialog({
+  poolId,
+  open,
+  onClose,
+  onSuccess,
+}: LeavePoolDialogProps) {
+  const { toast } = useToast();
+  const { leavePool, state, error, reset, performanceFee } =
+    useCooperativePool();
+  const { poolInfo } = usePoolInfo(poolId || 0);
+  const { memberInfo } = useMemberInfo(poolId || 0);
+  const { pendingYield } = useMemberYield(poolId || 0);
 
   // Handle leave
   const handleLeave = async () => {
-    if (!poolId) return
+    if (!poolId) return;
 
     try {
-      await leavePool(poolId)
+      await leavePool(poolId);
     } catch (err) {
-      console.error('Leave pool error:', err)
+      console.error("Leave pool error:", err);
       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: err instanceof Error ? err.message : 'Failed to leave pool. Please try again.',
-      })
+        variant: "destructive",
+        title: "Error",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Failed to leave pool. Please try again.",
+      });
     }
-  }
+  };
 
   // Handle success
   React.useEffect(() => {
-    if (state === 'success') {
+    if (state === "success") {
       toast({
-        title: 'Left Pool',
-        description: 'You have successfully left the pool and withdrawn your funds.',
-      })
-      onSuccess?.()
-      handleClose()
+        title: "Left Pool",
+        description:
+          "You have successfully left the pool and withdrawn your funds.",
+      });
+      onSuccess?.();
+      handleClose();
     }
-  }, [state])
+  }, [state]);
 
   // Handle close
   const handleClose = () => {
-    reset()
-    onClose()
-  }
+    reset();
+    onClose();
+  };
 
-  const isProcessing = state === 'executing' || state === 'processing'
+  const isProcessing = state === "executing" || state === "processing";
 
-  if (!poolId || !memberInfo) return null
+  if (!poolId || !memberInfo) return null;
 
-  const grossYield = pendingYield
-  const netYield = calculateNetYield(grossYield, performanceFee)
-  const feeAmount = grossYield - netYield
-  const totalWithdrawal = memberInfo.btcContributed
+  const grossYield = pendingYield;
+  const netYield = calculateNetYield(grossYield, performanceFee);
+  const feeAmount = grossYield - netYield;
+  const totalWithdrawal = memberInfo.btcContributed;
 
   return (
     <AlertDialog open={open} onOpenChange={handleClose}>
@@ -93,8 +112,8 @@ export function LeavePoolDialog({ poolId, open, onClose, onSuccess }: LeavePoolD
             Leave Pool?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This action will remove you from the pool and withdraw your contribution plus any earned
-            yields. This action cannot be undone.
+            This action will remove you from the pool and withdraw your
+            contribution plus any earned yields. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -162,13 +181,14 @@ export function LeavePoolDialog({ poolId, open, onClose, onSuccess }: LeavePoolD
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="text-sm">
-              <strong>Warning:</strong> Leaving the pool will permanently remove you from this
-              cooperative. You will need to rejoin to participate again.
+              <strong>Warning:</strong> Leaving the pool will permanently remove
+              you from this cooperative. You will need to rejoin to participate
+              again.
             </AlertDescription>
           </Alert>
 
           {/* Transaction Error */}
-          {error && state === 'error' && (
+          {error && state === "error" && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
@@ -186,14 +206,16 @@ export function LeavePoolDialog({ poolId, open, onClose, onSuccess }: LeavePoolD
             {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {state === 'executing' ? 'Confirm in Wallet...' : 'Leaving Pool...'}
+                {state === "executing"
+                  ? "Confirm in Wallet..."
+                  : "Leaving Pool..."}
               </>
             ) : (
-              'Yes, Leave Pool'
+              "Yes, Leave Pool"
             )}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
-  )
+  );
 }

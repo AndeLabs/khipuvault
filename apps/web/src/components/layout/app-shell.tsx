@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { DashboardHeader } from "./dashboard-header"
-import { Sidebar } from "./sidebar"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { DashboardHeader } from "./dashboard-header";
+import { Sidebar } from "./sidebar";
+import { cn } from "@/lib/utils";
 
 interface AppShellProps {
-  children: React.ReactNode
-  className?: string
+  children: React.ReactNode;
+  className?: string;
 }
 
 export function AppShell({ children, className }: AppShellProps) {
-  const [sidebarOpen, setSidebarOpen] = React.useState(false)
+  const [sidebarOpen, setSidebarOpen] = React.useState(false);
 
-  const toggleSidebar = () => setSidebarOpen((prev) => !prev)
-  const closeSidebar = () => setSidebarOpen(false)
+  const toggleSidebar = () => setSidebarOpen((prev) => !prev);
+  const closeSidebar = () => setSidebarOpen(false);
 
   return (
     <div className="min-h-screen bg-background">
@@ -31,24 +31,24 @@ export function AppShell({ children, className }: AppShellProps) {
             "flex-1 w-full md:ml-0",
             "px-4 md:px-6 py-6",
             "max-w-[1600px] mx-auto",
-            className
+            className,
           )}
         >
           {children}
         </main>
       </div>
     </div>
-  )
+  );
 }
 
 /**
  * Page Header - Reusable header for pages within the AppShell
  */
 interface PageHeaderProps {
-  title: string
-  description?: string
-  actions?: React.ReactNode
-  className?: string
+  title: string;
+  description?: string;
+  actions?: React.ReactNode;
+  className?: string;
 }
 
 export function PageHeader({
@@ -73,17 +73,17 @@ export function PageHeader({
         {actions && <div className="flex items-center gap-2">{actions}</div>}
       </div>
     </div>
-  )
+  );
 }
 
 /**
  * Page Section - Reusable section wrapper for organizing page content
  */
 interface PageSectionProps {
-  title?: string
-  description?: string
-  children: React.ReactNode
-  className?: string
+  title?: string;
+  description?: string;
+  children: React.ReactNode;
+  className?: string;
 }
 
 export function PageSection({
@@ -108,5 +108,5 @@ export function PageSection({
       )}
       {children}
     </section>
-  )
+  );
 }

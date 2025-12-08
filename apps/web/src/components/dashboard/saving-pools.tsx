@@ -1,5 +1,11 @@
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Handshake, Lightbulb, RotateCw, Trophy } from "lucide-react";
 import Link from "next/link";
 
@@ -57,22 +63,22 @@ export function SavingPools() {
         {pools.map((pool, index) => (
           <Card
             key={index}
-            className={`flex flex-col ${pool.primary ? 'bg-card border-primary/50' : 'bg-card border-primary/20'} shadow-custom hover:border-primary/60 transition-all`}
+            className={`flex flex-col ${pool.primary ? "bg-card border-primary/50" : "bg-card border-primary/20"} shadow-custom hover:border-primary/60 transition-all`}
           >
             <CardHeader className="flex-row items-start gap-4 space-y-0">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
-                    {pool.icon}
-                </div>
-                <div>
-                    <CardTitle>{pool.title}</CardTitle>
-                    <CardDescription className="mt-1">
-                        Mínimo: {pool.min}
-                    </CardDescription>
-                </div>
-                <div className="ml-auto text-right">
-                    <p className="text-sm font-bold text-secondary">{pool.apr}</p>
-                    <p className="text-xs text-muted-foreground">APR</p>
-                </div>
+              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10">
+                {pool.icon}
+              </div>
+              <div>
+                <CardTitle>{pool.title}</CardTitle>
+                <CardDescription className="mt-1">
+                  Mínimo: {pool.min}
+                </CardDescription>
+              </div>
+              <div className="ml-auto text-right">
+                <p className="text-sm font-bold text-secondary">{pool.apr}</p>
+                <p className="text-xs text-muted-foreground">APR</p>
+              </div>
             </CardHeader>
             <CardContent className="flex flex-col flex-grow">
               <ul className="space-y-2 text-sm text-muted-foreground flex-grow">
@@ -84,7 +90,16 @@ export function SavingPools() {
                 ))}
               </ul>
               <Link href={pool.href} passHref>
-                <Button variant={(pool.href === '/dashboard/prize-pool' || pool.href === '/dashboard/rotating-pool') || pool.primary ? 'secondary' : 'outline'} className="mt-6 w-full">
+                <Button
+                  variant={
+                    pool.href === "/dashboard/prize-pool" ||
+                    pool.href === "/dashboard/rotating-pool" ||
+                    pool.primary
+                      ? "secondary"
+                      : "outline"
+                  }
+                  className="mt-6 w-full"
+                >
                   {pool.buttonLabel}
                 </Button>
               </Link>

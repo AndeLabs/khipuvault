@@ -1,6 +1,6 @@
-"use client"
+"use client";
 
-import * as React from "react"
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -8,26 +8,26 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { AmountDisplay } from "@/components/common"
-import { Badge } from "@/components/ui/badge"
-import { useTransactionExecute } from "@/features/transactions"
-import { Users, Calendar, TrendingUp, Info, AlertCircle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { AmountDisplay } from "@/components/common";
+import { Badge } from "@/components/ui/badge";
+import { useTransactionExecute } from "@/features/transactions";
+import { Users, Calendar, TrendingUp, Info, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface JoinPoolModalProps {
-  open: boolean
-  onClose: () => void
-  poolId?: string
-  poolName?: string
-  depositAmount?: string
-  maxMembers?: number
-  currentMembers?: number
-  cycleLength?: number
-  currentCycle?: number
-  apy?: number
-  onJoinPool?: (poolId: string) => Promise<any>
+  open: boolean;
+  onClose: () => void;
+  poolId?: string;
+  poolName?: string;
+  depositAmount?: string;
+  maxMembers?: number;
+  currentMembers?: number;
+  cycleLength?: number;
+  currentCycle?: number;
+  apy?: number;
+  onJoinPool?: (poolId: string) => Promise<any>;
 }
 
 export function JoinPoolModal({
@@ -43,25 +43,25 @@ export function JoinPoolModal({
   apy = 15.0,
   onJoinPool,
 }: JoinPoolModalProps) {
-  const { execute } = useTransactionExecute({ type: "Join Cooperative Pool" })
-  const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const { execute } = useTransactionExecute({ type: "Join Cooperative Pool" });
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
-  const spotsLeft = maxMembers - currentMembers
-  const isFull = spotsLeft <= 0
+  const spotsLeft = maxMembers - currentMembers;
+  const isFull = spotsLeft <= 0;
 
   const handleJoin = async () => {
-    if (!poolId || !onJoinPool) return
+    if (!poolId || !onJoinPool) return;
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
       await execute(async () => {
-        return await onJoinPool(poolId)
-      })
-      onClose()
+        return await onJoinPool(poolId);
+      });
+      onClose();
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -87,7 +87,9 @@ export function JoinPoolModal({
               </div>
               <div className="flex items-baseline gap-1">
                 <span className="text-2xl font-bold">{currentMembers}</span>
-                <span className="text-sm text-muted-foreground">/ {maxMembers}</span>
+                <span className="text-sm text-muted-foreground">
+                  / {maxMembers}
+                </span>
               </div>
               <p className="text-xs text-muted-foreground mt-1">
                 {spotsLeft} spots left
@@ -110,12 +112,16 @@ export function JoinPoolModal({
           {/* Deposit Amount */}
           <div className="p-4 rounded-lg bg-gradient-orange border border-accent/20">
             <div className="flex items-center justify-between mb-2">
-              <span className="text-sm text-muted-foreground">Required Deposit</span>
+              <span className="text-sm text-muted-foreground">
+                Required Deposit
+              </span>
               <Badge variant="orange">Per Member</Badge>
             </div>
             <AmountDisplay amount={depositAmount} symbol="mUSD" size="xl" />
             <div className="flex items-center justify-between mt-3 pt-3 border-t border-accent/20">
-              <span className="text-xs text-muted-foreground">Estimated APY</span>
+              <span className="text-xs text-muted-foreground">
+                Estimated APY
+              </span>
               <span className="text-sm font-semibold text-success tabular-nums">
                 {apy.toFixed(1)}%
               </span>
@@ -135,7 +141,9 @@ export function JoinPoolModal({
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-lavanda mt-0.5">•</span>
-                <span>Each cycle, one member receives the total pool + yields</span>
+                <span>
+                  Each cycle, one member receives the total pool + yields
+                </span>
               </li>
               <li className="flex items-start gap-2">
                 <span className="text-lavanda mt-0.5">•</span>
@@ -160,11 +168,7 @@ export function JoinPoolModal({
         </div>
 
         <DialogFooter className="gap-2 sm:gap-0">
-          <Button
-            variant="ghost"
-            onClick={onClose}
-            disabled={isSubmitting}
-          >
+          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
             Cancel
           </Button>
           <Button
@@ -178,5 +182,5 @@ export function JoinPoolModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

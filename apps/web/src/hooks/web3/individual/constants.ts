@@ -8,21 +8,21 @@
 // ============================================================================
 
 export const QUERY_KEYS = {
-  INDIVIDUAL_POOL: ['individual-pool-v3'] as const,
-  YIELD_AGGREGATOR: ['yield-aggregator-v3'] as const,
-  BALANCE: ['balance'] as const,
-} as const
+  INDIVIDUAL_POOL: ["individual-pool-v3"] as const,
+  YIELD_AGGREGATOR: ["yield-aggregator-v3"] as const,
+  BALANCE: ["balance"] as const,
+} as const;
 
 // ============================================================================
 // TRANSACTION STATE
 // ============================================================================
 
 export interface TransactionState {
-  isProcessing: boolean
-  hash: string | null
+  isProcessing: boolean;
+  hash: string | null;
 }
 
 export const INITIAL_TX_STATE: TransactionState = {
   isProcessing: false,
   hash: null,
-}
+};

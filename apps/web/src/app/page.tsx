@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import Link from "next/link";
 import { Header } from "@/components/layout/header";
@@ -10,7 +10,7 @@ import { ContractsSection } from "@/components/sections/contracts-section";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
 export default function Home() {
   return (
@@ -22,7 +22,10 @@ export default function Home() {
         <Features />
         <ContractsSection />
         <div className="text-center py-20">
-          <Link href="/dashboard" className={cn(buttonVariants({ size: "lg", variant: "secondary" }))}>
+          <Link
+            href="/dashboard"
+            className={cn(buttonVariants({ size: "lg", variant: "secondary" }))}
+          >
             Ir al Dashboard
           </Link>
         </div>

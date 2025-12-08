@@ -19,10 +19,10 @@
  * The exports below maintain backward compatibility with existing code.
  */
 
-'use client'
+"use client";
 
 // Re-export everything from the refactored modules
-export * from './cooperative'
+export * from "./cooperative";
 
 // Import and re-export individual query hooks for backward compatibility
 export {
@@ -30,7 +30,7 @@ export {
   useMemberInfo,
   usePoolMembers,
   useMemberYield,
-} from './cooperative/use-pool-queries'
+} from "./cooperative/use-pool-queries";
 
 // Import and re-export the main combined hook
-export { useCooperativePool } from './cooperative'
+export { useCooperativePool } from "./cooperative";

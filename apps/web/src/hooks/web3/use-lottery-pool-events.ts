@@ -9,16 +9,16 @@
  * When events occur, ALL active TanStack Query queries are refetched.
  */
 
-'use client'
+"use client";
 
-import { useWatchContractEvent } from 'wagmi'
-import { useQueryClient } from '@tanstack/react-query'
-import { LOTTERY_POOL_ABI } from '@/lib/web3/lottery-pool-abi'
-import { MEZO_TESTNET_ADDRESSES } from '@/lib/web3/contracts'
-import type { Address } from 'viem'
+import { useWatchContractEvent } from "wagmi";
+import { useQueryClient } from "@tanstack/react-query";
+import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
+import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
+import type { Address } from "viem";
 
 // Use centralized contract address config
-const LOTTERY_POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.lotteryPool as Address
+const LOTTERY_POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.lotteryPool as Address;
 
 /**
  * Hook to watch for LotteryPool contract events and auto-refetch queries
@@ -35,49 +35,49 @@ const LOTTERY_POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.lotteryPool as Address
  * This is the best practice for real-time updates as recommended by TanStack Query docs
  */
 export function useLotteryPoolEvents() {
-  const queryClient = useQueryClient()
+  const queryClient = useQueryClient();
 
   // Watch for RoundCreated events
   useWatchContractEvent({
     address: LOTTERY_POOL_ADDRESS,
     abi: LOTTERY_POOL_ABI,
-    eventName: 'RoundCreated',
+    eventName: "RoundCreated",
     onLogs(logs) {
-      console.log('🔔 RoundCreated event detected:', logs)
-      queryClient.refetchQueries({ type: 'active' })
+      console.log("🔔 RoundCreated event detected:", logs);
+      queryClient.refetchQueries({ type: "active" });
     },
-  })
+  });
 
   // Watch for TicketsPurchased events
   useWatchContractEvent({
     address: LOTTERY_POOL_ADDRESS,
     abi: LOTTERY_POOL_ABI,
-    eventName: 'TicketsPurchased',
+    eventName: "TicketsPurchased",
     onLogs(logs) {
-      console.log('🔔 TicketsPurchased event detected:', logs)
-      queryClient.refetchQueries({ type: 'active' })
+      console.log("🔔 TicketsPurchased event detected:", logs);
+      queryClient.refetchQueries({ type: "active" });
     },
-  })
+  });
 
   // Watch for WinnerSelected events (round drawing completed)
   useWatchContractEvent({
     address: LOTTERY_POOL_ADDRESS,
     abi: LOTTERY_POOL_ABI,
-    eventName: 'WinnerSelected',
+    eventName: "WinnerSelected",
     onLogs(logs) {
-      console.log('🔔 WinnerSelected event detected:', logs)
-      queryClient.refetchQueries({ type: 'active' })
+      console.log("🔔 WinnerSelected event detected:", logs);
+      queryClient.refetchQueries({ type: "active" });
     },
-  })
+  });
 
   // Watch for PrizeClaimed events
   useWatchContractEvent({
     address: LOTTERY_POOL_ADDRESS,
     abi: LOTTERY_POOL_ABI,
-    eventName: 'PrizeClaimed',
+    eventName: "PrizeClaimed",
     onLogs(logs) {
-      console.log('🔔 PrizeClaimed event detected:', logs)
-      queryClient.refetchQueries({ type: 'active' })
+      console.log("🔔 PrizeClaimed event detected:", logs);
+      queryClient.refetchQueries({ type: "active" });
     },
-  })
+  });
 }

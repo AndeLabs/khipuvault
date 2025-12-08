@@ -43,13 +43,14 @@ Extends base configuration with Node.js-specific rules:
 - Relaxed rules for test and config files
 
 **Usage:**
+
 ```js
 module.exports = {
-  extends: ['../../tooling/eslint/node.js'],
+  extends: ["../../tooling/eslint/node.js"],
   parserOptions: {
-    project: './tsconfig.json',
+    project: "./tsconfig.json",
   },
-}
+};
 ```
 
 ### Next.js Configuration (`nextjs.js`)
@@ -78,13 +79,14 @@ Extends base configuration with React and Next.js-specific rules:
   - Config files - allows CommonJS
 
 **Usage:**
+
 ```js
 module.exports = {
-  extends: ['../../tooling/eslint/nextjs.js'],
+  extends: ["../../tooling/eslint/nextjs.js"],
   parserOptions: {
-    project: './tsconfig.json',
+    project: "./tsconfig.json",
   },
-}
+};
 ```
 
 ## Rule Severity Philosophy
@@ -139,6 +141,7 @@ pnpm --filter=@khipu/api lint --fix
 ## Ignoring Patterns
 
 Common ignore patterns are already configured:
+
 - `node_modules/`
 - `dist/`, `build/`, `.next/`, `out/`
 - `coverage/`
@@ -163,27 +166,31 @@ To customize rules for a specific package, add overrides to the package's `.esli
 
 ```js
 module.exports = {
-  extends: ['../../tooling/eslint/node.js'],
+  extends: ["../../tooling/eslint/node.js"],
   parserOptions: {
-    project: './tsconfig.json',
+    project: "./tsconfig.json",
   },
   rules: {
     // Override specific rules
-    'no-console': 'off',
+    "no-console": "off",
   },
-}
+};
 ```
 
 ## Troubleshooting
 
 ### Plugin conflicts
+
 If you see plugin conflicts, ensure you're not duplicating plugin declarations between configs.
 
 ### Import resolution issues
+
 Make sure your `tsconfig.json` has proper path mappings configured.
 
 ### Performance issues
+
 ESLint with TypeScript rules can be slow on large codebases. Consider:
+
 - Using `.eslintignore` for large generated files
 - Running ESLint on changed files only in CI
 - Enabling ESLint caching: `--cache`

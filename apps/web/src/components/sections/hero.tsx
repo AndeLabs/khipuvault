@@ -1,21 +1,21 @@
-'use client'
+"use client";
 
-import { useState } from "react"
-import { Button, buttonVariants } from "@/components/ui/button"
-import { AnimateOnScroll } from "@/components/animate-on-scroll"
+import { useState } from "react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { X } from "lucide-react"
-import Link from "next/link"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dialog";
+import { X } from "lucide-react";
+import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 export function Hero() {
-  const [showVideoModal, setShowVideoModal] = useState(false)
+  const [showVideoModal, setShowVideoModal] = useState(false);
 
   return (
     <>
@@ -29,12 +29,16 @@ export function Hero() {
               </span>
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-lg text-muted-foreground md:text-xl">
-              Digitalizamos tradiciones financieras latinoamericanas. Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.
+              Digitalizamos tradiciones financieras latinoamericanas. Pasanaku,
+              Tandas y Roscas en blockchain con MUSD de Mezo.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link
                 href="/dashboard"
-                className={cn(buttonVariants({ size: "lg", variant: "secondary" }), "transform transition-transform duration-300 hover:scale-105")}
+                className={cn(
+                  buttonVariants({ size: "lg", variant: "secondary" }),
+                  "transform transition-transform duration-300 hover:scale-105",
+                )}
               >
                 🚀 Empezar Ahora
               </Link>
@@ -78,5 +82,5 @@ export function Hero() {
         </DialogContent>
       </Dialog>
     </>
-  )
+  );
 }

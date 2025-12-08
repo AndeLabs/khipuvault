@@ -29,6 +29,7 @@ enum TransactionStatus {
   PENDING
   CONFIRMED
   FAILED
+  REORGED
 }
 
 enum PoolStatus {
@@ -66,6 +67,7 @@ model Deposit {
   // Pool info - denormalized for performance
   poolType    PoolType
   poolId      String? // For cooperative/lottery/rotating pools
+  pool        Pool?   @relation(fields: [poolId], references: [id])
   poolAddress String // Denormalized for fast queries
 
   // Transaction details
@@ -141,6 +143,7 @@ model Pool {
   updatedAt DateTime @updatedAt
 
   analytics PoolAnalytics[]
+  deposits  Deposit[]
 
   @@index([poolType])
   @@index([status])

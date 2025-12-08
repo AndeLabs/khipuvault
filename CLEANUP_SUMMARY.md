@@ -5,6 +5,7 @@
 ### 🗑️ Eliminado (Obsoleto)
 
 #### Carpetas Completas
+
 - ❌ `contracts/` - Duplicado de `packages/contracts/`
 - ❌ `frontend/` - Duplicado de `apps/web/`
 - ❌ `infrastructure/` - Configuración obsoleta
@@ -15,6 +16,7 @@
 - ❌ `tests/` - Tests viejos
 
 #### Archivos Individuales
+
 - ❌ `khipuplan` - Archivo de planning obsoleto
 - ❌ `Makefile` - Ya no se usa (reemplazado por pnpm scripts)
 - ❌ `package-lock.json` - Usamos pnpm, no npm
@@ -68,6 +70,7 @@ KhipuVault/
 ## 📊 Antes vs Después
 
 ### Antes
+
 ```
 22 archivos/carpetas en root
 - Código duplicado (contracts, frontend)
@@ -78,6 +81,7 @@ KhipuVault/
 ```
 
 ### Después
+
 ```
 15 archivos/carpetas en root
 - Solo código activo

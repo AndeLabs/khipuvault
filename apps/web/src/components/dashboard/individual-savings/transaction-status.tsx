@@ -1,26 +1,31 @@
-'use client'
+"use client";
 
-import { Card, CardContent } from '@/components/ui/card'
-import { CheckCircle, Clock, Loader2, ExternalLink } from 'lucide-react'
-import Link from 'next/link'
+import { Card, CardContent } from "@/components/ui/card";
+import { CheckCircle, Clock, Loader2, ExternalLink } from "lucide-react";
+import Link from "next/link";
 
 interface TransactionStatusProps {
-  hash?: string
-  isConfirming: boolean
-  isSuccess: boolean
-  type: 'deposit' | 'withdraw' | 'claim'
+  hash?: string;
+  isConfirming: boolean;
+  isSuccess: boolean;
+  type: "deposit" | "withdraw" | "claim";
 }
 
-export function TransactionStatus({ hash, isConfirming, isSuccess, type }: TransactionStatusProps) {
-  if (!hash) return null
+export function TransactionStatus({
+  hash,
+  isConfirming,
+  isSuccess,
+  type,
+}: TransactionStatusProps) {
+  if (!hash) return null;
 
-  const explorerUrl = `https://explorer.test.mezo.org/tx/${hash}`
-  
+  const explorerUrl = `https://explorer.test.mezo.org/tx/${hash}`;
+
   const typeLabels = {
-    deposit: 'Depósito',
-    withdraw: 'Retiro',
-    claim: 'Reclamo de Yield'
-  }
+    deposit: "Depósito",
+    withdraw: "Retiro",
+    claim: "Reclamo de Yield",
+  };
 
   return (
     <Card className="border-2 border-blue-500/50 bg-blue-500/5">
@@ -35,27 +40,25 @@ export function TransactionStatus({ hash, isConfirming, isSuccess, type }: Trans
               <Clock className="h-5 w-5 text-yellow-500" />
             )}
           </div>
-          
+
           <div className="flex-1 space-y-2">
             <div>
               <p className="text-sm font-semibold text-white">
-                {isSuccess ? (
-                  `✅ ${typeLabels[type]} Confirmado`
-                ) : isConfirming ? (
-                  `⏳ Confirmando ${typeLabels[type]}...`
-                ) : (
-                  `📤 ${typeLabels[type]} Enviado`
-                )}
+                {isSuccess
+                  ? `✅ ${typeLabels[type]} Confirmado`
+                  : isConfirming
+                    ? `⏳ Confirmando ${typeLabels[type]}...`
+                    : `📤 ${typeLabels[type]} Enviado`}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {isSuccess 
-                  ? 'La transacción se ha completado exitosamente. Los balances se actualizarán en breve.'
+                {isSuccess
+                  ? "La transacción se ha completado exitosamente. Los balances se actualizarán en breve."
                   : isConfirming
-                  ? 'Esperando confirmación del blockchain de Mezo...'
-                  : 'Transacción enviada al blockchain.'}
+                    ? "Esperando confirmación del blockchain de Mezo..."
+                    : "Transacción enviada al blockchain."}
               </p>
             </div>
-            
+
             <div className="flex items-center gap-2 text-xs">
               <span className="text-muted-foreground font-mono">
                 {hash.slice(0, 10)}...{hash.slice(-8)}
@@ -73,7 +76,10 @@ export function TransactionStatus({ hash, isConfirming, isSuccess, type }: Trans
             {isConfirming && (
               <div className="mt-2 space-y-1">
                 <div className="h-1 bg-muted rounded-full overflow-hidden">
-                  <div className="h-full bg-blue-500 animate-pulse" style={{ width: '70%' }} />
+                  <div
+                    className="h-full bg-blue-500 animate-pulse"
+                    style={{ width: "70%" }}
+                  />
                 </div>
                 <p className="text-xs text-blue-400">
                   Tiempo estimado: ~10-30 segundos
@@ -92,5 +98,5 @@ export function TransactionStatus({ hash, isConfirming, isSuccess, type }: Trans
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

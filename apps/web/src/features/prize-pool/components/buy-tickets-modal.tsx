@@ -5,9 +5,9 @@
  * Modal for purchasing lottery tickets with BTC
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -15,26 +15,36 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
-import { Ticket, AlertCircle, Wallet, Calculator, CheckCircle2, Loader2 } from 'lucide-react'
-import { formatEther, parseEther } from 'viem'
-import { useAccount, useBalance } from 'wagmi'
-import { useBuyTickets, formatProbability } from '@/hooks/web3/use-lottery-pool'
-import type { LotteryRound } from '@/lib/blockchain/fetch-lottery-pools'
-import { useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import {
+  Ticket,
+  AlertCircle,
+  Wallet,
+  Calculator,
+  CheckCircle2,
+  Loader2,
+} from "lucide-react";
+import { formatEther, parseEther } from "viem";
+import { useAccount, useBalance } from "wagmi";
+import {
+  useBuyTickets,
+  formatProbability,
+} from "@/hooks/web3/use-lottery-pool";
+import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 interface BuyTicketsModalProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  roundInfo: LotteryRound | null
-  currentUserTickets?: bigint
-  maxTicketsPerUser?: bigint
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  roundInfo: LotteryRound | null;
+  currentUserTickets?: bigint;
+  maxTicketsPerUser?: bigint;
 }
 
 export function BuyTicketsModal({
@@ -44,79 +54,90 @@ export function BuyTicketsModal({
   currentUserTickets = BigInt(0),
   maxTicketsPerUser = BigInt(10),
 }: BuyTicketsModalProps) {
-  const { address } = useAccount()
-  const { data: balance } = useBalance({ address })
-  const { buyTickets, isPending, isSuccess, hash, error } = useBuyTickets()
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const { address } = useAccount();
+  const { data: balance } = useBalance({ address });
+  const { buyTickets, isPending, isSuccess, hash, error } = useBuyTickets();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
-  const [ticketCount, setTicketCount] = React.useState('1')
-  const [step, setStep] = React.useState<'input' | 'confirming' | 'success'>('input')
+  const [ticketCount, setTicketCount] = React.useState("1");
+  const [step, setStep] = React.useState<"input" | "confirming" | "success">(
+    "input",
+  );
 
   // Calculate values
-  const ticketCountNum = parseInt(ticketCount) || 0
-  const totalCost = roundInfo ? roundInfo.ticketPrice * BigInt(ticketCountNum) : BigInt(0)
-  const remainingTickets = Number(maxTicketsPerUser) - Number(currentUserTickets)
+  const ticketCountNum = parseInt(ticketCount) || 0;
+  const totalCost = roundInfo
+    ? roundInfo.ticketPrice * BigInt(ticketCountNum)
+    : BigInt(0);
+  const remainingTickets =
+    Number(maxTicketsPerUser) - Number(currentUserTickets);
 
   // Calculate probability
   const estimatedTotalTickets = roundInfo
     ? Number(roundInfo.totalTicketsSold) + ticketCountNum
-    : ticketCountNum
-  const estimatedProbability = estimatedTotalTickets > 0
-    ? (ticketCountNum / estimatedTotalTickets) * 10000
-    : 0
+    : ticketCountNum;
+  const estimatedProbability =
+    estimatedTotalTickets > 0
+      ? (ticketCountNum / estimatedTotalTickets) * 10000
+      : 0;
 
   // Validation
-  const hasEnoughBalance = balance ? balance.value >= totalCost : false
-  const isValidCount = ticketCountNum > 0 && ticketCountNum <= remainingTickets
-  const canPurchase = hasEnoughBalance && isValidCount && !isPending
+  const hasEnoughBalance = balance ? balance.value >= totalCost : false;
+  const isValidCount = ticketCountNum > 0 && ticketCountNum <= remainingTickets;
+  const canPurchase = hasEnoughBalance && isValidCount && !isPending;
 
   // Quick select buttons
-  const quickSelectOptions = [1, 5, 10].filter(n => n <= remainingTickets)
+  const quickSelectOptions = [1, 5, 10].filter((n) => n <= remainingTickets);
 
   // Handle purchase
   const handlePurchase = async () => {
-    if (!roundInfo || !canPurchase) return
+    if (!roundInfo || !canPurchase) return;
 
     try {
-      setStep('confirming')
-      await buyTickets(Number(roundInfo.roundId), ticketCountNum, roundInfo.ticketPrice)
+      setStep("confirming");
+      await buyTickets(
+        Number(roundInfo.roundId),
+        ticketCountNum,
+        roundInfo.ticketPrice,
+      );
     } catch (err) {
-      console.error('Purchase error:', err)
-      setStep('input')
+      console.error("Purchase error:", err);
+      setStep("input");
       toast({
-        title: 'Purchase Failed',
-        description: err instanceof Error ? err.message : 'Failed to purchase tickets',
-        variant: 'destructive',
-      })
+        title: "Purchase Failed",
+        description:
+          err instanceof Error ? err.message : "Failed to purchase tickets",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
   // Watch for transaction success
   React.useEffect(() => {
     if (isSuccess && hash) {
-      setStep('success')
+      setStep("success");
 
       // Refetch lottery data after successful purchase
       setTimeout(() => {
-        queryClient.refetchQueries({ type: 'active' })
-      }, 3000)
+        queryClient.refetchQueries({ type: "active" });
+      }, 3000);
 
       toast({
-        title: 'Tickets Purchased!',
+        title: "Tickets Purchased!",
         description: `Successfully purchased ${ticketCountNum} ticket(s)`,
-      })
+      });
     }
-  }, [isSuccess, hash, ticketCountNum, queryClient, toast])
+  }, [isSuccess, hash, ticketCountNum, queryClient, toast]);
 
   // Reset on close
   const handleClose = () => {
-    setTicketCount('1')
-    setStep('input')
-    onOpenChange(false)
-  }
+    setTicketCount("1");
+    setStep("input");
+    onOpenChange(false);
+  };
 
-  if (!roundInfo) return null
+  if (!roundInfo) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -131,17 +152,26 @@ export function BuyTicketsModal({
           </DialogDescription>
         </DialogHeader>
 
-        {step === 'input' && (
+        {step === "input" && (
           <div className="space-y-6">
             {/* Ticket Price Info */}
             <div className="p-4 rounded-lg bg-surface-elevated border border-border">
               <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-muted-foreground">Ticket Price</span>
-                <Badge variant="secondary">{formatEther(roundInfo.ticketPrice)} BTC</Badge>
+                <span className="text-sm text-muted-foreground">
+                  Ticket Price
+                </span>
+                <Badge variant="secondary">
+                  {formatEther(roundInfo.ticketPrice)} BTC
+                </Badge>
               </div>
               <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">Your Tickets</span>
-                <span className="text-sm font-medium">{currentUserTickets.toString()} / {maxTicketsPerUser.toString()}</span>
+                <span className="text-sm text-muted-foreground">
+                  Your Tickets
+                </span>
+                <span className="text-sm font-medium">
+                  {currentUserTickets.toString()} /{" "}
+                  {maxTicketsPerUser.toString()}
+                </span>
               </div>
             </div>
 
@@ -198,8 +228,12 @@ export function BuyTicketsModal({
 
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Your Wallet</span>
-                <span className={hasEnoughBalance ? 'text-success' : 'text-destructive'}>
-                  {balance ? formatEther(balance.value) : '0'} BTC
+                <span
+                  className={
+                    hasEnoughBalance ? "text-success" : "text-destructive"
+                  }
+                >
+                  {balance ? formatEther(balance.value) : "0"} BTC
                 </span>
               </div>
 
@@ -207,12 +241,16 @@ export function BuyTicketsModal({
 
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Win Probability</span>
-                <span className="font-medium text-lavanda">{formatProbability(BigInt(Math.floor(estimatedProbability)))}</span>
+                <span className="font-medium text-lavanda">
+                  {formatProbability(BigInt(Math.floor(estimatedProbability)))}
+                </span>
               </div>
 
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Potential Prize</span>
-                <span className="font-bold text-success">{formatEther(roundInfo.totalPrize + totalCost)} BTC</span>
+                <span className="font-bold text-success">
+                  {formatEther(roundInfo.totalPrize + totalCost)} BTC
+                </span>
               </div>
             </div>
 
@@ -221,7 +259,8 @@ export function BuyTicketsModal({
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Insufficient BTC balance. You need {formatEther(totalCost)} BTC.
+                  Insufficient BTC balance. You need {formatEther(totalCost)}{" "}
+                  BTC.
                 </AlertDescription>
               </Alert>
             )}
@@ -239,14 +278,14 @@ export function BuyTicketsModal({
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  {error.message || 'Transaction failed. Please try again.'}
+                  {error.message || "Transaction failed. Please try again."}
                 </AlertDescription>
               </Alert>
             )}
           </div>
         )}
 
-        {step === 'confirming' && (
+        {step === "confirming" && (
           <div className="py-8 text-center space-y-4">
             <Loader2 className="h-12 w-12 animate-spin text-lavanda mx-auto" />
             <div>
@@ -258,7 +297,7 @@ export function BuyTicketsModal({
           </div>
         )}
 
-        {step === 'success' && (
+        {step === "success" && (
           <div className="py-8 text-center space-y-4">
             <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center mx-auto">
               <CheckCircle2 className="h-8 w-8 text-success" />
@@ -276,7 +315,7 @@ export function BuyTicketsModal({
         )}
 
         <DialogFooter className="sm:justify-between">
-          {step === 'input' && (
+          {step === "input" && (
             <>
               <Button variant="ghost" onClick={handleClose}>
                 Cancel
@@ -292,13 +331,13 @@ export function BuyTicketsModal({
             </>
           )}
 
-          {step === 'confirming' && (
+          {step === "confirming" && (
             <Button variant="ghost" disabled className="w-full">
               Processing...
             </Button>
           )}
 
-          {step === 'success' && (
+          {step === "success" && (
             <Button onClick={handleClose} className="w-full">
               Close
             </Button>
@@ -306,5 +345,5 @@ export function BuyTicketsModal({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

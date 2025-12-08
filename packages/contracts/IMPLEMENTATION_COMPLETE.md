@@ -17,8 +17,8 @@ La funcionalidad de **retiro parcial** (`withdrawPartial`) ha sido completamente
        nonReentrant
        noFlashLoan
    ```
-   
 2. **Nuevo Evento `PartialWithdrawal`** (líneas 125-131)
+
    ```solidity
    event PartialWithdrawal(
        uint256 indexed poolId,
@@ -34,6 +34,7 @@ La funcionalidad de **retiro parcial** (`withdrawPartial`) ha sido completamente
 ### Funcionalidad
 
 #### ✅ Características
+
 - Retiro parcial sin salir del pool
 - Mantiene membresía activa
 - Quema shares proporcionalmente
@@ -41,16 +42,18 @@ La funcionalidad de **retiro parcial** (`withdrawPartial`) ha sido completamente
 - Protecciones: `nonReentrant` + `noFlashLoan`
 
 #### ✅ Validaciones
+
 - `withdrawAmount > 0`
-- `withdrawAmount < currentContribution`  
+- `withdrawAmount < currentContribution`
 - `remainingContribution >= pool.minContribution`
 - Usuario debe ser miembro activo
 
 #### ✅ Ejemplo de Uso
+
 ```typescript
 // Usuario tiene 1.0 BTC en el pool
 // Quiere retirar 0.3 BTC
-await cooperativePool.withdrawPartial(poolId, parseEther("0.3"))
+await cooperativePool.withdrawPartial(poolId, parseEther("0.3"));
 // Resultado: Usuario ahora tiene 0.7 BTC en el pool
 ```
 
@@ -73,6 +76,7 @@ forge build
 ### Documentación
 
 📄 **COOPERATIVE_POOL_V3.1_UPGRADE.md** - Guía completa con:
+
 - Especificaciones técnicas
 - Ejemplos de implementación frontend
 - Instrucciones de deployment UUPS
@@ -81,6 +85,7 @@ forge build
 ### Próximos Pasos
 
 #### Opción 1: Deploy en Testnet (RECOMENDADO)
+
 ```bash
 # 1. Deploy nueva implementación
 forge create src/pools/v3/CooperativePoolV3.sol:CooperativePoolV3 \
@@ -99,7 +104,9 @@ cast call $PROXY_ADDRESS "version()" --rpc-url $MEZO_RPC_URL
 ```
 
 #### Opción 2: Testing Manual en Testnet
+
 Una vez deployed, probar:
+
 1. `joinPool` - Unirse a un pool
 2. `withdrawPartial` - Retirar parte de la contribución
 3. Verificar que el saldo y shares se actualizan correctamente
@@ -119,15 +126,15 @@ cp out/CooperativePoolV3.sol/CooperativePoolV3.json \
 
 ### Resumen
 
-| Item | Estado |
-|------|--------|
-| Implementación del contrato | ✅ Completo |
-| Evento agregado | ✅ Completo |
-| Versión actualizada | ✅ Completo |
-| Compilación | ✅ Exitosa |
-| Tests unitarios | ⚠️ Requiere ajuste |
-| Documentación | ✅ Completo |
-| Listo para deployment | ✅ SÍ |
+| Item                        | Estado             |
+| --------------------------- | ------------------ |
+| Implementación del contrato | ✅ Completo        |
+| Evento agregado             | ✅ Completo        |
+| Versión actualizada         | ✅ Completo        |
+| Compilación                 | ✅ Exitosa         |
+| Tests unitarios             | ⚠️ Requiere ajuste |
+| Documentación               | ✅ Completo        |
+| Listo para deployment       | ✅ SÍ              |
 
 ---
 

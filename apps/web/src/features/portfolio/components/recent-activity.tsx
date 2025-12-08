@@ -1,26 +1,36 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { AmountDisplay, TransactionStatus, type TransactionState } from "@/components/common"
-import { ArrowDown, ArrowUp, Users, Award, ExternalLink } from "lucide-react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import {
+  AmountDisplay,
+  TransactionStatus,
+  type TransactionState,
+} from "@/components/common";
+import { ArrowDown, ArrowUp, Users, Award, ExternalLink } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface Activity {
-  id: string
-  type: "deposit" | "withdraw" | "claim" | "join_pool" | "create_pool"
-  amount?: string
-  timestamp: number
-  status: TransactionState
-  txHash?: string
-  poolName?: string
+  id: string;
+  type: "deposit" | "withdraw" | "claim" | "join_pool" | "create_pool";
+  amount?: string;
+  timestamp: number;
+  status: TransactionState;
+  txHash?: string;
+  poolName?: string;
 }
 
 interface RecentActivityProps {
-  activities?: Activity[]
-  isLoading?: boolean
-  maxItems?: number
+  activities?: Activity[];
+  isLoading?: boolean;
+  maxItems?: number;
 }
 
 const activityConfig = {
@@ -54,14 +64,14 @@ const activityConfig = {
     color: "text-lavanda",
     bgColor: "bg-lavanda/20",
   },
-}
+};
 
 export function RecentActivity({
   activities = [],
   isLoading,
   maxItems = 10,
 }: RecentActivityProps) {
-  const displayedActivities = activities.slice(0, maxItems)
+  const displayedActivities = activities.slice(0, maxItems);
 
   if (isLoading) {
     return (
@@ -72,12 +82,15 @@ export function RecentActivity({
         <CardContent>
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-surface-elevated animate-shimmer rounded" />
+              <div
+                key={i}
+                className="h-16 bg-surface-elevated animate-shimmer rounded"
+              />
             ))}
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -97,8 +110,8 @@ export function RecentActivity({
         ) : (
           <div className="space-y-3">
             {displayedActivities.map((activity) => {
-              const config = activityConfig[activity.type]
-              const Icon = config.icon
+              const config = activityConfig[activity.type];
+              const Icon = config.icon;
 
               return (
                 <div
@@ -108,12 +121,17 @@ export function RecentActivity({
                     activity.status === "success"
                       ? "border-border bg-surface-elevated"
                       : activity.status === "error"
-                      ? "border-error/30 bg-error/5"
-                      : "border-border bg-surface-elevated"
+                        ? "border-error/30 bg-error/5"
+                        : "border-border bg-surface-elevated",
                   )}
                 >
                   {/* Icon */}
-                  <div className={cn("h-10 w-10 rounded-full flex items-center justify-center", config.bgColor)}>
+                  <div
+                    className={cn(
+                      "h-10 w-10 rounded-full flex items-center justify-center",
+                      config.bgColor,
+                    )}
+                  >
                     <Icon className={cn("h-5 w-5", config.color)} />
                   </div>
 
@@ -153,24 +171,28 @@ export function RecentActivity({
                         symbol="mUSD"
                         size="sm"
                         className={cn(
-                          activity.type === "deposit" || activity.type === "claim"
+                          activity.type === "deposit" ||
+                            activity.type === "claim"
                             ? "text-success"
                             : activity.type === "withdraw"
-                            ? "text-accent"
-                            : ""
+                              ? "text-accent"
+                              : "",
                         )}
                       />
                     )}
                     <div className="mt-1">
-                      <TransactionStatus status={activity.status} variant="badge" />
+                      <TransactionStatus
+                        status={activity.status}
+                        variant="badge"
+                      />
                     </div>
                   </div>
                 </div>
-              )
+              );
             })}
           </div>
         )}
       </CardContent>
     </Card>
-  )
+  );
 }

@@ -6,314 +6,341 @@
  * Uses atomic state management to prevent race conditions
  */
 
-'use client'
+"use client";
 
-import { useWriteContract, useWaitForTransactionReceipt, useAccount } from 'wagmi'
-import { useQueryClient } from '@tanstack/react-query'
-import { useEffect, useCallback, useState, useRef } from 'react'
-import { parseEther, maxUint256 } from 'viem'
-import { readContract } from 'wagmi/actions'
-import { useConfig } from 'wagmi'
-import { MEZO_TESTNET_ADDRESSES, INDIVIDUAL_POOL_ABI } from '@/lib/web3/contracts'
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useAccount,
+} from "wagmi";
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useCallback, useState, useRef } from "react";
+import { parseEther, maxUint256 } from "viem";
+import { readContract } from "wagmi/actions";
+import { useConfig } from "wagmi";
+import {
+  MEZO_TESTNET_ADDRESSES,
+  INDIVIDUAL_POOL_ABI,
+} from "@/lib/web3/contracts";
 
-const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`
-const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`
+const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`;
+const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`;
 
 const ERC20_ABI = [
   {
-    name: 'approve',
-    type: 'function',
-    stateMutability: 'nonpayable',
+    name: "approve",
+    type: "function",
+    stateMutability: "nonpayable",
     inputs: [
-      { name: 'spender', type: 'address' },
-      { name: 'amount', type: 'uint256' }
+      { name: "spender", type: "address" },
+      { name: "amount", type: "uint256" },
     ],
-    outputs: [{ type: 'bool' }]
+    outputs: [{ type: "bool" }],
   },
   {
-    name: 'allowance',
-    type: 'function',
-    stateMutability: 'view',
+    name: "allowance",
+    type: "function",
+    stateMutability: "view",
     inputs: [
-      { name: 'owner', type: 'address' },
-      { name: 'spender', type: 'address' }
+      { name: "owner", type: "address" },
+      { name: "spender", type: "address" },
     ],
-    outputs: [{ type: 'uint256' }]
-  }
-] as const
+    outputs: [{ type: "uint256" }],
+  },
+] as const;
 
-type DepositStep = 'idle' | 'checking' | 'approving' | 'awaiting-approval' | 'verifying-allowance' | 'depositing'
+type DepositStep =
+  | "idle"
+  | "checking"
+  | "approving"
+  | "awaiting-approval"
+  | "verifying-allowance"
+  | "depositing";
 
 interface DepositState {
-  isProcessing: boolean
-  depositHash: string | null
-  approveHash: string | null
-  step: DepositStep
-  error: string | null
-  operationId: number // Unique ID to track each deposit operation
+  isProcessing: boolean;
+  depositHash: string | null;
+  approveHash: string | null;
+  step: DepositStep;
+  error: string | null;
+  operationId: number; // Unique ID to track each deposit operation
 }
 
 export function useDepositWithApprove() {
-  const { address } = useAccount()
-  const config = useConfig()
-  const queryClient = useQueryClient()
+  const { address } = useAccount();
+  const config = useConfig();
+  const queryClient = useQueryClient();
 
   // Use ref for operation mutex to prevent concurrent deposits
-  const operationLockRef = useRef(false)
-  const currentOperationIdRef = useRef(0)
+  const operationLockRef = useRef(false);
+  const currentOperationIdRef = useRef(0);
 
   const [localState, setLocalState] = useState<DepositState>({
     isProcessing: false,
     depositHash: null,
     approveHash: null,
-    step: 'idle',
+    step: "idle",
     error: null,
     operationId: 0,
-  })
+  });
 
-  const [pendingAmount, setPendingAmount] = useState<bigint | null>(null)
+  const [pendingAmount, setPendingAmount] = useState<bigint | null>(null);
 
-  const { writeContract: writeApprove, data: approveHash, reset: resetApprove } = useWriteContract()
-  const { writeContract: writeDeposit, data: depositHash, reset: resetDeposit } = useWriteContract()
+  const {
+    writeContract: writeApprove,
+    data: approveHash,
+    reset: resetApprove,
+  } = useWriteContract();
+  const {
+    writeContract: writeDeposit,
+    data: depositHash,
+    reset: resetDeposit,
+  } = useWriteContract();
 
-  const { isLoading: isApproving, isSuccess: isApproveSuccess } = useWaitForTransactionReceipt({
-    hash: approveHash,
-    pollingInterval: 3000,
-  })
+  const { isLoading: isApproving, isSuccess: isApproveSuccess } =
+    useWaitForTransactionReceipt({
+      hash: approveHash,
+      pollingInterval: 3000,
+    });
 
-  const { isLoading: isDepositing, isSuccess: isDepositSuccess } = useWaitForTransactionReceipt({
-    hash: depositHash,
-    pollingInterval: 3000,
-  })
+  const { isLoading: isDepositing, isSuccess: isDepositSuccess } =
+    useWaitForTransactionReceipt({
+      hash: depositHash,
+      pollingInterval: 3000,
+    });
 
   // After approve succeeds, verify allowance and do deposit
   // This prevents the race condition by re-checking allowance after approval
   useEffect(() => {
-    if (isApproveSuccess && pendingAmount && localState.step === 'awaiting-approval') {
-      const operationId = localState.operationId
-      console.log('✅ Approval confirmed! Verifying allowance before deposit...')
-      setLocalState(prev => ({ ...prev, step: 'verifying-allowance' }))
+    if (
+      isApproveSuccess &&
+      pendingAmount &&
+      localState.step === "awaiting-approval"
+    ) {
+      const operationId = localState.operationId;
+      setLocalState((prev) => ({ ...prev, step: "verifying-allowance" }));
 
       // Verify the allowance is actually set before depositing
       const verifyAndDeposit = async () => {
         try {
           // Check this is still the current operation
           if (currentOperationIdRef.current !== operationId) {
-            console.log('⚠️ Operation superseded, aborting')
-            return
+            return;
           }
 
           if (!address) {
-            throw new Error('Wallet disconnected')
+            throw new Error("Wallet disconnected");
           }
 
           // Re-read allowance to ensure it's set
-          const allowance = await readContract(config, {
+          const allowance = (await readContract(config, {
             address: MUSD_ADDRESS,
             abi: ERC20_ABI,
-            functionName: 'allowance',
+            functionName: "allowance",
             args: [address, POOL_ADDRESS],
-          }) as bigint
+          })) as bigint;
 
           if (allowance < pendingAmount) {
-            throw new Error('Allowance verification failed - approval may not have been processed correctly')
+            throw new Error(
+              "Allowance verification failed - approval may not have been processed correctly",
+            );
           }
 
-          console.log('✅ Allowance verified! Now depositing...')
-          setLocalState(prev => ({ ...prev, step: 'depositing' }))
+          setLocalState((prev) => ({ ...prev, step: "depositing" }));
 
           writeDeposit(
             {
               address: POOL_ADDRESS,
               abi: INDIVIDUAL_POOL_ABI,
-              functionName: 'deposit',
+              functionName: "deposit",
               args: [pendingAmount],
             },
             {
               onSuccess: (hash) => {
-                console.log('✅ Deposit tx sent:', hash)
-                setLocalState(prev => ({ ...prev, depositHash: hash }))
+                setLocalState((prev) => ({ ...prev, depositHash: hash }));
               },
               onError: (error) => {
-                console.error('❌ Deposit error:', error.message)
-                operationLockRef.current = false
-                setLocalState(prev => ({
+                operationLockRef.current = false;
+                setLocalState((prev) => ({
                   ...prev,
-                  step: 'idle',
+                  step: "idle",
                   isProcessing: false,
-                  error: error.message
-                }))
-              }
-            }
-          )
+                  error: error.message,
+                }));
+              },
+            },
+          );
         } catch (error) {
-          const errorMsg = error instanceof Error ? error.message : 'Verification failed'
-          console.error('❌ Allowance verification error:', errorMsg)
-          operationLockRef.current = false
-          setLocalState(prev => ({
+          const errorMsg =
+            error instanceof Error ? error.message : "Verification failed";
+          operationLockRef.current = false;
+          setLocalState((prev) => ({
             ...prev,
-            step: 'idle',
+            step: "idle",
             isProcessing: false,
-            error: errorMsg
-          }))
+            error: errorMsg,
+          }));
         }
-      }
+      };
 
-      verifyAndDeposit()
+      verifyAndDeposit();
     }
-  }, [isApproveSuccess, pendingAmount, localState.step, localState.operationId, address, config, writeDeposit])
+  }, [
+    isApproveSuccess,
+    pendingAmount,
+    localState.step,
+    localState.operationId,
+    address,
+    config,
+    writeDeposit,
+  ]);
 
   // After deposit succeeds, cleanup and refetch
   useEffect(() => {
     if (isDepositSuccess && depositHash) {
-      console.log('✅ Deposit confirmed!')
-      queryClient.invalidateQueries({ queryKey: ['individual-pool-v3'] })
-      queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
-      operationLockRef.current = false
-      setLocalState(prev => ({
+      queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
+      queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
+      operationLockRef.current = false;
+      setLocalState((prev) => ({
         ...prev,
         isProcessing: false,
-        step: 'idle',
-      }))
-      setPendingAmount(null)
+        step: "idle",
+      }));
+      setPendingAmount(null);
     }
-  }, [isDepositSuccess, depositHash, queryClient])
+  }, [isDepositSuccess, depositHash, queryClient]);
 
   const deposit = useCallback(
     async (amount: string | bigint) => {
       // Mutex: prevent concurrent deposit operations
       if (operationLockRef.current) {
-        console.warn('⚠️ Deposit operation already in progress')
-        throw new Error('A deposit operation is already in progress. Please wait.')
+        throw new Error(
+          "A deposit operation is already in progress. Please wait.",
+        );
       }
 
       try {
         if (!address) {
-          throw new Error('Wallet not connected')
+          throw new Error("Wallet not connected");
         }
 
         // Acquire lock and assign new operation ID
-        operationLockRef.current = true
-        const operationId = ++currentOperationIdRef.current
+        operationLockRef.current = true;
+        const operationId = ++currentOperationIdRef.current;
 
         // Reset previous transaction states
-        resetApprove()
-        resetDeposit()
+        resetApprove();
+        resetDeposit();
 
-        const amountWei = typeof amount === 'string' ? parseEther(amount) : amount
-        setPendingAmount(amountWei)
+        const amountWei =
+          typeof amount === "string" ? parseEther(amount) : amount;
+        setPendingAmount(amountWei);
 
-        console.log('🔍 Checking MUSD allowance...')
         setLocalState({
-          step: 'checking',
+          step: "checking",
           isProcessing: true,
           depositHash: null,
           approveHash: null,
           error: null,
           operationId,
-        })
+        });
 
-        const allowance = await readContract(config, {
+        const allowance = (await readContract(config, {
           address: MUSD_ADDRESS,
           abi: ERC20_ABI,
-          functionName: 'allowance',
+          functionName: "allowance",
           args: [address, POOL_ADDRESS],
-        }) as bigint
-
-        console.log('Current allowance:', allowance.toString())
-        console.log('Required amount:', amountWei.toString())
+        })) as bigint;
 
         if (allowance >= amountWei) {
           // Already approved, just deposit
-          console.log('✅ Already approved! Depositing directly...')
-          setLocalState(prev => ({ ...prev, step: 'depositing' }))
+          setLocalState((prev) => ({ ...prev, step: "depositing" }));
 
           writeDeposit(
             {
               address: POOL_ADDRESS,
               abi: INDIVIDUAL_POOL_ABI,
-              functionName: 'deposit',
+              functionName: "deposit",
               args: [amountWei],
             },
             {
               onSuccess: (hash) => {
-                console.log('✅ Deposit tx sent:', hash)
-                setLocalState(prev => ({ ...prev, depositHash: hash }))
+                setLocalState((prev) => ({ ...prev, depositHash: hash }));
               },
               onError: (error) => {
-                console.error('❌ Deposit error:', error.message)
-                operationLockRef.current = false
-                setLocalState(prev => ({
+                operationLockRef.current = false;
+                setLocalState((prev) => ({
                   ...prev,
-                  step: 'idle',
+                  step: "idle",
                   isProcessing: false,
-                  error: error.message
-                }))
-              }
-            }
-          )
+                  error: error.message,
+                }));
+              },
+            },
+          );
         } else {
           // Need to approve first
-          console.log('1️⃣ Requesting MUSD approval for unlimited amount...')
-          setLocalState(prev => ({ ...prev, step: 'approving' }))
+          setLocalState((prev) => ({ ...prev, step: "approving" }));
 
           writeApprove(
             {
               address: MUSD_ADDRESS,
               abi: ERC20_ABI,
-              functionName: 'approve',
+              functionName: "approve",
               args: [POOL_ADDRESS, maxUint256],
             },
             {
               onSuccess: (hash) => {
-                console.log('✅ Approve tx sent:', hash)
                 // Move to awaiting-approval state to wait for confirmation
-                setLocalState(prev => ({ ...prev, step: 'awaiting-approval', approveHash: hash }))
+                setLocalState((prev) => ({
+                  ...prev,
+                  step: "awaiting-approval",
+                  approveHash: hash,
+                }));
               },
               onError: (error) => {
-                console.error('❌ Approve error:', error.message)
-                operationLockRef.current = false
-                setLocalState(prev => ({
+                operationLockRef.current = false;
+                setLocalState((prev) => ({
                   ...prev,
-                  step: 'idle',
+                  step: "idle",
                   isProcessing: false,
-                  error: error.message
-                }))
-              }
-            }
-          )
+                  error: error.message,
+                }));
+              },
+            },
+          );
         }
       } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : 'Unknown error'
-        console.error('❌ Deposit error:', errorMsg)
-        operationLockRef.current = false
-        setLocalState(prev => ({
+        const errorMsg =
+          error instanceof Error ? error.message : "Unknown error";
+        operationLockRef.current = false;
+        setLocalState((prev) => ({
           ...prev,
           isProcessing: false,
-          step: 'idle',
-          error: errorMsg
-        }))
-        throw error
+          step: "idle",
+          error: errorMsg,
+        }));
+        throw error;
       }
     },
-    [address, config, writeApprove, writeDeposit, resetApprove, resetDeposit]
-  )
+    [address, config, writeApprove, writeDeposit, resetApprove, resetDeposit],
+  );
 
   // Reset function to clear state and release lock
   const reset = useCallback(() => {
-    operationLockRef.current = false
-    resetApprove()
-    resetDeposit()
-    setPendingAmount(null)
+    operationLockRef.current = false;
+    resetApprove();
+    resetDeposit();
+    setPendingAmount(null);
     setLocalState({
       isProcessing: false,
       depositHash: null,
       approveHash: null,
-      step: 'idle',
+      step: "idle",
       error: null,
       operationId: 0,
-    })
-  }, [resetApprove, resetDeposit])
+    });
+  }, [resetApprove, resetDeposit]);
 
   return {
     deposit,
@@ -326,5 +353,5 @@ export function useDepositWithApprove() {
     depositHash,
     step: localState.step,
     error: localState.error,
-  }
+  };
 }

@@ -1,20 +1,37 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { AmountDisplay } from "@/components/common"
-import { useTransactionExecute } from "@/features/transactions"
-import { ArrowUp, AlertCircle, Info, TrendingDown, AlertTriangle } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { formatUnits } from "viem"
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { AmountDisplay } from "@/components/common";
+import { useTransactionExecute } from "@/features/transactions";
+import {
+  ArrowUp,
+  AlertCircle,
+  Info,
+  TrendingDown,
+  AlertTriangle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { formatUnits } from "viem";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -24,22 +41,25 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-} from "@/components/ui/alert-dialog"
+} from "@/components/ui/alert-dialog";
 
 const withdrawSchema = z.object({
-  amount: z.string().min(1, "Amount is required").refine(
-    (val) => !isNaN(Number(val)) && Number(val) > 0,
-    "Amount must be greater than 0"
-  ),
-})
+  amount: z
+    .string()
+    .min(1, "Amount is required")
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Amount must be greater than 0",
+    ),
+});
 
-type WithdrawFormData = z.infer<typeof withdrawSchema>
+type WithdrawFormData = z.infer<typeof withdrawSchema>;
 
 interface WithdrawCardProps {
-  availableBalance?: string
-  onWithdraw: (amount: string) => Promise<any>
-  isLoading?: boolean
-  className?: string
+  availableBalance?: string;
+  onWithdraw: (amount: string) => Promise<any>;
+  isLoading?: boolean;
+  className?: string;
 }
 
 export function WithdrawCard({
@@ -48,9 +68,12 @@ export function WithdrawCard({
   isLoading,
   className,
 }: WithdrawCardProps) {
-  const { execute } = useTransactionExecute({ type: "Withdraw mUSD" })
-  const [showFullWithdrawConfirm, setShowFullWithdrawConfirm] = React.useState(false)
-  const [pendingWithdrawAmount, setPendingWithdrawAmount] = React.useState<string | null>(null)
+  const { execute } = useTransactionExecute({ type: "Withdraw mUSD" });
+  const [showFullWithdrawConfirm, setShowFullWithdrawConfirm] =
+    React.useState(false);
+  const [pendingWithdrawAmount, setPendingWithdrawAmount] = React.useState<
+    string | null
+  >(null);
 
   const {
     register,
@@ -60,58 +83,61 @@ export function WithdrawCard({
     formState: { errors },
   } = useForm<WithdrawFormData>({
     resolver: zodResolver(withdrawSchema),
-  })
+  });
 
-  const amount = watch("amount")
+  const amount = watch("amount");
 
   // Format balance for display
   const formattedBalance = React.useMemo(() => {
     try {
-      if (!availableBalance || availableBalance === '0') return '0.00'
-      const balanceBigInt = typeof availableBalance === 'bigint' ? availableBalance : BigInt(availableBalance)
-      return Number(formatUnits(balanceBigInt, 18)).toFixed(2)
+      if (!availableBalance || availableBalance === "0") return "0.00";
+      const balanceBigInt =
+        typeof availableBalance === "bigint"
+          ? availableBalance
+          : BigInt(availableBalance);
+      return Number(formatUnits(balanceBigInt, 18)).toFixed(2);
     } catch (error) {
-      console.error('Error formatting balance:', error)
-      return '0.00'
+      console.error("Error formatting balance:", error);
+      return "0.00";
     }
-  }, [availableBalance])
+  }, [availableBalance]);
 
   const setMaxAmount = () => {
-    setValue("amount", formattedBalance)
-  }
+    setValue("amount", formattedBalance);
+  };
 
   // Check if this is a full withdrawal (withdrawing all or >95% of balance)
   const isFullWithdrawal = (withdrawAmount: string) => {
-    const withdrawNum = Number(withdrawAmount)
-    const balanceNum = Number(formattedBalance)
-    return withdrawNum >= balanceNum * 0.95
-  }
+    const withdrawNum = Number(withdrawAmount);
+    const balanceNum = Number(formattedBalance);
+    return withdrawNum >= balanceNum * 0.95;
+  };
 
   const executeWithdraw = async (withdrawAmount: string) => {
     await execute(async () => {
-      return await onWithdraw(withdrawAmount)
-    })
-    setPendingWithdrawAmount(null)
-  }
+      return await onWithdraw(withdrawAmount);
+    });
+    setPendingWithdrawAmount(null);
+  };
 
   const onSubmit = async (data: WithdrawFormData) => {
     // Show confirmation for full withdrawals
     if (isFullWithdrawal(data.amount)) {
-      setPendingWithdrawAmount(data.amount)
-      setShowFullWithdrawConfirm(true)
-      return
+      setPendingWithdrawAmount(data.amount);
+      setShowFullWithdrawConfirm(true);
+      return;
     }
-    await executeWithdraw(data.amount)
-  }
+    await executeWithdraw(data.amount);
+  };
 
   const handleConfirmFullWithdraw = async () => {
-    setShowFullWithdrawConfirm(false)
+    setShowFullWithdrawConfirm(false);
     if (pendingWithdrawAmount) {
-      await executeWithdraw(pendingWithdrawAmount)
+      await executeWithdraw(pendingWithdrawAmount);
     }
-  }
+  };
 
-  const hasBalance = Number(formattedBalance) > 0
+  const hasBalance = Number(formattedBalance) > 0;
 
   return (
     <Card variant="surface" className={className}>
@@ -127,7 +153,8 @@ export function WithdrawCard({
           <Alert className="border-amber-500/20 bg-amber-500/5">
             <AlertCircle className="h-4 w-4 text-amber-500" />
             <AlertDescription className="text-sm">
-              No balance available to withdraw. Deposit mUSD first to start earning.
+              No balance available to withdraw. Deposit mUSD first to start
+              earning.
             </AlertDescription>
           </Alert>
         ) : (
@@ -136,7 +163,9 @@ export function WithdrawCard({
             <div className="space-y-2">
               {/* Available Balance Row */}
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">Deposited: {formattedBalance} mUSD</span>
+                <span className="text-muted-foreground">
+                  Deposited: {formattedBalance} mUSD
+                </span>
                 <Button
                   type="button"
                   variant="ghost"
@@ -149,13 +178,16 @@ export function WithdrawCard({
               </div>
 
               {/* Large Input Container - Aave/Uniswap Style */}
-              <div className={cn(
-                "relative p-4 rounded-xl border-2 transition-all",
-                "bg-surface-elevated hover:border-accent/50",
-                errors.amount || (amount && Number(amount) > Number(formattedBalance))
-                  ? "border-error focus-within:border-error"
-                  : "border-border focus-within:border-accent"
-              )}>
+              <div
+                className={cn(
+                  "relative p-4 rounded-xl border-2 transition-all",
+                  "bg-surface-elevated hover:border-accent/50",
+                  errors.amount ||
+                    (amount && Number(amount) > Number(formattedBalance))
+                    ? "border-error focus-within:border-error"
+                    : "border-border focus-within:border-accent",
+                )}
+              >
                 <div className="flex items-center gap-3">
                   {/* Token Badge */}
                   <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-border">
@@ -175,7 +207,7 @@ export function WithdrawCard({
                     className={cn(
                       "flex-1 bg-transparent border-0 outline-none",
                       "text-3xl font-bold tabular-nums placeholder:text-muted-foreground/50",
-                      "focus:outline-none focus:ring-0"
+                      "focus:outline-none focus:ring-0",
                     )}
                   />
                 </div>
@@ -202,24 +234,31 @@ export function WithdrawCard({
             </div>
 
             {/* Transaction Details - Only show when amount entered */}
-            {amount && Number(amount) > 0 && Number(amount) <= Number(formattedBalance) && (
-              <div className="space-y-2 p-3 rounded-lg bg-surface-elevated border border-border text-sm">
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">You will receive</span>
-                  <span className="font-semibold">{amount} mUSD</span>
+            {amount &&
+              Number(amount) > 0 &&
+              Number(amount) <= Number(formattedBalance) && (
+                <div className="space-y-2 p-3 rounded-lg bg-surface-elevated border border-border text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      You will receive
+                    </span>
+                    <span className="font-semibold">{amount} mUSD</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Network fee</span>
+                    <span className="font-semibold">~$0.30</span>
+                  </div>
+                  <div className="flex justify-between pt-2 border-t border-border">
+                    <span className="text-muted-foreground">
+                      Remaining balance
+                    </span>
+                    <span className="font-semibold text-accent">
+                      {(Number(formattedBalance) - Number(amount)).toFixed(2)}{" "}
+                      mUSD
+                    </span>
+                  </div>
                 </div>
-                <div className="flex justify-between">
-                  <span className="text-muted-foreground">Network fee</span>
-                  <span className="font-semibold">~$0.30</span>
-                </div>
-                <div className="flex justify-between pt-2 border-t border-border">
-                  <span className="text-muted-foreground">Remaining balance</span>
-                  <span className="font-semibold text-accent">
-                    {(Number(formattedBalance) - Number(amount)).toFixed(2)} mUSD
-                  </span>
-                </div>
-              </div>
-            )}
+              )}
 
             {/* Submit Button */}
             <Button
@@ -228,14 +267,17 @@ export function WithdrawCard({
               className="w-full"
               size="lg"
               loading={isLoading}
-              disabled={!amount || Number(amount) <= 0 || Number(amount) > Number(formattedBalance)}
+              disabled={
+                !amount ||
+                Number(amount) <= 0 ||
+                Number(amount) > Number(formattedBalance)
+              }
             >
               {!amount || Number(amount) <= 0
                 ? "Enter amount"
                 : Number(amount) > Number(formattedBalance)
-                ? "Insufficient balance"
-                : `Withdraw ${amount} mUSD`
-              }
+                  ? "Insufficient balance"
+                  : `Withdraw ${amount} mUSD`}
             </Button>
 
             {/* Help Text */}
@@ -247,7 +289,10 @@ export function WithdrawCard({
       </CardContent>
 
       {/* Full Withdrawal Confirmation Dialog */}
-      <AlertDialog open={showFullWithdrawConfirm} onOpenChange={setShowFullWithdrawConfirm}>
+      <AlertDialog
+        open={showFullWithdrawConfirm}
+        onOpenChange={setShowFullWithdrawConfirm}
+      >
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -256,7 +301,9 @@ export function WithdrawCard({
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-3">
               <p>
-                You are about to withdraw <strong>{pendingWithdrawAmount} mUSD</strong>, which is your entire balance.
+                You are about to withdraw{" "}
+                <strong>{pendingWithdrawAmount} mUSD</strong>, which is your
+                entire balance.
               </p>
               <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-sm">
                 <p className="font-medium text-foreground mb-1">This will:</p>
@@ -266,9 +313,7 @@ export function WithdrawCard({
                   <li>Require a new deposit to rejoin</li>
                 </ul>
               </div>
-              <p className="text-sm">
-                Are you sure you want to proceed?
-              </p>
+              <p className="text-sm">Are you sure you want to proceed?</p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
@@ -285,5 +330,5 @@ export function WithdrawCard({
         </AlertDialogContent>
       </AlertDialog>
     </Card>
-  )
+  );
 }

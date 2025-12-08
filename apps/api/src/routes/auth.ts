@@ -1,6 +1,6 @@
-import { Router, Request, Response } from 'express'
-import type { Router as ExpressRouter } from 'express'
-import { z } from 'zod'
+import { Router, Request, Response } from "express";
+import type { Router as ExpressRouter } from "express";
+import { z } from "zod";
 import {
   generateNonce,
   verifySiweMessage,
@@ -8,12 +8,12 @@ import {
   requireAuth,
   getNonceStats,
   invalidateToken,
-} from '../middleware/auth'
-import { asyncHandler, AppError } from '../middleware/error-handler'
-import { validate } from '../middleware/validate'
-import { authRateLimiter } from '../middleware/rate-limit'
+} from "../middleware/auth";
+import { asyncHandler, AppError } from "../middleware/error-handler";
+import { validate } from "../middleware/validate";
+import { authRateLimiter } from "../middleware/rate-limit";
 
-const router: ExpressRouter = Router()
+const router: ExpressRouter = Router();
 
 // ===== VALIDATION SCHEMAS =====
 
@@ -21,12 +21,12 @@ const router: ExpressRouter = Router()
  * Schema for SIWE message verification request
  */
 const verifySchema = z.object({
-  message: z.string().min(1, 'Message is required'),
+  message: z.string().min(1, "Message is required"),
   signature: z
     .string()
-    .regex(/^0x[a-fA-F0-9]{130}$/, 'Invalid signature format')
-    .min(1, 'Signature is required'),
-})
+    .regex(/^0x[a-fA-F0-9]{130}$/, "Invalid signature format")
+    .min(1, "Signature is required"),
+});
 
 // ===== ROUTES =====
 
@@ -40,16 +40,16 @@ const verifySchema = z.object({
  * }
  */
 router.get(
-  '/nonce',
+  "/nonce",
   authRateLimiter,
   asyncHandler(async (req: Request, res: Response) => {
-    const nonce = generateNonce()
+    const nonce = generateNonce();
 
     res.json({
       nonce,
-    })
-  })
-)
+    });
+  }),
+);
 
 /**
  * POST /api/auth/verify
@@ -69,45 +69,42 @@ router.get(
  * }
  */
 router.post(
-  '/verify',
+  "/verify",
   authRateLimiter,
   validate(verifySchema),
   asyncHandler(async (req: Request, res: Response) => {
-    const { message, signature } = req.body
+    const { message, signature } = req.body;
 
     // Verify SIWE message
-    const verification = await verifySiweMessage(message, signature)
+    const verification = await verifySiweMessage(message, signature);
 
     if (!verification.valid) {
-      throw new AppError(
-        401,
-        'Authentication failed',
-        true,
-        { reason: verification.error }
-      )
+      throw new AppError(401, "Authentication failed", true, {
+        reason: verification.error,
+      });
     }
 
     if (!verification.address) {
       throw new AppError(
         500,
-        'Verification succeeded but no address returned',
-        true
-      )
+        "Verification succeeded but no address returned",
+        true,
+      );
     }
 
     // Generate JWT token
-    const token = generateJWT(verification.address)
+    const token = generateJWT(verification.address);
 
     // Get token expiration from env or use secure default (2 hours)
-    const expiresIn = process.env.JWT_EXPIRATION || '2h'
+    const expiresIn = process.env.JWT_EXPIRATION || "2h";
 
     res.json({
       token,
       address: verification.address.toLowerCase(),
       expiresIn,
-    })
-  })
-)
+    });
+  }),
+);
 
 /**
  * POST /api/auth/logout
@@ -126,20 +123,20 @@ router.post(
  * Subsequent requests with this token will be rejected.
  */
 router.post(
-  '/logout',
+  "/logout",
   requireAuth,
   asyncHandler(async (req: Request, res: Response) => {
     // Invalidate the token by adding it to the blacklist
     if (req.user?.jti && req.user.exp) {
-      await invalidateToken(req.user.jti, req.user.exp)
+      await invalidateToken(req.user.jti, req.user.exp);
     }
 
     res.json({
       success: true,
-      message: 'Logged out successfully. Token has been invalidated.',
-    })
-  })
-)
+      message: "Logged out successfully. Token has been invalidated.",
+    });
+  }),
+);
 
 /**
  * GET /api/auth/me
@@ -157,11 +154,11 @@ router.post(
  * }
  */
 router.get(
-  '/me',
+  "/me",
   requireAuth,
   asyncHandler(async (req: Request, res: Response) => {
     if (!req.user) {
-      throw new AppError(401, 'User not authenticated', true)
+      throw new AppError(401, "User not authenticated", true);
     }
 
     res.json({
@@ -169,9 +166,9 @@ router.get(
       authenticated: true,
       iat: req.user.iat,
       exp: req.user.exp,
-    })
-  })
-)
+    });
+  }),
+);
 
 /**
  * GET /api/auth/stats
@@ -190,23 +187,23 @@ router.get(
  * }
  */
 router.get(
-  '/stats',
+  "/stats",
   asyncHandler(async (req: Request, res: Response) => {
     // Only allow in development or with admin auth
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       throw new AppError(
         403,
-        'Stats endpoint not available in production',
-        true
-      )
+        "Stats endpoint not available in production",
+        true,
+      );
     }
 
-    const stats = getNonceStats()
+    const stats = getNonceStats();
 
     res.json({
       nonces: stats,
-    })
-  })
-)
+    });
+  }),
+);
 
-export default router
+export default router;

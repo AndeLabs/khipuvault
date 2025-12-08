@@ -1,21 +1,28 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3"
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 
 export function ProjectionsCalculator() {
-  const [deposit, setDeposit] = useState(100) // MUSD amount
-  const [period, setPeriod] = useState("12") // in months
-  const { userInfo } = useIndividualPoolV3()
-  
+  const [deposit, setDeposit] = useState(100); // MUSD amount
+  const [period, setPeriod] = useState("12"); // in months
+  const { userInfo } = useIndividualPoolV3();
+
   // Use estimated APR from user's position or default to 5%
-  const apr = userInfo && userInfo.estimatedAPR > BigInt(0) 
-    ? Number(userInfo.estimatedAPR) / 10000 // APR is in basis points (10000 = 100%)
-    : 0.05 // Default 5% APR
+  const apr =
+    userInfo && userInfo.estimatedAPR > BigInt(0)
+      ? Number(userInfo.estimatedAPR) / 10000 // APR is in basis points (10000 = 100%)
+      : 0.05; // Default 5% APR
 
   const finalCapital = deposit * Math.pow(1 + apr / 12, parseInt(period));
   const earnings = finalCapital - deposit;
@@ -39,7 +46,9 @@ export function ProjectionsCalculator() {
               min="10"
               step="10"
             />
-            <span className="absolute inset-y-0 right-0 flex items-center pr-3 font-code text-muted-foreground">MUSD</span>
+            <span className="absolute inset-y-0 right-0 flex items-center pr-3 font-code text-muted-foreground">
+              MUSD
+            </span>
           </div>
         </div>
         <div className="space-y-2">
@@ -59,18 +68,24 @@ export function ProjectionsCalculator() {
         <div className="space-y-2 rounded-lg bg-background/50 p-4 border border-primary/20">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Capital al final:</span>
-            <span className="font-code font-bold text-white">{finalCapital.toFixed(2)} MUSD</span>
+            <span className="font-code font-bold text-white">
+              {finalCapital.toFixed(2)} MUSD
+            </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">Rendimientos:</span>
-            <span className="font-code font-bold text-secondary">+{earnings.toFixed(2)} MUSD</span>
+            <span className="font-code font-bold text-secondary">
+              +{earnings.toFixed(2)} MUSD
+            </span>
           </div>
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">ROI:</span>
-            <span className="font-code font-bold text-secondary">{roi.toFixed(2)}%</span>
+            <span className="font-code font-bold text-secondary">
+              {roi.toFixed(2)}%
+            </span>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

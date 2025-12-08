@@ -1,10 +1,14 @@
-'use client'
+"use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useAccount } from "wagmi";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
-import { useMusdApproval, formatMUSD, formatMUSDShort } from "@/hooks/web3/use-musd-approval";
+import {
+  useMusdApproval,
+  formatMUSD,
+  formatMUSDShort,
+} from "@/hooks/web3/use-musd-approval";
 
 /**
  * Simple SummaryCards component without charts
@@ -64,9 +68,7 @@ export function SummaryCards() {
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Balance MUSD</span>
-            <span className="font-mono">
-              {formatMUSDShort(musdBalance)}
-            </span>
+            <span className="font-mono">{formatMUSDShort(musdBalance)}</span>
           </div>
           <div className="flex justify-between">
             <span className="text-muted-foreground">Depósitos Activos</span>
@@ -74,17 +76,19 @@ export function SummaryCards() {
               <Skeleton className="h-5 w-24" />
             ) : (
               <span className="font-mono">
-                {userInfo?.deposit ? formatMUSD(userInfo.deposit) : '0.00'} MUSD
+                {userInfo?.deposit ? formatMUSD(userInfo.deposit) : "0.00"} MUSD
               </span>
             )}
           </div>
           <div className="flex justify-between">
-            <span className="text-muted-foreground">Rendimientos Acumulados</span>
+            <span className="text-muted-foreground">
+              Rendimientos Acumulados
+            </span>
             {isPoolLoading ? (
               <Skeleton className="h-5 w-24" />
             ) : (
               <span className="font-mono text-green-500">
-                {userInfo?.yields ? formatMUSD(userInfo.yields) : '0.00'} MUSD
+                {userInfo?.yields ? formatMUSD(userInfo.yields) : "0.00"} MUSD
               </span>
             )}
           </div>

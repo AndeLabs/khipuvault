@@ -1,38 +1,57 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { AmountDisplay } from "@/components/common"
-import { useTransactionExecute } from "@/features/transactions"
-import { ArrowDown, Info, TrendingUp, Gift } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { formatUnits, isAddress } from "viem"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { AmountDisplay } from "@/components/common";
+import { useTransactionExecute } from "@/features/transactions";
+import { ArrowDown, Info, TrendingUp, Gift } from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { formatUnits, isAddress } from "viem";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 
 const depositSchema = z.object({
-  amount: z.string().min(1, "Amount is required").refine(
-    (val) => !isNaN(Number(val)) && Number(val) > 0,
-    "Amount must be greater than 0"
-  ),
+  amount: z
+    .string()
+    .min(1, "Amount is required")
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Amount must be greater than 0",
+    ),
   referralCode: z.string().optional(),
-})
+});
 
-type DepositFormData = z.infer<typeof depositSchema>
+type DepositFormData = z.infer<typeof depositSchema>;
 
 interface DepositCardProps {
-  balance?: string
-  minDeposit?: string
-  apy?: number
-  onDeposit: (amount: string, referralCode?: string) => Promise<any>
-  isLoading?: boolean
-  className?: string
+  balance?: string;
+  minDeposit?: string;
+  apy?: number;
+  onDeposit: (amount: string, referralCode?: string) => Promise<any>;
+  isLoading?: boolean;
+  className?: string;
 }
 
 export function DepositCard({
@@ -43,9 +62,9 @@ export function DepositCard({
   isLoading,
   className,
 }: DepositCardProps) {
-  const [isApproving, setIsApproving] = React.useState(false)
-  const [showReferral, setShowReferral] = React.useState(false)
-  const { execute } = useTransactionExecute({ type: "Deposit mUSD" })
+  const [isApproving, setIsApproving] = React.useState(false);
+  const [showReferral, setShowReferral] = React.useState(false);
+  const { execute } = useTransactionExecute({ type: "Deposit mUSD" });
 
   const {
     register,
@@ -55,36 +74,37 @@ export function DepositCard({
     formState: { errors },
   } = useForm<DepositFormData>({
     resolver: zodResolver(depositSchema),
-  })
+  });
 
-  const amount = watch("amount")
-  const referralCode = watch("referralCode")
+  const amount = watch("amount");
+  const referralCode = watch("referralCode");
 
   // Validate referral code is a valid address
-  const isValidReferral = referralCode ? isAddress(referralCode) : true
-  const referralBonus = 0.5 // 0.5%
+  const isValidReferral = referralCode ? isAddress(referralCode) : true;
+  const referralBonus = 0.5; // 0.5%
 
   const onSubmit = async (data: DepositFormData) => {
     await execute(async () => {
-      return await onDeposit(data.amount, data.referralCode)
-    })
-  }
+      return await onDeposit(data.amount, data.referralCode);
+    });
+  };
 
   // Format balance for display
   const formattedBalance = React.useMemo(() => {
     try {
-      if (!balance || balance === '0') return '0.00'
-      const balanceBigInt = typeof balance === 'bigint' ? balance : BigInt(balance)
-      return Number(formatUnits(balanceBigInt, 18)).toFixed(2)
+      if (!balance || balance === "0") return "0.00";
+      const balanceBigInt =
+        typeof balance === "bigint" ? balance : BigInt(balance);
+      return Number(formatUnits(balanceBigInt, 18)).toFixed(2);
     } catch (error) {
-      console.error('Error formatting balance:', error)
-      return '0.00'
+      console.error("Error formatting balance:", error);
+      return "0.00";
     }
-  }, [balance])
+  }, [balance]);
 
   const setMaxAmount = () => {
-    setValue("amount", formattedBalance)
-  }
+    setValue("amount", formattedBalance);
+  };
 
   return (
     <Card variant="surface" className={className}>
@@ -101,7 +121,9 @@ export function DepositCard({
           <div className="space-y-2">
             {/* Balance Row */}
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Wallet balance: {formattedBalance} mUSD</span>
+              <span className="text-muted-foreground">
+                Wallet balance: {formattedBalance} mUSD
+              </span>
               <Button
                 type="button"
                 variant="ghost"
@@ -114,13 +136,15 @@ export function DepositCard({
             </div>
 
             {/* Large Input Container - Aave/Uniswap Style */}
-            <div className={cn(
-              "relative p-4 rounded-xl border-2 transition-all",
-              "bg-surface-elevated hover:border-lavanda/50",
-              errors.amount
-                ? "border-error focus-within:border-error"
-                : "border-border focus-within:border-lavanda"
-            )}>
+            <div
+              className={cn(
+                "relative p-4 rounded-xl border-2 transition-all",
+                "bg-surface-elevated hover:border-lavanda/50",
+                errors.amount
+                  ? "border-error focus-within:border-error"
+                  : "border-border focus-within:border-lavanda",
+              )}
+            >
               <div className="flex items-center gap-3">
                 {/* Token Badge */}
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-border">
@@ -140,7 +164,7 @@ export function DepositCard({
                   className={cn(
                     "flex-1 bg-transparent border-0 outline-none",
                     "text-3xl font-bold tabular-nums placeholder:text-muted-foreground/50",
-                    "focus:outline-none focus:ring-0"
+                    "focus:outline-none focus:ring-0",
                   )}
                 />
               </div>
@@ -171,12 +195,16 @@ export function DepositCard({
               >
                 <Gift className="h-4 w-4" />
                 <span className="text-sm">
-                  {showReferral ? 'Hide' : 'Have a'} referral code? Get {referralBonus}% bonus!
+                  {showReferral ? "Hide" : "Have a"} referral code? Get{" "}
+                  {referralBonus}% bonus!
                 </span>
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 pt-2">
-              <Label htmlFor="referralCode" className="text-xs text-muted-foreground">
+              <Label
+                htmlFor="referralCode"
+                className="text-xs text-muted-foreground"
+              >
                 Referral Code (Wallet Address)
               </Label>
               <Input
@@ -185,7 +213,7 @@ export function DepositCard({
                 {...register("referralCode")}
                 className={cn(
                   "font-mono text-sm",
-                  referralCode && !isValidReferral && "border-error"
+                  referralCode && !isValidReferral && "border-error",
                 )}
               />
               {referralCode && !isValidReferral && (
@@ -206,7 +234,9 @@ export function DepositCard({
               <TrendingUp className="h-4 w-4 text-success" />
               <span>Estimated APY</span>
             </div>
-            <span className="text-sm font-bold text-success">~{apy.toFixed(1)}%</span>
+            <span className="text-sm font-bold text-success">
+              ~{apy.toFixed(1)}%
+            </span>
           </div>
 
           {/* Transaction Details - Only show when amount entered */}
@@ -222,7 +252,9 @@ export function DepositCard({
               </div>
               <div className="flex justify-between pt-2 border-t border-border">
                 <span className="text-muted-foreground">Min. deposit</span>
-                <span className="text-xs text-muted-foreground">{minDeposit} mUSD</span>
+                <span className="text-xs text-muted-foreground">
+                  {minDeposit} mUSD
+                </span>
               </div>
             </div>
           )}
@@ -233,9 +265,15 @@ export function DepositCard({
             className="w-full"
             size="lg"
             loading={isLoading}
-            disabled={!amount || Number(amount) <= 0 || Boolean(referralCode && !isValidReferral)}
+            disabled={
+              !amount ||
+              Number(amount) <= 0 ||
+              Boolean(referralCode && !isValidReferral)
+            }
           >
-            {!amount || Number(amount) <= 0 ? "Enter amount" : `Deposit ${amount} mUSD`}
+            {!amount || Number(amount) <= 0
+              ? "Enter amount"
+              : `Deposit ${amount} mUSD`}
           </Button>
 
           {/* Help Text */}
@@ -245,5 +283,5 @@ export function DepositCard({
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

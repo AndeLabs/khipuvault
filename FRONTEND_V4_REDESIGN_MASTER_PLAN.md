@@ -10,7 +10,9 @@
 ## 📋 EXECUTIVE SUMMARY
 
 ### The Problem
+
 Current frontend (V3) has:
+
 - ❌ Inconsistent architecture (30% migrated to features/)
 - ❌ 10,000+ line components (unmaintainable)
 - ❌ Duplicate/legacy code everywhere
@@ -19,7 +21,9 @@ Current frontend (V3) has:
 - ❌ Mixed design patterns, no cohesive UI
 
 ### The Solution
+
 Complete rebuild with:
+
 - ✅ **Clean Architecture** - Feature-based, modular, scalable
 - ✅ **Modern DeFi Design** - Based on Aave, Uniswap, Compound best practices
 - ✅ **Brand Identity** - Lavanda (#BFA4FF) + Orange (#FFC77D) as primary colors
@@ -27,6 +31,7 @@ Complete rebuild with:
 - ✅ **Production-ready** - Tests, monitoring, performance optimized
 
 ### Timeline
+
 - **Phase 1** (Week 1-2): Core architecture + design system
 - **Phase 2** (Week 3-4): Features implementation
 - **Phase 3** (Week 5-6): Testing + optimization
@@ -39,18 +44,21 @@ Complete rebuild with:
 ### Top DeFi Platforms Analysis
 
 **Aave (Material-UI + Emotion):**
+
 - iOS app launch 2024 (mainstream adoption)
 - Simplified fiat onboarding
 - Multi-wallet real-time balance tracking
 - Clean, professional, trustworthy design
 
 **Uniswap v4:**
+
 - Official Figma design kit
 - Universal Router (simplified UX)
 - 20x gas savings with flash accounting
 - Open source interface
 
 **Compound:**
+
 - Clear information hierarchy
 - Focus on APY/supply/borrow rates
 - Minimalist design language
@@ -58,17 +66,20 @@ Complete rebuild with:
 ### Banking Best Practices
 
 **Revolut:**
+
 - 5-minute onboarding (benchmark)
 - Biometric security with explanations
 - Customizable accounts/wallets
 - Built-in chat support
 
 **N26:**
+
 - Minimalist design philosophy
 - Instant transfers (email/phone)
 - Cross-platform real-time sync
 
 **Wise:**
+
 - Strong brand identity (bright green)
 - Consistent visual language
 
@@ -102,46 +113,46 @@ Complete rebuild with:
 
 ```css
 /* Brand Identity */
---lavanda: #BFA4FF;      /* Soft Lavanda - Energy, innovation, calm */
---orange: #FFC77D;       /* Vivid Orange - Action, confidence, strength */
+--lavanda: #bfa4ff; /* Soft Lavanda - Energy, innovation, calm */
+--orange: #ffc77d; /* Vivid Orange - Action, confidence, strength */
 
 /* Semantic Colors (derived from brand) */
---primary: #BFA4FF;      /* Lavanda - Primary actions, highlights */
---accent: #FFC77D;       /* Orange - CTAs, important actions */
---success: #10B981;      /* Green - Positive yields, success states */
---warning: #F59E0B;      /* Amber - Warnings, pending states */
---error: #EF4444;        /* Red - Errors, losses */
+--primary: #bfa4ff; /* Lavanda - Primary actions, highlights */
+--accent: #ffc77d; /* Orange - CTAs, important actions */
+--success: #10b981; /* Green - Positive yields, success states */
+--warning: #f59e0b; /* Amber - Warnings, pending states */
+--error: #ef4444; /* Red - Errors, losses */
 
 /* Neutral Palette (Dark mode optimized) */
---bg-primary: #0A0A0F;   /* Deep dark - Main background */
+--bg-primary: #0a0a0f; /* Deep dark - Main background */
 --bg-secondary: #141419; /* Dark gray - Cards, surfaces */
---bg-tertiary: #1E1E24;  /* Lighter gray - Elevated surfaces */
+--bg-tertiary: #1e1e24; /* Lighter gray - Elevated surfaces */
 
---text-primary: #FFFFFF;  /* White - Main text */
---text-secondary: #A1A1AA;/* Gray - Secondary text */
---text-tertiary: #71717A; /* Darker gray - Disabled text */
+--text-primary: #ffffff; /* White - Main text */
+--text-secondary: #a1a1aa; /* Gray - Secondary text */
+--text-tertiary: #71717a; /* Darker gray - Disabled text */
 
---border-primary: #27272A;   /* Subtle borders */
---border-secondary: #3F3F46; /* Stronger borders */
+--border-primary: #27272a; /* Subtle borders */
+--border-secondary: #3f3f46; /* Stronger borders */
 ```
 
 ### Typography
 
 ```css
 /* Fonts */
---font-sans: 'Inter', system-ui, sans-serif;
---font-heading: 'Satoshi', 'Inter', sans-serif;
---font-mono: 'IBM Plex Mono', monospace;
+--font-sans: "Inter", system-ui, sans-serif;
+--font-heading: "Satoshi", "Inter", sans-serif;
+--font-mono: "IBM Plex Mono", monospace;
 
 /* Scale (Type Scale 1.250 - Major Third) */
---text-xs: 0.75rem;    /* 12px - Captions, labels */
---text-sm: 0.875rem;   /* 14px - Body small */
---text-base: 1rem;     /* 16px - Body text */
---text-lg: 1.125rem;   /* 18px - Emphasized */
---text-xl: 1.25rem;    /* 20px - Small headings */
---text-2xl: 1.563rem;  /* 25px - Section headings */
---text-3xl: 1.953rem;  /* 31px - Page headings */
---text-4xl: 2.441rem;  /* 39px - Hero text */
+--text-xs: 0.75rem; /* 12px - Captions, labels */
+--text-sm: 0.875rem; /* 14px - Body small */
+--text-base: 1rem; /* 16px - Body text */
+--text-lg: 1.125rem; /* 18px - Emphasized */
+--text-xl: 1.25rem; /* 20px - Small headings */
+--text-2xl: 1.563rem; /* 25px - Section headings */
+--text-3xl: 1.953rem; /* 31px - Page headings */
+--text-4xl: 2.441rem; /* 39px - Hero text */
 
 /* Weights */
 --font-normal: 400;
@@ -154,27 +165,27 @@ Complete rebuild with:
 
 ```css
 /* Consistent 4px base unit */
---space-1: 0.25rem;   /* 4px */
---space-2: 0.5rem;    /* 8px */
---space-3: 0.75rem;   /* 12px */
---space-4: 1rem;      /* 16px */
---space-5: 1.25rem;   /* 20px */
---space-6: 1.5rem;    /* 24px */
---space-8: 2rem;      /* 32px */
---space-10: 2.5rem;   /* 40px */
---space-12: 3rem;     /* 48px */
---space-16: 4rem;     /* 64px */
---space-20: 5rem;     /* 80px */
+--space-1: 0.25rem; /* 4px */
+--space-2: 0.5rem; /* 8px */
+--space-3: 0.75rem; /* 12px */
+--space-4: 1rem; /* 16px */
+--space-5: 1.25rem; /* 20px */
+--space-6: 1.5rem; /* 24px */
+--space-8: 2rem; /* 32px */
+--space-10: 2.5rem; /* 40px */
+--space-12: 3rem; /* 48px */
+--space-16: 4rem; /* 64px */
+--space-20: 5rem; /* 80px */
 ```
 
 ### Border Radius
 
 ```css
---radius-sm: 0.375rem;  /* 6px - Small elements */
---radius-md: 0.5rem;    /* 8px - Cards, inputs */
---radius-lg: 0.75rem;   /* 12px - Large cards */
---radius-xl: 1rem;      /* 16px - Modals */
---radius-full: 9999px;  /* Pills, avatars */
+--radius-sm: 0.375rem; /* 6px - Small elements */
+--radius-md: 0.5rem; /* 8px - Cards, inputs */
+--radius-lg: 0.75rem; /* 12px - Large cards */
+--radius-xl: 1rem; /* 16px - Modals */
+--radius-full: 9999px; /* Pills, avatars */
 ```
 
 ### Shadows
@@ -196,11 +207,11 @@ Complete rebuild with:
 ```css
 /* Buttons */
 --btn-primary-bg: var(--lavanda);
---btn-primary-hover: #A984E6;
+--btn-primary-hover: #a984e6;
 --btn-primary-text: var(--bg-primary);
 
 --btn-accent-bg: var(--orange);
---btn-accent-hover: #FFB564;
+--btn-accent-hover: #ffb564;
 --btn-accent-text: var(--bg-primary);
 
 --btn-ghost-hover: var(--bg-tertiary);
@@ -429,6 +440,7 @@ apps/web/
 ### 1. Card-Based Layout (Primary Pattern)
 
 **Desktop:**
+
 ```
 ┌─────────────────────────────────────────────────────┐
 │  Header (Wallet, Network, Profile)                  │
@@ -447,6 +459,7 @@ apps/web/
 ```
 
 **Mobile:**
+
 ```
 ┌────────────────────┐
 │  Header (compact)  │
@@ -499,10 +512,14 @@ type TransactionStatus =
 
 ```tsx
 // BAD (old way)
-{isLoading ? <Spinner /> : <PositionCard data={data} />}
+{
+  isLoading ? <Spinner /> : <PositionCard data={data} />;
+}
 
 // GOOD (new way)
-{isLoading ? <PositionCardSkeleton /> : <PositionCard data={data} />}
+{
+  isLoading ? <PositionCardSkeleton /> : <PositionCard data={data} />;
+}
 
 // Skeleton matches actual component structure
 function PositionCardSkeleton() {
@@ -515,7 +532,7 @@ function PositionCardSkeleton() {
         <Skeleton className="h-10 flex-1" /> {/* Button */}
       </div>
     </Card>
-  )
+  );
 }
 ```
 
@@ -528,8 +545,8 @@ function PositionCardSkeleton() {
       title="Something went wrong"
       message={error.message}
       actions={[
-        { label: 'Try Again', onClick: reset },
-        { label: 'Go Home', onClick: () => router.push('/') }
+        { label: "Try Again", onClick: reset },
+        { label: "Go Home", onClick: () => router.push("/") },
       ]}
     />
   )}
@@ -579,27 +596,27 @@ export function useIndividualPool() {
   // Read Functions
   const { data: userInfo } = useReadContract({
     abi: IndividualPoolV3ABI,
-    functionName: 'getUserInfo',
+    functionName: "getUserInfo",
     args: [address],
-  })
+  });
 
   const { data: totalBalance } = useReadContract({
     abi: IndividualPoolV3ABI,
-    functionName: 'getUserTotalBalance',
+    functionName: "getUserTotalBalance",
     args: [address],
-  })
+  });
 
   const { data: referralStats } = useReadContract({
     abi: IndividualPoolV3ABI,
-    functionName: 'getReferralStats',
+    functionName: "getReferralStats",
     args: [address],
-  })
+  });
 
   // Write Functions
-  const { writeContractAsync: deposit } = useWriteContract()
-  const { writeContractAsync: withdraw } = useWriteContract()
-  const { writeContractAsync: claimYields } = useWriteContract()
-  const { writeContractAsync: toggleAutoCompound } = useWriteContract()
+  const { writeContractAsync: deposit } = useWriteContract();
+  const { writeContractAsync: withdraw } = useWriteContract();
+  const { writeContractAsync: claimYields } = useWriteContract();
+  const { writeContractAsync: toggleAutoCompound } = useWriteContract();
 
   return {
     // Data
@@ -615,30 +632,30 @@ export function useIndividualPool() {
     deposit: (amount: bigint, referrer?: Address) => {
       return deposit({
         abi: IndividualPoolV3ABI,
-        functionName: 'deposit',
+        functionName: "deposit",
         args: [amount, referrer || zeroAddress],
-      })
+      });
     },
     withdraw: (amount: bigint) => {
       return withdraw({
         abi: IndividualPoolV3ABI,
-        functionName: 'withdraw',
+        functionName: "withdraw",
         args: [amount],
-      })
+      });
     },
     claimYields: () => {
       return claimYields({
         abi: IndividualPoolV3ABI,
-        functionName: 'claimYields',
-      })
+        functionName: "claimYields",
+      });
     },
     toggleAutoCompound: () => {
       return toggleAutoCompound({
         abi: IndividualPoolV3ABI,
-        functionName: 'toggleAutoCompound',
-      })
+        functionName: "toggleAutoCompound",
+      });
     },
-  }
+  };
 }
 ```
 
@@ -650,24 +667,24 @@ export function useCooperativePool(poolId?: bigint) {
   // Read Pool Info
   const { data: poolInfo } = useReadContract({
     abi: CooperativePoolV3ABI,
-    functionName: 'getPoolInfo',
+    functionName: "getPoolInfo",
     args: [poolId],
     enabled: !!poolId,
-  })
+  });
 
   // Read Member Info
   const { data: memberInfo } = useReadContract({
     abi: CooperativePoolV3ABI,
-    functionName: 'getMemberInfo',
+    functionName: "getMemberInfo",
     args: [poolId, address],
     enabled: !!poolId && !!address,
-  })
+  });
 
   // List all pools
   const { data: poolCounter } = useReadContract({
     abi: CooperativePoolV3ABI,
-    functionName: 'poolCounter',
-  })
+    functionName: "poolCounter",
+  });
 
   return {
     // Pool Data
@@ -684,14 +701,22 @@ export function useCooperativePool(poolId?: bigint) {
     lastClaimTime: memberInfo?.lastClaimTime,
 
     // Actions
-    createPool: (params) => { /* ... */ },
-    joinPool: (value: bigint) => { /* ... */ },
-    leavePool: () => { /* ... */ },
-    claimYield: () => { /* ... */ },
+    createPool: (params) => {
+      /* ... */
+    },
+    joinPool: (value: bigint) => {
+      /* ... */
+    },
+    leavePool: () => {
+      /* ... */
+    },
+    claimYield: () => {
+      /* ... */
+    },
 
     // Metadata
     totalPools: Number(poolCounter || 0n),
-  }
+  };
 }
 ```
 
@@ -700,54 +725,54 @@ export function useCooperativePool(poolId?: bigint) {
 ```typescript
 // features/transactions/hooks/useTransaction.ts
 export function useTransaction() {
-  const [status, setStatus] = useState<TransactionStatus>('idle')
-  const [txHash, setTxHash] = useState<Hash>()
-  const [error, setError] = useState<Error>()
+  const [status, setStatus] = useState<TransactionStatus>("idle");
+  const [txHash, setTxHash] = useState<Hash>();
+  const [error, setError] = useState<Error>();
 
   const execute = async (
     contractWrite: () => Promise<Hash>,
-    options?: TransactionOptions
+    options?: TransactionOptions,
   ) => {
     try {
-      setStatus('preparing')
+      setStatus("preparing");
 
       // Step 1: Prepare transaction
       // ...
 
-      setStatus('signing')
+      setStatus("signing");
 
       // Step 2: Request signature
-      const hash = await contractWrite()
-      setTxHash(hash)
-      setStatus('submitted')
+      const hash = await contractWrite();
+      setTxHash(hash);
+      setStatus("submitted");
 
-      setStatus('confirming')
+      setStatus("confirming");
 
       // Step 3: Wait for confirmation
       const receipt = await waitForTransactionReceipt({
         hash,
         confirmations: options?.confirmations || 3,
-      })
+      });
 
-      setStatus('success')
+      setStatus("success");
 
       // Step 4: Callbacks
-      options?.onSuccess?.(receipt)
+      options?.onSuccess?.(receipt);
 
-      return receipt
+      return receipt;
     } catch (err) {
-      setStatus('error')
-      setError(err as Error)
-      options?.onError?.(err)
-      throw err
+      setStatus("error");
+      setError(err as Error);
+      options?.onError?.(err);
+      throw err;
     }
-  }
+  };
 
   const reset = () => {
-    setStatus('idle')
-    setTxHash(undefined)
-    setError(undefined)
-  }
+    setStatus("idle");
+    setTxHash(undefined);
+    setError(undefined);
+  };
 
   return {
     status,
@@ -755,10 +780,12 @@ export function useTransaction() {
     error,
     execute,
     reset,
-    isLoading: ['preparing', 'signing', 'submitted', 'confirming'].includes(status),
-    isSuccess: status === 'success',
-    isError: status === 'error',
-  }
+    isLoading: ["preparing", "signing", "submitted", "confirming"].includes(
+      status,
+    ),
+    isSuccess: status === "success",
+    isError: status === "error",
+  };
 }
 ```
 
@@ -769,6 +796,7 @@ export function useTransaction() {
 ### 1. Dashboard Home
 
 **Layout:**
+
 ```
 ┌────────────────────────────────────────────────────┐
 │  Header                                             │
@@ -794,12 +822,14 @@ export function useTransaction() {
 ```
 
 **Components:**
+
 - `PortfolioOverview` - Summary cards with animated numbers
 - `PositionsList` - All active positions with quick actions
 - `RecentActivity` - Transaction history (last 10)
 - `QuickActions` - Deposit, Create Pool buttons
 
 **Colors:**
+
 - Cards: `bg-secondary` with `border-primary`
 - Positive numbers: `text-success` (green)
 - Yields: `text-accent` (orange #FFC77D)
@@ -808,6 +838,7 @@ export function useTransaction() {
 ### 2. Individual Savings Page
 
 **Layout:**
+
 ```
 ┌────────────────────────────────────────────────────┐
 │  Individual Savings                                 │
@@ -848,6 +879,7 @@ export function useTransaction() {
 ```
 
 **Components:**
+
 - `PositionCard` - Main position with stats
 - `DepositCard` - Deposit form with MUSD approval
 - `WithdrawDialog` - Withdrawal modal
@@ -857,6 +889,7 @@ export function useTransaction() {
 ### 3. Cooperative Savings Page
 
 **Browse Pools Layout:**
+
 ```
 ┌────────────────────────────────────────────────────┐
 │  Cooperative Pools                                  │
@@ -883,6 +916,7 @@ export function useTransaction() {
 ```
 
 **Components:**
+
 - `PoolCard` - Pool preview with key stats
 - `CreatePoolDialog` - Wizard modal (3 steps)
 - `JoinPoolDialog` - Join flow with amount input
@@ -891,6 +925,7 @@ export function useTransaction() {
 ### 4. Settings Page
 
 **Real Implementation (not placeholder):**
+
 ```
 ┌────────────────────────────────────────────────────┐
 │  Settings                                           │
@@ -918,6 +953,7 @@ export function useTransaction() {
 ```
 
 **Features:**
+
 - Save preferences to localStorage
 - Manage connected wallets
 - Security settings
@@ -933,6 +969,7 @@ export function useTransaction() {
 **Week 1: Design System + Architecture**
 
 Day 1-2: **Setup**
+
 - [ ] Create new branch `v4-redesign`
 - [ ] Install additional dependencies:
   - `@rainbow-me/rainbowkit` (wallet UX)
@@ -944,6 +981,7 @@ Day 1-2: **Setup**
 - [ ] Add Inter & Satoshi fonts
 
 Day 3-4: **Core Components**
+
 - [ ] Create design system components:
   - `Card` variants (with glow effects)
   - `Button` variants (primary lavanda, accent orange)
@@ -958,6 +996,7 @@ Day 3-4: **Core Components**
 - [ ] Create loading states library
 
 Day 5-6: **Web3 Foundation**
+
 - [ ] Integrate RainbowKit
 - [ ] Configure multi-wallet support
 - [ ] Create `WalletButton` component
@@ -966,6 +1005,7 @@ Day 5-6: **Web3 Foundation**
 - [ ] Create `TransactionFeedback` component
 
 Day 7: **Testing & Documentation**
+
 - [ ] Write Storybook stories for components
 - [ ] Document design system
 - [ ] Setup testing infrastructure (Vitest + Testing Library)
@@ -973,6 +1013,7 @@ Day 7: **Testing & Documentation**
 **Week 2: Feature Structure**
 
 Day 8-9: **Unified Transaction System**
+
 - [ ] Create `TransactionContext`
 - [ ] Build `useTransaction` hook
 - [ ] Implement 7-step feedback flow
@@ -980,6 +1021,7 @@ Day 8-9: **Unified Transaction System**
 - [ ] Add transaction history persistence
 
 Day 10-11: **Individual Savings Feature**
+
 - [ ] Refactor `useIndividualPool` hook
 - [ ] Build `PositionCard` component
 - [ ] Build `DepositCard` component
@@ -988,6 +1030,7 @@ Day 10-11: **Individual Savings Feature**
 - [ ] Migrate to features/ structure
 
 Day 12-13: **Cooperative Savings Feature**
+
 - [ ] Split large cooperative components
 - [ ] Build `PoolCard` component
 - [ ] Build `CreatePoolDialog` (wizard)
@@ -995,6 +1038,7 @@ Day 12-13: **Cooperative Savings Feature**
 - [ ] Build `PoolDetailsPage`
 
 Day 14: **Testing & Refinement**
+
 - [ ] Unit tests for hooks
 - [ ] Component tests
 - [ ] Integration tests for deposit/withdraw flow
@@ -1004,6 +1048,7 @@ Day 14: **Testing & Refinement**
 **Week 3: Pages & Features**
 
 Day 15-16: **Dashboard Home**
+
 - [ ] Build `PortfolioOverview`
 - [ ] Build `PositionsList`
 - [ ] Build `QuickActions`
@@ -1011,18 +1056,21 @@ Day 15-16: **Dashboard Home**
 - [ ] Implement real-time updates
 
 Day 17-18: **Individual Savings Page**
+
 - [ ] Complete page layout
 - [ ] Integrate all components
 - [ ] Add responsive design
 - [ ] Test deposit flow end-to-end
 
 Day 19-20: **Cooperative Savings Page**
+
 - [ ] Complete browse pools view
 - [ ] Complete pool details view
 - [ ] Complete my pools view
 - [ ] Test pool creation/joining
 
 Day 21: **Settings (Real Implementation)**
+
 - [ ] Build preferences form
 - [ ] Build wallet management
 - [ ] Build security settings
@@ -1031,12 +1079,14 @@ Day 21: **Settings (Real Implementation)**
 **Week 4: Polish & Optimization**
 
 Day 22-23: **Mobile Optimization**
+
 - [ ] Table → Card transformations
 - [ ] Bottom navigation
 - [ ] Touch-friendly targets
 - [ ] Test on real devices
 
 Day 24-25: **Performance**
+
 - [ ] Code splitting
 - [ ] Lazy loading
 - [ ] Image optimization
@@ -1044,6 +1094,7 @@ Day 24-25: **Performance**
 - [ ] RPC call batching
 
 Day 26-27: **Accessibility**
+
 - [ ] ARIA labels
 - [ ] Keyboard navigation
 - [ ] Focus management
@@ -1051,6 +1102,7 @@ Day 26-27: **Accessibility**
 - [ ] Color contrast validation
 
 Day 28: **Documentation**
+
 - [ ] Component documentation
 - [ ] API documentation
 - [ ] User guide
@@ -1061,6 +1113,7 @@ Day 28: **Documentation**
 **Week 5: Testing**
 
 Day 29-31: **Comprehensive Testing**
+
 - [ ] Unit tests (80% coverage target)
 - [ ] Integration tests
 - [ ] E2E tests (Playwright)
@@ -1068,11 +1121,13 @@ Day 29-31: **Comprehensive Testing**
 - [ ] Security audit
 
 Day 32-33: **Bug Fixes**
+
 - [ ] Fix critical bugs
 - [ ] Fix high-priority bugs
 - [ ] Polish UI issues
 
 Day 34-35: **User Testing**
+
 - [ ] Internal testing
 - [ ] Beta user testing
 - [ ] Gather feedback
@@ -1081,6 +1136,7 @@ Day 34-35: **User Testing**
 **Week 6: Launch Prep**
 
 Day 36-37: **Pre-Launch**
+
 - [ ] Final performance audit
 - [ ] Final security audit
 - [ ] Analytics setup
@@ -1088,12 +1144,14 @@ Day 36-37: **Pre-Launch**
 - [ ] Backup/rollback plan
 
 Day 38-39: **Deployment**
+
 - [ ] Deploy to staging
 - [ ] Smoke tests
 - [ ] Deploy to production
 - [ ] Monitor metrics
 
 Day 40-42: **Post-Launch**
+
 - [ ] Monitor for issues
 - [ ] Gather user feedback
 - [ ] Quick fixes if needed
@@ -1104,24 +1162,28 @@ Day 40-42: **Post-Launch**
 ## 🎯 SUCCESS METRICS
 
 ### Performance
+
 - [ ] Lighthouse score: 90+ (all categories)
 - [ ] First Contentful Paint: <1.5s
 - [ ] Time to Interactive: <3s
 - [ ] Bundle size: <300KB (gzipped)
 
 ### User Experience
+
 - [ ] WCAG 2.2 AA compliance
 - [ ] Mobile usability score: 90+
 - [ ] Transaction success rate: >95%
 - [ ] Error recovery rate: >80%
 
 ### Code Quality
+
 - [ ] Test coverage: >80%
 - [ ] TypeScript strict mode
 - [ ] Zero console errors
 - [ ] ESLint warnings: 0
 
 ### Business
+
 - [ ] User onboarding time: <5 minutes
 - [ ] Deposit flow completion: >70%
 - [ ] Active user retention: >60%
@@ -1132,16 +1194,19 @@ Day 40-42: **Post-Launch**
 ## 📚 RESOURCES
 
 ### Design
+
 - Figma: https://figma.com/khipuvault-v4
 - Storybook: http://localhost:6006
 - Design tokens: `/styles/design-tokens.css`
 
 ### Development
+
 - Component docs: `/docs/components.md`
 - API docs: `/docs/api.md`
 - Architecture: `/docs/architecture.md`
 
 ### Tools
+
 - Lighthouse: https://developers.google.com/web/tools/lighthouse
 - axe DevTools: https://www.deque.com/axe/devtools/
 - Playwright: https://playwright.dev
@@ -1170,6 +1235,7 @@ Day 40-42: **Post-Launch**
 ## ✅ CHECKLIST
 
 ### Pre-Development
+
 - [ ] Plan approved by team
 - [ ] Design system tokens defined
 - [ ] Brand colors confirmed (#BFA4FF, #FFC77D)
@@ -1177,11 +1243,13 @@ Day 40-42: **Post-Launch**
 - [ ] Development environment ready
 
 ### Development
+
 - [ ] Phase 1 complete (Foundation)
 - [ ] Phase 2 complete (Features)
 - [ ] Phase 3 complete (Testing)
 
 ### Launch
+
 - [ ] All tests passing
 - [ ] Performance metrics met
 - [ ] Accessibility audit passed

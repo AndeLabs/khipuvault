@@ -41,7 +41,9 @@
 ### 1. 📱 **FRONTEND (Next.js)**
 
 #### ✅ **Opción 1: Vercel (RECOMENDADO)**
+
 **Plan Gratuito**:
+
 - ✅ Despliegue ilimitado
 - ✅ Deploy automático desde GitHub
 - ✅ Preview deploys para PRs
@@ -51,6 +53,7 @@
 - ✅ 100GB bandwidth/mes
 
 **Cómo usar**:
+
 ```bash
 # 1. Conectar repo GitHub con Vercel
 # 2. Importar proyecto
@@ -68,13 +71,16 @@ vercel --prod
 ---
 
 #### ✅ **Opción 2: Netlify**
+
 **Plan Gratuito**:
+
 - ✅ 100GB bandwidth/mes
 - ✅ Deploy automático
 - ✅ SSL gratis
 - ✅ Dominio personalizado
 
 **Cómo usar**:
+
 ```bash
 # 1. Conectar GitHub
 # 2. Build command: cd apps/web && pnpm build
@@ -88,7 +94,9 @@ vercel --prod
 ### 2. 🔧 **BACKEND API (Express.js)**
 
 #### ✅ **Opción 1: Railway (RECOMENDADO)**
+
 **Plan Gratuito**:
+
 - ✅ $5 crédito mensual gratis
 - ✅ Suficiente para API pequeña/mediana
 - ✅ PostgreSQL incluido
@@ -97,6 +105,7 @@ vercel --prod
 - ✅ Logs en tiempo real
 
 **Cómo usar**:
+
 ```bash
 # 1. Crear cuenta en railway.app
 # 2. New Project → Deploy from GitHub
@@ -114,6 +123,7 @@ vercel --prod
 **Link**: https://railway.app
 
 **Límites**:
+
 - $5/mes gratis
 - ~500 horas/mes de runtime
 - Suficiente para desarrollo y MVP
@@ -121,13 +131,16 @@ vercel --prod
 ---
 
 #### ✅ **Opción 2: Render**
+
 **Plan Gratuito**:
+
 - ✅ Completamente gratis (con limitaciones)
 - ⚠️ Se duerme después de 15 min sin uso
 - ⚠️ Tarda 30-60s en despertar
 - ✅ 750 horas/mes
 
 **Cómo usar**:
+
 ```bash
 # 1. Crear cuenta en render.com
 # 2. New → Web Service
@@ -142,6 +155,7 @@ vercel --prod
 **Link**: https://render.com
 
 **Consideraciones**:
+
 - ✅ Gratis 100%
 - ⚠️ Cold starts (30-60s)
 - ✅ Bueno para prototipos
@@ -149,7 +163,9 @@ vercel --prod
 ---
 
 #### ✅ **Opción 3: Fly.io**
+
 **Plan Gratuito**:
+
 - ✅ 3 VMs pequeñas gratis
 - ✅ No se duerme
 - ✅ Deploy rápido
@@ -161,7 +177,9 @@ vercel --prod
 ### 3. 🗄️ **DATABASE (PostgreSQL)**
 
 #### ✅ **Opción 1: Neon (RECOMENDADO)**
+
 **Plan Gratuito**:
+
 - ✅ 512MB storage
 - ✅ PostgreSQL serverless
 - ✅ No se duerme
@@ -169,6 +187,7 @@ vercel --prod
 - ✅ 100 horas compute/mes
 
 **Cómo usar**:
+
 ```bash
 # 1. Crear cuenta en neon.tech
 # 2. Create Project
@@ -182,7 +201,9 @@ vercel --prod
 ---
 
 #### ✅ **Opción 2: Supabase**
+
 **Plan Gratuito**:
+
 - ✅ 500MB database
 - ✅ PostgreSQL completo
 - ✅ No se duerme
@@ -190,6 +211,7 @@ vercel --prod
 - ✅ Realtime subscriptions
 
 **Cómo usar**:
+
 ```bash
 # 1. Crear cuenta en supabase.com
 # 2. New project
@@ -202,7 +224,9 @@ vercel --prod
 ---
 
 #### ✅ **Opción 3: Railway PostgreSQL**
+
 **Plan Gratuito**:
+
 - ✅ Incluido en crédito de $5/mes
 - ✅ Mismo proyecto que API
 - ✅ Simple de conectar
@@ -214,7 +238,9 @@ vercel --prod
 ### 4. ⛓️ **BLOCKCHAIN INDEXER**
 
 #### ✅ **Opción 1: Railway Worker (RECOMENDADO)**
+
 **Cómo usar**:
+
 ```bash
 # 1. En Railway, mismo proyecto de API
 # 2. New Service → Deploy from GitHub
@@ -232,7 +258,9 @@ vercel --prod
 ---
 
 #### ✅ **Opción 2: Render Background Worker**
+
 **Cómo usar**:
+
 ```bash
 # 1. New → Background Worker
 # 2. Conectar GitHub
@@ -432,6 +460,7 @@ curl https://khipuvault-api.railway.app/api/pools
 ## 💰 COSTOS ESTIMADOS
 
 ### **Plan Gratuito Total**:
+
 ```
 ✅ Vercel (Frontend):         $0/mes
 ✅ Railway (API + Indexer):   $0/mes (primeros $5 gratis)
@@ -442,6 +471,7 @@ curl https://khipuvault-api.railway.app/api/pools
 ```
 
 ### **Cuando Escales** (más tráfico):
+
 ```
 📱 Vercel Pro:                $20/mes (opcional, si necesitas más)
 🔧 Railway Pro:               $5/mes (cuando uses > $5 crédito)
@@ -480,6 +510,7 @@ docker-compose logs -f
 ```
 
 **Costos VPS más baratos**:
+
 - Hetzner: $4.50/mes (2GB RAM)
 - DigitalOcean: $6/mes (1GB RAM)
 - Vultr: $5/mes (1GB RAM)
@@ -489,6 +520,7 @@ docker-compose logs -f
 ## 🎯 RECOMENDACIÓN FINAL
 
 ### **Para MVP / Prototipo** (GRATIS):
+
 ```
 ✅ Frontend: Vercel
 ✅ Backend: Railway
@@ -497,6 +529,7 @@ docker-compose logs -f
 ```
 
 ### **Para Producción** (cuando tengas usuarios):
+
 ```
 ✅ Frontend: Vercel Pro ($20/mes)
 ✅ Backend: Railway Pro ($20/mes)
@@ -508,6 +541,7 @@ docker-compose logs -f
 ```
 
 ### **Para Gran Escala** (muchos usuarios):
+
 ```
 ✅ Frontend: Vercel Enterprise
 ✅ Backend: AWS/GCP con auto-scaling
@@ -522,20 +556,21 @@ docker-compose logs -f
 
 ## 📊 COMPARACIÓN DE OPCIONES
 
-| Servicio | Plan Gratuito | Cold Starts | Deploy Time | Límites |
-|----------|---------------|-------------|-------------|---------|
-| **Vercel** | ✅ Ilimitado | ❌ No | ~30s | 100GB bandwidth |
-| **Railway** | ⚠️ $5/mes | ❌ No | ~2min | 500 horas |
-| **Render** | ✅ Ilimitado | ⚠️ Sí (30-60s) | ~5min | 750 horas |
-| **Fly.io** | ⚠️ 3 VMs | ❌ No | ~1min | 3 instancias |
-| **Neon** | ✅ Sí | ❌ No | Instant | 512MB + 100h |
-| **Supabase** | ✅ Sí | ❌ No | Instant | 500MB |
+| Servicio     | Plan Gratuito | Cold Starts    | Deploy Time | Límites         |
+| ------------ | ------------- | -------------- | ----------- | --------------- |
+| **Vercel**   | ✅ Ilimitado  | ❌ No          | ~30s        | 100GB bandwidth |
+| **Railway**  | ⚠️ $5/mes     | ❌ No          | ~2min       | 500 horas       |
+| **Render**   | ✅ Ilimitado  | ⚠️ Sí (30-60s) | ~5min       | 750 horas       |
+| **Fly.io**   | ⚠️ 3 VMs      | ❌ No          | ~1min       | 3 instancias    |
+| **Neon**     | ✅ Sí         | ❌ No          | Instant     | 512MB + 100h    |
+| **Supabase** | ✅ Sí         | ❌ No          | Instant     | 500MB           |
 
 ---
 
 ## 🚨 PROBLEMAS COMUNES Y SOLUCIONES
 
 ### ❌ "Build failed on Railway"
+
 ```bash
 # Solución: Verificar package.json scripts
 # Asegurar que existe:
@@ -548,6 +583,7 @@ docker-compose logs -f
 ```
 
 ### ❌ "Database connection failed"
+
 ```bash
 # Solución: Verificar connection string
 # Formato correcto:
@@ -558,6 +594,7 @@ psql "postgresql://..."
 ```
 
 ### ❌ "API returns 502 Bad Gateway"
+
 ```bash
 # Solución: Verificar PORT variable
 # Railway asigna PORT automáticamente
@@ -565,6 +602,7 @@ psql "postgresql://..."
 ```
 
 ### ❌ "CORS error en frontend"
+
 ```bash
 # Solución: Agregar dominio de Vercel a CORS_ORIGIN
 CORS_ORIGIN=https://khipuvault.vercel.app,https://*.vercel.app
@@ -603,6 +641,7 @@ CORS_ORIGIN=https://khipuvault.vercel.app,https://*.vercel.app
 **NO NECESITAS SERVIDOR PROPIO** ✅
 
 Puedes hospedar **TODO GRATIS** con:
+
 - Vercel (frontend)
 - Railway (backend + indexer)
 - Neon (database)

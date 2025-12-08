@@ -3,101 +3,119 @@
  * Modern UI for creating saving pools with native BTC deposits
  */
 
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useCooperativePool } from '@/hooks/web3/use-cooperative-pool'
-import { Users, TrendingUp, Shield, Info, Loader2, CheckCircle2 } from 'lucide-react'
-import { formatEther } from 'viem'
+import { useState } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
+import {
+  Users,
+  TrendingUp,
+  Shield,
+  Info,
+  Loader2,
+  CheckCircle2,
+} from "lucide-react";
+import { formatEther } from "viem";
 
 export function CreatePoolV3() {
-  const { createPool, state, error, txHash, isProcessing } = useCooperativePool()
+  const { createPool, state, error, txHash, isProcessing } =
+    useCooperativePool();
 
   const [formData, setFormData] = useState({
-    name: '',
-    minContribution: '0.001',
-    maxContribution: '1',
-    maxMembers: '10',
-    description: ''
-  })
+    name: "",
+    minContribution: "0.001",
+    maxContribution: "1",
+    maxMembers: "10",
+    description: "",
+  });
 
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
+  const [validationErrors, setValidationErrors] = useState<
+    Record<string, string>
+  >({});
 
   const validateForm = (): boolean => {
-    const errors: Record<string, string> = {}
+    const errors: Record<string, string> = {};
 
     if (!formData.name.trim()) {
-      errors.name = 'El nombre es requerido'
+      errors.name = "El nombre es requerido";
     } else if (formData.name.length < 3) {
-      errors.name = 'Mínimo 3 caracteres'
+      errors.name = "Mínimo 3 caracteres";
     } else if (formData.name.length > 50) {
-      errors.name = 'Máximo 50 caracteres'
+      errors.name = "Máximo 50 caracteres";
     }
 
-    const min = parseFloat(formData.minContribution)
-    const max = parseFloat(formData.maxContribution)
-    const members = parseInt(formData.maxMembers)
+    const min = parseFloat(formData.minContribution);
+    const max = parseFloat(formData.maxContribution);
+    const members = parseInt(formData.maxMembers);
 
     if (isNaN(min) || min < 0.001) {
-      errors.minContribution = 'Mínimo 0.001 BTC'
+      errors.minContribution = "Mínimo 0.001 BTC";
     }
 
     if (isNaN(max) || max < min) {
-      errors.maxContribution = 'Debe ser mayor que el mínimo'
+      errors.maxContribution = "Debe ser mayor que el mínimo";
     }
 
     if (max > 100) {
-      errors.maxContribution = 'Máximo 100 BTC'
+      errors.maxContribution = "Máximo 100 BTC";
     }
 
     if (isNaN(members) || members < 2) {
-      errors.maxMembers = 'Mínimo 2 miembros'
+      errors.maxMembers = "Mínimo 2 miembros";
     }
 
     if (members > 100) {
-      errors.maxMembers = 'Máximo 100 miembros'
+      errors.maxMembers = "Máximo 100 miembros";
     }
 
-    setValidationErrors(errors)
-    return Object.keys(errors).length === 0
-  }
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateForm()) return
+    if (!validateForm()) return;
 
     await createPool(
       formData.name,
       formData.minContribution,
       formData.maxContribution,
-      parseInt(formData.maxMembers)
-    )
-  }
+      parseInt(formData.maxMembers),
+    );
+  };
 
   const handleReset = () => {
     setFormData({
-      name: '',
-      minContribution: '0.001',
-      maxContribution: '1',
-      maxMembers: '10',
-      description: ''
-    })
-    setValidationErrors({})
-  }
+      name: "",
+      minContribution: "0.001",
+      maxContribution: "1",
+      maxMembers: "10",
+      description: "",
+    });
+    setValidationErrors({});
+  };
 
-  if (state === 'success') {
+  if (state === "success") {
     return (
       <Card className="bg-gradient-to-br from-green-500/10 via-card to-card border-2 border-green-500/50">
         <CardContent className="p-6 text-center">
           <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-green-500 mb-2">¡Pool Creado Exitosamente!</h2>
+          <h2 className="text-2xl font-bold text-green-500 mb-2">
+            ¡Pool Creado Exitosamente!
+          </h2>
           <p className="text-muted-foreground mb-4">
             Tu pool cooperativo ha sido creado. Los miembros ya pueden unirse.
           </p>
@@ -116,7 +134,7 @@ export function CreatePoolV3() {
           </Button>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -142,9 +160,11 @@ export function CreatePoolV3() {
               id="name"
               placeholder="Ej: Ahorro Familiar 2025"
               value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               disabled={isProcessing}
-              className={validationErrors.name ? 'border-red-500' : ''}
+              className={validationErrors.name ? "border-red-500" : ""}
             />
             {validationErrors.name && (
               <p className="text-sm text-red-500">{validationErrors.name}</p>
@@ -155,7 +175,8 @@ export function CreatePoolV3() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="minContribution">
-                Contribución Mínima (BTC) <span className="text-red-500">*</span>
+                Contribución Mínima (BTC){" "}
+                <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Input
@@ -165,20 +186,32 @@ export function CreatePoolV3() {
                   min="0.001"
                   placeholder="0.001"
                   value={formData.minContribution}
-                  onChange={(e) => setFormData({ ...formData, minContribution: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      minContribution: e.target.value,
+                    })
+                  }
                   disabled={isProcessing}
-                  className={validationErrors.minContribution ? 'border-red-500' : ''}
+                  className={
+                    validationErrors.minContribution ? "border-red-500" : ""
+                  }
                 />
-                <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">BTC</span>
+                <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">
+                  BTC
+                </span>
               </div>
               {validationErrors.minContribution && (
-                <p className="text-sm text-red-500">{validationErrors.minContribution}</p>
+                <p className="text-sm text-red-500">
+                  {validationErrors.minContribution}
+                </p>
               )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="maxContribution">
-                Contribución Máxima (BTC) <span className="text-red-500">*</span>
+                Contribución Máxima (BTC){" "}
+                <span className="text-red-500">*</span>
               </Label>
               <div className="relative">
                 <Input
@@ -188,14 +221,25 @@ export function CreatePoolV3() {
                   min="0.001"
                   placeholder="1"
                   value={formData.maxContribution}
-                  onChange={(e) => setFormData({ ...formData, maxContribution: e.target.value })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      maxContribution: e.target.value,
+                    })
+                  }
                   disabled={isProcessing}
-                  className={validationErrors.maxContribution ? 'border-red-500' : ''}
+                  className={
+                    validationErrors.maxContribution ? "border-red-500" : ""
+                  }
                 />
-                <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">BTC</span>
+                <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">
+                  BTC
+                </span>
               </div>
               {validationErrors.maxContribution && (
-                <p className="text-sm text-red-500">{validationErrors.maxContribution}</p>
+                <p className="text-sm text-red-500">
+                  {validationErrors.maxContribution}
+                </p>
               )}
             </div>
           </div>
@@ -212,12 +256,16 @@ export function CreatePoolV3() {
               max="100"
               placeholder="10"
               value={formData.maxMembers}
-              onChange={(e) => setFormData({ ...formData, maxMembers: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, maxMembers: e.target.value })
+              }
               disabled={isProcessing}
-              className={validationErrors.maxMembers ? 'border-red-500' : ''}
+              className={validationErrors.maxMembers ? "border-red-500" : ""}
             />
             {validationErrors.maxMembers && (
-              <p className="text-sm text-red-500">{validationErrors.maxMembers}</p>
+              <p className="text-sm text-red-500">
+                {validationErrors.maxMembers}
+              </p>
             )}
             <p className="text-xs text-muted-foreground">
               Número máximo de personas que pueden unirse al pool
@@ -227,13 +275,16 @@ export function CreatePoolV3() {
           {/* Description (Optional) */}
           <div className="space-y-2">
             <Label htmlFor="description">
-              Descripción <span className="text-muted-foreground">(Opcional)</span>
+              Descripción{" "}
+              <span className="text-muted-foreground">(Opcional)</span>
             </Label>
             <Textarea
               id="description"
               placeholder="Describe el propósito del pool, reglas del grupo, objetivos de ahorro..."
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               disabled={isProcessing}
               rows={4}
               maxLength={500}
@@ -249,7 +300,8 @@ export function CreatePoolV3() {
             <AlertDescription className="text-blue-200 text-sm">
               <strong className="text-blue-400">Sin costo de creación</strong>
               <br />
-              Solo pagas el gas de la transacción. El pool se activa cuando el primer miembro deposita.
+              Solo pagas el gas de la transacción. El pool se activa cuando el
+              primer miembro deposita.
             </AlertDescription>
           </Alert>
 
@@ -257,18 +309,26 @@ export function CreatePoolV3() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div className="p-3 rounded-lg bg-primary/10 border border-primary/30">
               <TrendingUp className="h-4 w-4 text-primary mb-1" />
-              <p className="text-xs font-medium text-primary">Yields Compartidos</p>
+              <p className="text-xs font-medium text-primary">
+                Yields Compartidos
+              </p>
               <p className="text-xs text-muted-foreground">5-7% APR del pool</p>
             </div>
             <div className="p-3 rounded-lg bg-green-500/10 border border-green-500/30">
               <Shield className="h-4 w-4 text-green-500 mb-1" />
-              <p className="text-xs font-medium text-green-500">Totalmente Seguro</p>
-              <p className="text-xs text-muted-foreground">Smart contracts auditados</p>
+              <p className="text-xs font-medium text-green-500">
+                Totalmente Seguro
+              </p>
+              <p className="text-xs text-muted-foreground">
+                Smart contracts auditados
+              </p>
             </div>
             <div className="p-3 rounded-lg bg-purple-500/10 border border-purple-500/30">
               <Users className="h-4 w-4 text-purple-500 mb-1" />
               <p className="text-xs font-medium text-purple-500">Flexible</p>
-              <p className="text-xs text-muted-foreground">Entra y sal cuando quieras</p>
+              <p className="text-xs text-muted-foreground">
+                Entra y sal cuando quieras
+              </p>
             </div>
           </div>
 
@@ -284,8 +344,9 @@ export function CreatePoolV3() {
             <Alert className="bg-yellow-500/10 border-yellow-500/30">
               <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
               <AlertDescription className="text-yellow-200">
-                {state === 'executing' && 'Confirma la transacción en tu wallet...'}
-                {state === 'processing' && 'Creando pool en la blockchain...'}
+                {state === "executing" &&
+                  "Confirma la transacción en tu wallet..."}
+                {state === "processing" && "Creando pool en la blockchain..."}
               </AlertDescription>
             </Alert>
           )}
@@ -324,5 +385,5 @@ export function CreatePoolV3() {
         </form>
       </CardContent>
     </Card>
-  )
+  );
 }

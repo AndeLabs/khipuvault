@@ -29,15 +29,15 @@ The API uses [Pino](https://getpino.io/) for high-performance, structured JSON l
 ### Basic Logging
 
 ```typescript
-import { logger } from '../lib/logger'
+import { logger } from "../lib/logger";
 
 // Different log levels
-logger.trace('Very detailed debugging info')
-logger.debug('Debug information')
-logger.info('General information')
-logger.warn('Warning message')
-logger.error('Error occurred')
-logger.fatal('Critical failure')
+logger.trace("Very detailed debugging info");
+logger.debug("Debug information");
+logger.info("General information");
+logger.warn("Warning message");
+logger.error("Error occurred");
+logger.fatal("Critical failure");
 ```
 
 ### Structured Logging
@@ -46,14 +46,17 @@ Always use structured data instead of string concatenation:
 
 ```typescript
 // ✅ GOOD - Structured logging
-logger.info({
-  userId: '123',
-  action: 'login',
-  ip: '192.168.1.1'
-}, 'User logged in')
+logger.info(
+  {
+    userId: "123",
+    action: "login",
+    ip: "192.168.1.1",
+  },
+  "User logged in",
+);
 
 // ❌ BAD - String concatenation
-logger.info('User 123 logged in from 192.168.1.1')
+logger.info("User 123 logged in from 192.168.1.1");
 ```
 
 ### Child Loggers
@@ -61,16 +64,16 @@ logger.info('User 123 logged in from 192.168.1.1')
 Create child loggers for specific modules or contexts:
 
 ```typescript
-import { createChildLogger } from '../lib/logger'
+import { createChildLogger } from "../lib/logger";
 
-const authLogger = createChildLogger({ module: 'auth' })
-authLogger.info({ userId: '123' }, 'User authenticated')
+const authLogger = createChildLogger({ module: "auth" });
+authLogger.info({ userId: "123" }, "User authenticated");
 
 const poolLogger = createChildLogger({
-  module: 'pool-service',
-  poolId: 'pool_789'
-})
-poolLogger.debug('Processing pool transaction')
+  module: "pool-service",
+  poolId: "pool_789",
+});
+poolLogger.debug("Processing pool transaction");
 ```
 
 ### Error Logging
@@ -81,14 +84,17 @@ Log errors with full context:
 try {
   // Some operation
 } catch (error) {
-  logger.error({
-    error, // Stack trace included automatically
-    context: {
-      userId: '123',
-      operation: 'payment',
-      retries: 3
-    }
-  }, 'Operation failed')
+  logger.error(
+    {
+      error, // Stack trace included automatically
+      context: {
+        userId: "123",
+        operation: "payment",
+        retries: 3,
+      },
+    },
+    "Operation failed",
+  );
 }
 ```
 
@@ -99,18 +105,18 @@ In middleware or route handlers:
 ```typescript
 function handleRequest(req: Request, res: Response) {
   const requestLogger = createChildLogger({
-    requestId: req.headers['x-request-id'],
+    requestId: req.headers["x-request-id"],
     method: req.method,
-    path: req.path
-  })
+    path: req.path,
+  });
 
-  requestLogger.info('Processing request')
+  requestLogger.info("Processing request");
 
   try {
     // Handle request
-    requestLogger.info({ statusCode: 200 }, 'Request completed')
+    requestLogger.info({ statusCode: 200 }, "Request completed");
   } catch (error) {
-    requestLogger.error({ error }, 'Request failed')
+    requestLogger.error({ error }, "Request failed");
   }
 }
 ```
@@ -119,14 +125,14 @@ function handleRequest(req: Request, res: Response) {
 
 The logger uses standard Pino log levels:
 
-| Level | Value | Description | When to Use |
-|-------|-------|-------------|-------------|
-| **fatal** | 60 | Application is about to crash | Critical failures that require immediate attention |
-| **error** | 50 | Error that needs attention | Errors that should be investigated |
-| **warn** | 40 | Warning message | Potential issues or deprecated features |
-| **info** | 30 | General informational message | Important application events |
-| **debug** | 20 | Debugging information | Detailed information for debugging |
-| **trace** | 10 | Very detailed debugging | Step-by-step execution details |
+| Level     | Value | Description                   | When to Use                                        |
+| --------- | ----- | ----------------------------- | -------------------------------------------------- |
+| **fatal** | 60    | Application is about to crash | Critical failures that require immediate attention |
+| **error** | 50    | Error that needs attention    | Errors that should be investigated                 |
+| **warn**  | 40    | Warning message               | Potential issues or deprecated features            |
+| **info**  | 30    | General informational message | Important application events                       |
+| **debug** | 20    | Debugging information         | Detailed information for debugging                 |
+| **trace** | 10    | Very detailed debugging       | Step-by-step execution details                     |
 
 ### Default Levels by Environment
 
@@ -161,13 +167,16 @@ The following fields are automatically redacted from logs:
 ### Example
 
 ```typescript
-logger.info({
-  user: {
-    email: 'user@example.com',
-    password: 'secret123', // Will be [REDACTED]
-    apiKey: 'key_xyz'      // Will be [REDACTED]
-  }
-}, 'User data')
+logger.info(
+  {
+    user: {
+      email: "user@example.com",
+      password: "secret123", // Will be [REDACTED]
+      apiKey: "key_xyz", // Will be [REDACTED]
+    },
+  },
+  "User data",
+);
 
 // Output:
 // {
@@ -233,7 +242,15 @@ pnpm dev:json
 Logs are output as raw JSON (useful for testing log parsing):
 
 ```json
-{"level":30,"timestamp":"2023-11-09T12:00:00.000Z","pid":12345,"hostname":"hostname","msg":"KhipuVault API Server started","port":3001,"environment":"development"}
+{
+  "level": 30,
+  "timestamp": "2023-11-09T12:00:00.000Z",
+  "pid": 12345,
+  "hostname": "hostname",
+  "msg": "KhipuVault API Server started",
+  "port": 3001,
+  "environment": "development"
+}
 ```
 
 ### Production Mode
@@ -245,7 +262,15 @@ NODE_ENV=production pnpm start
 Logs are always JSON in production for log aggregation systems:
 
 ```json
-{"level":30,"timestamp":"2023-11-09T12:00:00.000Z","pid":12345,"hostname":"prod-server","msg":"KhipuVault API Server started","port":3001,"environment":"production"}
+{
+  "level": 30,
+  "timestamp": "2023-11-09T12:00:00.000Z",
+  "pid": 12345,
+  "hostname": "prod-server",
+  "msg": "KhipuVault API Server started",
+  "port": 3001,
+  "environment": "production"
+}
 ```
 
 ## Best Practices
@@ -253,85 +278,97 @@ Logs are always JSON in production for log aggregation systems:
 ### DO ✅
 
 1. **Use structured data**: Always log objects with meaningful keys
+
    ```typescript
-   logger.info({ userId, action: 'login' }, 'User logged in')
+   logger.info({ userId, action: "login" }, "User logged in");
    ```
 
 2. **Use appropriate log levels**: Use `error` for errors, `info` for important events, `debug` for debugging
+
    ```typescript
-   logger.error({ error }, 'Database connection failed')
-   logger.info({ userId }, 'User logged in')
-   logger.debug({ cacheKey }, 'Cache lookup')
+   logger.error({ error }, "Database connection failed");
+   logger.info({ userId }, "User logged in");
+   logger.debug({ cacheKey }, "Cache lookup");
    ```
 
 3. **Include context**: Add relevant information to help debugging
+
    ```typescript
-   logger.warn({
-     userId: '123',
-     endpoint: '/api/users',
-     rateLimit: { current: 95, max: 100 }
-   }, 'Approaching rate limit')
+   logger.warn(
+     {
+       userId: "123",
+       endpoint: "/api/users",
+       rateLimit: { current: 95, max: 100 },
+     },
+     "Approaching rate limit",
+   );
    ```
 
 4. **Use child loggers**: For modules or specific contexts
+
    ```typescript
-   const moduleLogger = createChildLogger({ module: 'payment-service' })
-   moduleLogger.info('Processing payment')
+   const moduleLogger = createChildLogger({ module: "payment-service" });
+   moduleLogger.info("Processing payment");
    ```
 
 5. **Log errors with stack traces**: Always include the error object
    ```typescript
-   logger.error({ error }, 'Operation failed')
+   logger.error({ error }, "Operation failed");
    ```
 
 ### DON'T ❌
 
 1. **Don't use string concatenation**
+
    ```typescript
    // ❌ BAD
-   logger.info('User ' + userId + ' logged in')
+   logger.info("User " + userId + " logged in");
 
    // ✅ GOOD
-   logger.info({ userId }, 'User logged in')
+   logger.info({ userId }, "User logged in");
    ```
 
 2. **Don't log sensitive data directly** (even though it's redacted, be careful)
+
    ```typescript
    // ❌ BAD
-   logger.info({ rawPassword: password }, 'Password check')
+   logger.info({ rawPassword: password }, "Password check");
 
    // ✅ GOOD
-   logger.info({ passwordLength: password.length }, 'Password validated')
+   logger.info({ passwordLength: password.length }, "Password validated");
    ```
 
 3. **Don't use wrong log levels**
+
    ```typescript
    // ❌ BAD
-   logger.error('User logged in') // Not an error
+   logger.error("User logged in"); // Not an error
 
    // ✅ GOOD
-   logger.info({ userId }, 'User logged in')
+   logger.info({ userId }, "User logged in");
    ```
 
 4. **Don't repeat context in every log**
+
    ```typescript
    // ❌ BAD
-   logger.info({ module: 'payment' }, 'Processing')
-   logger.info({ module: 'payment' }, 'Complete')
+   logger.info({ module: "payment" }, "Processing");
+   logger.info({ module: "payment" }, "Complete");
 
    // ✅ GOOD
-   const paymentLogger = createChildLogger({ module: 'payment' })
-   paymentLogger.info('Processing')
-   paymentLogger.info('Complete')
+   const paymentLogger = createChildLogger({ module: "payment" });
+   paymentLogger.info("Processing");
+   paymentLogger.info("Complete");
    ```
 
 5. **Don't use console.log/error directly**
+
    ```typescript
    // ❌ BAD
-   console.log('Something happened')
+   console.log("Something happened");
 
    // ✅ GOOD
-   logger.info('Something happened')
+   logger.info("Something happened");
    ```
 
 ## Log Aggregation
@@ -349,13 +386,13 @@ Example configuration for production:
 ```typescript
 // In logger.ts
 const productionConfig = {
-  target: 'pino-datadog',
+  target: "pino-datadog",
   options: {
     apiKey: process.env.DATADOG_API_KEY,
-    service: 'khipuvault-api',
-    ddsource: 'nodejs',
-  }
-}
+    service: "khipuvault-api",
+    ddsource: "nodejs",
+  },
+};
 ```
 
 ## Monitoring and Alerting

@@ -1,7 +1,21 @@
-"use client"
+"use client";
 
-import { Area, AreaChart, CartesianGrid, Tooltip, ResponsiveContainer, XAxis, YAxis } from "recharts"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+} from "recharts";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 const chartData = [
   { date: "2024-05-01", value: 200 },
@@ -45,48 +59,78 @@ export function PerformanceChart() {
       </CardHeader>
       <CardContent>
         <div className="h-[300px] w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart
-                data={chartData}
-                margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
-              >
-                <defs>
-                  <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(var(--secondary))" stopOpacity={0.2} />
-                  </linearGradient>
-                  <linearGradient id="colorStroke" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="5%" stopColor="hsl(var(--primary))" />
-                    <stop offset="95%" stopColor="hsl(var(--secondary))" />
-                  </linearGradient>
-                </defs>
-                <XAxis 
-                    dataKey="date" 
-                    tickFormatter={(value) => new Date(value).getDate().toString()}
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                    axisLine={{ stroke: 'hsl(var(--muted-foreground))', opacity: 0.2 }}
-                    tickLine={{ stroke: 'hsl(var(--muted-foreground))', opacity: 0.2 }}
-                />
-                <YAxis 
-                    tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
-                    axisLine={{ stroke: 'hsl(var(--muted-foreground))', opacity: 0.2 }}
-                    tickLine={{ stroke: 'hsl(var(--muted-foreground))', opacity: 0.2 }}
-                />
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted-foreground))" opacity={0.1} />
-                <Tooltip
-                  contentStyle={{ 
-                    backgroundColor: 'hsl(var(--card))',
-                    border: '1px solid hsl(var(--primary) / 0.2)',
-                    borderRadius: 'var(--radius)',
-                  }}
-                  labelStyle={{ color: 'hsl(var(--foreground))' }}
-                  itemStyle={{ color: 'hsl(var(--primary))' }}
-                />
-                <Area type="monotone" dataKey="value" stroke="url(#colorStroke)" strokeWidth={2} fill="url(#colorUv)" />
-              </AreaChart>
-            </ResponsiveContainer>
+          <ResponsiveContainer width="100%" height="100%">
+            <AreaChart
+              data={chartData}
+              margin={{ top: 5, right: 20, left: -10, bottom: 5 }}
+            >
+              <defs>
+                <linearGradient id="colorUv" x1="0" y1="0" x2="0" y2="1">
+                  <stop
+                    offset="5%"
+                    stopColor="hsl(var(--primary))"
+                    stopOpacity={0.2}
+                  />
+                  <stop
+                    offset="95%"
+                    stopColor="hsl(var(--secondary))"
+                    stopOpacity={0.2}
+                  />
+                </linearGradient>
+                <linearGradient id="colorStroke" x1="0" y1="0" x2="1" y2="0">
+                  <stop offset="5%" stopColor="hsl(var(--primary))" />
+                  <stop offset="95%" stopColor="hsl(var(--secondary))" />
+                </linearGradient>
+              </defs>
+              <XAxis
+                dataKey="date"
+                tickFormatter={(value) => new Date(value).getDate().toString()}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                axisLine={{
+                  stroke: "hsl(var(--muted-foreground))",
+                  opacity: 0.2,
+                }}
+                tickLine={{
+                  stroke: "hsl(var(--muted-foreground))",
+                  opacity: 0.2,
+                }}
+              />
+              <YAxis
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
+                axisLine={{
+                  stroke: "hsl(var(--muted-foreground))",
+                  opacity: 0.2,
+                }}
+                tickLine={{
+                  stroke: "hsl(var(--muted-foreground))",
+                  opacity: 0.2,
+                }}
+              />
+              <CartesianGrid
+                strokeDasharray="3 3"
+                stroke="hsl(var(--muted-foreground))"
+                opacity={0.1}
+              />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "hsl(var(--card))",
+                  border: "1px solid hsl(var(--primary) / 0.2)",
+                  borderRadius: "var(--radius)",
+                }}
+                labelStyle={{ color: "hsl(var(--foreground))" }}
+                itemStyle={{ color: "hsl(var(--primary))" }}
+              />
+              <Area
+                type="monotone"
+                dataKey="value"
+                stroke="url(#colorStroke)"
+                strokeWidth={2}
+                fill="url(#colorUv)"
+              />
+            </AreaChart>
+          </ResponsiveContainer>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

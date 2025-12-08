@@ -7,6 +7,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 ## What Was Built
 
 ### 1. Monorepo Foundation ✅
+
 - **pnpm workspaces** configured for package management
 - **Turborepo** set up for build orchestration and caching
 - Root package.json with comprehensive scripts
@@ -15,6 +16,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 ### 2. Packages Created ✅
 
 #### @khipu/shared
+
 - Shared TypeScript types (Pool, Transaction, User)
 - Constants (chains, pools, contracts)
 - Utility functions (formatters, validators)
@@ -22,6 +24,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 - **Location**: `packages/shared/`
 
 #### @khipu/ui
+
 - Reusable UI components (Button, Card)
 - Built with Radix UI primitives
 - Styled with Tailwind CSS
@@ -29,6 +32,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 - **Location**: `packages/ui/`
 
 #### @khipu/web3
+
 - React hooks for contract interactions
   - `useIndividualPool()` - Individual savings pool
   - `useCooperativePool()` - Cooperative savings pool
@@ -37,6 +41,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 - **Location**: `packages/web3/`
 
 #### @khipu/database
+
 - Complete Prisma schema with 6 models:
   - User, Deposit, Pool, PoolAnalytics, Notification, EventLog
 - Prisma client with singleton pattern
@@ -45,6 +50,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 - **Location**: `packages/database/`
 
 #### @khipu/blockchain
+
 - Real-time event listeners for:
   - IndividualPool events (Deposited, Withdrawn, YieldClaimed)
   - CooperativePool events (PoolCreated, MemberJoined, etc.)
@@ -54,6 +60,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 - **Location**: `packages/blockchain/`
 
 #### @khipu/contracts
+
 - Cleaned and organized V3 contracts
 - Removed obsolete files and versions
 - Organized by version (pools/v3/, integrations/v3/)
@@ -62,6 +69,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 ### 3. Apps Created ✅
 
 #### apps/web (Frontend)
+
 - **Feature-based architecture** with modules:
   - `features/individual-pool/` - Individual savings feature
   - `features/cooperative-pool/` - Cooperative savings feature
@@ -77,6 +85,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 - **Architecture documentation** at `apps/web/ARCHITECTURE.md`
 
 #### apps/api (Backend)
+
 - Complete REST API with Express.js
 - **Routes**:
   - `/api/users` - User portfolio, transactions, positions
@@ -95,6 +104,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 ### 4. Tooling & DevOps ✅
 
 #### Docker Compose
+
 - PostgreSQL service with health checks
 - API service configuration
 - Blockchain indexer service
@@ -102,15 +112,18 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 - **File**: `docker-compose.yml`
 
 #### Shared TypeScript Configs
+
 - `tooling/typescript/base.json` - Base config
 - `tooling/typescript/nextjs.json` - Next.js config
 - `tooling/typescript/node.json` - Node.js config
 
 #### Shared ESLint Configs
+
 - `tooling/eslint/base.js` - Base rules
 - `tooling/eslint/nextjs.js` - Next.js rules
 
 #### Development Scripts
+
 - `scripts/setup.sh` - Complete setup from scratch
 - `scripts/dev.sh` - Start development environment
 - `scripts/clean.sh` - Clean all artifacts
@@ -119,6 +132,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 ### 5. Documentation ✅
 
 #### Root README.md
+
 - Complete monorepo overview
 - Quick start guide
 - Tech stack details
@@ -126,6 +140,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 - Deployment instructions
 
 #### Package Documentation
+
 - Each package has its own README
 - API endpoints documented in apps/api
 - Frontend architecture in apps/web/ARCHITECTURE.md
@@ -133,6 +148,7 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 - Best practices and patterns
 
 #### Environment Files
+
 - `.env.example` files in:
   - Root directory
   - apps/web
@@ -144,29 +160,33 @@ This document summarizes the complete monorepo refactor of KhipuVault from a bas
 ## Architecture Highlights
 
 ### 1. Feature-Based Frontend
+
 Instead of organizing by technical layers, the frontend is organized by features. Each feature is self-contained with its own components, hooks, API clients, and types.
 
 **Benefits**:
+
 - Easy to find and modify code
 - Features can be developed independently
 - Clear boundaries and responsibilities
 - Better for scaling teams
 
 ### 2. Hybrid Data Fetching
+
 Combines on-chain data (via Wagmi hooks) with off-chain data (via React Query) for optimal UX:
 
 ```typescript
 // On-chain data (real-time)
-const { userInfo } = useIndividualPool()
+const { userInfo } = useIndividualPool();
 
 // Off-chain data (cached, with background updates)
 const { data: analytics } = useQuery({
-  queryKey: ['pool-analytics'],
-  queryFn: getPoolAnalytics
-})
+  queryKey: ["pool-analytics"],
+  queryFn: getPoolAnalytics,
+});
 ```
 
 ### 3. Event-Driven Architecture
+
 Blockchain indexer listens to on-chain events and stores them in PostgreSQL. Backend API serves this data to the frontend with proper caching and pagination.
 
 ```
@@ -174,7 +194,9 @@ Smart Contracts → Event Emission → Indexer → PostgreSQL → API → Fronte
 ```
 
 ### 4. Type Safety Across Stack
+
 Shared types in `@khipu/shared` are used by:
+
 - Frontend components
 - Backend API
 - Blockchain indexer
@@ -183,6 +205,7 @@ Shared types in `@khipu/shared` are used by:
 Single source of truth for all types.
 
 ### 5. Monorepo Benefits
+
 - Code sharing between packages
 - Consistent tooling and configs
 - Atomic commits across packages
@@ -222,6 +245,7 @@ pnpm typecheck              # Type check all code
 ## What's Different from Before
 
 ### Before
+
 - Contracts, frontend, and docs scattered
 - No backend API
 - No event indexing
@@ -232,6 +256,7 @@ pnpm typecheck              # Type check all code
 - Manual data fetching
 
 ### After
+
 - Organized monorepo with clear structure
 - Full REST API backend
 - Real-time event indexer
@@ -293,22 +318,26 @@ pnpm typecheck              # Type check all code
 ## Production Readiness
 
 ### ✅ Ready to Deploy
+
 - Frontend → Vercel (one click)
 - Backend → Railway/Render
 - Indexer → Background worker
 - Database → Supabase/Railway
 
 ### ✅ Environment Management
+
 - Separate configs for dev/staging/prod
 - Environment variables documented
 - Secrets management ready
 
 ### ✅ Monitoring Hooks
+
 - Health check endpoint
 - Error tracking ready
 - Performance monitoring ready
 
 ### ✅ CI/CD Ready
+
 - All builds automated
 - Tests can be run in CI
 - Type checking automated
@@ -352,6 +381,7 @@ While the refactor is 100% complete and production-ready, here are optional futu
 The KhipuVault monorepo has been completely refactored from a basic structure to a world-class, production-ready architecture. All packages are created, all features are organized, all tooling is configured, and all documentation is written.
 
 The codebase is now:
+
 - ✅ Organized and maintainable
 - ✅ Type-safe across the stack
 - ✅ Scalable for growth

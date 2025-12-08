@@ -1,14 +1,14 @@
-'use client'
+"use client";
 
 /**
  * @fileoverview Simplified Yield History Component - REMOVED
  * @module components/dashboard/individual-savings/yield-history-chart
- * 
+ *
  * This component has been simplified to remove all charts and graphs
  * Only displays a simple message instead of complex visualizations
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function YieldHistoryChart() {
   return (
@@ -28,5 +28,5 @@ export function YieldHistoryChart() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

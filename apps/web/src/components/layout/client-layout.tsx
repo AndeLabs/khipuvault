@@ -1,11 +1,14 @@
-'use client'
+"use client";
 
-import dynamic from 'next/dynamic'
-import { ReactNode } from 'react'
+import dynamic from "next/dynamic";
+import { ReactNode } from "react";
 
 // Dynamically import ClientProviders with ssr: false to avoid MetaMask SDK localStorage issues
 const ClientProviders = dynamic(
-  () => import('@/providers/client-providers').then(mod => ({ default: mod.ClientProviders })),
+  () =>
+    import("@/providers/client-providers").then((mod) => ({
+      default: mod.ClientProviders,
+    })),
   {
     ssr: false,
     loading: () => (
@@ -16,13 +19,13 @@ const ClientProviders = dynamic(
         </div>
       </div>
     ),
-  }
-)
+  },
+);
 
 interface ClientLayoutProps {
-  children: ReactNode
+  children: ReactNode;
   /** Initial Wagmi state from cookies for SSR hydration */
-  initialState?: any
+  initialState?: any;
 }
 
 /**
@@ -31,5 +34,7 @@ interface ClientLayoutProps {
  * This prevents MetaMask SDK from trying to access localStorage during SSR
  */
 export function ClientLayout({ children, initialState }: ClientLayoutProps) {
-  return <ClientProviders initialState={initialState}>{children}</ClientProviders>
+  return (
+    <ClientProviders initialState={initialState}>{children}</ClientProviders>
+  );
 }

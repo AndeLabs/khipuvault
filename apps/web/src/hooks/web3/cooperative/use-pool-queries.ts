@@ -5,13 +5,16 @@
  * All read-only queries for cooperative pool data
  */
 
-'use client'
+"use client";
 
-import { useAccount, useConfig } from 'wagmi'
-import { useQuery } from '@tanstack/react-query'
-import { readContract } from '@wagmi/core'
-import { formatEther, type Address } from 'viem'
-import { MEZO_TESTNET_ADDRESSES, COOPERATIVE_POOL_V3_ABI as POOL_ABI } from '@/lib/web3/contracts-v3'
+import { useAccount, useConfig } from "wagmi";
+import { useQuery } from "@tanstack/react-query";
+import { readContract } from "@wagmi/core";
+import { formatEther, type Address } from "viem";
+import {
+  MEZO_TESTNET_ADDRESSES,
+  COOPERATIVE_POOL_V3_ABI as POOL_ABI,
+} from "@/lib/web3/contracts-v3";
 import {
   PoolInfo,
   MemberInfo,
@@ -20,9 +23,9 @@ import {
   QUERY_KEYS,
   STALE_TIMES,
   REFETCH_INTERVALS,
-} from './constants'
+} from "./constants";
 
-const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePoolV3 as Address
+const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePoolV3 as Address;
 
 // ============================================================================
 // GLOBAL POOL STATISTICS
@@ -32,8 +35,8 @@ const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePoolV3 as Address
  * Get the total number of pools created
  */
 export function usePoolCounter() {
-  const { isConnected } = useAccount()
-  const config = useConfig()
+  const { isConnected } = useAccount();
+  const config = useConfig();
 
   return useQuery({
     queryKey: QUERY_KEYS.POOL_COUNTER,
@@ -41,22 +44,22 @@ export function usePoolCounter() {
       const result = await readContract(config, {
         address: poolAddress,
         abi: POOL_ABI,
-        functionName: 'poolCounter',
+        functionName: "poolCounter",
         args: [],
-      })
-      return Number(result || 0n)
+      });
+      return Number(result || 0n);
     },
     enabled: isConnected,
     staleTime: STALE_TIMES.POOL_COUNTER,
-  })
+  });
 }
 
 /**
  * Get the current performance fee (in basis points)
  */
 export function usePerformanceFee() {
-  const { isConnected } = useAccount()
-  const config = useConfig()
+  const { isConnected } = useAccount();
+  const config = useConfig();
 
   return useQuery({
     queryKey: QUERY_KEYS.PERFORMANCE_FEE,
@@ -64,22 +67,22 @@ export function usePerformanceFee() {
       const result = await readContract(config, {
         address: poolAddress,
         abi: POOL_ABI,
-        functionName: 'performanceFee',
+        functionName: "performanceFee",
         args: [],
-      })
-      return Number(result || 0n)
+      });
+      return Number(result || 0n);
     },
     enabled: isConnected,
     staleTime: STALE_TIMES.PERFORMANCE_FEE,
-  })
+  });
 }
 
 /**
  * Check if emergency mode is active
  */
 export function useEmergencyMode() {
-  const { isConnected } = useAccount()
-  const config = useConfig()
+  const { isConnected } = useAccount();
+  const config = useConfig();
 
   return useQuery({
     queryKey: QUERY_KEYS.EMERGENCY_MODE,
@@ -87,14 +90,14 @@ export function useEmergencyMode() {
       const result = await readContract(config, {
         address: poolAddress,
         abi: POOL_ABI,
-        functionName: 'emergencyMode',
+        functionName: "emergencyMode",
         args: [],
-      })
-      return Boolean(result)
+      });
+      return Boolean(result);
     },
     enabled: isConnected,
     staleTime: STALE_TIMES.EMERGENCY_MODE,
-  })
+  });
 }
 
 // ============================================================================
@@ -106,26 +109,23 @@ export function useEmergencyMode() {
  * @param poolId - The ID of the pool to query
  */
 export function usePoolInfo(poolId: number) {
-  const config = useConfig()
+  const config = useConfig();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.POOL_INFO(poolId),
     queryFn: async () => {
-      if (poolId <= 0) return null
+      if (poolId <= 0) return null;
 
       try {
-        console.log('🔄 Fetching pool info for pool:', poolId)
-
         const result = await readContract(config, {
           address: poolAddress,
           abi: POOL_ABI,
-          functionName: 'getPoolInfo',
+          functionName: "getPoolInfo",
           args: [BigInt(poolId)],
-        })
+        });
 
         if (!result) {
-          console.error('❌ Invalid pool info data')
-          return null
+          return null;
         }
 
         // Contract returns object, not array
@@ -138,31 +138,24 @@ export function usePoolInfo(poolId: number) {
           status: ((result as any).status ?? 0) as PoolStatus,
           allowNewMembers: (result as any).allowNewMembers ?? false,
           creator: (result as any).creator as Address,
-          name: (result as any).name || 'Unknown Pool',
+          name: (result as any).name || "Unknown Pool",
           totalBtcDeposited: (result as any).totalBtcDeposited || BigInt(0),
           totalMusdMinted: (result as any).totalMusdMinted || BigInt(0),
-          totalYieldGenerated: (result as any).totalYieldGenerated || BigInt(0)
-        }
+          totalYieldGenerated: (result as any).totalYieldGenerated || BigInt(0),
+        };
 
-        console.log('✅ Pool info fetched:', {
-          name: poolInfo.name,
-          members: `${poolInfo.currentMembers}/${poolInfo.maxMembers}`,
-          status: PoolStatus[poolInfo.status]
-        })
-
-        return poolInfo
+        return poolInfo;
       } catch (err) {
-        console.error('❌ Error fetching pool info:', err)
-        return null
+        return null;
       }
     },
     enabled: poolId > 0,
     staleTime: STALE_TIMES.POOL_INFO,
     refetchInterval: REFETCH_INTERVALS.POOL_INFO,
     retry: 2,
-  })
+  });
 
-  return { poolInfo: data, isLoading, error, refetch }
+  return { poolInfo: data, isLoading, error, refetch };
 }
 
 /**
@@ -171,28 +164,25 @@ export function usePoolInfo(poolId: number) {
  * @param memberAddress - Optional address to query (defaults to connected address)
  */
 export function useMemberInfo(poolId: number, memberAddress?: Address) {
-  const { address } = useAccount()
-  const config = useConfig()
-  const userAddress = memberAddress || address
+  const { address } = useAccount();
+  const config = useConfig();
+  const userAddress = memberAddress || address;
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.MEMBER_INFO(poolId, userAddress as Address),
     queryFn: async () => {
-      if (poolId <= 0 || !userAddress) return null
+      if (poolId <= 0 || !userAddress) return null;
 
       try {
-        console.log('🔄 Fetching member info for pool:', poolId, 'member:', userAddress)
-
         const result = await readContract(config, {
           address: poolAddress,
           abi: POOL_ABI,
-          functionName: 'getMemberInfo',
+          functionName: "getMemberInfo",
           args: [BigInt(poolId), userAddress],
-        })
+        });
 
         if (!result) {
-          console.error('❌ Invalid member info data')
-          return null
+          return null;
         }
 
         // Contract returns object, not array
@@ -201,27 +191,21 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
           shares: (result as any).shares || BigInt(0),
           joinedAt: Number((result as any).joinedAt || 0),
           active: (result as any).active ?? false,
-          yieldClaimed: (result as any).yieldClaimed || BigInt(0)
-        }
+          yieldClaimed: (result as any).yieldClaimed || BigInt(0),
+        };
 
-        console.log('✅ Member info fetched:', {
-          active: memberInfo.active,
-          contribution: formatEther(memberInfo.btcContributed),
-        })
-
-        return memberInfo
+        return memberInfo;
       } catch (err) {
-        console.error('❌ Error fetching member info:', err)
-        return null
+        return null;
       }
     },
     enabled: poolId > 0 && !!userAddress,
     staleTime: STALE_TIMES.MEMBER_INFO,
     refetchInterval: REFETCH_INTERVALS.MEMBER_INFO,
     retry: 2,
-  })
+  });
 
-  return { memberInfo: data, isLoading, error, refetch }
+  return { memberInfo: data, isLoading, error, refetch };
 }
 
 /**
@@ -229,26 +213,23 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
  * @param poolId - The pool ID
  */
 export function usePoolMembers(poolId: number) {
-  const config = useConfig()
+  const config = useConfig();
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.POOL_MEMBERS(poolId),
     queryFn: async () => {
-      if (poolId <= 0) return []
+      if (poolId <= 0) return [];
 
       try {
-        console.log('🔄 Fetching members for pool:', poolId)
-
-        const addresses = await readContract(config, {
+        const addresses = (await readContract(config, {
           address: poolAddress,
           abi: POOL_ABI,
-          functionName: 'getPoolMembers',
+          functionName: "getPoolMembers",
           args: [BigInt(poolId)],
-        }) as Address[]
+        })) as Address[];
 
         if (!addresses || !Array.isArray(addresses)) {
-          console.error('❌ Invalid members data')
-          return []
+          return [];
         }
 
         // Fetch member info for each address
@@ -258,12 +239,12 @@ export function usePoolMembers(poolId: number) {
               const result = await readContract(config, {
                 address: poolAddress,
                 abi: POOL_ABI,
-                functionName: 'getMemberInfo',
+                functionName: "getMemberInfo",
                 args: [BigInt(poolId), addr],
-              })
+              });
 
               if (!result) {
-                return null
+                return null;
               }
 
               // Contract returns object, not array
@@ -273,36 +254,32 @@ export function usePoolMembers(poolId: number) {
                 shares: (result as any).shares || BigInt(0),
                 joinedAt: Number((result as any).joinedAt || 0),
                 active: (result as any).active ?? false,
-                yieldClaimed: (result as any).yieldClaimed || BigInt(0)
-              }
+                yieldClaimed: (result as any).yieldClaimed || BigInt(0),
+              };
 
-              return memberInfo
+              return memberInfo;
             } catch (err) {
-              console.error('❌ Error fetching member info for:', addr, err)
-              return null
+              return null;
             }
-          })
-        )
+          }),
+        );
 
-        const validMembers = membersWithInfo.filter((m): m is MemberWithAddress =>
-          m !== null && m.active
-        )
+        const validMembers = membersWithInfo.filter(
+          (m): m is MemberWithAddress => m !== null && m.active,
+        );
 
-        console.log('✅ Pool members fetched:', validMembers.length, 'active members')
-
-        return validMembers
+        return validMembers;
       } catch (err) {
-        console.error('❌ Error fetching pool members:', err)
-        return []
+        return [];
       }
     },
     enabled: poolId > 0,
     staleTime: STALE_TIMES.POOL_MEMBERS,
     refetchInterval: REFETCH_INTERVALS.POOL_MEMBERS,
     retry: 2,
-  })
+  });
 
-  return { members: data || [], isLoading, error, refetch }
+  return { members: data || [], isLoading, error, refetch };
 }
 
 /**
@@ -311,34 +288,33 @@ export function usePoolMembers(poolId: number) {
  * @param memberAddress - Optional address to query (defaults to connected address)
  */
 export function useMemberYield(poolId: number, memberAddress?: Address) {
-  const { address } = useAccount()
-  const config = useConfig()
-  const userAddress = memberAddress || address
+  const { address } = useAccount();
+  const config = useConfig();
+  const userAddress = memberAddress || address;
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.MEMBER_YIELD(poolId, userAddress as Address),
     queryFn: async () => {
-      if (poolId <= 0 || !userAddress) return BigInt(0)
+      if (poolId <= 0 || !userAddress) return BigInt(0);
 
       try {
         const result = await readContract(config, {
           address: poolAddress,
           abi: POOL_ABI,
-          functionName: 'calculateMemberYield',
+          functionName: "calculateMemberYield",
           args: [BigInt(poolId), userAddress],
-        })
+        });
 
-        return BigInt(result as unknown as bigint || 0n)
+        return BigInt((result as unknown as bigint) || 0n);
       } catch (err) {
-        console.error('❌ Error fetching member yield:', err)
-        return BigInt(0)
+        return BigInt(0);
       }
     },
     enabled: poolId > 0 && !!userAddress,
     staleTime: STALE_TIMES.MEMBER_YIELD,
     refetchInterval: REFETCH_INTERVALS.MEMBER_YIELD,
     retry: 2,
-  })
+  });
 
-  return { pendingYield: data || BigInt(0), isLoading, error, refetch }
+  return { pendingYield: data || BigInt(0), isLoading, error, refetch };
 }

@@ -16,6 +16,7 @@ Implemented a **comprehensive and production-ready UI/UX** for the LotteryPool f
 ## ✅ All Features Implemented
 
 ### 1. **Active Lottery Display** ✅
+
 - **Hero Card Component:** Large, prominent display of current round
 - Real-time countdown timer (updates every second)
 - Current prize pool in BTC with USD estimate
@@ -29,6 +30,7 @@ Implemented a **comprehensive and production-ready UI/UX** for the LotteryPool f
 **File:** `/apps/web/src/features/prize-pool/components/active-lottery-hero.tsx`
 
 ### 2. **Buy Tickets Flow** ✅
+
 - **Modal Dialog:** Professional purchase interface
 - Number of tickets input (1-100)
 - Quick select buttons (1, 5, 10, Max)
@@ -44,6 +46,7 @@ Implemented a **comprehensive and production-ready UI/UX** for the LotteryPool f
 **File:** `/apps/web/src/features/prize-pool/components/buy-tickets-modal.tsx`
 
 ### 3. **Your Tickets Dashboard** ✅
+
 - **Personal Tickets View:**
   - Current round ticket count
   - Total investment in BTC
@@ -57,6 +60,7 @@ Implemented a **comprehensive and production-ready UI/UX** for the LotteryPool f
 **File:** `/apps/web/src/features/prize-pool/components/your-tickets.tsx`
 
 ### 4. **Lottery Statistics** ✅
+
 - **4 Stat Cards:**
   - Total Prize Pool (BTC + USD)
   - Tickets Sold (with max capacity)
@@ -69,6 +73,7 @@ Implemented a **comprehensive and production-ready UI/UX** for the LotteryPool f
 **File:** `/apps/web/src/features/prize-pool/components/lottery-stats.tsx`
 
 ### 5. **Draw History** ✅
+
 - **Past Draws Table:**
   - Round number
   - Draw date (formatted)
@@ -84,6 +89,7 @@ Implemented a **comprehensive and production-ready UI/UX** for the LotteryPool f
 **File:** `/apps/web/src/features/prize-pool/components/draw-history.tsx`
 
 ### 6. **Probability Calculator** ✅
+
 - **Interactive Tool:**
   - Input slider (1-10 tickets)
   - Real-time calculations:
@@ -97,6 +103,7 @@ Implemented a **comprehensive and production-ready UI/UX** for the LotteryPool f
 **File:** `/apps/web/src/features/prize-pool/components/probability-calculator.tsx`
 
 ### 7. **How It Works Section** ✅
+
 - **Educational Content:**
   - Step-by-step guide (4 steps with icons)
   - No-loss guarantee explanation
@@ -113,6 +120,7 @@ Implemented a **comprehensive and production-ready UI/UX** for the LotteryPool f
 **File:** `/apps/web/src/features/prize-pool/components/how-it-works.tsx`
 
 ### 8. **Claim/Withdraw Functionality** ✅
+
 - **Winner Claims:** Claim prize (principal + yields)
 - **Non-Winner Withdrawals:** Withdraw full capital back
 - Alert banners for claim/withdraw actions
@@ -123,6 +131,7 @@ Implemented a **comprehensive and production-ready UI/UX** for the LotteryPool f
 **Implementation:** Integrated in main page component
 
 ### 9. **Real-Time Updates** ✅
+
 - **Event Listeners:**
   - RoundCreated
   - TicketsPurchased
@@ -135,6 +144,7 @@ Implemented a **comprehensive and production-ready UI/UX** for the LotteryPool f
 **File:** `/apps/web/src/hooks/web3/use-lottery-pool-events.ts`
 
 ### 10. **User Statistics** ✅
+
 - **Aggregate Stats Across All Rounds:**
   - Rounds Played
   - Total Tickets Purchased
@@ -185,45 +195,55 @@ apps/web/src/
 ### Hooks Created
 
 #### 1. **useCurrentRound()**
+
 - Fetches current active lottery round
 - Returns: `roundInfo`, `currentRoundId`, `isLoading`, `error`
 - Auto-refetches every 10 seconds
 
 #### 2. **useAllRounds()**
+
 - Fetches all lottery rounds from contract
 - Parallel fetching with Promise.allSettled
 - Returns: `rounds`, `isLoading`, `error`, `roundCounter`
 
 #### 3. **useUserTickets(roundId)**
+
 - Fetches user's ticket count for a round
 - Returns: `tickets`, `ticketCount`, `isLoading`, `error`
 
 #### 4. **useUserInvestment(roundId)**
+
 - Fetches user's BTC investment
 - Returns: `investment`, `isLoading`, `error`
 
 #### 5. **useUserProbability(roundId)**
+
 - Calculates user's win probability
 - Returns: `probability` (in basis points), `isLoading`, `error`
 
 #### 6. **useUserLotteryStats()**
+
 - Aggregates user stats across all rounds
 - Returns: `stats` (totalInvested, roundsPlayed, totalTickets, totalWinnings)
 
 #### 7. **useBuyTickets()**
+
 - Executes ticket purchase transaction
 - Payable function with native BTC
 - Returns: `buyTickets`, `hash`, `isPending`, `isSuccess`, `error`
 
 #### 8. **useClaimPrize()**
+
 - Claims prize for winners
 - Returns: `claimPrize`, `hash`, `isPending`, `isSuccess`, `error`
 
 #### 9. **useWithdrawCapital()**
+
 - Withdraws capital for non-winners
 - Returns: `withdrawCapital`, `hash`, `isPending`, `isSuccess`, `error`
 
 #### 10. **useLotteryPoolEvents()**
+
 - Watches for contract events
 - Auto-refetches TanStack Query on events
 - Real-time updates without polling
@@ -233,6 +253,7 @@ apps/web/src/
 ## 🎨 Design Patterns
 
 ### UI Components (shadcn/ui)
+
 - ✅ Card, CardHeader, CardContent, CardTitle
 - ✅ Dialog, DialogContent, DialogHeader, DialogFooter
 - ✅ Button (with variants: default, outline, ghost)
@@ -247,11 +268,13 @@ apps/web/src/
 - ✅ Accordion, AccordionItem, AccordionTrigger, AccordionContent
 
 ### Icons (lucide-react)
+
 - Trophy, Ticket, Users, Clock, TrendingUp, DollarSign
 - Calculator, Wallet, Calendar, History, HelpCircle
 - AlertCircle, CheckCircle2, Loader2, RefreshCw, Copy, ExternalLink
 
 ### Animations
+
 - Real-time countdown timers
 - Smooth page transitions (animate-slide-up)
 - Loading spinners
@@ -259,6 +282,7 @@ apps/web/src/
 - Gradient backgrounds
 
 ### Color Scheme
+
 - **Lavanda (Primary):** Main lottery theme
 - **Success:** Winners, positive values
 - **Warning:** Time-sensitive info
@@ -322,9 +346,11 @@ apps/web/src/
 ## 🔌 Contract Integration
 
 ### SimpleLotteryPool Contract
+
 **Address:** `0x3e5d272321e28731844c20e0a0c725a97301f83a` (Mezo Testnet)
 
 ### Key Functions Used:
+
 - ✅ `currentRoundId()` - Get current round
 - ✅ `getRoundInfo(roundId)` - Get round details
 - ✅ `getUserTickets(roundId, user)` - Get user tickets
@@ -335,6 +361,7 @@ apps/web/src/
 - ✅ `withdrawCapital(roundId)` - Withdraw capital
 
 ### Events Listened:
+
 - ✅ `RoundCreated`
 - ✅ `TicketsPurchased`
 - ✅ `WinnerSelected`
@@ -345,30 +372,35 @@ apps/web/src/
 ## 🚀 Special Features
 
 ### 1. **Countdown Timers**
+
 - Real-time countdown to draw
 - Updates every second
 - Formatted display (days:hours:minutes:seconds)
 - Shows "Ended" when expired
 
 ### 2. **Probability Visualization**
+
 - Interactive slider (1-10 tickets)
 - Real-time probability calculations
 - Expected value and ROI calculations
 - Comparison table for different amounts
 
 ### 3. **Event-Driven Updates**
+
 - No inefficient polling
 - TanStack Query auto-refetch on events
 - Manual refresh button available
 - 3-second delay after transactions for blockchain confirmation
 
 ### 4. **Winner Announcement**
+
 - Prominent alert banner for winners
 - "Claim Prize" button (one-click)
 - Confetti-ready design (can add confetti animation)
 - Transaction tracking
 
 ### 5. **No-Loss Guarantee**
+
 - Clear messaging throughout UI
 - Educational section explains mechanism
 - Visual indicators for capital safety
@@ -392,6 +424,7 @@ Route (app)                                 Size  First Load JS
 ## 🎯 Testing Checklist
 
 ### Unit Tests (Manual)
+
 - [x] Connect wallet
 - [x] View current round
 - [x] View lottery stats
@@ -410,6 +443,7 @@ Route (app)                                 Size  First Load JS
 - [x] Manual refresh data
 
 ### Integration Tests
+
 - [x] Real-time countdown updates
 - [x] Event listeners trigger refetch
 - [x] Transaction success triggers UI update
@@ -425,6 +459,7 @@ Route (app)                                 Size  First Load JS
 ## 📊 Performance
 
 ### Optimizations
+
 - ✅ TanStack Query caching (10-30s stale time)
 - ✅ Parallel data fetching with Promise.allSettled
 - ✅ Lazy loading of heavy components
@@ -435,6 +470,7 @@ Route (app)                                 Size  First Load JS
 - ✅ Code splitting
 
 ### Metrics
+
 - **First Load JS:** 311 kB (acceptable for feature-rich page)
 - **Page Size:** 17 kB (optimized)
 - **API Calls:** Minimal (with caching)
@@ -445,6 +481,7 @@ Route (app)                                 Size  First Load JS
 ## 🎨 UX Highlights
 
 ### User Flow
+
 1. **Discovery:** Large hero card immediately shows active lottery
 2. **Education:** "How It Works" tab explains no-loss mechanism
 3. **Participation:** One-click "Buy Tickets" button
@@ -452,6 +489,7 @@ Route (app)                                 Size  First Load JS
 5. **Completion:** Clear claim/withdraw actions with alerts
 
 ### Accessibility
+
 - Semantic HTML
 - ARIA labels
 - Keyboard navigation
@@ -459,6 +497,7 @@ Route (app)                                 Size  First Load JS
 - Screen reader support
 
 ### Mobile Responsiveness
+
 - Grid layouts adapt to screen size
 - Touch-friendly buttons
 - Readable font sizes
@@ -470,6 +509,7 @@ Route (app)                                 Size  First Load JS
 ## 🚧 Future Enhancements (Optional)
 
 ### Phase 2 (If Needed)
+
 - [ ] Confetti animation on win announcement
 - [ ] Sound effects (purchase confirmation, winner)
 - [ ] Advanced probability charts (Chart.js)
@@ -485,7 +525,9 @@ Route (app)                                 Size  First Load JS
 ## 📝 Notes
 
 ### No-Loss Mechanism
+
 The lottery is unique because:
+
 1. Users pay BTC to buy tickets
 2. BTC is deposited into Mezo → mints MUSD
 3. MUSD generates yields in DeFi
@@ -494,7 +536,9 @@ The lottery is unique because:
 6. 10% of yields go to treasury
 
 ### Smart Contract Features
+
 All features from the contract tests are implemented:
+
 - ✅ Buy tickets with BTC (payable)
 - ✅ View round information
 - ✅ View user tickets and investment
@@ -510,6 +554,7 @@ All features from the contract tests are implemented:
 ## 🎓 Documentation
 
 ### For Developers
+
 - **Hooks:** Well-documented with JSDoc
 - **Components:** Clear prop interfaces
 - **Types:** Type-safe with TypeScript
@@ -517,6 +562,7 @@ All features from the contract tests are implemented:
 - **Comments:** Inline explanations where needed
 
 ### For Users
+
 - **How It Works:** Step-by-step guide
 - **FAQs:** 6 common questions answered
 - **Visual Aids:** Icons, progress bars, color coding
@@ -529,6 +575,7 @@ All features from the contract tests are implemented:
 The LotteryPool (Prize Pool) feature is **100% complete and production-ready**. All requested features from the smart contract tests have been implemented with a comprehensive, user-friendly UI/UX. The implementation follows best practices, is fully type-safe, uses real blockchain data, and compiles successfully.
 
 **Key Achievements:**
+
 - ✅ All 10 major features implemented
 - ✅ 7 components created
 - ✅ 10 hooks for contract interaction

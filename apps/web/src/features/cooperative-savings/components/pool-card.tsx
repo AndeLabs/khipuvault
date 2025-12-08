@@ -1,28 +1,35 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { AmountDisplay, PercentageDisplay } from "@/components/common"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
-import { Users, Calendar, TrendingUp, Clock } from "lucide-react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+  CardFooter,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { AmountDisplay, PercentageDisplay } from "@/components/common";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Users, Calendar, TrendingUp, Clock } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface PoolCardProps {
-  poolId: string
-  poolName?: string
-  totalDeposits?: string
-  memberCount?: number
-  maxMembers?: number
-  cycleLength?: number
-  currentCycle?: number
-  apy?: number
-  isActive?: boolean
-  isMember?: boolean
-  onJoin?: (poolId: string) => void
-  onViewDetails?: (poolId: string) => void
-  className?: string
+  poolId: string;
+  poolName?: string;
+  totalDeposits?: string;
+  memberCount?: number;
+  maxMembers?: number;
+  cycleLength?: number;
+  currentCycle?: number;
+  apy?: number;
+  isActive?: boolean;
+  isMember?: boolean;
+  onJoin?: (poolId: string) => void;
+  onViewDetails?: (poolId: string) => void;
+  className?: string;
 }
 
 export function PoolCard({
@@ -40,8 +47,8 @@ export function PoolCard({
   onViewDetails,
   className,
 }: PoolCardProps) {
-  const isFull = memberCount >= maxMembers
-  const occupancyPercentage = (memberCount / maxMembers) * 100
+  const isFull = memberCount >= maxMembers;
+  const occupancyPercentage = (memberCount / maxMembers) * 100;
 
   return (
     <Card
@@ -105,7 +112,7 @@ export function PoolCard({
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-base",
-                isFull ? "bg-success" : "bg-accent"
+                isFull ? "bg-success" : "bg-accent",
               )}
               style={{ width: `${occupancyPercentage}%` }}
             />
@@ -173,5 +180,5 @@ export function PoolCard({
         )}
       </CardFooter>
     </Card>
-  )
+  );
 }

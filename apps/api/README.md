@@ -16,6 +16,7 @@ REST API backend for KhipuVault.
 ## Setup
 
 1. Configure environment variables in `.env`:
+
    ```bash
    PORT=3001
    NODE_ENV=development
@@ -24,6 +25,7 @@ REST API backend for KhipuVault.
    ```
 
 2. Install dependencies:
+
    ```bash
    pnpm install
    ```
@@ -47,9 +49,11 @@ pnpm start    # Start production server
 ## API Endpoints
 
 ### Health
+
 - `GET /health` - Health check
 
 ### Users
+
 - `GET /api/users/:address` - Get user by address
 - `GET /api/users/:address/portfolio` - Get user portfolio
 - `GET /api/users/:address/transactions` - Get user transactions
@@ -57,6 +61,7 @@ pnpm start    # Start production server
 - `POST /api/users` - Create or update user
 
 ### Pools
+
 - `GET /api/pools` - Get all active pools
 - `GET /api/pools/:poolId` - Get pool by ID
 - `GET /api/pools/address/:address` - Get pool by contract address
@@ -65,12 +70,14 @@ pnpm start    # Start production server
 - `POST /api/pools/address/:address/refresh` - Refresh pool statistics
 
 ### Transactions
+
 - `GET /api/transactions/recent` - Get recent transactions
 - `GET /api/transactions/stats` - Get transaction statistics
 - `GET /api/transactions/:txHash` - Get transaction by hash
 - `GET /api/transactions/pool/:poolAddress` - Get transactions for a pool
 
 ### Analytics
+
 - `GET /api/analytics/global` - Get global platform statistics
 - `GET /api/analytics/timeline?days=30` - Get activity timeline
 - `GET /api/analytics/top-pools?limit=10` - Get top pools by TVL
@@ -118,6 +125,7 @@ pnpm tsc --noEmit
 ## Error Handling
 
 The API uses a centralized error handling middleware that:
+
 - Validates requests with Zod schemas
 - Returns consistent error responses
 - Logs errors for debugging

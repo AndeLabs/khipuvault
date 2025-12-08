@@ -5,6 +5,7 @@
 ### 1. **Database Schema Optimization** (`packages/database/prisma/schema.prisma`)
 
 #### Changes:
+
 - ✅ **Type Safety with Enums**: Added enums for `PoolType`, `TransactionType`, `TransactionStatus`, `PoolStatus`
 - ✅ **Denormalized Fields**: Added `userAddress` and `poolAddress` directly on `Deposit` for faster queries
 - ✅ **Reorg Detection**: Added `blockHash`, `logIndex`, `removed`, `confirmedAt` fields
@@ -14,6 +15,7 @@
 - ✅ **Analytics Enhancements**: Added `activeUsers`, `netFlow`, `yieldGenerated`, `yieldDistributed`
 
 #### Benefits:
+
 - 🎯 Type-safe queries with enums
 - ⚡ Faster lookups with denormalized data
 - 🔄 Blockchain reorg handling capability
@@ -24,6 +26,7 @@
 ### 2. **Comprehensive Error Handling** (`apps/api/src/middleware/error-handler.ts`)
 
 #### Features:
+
 - ✅ **Prisma Error Handling**: All Prisma error types covered
   - `PrismaClientKnownRequestError` (P2002, P2003, P2025, P2034, etc.)
   - `PrismaClientValidationError`
@@ -36,6 +39,7 @@
 - ✅ **Contextual Logging**: Logs include request path, method, timestamp
 
 #### Error Codes Handled:
+
 - `P2002`: Unique constraint violation → 409 Conflict
 - `P2003`: Foreign key constraint → 400 Bad Request
 - `P2025`: Record not found → 404 Not Found
@@ -47,6 +51,7 @@
 ### 3. **Resilient RPC Provider** (`packages/blockchain/src/provider.ts`)
 
 #### Features:
+
 - ✅ **Auto-Reconnection**: Exponential backoff reconnection strategy
 - ✅ **Health Monitoring**: 30-second health checks
 - ✅ **Error Detection**: Tracks consecutive failures
@@ -55,18 +60,20 @@
 - ✅ **Event Listeners**: Monitors provider errors and network changes
 
 #### Health Check Metrics:
+
 ```typescript
 interface ProviderHealth {
-  isHealthy: boolean
-  lastCheck: Date
-  lastError?: string
-  consecutiveFailures: number
-  blockNumber?: number
-  latency?: number
+  isHealthy: boolean;
+  lastCheck: Date;
+  lastError?: string;
+  consecutiveFailures: number;
+  blockNumber?: number;
+  latency?: number;
 }
 ```
 
 #### Auto-Recovery:
+
 - Reconnects after 3 consecutive failures
 - Exponential backoff (max 1 minute)
 - Removes stale event listeners
@@ -77,6 +84,7 @@ interface ProviderHealth {
 ### 4. **Advanced Retry Utilities** (`packages/blockchain/src/utils/retry.ts`)
 
 #### Features:
+
 - ✅ **Exponential Backoff with Jitter**: Prevents thundering herd
 - ✅ **Custom Retry Logic**: `shouldRetry` callback
 - ✅ **Rate-Limited Processing**: `rateLimitedProcess` function
@@ -85,20 +93,18 @@ interface ProviderHealth {
 - ✅ **Retryable Error Detection**: `isRetryableError` helper
 
 #### Usage Examples:
+
 ```typescript
 // With retry options
-const block = await retryWithBackoff(
-  () => provider.getBlock(123),
-  {
-    maxRetries: 5,
-    jitter: true,
-    shouldRetry: isRetryableError
-  }
-)
+const block = await retryWithBackoff(() => provider.getBlock(123), {
+  maxRetries: 5,
+  jitter: true,
+  shouldRetry: isRetryableError,
+});
 
 // Circuit breaker
-const breaker = new CircuitBreaker(5, 60000)
-const result = await breaker.execute(() => expensiveOperation())
+const breaker = new CircuitBreaker(5, 60000);
+const result = await breaker.execute(() => expensiveOperation());
 ```
 
 ---
@@ -106,6 +112,7 @@ const result = await breaker.execute(() => expensiveOperation())
 ### 5. **Security & Rate Limiting** (`apps/api/src/middleware/`)
 
 #### Security Middleware (`security.ts`):
+
 - ✅ **NoSQL Injection Protection**: `sanitizeMongoQueries`
 - ✅ **XSS Protection**: `xssProtection` middleware
 - ✅ **Request Size Limiting**: Prevents large payload attacks
@@ -116,6 +123,7 @@ const result = await breaker.execute(() => expensiveOperation())
 - ✅ **API Key Validation**: For internal services
 
 #### Rate Limiting (`rate-limit.ts`):
+
 - ✅ **Global Rate Limiter**: 100 requests per 15 minutes per IP
 - ✅ **Auth Rate Limiter**: 5 auth attempts per 15 minutes
 - ✅ **Write Operations Limiter**: 20 writes per minute
@@ -124,6 +132,7 @@ const result = await breaker.execute(() => expensiveOperation())
 - ✅ **IP Whitelist Support**: Skip rate limiting for internal IPs
 
 #### API Configuration (`apps/api/src/index.ts`):
+
 - Helmet with CSP and HSTS
 - Dynamic CORS with multiple origins
 - Request size validation (10MB limit)
@@ -136,6 +145,7 @@ const result = await breaker.execute(() => expensiveOperation())
 ### 6. **Optimized Database Queries** (`apps/api/src/services/pools.ts`)
 
 #### Before (N+1 Problem):
+
 ```typescript
 // ❌ BAD: Multiple queries per user
 const deposits = await prisma.deposit.findMany({ ... })
@@ -146,19 +156,21 @@ for (const deposit of deposits) {
 ```
 
 #### After (Optimized):
+
 ```typescript
 // ✅ GOOD: Single query with aggregation
 const allDeposits = await prisma.deposit.findMany({
-  include: { user: true }
-})
+  include: { user: true },
+});
 // Process in memory
-const userBalances = new Map()
+const userBalances = new Map();
 for (const deposit of allDeposits) {
   // Single-pass aggregation
 }
 ```
 
 #### Performance Improvements:
+
 - `getPoolUsers`: **1 query** instead of **1 + N + N queries**
 - `updatePoolStats`: **1 query** instead of **1 + N queries**
 - **50-90% faster** for pools with 100+ users
@@ -169,6 +181,7 @@ for (const deposit of allDeposits) {
 ## 📊 Performance Metrics
 
 ### Before:
+
 - ⚠️ N+1 queries: ~200+ DB calls for 100 users
 - ⚠️ No rate limiting: Vulnerable to abuse
 - ⚠️ No connection recovery: Crashes on RPC failure
@@ -176,6 +189,7 @@ for (const deposit of allDeposits) {
 - ⚠️ No security middleware: Vulnerable to attacks
 
 ### After:
+
 - ✅ Optimized queries: ~1-3 DB calls for 100 users
 - ✅ Rate limiting: Protected against abuse
 - ✅ Auto-recovery: Survives RPC failures
@@ -217,6 +231,7 @@ for (const deposit of allDeposits) {
 ## 🏗️ Architecture Improvements
 
 ### Separation of Concerns:
+
 ```
 apps/api/
 ├── middleware/
@@ -239,6 +254,7 @@ packages/database/
 ```
 
 ### Best Practices Applied:
+
 - ✅ Single Responsibility Principle
 - ✅ DRY (Don't Repeat Yourself)
 - ✅ SOLID principles
@@ -293,17 +309,19 @@ pnpm prisma db push
 The schema changes require updating code that references the old field names:
 
 #### Old:
+
 ```typescript
-deposit.type === 'deposit'  // String literal
-deposit.status === 'confirmed'  // String literal
-pool.status === 'active'  // String literal
+deposit.type === "deposit"; // String literal
+deposit.status === "confirmed"; // String literal
+pool.status === "active"; // String literal
 ```
 
 #### New:
+
 ```typescript
-deposit.type === 'DEPOSIT'  // Enum value
-deposit.status === 'CONFIRMED'  // Enum value
-pool.status === 'ACTIVE'  // Enum value
+deposit.type === "DEPOSIT"; // Enum value
+deposit.status === "CONFIRMED"; // Enum value
+pool.status === "ACTIVE"; // Enum value
 ```
 
 ### 4. Test the Changes
@@ -330,6 +348,7 @@ pnpm --filter @khipu/blockchain dev
 ## 🧪 Testing Recommendations
 
 ### Unit Tests Needed:
+
 - [ ] Error handler middleware (all error types)
 - [ ] Rate limiting middleware
 - [ ] Security middleware
@@ -338,12 +357,14 @@ pnpm --filter @khipu/blockchain dev
 - [ ] Service layer methods
 
 ### Integration Tests Needed:
+
 - [ ] API endpoints with rate limiting
 - [ ] Database operations with new schema
 - [ ] Provider reconnection scenarios
 - [ ] Circuit breaker behavior
 
 ### Load Tests Needed:
+
 - [ ] Rate limiting under load
 - [ ] Query performance with large datasets
 - [ ] Provider failover scenarios
@@ -353,6 +374,7 @@ pnpm --filter @khipu/blockchain dev
 ## 🔮 Future Enhancements (Roadmap)
 
 ### High Priority:
+
 1. **Redis Caching**:
    - Cache pool stats, user balances
    - Reduce database load
@@ -369,6 +391,7 @@ pnpm --filter @khipu/blockchain dev
    - E2E tests for critical flows
 
 ### Medium Priority:
+
 4. **Authentication/Authorization**:
    - JWT-based auth
    - Role-based access control
@@ -386,6 +409,7 @@ pnpm --filter @khipu/blockchain dev
    - Code examples
 
 ### Low Priority:
+
 7. **Advanced Features**:
    - GraphQL API
    - WebSocket support for real-time updates
@@ -397,6 +421,7 @@ pnpm --filter @khipu/blockchain dev
 ## 💡 Key Takeaways
 
 ### What We Fixed:
+
 1. ✅ **Schema**: Added type safety, indexes, and reorg detection
 2. ✅ **Error Handling**: Comprehensive, user-friendly, secure
 3. ✅ **Provider**: Auto-reconnection, health monitoring
@@ -405,6 +430,7 @@ pnpm --filter @khipu/blockchain dev
 6. ✅ **Performance**: Eliminated N+1 queries
 
 ### What We Gained:
+
 - 🚀 **Performance**: 50-90% faster queries
 - 🛡️ **Security**: Protected against common attacks
 - 💪 **Resilience**: Survives RPC failures
@@ -413,6 +439,7 @@ pnpm --filter @khipu/blockchain dev
 - ⚡ **Scalability**: Ready for production load
 
 ### Production Readiness:
+
 - ✅ Error handling
 - ✅ Rate limiting
 - ✅ Security hardening
@@ -427,6 +454,7 @@ pnpm --filter @khipu/blockchain dev
 ## 🚀 Next Steps
 
 1. **Test the Changes**:
+
    ```bash
    pnpm prisma generate
    pnpm build
@@ -434,6 +462,7 @@ pnpm --filter @khipu/blockchain dev
    ```
 
 2. **Run Database Migration**:
+
    ```bash
    pnpm prisma migrate dev
    ```
@@ -459,6 +488,7 @@ pnpm --filter @khipu/blockchain dev
 ## 📞 Support
 
 If you encounter any issues:
+
 1. Check logs for detailed error messages
 2. Verify environment variables are set
 3. Ensure database migration completed

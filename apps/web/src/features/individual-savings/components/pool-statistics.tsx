@@ -1,9 +1,15 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { AmountDisplay, PercentageDisplay } from "@/components/common"
-import { Skeleton } from "@/components/ui/skeleton"
+import * as React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { AmountDisplay, PercentageDisplay } from "@/components/common";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   TrendingUp,
   Database,
@@ -12,23 +18,28 @@ import {
   PieChart,
   DollarSign,
   Info,
-  Activity
-} from "lucide-react"
-import { formatUnits } from "viem"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Badge } from "@/components/ui/badge"
-import { V3_FEATURES } from "@/lib/web3/contracts-v3"
+  Activity,
+} from "lucide-react";
+import { formatUnits } from "viem";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Badge } from "@/components/ui/badge";
+import { V3_FEATURES } from "@/lib/web3/contracts-v3";
 
 interface PoolStatisticsProps {
-  totalDeposits?: bigint
-  totalYields?: bigint
-  totalReferralRewards?: bigint
-  poolAPR?: number
-  performanceFee?: number
-  activeDepositors?: number
-  emergencyMode?: boolean
-  isLoading?: boolean
-  className?: string
+  totalDeposits?: bigint;
+  totalYields?: bigint;
+  totalReferralRewards?: bigint;
+  poolAPR?: number;
+  performanceFee?: number;
+  activeDepositors?: number;
+  emergencyMode?: boolean;
+  isLoading?: boolean;
+  className?: string;
 }
 
 export function PoolStatistics({
@@ -45,31 +56,38 @@ export function PoolStatistics({
   // Format values
   const formatValue = (value: bigint) => {
     try {
-      const num = Number(formatUnits(value, 18))
-      if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`
-      if (num >= 1_000) return `${(num / 1_000).toFixed(2)}K`
-      return num.toFixed(2)
+      const num = Number(formatUnits(value, 18));
+      if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`;
+      if (num >= 1_000) return `${(num / 1_000).toFixed(2)}K`;
+      return num.toFixed(2);
     } catch {
-      return '0.00'
+      return "0.00";
     }
-  }
+  };
 
-  const formattedTotalDeposits = formatValue(totalDeposits)
-  const formattedTotalYields = formatValue(totalYields)
-  const formattedReferralRewards = formatValue(totalReferralRewards)
-  const formattedPerformanceFee = (performanceFee / 100).toFixed(2)
+  const formattedTotalDeposits = formatValue(totalDeposits);
+  const formattedTotalYields = formatValue(totalYields);
+  const formattedReferralRewards = formatValue(totalReferralRewards);
+  const formattedPerformanceFee = (performanceFee / 100).toFixed(2);
 
   // Calculate pool health score (0-100)
   const healthScore = React.useMemo(() => {
-    if (emergencyMode) return 0
-    const depositsScore = Math.min(Number(formatUnits(totalDeposits, 18)) / 100000, 1) * 40
-    const aprScore = Math.min(poolAPR / 10, 1) * 30
-    const depositorsScore = Math.min(activeDepositors / 100, 1) * 30
-    return Math.round(depositsScore + aprScore + depositorsScore)
-  }, [totalDeposits, poolAPR, activeDepositors, emergencyMode])
+    if (emergencyMode) return 0;
+    const depositsScore =
+      Math.min(Number(formatUnits(totalDeposits, 18)) / 100000, 1) * 40;
+    const aprScore = Math.min(poolAPR / 10, 1) * 30;
+    const depositorsScore = Math.min(activeDepositors / 100, 1) * 30;
+    return Math.round(depositsScore + aprScore + depositorsScore);
+  }, [totalDeposits, poolAPR, activeDepositors, emergencyMode]);
 
-  const healthColor = healthScore >= 70 ? 'text-success' : healthScore >= 40 ? 'text-warning' : 'text-error'
-  const healthLabel = healthScore >= 70 ? 'Excellent' : healthScore >= 40 ? 'Good' : 'Fair'
+  const healthColor =
+    healthScore >= 70
+      ? "text-success"
+      : healthScore >= 40
+        ? "text-warning"
+        : "text-error";
+  const healthLabel =
+    healthScore >= 70 ? "Excellent" : healthScore >= 40 ? "Good" : "Fair";
 
   if (isLoading) {
     return (
@@ -90,7 +108,7 @@ export function PoolStatistics({
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -147,14 +165,18 @@ export function PoolStatistics({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <Info className="h-3 w-3" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-sm max-w-xs">
-                      Total amount of mUSD deposited by all users in the Individual Savings Pool.
-                      This represents the total capital earning yields through Mezo's Stability Pool.
+                      Total amount of mUSD deposited by all users in the
+                      Individual Savings Pool. This represents the total capital
+                      earning yields through Mezo's Stability Pool.
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -180,14 +202,18 @@ export function PoolStatistics({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <Info className="h-3 w-3" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-sm max-w-xs">
-                      Lifetime yields generated for all users. This is the total profit earned
-                      from Mezo's Stability Pool since the contract was deployed.
+                      Lifetime yields generated for all users. This is the total
+                      profit earned from Mezo's Stability Pool since the
+                      contract was deployed.
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -213,14 +239,18 @@ export function PoolStatistics({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <Info className="h-3 w-3" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-sm max-w-xs">
-                      Total referral bonuses distributed to users who referred others.
-                      Referrers earn 0.5% of each deposit from their referred users.
+                      Total referral bonuses distributed to users who referred
+                      others. Referrers earn 0.5% of each deposit from their
+                      referred users.
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -246,14 +276,18 @@ export function PoolStatistics({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <Info className="h-3 w-3" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-sm max-w-xs">
-                      Current Annual Percentage Rate based on recent yield performance.
-                      This rate can fluctuate based on Stability Pool activity.
+                      Current Annual Percentage Rate based on recent yield
+                      performance. This rate can fluctuate based on Stability
+                      Pool activity.
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -279,14 +313,18 @@ export function PoolStatistics({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <Info className="h-3 w-3" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-sm max-w-xs">
-                      Fee charged on yields only (not on deposits). This fee goes to the
-                      KhipuVault treasury to support protocol development and operations.
+                      Fee charged on yields only (not on deposits). This fee
+                      goes to the KhipuVault treasury to support protocol
+                      development and operations.
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -296,9 +334,7 @@ export function PoolStatistics({
               <div className="text-2xl font-bold tabular-nums">
                 {formattedPerformanceFee}%
               </div>
-              <p className="text-xs text-muted-foreground">
-                On yields only
-              </p>
+              <p className="text-xs text-muted-foreground">On yields only</p>
             </div>
           </div>
 
@@ -312,14 +348,17 @@ export function PoolStatistics({
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <button
+                      type="button"
+                      className="text-muted-foreground hover:text-foreground"
+                    >
                       <Info className="h-3 w-3" />
                     </button>
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="text-sm max-w-xs">
-                      Number of unique addresses with active deposits in the pool.
-                      More depositors indicates higher trust and adoption.
+                      Number of unique addresses with active deposits in the
+                      pool. More depositors indicates higher trust and adoption.
                     </p>
                   </TooltipContent>
                 </Tooltip>
@@ -329,9 +368,7 @@ export function PoolStatistics({
               <div className="text-2xl font-bold tabular-nums">
                 {activeDepositors}
               </div>
-              <p className="text-xs text-muted-foreground">
-                Unique depositors
-              </p>
+              <p className="text-xs text-muted-foreground">Unique depositors</p>
             </div>
           </div>
         </div>
@@ -362,7 +399,8 @@ export function PoolStatistics({
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground">
-                This pool uses the latest V3 smart contract with enhanced security and gas optimization
+                This pool uses the latest V3 smart contract with enhanced
+                security and gas optimization
               </p>
             </div>
           </div>
@@ -372,18 +410,39 @@ export function PoolStatistics({
         <div className="text-xs text-muted-foreground space-y-1">
           <div className="flex items-center justify-between">
             <span>Min Deposit:</span>
-            <span className="font-mono">{Number(formatUnits(BigInt(V3_FEATURES.individualPool.minDeposit), 18))} mUSD</span>
+            <span className="font-mono">
+              {Number(
+                formatUnits(BigInt(V3_FEATURES.individualPool.minDeposit), 18),
+              )}{" "}
+              mUSD
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span>Min Withdrawal:</span>
-            <span className="font-mono">{Number(formatUnits(BigInt(V3_FEATURES.individualPool.minWithdrawal), 18))} mUSD</span>
+            <span className="font-mono">
+              {Number(
+                formatUnits(
+                  BigInt(V3_FEATURES.individualPool.minWithdrawal),
+                  18,
+                ),
+              )}{" "}
+              mUSD
+            </span>
           </div>
           <div className="flex items-center justify-between">
             <span>Auto-Compound Threshold:</span>
-            <span className="font-mono">{Number(formatUnits(BigInt(V3_FEATURES.individualPool.autoCompoundThreshold), 18))} mUSD</span>
+            <span className="font-mono">
+              {Number(
+                formatUnits(
+                  BigInt(V3_FEATURES.individualPool.autoCompoundThreshold),
+                  18,
+                ),
+              )}{" "}
+              mUSD
+            </span>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

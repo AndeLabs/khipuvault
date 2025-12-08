@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
+import * as React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
 import {
   Dialog,
   DialogContent,
@@ -11,42 +11,51 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { AmountDisplay } from "@/components/common"
-import { useTransactionExecute } from "@/features/transactions"
-import { Info, Users, Calendar, DollarSign } from "lucide-react"
-import { cn } from "@/lib/utils"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { AmountDisplay } from "@/components/common";
+import { useTransactionExecute } from "@/features/transactions";
+import { Info, Users, Calendar, DollarSign } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const createPoolSchema = z.object({
-  poolName: z.string().min(3, "Pool name must be at least 3 characters").max(50, "Pool name too long"),
-  maxMembers: z.string().refine(
-    (val) => !isNaN(Number(val)) && Number(val) >= 2 && Number(val) <= 50,
-    "Must be between 2 and 50 members"
-  ),
-  depositAmount: z.string().refine(
-    (val) => !isNaN(Number(val)) && Number(val) > 0,
-    "Amount must be greater than 0"
-  ),
-  cycleLength: z.string().refine(
-    (val) => !isNaN(Number(val)) && Number(val) >= 7 && Number(val) <= 365,
-    "Must be between 7 and 365 days"
-  ),
-})
+  poolName: z
+    .string()
+    .min(3, "Pool name must be at least 3 characters")
+    .max(50, "Pool name too long"),
+  maxMembers: z
+    .string()
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) >= 2 && Number(val) <= 50,
+      "Must be between 2 and 50 members",
+    ),
+  depositAmount: z
+    .string()
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) > 0,
+      "Amount must be greater than 0",
+    ),
+  cycleLength: z
+    .string()
+    .refine(
+      (val) => !isNaN(Number(val)) && Number(val) >= 7 && Number(val) <= 365,
+      "Must be between 7 and 365 days",
+    ),
+});
 
-type CreatePoolFormData = z.infer<typeof createPoolSchema>
+type CreatePoolFormData = z.infer<typeof createPoolSchema>;
 
 interface CreatePoolModalProps {
-  open: boolean
-  onClose: () => void
+  open: boolean;
+  onClose: () => void;
   onCreatePool: (data: {
-    poolName: string
-    maxMembers: number
-    depositAmount: string
-    cycleLength: number
-  }) => Promise<any>
+    poolName: string;
+    maxMembers: number;
+    depositAmount: string;
+    cycleLength: number;
+  }) => Promise<any>;
 }
 
 export function CreatePoolModal({
@@ -54,7 +63,9 @@ export function CreatePoolModal({
   onClose,
   onCreatePool,
 }: CreatePoolModalProps) {
-  const { execute } = useTransactionExecute({ type: "Create Cooperative Pool" })
+  const { execute } = useTransactionExecute({
+    type: "Create Cooperative Pool",
+  });
 
   const {
     register,
@@ -70,9 +81,9 @@ export function CreatePoolModal({
       depositAmount: "",
       cycleLength: "30",
     },
-  })
+  });
 
-  const formData = watch()
+  const formData = watch();
 
   const onSubmit = async (data: CreatePoolFormData) => {
     await execute(async () => {
@@ -81,18 +92,18 @@ export function CreatePoolModal({
         maxMembers: Number(data.maxMembers),
         depositAmount: data.depositAmount,
         cycleLength: Number(data.cycleLength),
-      })
-    })
-    reset()
-    onClose()
-  }
+      });
+    });
+    reset();
+    onClose();
+  };
 
   const handleClose = () => {
     if (!isSubmitting) {
-      reset()
-      onClose()
+      reset();
+      onClose();
     }
-  }
+  };
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
@@ -154,17 +165,16 @@ export function CreatePoolModal({
                 step="0.01"
                 placeholder="100.00"
                 {...register("depositAmount")}
-                className={cn(
-                  "pr-16",
-                  errors.depositAmount && "border-error"
-                )}
+                className={cn("pr-16", errors.depositAmount && "border-error")}
               />
               <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
                 mUSD
               </div>
             </div>
             {errors.depositAmount && (
-              <p className="text-sm text-error">{errors.depositAmount.message}</p>
+              <p className="text-sm text-error">
+                {errors.depositAmount.message}
+              </p>
             )}
             <p className="text-xs text-muted-foreground">
               Each member will deposit this amount
@@ -202,10 +212,13 @@ export function CreatePoolModal({
               </div>
               <div className="space-y-1 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Total Pool Value</span>
+                  <span className="text-muted-foreground">
+                    Total Pool Value
+                  </span>
                   <AmountDisplay
                     amount={(
-                      Number(formData.depositAmount) * Number(formData.maxMembers)
+                      Number(formData.depositAmount) *
+                      Number(formData.maxMembers)
                     ).toFixed(2)}
                     symbol="mUSD"
                     size="sm"
@@ -221,7 +234,9 @@ export function CreatePoolModal({
                   />
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">Rotation Frequency</span>
+                  <span className="text-muted-foreground">
+                    Rotation Frequency
+                  </span>
                   <span>Every {formData.cycleLength} days</span>
                 </div>
               </div>
@@ -237,16 +252,12 @@ export function CreatePoolModal({
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="accent"
-              loading={isSubmitting}
-            >
+            <Button type="submit" variant="accent" loading={isSubmitting}>
               Create Pool
             </Button>
           </DialogFooter>
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -1,15 +1,22 @@
-'use client'
+"use client";
 
-import * as React from 'react'
-import { AlertTriangle, RefreshCw, Home, Mail } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { captureError, addBreadcrumb } from '@/lib/error-tracking'
+import * as React from "react";
+import { AlertTriangle, RefreshCw, Home, Mail } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { captureError, addBreadcrumb } from "@/lib/error-tracking";
 
 interface ErrorProps {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }
 
 /**
@@ -31,33 +38,35 @@ interface ErrorProps {
  * @see https://nextjs.org/docs/app/api-reference/file-conventions/error
  */
 export default function Error({ error, reset }: ErrorProps) {
-  const isDevelopment = process.env.NODE_ENV === 'development'
+  const isDevelopment = process.env.NODE_ENV === "development";
 
   React.useEffect(() => {
     // Log error to console for debugging
-    console.error('Page Error:', error)
+    console.error("Page Error:", error);
 
     // Report error to error tracking service (Sentry if configured)
     captureError(error, {
       tags: {
-        errorBoundary: 'page',
-        digest: error.digest || 'unknown',
+        errorBoundary: "page",
+        digest: error.digest || "unknown",
       },
       extra: {
-        pathname: typeof window !== 'undefined' ? window.location.pathname : 'unknown',
-        userAgent: typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+        pathname:
+          typeof window !== "undefined" ? window.location.pathname : "unknown",
+        userAgent:
+          typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
       },
-      level: 'error',
-    })
+      level: "error",
+    });
 
     // Add breadcrumb for debugging
     addBreadcrumb({
-      category: 'error.boundary',
+      category: "error.boundary",
       message: `Page error caught: ${error.message}`,
-      level: 'error',
+      level: "error",
       data: { digest: error.digest },
-    })
-  }, [error])
+    });
+  }, [error]);
 
   return (
     <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
@@ -68,7 +77,9 @@ export default function Error({ error, reset }: ErrorProps) {
               <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-heading">Algo salio mal</CardTitle>
+              <CardTitle className="text-2xl font-heading">
+                Algo salio mal
+              </CardTitle>
               <CardDescription>
                 Ocurrio un error inesperado en esta pagina
               </CardDescription>
@@ -80,7 +91,7 @@ export default function Error({ error, reset }: ErrorProps) {
           {/* Error Message */}
           <Alert variant="destructive">
             <AlertDescription className="font-mono text-sm">
-              {error.message || 'Error desconocido'}
+              {error.message || "Error desconocido"}
             </AlertDescription>
           </Alert>
 
@@ -147,8 +158,8 @@ export default function Error({ error, reset }: ErrorProps) {
           {/* Additional Help */}
           <div className="pt-4 border-t border-border">
             <p className="text-xs text-muted-foreground">
-              Este error ha sido registrado automaticamente. Estamos trabajando para mejorar
-              la estabilidad de la aplicacion.
+              Este error ha sido registrado automaticamente. Estamos trabajando
+              para mejorar la estabilidad de la aplicacion.
             </p>
           </div>
         </CardContent>
@@ -160,7 +171,7 @@ export default function Error({ error, reset }: ErrorProps) {
           </Button>
           <Button
             variant="outline"
-            onClick={() => (window.location.href = '/')}
+            onClick={() => (window.location.href = "/")}
             className="gap-2 flex-1"
             size="lg"
           >
@@ -170,5 +181,5 @@ export default function Error({ error, reset }: ErrorProps) {
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }

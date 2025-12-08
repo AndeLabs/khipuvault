@@ -23,34 +23,34 @@
  * The exports below maintain backward compatibility with existing code.
  */
 
-'use client'
+"use client";
 
 // Re-export everything from the refactored modules
-export * from './individual'
+export * from "./individual";
 
 // Import and re-export individual hooks for backward compatibility
 export {
   useDeposit,
   usePartialWithdraw,
   useFullWithdraw,
-} from './individual/use-deposit-hooks'
+} from "./individual/use-deposit-hooks";
 
 export {
   useClaimYield,
   useClaimReferralRewards,
   useToggleAutoCompound,
-} from './individual/use-yield-hooks'
+} from "./individual/use-yield-hooks";
 
 // useCompoundYields is exported from use-aggregator-hooks
-export { useCompoundYields } from './individual/use-aggregator-hooks'
+export { useCompoundYields } from "./individual/use-aggregator-hooks";
 
 export {
   useYieldAggregatorDeposit,
   useYieldAggregatorWithdraw,
-} from './individual/use-aggregator-hooks'
+} from "./individual/use-aggregator-hooks";
 
 // Import and re-export combined hooks
 export {
   useIndividualPoolTransactions,
   useYieldAggregatorTransactions,
-} from './individual'
+} from "./individual";

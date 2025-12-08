@@ -8,15 +8,15 @@
  * - Quick actions for each pool
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Progress } from '@/components/ui/progress'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import * as React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Users,
   Bitcoin,
@@ -26,9 +26,13 @@ import {
   ArrowRight,
   Coins,
   Info,
-} from 'lucide-react'
-import { SkeletonCard } from '@/components/ui/skeleton'
-import { useUserPools, useCreatedPools, type PoolWithMembership } from '@/hooks/web3/use-all-cooperative-pools'
+} from "lucide-react";
+import { SkeletonCard } from "@/components/ui/skeleton";
+import {
+  useUserPools,
+  useCreatedPools,
+  type PoolWithMembership,
+} from "@/hooks/web3/use-all-cooperative-pools";
 import {
   formatBTCCompact,
   formatMUSD,
@@ -36,28 +40,28 @@ import {
   formatDate,
   formatPercentage,
   type PoolInfo,
-} from '@/hooks/web3/use-cooperative-pool'
-import { usePoolMembers } from '@/hooks/web3/use-cooperative-pool'
+} from "@/hooks/web3/use-cooperative-pool";
+import { usePoolMembers } from "@/hooks/web3/use-cooperative-pool";
 
 // Type definitions for sub-components
 interface CreatedPoolCardProps {
-  pool: PoolInfo & { poolId: number }
-  onViewDetails?: (poolId: number) => void
-  onManagePool?: (poolId: number) => void
+  pool: PoolInfo & { poolId: number };
+  onViewDetails?: (poolId: number) => void;
+  onManagePool?: (poolId: number) => void;
 }
 
 interface MembershipCardProps {
-  pool: PoolWithMembership
-  onViewDetails?: (poolId: number) => void
-  onClaimYield?: (poolId: number) => void
-  onLeavePool?: (poolId: number) => void
+  pool: PoolWithMembership;
+  onViewDetails?: (poolId: number) => void;
+  onClaimYield?: (poolId: number) => void;
+  onLeavePool?: (poolId: number) => void;
 }
 
 interface MyPoolsDashboardProps {
-  onViewDetails?: (poolId: number) => void
-  onClaimYield?: (poolId: number) => void
-  onLeavePool?: (poolId: number) => void
-  onManagePool?: (poolId: number) => void
+  onViewDetails?: (poolId: number) => void;
+  onClaimYield?: (poolId: number) => void;
+  onLeavePool?: (poolId: number) => void;
+  onManagePool?: (poolId: number) => void;
 }
 
 export function MyPoolsDashboard({
@@ -66,15 +70,22 @@ export function MyPoolsDashboard({
   onLeavePool,
   onManagePool,
 }: MyPoolsDashboardProps) {
-  const { pools: userPools, isLoading: loadingUserPools } = useUserPools()
-  const { pools: createdPools, isLoading: loadingCreatedPools } = useCreatedPools()
+  const { pools: userPools, isLoading: loadingUserPools } = useUserPools();
+  const { pools: createdPools, isLoading: loadingCreatedPools } =
+    useCreatedPools();
 
-  const isLoading = loadingUserPools || loadingCreatedPools
+  const isLoading = loadingUserPools || loadingCreatedPools;
 
   // Calculate total statistics
-  const totalContribution = userPools.reduce((sum, p) => sum + p.userContribution, BigInt(0))
-  const totalPendingYield = userPools.reduce((sum, p) => sum + p.userPendingYield, BigInt(0))
-  const totalPools = userPools.length
+  const totalContribution = userPools.reduce(
+    (sum, p) => sum + p.userContribution,
+    BigInt(0),
+  );
+  const totalPendingYield = userPools.reduce(
+    (sum, p) => sum + p.userPendingYield,
+    BigInt(0),
+  );
+  const totalPools = userPools.length;
 
   if (isLoading) {
     return (
@@ -82,7 +93,10 @@ export function MyPoolsDashboard({
         {/* Stats Skeleton */}
         <div className="grid gap-4 md:grid-cols-3">
           {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-24 bg-surface-elevated animate-shimmer rounded-lg" />
+            <div
+              key={i}
+              className="h-24 bg-surface-elevated animate-shimmer rounded-lg"
+            />
           ))}
         </div>
 
@@ -93,7 +107,7 @@ export function MyPoolsDashboard({
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   if (totalPools === 0 && createdPools.length === 0) {
@@ -105,12 +119,12 @@ export function MyPoolsDashboard({
         <div className="space-y-2">
           <h3 className="text-xl font-heading font-semibold">No Pools Yet</h3>
           <p className="text-muted-foreground max-w-md mx-auto">
-            You haven't joined or created any cooperative pools yet. Start by browsing available pools
-            or creating your own.
+            You haven't joined or created any cooperative pools yet. Start by
+            browsing available pools or creating your own.
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -121,7 +135,9 @@ export function MyPoolsDashboard({
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">Total Contribution</p>
+                <p className="text-xs text-muted-foreground">
+                  Total Contribution
+                </p>
                 <p className="text-2xl font-heading font-bold font-mono">
                   {formatBTCCompact(totalContribution)} BTC
                 </p>
@@ -154,9 +170,7 @@ export function MyPoolsDashboard({
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Active Pools</p>
-                <p className="text-2xl font-heading font-bold">
-                  {totalPools}
-                </p>
+                <p className="text-2xl font-heading font-bold">{totalPools}</p>
               </div>
               <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
                 <Users className="h-5 w-5 text-accent" />
@@ -171,7 +185,9 @@ export function MyPoolsDashboard({
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-accent" />
-            <h3 className="text-lg font-heading font-semibold">Pools You Created</h3>
+            <h3 className="text-lg font-heading font-semibold">
+              Pools You Created
+            </h3>
             <Badge variant="secondary">{createdPools.length}</Badge>
           </div>
 
@@ -193,7 +209,9 @@ export function MyPoolsDashboard({
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-blue-500" />
-            <h3 className="text-lg font-heading font-semibold">Your Memberships</h3>
+            <h3 className="text-lg font-heading font-semibold">
+              Your Memberships
+            </h3>
             <Badge variant="secondary">{userPools.length}</Badge>
           </div>
 
@@ -211,16 +229,20 @@ export function MyPoolsDashboard({
         </div>
       )}
     </div>
-  )
+  );
 }
 
 // ============================================================================
 // SUB-COMPONENTS (Memoized for performance)
 // ============================================================================
 
-const CreatedPoolCard = React.memo(function CreatedPoolCard({ pool, onViewDetails, onManagePool }: CreatedPoolCardProps) {
-  const statusBadge = getPoolStatusBadge(pool.status)
-  const memberProgress = (pool.currentMembers / pool.maxMembers) * 100
+const CreatedPoolCard = React.memo(function CreatedPoolCard({
+  pool,
+  onViewDetails,
+  onManagePool,
+}: CreatedPoolCardProps) {
+  const statusBadge = getPoolStatusBadge(pool.status);
+  const memberProgress = (pool.currentMembers / pool.maxMembers) * 100;
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -229,7 +251,9 @@ const CreatedPoolCard = React.memo(function CreatedPoolCard({ pool, onViewDetail
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <Crown className="h-4 w-4 text-accent shrink-0" />
-              <h4 className="font-heading font-semibold truncate">{pool.name}</h4>
+              <h4 className="font-heading font-semibold truncate">
+                {pool.name}
+              </h4>
               <Badge variant={statusBadge.variant} className="shrink-0">
                 {statusBadge.label}
               </Badge>
@@ -298,14 +322,19 @@ const CreatedPoolCard = React.memo(function CreatedPoolCard({ pool, onViewDetail
         </div>
       </CardContent>
     </Card>
-  )
-})
+  );
+});
 
-const MembershipCard = React.memo(function MembershipCard({ pool, onViewDetails, onClaimYield, onLeavePool }: MembershipCardProps) {
-  const { members } = usePoolMembers(pool.poolId)
-  const totalShares = members.reduce((sum, m) => sum + m.shares, BigInt(0))
-  const sharePercentage = formatPercentage(pool.userShares, totalShares)
-  const hasYield = pool.userPendingYield > BigInt(0)
+const MembershipCard = React.memo(function MembershipCard({
+  pool,
+  onViewDetails,
+  onClaimYield,
+  onLeavePool,
+}: MembershipCardProps) {
+  const { members } = usePoolMembers(pool.poolId);
+  const totalShares = members.reduce((sum, m) => sum + m.shares, BigInt(0));
+  const sharePercentage = formatPercentage(pool.userShares, totalShares);
+  const hasYield = pool.userPendingYield > BigInt(0);
 
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -376,9 +405,7 @@ const MembershipCard = React.memo(function MembershipCard({ pool, onViewDetails,
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Joined</p>
-            <p className="text-xs">
-              {formatDate(pool.createdAt)}
-            </p>
+            <p className="text-xs">{formatDate(pool.createdAt)}</p>
           </div>
         </div>
 
@@ -413,5 +440,5 @@ const MembershipCard = React.memo(function MembershipCard({ pool, onViewDetails,
         </div>
       </CardContent>
     </Card>
-  )
-})
+  );
+});

@@ -1,5 +1,5 @@
-import { AppShell } from "@/components/layout"
-import { TransactionProvider, TransactionModal } from "@/features/transactions"
+import { AppShell } from "@/components/layout";
+import { TransactionProvider, TransactionModal } from "@/features/transactions";
 
 /**
  * Dashboard Layout - V4 Design
@@ -12,12 +12,12 @@ import { TransactionProvider, TransactionModal } from "@/features/transactions"
 export default function DashboardLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
   return (
     <TransactionProvider>
       <AppShell>{children}</AppShell>
       <TransactionModal />
     </TransactionProvider>
-  )
+  );
 }

@@ -18,26 +18,26 @@ export enum RoundStatus {
  * Round Information from Contract
  */
 export interface RoundInfo {
-  roundId: bigint
-  ticketPrice: bigint
-  maxTickets: bigint
-  totalTicketsSold: bigint
-  totalPrize: bigint
-  startTime: bigint
-  endTime: bigint
-  winner: `0x${string}`
-  status: RoundStatus
+  roundId: bigint;
+  ticketPrice: bigint;
+  maxTickets: bigint;
+  totalTicketsSold: bigint;
+  totalPrize: bigint;
+  startTime: bigint;
+  endTime: bigint;
+  winner: `0x${string}`;
+  status: RoundStatus;
 }
 
 /**
  * User's Lottery Participation
  */
 export interface UserLotteryInfo {
-  ticketCount: bigint
-  investment: bigint
-  probability: bigint // in basis points (10000 = 100%)
-  hasClaimed: boolean
-  isWinner: boolean
+  ticketCount: bigint;
+  investment: bigint;
+  probability: bigint; // in basis points (10000 = 100%)
+  hasClaimed: boolean;
+  isWinner: boolean;
 }
 
 /**
@@ -46,26 +46,28 @@ export interface UserLotteryInfo {
 export function getRoundStatusName(status: RoundStatus): string {
   switch (status) {
     case RoundStatus.OPEN:
-      return 'Accepting Tickets'
+      return "Accepting Tickets";
     case RoundStatus.DRAWING:
-      return 'Drawing Winner'
+      return "Drawing Winner";
     case RoundStatus.COMPLETED:
-      return 'Completed'
+      return "Completed";
     default:
-      return 'Unknown'
+      return "Unknown";
   }
 }
 
-export function getRoundStatusColor(status: RoundStatus): 'success' | 'warning' | 'default' {
+export function getRoundStatusColor(
+  status: RoundStatus,
+): "success" | "warning" | "default" {
   switch (status) {
     case RoundStatus.OPEN:
-      return 'success'
+      return "success";
     case RoundStatus.DRAWING:
-      return 'warning'
+      return "warning";
     case RoundStatus.COMPLETED:
-      return 'default'
+      return "default";
     default:
-      return 'default'
+      return "default";
   }
 }
 
@@ -73,16 +75,16 @@ export function getRoundStatusColor(status: RoundStatus): 'success' | 'warning' 
  * Calculate time remaining
  */
 export function getTimeRemaining(endTime: bigint): {
-  total: number
-  days: number
-  hours: number
-  minutes: number
-  seconds: number
-  isExpired: boolean
+  total: number;
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  isExpired: boolean;
 } {
-  const now = Math.floor(Date.now() / 1000)
-  const end = Number(endTime)
-  const total = end - now
+  const now = Math.floor(Date.now() / 1000);
+  const end = Number(endTime);
+  const total = end - now;
 
   if (total <= 0) {
     return {
@@ -92,7 +94,7 @@ export function getTimeRemaining(endTime: bigint): {
       minutes: 0,
       seconds: 0,
       isExpired: true,
-    }
+    };
   }
 
   return {
@@ -102,40 +104,40 @@ export function getTimeRemaining(endTime: bigint): {
     minutes: Math.floor((total % 3600) / 60),
     seconds: total % 60,
     isExpired: false,
-  }
+  };
 }
 
 /**
  * Format countdown display
  */
 export function formatCountdown(endTime: bigint): string {
-  const time = getTimeRemaining(endTime)
+  const time = getTimeRemaining(endTime);
 
   if (time.isExpired) {
-    return 'Ended'
+    return "Ended";
   }
 
   if (time.days > 0) {
-    return `${time.days}d ${time.hours}h ${time.minutes}m`
+    return `${time.days}d ${time.hours}h ${time.minutes}m`;
   }
 
   if (time.hours > 0) {
-    return `${time.hours}h ${time.minutes}m ${time.seconds}s`
+    return `${time.hours}h ${time.minutes}m ${time.seconds}s`;
   }
 
   if (time.minutes > 0) {
-    return `${time.minutes}m ${time.seconds}s`
+    return `${time.minutes}m ${time.seconds}s`;
   }
 
-  return `${time.seconds}s`
+  return `${time.seconds}s`;
 }
 
 /**
  * Format probability as percentage
  */
 export function formatProbability(basisPoints: bigint): string {
-  const percentage = Number(basisPoints) / 100
-  return `${percentage.toFixed(2)}%`
+  const percentage = Number(basisPoints) / 100;
+  return `${percentage.toFixed(2)}%`;
 }
 
 /**
@@ -144,10 +146,10 @@ export function formatProbability(basisPoints: bigint): string {
 export function calculateExpectedValue(
   probability: bigint,
   prizeAmount: bigint,
-  ticketCost: bigint
+  ticketCost: bigint,
 ): bigint {
   // EV = (probability * prize) - cost
   // probability is in basis points (10000 = 100% = 1.0)
-  const expectedReturn = (probability * prizeAmount) / BigInt(10000)
-  return expectedReturn - ticketCost
+  const expectedReturn = (probability * prizeAmount) / BigInt(10000);
+  return expectedReturn - ticketCost;
 }

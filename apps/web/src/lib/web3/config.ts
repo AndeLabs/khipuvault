@@ -12,10 +12,10 @@
  * - Graceful degradation when localStorage unavailable
  */
 
-import { createConfig, http, createStorage } from 'wagmi'
-import { metaMask } from 'wagmi/connectors'
-import { mezoTestnet } from './chains'
-import { createPublicClient } from 'viem'
+import { createConfig, http, createStorage } from "wagmi";
+import { metaMask } from "wagmi/connectors";
+import { mezoTestnet } from "./chains";
+import { createPublicClient } from "viem";
 
 /**
  * SSR-safe localStorage wrapper
@@ -23,7 +23,7 @@ import { createPublicClient } from 'viem'
  */
 function createSsrSafeStorage() {
   // Check if we're on the server
-  const isServer = typeof window === 'undefined'
+  const isServer = typeof window === "undefined";
 
   if (isServer) {
     // Return no-op storage for SSR
@@ -33,7 +33,7 @@ function createSsrSafeStorage() {
         setItem: () => {},
         removeItem: () => {},
       },
-    })
+    });
   }
 
   // On client, use localStorage with try-catch for safety
@@ -41,32 +41,28 @@ function createSsrSafeStorage() {
     storage: {
       getItem: (key: string) => {
         try {
-          return window.localStorage.getItem(key)
+          return window.localStorage.getItem(key);
         } catch {
-          return null
+          return null;
         }
       },
       setItem: (key: string, value: string) => {
         try {
-          window.localStorage.setItem(key, value)
+          window.localStorage.setItem(key, value);
         } catch {
           // Silently fail if localStorage is full or blocked
         }
       },
       removeItem: (key: string) => {
         try {
-          window.localStorage.removeItem(key)
+          window.localStorage.removeItem(key);
         } catch {
           // Silently fail
         }
       },
     },
-  })
+  });
 }
-
-
-
-
 
 /**
  * Extend Window interface for Unisat
@@ -74,17 +70,21 @@ function createSsrSafeStorage() {
 declare global {
   interface Window {
     unisat?: {
-      requestAccounts: () => Promise<string[]>
-      getAccounts: () => Promise<string[]>
-      signMessage: (message: string) => Promise<string>
-      signPsbt: (psbt: string) => Promise<string>
-      pushPsbt: (psbt: string) => Promise<string>
-      switchNetwork: (network: string) => Promise<void>
-      getNetwork: () => Promise<{ name: string; chain: string }>
-      getBalance: () => Promise<{ confirmed: number; unconfirmed: number; total: number }>
-      sendBitcoin: (toAddress: string, satoshis: number) => Promise<string>
-      inscribeTransfer: (tick: string, amount: number) => Promise<string>
-    }
+      requestAccounts: () => Promise<string[]>;
+      getAccounts: () => Promise<string[]>;
+      signMessage: (message: string) => Promise<string>;
+      signPsbt: (psbt: string) => Promise<string>;
+      pushPsbt: (psbt: string) => Promise<string>;
+      switchNetwork: (network: string) => Promise<void>;
+      getNetwork: () => Promise<{ name: string; chain: string }>;
+      getBalance: () => Promise<{
+        confirmed: number;
+        unconfirmed: number;
+        total: number;
+      }>;
+      sendBitcoin: (toAddress: string, satoshis: number) => Promise<string>;
+      inscribeTransfer: (tick: string, amount: number) => Promise<string>;
+    };
   }
 }
 
@@ -116,13 +116,16 @@ export function getWagmiConfig() {
     connectors: [
       metaMask({
         dappMetadata: {
-          name: 'KhipuVault',
-          url: typeof window !== 'undefined' ? window.location.origin : 'https://khipuvault.vercel.app',
+          name: "KhipuVault",
+          url:
+            typeof window !== "undefined"
+              ? window.location.origin
+              : "https://khipuvault.vercel.app",
         },
       }),
     ],
     transports: {
-      [mezoTestnet.id]: http('https://rpc.test.mezo.org', {
+      [mezoTestnet.id]: http("https://rpc.test.mezo.org", {
         batch: {
           wait: 100, // ms to wait before sending batch
         },
@@ -136,7 +139,7 @@ export function getWagmiConfig() {
     // Use SSR-safe localStorage wrapper for wallet persistence
     storage: createSsrSafeStorage(),
     pollingInterval: 4_000, // poll every 4 seconds
-  })
+  });
 }
 
 /**
@@ -144,13 +147,13 @@ export function getWagmiConfig() {
  * Useful for debugging and direct contract interactions
  * Lazy-initialized to avoid SSR issues
  */
-let _publicClient: ReturnType<typeof createPublicClient> | null = null
+let _publicClient: ReturnType<typeof createPublicClient> | null = null;
 
 export function getPublicClient() {
   if (!_publicClient) {
     _publicClient = createPublicClient({
       chain: mezoTestnet,
-      transport: http('https://rpc.test.mezo.org', {
+      transport: http("https://rpc.test.mezo.org", {
         batch: {
           wait: 100,
         },
@@ -158,27 +161,31 @@ export function getPublicClient() {
         retryDelay: 1000,
         timeout: 10_000,
       }),
-    })
+    });
   }
-  return _publicClient
+  return _publicClient;
 }
 
 // Backward compatibility - but this will only work on client side
-export const publicClient = typeof window !== 'undefined' ? getPublicClient() : null as any
+export const publicClient =
+  typeof window !== "undefined" ? getPublicClient() : (null as any);
 
 /**
  * App metadata for wallet connection
  */
 export const appMetadata = {
-  name: 'KhipuVault',
-  description: 'Ahorro Bitcoin para Latinoamérica con MUSD de Mezo',
-  url: typeof window !== 'undefined' ? window.location.origin : 'https://khipuvault.vercel.app',
+  name: "KhipuVault",
+  description: "Ahorro Bitcoin para Latinoamérica con MUSD de Mezo",
+  url:
+    typeof window !== "undefined"
+      ? window.location.origin
+      : "https://khipuvault.vercel.app",
   icons: [
-    typeof window !== 'undefined' 
-      ? `${window.location.origin}/logos/khipu-logo.png` 
-      : 'https://khipuvault.vercel.app/logos/khipu-logo.png'
+    typeof window !== "undefined"
+      ? `${window.location.origin}/logos/khipu-logo.png`
+      : "https://khipuvault.vercel.app/logos/khipu-logo.png",
   ],
-} as const
+} as const;
 
 /**
  * Network validation helpers
@@ -190,7 +197,7 @@ export const appMetadata = {
  * @returns true if on Mezo Testnet
  */
 export function isCorrectNetwork(chainId?: number): boolean {
-  return chainId === mezoTestnet.id
+  return chainId === mezoTestnet.id;
 }
 
 /**
@@ -200,9 +207,9 @@ export function isCorrectNetwork(chainId?: number): boolean {
  */
 export function getNetworkMismatchMessage(currentChainId?: number): string {
   if (!currentChainId) {
-    return 'Por favor conecta tu wallet a Mezo Testnet (Chain ID: 31611)'
+    return "Por favor conecta tu wallet a Mezo Testnet (Chain ID: 31611)";
   }
-  return `Red incorrecta. Estás en Chain ID ${currentChainId}. Por favor cambia a Mezo Testnet (31611)`
+  return `Red incorrecta. Estás en Chain ID ${currentChainId}. Por favor cambia a Mezo Testnet (31611)`;
 }
 
 /**
@@ -210,7 +217,7 @@ export function getNetworkMismatchMessage(currentChainId?: number): string {
  * @returns true if Unisat extension is installed
  */
 export function isUnisatAvailable(): boolean {
-  return typeof window !== 'undefined' && !!window.unisat
+  return typeof window !== "undefined" && !!window.unisat;
 }
 
 /**
@@ -219,9 +226,9 @@ export function isUnisatAvailable(): boolean {
  */
 export function getWalletAvailability() {
   return {
-    metaMask: typeof window !== 'undefined' && !!window.ethereum,
+    metaMask: typeof window !== "undefined" && !!window.ethereum,
     unisat: isUnisatAvailable(),
-  }
+  };
 }
 
 /**
@@ -229,7 +236,7 @@ export function getWalletAvailability() {
  * No required environment variables for this simplified setup
  */
 export function validateEnvironment(): { valid: boolean; warnings: string[] } {
-  const warnings: string[] = []
+  const warnings: string[] = [];
 
   // No WalletConnect Project ID required anymore
   // No external dependencies that need env vars
@@ -237,5 +244,5 @@ export function validateEnvironment(): { valid: boolean; warnings: string[] } {
   return {
     valid: warnings.length === 0,
     warnings,
-  }
+  };
 }

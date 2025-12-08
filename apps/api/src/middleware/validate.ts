@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express'
-import { AnyZodObject } from 'zod'
+import { Request, Response, NextFunction } from "express";
+import { AnyZodObject } from "zod";
 
 export function validate(schema: AnyZodObject) {
   return async (req: Request, res: Response, next: NextFunction) => {
@@ -8,10 +8,10 @@ export function validate(schema: AnyZodObject) {
         body: req.body,
         query: req.query,
         params: req.params,
-      })
-      next()
+      });
+      next();
     } catch (error) {
-      next(error)
+      next(error);
     }
-  }
+  };
 }

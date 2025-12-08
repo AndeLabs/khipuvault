@@ -1,17 +1,17 @@
 "use client";
 
-import Image from 'next/image';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
-import { ConnectButton } from '@/components/wallet/connect-button';
-import { useState, useEffect } from 'react';
+import Image from "next/image";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Menu } from "lucide-react";
+import { ConnectButton } from "@/components/wallet/connect-button";
+import { useState, useEffect } from "react";
 
 const navLinks = [
-  { href: '#features', label: 'Características' },
-  { href: '#pools', label: 'Pools' },
-  { href: '#how-it-works', label: 'Cómo Funciona' },
+  { href: "#features", label: "Características" },
+  { href: "#pools", label: "Pools" },
+  { href: "#how-it-works", label: "Cómo Funciona" },
 ];
 
 export function Header() {
@@ -33,7 +33,9 @@ export function Header() {
             className="h-10 w-10"
             priority
           />
-          <span className="text-2xl font-bold hidden sm:inline">KhipuVault</span>
+          <span className="text-2xl font-bold hidden sm:inline">
+            KhipuVault
+          </span>
         </Link>
 
         <nav className="hidden items-center gap-8 md:flex">
@@ -67,7 +69,10 @@ export function Header() {
                 <span className="sr-only">Abrir menú</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-background border-l-primary/20">
+            <SheetContent
+              side="right"
+              className="bg-background border-l-primary/20"
+            >
               <div className="flex h-full flex-col">
                 <div className="border-b border-primary/20 pb-4">
                   <Link href="/" className="flex items-center gap-2">

@@ -1,7 +1,7 @@
 /**
  * @fileoverview Query options for Cooperative Pool
  * @module lib/query-options/cooperative-pool-queries
- * 
+ *
  * This file defines reusable query options using TanStack Query's queryOptions helper.
  * This is a best practice that allows:
  * - Type-safe query options
@@ -10,9 +10,9 @@
  * - Easier testing and maintenance
  */
 
-import { queryOptions } from '@tanstack/react-query'
-import { PublicClient } from 'viem'
-import { normalizeBigInt } from '@/lib/query-utils'
+import { queryOptions } from "@tanstack/react-query";
+import { PublicClient } from "viem";
+import { normalizeBigInt } from "@/lib/query-utils";
 import {
   fetchCooperativePools,
   fetchPoolInfo,
@@ -21,11 +21,11 @@ import {
   fetchMemberYield,
   type PoolInfo,
   type MemberInfo,
-} from '@/lib/blockchain/fetch-cooperative-pools'
+} from "@/lib/blockchain/fetch-cooperative-pools";
 
 /**
  * Query options for Cooperative Pool
- * 
+ *
  * Usage:
  * ```tsx
  * const { data: pools } = useQuery(
@@ -36,19 +36,22 @@ import {
 export const cooperativePoolQueries = {
   /**
    * All pools query options
-   * 
+   *
    * @param publicClient - Viem PublicClient
    * @param poolCounter - Total number of pools
    * @returns Query options object
    */
-  allPools: (publicClient: PublicClient | null, poolCounter: number | bigint | undefined) =>
+  allPools: (
+    publicClient: PublicClient | null,
+    poolCounter: number | bigint | undefined,
+  ) =>
     queryOptions({
-      queryKey: ['cooperative-pool', 'all-pools', normalizeBigInt(poolCounter)],
+      queryKey: ["cooperative-pool", "all-pools", normalizeBigInt(poolCounter)],
       queryFn: async () => {
         if (!publicClient) {
-          return []
+          return [];
         }
-        return fetchCooperativePools(publicClient, Number(poolCounter || 0))
+        return fetchCooperativePools(publicClient, Number(poolCounter || 0));
       },
       enabled: !!publicClient && !!poolCounter && Number(poolCounter) > 0,
       staleTime: 30 * 1000, // 30 seconds
@@ -59,19 +62,19 @@ export const cooperativePoolQueries = {
 
   /**
    * Specific pool info query options
-   * 
+   *
    * @param publicClient - Viem PublicClient
    * @param poolId - ID of the pool
    * @returns Query options object
    */
   poolInfo: (publicClient: PublicClient | null, poolId: number) =>
     queryOptions({
-      queryKey: ['cooperative-pool', 'pool-info', poolId],
+      queryKey: ["cooperative-pool", "pool-info", poolId],
       queryFn: async () => {
         if (!publicClient) {
-          return null
+          return null;
         }
-        return fetchPoolInfo(publicClient, poolId)
+        return fetchPoolInfo(publicClient, poolId);
       },
       enabled: !!publicClient && poolId > 0,
       staleTime: 30 * 1000,
@@ -80,20 +83,29 @@ export const cooperativePoolQueries = {
 
   /**
    * Member info query options
-   * 
+   *
    * @param publicClient - Viem PublicClient
    * @param poolId - ID of the pool
    * @param memberAddress - Address of the member
    * @returns Query options object
    */
-  memberInfo: (publicClient: PublicClient | null, poolId: number, memberAddress: `0x${string}` | undefined) =>
+  memberInfo: (
+    publicClient: PublicClient | null,
+    poolId: number,
+    memberAddress: `0x${string}` | undefined,
+  ) =>
     queryOptions({
-      queryKey: ['cooperative-pool', 'member-info', poolId, memberAddress || 'none'],
+      queryKey: [
+        "cooperative-pool",
+        "member-info",
+        poolId,
+        memberAddress || "none",
+      ],
       queryFn: async () => {
         if (!publicClient || !memberAddress) {
-          return null
+          return null;
         }
-        return fetchMemberInfo(publicClient, poolId, memberAddress)
+        return fetchMemberInfo(publicClient, poolId, memberAddress);
       },
       enabled: !!publicClient && poolId > 0 && !!memberAddress,
       staleTime: 30 * 1000,
@@ -102,19 +114,19 @@ export const cooperativePoolQueries = {
 
   /**
    * Pool members query options
-   * 
+   *
    * @param publicClient - Viem PublicClient
    * @param poolId - ID of the pool
    * @returns Query options object
    */
   poolMembers: (publicClient: PublicClient | null, poolId: number) =>
     queryOptions({
-      queryKey: ['cooperative-pool', 'members', poolId],
+      queryKey: ["cooperative-pool", "members", poolId],
       queryFn: async () => {
         if (!publicClient) {
-          return []
+          return [];
         }
-        return fetchPoolMembers(publicClient, poolId)
+        return fetchPoolMembers(publicClient, poolId);
       },
       enabled: !!publicClient && poolId > 0,
       staleTime: 30 * 1000,
@@ -123,23 +135,32 @@ export const cooperativePoolQueries = {
 
   /**
    * Member yield query options
-   * 
+   *
    * @param publicClient - Viem PublicClient
    * @param poolId - ID of the pool
    * @param memberAddress - Address of the member
    * @returns Query options object
    */
-  memberYield: (publicClient: PublicClient | null, poolId: number, memberAddress: `0x${string}` | undefined) =>
+  memberYield: (
+    publicClient: PublicClient | null,
+    poolId: number,
+    memberAddress: `0x${string}` | undefined,
+  ) =>
     queryOptions({
-      queryKey: ['cooperative-pool', 'member-yield', poolId, memberAddress || 'none'],
+      queryKey: [
+        "cooperative-pool",
+        "member-yield",
+        poolId,
+        memberAddress || "none",
+      ],
       queryFn: async () => {
         if (!publicClient || !memberAddress) {
-          return null
+          return null;
         }
-        return fetchMemberYield(publicClient, poolId, memberAddress)
+        return fetchMemberYield(publicClient, poolId, memberAddress);
       },
       enabled: !!publicClient && poolId > 0 && !!memberAddress,
       staleTime: 30 * 1000,
       gcTime: 5 * 60 * 1000,
     }),
-}
+};
