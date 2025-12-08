@@ -20,23 +20,9 @@ import { createPublicClient } from "viem";
 /**
  * SSR-safe localStorage wrapper
  * Uses localStorage on client, no-op storage on server
+ * NOTE: Only call this on the client side
  */
-function createSsrSafeStorage() {
-  // Check if we're on the server
-  const isServer = typeof window === "undefined";
-
-  if (isServer) {
-    // Return no-op storage for SSR
-    return createStorage({
-      storage: {
-        getItem: () => null,
-        setItem: () => {},
-        removeItem: () => {},
-      },
-    });
-  }
-
-  // On client, use localStorage with try-catch for safety
+function createClientStorage() {
   return createStorage({
     storage: {
       getItem: (key: string) => {
@@ -100,18 +86,27 @@ declare global {
  * - SSR-compatible with cookieStorage
  */
 
+// Singleton config instance - only created on client
+let wagmiConfigInstance: ReturnType<typeof createConfig> | null = null;
+
 /**
  * Get Wagmi config with SSR compatibility
  * Uses localStorage for wallet persistence with SSR-safe fallback
  *
  * SSR-Safe Pattern:
- * - Uses SSR-safe storage wrapper (no-op on server, localStorage on client)
- * - ssr: true enables Server-Side Rendering
+ * - Config is only created on the client side
+ * - Uses singleton pattern to avoid recreating config
+ * - ssr: true enables Server-Side Rendering support
  * - Wallet connection persists across page reloads on client
- * - Reconnects automatically when available
  */
 export function getWagmiConfig() {
-  return createConfig({
+  // Return existing instance if available
+  if (wagmiConfigInstance) {
+    return wagmiConfigInstance;
+  }
+
+  // Create config (only happens on client due to dynamic import in client-layout)
+  wagmiConfigInstance = createConfig({
     chains: [mezoTestnet],
     connectors: [
       metaMask({
@@ -136,10 +131,12 @@ export function getWagmiConfig() {
     },
     // Enable SSR support
     ssr: true,
-    // Use SSR-safe localStorage wrapper for wallet persistence
-    storage: createSsrSafeStorage(),
+    // Use client-side localStorage for wallet persistence
+    storage: typeof window !== "undefined" ? createClientStorage() : undefined,
     pollingInterval: 4_000, // poll every 4 seconds
   });
+
+  return wagmiConfigInstance;
 }
 
 /**
