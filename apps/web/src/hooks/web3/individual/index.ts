@@ -5,32 +5,32 @@
  * Central export point for all individual pool and yield aggregator functionality
  */
 
-'use client'
+"use client";
 
 // Re-export everything from submodules
-export * from './constants'
-export * from './use-deposit-hooks'
-export * from './use-yield-hooks'
-export * from './use-aggregator-hooks'
+export * from "./constants";
+export * from "./use-deposit-hooks";
+export * from "./use-yield-hooks";
+export * from "./use-aggregator-hooks";
 
 // Import what we need for combined hooks
 import {
   useDeposit,
   usePartialWithdraw,
   useFullWithdraw,
-} from './use-deposit-hooks'
+} from "./use-deposit-hooks";
 
 import {
   useClaimYield,
   useClaimReferralRewards,
   useToggleAutoCompound,
-} from './use-yield-hooks'
+} from "./use-yield-hooks";
 
 import {
   useYieldAggregatorDeposit,
   useYieldAggregatorWithdraw,
   useCompoundYields,
-} from './use-aggregator-hooks'
+} from "./use-aggregator-hooks";
 
 // ============================================================================
 // COMBINED HOOKS
@@ -40,12 +40,12 @@ import {
  * Combined hook for all V3 individual pool transactions
  */
 export function useIndividualPoolTransactions() {
-  const deposit = useDeposit()
-  const partialWithdraw = usePartialWithdraw()
-  const fullWithdraw = useFullWithdraw()
-  const toggleAutoCompound = useToggleAutoCompound()
-  const claimYield = useClaimYield()
-  const claimReferralRewards = useClaimReferralRewards()
+  const deposit = useDeposit();
+  const partialWithdraw = usePartialWithdraw();
+  const fullWithdraw = useFullWithdraw();
+  const toggleAutoCompound = useToggleAutoCompound();
+  const claimYield = useClaimYield();
+  const claimReferralRewards = useClaimReferralRewards();
 
   return {
     deposit,
@@ -63,16 +63,16 @@ export function useIndividualPoolTransactions() {
       toggleAutoCompound.isToggling ||
       claimYield.isClaiming ||
       claimReferralRewards.isClaiming,
-  }
+  };
 }
 
 /**
  * Combined hook for all V3 yield aggregator transactions
  */
 export function useYieldAggregatorTransactions() {
-  const deposit = useYieldAggregatorDeposit()
-  const withdraw = useYieldAggregatorWithdraw()
-  const compoundYields = useCompoundYields()
+  const deposit = useYieldAggregatorDeposit();
+  const withdraw = useYieldAggregatorWithdraw();
+  const compoundYields = useCompoundYields();
 
   return {
     deposit,
@@ -84,5 +84,5 @@ export function useYieldAggregatorTransactions() {
       deposit.isDepositing ||
       withdraw.isWithdrawing ||
       compoundYields.isCompounding,
-  }
+  };
 }

@@ -1,18 +1,31 @@
-"use client"
+"use client";
 
-export const dynamic = "force-dynamic"
+export const dynamic = "force-dynamic";
 
-import * as React from "react"
-import { useAccount } from "wagmi"
-import Link from "next/link"
-import { PageHeader } from "@/components/layout"
-import { PortfolioOverview, AllocationChart, RecentActivity } from "@/features/portfolio"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Wallet, Users, Trophy, ArrowRight } from "lucide-react"
-import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3"
-import { useCooperativePools, useUserCooperativeTotal } from "@/hooks/web3/use-cooperative-pools"
-import { formatUnits } from "viem"
+import * as React from "react";
+import { useAccount } from "wagmi";
+import Link from "next/link";
+import { PageHeader } from "@/components/layout";
+import {
+  PortfolioOverview,
+  AllocationChart,
+  RecentActivity,
+} from "@/features/portfolio";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Wallet, Users, Trophy, ArrowRight } from "lucide-react";
+import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
+import {
+  useCooperativePools,
+  useUserCooperativeTotal,
+} from "@/hooks/web3/use-cooperative-pools";
+import { formatUnits } from "viem";
 
 /**
  * Dashboard Page - V4 Redesign
@@ -24,32 +37,32 @@ import { formatUnits } from "viem"
  * - Quick access to features
  */
 export default function DashboardPage() {
-  const { isConnected, address } = useAccount()
+  const { isConnected, address } = useAccount();
 
   // Fetch REAL blockchain data
-  const { userInfo, isLoading: isLoadingIndividual } = useIndividualPoolV3()
-  const { pools, isLoading: isLoadingPools } = useCooperativePools()
+  const { userInfo, isLoading: isLoadingIndividual } = useIndividualPoolV3();
+  const { pools, isLoading: isLoadingPools } = useCooperativePools();
   const {
     totalContribution: cooperativeContribution,
     poolsParticipated,
-    isLoading: isLoadingCoopTotal
-  } = useUserCooperativeTotal(address as `0x${string}` | undefined)
+    isLoading: isLoadingCoopTotal,
+  } = useUserCooperativeTotal(address as `0x${string}` | undefined);
 
   // Calculate real portfolio data
   const individualSavings = userInfo?.deposit
     ? Number(formatUnits(userInfo.deposit, 18))
-    : 0
+    : 0;
 
   const totalYields = userInfo?.yields
     ? Number(formatUnits(userInfo.yields, 18))
-    : 0
+    : 0;
 
   // Calculate cooperative pools total from user's contributions across all pools
   const cooperativeSavings = cooperativeContribution
     ? Number(formatUnits(cooperativeContribution, 18))
-    : 0
+    : 0;
 
-  const totalValue = individualSavings + cooperativeSavings
+  const totalValue = individualSavings + cooperativeSavings;
 
   const portfolioData = {
     totalValue: totalValue.toFixed(2),
@@ -59,19 +72,18 @@ export default function DashboardPage() {
     change24h: 0, // TODO: Implement 24h change calculation
     change7d: 0, // TODO: Implement 7d change calculation
     recentActivities: [], // TODO: Fetch from user transactions
-  }
+  };
 
   if (!isConnected) {
     return (
       <div className="space-y-6">
-        <PageHeader
-          title="Dashboard"
-          description="Welcome to KhipuVault"
-        />
+        <PageHeader title="Dashboard" description="Welcome to KhipuVault" />
         <Card variant="glass" className="text-center py-12">
           <CardContent>
             <Wallet className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-2xl font-heading font-bold mb-2">Connect Your Wallet</h2>
+            <h2 className="text-2xl font-heading font-bold mb-2">
+              Connect Your Wallet
+            </h2>
             <p className="text-muted-foreground mb-6">
               Connect your wallet to access your portfolio and start saving
             </p>
@@ -81,17 +93,14 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   // Show loading state while fetching blockchain data
   if (isLoadingIndividual || isLoadingPools || isLoadingCoopTotal) {
     return (
       <div className="space-y-6">
-        <PageHeader
-          title="Dashboard"
-          description="Loading your portfolio..."
-        />
+        <PageHeader title="Dashboard" description="Loading your portfolio..." />
         <Card variant="glass" className="text-center py-12">
           <CardContent>
             <div className="animate-pulse space-y-4">
@@ -101,7 +110,7 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       </div>
-    )
+    );
   }
 
   return (
@@ -139,7 +148,11 @@ export default function DashboardPage() {
       {/* Quick Access Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         <Link href="/dashboard/individual-savings">
-          <Card variant="surface" hover="glow-lavanda" className="h-full cursor-pointer group">
+          <Card
+            variant="surface"
+            hover="glow-lavanda"
+            className="h-full cursor-pointer group"
+          >
             <CardContent className="pt-6">
               <div className="h-12 w-12 rounded-full bg-lavanda/20 flex items-center justify-center mb-4">
                 <Wallet className="h-6 w-6 text-lavanda" />
@@ -158,7 +171,11 @@ export default function DashboardPage() {
         </Link>
 
         <Link href="/dashboard/cooperative-savings">
-          <Card variant="surface" hover="glow-orange" className="h-full cursor-pointer group">
+          <Card
+            variant="surface"
+            hover="glow-orange"
+            className="h-full cursor-pointer group"
+          >
             <CardContent className="pt-6">
               <div className="h-12 w-12 rounded-full bg-accent/20 flex items-center justify-center mb-4">
                 <Users className="h-6 w-6 text-accent" />
@@ -177,7 +194,11 @@ export default function DashboardPage() {
         </Link>
 
         <Link href="/dashboard/prize-pool">
-          <Card variant="surface" hover="glow-success" className="h-full cursor-pointer group">
+          <Card
+            variant="surface"
+            hover="glow-success"
+            className="h-full cursor-pointer group"
+          >
             <CardContent className="pt-6">
               <div className="h-12 w-12 rounded-full bg-success/20 flex items-center justify-center mb-4">
                 <Trophy className="h-6 w-6 text-success" />
@@ -196,5 +217,5 @@ export default function DashboardPage() {
         </Link>
       </div>
     </div>
-  )
+  );
 }

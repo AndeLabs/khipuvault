@@ -5,7 +5,7 @@
   "explorer": "https://explorer.test.mezo.org",
   "deployedAt": "2025-11-02",
   "deployer": "0x8e7E7BA2BD22e6f194821Ea2cEf903eaD949F257",
-  
+
   "khipuVault": {
     "mezoIntegrationV3": {
       "proxy": "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6",
@@ -50,7 +50,7 @@
       "explorerUrl": "https://explorer.test.mezo.org/address/0xe6e0608abEf8f31847C1c9367465DbF68A040Edc"
     }
   },
-  
+
   "mezoProtocol": {
     "musd": {
       "address": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
@@ -83,7 +83,7 @@
       "status": "native"
     }
   },
-  
+
   "configuration": {
     "targetLtv": 5000,
     "targetLtvPercentage": "50%",
@@ -93,7 +93,7 @@
     "vaultAprPercentage": "6%",
     "feeCollector": "0x8e7E7BA2BD22e6f194821Ea2cEf903eaD949F257"
   },
-  
+
   "notes": {
     "btcIsNative": true,
     "btcDecimals": 18,

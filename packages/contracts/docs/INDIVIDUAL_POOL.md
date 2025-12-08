@@ -63,24 +63,24 @@ struct UserDeposit {
 
 ### Mappings
 
-| Variable | Type | Purpose |
-|----------|------|---------|
-| `userDeposits` | `mapping(address => UserDeposit)` | User position tracking |
-| `referrers` | `mapping(address => address)` | User → Referrer mapping |
-| `referralRewards` | `mapping(address => uint256)` | Unclaimed referral bonuses |
-| `referralCount` | `mapping(address => uint256)` | Number of referrals |
+| Variable          | Type                              | Purpose                    |
+| ----------------- | --------------------------------- | -------------------------- |
+| `userDeposits`    | `mapping(address => UserDeposit)` | User position tracking     |
+| `referrers`       | `mapping(address => address)`     | User → Referrer mapping    |
+| `referralRewards` | `mapping(address => uint256)`     | Unclaimed referral bonuses |
+| `referralCount`   | `mapping(address => uint256)`     | Number of referrals        |
 
 ### Global State
 
-| Variable | Type | Description |
-|----------|------|-------------|
-| `totalMusdDeposited` | `uint256` | Sum of all active deposits |
-| `totalYieldsGenerated` | `uint256` | Cumulative yields earned |
-| `totalReferralRewards` | `uint256` | Total referral bonuses issued |
-| `performanceFee` | `uint256` | Fee in basis points (default: 100 = 1%) |
-| `referralBonus` | `uint256` | Bonus in basis points (default: 50 = 0.5%) |
-| `feeCollector` | `address` | Address receiving fees |
-| `emergencyMode` | `bool` | Emergency bypass flag |
+| Variable               | Type      | Description                                |
+| ---------------------- | --------- | ------------------------------------------ |
+| `totalMusdDeposited`   | `uint256` | Sum of all active deposits                 |
+| `totalYieldsGenerated` | `uint256` | Cumulative yields earned                   |
+| `totalReferralRewards` | `uint256` | Total referral bonuses issued              |
+| `performanceFee`       | `uint256` | Fee in basis points (default: 100 = 1%)    |
+| `referralBonus`        | `uint256` | Bonus in basis points (default: 50 = 0.5%) |
+| `feeCollector`         | `address` | Address receiving fees                     |
+| `emergencyMode`        | `bool`    | Emergency bypass flag                      |
 
 ### Constants
 
@@ -102,15 +102,18 @@ uint256 public constant AUTO_COMPOUND_THRESHOLD = 1 ether; // 1 MUSD
 Deposits MUSD to earn yields.
 
 **Parameters:**
+
 - `musdAmount`: Amount of MUSD to deposit
 
 **Requirements:**
+
 - `musdAmount >= MIN_DEPOSIT` (10 MUSD)
 - `totalDeposit <= MAX_DEPOSIT` (100k MUSD)
 - Contract not paused
 - User has approved contract to spend MUSD
 
 **Effects:**
+
 - Transfers MUSD from user
 - Deposits to YieldAggregator
 - Updates user position
@@ -131,16 +134,19 @@ pool.deposit(100 ether);
 Deposits MUSD with a referral code.
 
 **Parameters:**
+
 - `musdAmount`: Amount to deposit
 - `referrer`: Address of referrer (0x0 if none)
 
 **Referral Logic:**
+
 - Referrer set on first deposit only
 - Cannot self-refer
 - Referrer earns 0.5% bonus (default) from protocol, not user funds
 - Bonus added to `referralRewards[referrer]`
 
 **Effects:**
+
 - Same as `deposit()` plus referral tracking
 - Emits `ReferralRecorded` event
 
@@ -156,14 +162,17 @@ pool.depositWithReferral(100 ether, referrerAddress);
 Withdraws a portion of the principal.
 
 **Parameters:**
+
 - `musdAmount`: Amount to withdraw
 
 **Requirements:**
+
 - `musdAmount >= MIN_WITHDRAWAL` (1 MUSD)
 - `musdAmount <= userDeposit.musdAmount`
 - Remaining balance >= MIN_DEPOSIT or 0
 
 **Effects:**
+
 - Updates pending yields first
 - Withdraws from YieldAggregator
 - Transfers MUSD to user
@@ -186,6 +195,7 @@ Claims accrued yields without touching principal.
 **Returns:** `netYield` - Amount received after fees
 
 **Effects:**
+
 - Calculates pending yields
 - Deducts performance fee (1% default)
 - Transfers net yield to user
@@ -195,6 +205,7 @@ Claims accrued yields without touching principal.
 **Gas Estimate:** ~90k gas
 
 **Fee Calculation:**
+
 ```solidity
 grossYield = userDeposit.yieldAccrued + pendingYield
 feeAmount = (grossYield * performanceFee) / 10000
@@ -213,10 +224,12 @@ uint256 netYield = pool.claimYield();
 Full withdrawal of principal + yields.
 
 **Returns:**
+
 - `musdAmount` - Principal returned
 - `netYield` - Yields after fees
 
 **Effects:**
+
 - Closes user position
 - Withdraws from YieldAggregator
 - Transfers principal + net yield
@@ -238,9 +251,11 @@ Full withdrawal of principal + yields.
 Enables or disables automatic yield compounding.
 
 **Parameters:**
+
 - `enabled`: True to enable, false to disable
 
 **Behavior When Enabled:**
+
 - On each deposit/withdrawal, if `yieldAccrued >= AUTO_COMPOUND_THRESHOLD` (1 MUSD)
 - Yields are added to principal automatically
 - User earns compounding returns
@@ -251,6 +266,7 @@ pool.setAutoCompound(true);
 ```
 
 **Internal Logic:**
+
 ```solidity
 function _maybeAutoCompound(address user) internal {
     UserDeposit storage userDeposit = userDeposits[user];
@@ -276,9 +292,11 @@ Claims accumulated referral bonuses.
 **Returns:** Amount of rewards claimed
 
 **Requirements:**
+
 - `referralRewards[msg.sender] > 0`
 
 **Effects:**
+
 - Resets rewards to 0
 - Transfers MUSD to referrer
 
@@ -296,6 +314,7 @@ uint256 rewards = pool.claimReferralRewards();
 Gets referral statistics for a user.
 
 **Returns:**
+
 - `count` - Number of successful referrals
 - `rewards` - Unclaimed rewards
 - `referrer` - Who referred this user (0x0 if none)
@@ -313,6 +332,7 @@ Gets referral statistics for a user.
 Comprehensive user position information.
 
 **Returns:**
+
 - `deposit` - Current principal amount
 - `yields` - Accrued + pending yields
 - `netYields` - Yields after performance fee
@@ -332,6 +352,7 @@ Comprehensive user position information.
 ```
 
 **APR Calculation:**
+
 ```solidity
 estimatedAPR = (yields * 365 * 100) / (deposit * daysActive)
 // Example: 10 MUSD deposit, 0.5 MUSD yield in 30 days
@@ -361,6 +382,7 @@ uint256 totalBalance = pool.getUserTotalBalance(userAddress);
 Enables/disables emergency mode.
 
 **Effects:**
+
 - Bypasses flash loan protection
 - Waives performance fees
 - Allows contract interactions in crisis
@@ -372,9 +394,11 @@ Enables/disables emergency mode.
 **Access:** Owner only
 
 **Requirements:**
+
 - `newFee <= 1000` (max 10%)
 
 **Effects:**
+
 - Updates `performanceFee`
 - Applies to future yield claims
 
@@ -385,6 +409,7 @@ Enables/disables emergency mode.
 **Access:** Owner only
 
 **Requirements:**
+
 - `newBonus <= 500` (max 5%)
 
 ---
@@ -448,6 +473,7 @@ Circuit breaker for emergency stops.
 **Scenario:** User withdraws leaving < MIN_DEPOSIT
 
 **Behavior:**
+
 ```solidity
 if (userDeposit.musdAmount < MIN_DEPOSIT && userDeposit.musdAmount > 0) {
     // Force full withdrawal
@@ -470,6 +496,7 @@ if (userDeposit.musdAmount < MIN_DEPOSIT && userDeposit.musdAmount > 0) {
 **Error:** `InvalidAmount()`
 
 **Prevention:**
+
 ```solidity
 if (totalYield == 0) revert InvalidAmount();
 ```
@@ -481,6 +508,7 @@ if (totalYield == 0) revert InvalidAmount();
 **Scenario:** `YIELD_AGGREGATOR.claimYield()` reverts
 
 **Handling:**
+
 ```solidity
 uint256 poolYield = YIELD_AGGREGATOR.getPendingYield(address(this));
 if (poolYield > 0) {
@@ -498,6 +526,7 @@ if (poolYield > 0) {
 **Scenario:** Malicious contract calls via delegatecall
 
 **Protection:**
+
 ```solidity
 modifier noFlashLoan() {
     if (!emergencyMode && tx.origin != msg.sender) revert FlashLoanDetected();
@@ -506,6 +535,7 @@ modifier noFlashLoan() {
 ```
 
 **Limitation:** Blocks all contract interactions unless:
+
 - Emergency mode enabled, OR
 - Call is from EOA (tx.origin == msg.sender)
 
@@ -516,6 +546,7 @@ modifier noFlashLoan() {
 **Scenario:** Small deposits, short time periods
 
 **Example:**
+
 ```solidity
 // 1 MUSD deposit for 1 second at 10% APR
 pendingYield = (1e18 * poolYield * 1e18) / totalMusdDeposited / 1e18
@@ -531,6 +562,7 @@ pendingYield = (1e18 * poolYield * 1e18) / totalMusdDeposited / 1e18
 ### 1. Storage Packing
 
 **Before:**
+
 ```solidity
 struct UserDeposit {
     uint256 musdAmount;          // 32 bytes
@@ -543,6 +575,7 @@ struct UserDeposit {
 ```
 
 **After:**
+
 ```solidity
 struct UserDeposit {
     uint128 musdAmount;          // 16 bytes
@@ -582,6 +615,7 @@ if (userDeposit.active) {
 ### 3. Safe Arithmetic (Solidity 0.8+)
 
 **Built-in overflow checks:**
+
 ```solidity
 // No need for SafeMath library
 userDeposit.musdAmount += amount; // Reverts on overflow
@@ -603,13 +637,13 @@ userDeposit.musdAmount += amount; // Reverts on overflow
 
 ### Potential Vulnerabilities
 
-| Risk | Mitigation | Severity |
-|------|------------|----------|
-| Reentrancy | `nonReentrant` modifier | HIGH → LOW |
-| Flash loans | `tx.origin` check | HIGH → MEDIUM |
-| Integer overflow | Solidity 0.8.25 | HIGH → LOW |
-| Centralization | Owner controls upgrades | MEDIUM |
-| Oracle manipulation | Delegated to YieldAggregator | MEDIUM |
+| Risk                | Mitigation                   | Severity      |
+| ------------------- | ---------------------------- | ------------- |
+| Reentrancy          | `nonReentrant` modifier      | HIGH → LOW    |
+| Flash loans         | `tx.origin` check            | HIGH → MEDIUM |
+| Integer overflow    | Solidity 0.8.25              | HIGH → LOW    |
+| Centralization      | Owner controls upgrades      | MEDIUM        |
+| Oracle manipulation | Delegated to YieldAggregator | MEDIUM        |
 
 ---
 
@@ -698,11 +732,13 @@ function testFuzzDeposit(uint256 amount) public {
 ### Storage Layout Compatibility
 
 **CRITICAL:** New versions MUST NOT:
+
 - Change order of existing state variables
 - Remove state variables
 - Change types of existing variables
 
 **Safe Additions:**
+
 - Append new variables at the end
 - Add new mappings
 - Introduce new constants

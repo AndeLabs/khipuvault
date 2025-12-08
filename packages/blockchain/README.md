@@ -13,12 +13,14 @@ Blockchain event indexer for KhipuVault. Listens to on-chain events and stores t
 ## Setup
 
 1. Configure environment variables in `.env`:
+
    ```bash
    DATABASE_URL="postgresql://user:password@localhost:5432/khipuvault"
    RPC_URL="https://rpc.test.mezo.org"
    ```
 
 2. Install dependencies:
+
    ```bash
    pnpm install
    ```
@@ -43,23 +45,25 @@ pnpm index start # Via CLI
 ### Programmatic usage
 
 ```typescript
-import { startIndexer } from '@khipu/blockchain'
+import { startIndexer } from "@khipu/blockchain";
 
-const orchestrator = await startIndexer()
+const orchestrator = await startIndexer();
 
 // Later...
-orchestrator.stop()
+orchestrator.stop();
 ```
 
 ## Events Indexed
 
 ### IndividualPool
+
 - `Deposited` - User deposits into pool
 - `Withdrawn` - User withdraws from pool
 - `YieldClaimed` - User claims earned yield
 - `YieldDistributed` - Yield distributed to pool
 
 ### CooperativePool
+
 - `PoolCreated` - New cooperative pool created
 - `MemberJoined` - Member joins pool with contribution
 - `MemberLeft` - Member leaves pool with refund

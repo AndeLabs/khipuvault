@@ -3,117 +3,140 @@
  * Form for contributing to existing pools
  */
 
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Badge } from '@/components/ui/badge'
-import { useCooperativePool, usePoolInfo, PoolStatus } from '@/hooks/web3/use-cooperative-pool'
-import { Users, TrendingUp, AlertTriangle, Info, Loader2, CheckCircle2, ArrowLeft } from 'lucide-react'
-import { formatEther, parseEther } from 'viem'
-import { useAccount, useBalance } from 'wagmi'
+import { useState, useEffect } from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import {
+  useCooperativePool,
+  usePoolInfo,
+  PoolStatus,
+} from "@/hooks/web3/use-cooperative-pool";
+import {
+  Users,
+  TrendingUp,
+  AlertTriangle,
+  Info,
+  Loader2,
+  CheckCircle2,
+  ArrowLeft,
+} from "lucide-react";
+import { formatEther, parseEther } from "viem";
+import { useAccount, useBalance } from "wagmi";
 
 interface JoinPoolV3Props {
-  poolId: number
-  onBack?: () => void
-  onSuccess?: () => void
+  poolId: number;
+  onBack?: () => void;
+  onSuccess?: () => void;
 }
 
 export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
-  const { address } = useAccount()
-  const { joinPool, state, error, txHash, isProcessing, reset } = useCooperativePool()
-  const { poolInfo, isLoading: isLoadingPool } = usePoolInfo(poolId)
+  const { address } = useAccount();
+  const { joinPool, state, error, txHash, isProcessing, reset } =
+    useCooperativePool();
+  const { poolInfo, isLoading: isLoadingPool } = usePoolInfo(poolId);
 
   const { data: btcBalance } = useBalance({
     address,
-  })
+  });
 
-  const [btcAmount, setBtcAmount] = useState('')
-  const [validationError, setValidationError] = useState('')
+  const [btcAmount, setBtcAmount] = useState("");
+  const [validationError, setValidationError] = useState("");
 
   useEffect(() => {
-    if (state === 'success') {
+    if (state === "success") {
       const timer = setTimeout(() => {
-        onSuccess?.()
-      }, 3000)
-      return () => clearTimeout(timer)
+        onSuccess?.();
+      }, 3000);
+      return () => clearTimeout(timer);
     }
-  }, [state, onSuccess])
+  }, [state, onSuccess]);
 
   const validateAmount = (): boolean => {
     if (!poolInfo) {
-      setValidationError('Pool no encontrado')
-      return false
+      setValidationError("Pool no encontrado");
+      return false;
     }
 
     if (!btcAmount || parseFloat(btcAmount) <= 0) {
-      setValidationError('Ingresa un monto válido')
-      return false
+      setValidationError("Ingresa un monto válido");
+      return false;
     }
 
-    const amount = parseEther(btcAmount)
-    const min = poolInfo.minContribution
-    const max = poolInfo.maxContribution
+    const amount = parseEther(btcAmount);
+    const min = poolInfo.minContribution;
+    const max = poolInfo.maxContribution;
 
     if (amount < min) {
-      setValidationError(`Mínimo ${formatEther(min)} BTC`)
-      return false
+      setValidationError(`Mínimo ${formatEther(min)} BTC`);
+      return false;
     }
 
     if (amount > max) {
-      setValidationError(`Máximo ${formatEther(max)} BTC`)
-      return false
+      setValidationError(`Máximo ${formatEther(max)} BTC`);
+      return false;
     }
 
     if (btcBalance && amount > btcBalance.value) {
-      setValidationError('Balance insuficiente')
-      return false
+      setValidationError("Balance insuficiente");
+      return false;
     }
 
-    setValidationError('')
-    return true
-  }
+    setValidationError("");
+    return true;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
-    if (!validateAmount()) return
+    if (!validateAmount()) return;
 
-    await joinPool(poolId, btcAmount)
-  }
+    await joinPool(poolId, btcAmount);
+  };
 
   const handleSetMax = () => {
-    if (!btcBalance || !poolInfo) return
-    
-    const maxAllowed = poolInfo.maxContribution
-    const userBalance = btcBalance.value
-    const gasReserve = parseEther('0.0001')
-    
-    const availableBalance = userBalance > gasReserve ? userBalance - gasReserve : 0n
-    const amount = availableBalance < maxAllowed ? availableBalance : maxAllowed
-    
-    setBtcAmount(formatEther(amount))
-  }
+    if (!btcBalance || !poolInfo) return;
+
+    const maxAllowed = poolInfo.maxContribution;
+    const userBalance = btcBalance.value;
+    const gasReserve = parseEther("0.0001");
+
+    const availableBalance =
+      userBalance > gasReserve ? userBalance - gasReserve : 0n;
+    const amount =
+      availableBalance < maxAllowed ? availableBalance : maxAllowed;
+
+    setBtcAmount(formatEther(amount));
+  };
 
   const handleReset = () => {
-    reset()
-    setBtcAmount('')
-    setValidationError('')
-  }
+    reset();
+    setBtcAmount("");
+    setValidationError("");
+  };
 
   if (isLoadingPool) {
     return (
       <Card className="bg-card border-2 border-muted">
         <CardContent className="p-12 text-center">
           <Loader2 className="h-12 w-12 animate-spin text-muted-foreground mx-auto mb-4" />
-          <p className="text-muted-foreground">Cargando información del pool...</p>
+          <p className="text-muted-foreground">
+            Cargando información del pool...
+          </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (!poolInfo) {
@@ -121,7 +144,9 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
       <Card className="bg-card border-2 border-red-500/50">
         <CardContent className="p-12 text-center">
           <AlertTriangle className="h-12 w-12 text-red-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-foreground mb-2">Pool no encontrado</h3>
+          <h3 className="text-xl font-bold text-foreground mb-2">
+            Pool no encontrado
+          </h3>
           <p className="text-muted-foreground mb-4">
             El pool #{poolId} no existe o ha sido eliminado
           </p>
@@ -131,25 +156,28 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
           </Button>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const canJoin = poolInfo.allowNewMembers && 
-                  poolInfo.currentMembers < poolInfo.maxMembers &&
-                  poolInfo.status === PoolStatus.ACCEPTING
+  const canJoin =
+    poolInfo.allowNewMembers &&
+    poolInfo.currentMembers < poolInfo.maxMembers &&
+    poolInfo.status === PoolStatus.ACCEPTING;
 
   if (!canJoin) {
     return (
       <Card className="bg-card border-2 border-yellow-500/50">
         <CardContent className="p-12 text-center">
           <AlertTriangle className="h-12 w-12 text-yellow-500 mx-auto mb-4" />
-          <h3 className="text-xl font-bold text-foreground mb-2">Pool no disponible</h3>
+          <h3 className="text-xl font-bold text-foreground mb-2">
+            Pool no disponible
+          </h3>
           <p className="text-muted-foreground mb-4">
             {poolInfo.status === PoolStatus.CLOSED
-              ? 'Este pool está cerrado y no acepta nuevos miembros'
+              ? "Este pool está cerrado y no acepta nuevos miembros"
               : poolInfo.currentMembers >= poolInfo.maxMembers
-              ? 'Este pool está lleno'
-              : 'Este pool no está aceptando nuevos miembros'}
+                ? "Este pool está lleno"
+                : "Este pool no está aceptando nuevos miembros"}
           </p>
           <Button onClick={onBack} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -157,15 +185,17 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
           </Button>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  if (state === 'success') {
+  if (state === "success") {
     return (
       <Card className="bg-gradient-to-br from-green-500/10 via-card to-card border-2 border-green-500/50">
         <CardContent className="p-12 text-center">
           <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-green-500 mb-2">¡Te uniste exitosamente!</h2>
+          <h2 className="text-2xl font-bold text-green-500 mb-2">
+            ¡Te uniste exitosamente!
+          </h2>
           <p className="text-muted-foreground mb-4">
             Ahora eres miembro del pool <strong>{poolInfo.name}</strong>
           </p>
@@ -183,17 +213,16 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
             <Button onClick={handleReset} variant="outline">
               Unirse a Otro Pool
             </Button>
-            <Button onClick={onSuccess}>
-              Ver Mis Pools
-            </Button>
+            <Button onClick={onSuccess}>Ver Mis Pools</Button>
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
-  const statusBadge = getStatusBadge(poolInfo.status)
-  const occupancyPercentage = (poolInfo.currentMembers / poolInfo.maxMembers) * 100
+  const statusBadge = getStatusBadge(poolInfo.status);
+  const occupancyPercentage =
+    (poolInfo.currentMembers / poolInfo.maxMembers) * 100;
 
   return (
     <Card className="bg-card border-2 border-primary/50">
@@ -208,7 +237,9 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
             <ArrowLeft className="h-4 w-4 mr-2" />
             Volver
           </Button>
-          <Badge className={`${statusBadge.bgColor} ${statusBadge.textColor} border-0`}>
+          <Badge
+            className={`${statusBadge.bgColor} ${statusBadge.textColor} border-0`}
+          >
             {statusBadge.label}
           </Badge>
         </div>
@@ -228,13 +259,15 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
             <div className="p-4 rounded-lg bg-primary/10 border border-primary/30">
               <div className="flex items-center gap-2 mb-2">
                 <Users className="h-4 w-4 text-primary" />
-                <span className="text-sm font-medium text-primary">Miembros</span>
+                <span className="text-sm font-medium text-primary">
+                  Miembros
+                </span>
               </div>
               <p className="text-xl font-bold text-foreground mb-2">
                 {poolInfo.currentMembers} / {poolInfo.maxMembers}
               </p>
               <div className="h-2 bg-primary/20 rounded-full overflow-hidden">
-                <div 
+                <div
                   className="h-full bg-primary rounded-full transition-all"
                   style={{ width: `${occupancyPercentage}%` }}
                 />
@@ -244,13 +277,17 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
             <div className="p-4 rounded-lg bg-green-500/10 border border-green-500/30">
               <div className="flex items-center gap-2 mb-2">
                 <TrendingUp className="h-4 w-4 text-green-500" />
-                <span className="text-sm font-medium text-green-500">Total Depositado</span>
+                <span className="text-sm font-medium text-green-500">
+                  Total Depositado
+                </span>
               </div>
               <p className="text-xl font-bold text-foreground">
-                {parseFloat(formatEther(poolInfo.totalBtcDeposited)).toFixed(4)} BTC
+                {parseFloat(formatEther(poolInfo.totalBtcDeposited)).toFixed(4)}{" "}
+                BTC
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {parseFloat(formatEther(poolInfo.totalMusdMinted)).toFixed(2)} MUSD generado
+                {parseFloat(formatEther(poolInfo.totalMusdMinted)).toFixed(2)}{" "}
+                MUSD generado
               </p>
             </div>
           </div>
@@ -259,9 +296,21 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
             <Info className="h-4 w-4 text-blue-500" />
             <AlertDescription className="text-blue-200 text-sm">
               <div className="space-y-1">
-                <p><strong className="text-blue-400">Rango de contribución:</strong> {formatEther(poolInfo.minContribution)} - {formatEther(poolInfo.maxContribution)} BTC</p>
-                <p><strong className="text-blue-400">Yields:</strong> ~6% APR compartido entre todos los miembros</p>
-                <p><strong className="text-blue-400">Flexibilidad:</strong> Puedes salir cuando quieras y reclamar tus yields</p>
+                <p>
+                  <strong className="text-blue-400">
+                    Rango de contribución:
+                  </strong>{" "}
+                  {formatEther(poolInfo.minContribution)} -{" "}
+                  {formatEther(poolInfo.maxContribution)} BTC
+                </p>
+                <p>
+                  <strong className="text-blue-400">Yields:</strong> ~6% APR
+                  compartido entre todos los miembros
+                </p>
+                <p>
+                  <strong className="text-blue-400">Flexibilidad:</strong>{" "}
+                  Puedes salir cuando quieras y reclamar tus yields
+                </p>
               </div>
             </AlertDescription>
           </Alert>
@@ -281,9 +330,11 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
                   value={btcAmount}
                   onChange={(e) => setBtcAmount(e.target.value)}
                   disabled={isProcessing}
-                  className={validationError ? 'border-red-500' : ''}
+                  className={validationError ? "border-red-500" : ""}
                 />
-                <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">BTC</span>
+                <span className="absolute right-3 top-2.5 text-sm text-muted-foreground">
+                  BTC
+                </span>
               </div>
 
               {validationError && (
@@ -291,7 +342,13 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
               )}
 
               <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Balance: {btcBalance ? parseFloat(formatEther(btcBalance.value)).toFixed(4) : '0'} BTC</span>
+                <span>
+                  Balance:{" "}
+                  {btcBalance
+                    ? parseFloat(formatEther(btcBalance.value)).toFixed(4)
+                    : "0"}{" "}
+                  BTC
+                </span>
                 <Button
                   type="button"
                   variant="link"
@@ -307,9 +364,9 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
 
             <div className="grid grid-cols-3 gap-2">
               {[
-                { label: '25%', factor: 0.25 },
-                { label: '50%', factor: 0.5 },
-                { label: '75%', factor: 0.75 }
+                { label: "25%", factor: 0.25 },
+                { label: "50%", factor: 0.5 },
+                { label: "75%", factor: 0.75 },
               ].map(({ label, factor }) => (
                 <Button
                   key={label}
@@ -317,13 +374,19 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    if (!btcBalance || !poolInfo) return
-                    const maxAllowed = poolInfo.maxContribution
-                    const userBalance = btcBalance.value
-                    const gasReserve = parseEther('0.0001')
-                    const availableBalance = userBalance > gasReserve ? userBalance - gasReserve : 0n
-                    const amount = (availableBalance < maxAllowed ? availableBalance : maxAllowed) * BigInt(Math.floor(factor * 100)) / 100n
-                    setBtcAmount(formatEther(amount))
+                    if (!btcBalance || !poolInfo) return;
+                    const maxAllowed = poolInfo.maxContribution;
+                    const userBalance = btcBalance.value;
+                    const gasReserve = parseEther("0.0001");
+                    const availableBalance =
+                      userBalance > gasReserve ? userBalance - gasReserve : 0n;
+                    const amount =
+                      ((availableBalance < maxAllowed
+                        ? availableBalance
+                        : maxAllowed) *
+                        BigInt(Math.floor(factor * 100))) /
+                      100n;
+                    setBtcAmount(formatEther(amount));
                   }}
                   disabled={isProcessing || !btcBalance}
                 >
@@ -342,8 +405,10 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
               <Alert className="bg-yellow-500/10 border-yellow-500/30">
                 <Loader2 className="h-4 w-4 text-yellow-500 animate-spin" />
                 <AlertDescription className="text-yellow-200">
-                  {state === 'executing' && 'Confirma la transacción en tu wallet...'}
-                  {state === 'processing' && 'Procesando tu contribución al pool...'}
+                  {state === "executing" &&
+                    "Confirma la transacción en tu wallet..."}
+                  {state === "processing" &&
+                    "Procesando tu contribución al pool..."}
                 </AlertDescription>
               </Alert>
             )}
@@ -361,7 +426,7 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
                     Procesando...
                   </>
                 ) : !address ? (
-                  'Conecta tu Wallet'
+                  "Conecta tu Wallet"
                 ) : (
                   <>
                     <Users className="h-4 w-4 mr-2" />
@@ -384,28 +449,28 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
 
 function getStatusBadge(status: PoolStatus) {
   switch (status) {
     case PoolStatus.ACCEPTING:
       return {
-        label: 'Aceptando Miembros',
-        bgColor: 'bg-blue-500/20',
-        textColor: 'text-blue-400'
-      }
+        label: "Aceptando Miembros",
+        bgColor: "bg-blue-500/20",
+        textColor: "text-blue-400",
+      };
     case PoolStatus.ACTIVE:
       return {
-        label: 'Activo',
-        bgColor: 'bg-green-500/20',
-        textColor: 'text-green-400'
-      }
+        label: "Activo",
+        bgColor: "bg-green-500/20",
+        textColor: "text-green-400",
+      };
     case PoolStatus.CLOSED:
       return {
-        label: 'Cerrado',
-        bgColor: 'bg-gray-500/20',
-        textColor: 'text-gray-400'
-      }
+        label: "Cerrado",
+        bgColor: "bg-gray-500/20",
+        textColor: "text-gray-400",
+      };
   }
 }

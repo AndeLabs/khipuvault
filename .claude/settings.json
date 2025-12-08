@@ -1,0 +1,149 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//**)",
+      "Write(//**)",
+      "Edit(//**)",
+      "Glob(*)",
+      "Grep(*)",
+      "Task(*)",
+      "NotebookEdit(*)",
+      "WebSearch",
+      "WebFetch",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__get-library-docs",
+      "Bash(pnpm:*)",
+      "Bash(pnpm install:*)",
+      "Bash(pnpm add:*)",
+      "Bash(pnpm dev:*)",
+      "Bash(pnpm build:*)",
+      "Bash(pnpm test:*)",
+      "Bash(pnpm lint:*)",
+      "Bash(pnpm typecheck:*)",
+      "Bash(pnpm format:*)",
+      "Bash(pnpm db:*)",
+      "Bash(pnpm docker:*)",
+      "Bash(pnpm contracts:*)",
+      "Bash(git:*)",
+      "Bash(docker:*)",
+      "Bash(docker-compose:*)",
+      "Bash(forge:*)",
+      "Bash(make:*)",
+      "Bash(curl:*)",
+      "Bash(tree:*)",
+      "Bash(mkdir:*)",
+      "Bash(rm:*)",
+      "Bash(mv:*)",
+      "Bash(cp:*)",
+      "Bash(cat:*)",
+      "Bash(ls:*)",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(pkill:*)",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "Bash(psql:*)",
+      "Bash(gh:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf /:*)",
+      "Bash(sudo:*)",
+      "Bash(chmod 777:*)",
+      "Write(**/.env)",
+      "Write(**/.env.local)",
+      "Write(**/.env.production)",
+      "Edit(**/.env)",
+      "Edit(**/.env.local)",
+      "Edit(**/.env.production)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '🚀 KhipuVault session started' && docker ps --format 'PostgreSQL: {{.Status}}' | grep postgres || echo '⚠️ Docker/PostgreSQL not running'",
+            "timeout": 5000
+          }
+        ]
+      }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Creating: ${CLAUDE_FILE_PATH}'",
+            "timeout": 5000
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if echo '${CLAUDE_BASH_COMMAND}' | grep -qE 'rm\\s+-rf|sudo|chmod\\s+777'; then echo 'BLOCKED: Dangerous command detected' && exit 1; fi",
+            "timeout": 2000
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm format --write ${CLAUDE_FILE_PATH} 2>/dev/null || true",
+            "timeout": 30000
+          }
+        ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if [[ '${CLAUDE_FILE_PATH}' == *.sol ]]; then cd packages/contracts && forge fmt ${CLAUDE_FILE_PATH} 2>/dev/null || true; fi",
+            "timeout": 30000
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "matcher": "solidity-auditor|code-reviewer",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo '✅ Security review completed by ${CLAUDE_AGENT_NAME}'",
+            "timeout": 2000
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm typecheck 2>&1 | head -30 || true",
+            "timeout": 90000
+          }
+        ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "pnpm lint --max-warnings 10 2>&1 | tail -20 || true",
+            "timeout": 90000
+          }
+        ]
+      }
+    ]
+  }
+}

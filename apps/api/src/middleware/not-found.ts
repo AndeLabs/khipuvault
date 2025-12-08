@@ -1,8 +1,8 @@
-import { Request, Response } from 'express'
+import { Request, Response } from "express";
 
 export function notFoundHandler(req: Request, res: Response) {
   res.status(404).json({
-    error: 'Not Found',
+    error: "Not Found",
     message: `Route ${req.method} ${req.path} not found`,
-  })
+  });
 }

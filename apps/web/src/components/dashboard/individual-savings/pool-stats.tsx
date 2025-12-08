@@ -1,6 +1,12 @@
-'use client'
+"use client";
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import { formatMUSD } from "@/hooks/web3/use-musd-approval";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -11,7 +17,7 @@ import { Skeleton } from "@/components/ui/skeleton";
  */
 export function PoolStats() {
   const { poolTVL, isLoading } = useIndividualPoolV3();
-  
+
   if (isLoading) {
     return (
       <Card className="sticky top-24 bg-card border-primary/20">
@@ -44,18 +50,22 @@ export function PoolStats() {
             Total Value Locked (TVL)
           </span>
           <div className="text-right">
-            <p className="font-bold font-code">
-              {formatMUSD(poolTVL)} MUSD
-            </p>
+            <p className="font-bold font-code">{formatMUSD(poolTVL)} MUSD</p>
             <p className="text-xs text-muted-foreground">
-              = ${(Number(poolTVL || BigInt(0)) / 1e18).toLocaleString('en-US', { maximumFractionDigits: 2 })} USD
+              = $
+              {(Number(poolTVL || BigInt(0)) / 1e18).toLocaleString("en-US", {
+                maximumFractionDigits: 2,
+              })}{" "}
+              USD
             </p>
           </div>
         </div>
 
         {/* V3 Features */}
         <div className="mt-4 p-3 bg-primary/10 rounded-lg border border-primary/30">
-          <p className="text-xs font-semibold text-primary mb-2">✨ V3 Features Activas:</p>
+          <p className="text-xs font-semibold text-primary mb-2">
+            ✨ V3 Features Activas:
+          </p>
           <ul className="text-xs text-muted-foreground space-y-1">
             <li>✅ Auto-Compound disponible</li>
             <li>✅ Retiros parciales</li>
@@ -67,7 +77,8 @@ export function PoolStats() {
         {/* Status Message */}
         <div className="mt-4 p-3 bg-muted/50 rounded-lg">
           <p className="text-xs text-center text-muted-foreground">
-            Pool V3 (UUPS) operando normalmente. Deposita MUSD para generar rendimientos.
+            Pool V3 (UUPS) operando normalmente. Deposita MUSD para generar
+            rendimientos.
           </p>
         </div>
       </CardContent>

@@ -10,9 +10,9 @@
  * - Transaction execution
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -20,121 +20,136 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Slider } from '@/components/ui/slider'
-import { Card, CardContent } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Loader2, Users, Bitcoin, Shield, AlertTriangle } from 'lucide-react'
-import { useCooperativePool } from '@/hooks/web3/use-cooperative-pool'
-import { useToast } from '@/hooks/use-toast'
-import { parseEther } from 'viem'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Loader2, Users, Bitcoin, Shield, AlertTriangle } from "lucide-react";
+import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
+import { useToast } from "@/hooks/use-toast";
+import { parseEther } from "viem";
 
 interface CreatePoolModalV3Props {
-  open: boolean
-  onClose: () => void
-  onSuccess?: () => void
+  open: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV3Props) {
-  const { toast } = useToast()
-  const { createPool, state, error, reset } = useCooperativePool()
+export function CreatePoolModalV3({
+  open,
+  onClose,
+  onSuccess,
+}: CreatePoolModalV3Props) {
+  const { toast } = useToast();
+  const { createPool, state, error, reset } = useCooperativePool();
 
-  const [poolName, setPoolName] = React.useState('')
-  const [minContribution, setMinContribution] = React.useState('0.001')
-  const [maxContribution, setMaxContribution] = React.useState('0.1')
-  const [maxMembers, setMaxMembers] = React.useState([10])
+  const [poolName, setPoolName] = React.useState("");
+  const [minContribution, setMinContribution] = React.useState("0.001");
+  const [maxContribution, setMaxContribution] = React.useState("0.1");
+  const [maxMembers, setMaxMembers] = React.useState([10]);
 
-  const [validationError, setValidationError] = React.useState('')
+  const [validationError, setValidationError] = React.useState("");
 
   // Validate inputs
   const validate = React.useCallback(() => {
     if (!poolName.trim()) {
-      setValidationError('Pool name is required')
-      return false
+      setValidationError("Pool name is required");
+      return false;
     }
 
-    const min = parseFloat(minContribution)
-    const max = parseFloat(maxContribution)
+    const min = parseFloat(minContribution);
+    const max = parseFloat(maxContribution);
 
     if (isNaN(min) || min <= 0) {
-      setValidationError('Minimum contribution must be greater than 0')
-      return false
+      setValidationError("Minimum contribution must be greater than 0");
+      return false;
     }
 
     if (isNaN(max) || max <= 0) {
-      setValidationError('Maximum contribution must be greater than 0')
-      return false
+      setValidationError("Maximum contribution must be greater than 0");
+      return false;
     }
 
     if (min < 0.001) {
-      setValidationError('Minimum contribution must be at least 0.001 BTC')
-      return false
+      setValidationError("Minimum contribution must be at least 0.001 BTC");
+      return false;
     }
 
     if (max < min) {
-      setValidationError('Maximum contribution must be greater than minimum')
-      return false
+      setValidationError("Maximum contribution must be greater than minimum");
+      return false;
     }
 
     if (maxMembers[0] < 2) {
-      setValidationError('Pool must allow at least 2 members')
-      return false
+      setValidationError("Pool must allow at least 2 members");
+      return false;
     }
 
-    setValidationError('')
-    return true
-  }, [poolName, minContribution, maxContribution, maxMembers])
+    setValidationError("");
+    return true;
+  }, [poolName, minContribution, maxContribution, maxMembers]);
 
   // Handle create
   const handleCreate = async () => {
-    if (!validate()) return
+    if (!validate()) return;
 
     try {
-      await createPool(poolName.trim(), minContribution, maxContribution, maxMembers[0])
+      await createPool(
+        poolName.trim(),
+        minContribution,
+        maxContribution,
+        maxMembers[0],
+      );
     } catch (err) {
-      console.error('Create pool error:', err)
+      console.error("Create pool error:", err);
       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: err instanceof Error ? err.message : 'Failed to create pool. Please try again.',
-      })
+        variant: "destructive",
+        title: "Error",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Failed to create pool. Please try again.",
+      });
     }
-  }
+  };
 
   // Handle success
   React.useEffect(() => {
-    if (state === 'success') {
+    if (state === "success") {
       toast({
-        title: 'Pool Created!',
-        description: 'Your cooperative pool has been created successfully.',
-      })
-      onSuccess?.()
-      handleClose()
+        title: "Pool Created!",
+        description: "Your cooperative pool has been created successfully.",
+      });
+      onSuccess?.();
+      handleClose();
     }
-  }, [state])
+  }, [state]);
 
   // Handle close
   const handleClose = () => {
-    setPoolName('')
-    setMinContribution('0.001')
-    setMaxContribution('0.1')
-    setMaxMembers([10])
-    setValidationError('')
-    reset()
-    onClose()
-  }
+    setPoolName("");
+    setMinContribution("0.001");
+    setMaxContribution("0.1");
+    setMaxMembers([10]);
+    setValidationError("");
+    reset();
+    onClose();
+  };
 
-  const isProcessing = state === 'executing' || state === 'processing'
-  const canSubmit = !isProcessing && poolName.trim() && minContribution && maxContribution
+  const isProcessing = state === "executing" || state === "processing";
+  const canSubmit =
+    !isProcessing && poolName.trim() && minContribution && maxContribution;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-heading">Create Cooperative Pool</DialogTitle>
+          <DialogTitle className="text-2xl font-heading">
+            Create Cooperative Pool
+          </DialogTitle>
           <DialogDescription>
             Set up a new pool where members can save together and earn yields
           </DialogDescription>
@@ -160,7 +175,9 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
           {/* Contribution Range */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="min-contribution">Minimum Contribution (BTC)</Label>
+              <Label htmlFor="min-contribution">
+                Minimum Contribution (BTC)
+              </Label>
               <div className="relative">
                 <Bitcoin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -178,7 +195,9 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="max-contribution">Maximum Contribution (BTC)</Label>
+              <Label htmlFor="max-contribution">
+                Maximum Contribution (BTC)
+              </Label>
               <div className="relative">
                 <Bitcoin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -200,7 +219,9 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Maximum Members</Label>
-              <span className="text-sm font-medium">{maxMembers[0]} members</span>
+              <span className="text-sm font-medium">
+                {maxMembers[0]} members
+              </span>
             </div>
             <Slider
               value={maxMembers}
@@ -227,7 +248,7 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div>
                   <p className="text-muted-foreground">Pool Name</p>
-                  <p className="font-medium">{poolName || 'Not set'}</p>
+                  <p className="font-medium">{poolName || "Not set"}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Max Members</p>
@@ -254,7 +275,7 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
           )}
 
           {/* Transaction Error */}
-          {error && state === 'error' && (
+          {error && state === "error" && (
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription>{error}</AlertDescription>
@@ -265,32 +286,35 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
           <Alert>
             <Users className="h-4 w-4" />
             <AlertDescription className="text-sm">
-              <strong>Note:</strong> Creating a pool is free. Members will contribute BTC when they
-              join, which will be automatically deposited into the Mezo protocol to generate yields.
+              <strong>Note:</strong> Creating a pool is free. Members will
+              contribute BTC when they join, which will be automatically
+              deposited into the Mezo protocol to generate yields.
             </AlertDescription>
           </Alert>
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={isProcessing}>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isProcessing}
+          >
             Cancel
           </Button>
-          <Button
-            variant="accent"
-            onClick={handleCreate}
-            disabled={!canSubmit}
-          >
+          <Button variant="accent" onClick={handleCreate} disabled={!canSubmit}>
             {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {state === 'executing' ? 'Confirm in Wallet...' : 'Creating Pool...'}
+                {state === "executing"
+                  ? "Confirm in Wallet..."
+                  : "Creating Pool..."}
               </>
             ) : (
-              'Create Pool'
+              "Create Pool"
             )}
           </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

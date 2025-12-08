@@ -26,6 +26,7 @@ Successfully implemented and tested the `withdrawPartial` functionality for Coop
 **Location:** `src/pools/v3/CooperativePoolV3.sol:366-424`
 
 **Signature:**
+
 ```solidity
 function withdrawPartial(uint256 poolId, uint256 withdrawAmount)
     external
@@ -34,6 +35,7 @@ function withdrawPartial(uint256 poolId, uint256 withdrawAmount)
 ```
 
 **Functionality:**
+
 - Allows partial BTC withdrawal without leaving the pool
 - Burns shares proportionally
 - Repays mUSD to YieldAggregator
@@ -41,16 +43,18 @@ function withdrawPartial(uint256 poolId, uint256 withdrawAmount)
 - Updates pool statistics
 
 **Validations:**
+
 - `withdrawAmount > 0` - No zero withdrawals
 - `withdrawAmount < currentContribution` - Must be partial (use `leavePool` for full exit)
 - `remainingContribution >= pool.minContribution` - Must maintain minimum balance
 - `member.active == true` - Only active members can withdraw
 
 **Example Usage:**
+
 ```typescript
 // User has 1.0 BTC deposited
 // Withdraw 0.3 BTC, keeping 0.7 BTC in pool
-await cooperativePool.withdrawPartial(poolId, parseEther("0.3"))
+await cooperativePool.withdrawPartial(poolId, parseEther("0.3"));
 // User remains active member with 0.7 BTC
 ```
 
@@ -130,19 +134,19 @@ forge test --match-contract CooperativePoolV3Test -vv
 
 ### Test Coverage
 
-| Test | Status | Gas Used | Coverage |
-|------|--------|----------|----------|
-| `test_Version()` | ✅ PASS | 14,883 | Version verification |
-| `test_CreatePool()` | ✅ PASS | 142,952 | Basic pool creation |
-| `test_JoinPool()` | ✅ PASS | 575,158 | Membership joining |
-| `test_WithdrawPartial()` | ✅ PASS | 631,579 | Basic partial withdrawal |
-| `test_WithdrawPartial_BelowMinimum()` | ✅ PASS | 578,988 | Minimum balance validation |
-| `test_WithdrawPartial_ZeroAmount()` | ✅ PASS | 578,207 | Zero amount rejection |
-| `test_WithdrawPartial_FullAmount()` | ✅ PASS | 578,523 | Full amount rejection |
-| `test_WithdrawPartial_NotMember()` | ✅ PASS | 153,097 | Non-member rejection |
-| `test_WithdrawPartial_Multiple()` | ✅ PASS | 683,044 | Multiple withdrawals |
-| `test_WithdrawPartial_ThenAddMore()` | ✅ PASS | 674,070 | Withdrawal + deposit flow |
-| `test_LeavePool()` | ✅ PASS | 665,475 | Full pool exit |
+| Test                                  | Status  | Gas Used | Coverage                   |
+| ------------------------------------- | ------- | -------- | -------------------------- |
+| `test_Version()`                      | ✅ PASS | 14,883   | Version verification       |
+| `test_CreatePool()`                   | ✅ PASS | 142,952  | Basic pool creation        |
+| `test_JoinPool()`                     | ✅ PASS | 575,158  | Membership joining         |
+| `test_WithdrawPartial()`              | ✅ PASS | 631,579  | Basic partial withdrawal   |
+| `test_WithdrawPartial_BelowMinimum()` | ✅ PASS | 578,988  | Minimum balance validation |
+| `test_WithdrawPartial_ZeroAmount()`   | ✅ PASS | 578,207  | Zero amount rejection      |
+| `test_WithdrawPartial_FullAmount()`   | ✅ PASS | 578,523  | Full amount rejection      |
+| `test_WithdrawPartial_NotMember()`    | ✅ PASS | 153,097  | Non-member rejection       |
+| `test_WithdrawPartial_Multiple()`     | ✅ PASS | 683,044  | Multiple withdrawals       |
+| `test_WithdrawPartial_ThenAddMore()`  | ✅ PASS | 674,070  | Withdrawal + deposit flow  |
+| `test_LeavePool()`                    | ✅ PASS | 665,475  | Full pool exit             |
 
 ### Gas Analysis
 
@@ -158,11 +162,13 @@ forge test --match-contract CooperativePoolV3Test -vv
 
 **Challenge:**
 The `noFlashLoan` modifier checks `tx.origin == msg.sender` to prevent flash loan attacks. In Foundry tests, this fails because:
+
 - `tx.origin` = test EOA
 - `msg.sender` = test contract
 - Therefore: `tx.origin != msg.sender` → `FlashLoanDetected()` error
 
 **Solution Rejected (Not Scalable):**
+
 - ❌ Using `vm.startPrank(user, user)` everywhere
 - ❌ Removing `noFlashLoan` from production
 - ❌ Deleting or skipping tests
@@ -175,13 +181,13 @@ The `noFlashLoan` modifier checks `tx.origin == msg.sender` to prevent flash loa
 
 ### Benefits
 
-| Aspect | Benefit |
-|--------|---------|
-| **Production Security** | ✅ No changes to security model |
-| **Test Coverage** | ✅ Complete testing of all scenarios |
-| **Maintainability** | ✅ Clean separation of concerns |
-| **Reusability** | ✅ Pattern applicable to other contracts |
-| **Scalability** | ✅ Easy to extend for future contracts |
+| Aspect                  | Benefit                                  |
+| ----------------------- | ---------------------------------------- |
+| **Production Security** | ✅ No changes to security model          |
+| **Test Coverage**       | ✅ Complete testing of all scenarios     |
+| **Maintainability**     | ✅ Clean separation of concerns          |
+| **Reusability**         | ✅ Pattern applicable to other contracts |
+| **Scalability**         | ✅ Easy to extend for future contracts   |
 
 ---
 
@@ -269,24 +275,24 @@ cp out/CooperativePoolV3.sol/CooperativePoolV3.json \
 **Create new hook:** `apps/web/src/hooks/web3/use-partial-withdrawal.ts`
 
 ```typescript
-import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { parseEther } from 'viem'
-import { CooperativePoolV3ABI } from '@/contracts/abis/CooperativePoolV3'
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import { parseEther } from "viem";
+import { CooperativePoolV3ABI } from "@/contracts/abis/CooperativePoolV3";
 
 export function usePartialWithdrawal() {
-  const { writeContract, data: hash } = useWriteContract()
-  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+  const { writeContract, data: hash } = useWriteContract();
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   const withdrawPartial = async (poolId: bigint, amount: string) => {
     return writeContract({
       address: COOPERATIVE_POOL_ADDRESS,
       abi: CooperativePoolV3ABI,
-      functionName: 'withdrawPartial',
-      args: [poolId, parseEther(amount)]
-    })
-  }
+      functionName: "withdrawPartial",
+      args: [poolId, parseEther(amount)],
+    });
+  };
 
-  return { withdrawPartial, isLoading, isSuccess, hash }
+  return { withdrawPartial, isLoading, isSuccess, hash };
 }
 ```
 
@@ -370,6 +376,7 @@ The CooperativePoolV3 v3.1.0 upgrade is:
 - ✅ **Ready** - Ready for testnet deployment and frontend integration
 
 The implementation demonstrates best practices in:
+
 - Smart contract development
 - Testing architecture
 - Security considerations

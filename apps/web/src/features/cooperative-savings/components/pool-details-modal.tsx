@@ -9,23 +9,23 @@
  * - Activity timeline
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-} from '@/components/ui/dialog'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Separator } from '@/components/ui/separator'
-import { Progress } from '@/components/ui/progress'
-import { ScrollArea } from '@/components/ui/scroll-area'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+} from "@/components/ui/dialog";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Table,
   TableBody,
@@ -33,7 +33,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
+} from "@/components/ui/table";
 import {
   Users,
   Bitcoin,
@@ -45,25 +45,30 @@ import {
   Copy,
   ExternalLink,
   Shield,
-} from 'lucide-react'
-import { usePoolInfo, usePoolMembers, useMemberInfo, useMemberYield } from '@/hooks/web3/use-cooperative-pool'
+} from "lucide-react";
+import {
+  usePoolInfo,
+  usePoolMembers,
+  useMemberInfo,
+  useMemberYield,
+} from "@/hooks/web3/use-cooperative-pool";
 import {
   formatBTCCompact,
   formatMUSD,
   getPoolStatusBadge,
   formatDate,
   formatPercentage,
-} from '@/hooks/web3/use-cooperative-pool'
-import { useToast } from '@/hooks/use-toast'
-import { SkeletonCard } from '@/components/ui/skeleton'
+} from "@/hooks/web3/use-cooperative-pool";
+import { useToast } from "@/hooks/use-toast";
+import { SkeletonCard } from "@/components/ui/skeleton";
 
 interface PoolDetailsModalProps {
-  poolId: number | null
-  open: boolean
-  onClose: () => void
-  onJoin?: (poolId: number) => void
-  onLeave?: (poolId: number) => void
-  onClaim?: (poolId: number) => void
+  poolId: number | null;
+  open: boolean;
+  onClose: () => void;
+  onJoin?: (poolId: number) => void;
+  onLeave?: (poolId: number) => void;
+  onClaim?: (poolId: number) => void;
 }
 
 export function PoolDetailsModal({
@@ -74,25 +79,25 @@ export function PoolDetailsModal({
   onLeave,
   onClaim,
 }: PoolDetailsModalProps) {
-  const { toast } = useToast()
-  const { poolInfo, isLoading: loadingPool } = usePoolInfo(poolId || 0)
-  const { members, isLoading: loadingMembers } = usePoolMembers(poolId || 0)
-  const { memberInfo, isLoading: loadingMember } = useMemberInfo(poolId || 0)
-  const { pendingYield } = useMemberYield(poolId || 0)
+  const { toast } = useToast();
+  const { poolInfo, isLoading: loadingPool } = usePoolInfo(poolId || 0);
+  const { members, isLoading: loadingMembers } = usePoolMembers(poolId || 0);
+  const { memberInfo, isLoading: loadingMember } = useMemberInfo(poolId || 0);
+  const { pendingYield } = useMemberYield(poolId || 0);
 
-  const isLoading = loadingPool || loadingMembers || loadingMember
-  const isMember = memberInfo?.active || false
-  const totalShares = members.reduce((sum, m) => sum + m.shares, BigInt(0))
+  const isLoading = loadingPool || loadingMembers || loadingMember;
+  const isMember = memberInfo?.active || false;
+  const totalShares = members.reduce((sum, m) => sum + m.shares, BigInt(0));
 
   const copyAddress = (address: string) => {
-    navigator.clipboard.writeText(address)
+    navigator.clipboard.writeText(address);
     toast({
-      title: 'Copied!',
-      description: 'Address copied to clipboard',
-    })
-  }
+      title: "Copied!",
+      description: "Address copied to clipboard",
+    });
+  };
 
-  if (!poolId) return null
+  if (!poolId) return null;
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
@@ -138,7 +143,8 @@ export function PoolDetailsModal({
                   <Crown className="h-4 w-4 text-accent" />
                   <span className="text-muted-foreground">Created by:</span>
                   <code className="bg-muted px-2 py-0.5 rounded text-xs">
-                    {poolInfo.creator.slice(0, 6)}...{poolInfo.creator.slice(-4)}
+                    {poolInfo.creator.slice(0, 6)}...
+                    {poolInfo.creator.slice(-4)}
                   </code>
                   <Button
                     variant="ghost"
@@ -163,7 +169,9 @@ export function PoolDetailsModal({
                   <CardContent className="space-y-3">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                       <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground">Contributed</p>
+                        <p className="text-xs text-muted-foreground">
+                          Contributed
+                        </p>
                         <p className="font-mono font-semibold">
                           {formatBTCCompact(memberInfo.btcContributed)} BTC
                         </p>
@@ -181,7 +189,9 @@ export function PoolDetailsModal({
                         </p>
                       </div>
                       <div className="space-y-1">
-                        <p className="text-xs text-muted-foreground">Pending Yield</p>
+                        <p className="text-xs text-muted-foreground">
+                          Pending Yield
+                        </p>
                         <p className="font-mono font-semibold text-success">
                           {formatMUSD(pendingYield)}
                         </p>
@@ -239,7 +249,9 @@ export function PoolDetailsModal({
                         </span>
                       </div>
                       <Progress
-                        value={(poolInfo.currentMembers / poolInfo.maxMembers) * 100}
+                        value={
+                          (poolInfo.currentMembers / poolInfo.maxMembers) * 100
+                        }
                         className="h-2"
                       />
                     </CardContent>
@@ -254,7 +266,9 @@ export function PoolDetailsModal({
                             <Bitcoin className="h-5 w-5 text-orange-500" />
                           </div>
                           <div className="space-y-0.5">
-                            <p className="text-xs text-muted-foreground">Total BTC</p>
+                            <p className="text-xs text-muted-foreground">
+                              Total BTC
+                            </p>
                             <p className="font-mono font-semibold">
                               {formatBTCCompact(poolInfo.totalBtcDeposited)}
                             </p>
@@ -270,7 +284,9 @@ export function PoolDetailsModal({
                             <Coins className="h-5 w-5 text-blue-500" />
                           </div>
                           <div className="space-y-0.5">
-                            <p className="text-xs text-muted-foreground">MUSD Minted</p>
+                            <p className="text-xs text-muted-foreground">
+                              MUSD Minted
+                            </p>
                             <p className="font-mono font-semibold">
                               {formatMUSD(poolInfo.totalMusdMinted)}
                             </p>
@@ -286,7 +302,9 @@ export function PoolDetailsModal({
                             <TrendingUp className="h-5 w-5 text-success" />
                           </div>
                           <div className="space-y-0.5">
-                            <p className="text-xs text-muted-foreground">Total Yields</p>
+                            <p className="text-xs text-muted-foreground">
+                              Total Yields
+                            </p>
                             <p className="font-mono font-semibold text-success">
                               {formatMUSD(poolInfo.totalYieldGenerated)}
                             </p>
@@ -302,7 +320,9 @@ export function PoolDetailsModal({
                             <Calendar className="h-5 w-5 text-accent" />
                           </div>
                           <div className="space-y-0.5">
-                            <p className="text-xs text-muted-foreground">Created</p>
+                            <p className="text-xs text-muted-foreground">
+                              Created
+                            </p>
                             <p className="text-sm font-medium">
                               {formatDate(poolInfo.createdAt)}
                             </p>
@@ -334,25 +354,33 @@ export function PoolDetailsModal({
                         </span>
                       </div>
                       <div className="flex items-center justify-between text-sm">
-                        <span className="text-muted-foreground">Accepting New Members</span>
-                        <Badge variant={poolInfo.allowNewMembers ? 'success' : 'error'}>
-                          {poolInfo.allowNewMembers ? 'Yes' : 'No'}
+                        <span className="text-muted-foreground">
+                          Accepting New Members
+                        </span>
+                        <Badge
+                          variant={
+                            poolInfo.allowNewMembers ? "success" : "error"
+                          }
+                        >
+                          {poolInfo.allowNewMembers ? "Yes" : "No"}
                         </Badge>
                       </div>
                     </CardContent>
                   </Card>
 
                   {/* Join Button */}
-                  {!isMember && poolInfo.allowNewMembers && poolInfo.currentMembers < poolInfo.maxMembers && (
-                    <Button
-                      variant="accent"
-                      className="w-full"
-                      onClick={() => onJoin?.(poolId)}
-                    >
-                      <Users className="h-4 w-4 mr-2" />
-                      Join This Pool
-                    </Button>
-                  )}
+                  {!isMember &&
+                    poolInfo.allowNewMembers &&
+                    poolInfo.currentMembers < poolInfo.maxMembers && (
+                      <Button
+                        variant="accent"
+                        className="w-full"
+                        onClick={() => onJoin?.(poolId)}
+                      >
+                        <Users className="h-4 w-4 mr-2" />
+                        Join This Pool
+                      </Button>
+                    )}
                 </TabsContent>
 
                 {/* Members Tab */}
@@ -372,7 +400,10 @@ export function PoolDetailsModal({
                         <TableBody>
                           {members.length === 0 ? (
                             <TableRow>
-                              <TableCell colSpan={5} className="text-center text-muted-foreground">
+                              <TableCell
+                                colSpan={5}
+                                className="text-center text-muted-foreground"
+                              >
                                 No members yet
                               </TableCell>
                             </TableRow>
@@ -382,13 +413,16 @@ export function PoolDetailsModal({
                                 <TableCell>
                                   <div className="flex items-center gap-2">
                                     <code className="text-xs bg-muted px-2 py-0.5 rounded">
-                                      {member.address.slice(0, 6)}...{member.address.slice(-4)}
+                                      {member.address.slice(0, 6)}...
+                                      {member.address.slice(-4)}
                                     </code>
                                     <Button
                                       variant="ghost"
                                       size="sm"
                                       className="h-6 w-6 p-0"
-                                      onClick={() => copyAddress(member.address)}
+                                      onClick={() =>
+                                        copyAddress(member.address)
+                                      }
                                       aria-label="Copy member address"
                                     >
                                       <Copy className="h-3 w-3" />
@@ -431,8 +465,12 @@ export function PoolDetailsModal({
                       <CardContent>
                         <p className="text-2xl font-mono font-bold">
                           {poolInfo.currentMembers > 0
-                            ? formatBTCCompact(poolInfo.totalBtcDeposited / BigInt(poolInfo.currentMembers))
-                            : '0'} BTC
+                            ? formatBTCCompact(
+                                poolInfo.totalBtcDeposited /
+                                  BigInt(poolInfo.currentMembers),
+                              )
+                            : "0"}{" "}
+                          BTC
                         </p>
                       </CardContent>
                     </Card>
@@ -445,9 +483,13 @@ export function PoolDetailsModal({
                       </CardHeader>
                       <CardContent>
                         <p className="text-2xl font-mono font-bold text-success">
-                          {poolInfo.totalBtcDeposited > BigInt(0) && poolInfo.totalYieldGenerated > BigInt(0)
-                            ? formatMUSD((poolInfo.totalYieldGenerated * BigInt(1e18)) / poolInfo.totalBtcDeposited)
-                            : '0'}
+                          {poolInfo.totalBtcDeposited > BigInt(0) &&
+                          poolInfo.totalYieldGenerated > BigInt(0)
+                            ? formatMUSD(
+                                (poolInfo.totalYieldGenerated * BigInt(1e18)) /
+                                  poolInfo.totalBtcDeposited,
+                              )
+                            : "0"}
                         </p>
                       </CardContent>
                     </Card>
@@ -460,7 +502,11 @@ export function PoolDetailsModal({
                       </CardHeader>
                       <CardContent>
                         <p className="text-2xl font-bold">
-                          {((poolInfo.currentMembers / poolInfo.maxMembers) * 100).toFixed(1)}%
+                          {(
+                            (poolInfo.currentMembers / poolInfo.maxMembers) *
+                            100
+                          ).toFixed(1)}
+                          %
                         </p>
                       </CardContent>
                     </Card>
@@ -485,5 +531,5 @@ export function PoolDetailsModal({
         )}
       </DialogContent>
     </Dialog>
-  )
+  );
 }

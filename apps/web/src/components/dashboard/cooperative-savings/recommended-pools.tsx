@@ -1,7 +1,7 @@
 /**
  * @fileoverview Recommended Pools Component
  * @module components/dashboard/cooperative-savings/recommended-pools
- * 
+ *
  * Displays recommended pools in the sidebar
  * Currently empty - ready for future enhancements
  */

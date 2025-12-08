@@ -1,5 +1,5 @@
-import { prisma } from '@khipu/database'
-import { AppError } from '../middleware/error-handler'
+import { prisma } from "@khipu/database";
+import { AppError } from "../middleware/error-handler";
 
 /**
  * Pool Service - Optimized for performance
@@ -13,8 +13,8 @@ export class PoolsService {
    */
   async getAllPools() {
     const pools = await prisma.pool.findMany({
-      where: { status: 'ACTIVE' },
-      orderBy: { apr: 'desc' },
+      where: { status: "ACTIVE" },
+      orderBy: { apr: "desc" },
       select: {
         id: true,
         contractAddress: true,
@@ -31,9 +31,9 @@ export class PoolsService {
         lastSyncAt: true,
         createdAt: true,
       },
-    })
+    });
 
-    return pools
+    return pools;
   }
 
   /**
@@ -44,17 +44,17 @@ export class PoolsService {
       where: { id: poolId },
       include: {
         analytics: {
-          orderBy: { timestamp: 'desc' },
+          orderBy: { timestamp: "desc" },
           take: 30, // Last 30 data points
         },
       },
-    })
+    });
 
     if (!pool) {
-      throw new AppError(404, 'Pool not found')
+      throw new AppError(404, "Pool not found");
     }
 
-    return pool
+    return pool;
   }
 
   /**
@@ -65,25 +65,25 @@ export class PoolsService {
       where: { contractAddress: address.toLowerCase() },
       include: {
         analytics: {
-          orderBy: { timestamp: 'desc' },
+          orderBy: { timestamp: "desc" },
           take: 30,
         },
       },
-    })
+    });
 
     if (!pool) {
-      throw new AppError(404, 'Pool not found')
+      throw new AppError(404, "Pool not found");
     }
 
-    return pool
+    return pool;
   }
 
   /**
    * Get pool analytics for a time period
    */
   async getPoolAnalytics(poolId: string, days: number = 30) {
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - days)
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
 
     const analytics = await prisma.poolAnalytics.findMany({
       where: {
@@ -92,10 +92,10 @@ export class PoolsService {
           gte: startDate,
         },
       },
-      orderBy: { timestamp: 'asc' },
-    })
+      orderBy: { timestamp: "asc" },
+    });
 
-    return analytics
+    return analytics;
   }
 
   /**
@@ -103,13 +103,13 @@ export class PoolsService {
    * OPTIMIZED: Single query instead of N+1
    */
   async getPoolUsers(poolAddress: string) {
-    const normalizedAddress = poolAddress.toLowerCase()
+    const normalizedAddress = poolAddress.toLowerCase();
 
     // Get deposits for this pool in ONE query (limited for performance)
     const allDeposits = await prisma.deposit.findMany({
       where: {
         poolAddress: normalizedAddress,
-        status: 'CONFIRMED', // Only confirmed transactions
+        status: "CONFIRMED", // Only confirmed transactions
       },
       include: {
         user: {
@@ -121,33 +121,40 @@ export class PoolsService {
         },
       },
       take: 5000, // Limit to prevent memory issues on large pools
-      orderBy: { timestamp: 'desc' },
-    })
+      orderBy: { timestamp: "desc" },
+    });
 
     // Group deposits by user address and calculate balances
-    const userBalances = new Map<string, {
-      user: { address: string; ensName: string | null; avatar: string | null }
-      deposited: bigint
-      withdrawn: bigint
-      yieldClaimed: bigint
-      lastActivity: Date
-    }>()
+    const userBalances = new Map<
+      string,
+      {
+        user: {
+          address: string;
+          ensName: string | null;
+          avatar: string | null;
+        };
+        deposited: bigint;
+        withdrawn: bigint;
+        yieldClaimed: bigint;
+        lastActivity: Date;
+      }
+    >();
 
     for (const deposit of allDeposits) {
-      const userAddress = deposit.userAddress
-      const existing = userBalances.get(userAddress)
+      const userAddress = deposit.userAddress;
+      const existing = userBalances.get(userAddress);
 
-      const amount = BigInt(deposit.amount)
-      const isDeposit = deposit.type === 'DEPOSIT'
-      const isWithdraw = deposit.type === 'WITHDRAW'
-      const isYieldClaim = deposit.type === 'YIELD_CLAIM'
+      const amount = BigInt(deposit.amount);
+      const isDeposit = deposit.type === "DEPOSIT";
+      const isWithdraw = deposit.type === "WITHDRAW";
+      const isYieldClaim = deposit.type === "YIELD_CLAIM";
 
       if (existing) {
-        if (isDeposit) existing.deposited += amount
-        if (isWithdraw) existing.withdrawn += amount
-        if (isYieldClaim) existing.yieldClaimed += amount
+        if (isDeposit) existing.deposited += amount;
+        if (isWithdraw) existing.withdrawn += amount;
+        if (isYieldClaim) existing.yieldClaimed += amount;
         if (deposit.timestamp > existing.lastActivity) {
-          existing.lastActivity = deposit.timestamp
+          existing.lastActivity = deposit.timestamp;
         }
       } else {
         userBalances.set(userAddress, {
@@ -156,14 +163,14 @@ export class PoolsService {
           withdrawn: isWithdraw ? amount : BigInt(0),
           yieldClaimed: isYieldClaim ? amount : BigInt(0),
           lastActivity: deposit.timestamp,
-        })
+        });
       }
     }
 
     // Build result array and filter out zero balances
     const users = Array.from(userBalances.entries())
       .map(([address, data]) => {
-        const currentBalance = data.deposited - data.withdrawn
+        const currentBalance = data.deposited - data.withdrawn;
         return {
           address,
           ensName: data.user.ensName,
@@ -173,19 +180,19 @@ export class PoolsService {
           totalWithdrawn: data.withdrawn.toString(),
           totalYieldClaimed: data.yieldClaimed.toString(),
           lastActivity: data.lastActivity,
-        }
+        };
       })
-      .filter(u => BigInt(u.balance) > 0)
+      .filter((u) => BigInt(u.balance) > 0)
       .sort((a, b) => {
         // Sort by balance descending
-        const balanceA = BigInt(a.balance)
-        const balanceB = BigInt(b.balance)
-        if (balanceA > balanceB) return -1
-        if (balanceA < balanceB) return 1
-        return 0
-      })
+        const balanceA = BigInt(a.balance);
+        const balanceB = BigInt(b.balance);
+        if (balanceA > balanceB) return -1;
+        if (balanceA < balanceB) return 1;
+        return 0;
+      });
 
-    return users
+    return users;
   }
 
   /**
@@ -193,17 +200,19 @@ export class PoolsService {
    * OPTIMIZED: Uses database aggregation instead of loading all records
    */
   async updatePoolStats(poolAddress: string) {
-    const normalizedAddress = poolAddress.toLowerCase()
+    const normalizedAddress = poolAddress.toLowerCase();
 
     // Use database aggregation for efficient stats calculation
     // This scales O(1) regardless of transaction count
-    const stats = await prisma.$queryRaw<Array<{
-      total_deposited: string
-      total_withdrawn: string
-      deposit_count: bigint
-      withdrawal_count: bigint
-      active_users: bigint
-    }>>`
+    const stats = await prisma.$queryRaw<
+      Array<{
+        total_deposited: string;
+        total_withdrawn: string;
+        deposit_count: bigint;
+        withdrawal_count: bigint;
+        active_users: bigint;
+      }>
+    >`
       WITH user_balances AS (
         SELECT
           "userAddress",
@@ -223,20 +232,20 @@ export class PoolsService {
       FROM "Deposit"
       WHERE "poolAddress" = ${normalizedAddress}
         AND status = 'CONFIRMED'
-    `
+    `;
 
-    const result = stats[0]
+    const result = stats[0];
     if (!result) {
       // No transactions yet, just update lastSyncAt
       return await prisma.pool.update({
         where: { contractAddress: normalizedAddress },
         data: { lastSyncAt: new Date() },
-      })
+      });
     }
 
-    const totalDeposited = BigInt(result.total_deposited)
-    const totalWithdrawn = BigInt(result.total_withdrawn)
-    const tvl = totalDeposited - totalWithdrawn
+    const totalDeposited = BigInt(result.total_deposited);
+    const totalWithdrawn = BigInt(result.total_withdrawn);
+    const tvl = totalDeposited - totalWithdrawn;
 
     return await prisma.pool.update({
       where: { contractAddress: normalizedAddress },
@@ -247,7 +256,7 @@ export class PoolsService {
         totalWithdrawals: Number(result.withdrawal_count),
         lastSyncAt: new Date(),
       },
-    })
+    });
   }
 
   /**
@@ -256,34 +265,34 @@ export class PoolsService {
   async createAnalyticsSnapshot(poolId: string) {
     const pool = await prisma.pool.findUnique({
       where: { id: poolId },
-    })
+    });
 
     if (!pool) {
-      throw new AppError(404, 'Pool not found')
+      throw new AppError(404, "Pool not found");
     }
 
-    const now = new Date()
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
     // Get deposits in last 24h for volume calculation
-    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000)
+    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
     const recentDeposits = await prisma.deposit.findMany({
       where: {
         poolAddress: pool.contractAddress,
         timestamp: { gte: yesterday },
-        status: 'CONFIRMED',
+        status: "CONFIRMED",
       },
-    })
+    });
 
-    let volumeIn = BigInt(0)
-    let volumeOut = BigInt(0)
+    let volumeIn = BigInt(0);
+    let volumeOut = BigInt(0);
 
     for (const deposit of recentDeposits) {
-      const amount = BigInt(deposit.amount)
-      if (deposit.type === 'DEPOSIT') {
-        volumeIn += amount
-      } else if (deposit.type === 'WITHDRAW') {
-        volumeOut += amount
+      const amount = BigInt(deposit.amount);
+      if (deposit.type === "DEPOSIT") {
+        volumeIn += amount;
+      } else if (deposit.type === "WITHDRAW") {
+        volumeOut += amount;
       }
     }
 
@@ -322,8 +331,8 @@ export class PoolsService {
         volumeOut: volumeOut.toString(),
         netFlow: (volumeIn - volumeOut).toString(),
       },
-    })
+    });
 
-    return pool
+    return pool;
   }
 }

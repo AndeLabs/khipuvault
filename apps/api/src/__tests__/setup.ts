@@ -1,15 +1,15 @@
-import { beforeAll, afterAll, vi } from 'vitest'
+import { beforeAll, afterAll, vi } from "vitest";
 
 // Mock environment variables
 beforeAll(() => {
-  process.env.NODE_ENV = 'test'
-  process.env.JWT_SECRET = 'test-jwt-secret-key-for-testing-purposes-only'
-  process.env.DATABASE_URL = 'postgresql://test:test@localhost:5432/test'
-})
+  process.env.NODE_ENV = "test";
+  process.env.JWT_SECRET = "test-jwt-secret-key-for-testing-purposes-only";
+  process.env.DATABASE_URL = "postgresql://test:test@localhost:5432/test";
+});
 
 afterAll(() => {
-  vi.clearAllMocks()
-})
+  vi.clearAllMocks();
+});
 
 // Global test utilities
 export const mockPrismaClient = () => {
@@ -35,5 +35,5 @@ export const mockPrismaClient = () => {
       update: vi.fn(),
     },
     $disconnect: vi.fn(),
-  }
-}
+  };
+};

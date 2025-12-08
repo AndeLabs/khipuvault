@@ -1,12 +1,12 @@
-'use client'
+"use client";
 
-import { useEffect, useState, useCallback } from 'react'
-import { useAccount, useSwitchChain, useWalletClient } from 'wagmi'
-import { mezoTestnet } from '@/lib/web3/chains'
-import { useToast } from '@/hooks/use-toast'
-import { AlertTriangle, X, RefreshCw } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { cn } from '@/lib/utils'
+import { useEffect, useState, useCallback } from "react";
+import { useAccount, useSwitchChain, useWalletClient } from "wagmi";
+import { mezoTestnet } from "@/lib/web3/chains";
+import { useToast } from "@/hooks/use-toast";
+import { AlertTriangle, X, RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 /**
  * NetworkSwitcher Component
@@ -16,45 +16,45 @@ import { cn } from '@/lib/utils'
  * Automatically attempts to add network if not configured
  */
 export function NetworkSwitcher() {
-  const { chain, isConnected } = useAccount()
-  const { switchChain, isPending: isSwitching } = useSwitchChain()
-  const { data: walletClient } = useWalletClient()
-  const { toast } = useToast()
-  const [isDismissed, setIsDismissed] = useState(false)
-  const [mounted, setMounted] = useState(false)
+  const { chain, isConnected } = useAccount();
+  const { switchChain, isPending: isSwitching } = useSwitchChain();
+  const { data: walletClient } = useWalletClient();
+  const { toast } = useToast();
+  const [isDismissed, setIsDismissed] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   // Reset dismiss state when network changes to correct one
   useEffect(() => {
     if (chain?.id === mezoTestnet.id) {
-      setIsDismissed(false)
+      setIsDismissed(false);
     }
-  }, [chain?.id])
+  }, [chain?.id]);
 
   // Reset when disconnected
   useEffect(() => {
     if (!isConnected) {
-      setIsDismissed(false)
+      setIsDismissed(false);
     }
-  }, [isConnected])
+  }, [isConnected]);
 
   const handleSwitchNetwork = useCallback(async () => {
-    if (!switchChain) return
+    if (!switchChain) return;
 
     switchChain(
       { chainId: mezoTestnet.id },
       {
         onError: async (error) => {
-          console.log('Switch failed, trying to add network:', error)
+          console.log("Switch failed, trying to add network:", error);
 
           // If switch fails, try to add the network
           try {
             if (walletClient) {
               await walletClient.request({
-                method: 'wallet_addEthereumChain',
+                method: "wallet_addEthereumChain",
                 params: [
                   {
                     chainId: `0x${mezoTestnet.id.toString(16)}`,
@@ -68,47 +68,49 @@ export function NetworkSwitcher() {
                     blockExplorerUrls: [mezoTestnet.blockExplorers.default.url],
                   },
                 ],
-              })
+              });
 
               toast({
                 title: "Red agregada",
-                description: "Mezo Testnet agregado a tu wallet. Por favor intenta cambiar de nuevo.",
-              })
+                description:
+                  "Mezo Testnet agregado a tu wallet. Por favor intenta cambiar de nuevo.",
+              });
             }
           } catch (addError) {
-            console.error('Failed to add network:', addError)
+            console.error("Failed to add network:", addError);
 
             toast({
               title: "Acción requerida",
-              description: "Por favor agrega Mezo Testnet manualmente a tu wallet (Chain ID: 31611)",
+              description:
+                "Por favor agrega Mezo Testnet manualmente a tu wallet (Chain ID: 31611)",
               variant: "destructive",
-            })
+            });
           }
         },
         onSuccess: () => {
           toast({
             title: "Red cambiada",
             description: "Conectado a Mezo Testnet",
-          })
-        }
-      }
-    )
-  }, [switchChain, walletClient, toast])
+          });
+        },
+      },
+    );
+  }, [switchChain, walletClient, toast]);
 
   // Don't render during SSR or before mount
   if (!mounted) {
-    return null
+    return null;
   }
 
   // Only show when connected and on wrong network
   if (!isConnected || !chain) {
-    return null
+    return null;
   }
 
-  const isCorrectNetwork = chain.id === mezoTestnet.id
+  const isCorrectNetwork = chain.id === mezoTestnet.id;
 
   if (isCorrectNetwork || isDismissed) {
-    return null
+    return null;
   }
 
   return (
@@ -118,7 +120,7 @@ export function NetworkSwitcher() {
         "bg-warning/95 backdrop-blur-sm",
         "border-b border-warning-foreground/20",
         "px-4 py-3",
-        "animate-in slide-in-from-top duration-300"
+        "animate-in slide-in-from-top duration-300",
       )}
       role="alert"
       aria-live="assertive"
@@ -128,8 +130,8 @@ export function NetworkSwitcher() {
           <AlertTriangle className="h-5 w-5 text-warning-foreground shrink-0" />
           <div className="text-sm font-medium text-warning-foreground">
             <span className="hidden sm:inline">
-              Estás conectado a <strong>{chain.name}</strong>.
-              KhipuVault solo funciona en <strong>Mezo Testnet</strong>.
+              Estás conectado a <strong>{chain.name}</strong>. KhipuVault solo
+              funciona en <strong>Mezo Testnet</strong>.
             </span>
             <span className="sm:hidden">
               Red incorrecta. Cambia a Mezo Testnet.
@@ -170,7 +172,7 @@ export function NetworkSwitcher() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 /**
@@ -178,12 +180,12 @@ export function NetworkSwitcher() {
  * @returns Object with isWrongNetwork boolean and current chain info
  */
 export function useNetworkStatus() {
-  const { chain, isConnected } = useAccount()
-  const [mounted, setMounted] = useState(false)
+  const { chain, isConnected } = useAccount();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    setMounted(true)
-  }, [])
+    setMounted(true);
+  }, []);
 
   if (!mounted) {
     return {
@@ -191,7 +193,7 @@ export function useNetworkStatus() {
       isConnected: false,
       currentChain: null,
       expectedChain: mezoTestnet,
-    }
+    };
   }
 
   return {
@@ -199,5 +201,5 @@ export function useNetworkStatus() {
     isConnected,
     currentChain: chain,
     expectedChain: mezoTestnet,
-  }
+  };
 }

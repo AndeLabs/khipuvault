@@ -1,4 +1,5 @@
 # DeFi & Banking Blockchain Frontend Design Research Report
+
 **Research Date:** November 20, 2025
 **Focus:** Modern UI/UX patterns, component libraries, and best practices for financial Web3 applications
 
@@ -9,6 +10,7 @@
 This comprehensive research analyzes top DeFi platforms (Aave, Uniswap, Compound, Lido, Yearn Finance) and modern banking/FinTech applications (Revolut, N26, Wise) to identify best practices for designing trust-building, accessible, and modern financial blockchain interfaces.
 
 **Key Findings:**
+
 - **Component Libraries:** shadcn/ui + Radix UI dominating 2024-2025 (66k+ stars)
 - **Typography:** Inter and Satoshi fonts are industry standards
 - **Color Schemes:** Blue (trust) + Green (growth) foundational for financial UI
@@ -23,26 +25,31 @@ This comprehensive research analyzes top DeFi platforms (Aave, Uniswap, Compound
 ### 1.1 Aave Interface Design
 
 **Open Source & Decentralized:**
+
 - Hosted on IPFS with Cloudflare gateway (app.aave.com)
 - GitHub: [aave/interface](https://github.com/aave/interface)
 
 **Technology Stack:**
+
 - **UI Framework:** Material-UI (MUI) with Emotion theming
 - **Theming:** Global styles at theme level for easy forking
 - **Component Strategy:** Well-tested MUI components with comprehensive documentation
 
 **Wallet Integration:**
+
 - Multi-wallet support: MetaMask, Ledger, Rabby, WalletConnect, Family wallets
 - Real-time balance display with fiat conversion
 - aToken balance tracking with automatic interest updates
 
 **2024 Innovation:**
+
 - iOS App Store launch (813M weekly visitors, 175 markets)
 - Simplified fiat onboarding (save euros/dollars, connect debit cards)
 - Backend handles complexity (fiat to yield-bearing stablecoins conversion)
 - User journey: Under 5 minutes to start earning yield
 
 **Key UX Pattern:**
+
 ```
 User Action: "Save money"
 Backend: Convert fiat → stablecoin → yield-bearing asset
@@ -52,26 +59,31 @@ User Sees: Simple savings interface (like traditional banking)
 ### 1.2 Uniswap v4 Interface Design
 
 **Official Design Resources:**
+
 - Figma: [Uniswap V4 Pools Official Design Kit](https://www.figma.com/community/file/1334811795504110095)
 - GitHub: [Uniswap/interface](https://github.com/Uniswap/interface)
 - Open source interface for protocol interaction
 
 **Architecture Pattern:**
+
 ```
 User → Universal Router → V4SwapRouter → V4Router → PoolManager
 ```
 
 **Swap Flow UX:**
+
 1. **SETTLE_ALL:** Input tokens properly paid (settlement pattern)
 2. **TAKE_ALL:** Output tokens collected after swap
 3. **Flash Accounting:** EIP-1153 transient storage (20x less gas)
 
 **Developer-Friendly Abstractions:**
+
 - Complex methods wrapped in familiar functions (`swapExactIn`, `swapExactOut`)
 - Universal Router: Single entry point for v1-v4 protocols
 - Semantic translator for v4's powerful interface
 
 **User Experience Focus:**
+
 - Gas-optimized paths
 - Multi-action chaining in single transaction
 - Hook extensions for competitive rates
@@ -79,6 +91,7 @@ User → Universal Router → V4SwapRouter → V4Router → PoolManager
 ### 1.3 Compound Protocol
 
 **General Patterns:**
+
 - SaaS-inspired dashboard design
 - Clear lending/borrowing mechanics visualization
 - Real-time APY display with historical data
@@ -86,11 +99,13 @@ User → Universal Router → V4SwapRouter → V4Router → PoolManager
 ### 1.4 Lido Finance
 
 **Integration Approach:**
+
 - Yearn Finance integration widget: [lido-yearn-widget](https://github.com/lidofinance/lido-yearn-widget)
 - Specialized UI at lido.ape.tax for stETH vaults
 - Dune Analytics dashboards for data visualization
 
 **UI Characteristics:**
+
 - Responsive design (full-sized and mobile screens)
 - User dashboard with search functionality
 - Clear APY information display
@@ -99,6 +114,7 @@ User → Universal Router → V4SwapRouter → V4Router → PoolManager
 ### 1.5 Yearn Finance UI v3.0
 
 **Design Evolution:**
+
 - Community-maintained interface
 - Multi-screen support (desktop + mobile)
 - Features: User dashboard, search, action buttons, APY info, transaction modals
@@ -111,29 +127,34 @@ User → Universal Router → V4SwapRouter → V4Router → PoolManager
 ### 2.1 Revolut - Mobile-First Excellence
 
 **Onboarding:**
+
 - Sign-up in under 5 minutes (industry benchmark)
 - Progressive information gathering (essential first, features unlocked later)
 - Full onboarding: 10-15 minutes
 - ID verification with clear security explanations
 
 **Customization Features:**
+
 - Rename accounts
 - Custom spending limits
 - Multiple currency wallets
 - Per-account financial management
 
 **Security UX:**
+
 - Biometric login (device-locked)
 - Visible security features during sign-up
 - Explanation of why security measures matter
 - Limited impact from stolen credentials
 
 **Support Integration:**
+
 - Easy-access customer support
 - Chat history persistence
 - Conversation resumption capability
 
 **Design Philosophy:**
+
 - Sleek, user-friendly interface
 - Customization-first approach
 - Mobile-optimized experience
@@ -141,16 +162,19 @@ User → Universal Router → V4SwapRouter → V4Router → PoolManager
 ### 2.2 N26 - Minimalist Design
 
 **Core Principles:**
+
 - Simplicity + Functionality
 - Straightforward banking experience
 - Stress-free user interface
 
 **Transaction Innovation:**
+
 - **MoneyBeam:** Send/receive funds in seconds
 - Email or phone number only (no complex banking details)
 - Real-time transaction processing
 
 **Technical Excellence:**
+
 - Cross-platform responsiveness
 - Real-time updates across all devices
 - Consistent experience (web, iOS, Android)
@@ -158,12 +182,14 @@ User → Universal Router → V4SwapRouter → V4Router → PoolManager
 ### 2.3 Wise (TransferWise) - Brand Through Color
 
 **Visual Identity:**
+
 - **Primary Color:** Bright green (consistently applied)
 - Used across: Ads, transfer calculators, app screens
 - Color psychology: Speed + Financial flow
 - Brand recognition through color alone
 
 **Design Consistency:**
+
 - Unified visual language
 - Clear action hierarchy
 - Focus on transfer experience
@@ -177,11 +203,13 @@ User → Universal Router → V4SwapRouter → V4Router → PoolManager
 **Best Practices:**
 
 **Visual Data Presentation:**
+
 - Graphs, bars, pie charts for quick overview
 - Financial trends visualization
 - Real-time balance updates
 
 **Information Hierarchy:**
+
 ```
 Primary: Total Portfolio Value (large, prominent)
 Secondary: Native balance + Token breakdown
@@ -189,18 +217,21 @@ Tertiary: Historical performance charts
 ```
 
 **Dashboard Structure:**
+
 - Native balance prominently displayed
 - Tabs for portfolio view and transaction history
 - Quick access to wallet connection
 - Customizable experience
 
 **Aave Pattern:**
+
 - Fiat conversion display
 - Real-time price charts
 - aToken balance with automatic interest tracking
 - Supply/borrow positions clearly separated
 
 **Card-Based Layout:**
+
 - Individual cards for each position
 - Color-coded status indicators
 - Quick actions per card
@@ -213,12 +244,14 @@ Tertiary: Historical performance charts
 **Problem:** Dissonance between app UI and wallet popups
 
 **Solutions:**
+
 1. **Action Bundling:** Group related transactions
 2. **Sequential Prompts:** Next action appears immediately after previous
 3. **Status Visibility:** Always show system status
 4. **Clear Instructions:** Tell users what to do next
 
 **Transaction States:**
+
 ```
 1. Initiated → "Preparing transaction..."
 2. Wallet Prompt → "Please confirm in your wallet"
@@ -229,21 +262,23 @@ Tertiary: Historical performance charts
 ```
 
 **Pre-Transaction Feedback:**
+
 - Warning if insufficient tokens for future transactions
 - Gas fee estimation before confirmation
 - Liquidation risk warnings
 - Transaction path visualization
 
 **UX Pattern Example (from research):**
+
 ```javascript
 // Wagmi + Viem Pattern
-const { sendTransaction } = useSendTransaction()
-const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+const { sendTransaction } = useSendTransaction();
+const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash });
 
 // Toast notifications at each stage
-toast.loading("Preparing transaction...")
-toast.success("Transaction confirmed!")
-toast.error("Transaction failed: [reason]")
+toast.loading("Preparing transaction...");
+toast.success("Transaction confirmed!");
+toast.error("Transaction failed: [reason]");
 ```
 
 ### 3.3 Wallet Connection Patterns
@@ -251,6 +286,7 @@ toast.error("Transaction failed: [reason]")
 **RainbowKit - Industry Standard (2024-2025):**
 
 **Features:**
+
 - React library for Connect Wallet UI
 - Built-in wallets: MetaMask, Rainbow, Coinbase, WalletConnect, more
 - Responsive mobile-first design
@@ -258,33 +294,38 @@ toast.error("Transaction failed: [reason]")
 - All connection states managed
 
 **User Education:**
+
 - Dedicated section explaining wallets
 - Download links for supported wallets
 - What is a wallet? information
 - Security best practices
 
 **Technical Implementation:**
+
 ```javascript
 // Auto-reconnect to last used wallet
 const wagmiClient = createClient({
   autoConnect: true,
   // ... config
-})
+});
 ```
 
 **Customization:**
+
 - Neutral design (developers control branding)
 - Wallet selection and ordering
 - Chain support (any EVM-compatible)
 - Network switching included
 
 **Mobile Pattern:**
+
 - Separate mobile flow for native feel
 - QR codes for mobile wallet apps
 - Deep linking to wallet apps
 - Responsive modal design
 
 **Connection States to Handle:**
+
 - Not connected
 - Connecting
 - Connected
@@ -300,6 +341,7 @@ const wagmiClient = createClient({
 **What:** Animated placeholders mimicking final UI structure
 
 **Benefits:**
+
 - Indicates loading state clearly
 - Reduces perceived loading time
 - Maintains layout structure (no content shift)
@@ -308,6 +350,7 @@ const wagmiClient = createClient({
 **Implementation Guidelines:**
 
 **Where to Use:**
+
 - Images
 - Text blocks
 - Avatars
@@ -317,18 +360,21 @@ const wagmiClient = createClient({
 - Cards
 
 **Where NOT to Use:**
+
 - Tooltips
 - Alert notices
 - Snackbars
 - Navigation buttons
 
 **Dark Mode Considerations:**
+
 - Use light-dark() CSS function
 - Ensure sufficient contrast (4.5:1 minimum)
 - Distinguishable colors for accessibility
 - Clear but undistracted animations
 
 **Example Structure:**
+
 ```css
 /* Skeleton with dark mode support */
 .skeleton {
@@ -337,8 +383,13 @@ const wagmiClient = createClient({
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
 }
 ```
 
@@ -349,6 +400,7 @@ const wagmiClient = createClient({
 **Web3-Specific Challenges:**
 
 **Error Types:**
+
 1. **User Rejection:** User denied transaction in wallet
 2. **Transaction Revert:** Smart contract execution failed
 3. **Network Error:** RPC connection issues
@@ -358,24 +410,27 @@ const wagmiClient = createClient({
 **Pattern from Research:**
 
 **Transaction Status Checking:**
+
 ```javascript
 // Post-Byzantium (block 4370000+)
-const receipt = await getTransactionReceipt(txHash)
+const receipt = await getTransactionReceipt(txHash);
 // receipt.status === 0 (failed) or 1 (success)
 ```
 
 **User Rejection Handling:**
+
 ```javascript
 try {
-  await sendTransaction()
+  await sendTransaction();
 } catch (error) {
   if (error.message.includes("User denied transaction")) {
-    toast.error("Transaction cancelled")
+    toast.error("Transaction cancelled");
   }
 }
 ```
 
 **Pre-Transaction Validation (Best Practice):**
+
 ```
 Pattern: Call contract method first (read-only)
 If would fail: Show error in UI, don't prompt wallet
@@ -383,6 +438,7 @@ If would succeed: Prompt wallet for transaction
 ```
 
 **Error Message Guidelines:**
+
 - Clear, non-technical language
 - Actionable next steps
 - Show transaction hash for debugging
@@ -390,6 +446,7 @@ If would succeed: Prompt wallet for transaction
 - Explain what happened and why
 
 **Visual Hierarchy for Errors:**
+
 ```
 [!] Transaction Failed
 ↓
@@ -410,6 +467,7 @@ Suggested action
 **Mobile:** Individual cards with stacked data
 
 **Implementation Pattern:**
+
 ```html
 <!-- Desktop: Table row -->
 <tr>
@@ -429,6 +487,7 @@ Suggested action
 ```
 
 **Using CSS :before/:after for Headers:**
+
 ```css
 @media (max-width: 768px) {
   td:before {
@@ -439,12 +498,14 @@ Suggested action
 ```
 
 **Benefits:**
+
 - No horizontal scrolling
 - All data visible without extra effort
 - Natural mobile reading flow
 - Better touch targets
 
 **Mobile-First Principles:**
+
 1. **Simplify interfaces** - Reduce screen clutter
 2. **Prioritize actions** - Most important actions easily accessible
 3. **Touch-friendly** - Minimum 44x44px touch targets
@@ -460,6 +521,7 @@ Suggested action
 #### **shadcn/ui** (66k+ GitHub stars) - RECOMMENDED
 
 **Why It's Winning:**
+
 - Copy-paste approach (not an NPM dependency)
 - Code lives in your project (full control)
 - Built on Tailwind CSS + Radix UI
@@ -467,11 +529,13 @@ Suggested action
 - No lock-in, own your components
 
 **Use Cases:**
+
 - DeFi dashboards requiring heavy customization
 - Projects needing specific brand identity
 - Teams wanting to own their component code
 
 **Technology:**
+
 ```
 shadcn/ui = Radix UI (primitives) + Tailwind CSS (styling) + Your customization
 ```
@@ -479,17 +543,20 @@ shadcn/ui = Radix UI (primitives) + Tailwind CSS (styling) + Your customization
 #### **Radix UI** - RECOMMENDED FOR ACCESSIBILITY
 
 **Key Features:**
+
 - Unstyled, accessible primitives
 - Full ARIA support out-of-the-box
 - Handles keyboard interactions automatically
 - Menus, dialogs, tooltips, dropdowns
 
 **Perfect For:**
+
 - Building custom design systems
 - Ensuring WCAG 2.1/2.2 compliance
 - Maximum flexibility with styling
 
 **Component Examples:**
+
 - `@radix-ui/react-dialog` - Accessible modals
 - `@radix-ui/react-dropdown-menu` - Keyboard-friendly menus
 - `@radix-ui/react-tooltip` - ARIA-compliant tooltips
@@ -497,6 +564,7 @@ shadcn/ui = Radix UI (primitives) + Tailwind CSS (styling) + Your customization
 #### **Chakra UI** - ALTERNATIVE FOR RAPID DEVELOPMENT
 
 **Characteristics:**
+
 - Pre-styled components
 - Built-in accessibility (roles + focus styles)
 - Modular architecture
@@ -509,6 +577,7 @@ shadcn/ui = Radix UI (primitives) + Tailwind CSS (styling) + Your customization
 **Used By:** Aave (confirmed)
 
 **Advantages:**
+
 - Mature ecosystem
 - Comprehensive documentation
 - Emotion for theming
@@ -519,6 +588,7 @@ shadcn/ui = Radix UI (primitives) + Tailwind CSS (styling) + Your customization
 ### 4.2 Recommended Tech Stack for DeFi Frontend (2024-2025)
 
 **Core Framework:**
+
 ```json
 {
   "framework": "Next.js 14+ (App Router)",
@@ -535,6 +605,7 @@ shadcn/ui = Radix UI (primitives) + Tailwind CSS (styling) + Your customization
 ```
 
 **Blockchain-Specific:**
+
 ```
 Web3 Library: wagmi v2 (React hooks for Ethereum)
 Low-level: viem (modern ethers.js alternative)
@@ -544,6 +615,7 @@ Multi-chain: wagmi's multi-chain support built-in
 ```
 
 **Why This Stack:**
+
 - **shadcn/ui:** Trending, customizable, modern
 - **wagmi + viem:** Official recommendation, better DX than ethers.js
 - **RainbowKit:** Industry standard for wallet UX
@@ -587,6 +659,7 @@ Multi-chain: wagmi's multi-chain support built-in
 ### 5.2 DeFi-Specific Accessibility Considerations
 
 **Semantic HTML for Blockchain UI:**
+
 ```html
 <!-- Good: Semantic structure -->
 <main>
@@ -608,6 +681,7 @@ Multi-chain: wagmi's multi-chain support built-in
 ```
 
 **ARIA for Dynamic Content:**
+
 ```html
 <!-- Transaction status updates -->
 <div role="status" aria-live="polite" aria-atomic="true">
@@ -621,6 +695,7 @@ Multi-chain: wagmi's multi-chain support built-in
 ```
 
 **Accessible Verification:**
+
 - Don't rely solely on visual CAPTCHAs
 - Provide alternative verification methods
 - Support screen readers for authentication flows
@@ -632,6 +707,7 @@ Multi-chain: wagmi's multi-chain support built-in
 **Why:** Automated tools catch ~30% of issues. Real users find the other 70%.
 
 **Testing Groups:**
+
 - Visual impairments (screen readers)
 - Motor disabilities (keyboard-only navigation)
 - Cognitive differences (clear language testing)
@@ -642,63 +718,69 @@ Multi-chain: wagmi's multi-chain support built-in
 **Web3-Specific Optimizations:**
 
 **1. RPC Call Batching**
+
 ```javascript
 // Bad: Multiple individual calls
-const balance1 = await contract.balanceOf(addr1)
-const balance2 = await contract.balanceOf(addr2)
-const balance3 = await contract.balanceOf(addr3)
+const balance1 = await contract.balanceOf(addr1);
+const balance2 = await contract.balanceOf(addr2);
+const balance3 = await contract.balanceOf(addr3);
 
 // Good: Batched multicall
 const results = await multicall({
   contracts: [
-    { address: contract, functionName: 'balanceOf', args: [addr1] },
-    { address: contract, functionName: 'balanceOf', args: [addr2] },
-    { address: contract, functionName: 'balanceOf', args: [addr3] },
-  ]
-})
+    { address: contract, functionName: "balanceOf", args: [addr1] },
+    { address: contract, functionName: "balanceOf", args: [addr2] },
+    { address: contract, functionName: "balanceOf", args: [addr3] },
+  ],
+});
 ```
 
 **2. Query Caching with wagmi**
+
 ```javascript
 const { data } = useReadContract({
   address: CONTRACT_ADDRESS,
   abi: ABI,
-  functionName: 'totalSupply',
+  functionName: "totalSupply",
   cacheTime: 30_000, // Cache for 30 seconds
-})
+});
 ```
 
 **3. Optimistic Updates**
+
 ```javascript
 // Show success immediately, revert if fails
-const { writeAsync } = useWriteContract()
+const { writeAsync } = useWriteContract();
 
 const handleDeposit = async () => {
   // Optimistic UI update
-  setBalance(balance + amount)
+  setBalance(balance + amount);
 
   try {
-    await writeAsync()
+    await writeAsync();
   } catch (error) {
     // Revert on failure
-    setBalance(balance)
+    setBalance(balance);
   }
-}
+};
 ```
 
 **4. Skeleton Screens (Already Covered)**
+
 - Reduces perceived loading time
 - Better than blank screens or spinners alone
 
 **5. Code Splitting**
+
 ```javascript
 // Next.js dynamic imports
-const WalletModal = dynamic(() => import('./WalletModal'), {
+const WalletModal = dynamic(() => import("./WalletModal"), {
   loading: () => <Skeleton />,
-})
+});
 ```
 
 **6. Image Optimization**
+
 ```jsx
 // Next.js Image component
 <Image
@@ -719,34 +801,41 @@ const WalletModal = dynamic(() => import('./WalletModal'), {
 **Foundation Colors:**
 
 **Primary: Blue** (Trust, Security, Stability)
+
 - Light Blue: #3B82F6 (Tailwind blue-500)
 - Dark Blue: #1E40AF (Tailwind blue-800)
 - Usage: Primary buttons, links, accent
 
 **Secondary: Green** (Growth, Money, Success)
+
 - Green: #10B981 (Tailwind green-500)
 - Usage: Positive numbers, success states, APY displays
 
 **Supporting Colors:**
 
 **Red** (Losses, Errors, Warnings)
+
 - Red: #EF4444 (Tailwind red-500)
 - Usage: Negative numbers, error states, critical warnings
 
 **Purple** (Premium, Wealth)
+
 - Purple: #8B5CF6 (Tailwind purple-500)
 - Usage: Premium features, governance tokens, special offers
 
 **Neutral Grays** (Structure)
+
 - Light mode: #F9FAFB to #111827 (Tailwind gray-50 to gray-900)
 - Dark mode: Inverted gray scale
 
 **Color Psychology Research:**
+
 - 62-90% of product decisions made in 90 seconds due to color
 - Blue universally trusted in finance
 - Green represents financial growth across cultures
 
 **Best Practices:**
+
 - **5-6 colors maximum** to avoid clutter
 - **High contrast:** Minimum 4.5:1 ratio for text
 - **Semantic colors:** Green = positive, Red = negative, Blue = neutral
@@ -755,33 +844,33 @@ const WalletModal = dynamic(() => import('./WalletModal'), {
 ### 6.2 Dark Mode Implementation
 
 **Why It Matters:**
+
 - Preferred by 60%+ of users (2024 data)
 - Reduces eye strain for long sessions
 - Modern expectation for DeFi apps
 - Battery saving on OLED screens
 
 **Implementation with Tailwind:**
+
 ```jsx
 <div className="bg-white dark:bg-gray-900">
-  <h1 className="text-gray-900 dark:text-gray-100">
-    Portfolio Balance
-  </h1>
-  <p className="text-gray-600 dark:text-gray-400">
-    $10,234.56
-  </p>
+  <h1 className="text-gray-900 dark:text-gray-100">Portfolio Balance</h1>
+  <p className="text-gray-600 dark:text-gray-400">$10,234.56</p>
 </div>
 ```
 
 **Color Adjustments for Dark Mode:**
+
 - Reduce pure white (#FFFFFF) to off-white (#F9FAFB)
 - Reduce pure black (#000000) to dark gray (#0F172A)
 - Lower contrast slightly (too high causes glare)
 - Mute bright colors (saturated colors hurt in dark mode)
 
 **Dark Mode Skeleton Screens:**
+
 ```css
 .skeleton-light {
-  background: #E5E7EB; /* gray-200 */
+  background: #e5e7eb; /* gray-200 */
 }
 
 .skeleton-dark {
@@ -794,6 +883,7 @@ const WalletModal = dynamic(() => import('./WalletModal'), {
 **Primary Fonts for DeFi (2024-2025):**
 
 #### **Inter** (Most Popular)
+
 - **Creator:** Rasmus Andersson
 - **Type:** Sans-serif, designed for screens
 - **Variable Font:** Yes (enables fine-tuning)
@@ -804,14 +894,19 @@ const WalletModal = dynamic(() => import('./WalletModal'), {
 **Download:** [Google Fonts - Inter](https://fonts.google.com/specimen/Inter)
 
 ```css
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    sans-serif;
 }
 ```
 
 #### **Satoshi** (Trending)
+
 - **Type:** Geometric sans-serif
 - **Characteristics:** Clean, contemporary, slightly reduced x-height (66%)
 - **Usage:** Headings, marketing pages, brand identity
@@ -819,6 +914,7 @@ body {
 - **Consideration:** Less legible at very small sizes
 
 **Font Pairing:**
+
 ```
 Headings: Satoshi Bold
 Body: Inter Regular/Medium
@@ -826,24 +922,43 @@ Data: Inter Mono (for numbers, addresses)
 ```
 
 #### **Alternative: DM Sans**
+
 - Similar to Inter
 - Slightly warmer feel
 - Good for brands wanting differentiation
 
 **Typography Scale:**
+
 ```css
 /* Tailwind-based scale */
-.text-xs    { font-size: 0.75rem; }   /* 12px - Captions, small labels */
-.text-sm    { font-size: 0.875rem; }  /* 14px - Body text, secondary info */
-.text-base  { font-size: 1rem; }      /* 16px - Primary body text */
-.text-lg    { font-size: 1.125rem; }  /* 18px - Emphasized text */
-.text-xl    { font-size: 1.25rem; }   /* 20px - Small headings */
-.text-2xl   { font-size: 1.5rem; }    /* 24px - Section headings */
-.text-3xl   { font-size: 1.875rem; }  /* 30px - Page headings */
-.text-4xl   { font-size: 2.25rem; }   /* 36px - Hero headings */
+.text-xs {
+  font-size: 0.75rem;
+} /* 12px - Captions, small labels */
+.text-sm {
+  font-size: 0.875rem;
+} /* 14px - Body text, secondary info */
+.text-base {
+  font-size: 1rem;
+} /* 16px - Primary body text */
+.text-lg {
+  font-size: 1.125rem;
+} /* 18px - Emphasized text */
+.text-xl {
+  font-size: 1.25rem;
+} /* 20px - Small headings */
+.text-2xl {
+  font-size: 1.5rem;
+} /* 24px - Section headings */
+.text-3xl {
+  font-size: 1.875rem;
+} /* 30px - Page headings */
+.text-4xl {
+  font-size: 2.25rem;
+} /* 36px - Hero headings */
 ```
 
 **Font Weights:**
+
 ```
 Regular (400): Body text
 Medium (500): Emphasized text, labels
@@ -852,6 +967,7 @@ Bold (700): Headings, important numbers
 ```
 
 **Number Display:**
+
 ```javascript
 // Use tabular numbers for aligned columns
 className="font-mono tabular-nums"
@@ -865,6 +981,7 @@ $  123.45  // Digits align vertically
 ### 6.4 Spacing & Layout
 
 **Consistent Spacing Scale (Tailwind):**
+
 ```
 4px   (space-1)  - Tight spacing within components
 8px   (space-2)  - Default spacing between related elements
@@ -877,18 +994,20 @@ $  123.45  // Digits align vertically
 ```
 
 **Card Padding:**
+
 ```jsx
-<Card className="p-6">  {/* 24px padding - comfortable */}
+<Card className="p-6">
+  {" "}
+  {/* 24px padding - comfortable */}
   <CardHeader className="pb-4">
     <CardTitle>Portfolio</CardTitle>
   </CardHeader>
-  <CardContent>
-    {/* Content */}
-  </CardContent>
+  <CardContent>{/* Content */}</CardContent>
 </Card>
 ```
 
 **Container Widths:**
+
 ```
 Mobile: 100% (with 16px padding)
 Tablet: 768px max
@@ -903,18 +1022,21 @@ Wide: 1536px max (for data-heavy interfaces)
 ### 7.1 Sidebar vs Top Navigation
 
 **When to Use Sidebar:**
+
 - **Complex applications** with many top-level items
 - **Hierarchical information** (multi-level menus)
 - **Data-heavy dashboards** (more space for content)
 - **Use Cases:** Admin dashboards, DeFi protocols with multiple products
 
 **Advantages of Sidebar:**
+
 - Faster navigation (shorter cursor movements)
 - More space for navigation items
 - Supports collapsible sub-menus
 - Better for scanning long lists
 
 **Pattern:**
+
 ```
 [Sidebar] [Main Content Area]
 ├─ Home              Portfolio Overview
@@ -925,11 +1047,13 @@ Wide: 1536px max (for data-heavy interfaces)
 ```
 
 **When to Use Top Navigation:**
+
 - **Simple applications** with <5 main sections
 - **Content-focused** sites (marketing sites)
 - **Limited hierarchy** (shallow navigation)
 
 **Hybrid Pattern (Most Common):**
+
 ```
 [Top Bar: Logo, Wallet, Network, Profile]
 [Sidebar: Main Navigation]
@@ -937,6 +1061,7 @@ Wide: 1536px max (for data-heavy interfaces)
 ```
 
 **Example from Aave/Uniswap:**
+
 ```
 Header:    [Logo] [...navigation...] [Connect Wallet] [Network]
 Sidebar:   [Dashboard] [Markets] [Stake] [Governance]
@@ -946,6 +1071,7 @@ Content:   Main application area
 ### 7.2 Dashboard Card Design
 
 **Card Consistency Requirements:**
+
 - Same background colors
 - Consistent padding (typically 24px)
 - Uniform border radius (typically 8-12px)
@@ -954,6 +1080,7 @@ Content:   Main application area
 - Aligned icons
 
 **Anatomy of a DeFi Position Card:**
+
 ```jsx
 <Card>
   <CardHeader>
@@ -982,6 +1109,7 @@ Content:   Main application area
 ```
 
 **Visual Hierarchy:**
+
 ```
 1. Card Title / Token Name (largest)
 2. Primary Metric (large, bold)
@@ -991,6 +1119,7 @@ Content:   Main application area
 ```
 
 **Scanning Optimization:**
+
 - Most important info top-left
 - Consistent positioning across cards
 - Visual grouping of related data
@@ -999,19 +1128,21 @@ Content:   Main application area
 ### 7.3 Responsive Breakpoints
 
 **Recommended Breakpoints:**
+
 ```javascript
 const breakpoints = {
-  sm: '640px',   // Mobile landscape
-  md: '768px',   // Tablet
-  lg: '1024px',  // Desktop
-  xl: '1280px',  // Large desktop
-  '2xl': '1536px' // Extra large
-}
+  sm: "640px", // Mobile landscape
+  md: "768px", // Tablet
+  lg: "1024px", // Desktop
+  xl: "1280px", // Large desktop
+  "2xl": "1536px", // Extra large
+};
 ```
 
 **Layout Transformations:**
 
 **Cards Grid:**
+
 ```
 Mobile (< 768px):    1 column
 Tablet (768-1024px): 2 columns
@@ -1019,6 +1150,7 @@ Desktop (> 1024px):  3-4 columns
 ```
 
 **Data Tables:**
+
 ```
 Mobile:   Card view (stacked data)
 Tablet:   Simplified table (fewer columns)
@@ -1026,6 +1158,7 @@ Desktop:  Full table (all columns)
 ```
 
 **Sidebar Navigation:**
+
 ```
 Mobile:   Bottom sheet or hamburger menu
 Tablet:   Collapsible sidebar
@@ -1035,6 +1168,7 @@ Desktop:  Full sidebar (always visible)
 ### 7.4 Grid Layouts
 
 **Dashboard Grid Example:**
+
 ```jsx
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
   <PositionCard />
@@ -1044,18 +1178,16 @@ Desktop:  Full sidebar (always visible)
 ```
 
 **Hero Section Grid:**
+
 ```jsx
 <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-  <div className="space-y-6">
-    {/* Left: Content */}
-  </div>
-  <div>
-    {/* Right: Visual/Form */}
-  </div>
+  <div className="space-y-6">{/* Left: Content */}</div>
+  <div>{/* Right: Visual/Form */}</div>
 </div>
 ```
 
 **Stats Grid (Common Pattern):**
+
 ```jsx
 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
   <StatCard label="TVL" value="$123M" />
@@ -1111,28 +1243,29 @@ Desktop:  Full sidebar (always visible)
 ```
 
 **Implementation with wagmi + react-hot-toast:**
+
 ```javascript
-import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import toast from 'react-hot-toast'
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+import toast from "react-hot-toast";
 
 function DepositButton() {
-  const { writeContractAsync, data: hash } = useWriteContract()
-  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+  const { writeContractAsync, data: hash } = useWriteContract();
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash });
 
   const handleDeposit = async () => {
     try {
       // Step 1: Prepare
-      const toastId = toast.loading('Preparing transaction...')
+      const toastId = toast.loading("Preparing transaction...");
 
       // Step 2: Prompt wallet
-      toast.loading('Please confirm in your wallet', { id: toastId })
+      toast.loading("Please confirm in your wallet", { id: toastId });
 
       const hash = await writeContractAsync({
         address: CONTRACT_ADDRESS,
         abi: ABI,
-        functionName: 'deposit',
+        functionName: "deposit",
         args: [amount],
-      })
+      });
 
       // Step 3: Submitted
       toast.loading(
@@ -1140,35 +1273,35 @@ function DepositButton() {
           Transaction submitted
           <a href={`https://explorer.com/tx/${hash}`}>View on Explorer</a>
         </div>,
-        { id: toastId }
-      )
+        { id: toastId },
+      );
 
       // Step 4-5: Handled by useWaitForTransactionReceipt
-
     } catch (error) {
-      if (error.message.includes('User denied')) {
-        toast.error('Transaction cancelled', { id: toastId })
+      if (error.message.includes("User denied")) {
+        toast.error("Transaction cancelled", { id: toastId });
       } else {
-        toast.error(`Failed: ${error.shortMessage}`, { id: toastId })
+        toast.error(`Failed: ${error.shortMessage}`, { id: toastId });
       }
     }
-  }
+  };
 
   // Step 6: Success (via useEffect)
   useEffect(() => {
     if (isSuccess) {
-      toast.success('Deposit successful!')
+      toast.success("Deposit successful!");
       // Refetch balances, etc.
     }
-  }, [isSuccess])
+  }, [isSuccess]);
 
-  return <Button onClick={handleDeposit}>Deposit</Button>
+  return <Button onClick={handleDeposit}>Deposit</Button>;
 }
 ```
 
 ### 8.2 Balance Display Component
 
 **Key Requirements:**
+
 - Large, readable numbers
 - Fiat conversion (if applicable)
 - Refresh indicator
@@ -1176,6 +1309,7 @@ function DepositButton() {
 - Error state
 
 **Example:**
+
 ```jsx
 <div className="space-y-2">
   {/* Primary Balance */}
@@ -1211,12 +1345,11 @@ function DepositButton() {
 ### 8.3 APY Display
 
 **Pattern:**
+
 ```jsx
 <div className="space-y-1">
   <div className="flex items-center gap-2">
-    <span className="text-2xl font-bold text-green-500">
-      {apy}%
-    </span>
+    <span className="text-2xl font-bold text-green-500">{apy}%</span>
     <Badge variant="outline" className="text-xs">
       APY
     </Badge>
@@ -1228,6 +1361,7 @@ function DepositButton() {
 ```
 
 **Color Coding:**
+
 - High APY (>10%): Green with warning indicator
 - Medium APY (5-10%): Green
 - Low APY (<5%): Muted green or gray
@@ -1236,12 +1370,14 @@ function DepositButton() {
 ### 8.4 Network Switcher
 
 **Requirements:**
+
 - Current network clearly displayed
 - Easy switching
 - Warning if on wrong network
 - Disable actions on wrong network
 
 **Pattern:**
+
 ```jsx
 <DropdownMenu>
   <DropdownMenuTrigger asChild>
@@ -1251,7 +1387,7 @@ function DepositButton() {
     </Button>
   </DropdownMenuTrigger>
   <DropdownMenuContent>
-    {supportedNetworks.map(network => (
+    {supportedNetworks.map((network) => (
       <DropdownMenuItem
         key={network.id}
         onClick={() => switchNetwork(network.id)}
@@ -1262,23 +1398,28 @@ function DepositButton() {
       </DropdownMenuItem>
     ))}
   </DropdownMenuContent>
-</DropdownMenu>
+</DropdownMenu>;
 
-{/* Wrong network warning */}
-{!isSupportedNetwork && (
-  <Alert variant="destructive">
-    <AlertTriangle />
-    <AlertTitle>Wrong Network</AlertTitle>
-    <AlertDescription>
-      Please switch to {SUPPORTED_NETWORK.name} to continue.
-    </AlertDescription>
-  </Alert>
-)}
+{
+  /* Wrong network warning */
+}
+{
+  !isSupportedNetwork && (
+    <Alert variant="destructive">
+      <AlertTriangle />
+      <AlertTitle>Wrong Network</AlertTitle>
+      <AlertDescription>
+        Please switch to {SUPPORTED_NETWORK.name} to continue.
+      </AlertDescription>
+    </Alert>
+  );
+}
 ```
 
 ### 8.5 Transaction History Table
 
 **Desktop View:**
+
 ```jsx
 <Table>
   <TableHeader>
@@ -1291,7 +1432,7 @@ function DepositButton() {
     </TableRow>
   </TableHeader>
   <TableBody>
-    {transactions.map(tx => (
+    {transactions.map((tx) => (
       <TableRow key={tx.hash}>
         <TableCell>
           <Badge>{tx.type}</Badge>
@@ -1315,9 +1456,10 @@ function DepositButton() {
 ```
 
 **Mobile View (Card):**
+
 ```jsx
 <div className="space-y-4">
-  {transactions.map(tx => (
+  {transactions.map((tx) => (
     <Card key={tx.hash}>
       <CardHeader>
         <div className="flex justify-between items-center">
@@ -1355,6 +1497,7 @@ function DepositButton() {
 ### 9.1 Purpose of Animations
 
 **Do:**
+
 - Provide feedback (button clicks, form submissions)
 - Guide attention (new notifications, important updates)
 - Show transitions (page changes, modal opens)
@@ -1362,6 +1505,7 @@ function DepositButton() {
 - Celebrate success (confetti on deposit, check marks)
 
 **Don't:**
+
 - Animate for decoration alone
 - Use slow animations (>300ms feels sluggish)
 - Animate everything (causes distraction)
@@ -1370,6 +1514,7 @@ function DepositButton() {
 ### 9.2 Recommended Animations
 
 **Framer Motion - Industry Standard:**
+
 ```jsx
 import { motion } from 'framer-motion'
 
@@ -1402,6 +1547,7 @@ import { motion } from 'framer-motion'
 ```
 
 **Transaction Success Animation:**
+
 ```jsx
 // Success checkmark with scale
 <motion.div
@@ -1410,7 +1556,7 @@ import { motion } from 'framer-motion'
   transition={{
     type: "spring",
     stiffness: 260,
-    damping: 20
+    damping: 20,
   }}
 >
   <CheckCircle className="text-green-500" size={48} />
@@ -1418,9 +1564,11 @@ import { motion } from 'framer-motion'
 ```
 
 **Skeleton Pulse (CSS):**
+
 ```css
 @keyframes pulse {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {
@@ -1436,6 +1584,7 @@ import { motion } from 'framer-motion'
 ### 9.3 Reduced Motion
 
 **Accessibility Requirement:**
+
 ```css
 @media (prefers-reduced-motion: reduce) {
   * {
@@ -1447,6 +1596,7 @@ import { motion } from 'framer-motion'
 ```
 
 **Framer Motion Support:**
+
 ```jsx
 <motion.div
   initial={{ opacity: 0, y: 20 }}
@@ -1463,6 +1613,7 @@ import { motion } from 'framer-motion'
 ### 10.1 Transparency Indicators
 
 **Show:**
+
 - Smart contract addresses (with Etherscan link)
 - Audit reports (with auditor name and date)
 - Open source code (GitHub link)
@@ -1470,6 +1621,7 @@ import { motion } from 'framer-motion'
 - Security measures
 
 **Example:**
+
 ```jsx
 <div className="space-y-4 p-6 border rounded-lg">
   <h3 className="font-semibold">Security & Trust</h3>
@@ -1502,6 +1654,7 @@ import { motion } from 'framer-motion'
 ### 10.2 Risk Warnings
 
 **When to Show:**
+
 - High APY (potential red flag)
 - New protocol (unproven)
 - Experimental features
@@ -1509,22 +1662,29 @@ import { motion } from 'framer-motion'
 - Irreversible actions
 
 **Pattern:**
+
 ```jsx
-{apy > 15 && (
-  <Alert variant="warning">
-    <AlertTriangle />
-    <AlertTitle>High Risk</AlertTitle>
-    <AlertDescription>
-      This pool offers unusually high returns. Please understand the risks before depositing.
-      <a href="/risks" className="text-blue-500">Learn more</a>
-    </AlertDescription>
-  </Alert>
-)}
+{
+  apy > 15 && (
+    <Alert variant="warning">
+      <AlertTriangle />
+      <AlertTitle>High Risk</AlertTitle>
+      <AlertDescription>
+        This pool offers unusually high returns. Please understand the risks
+        before depositing.
+        <a href="/risks" className="text-blue-500">
+          Learn more
+        </a>
+      </AlertDescription>
+    </Alert>
+  );
+}
 ```
 
 ### 10.3 Social Proof
 
 **Elements:**
+
 - Total Value Locked (TVL)
 - Number of users
 - Transaction volume
@@ -1532,28 +1692,13 @@ import { motion } from 'framer-motion'
 - Partners/integrations
 
 **Example:**
+
 ```jsx
 <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-  <StatCard
-    label="Total Value Locked"
-    value="$123.4M"
-    icon={<Lock />}
-  />
-  <StatCard
-    label="Active Users"
-    value="45,234"
-    icon={<Users />}
-  />
-  <StatCard
-    label="24h Volume"
-    value="$12.3M"
-    icon={<Activity />}
-  />
-  <StatCard
-    label="Since"
-    value="Jan 2023"
-    icon={<Calendar />}
-  />
+  <StatCard label="Total Value Locked" value="$123.4M" icon={<Lock />} />
+  <StatCard label="Active Users" value="45,234" icon={<Users />} />
+  <StatCard label="24h Volume" value="$12.3M" icon={<Activity />} />
+  <StatCard label="Since" value="Jan 2023" icon={<Calendar />} />
 </div>
 ```
 
@@ -1566,6 +1711,7 @@ import { motion } from 'framer-motion'
 **Principle:** Show basic info first, advanced options on demand
 
 **Example - Deposit Form:**
+
 ```jsx
 {/* Basic */}
 <Input label="Amount" />
@@ -1585,6 +1731,7 @@ import { motion } from 'framer-motion'
 ### 11.2 Confirmation Pattern
 
 **Before Irreversible Actions:**
+
 ```jsx
 <AlertDialog>
   <AlertDialogTrigger asChild>
@@ -1594,8 +1741,7 @@ import { motion } from 'framer-motion'
     <AlertDialogHeader>
       <AlertDialogTitle>Confirm Withdrawal</AlertDialogTitle>
       <AlertDialogDescription>
-        You're about to withdraw $10,234.56 USDC.
-        This action cannot be undone.
+        You're about to withdraw $10,234.56 USDC. This action cannot be undone.
       </AlertDialogDescription>
     </AlertDialogHeader>
 
@@ -1631,6 +1777,7 @@ import { motion } from 'framer-motion'
 **When:** No data to show (new user, no transactions, no positions)
 
 **Pattern:**
+
 ```jsx
 <div className="flex flex-col items-center justify-center py-12 text-center">
   <EmptyIcon className="h-24 w-24 text-muted-foreground mb-4" />
@@ -1638,15 +1785,14 @@ import { motion } from 'framer-motion'
   <p className="text-muted-foreground mb-6 max-w-md">
     Start earning yield on your crypto by making your first deposit.
   </p>
-  <Button onClick={handleDeposit}>
-    Make First Deposit
-  </Button>
+  <Button onClick={handleDeposit}>Make First Deposit</Button>
 </div>
 ```
 
 ### 11.4 Search & Filter Pattern
 
 **For Large Lists (pools, tokens, transactions):**
+
 ```jsx
 <div className="space-y-4">
   {/* Search */}
@@ -1663,20 +1809,20 @@ import { motion } from 'framer-motion'
   {/* Filters */}
   <div className="flex gap-2 flex-wrap">
     <Button
-      variant={filter === 'all' ? 'default' : 'outline'}
-      onClick={() => setFilter('all')}
+      variant={filter === "all" ? "default" : "outline"}
+      onClick={() => setFilter("all")}
     >
       All Pools
     </Button>
     <Button
-      variant={filter === 'active' ? 'default' : 'outline'}
-      onClick={() => setFilter('active')}
+      variant={filter === "active" ? "default" : "outline"}
+      onClick={() => setFilter("active")}
     >
       My Positions
     </Button>
     <Button
-      variant={filter === 'high-apy' ? 'default' : 'outline'}
-      onClick={() => setFilter('high-apy')}
+      variant={filter === "high-apy" ? "default" : "outline"}
+      onClick={() => setFilter("high-apy")}
     >
       High APY
     </Button>
@@ -1702,6 +1848,7 @@ import { motion } from 'framer-motion'
 ## 12. Implementation Checklist
 
 ### Pre-Development
+
 - [ ] Define target users (DeFi native vs beginners)
 - [ ] List all user actions (deposit, withdraw, claim, etc.)
 - [ ] Map transaction flows
@@ -1709,6 +1856,7 @@ import { motion } from 'framer-motion'
 - [ ] Choose tech stack
 
 ### Design Phase
+
 - [ ] Create design system (colors, typography, spacing)
 - [ ] Design components (buttons, cards, modals)
 - [ ] Design key pages (dashboard, portfolio, pools)
@@ -1718,6 +1866,7 @@ import { motion } from 'framer-motion'
 - [ ] Design empty states
 
 ### Development Phase
+
 - [ ] Set up project with chosen stack
 - [ ] Implement design system (Tailwind config, theme)
 - [ ] Build component library (shadcn/ui + custom)
@@ -1729,6 +1878,7 @@ import { motion } from 'framer-motion'
 - [ ] Add dark mode
 
 ### Accessibility Phase
+
 - [ ] Semantic HTML throughout
 - [ ] ARIA labels for dynamic content
 - [ ] Keyboard navigation support
@@ -1738,6 +1888,7 @@ import { motion } from 'framer-motion'
 - [ ] Reduced motion support
 
 ### Performance Phase
+
 - [ ] Optimize images (Next.js Image)
 - [ ] Code splitting (dynamic imports)
 - [ ] RPC call batching (multicall)
@@ -1746,6 +1897,7 @@ import { motion } from 'framer-motion'
 - [ ] Lighthouse audit (target 90+)
 
 ### Testing Phase
+
 - [ ] Unit tests (components)
 - [ ] Integration tests (transaction flows)
 - [ ] E2E tests (critical paths)
@@ -1755,6 +1907,7 @@ import { motion } from 'framer-motion'
 - [ ] Accessibility testing (real users)
 
 ### Pre-Launch
+
 - [ ] Security audit (smart contracts)
 - [ ] Frontend security review
 - [ ] Performance testing under load
@@ -1768,6 +1921,7 @@ import { motion } from 'framer-motion'
 ## 13. Resources & References
 
 ### Official Documentation
+
 - [shadcn/ui](https://ui.shadcn.com/) - Component library
 - [Radix UI](https://www.radix-ui.com/) - Accessible primitives
 - [wagmi](https://wagmi.sh/) - React hooks for Ethereum
@@ -1777,20 +1931,24 @@ import { motion } from 'framer-motion'
 - [Tailwind CSS](https://tailwindcss.com/) - Utility-first CSS
 
 ### Design Resources
+
 - [Figma - Uniswap V4 Pools Design Kit](https://www.figma.com/community/file/1334811795504110095)
 - [Dribbble - DeFi Dashboard Designs](https://dribbble.com/tags/defi-dashboard)
 - [Web3 UX Best Practices](https://web3ux.design/)
 
 ### Accessibility
+
 - [WCAG 2.2 Guidelines](https://www.w3.org/WAI/standards-guidelines/wcag/)
 - [Radix UI Accessibility](https://www.radix-ui.com/primitives/docs/overview/accessibility)
 - [WebAIM Color Contrast Checker](https://webaim.org/resources/contrastchecker/)
 
 ### Fonts
+
 - [Inter Font](https://fonts.google.com/specimen/Inter) - Free, Google Fonts
 - [Satoshi Font](https://www.fontshare.com/fonts/satoshi) - Free, Fontshare
 
 ### Inspiration
+
 - [Aave Interface](https://app.aave.com/)
 - [Uniswap Interface](https://app.uniswap.org/)
 - [Lido Finance](https://lido.fi/)
@@ -1798,6 +1956,7 @@ import { motion } from 'framer-motion'
 - [Revolut Web App](https://www.revolut.com/)
 
 ### Tools
+
 - [Lighthouse](https://developers.google.com/web/tools/lighthouse) - Performance auditing
 - [axe DevTools](https://www.deque.com/axe/devtools/) - Accessibility testing
 - [React DevTools](https://react.dev/learn/react-developer-tools) - React debugging
@@ -1808,6 +1967,7 @@ import { motion } from 'framer-motion'
 ## 14. Key Takeaways
 
 ### Design Philosophy
+
 1. **Simplicity First:** Complex protocols, simple interfaces
 2. **Progressive Disclosure:** Show basic, hide advanced until needed
 3. **Trust Through Transparency:** Show contracts, audits, risks
@@ -1815,6 +1975,7 @@ import { motion } from 'framer-motion'
 5. **Accessibility Is Non-Negotiable:** WCAG 2.2 compliance
 
 ### Technical Stack (Recommended 2024-2025)
+
 ```
 Framework:    Next.js 14+
 Styling:      Tailwind CSS
@@ -1827,6 +1988,7 @@ Charts:       Recharts
 ```
 
 ### Visual Design
+
 - **Colors:** Blue (trust) + Green (growth)
 - **Typography:** Inter for UI, Satoshi for brand
 - **Layout:** Sidebar for complex, top nav for simple
@@ -1834,6 +1996,7 @@ Charts:       Recharts
 - **Dark Mode:** Must-have in 2024
 
 ### UX Patterns
+
 - **Wallet Connection:** RainbowKit (production-ready)
 - **Loading States:** Skeleton screens (not just spinners)
 - **Transactions:** 7-step flow with clear feedback
@@ -1841,6 +2004,7 @@ Charts:       Recharts
 - **Responsive:** Table → Card transformation on mobile
 
 ### Performance
+
 - RPC call batching (multicall)
 - Query caching (wagmi)
 - Optimistic updates
@@ -1848,6 +2012,7 @@ Charts:       Recharts
 - Image optimization
 
 ### Accessibility
+
 - Semantic HTML
 - ARIA labels for dynamic content
 - 4.5:1 contrast minimum

@@ -1,8 +1,14 @@
-import * as React from "react"
-import { cva, type VariantProps } from "class-variance-authority"
-import { CheckCircle2, XCircle, Clock, Loader2, AlertCircle } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
+import * as React from "react";
+import { cva, type VariantProps } from "class-variance-authority";
+import {
+  CheckCircle2,
+  XCircle,
+  Clock,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
 
 /**
  * Transaction Status Component
@@ -16,7 +22,7 @@ export type TransactionState =
   | "confirming"
   | "success"
   | "error"
-  | "rejected"
+  | "rejected";
 
 const statusConfig = {
   idle: {
@@ -64,14 +70,14 @@ const statusConfig = {
     variant: "warning" as const,
     color: "text-warning",
   },
-}
+};
 
 interface TransactionStatusProps {
-  status: TransactionState
-  message?: string
-  txHash?: string
-  className?: string
-  variant?: "badge" | "inline" | "detailed"
+  status: TransactionState;
+  message?: string;
+  txHash?: string;
+  className?: string;
+  variant?: "badge" | "inline" | "detailed";
 }
 
 export function TransactionStatus({
@@ -81,29 +87,41 @@ export function TransactionStatus({
   className,
   variant = "inline",
 }: TransactionStatusProps) {
-  const config = statusConfig[status]
-  const Icon = config.icon
+  const config = statusConfig[status];
+  const Icon = config.icon;
 
   if (variant === "badge") {
     return (
       <Badge variant={config.variant} className={cn("gap-1.5", className)}>
-        <Icon className={cn("h-3 w-3", 'animate' in config && 'animate' in config && config.animate && "animate-spin")} />
+        <Icon
+          className={cn(
+            "h-3 w-3",
+            "animate" in config &&
+              "animate" in config &&
+              config.animate &&
+              "animate-spin",
+          )}
+        />
         {config.label}
       </Badge>
-    )
+    );
   }
 
   if (variant === "inline") {
     return (
       <div className={cn("flex items-center gap-2", className)}>
         <Icon
-          className={cn("h-4 w-4", config.color, 'animate' in config && config.animate && "animate-spin")}
+          className={cn(
+            "h-4 w-4",
+            config.color,
+            "animate" in config && config.animate && "animate-spin",
+          )}
         />
         <span className={cn("text-sm font-medium", config.color)}>
           {message || config.label}
         </span>
       </div>
-    )
+    );
   }
 
   // Detailed variant
@@ -111,7 +129,11 @@ export function TransactionStatus({
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center gap-2">
         <Icon
-          className={cn("h-5 w-5", config.color, 'animate' in config && config.animate && "animate-spin")}
+          className={cn(
+            "h-5 w-5",
+            config.color,
+            "animate" in config && config.animate && "animate-spin",
+          )}
         />
         <span className={cn("text-base font-semibold", config.color)}>
           {config.label}
@@ -144,27 +166,27 @@ export function TransactionStatus({
         </a>
       )}
     </div>
-  )
+  );
 }
 
 /**
  * Transaction Steps - Shows multi-step transaction progress
  */
 interface TransactionStep {
-  label: string
-  status: "pending" | "active" | "complete" | "error"
+  label: string;
+  status: "pending" | "active" | "complete" | "error";
 }
 
 interface TransactionStepsProps {
-  steps: TransactionStep[]
-  className?: string
+  steps: TransactionStep[];
+  className?: string;
 }
 
 export function TransactionSteps({ steps, className }: TransactionStepsProps) {
   return (
     <div className={cn("space-y-2", className)}>
       {steps.map((step, index) => {
-        const isLast = index === steps.length - 1
+        const isLast = index === steps.length - 1;
         return (
           <div key={index} className="flex items-start gap-3">
             <div className="flex flex-col items-center">
@@ -174,7 +196,8 @@ export function TransactionSteps({ steps, className }: TransactionStepsProps) {
                   step.status === "complete" && "bg-success text-white",
                   step.status === "active" && "bg-lavanda text-white",
                   step.status === "error" && "bg-error text-white",
-                  step.status === "pending" && "bg-surface border-2 border-border text-muted-foreground"
+                  step.status === "pending" &&
+                    "bg-surface border-2 border-border text-muted-foreground",
                 )}
               >
                 {step.status === "complete" ? (
@@ -189,7 +212,7 @@ export function TransactionSteps({ steps, className }: TransactionStepsProps) {
                 <div
                   className={cn(
                     "w-0.5 h-8 mt-1",
-                    step.status === "complete" ? "bg-success" : "bg-border"
+                    step.status === "complete" ? "bg-success" : "bg-border",
                   )}
                 />
               )}
@@ -201,15 +224,15 @@ export function TransactionSteps({ steps, className }: TransactionStepsProps) {
                   step.status === "active" && "text-foreground",
                   step.status === "complete" && "text-success",
                   step.status === "error" && "text-error",
-                  step.status === "pending" && "text-muted-foreground"
+                  step.status === "pending" && "text-muted-foreground",
                 )}
               >
                 {step.label}
               </p>
             </div>
           </div>
-        )
+        );
       })}
     </div>
-  )
+  );
 }

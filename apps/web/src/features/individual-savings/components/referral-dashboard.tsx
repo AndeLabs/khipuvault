@@ -1,26 +1,45 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
-import { AmountDisplay } from "@/components/common"
-import { useAccount } from "wagmi"
-import { formatUnits } from "viem"
-import { useClaimReferralRewards } from "@/hooks/web3/use-pool-transactions"
-import { Copy, Check, Gift, Users, Award, Share2, ExternalLink } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { V3_FEATURES } from "@/lib/web3/contracts-v3"
+import * as React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { AmountDisplay } from "@/components/common";
+import { useAccount } from "wagmi";
+import { formatUnits } from "viem";
+import { useClaimReferralRewards } from "@/hooks/web3/use-pool-transactions";
+import {
+  Copy,
+  Check,
+  Gift,
+  Users,
+  Award,
+  Share2,
+  ExternalLink,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { V3_FEATURES } from "@/lib/web3/contracts-v3";
 
 interface ReferralDashboardProps {
-  referralCount?: bigint
-  totalRewards?: bigint
-  referrerAddress?: string
-  isLoading?: boolean
-  onRefresh?: () => void
-  className?: string
+  referralCount?: bigint;
+  totalRewards?: bigint;
+  referrerAddress?: string;
+  isLoading?: boolean;
+  onRefresh?: () => void;
+  className?: string;
 }
 
 export function ReferralDashboard({
@@ -31,73 +50,76 @@ export function ReferralDashboard({
   onRefresh,
   className,
 }: ReferralDashboardProps) {
-  const { address } = useAccount()
-  const [copied, setCopied] = React.useState(false)
-  const { claimReferralRewards, isClaiming, isConfirming, isSuccess } = useClaimReferralRewards()
+  const { address } = useAccount();
+  const [copied, setCopied] = React.useState(false);
+  const { claimReferralRewards, isClaiming, isConfirming, isSuccess } =
+    useClaimReferralRewards();
 
   // Generate referral link
   const referralLink = address
-    ? `${typeof window !== 'undefined' ? window.location.origin : ''}/dashboard/individual-savings?ref=${address}`
-    : ''
+    ? `${typeof window !== "undefined" ? window.location.origin : ""}/dashboard/individual-savings?ref=${address}`
+    : "";
 
   // Format rewards
   const formattedRewards = React.useMemo(() => {
     try {
-      return Number(formatUnits(totalRewards, 18)).toFixed(4)
+      return Number(formatUnits(totalRewards, 18)).toFixed(4);
     } catch {
-      return '0.0000'
+      return "0.0000";
     }
-  }, [totalRewards])
+  }, [totalRewards]);
 
   // Referral bonus percentage
-  const referralBonus = (V3_FEATURES.individualPool.referralBonus / 100).toFixed(2)
+  const referralBonus = (
+    V3_FEATURES.individualPool.referralBonus / 100
+  ).toFixed(2);
 
   // Copy to clipboard
   const handleCopyLink = async () => {
-    if (!referralLink) return
+    if (!referralLink) return;
 
     try {
-      await navigator.clipboard.writeText(referralLink)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(referralLink);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy:', error)
+      console.error("Failed to copy:", error);
     }
-  }
+  };
 
   const handleCopyAddress = async () => {
-    if (!address) return
+    if (!address) return;
 
     try {
-      await navigator.clipboard.writeText(address)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (error) {
-      console.error('Failed to copy:', error)
+      console.error("Failed to copy:", error);
     }
-  }
+  };
 
   // Handle claim
   const handleClaimRewards = async () => {
     try {
-      await claimReferralRewards()
+      await claimReferralRewards();
       if (onRefresh) {
-        setTimeout(() => onRefresh(), 3000)
+        setTimeout(() => onRefresh(), 3000);
       }
     } catch (error) {
-      console.error('Failed to claim rewards:', error)
+      console.error("Failed to claim rewards:", error);
     }
-  }
+  };
 
   // Success effect
   React.useEffect(() => {
     if (isSuccess && onRefresh) {
-      setTimeout(() => onRefresh(), 2000)
+      setTimeout(() => onRefresh(), 2000);
     }
-  }, [isSuccess, onRefresh])
+  }, [isSuccess, onRefresh]);
 
-  const hasRewards = totalRewards > BigInt(0)
-  const hasReferrals = Number(referralCount) > 0
+  const hasRewards = totalRewards > BigInt(0);
+  const hasReferrals = Number(referralCount) > 0;
 
   return (
     <Card variant="surface" hover="glow-orange" className={className}>
@@ -124,8 +146,9 @@ export function ReferralDashboard({
               </TooltipTrigger>
               <TooltipContent>
                 <p className="text-sm max-w-xs">
-                  You earn {referralBonus}% of the deposit amount when someone uses your referral code.
-                  Rewards are paid in mUSD and can be claimed anytime.
+                  You earn {referralBonus}% of the deposit amount when someone
+                  uses your referral code. Rewards are paid in mUSD and can be
+                  claimed anytime.
                 </p>
               </TooltipContent>
             </Tooltip>
@@ -146,7 +169,7 @@ export function ReferralDashboard({
               {Number(referralCount)}
             </div>
             <p className="text-xs text-muted-foreground">
-              {hasReferrals ? 'Active users' : 'No referrals yet'}
+              {hasReferrals ? "Active users" : "No referrals yet"}
             </p>
           </div>
 
@@ -157,10 +180,14 @@ export function ReferralDashboard({
               <span>Total Rewards</span>
             </div>
             <div className="text-2xl font-bold tabular-nums text-accent">
-              <AmountDisplay amount={formattedRewards} symbol="mUSD" size="md" />
+              <AmountDisplay
+                amount={formattedRewards}
+                symbol="mUSD"
+                size="md"
+              />
             </div>
             <p className="text-xs text-muted-foreground">
-              {hasRewards ? 'Available to claim' : 'Start referring!'}
+              {hasRewards ? "Available to claim" : "Start referring!"}
             </p>
           </div>
 
@@ -170,7 +197,8 @@ export function ReferralDashboard({
               <Share2 className="h-4 w-4" />
               <span>Your Referrer</span>
             </div>
-            {referrerAddress && referrerAddress !== '0x0000000000000000000000000000000000000000' ? (
+            {referrerAddress &&
+            referrerAddress !== "0x0000000000000000000000000000000000000000" ? (
               <div className="space-y-1">
                 <div className="flex items-center gap-2">
                   <code className="text-xs font-mono bg-surface px-2 py-1 rounded">
@@ -248,10 +276,14 @@ export function ReferralDashboard({
               disabled={!address}
               className={cn(
                 "shrink-0 transition-colors",
-                copied && "bg-success/10 border-success text-success"
+                copied && "bg-success/10 border-success text-success",
               )}
             >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copied ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
             </Button>
           </div>
 
@@ -259,7 +291,7 @@ export function ReferralDashboard({
             <div className="flex-1 relative">
               <Input
                 readOnly
-                value={address || ''}
+                value={address || ""}
                 className="pr-10 font-mono text-xs"
                 placeholder="Your wallet address"
               />
@@ -272,7 +304,9 @@ export function ReferralDashboard({
                       </div>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p className="text-sm">This is your referral code (wallet address)</p>
+                      <p className="text-sm">
+                        This is your referral code (wallet address)
+                      </p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
@@ -285,10 +319,14 @@ export function ReferralDashboard({
               disabled={!address}
               className={cn(
                 "shrink-0 transition-colors",
-                copied && "bg-success/10 border-success text-success"
+                copied && "bg-success/10 border-success text-success",
               )}
             >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
+              {copied ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <Copy className="h-4 w-4" />
+              )}
             </Button>
           </div>
 
@@ -304,5 +342,5 @@ export function ReferralDashboard({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

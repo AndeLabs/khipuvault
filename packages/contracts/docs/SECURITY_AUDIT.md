@@ -18,13 +18,13 @@ KhipuVault is a decentralized savings platform built on Bitcoin that enables use
 
 ### Key Statistics
 
-| Metric | Value |
-|--------|-------|
-| Total Contracts | 7 core contracts |
-| Upgradeable Contracts | 4 (UUPS pattern) |
-| External Dependencies | OpenZeppelin, Chainlink, Mezo Protocol |
-| Supported Tokens | BTC (native), WBTC, MUSD |
-| Proxy Pattern | UUPS (Universal Upgradeable Proxy Standard) |
+| Metric                | Value                                       |
+| --------------------- | ------------------------------------------- |
+| Total Contracts       | 7 core contracts                            |
+| Upgradeable Contracts | 4 (UUPS pattern)                            |
+| External Dependencies | OpenZeppelin, Chainlink, Mezo Protocol      |
+| Supported Tokens      | BTC (native), WBTC, MUSD                    |
+| Proxy Pattern         | UUPS (Universal Upgradeable Proxy Standard) |
 
 ---
 
@@ -107,13 +107,13 @@ KhipuVault is a decentralized savings platform built on Bitcoin that enables use
 
 ### Role Matrix
 
-| Role | Contract | Permissions | Critical Actions |
-|------|----------|-------------|------------------|
-| **Owner** | All Upgradeable | Full admin control | Upgrade contracts, pause, set fees |
-| **User** | Pool Contracts | Deposit/Withdraw | Manage their own positions |
-| **Fee Collector** | All Pools | Receive fees | Collect performance fees |
-| **VRF Coordinator** | Lottery Pool | Provide randomness | Select lottery winners |
-| **Authorized Caller** | Yield Aggregator | Bypass flash loan check | Enable pool contracts to interact |
+| Role                  | Contract         | Permissions             | Critical Actions                   |
+| --------------------- | ---------------- | ----------------------- | ---------------------------------- |
+| **Owner**             | All Upgradeable  | Full admin control      | Upgrade contracts, pause, set fees |
+| **User**              | Pool Contracts   | Deposit/Withdraw        | Manage their own positions         |
+| **Fee Collector**     | All Pools        | Receive fees            | Collect performance fees           |
+| **VRF Coordinator**   | Lottery Pool     | Provide randomness      | Select lottery winners             |
+| **Authorized Caller** | Yield Aggregator | Bypass flash loan check | Enable pool contracts to interact  |
 
 ### Permission Hierarchy
 
@@ -222,11 +222,13 @@ nonReentrant modifier MUST be active on all state-changing external functions
 **Risk Level:** HIGH
 
 **Vulnerable Functions:**
+
 - All deposit/withdraw functions
 - Yield claim functions
 - Pool join/leave functions
 
 **Mitigations Implemented:**
+
 ```solidity
 // OpenZeppelin ReentrancyGuard on all state-changing functions
 function withdraw() external nonReentrant { ... }
@@ -249,10 +251,12 @@ function claimYield() external nonReentrant {
 **Risk Level:** HIGH
 
 **Attack Vector:**
+
 - Manipulate pool ratios within a single transaction
 - Sandwich attack on yield distribution
 
 **Mitigations Implemented:**
+
 ```solidity
 modifier noFlashLoan() {
     if (!emergencyMode && tx.origin != msg.sender) revert FlashLoanDetected();
@@ -270,6 +274,7 @@ function deposit(uint256 amount) external nonReentrant noFlashLoan { ... }
 **Risk Level:** LOW (Solidity 0.8.25 has built-in checks)
 
 **Additional Protections:**
+
 ```solidity
 // Packed storage with explicit uint128/uint64 sizes
 struct UserDeposit {
@@ -285,10 +290,12 @@ struct UserDeposit {
 **Risk Level:** MEDIUM
 
 **Vulnerable Operations:**
+
 - Lottery ticket purchases (winner determination)
 - Yield vault deposits (APR changes)
 
 **Mitigations:**
+
 ```solidity
 // Chainlink VRF for unpredictable randomness
 function requestDraw(uint256 roundId) external {
@@ -305,10 +312,12 @@ function requestDraw(uint256 roundId) external {
 **Risk Level:** HIGH
 
 **Vulnerable Components:**
+
 - BTC price feed (Mezo Integration)
 - APR calculations (Yield Aggregator)
 
 **Mitigations:**
+
 ```solidity
 // Price staleness check
 function _getCurrentPrice() internal returns (uint256 price) {
@@ -329,10 +338,12 @@ function _getCurrentPrice() internal returns (uint256 price) {
 **Risk Level:** MEDIUM
 
 **Attack Vectors:**
+
 - Gas limit attacks on unbounded loops
 - Block gas limit exhaustion
 
 **Mitigations:**
+
 ```solidity
 // Bounded iterations
 uint256 public constant MAX_MEMBERS = 100;
@@ -349,11 +360,13 @@ function pause() external onlyOwner {
 **Risk Level:** MEDIUM
 
 **Concerns:**
+
 - Owner can upgrade contracts
 - Owner can pause operations
 - Owner controls fee parameters
 
 **Mitigations:**
+
 - UUPS proxy pattern (owner-controlled upgrades)
 - Fee caps enforced in code:
   ```solidity
@@ -371,6 +384,7 @@ function pause() external onlyOwner {
 **Version:** 5.x (upgradeable)
 
 **Used Components:**
+
 - `Initializable` - Initialization logic
 - `UUPSUpgradeable` - Upgrade mechanism
 - `OwnableUpgradeable` - Access control
@@ -387,12 +401,14 @@ function pause() external onlyOwner {
 **Used In:** LotteryPool
 
 **Functions:**
+
 - `requestRandomWords()` - Request verifiable randomness
 - `fulfillRandomWords()` - Receive randomness callback
 
 **Risk Assessment:** LOW (decentralized oracle network)
 
 **Configuration:**
+
 ```solidity
 uint32 constant CALLBACK_GAS_LIMIT = 200000;
 uint16 constant REQUEST_CONFIRMATIONS = 3;
@@ -404,6 +420,7 @@ uint32 constant NUM_WORDS = 1;
 **Used In:** MezoIntegrationV3
 
 **Interfaces:**
+
 - `IMezoBorrowerOperations` - Open/adjust/close troves
 - `IMezoPriceFeed` - BTC price oracle
 - `IMezoTroveManager` - Trove state queries
@@ -412,6 +429,7 @@ uint32 constant NUM_WORDS = 1;
 **Risk Assessment:** MEDIUM (external protocol dependency)
 
 **Mitigation:**
+
 - Health checks on all operations
 - Emergency mode bypass
 - Collateral ratio monitoring
@@ -425,17 +443,20 @@ uint32 constant NUM_WORDS = 1;
 **Choice:** UUPS (Universal Upgradeable Proxy Standard)
 
 **Rationale:**
+
 - Lower deployment costs (no admin slot in proxy)
 - Upgrade logic in implementation (cheaper proxy)
 - Better gas efficiency
 
 **Trade-off:**
+
 - Implementation can brick upgrades if `_authorizeUpgrade()` is broken
 - Requires careful testing of upgrade paths
 
 ### 2. Storage Packing
 
 **Implementation:**
+
 ```solidity
 struct UserDeposit {
     uint128 musdAmount;      // Slot 0
@@ -448,10 +469,12 @@ struct UserDeposit {
 ```
 
 **Benefits:**
+
 - Saves ~40k gas per transaction
 - 2 slots instead of 5
 
 **Trade-off:**
+
 - Reduced max values (uint128 max = 340T, sufficient for MUSD)
 - More complex to read/debug
 
@@ -460,10 +483,12 @@ struct UserDeposit {
 **Implementation:** `tx.origin != msg.sender` check
 
 **Rationale:**
+
 - Simple and effective against flash loan attacks
 - Can be disabled in emergency mode
 
 **Trade-off:**
+
 - Blocks contract-to-contract interactions
 - Requires authorized caller whitelist for pools
 - May break wallet integrations (AA wallets, etc.)
@@ -479,11 +504,13 @@ pendingYield = (principal * apr * timeElapsed) / (10000 * 365 days)
 ```
 
 **Rationale:**
+
 - Predictable and transparent
 - Gas efficient
 - Easy to audit
 
 **Trade-off:**
+
 - Not compound interest (simpler but less accurate)
 - APR is manually set by admin (not auto-updated)
 
@@ -492,6 +519,7 @@ pendingYield = (principal * apr * timeElapsed) / (10000 * 365 days)
 **Purpose:** Allow recovery in critical situations
 
 **Effects:**
+
 - Disables flash loan protection
 - Waives performance fees
 - Maintains core withdraw functionality
@@ -511,6 +539,7 @@ pendingYield = (principal * apr * timeElapsed) / (10000 * 365 days)
 **Impact:** If oracle is compromised, collateral ratios may be incorrect
 
 **Recommendation:**
+
 - Monitor oracle health
 - Implement circuit breakers on large price movements
 - Consider multi-oracle approach in future versions
@@ -522,6 +551,7 @@ pendingYield = (principal * apr * timeElapsed) / (10000 * 365 days)
 **Impact:** Owner could introduce malicious code
 
 **Recommendation:**
+
 - Use multi-sig wallet as owner
 - Implement timelock on upgrades
 - Publish upgrade proposals before execution
@@ -535,6 +565,7 @@ pendingYield = (principal * apr * timeElapsed) / (10000 * 365 days)
 **Current Limit:** MAX_MEMBERS = 100
 
 **Recommendation:**
+
 - Paginate large operations
 - Consider off-chain computation with on-chain verification
 
@@ -553,6 +584,7 @@ pendingYield = (principal * apr * timeElapsed) / (10000 * 365 days)
 **Impact:** Users may receive less than expected during volatile periods
 
 **Recommendation:**
+
 - Add minimum output amounts to withdraw functions
 - Display expected yields before transactions
 
@@ -666,16 +698,19 @@ pool.setEmergencyMode(true);
 ### Recovery Scenarios
 
 **Scenario 1: Oracle Failure**
+
 - Enable emergency mode
 - Allow withdrawals at last known price
 - Pause new deposits
 
 **Scenario 2: Yield Vault Exploit**
+
 - Pause affected vault
 - Emergency withdraw from vault
 - Distribute losses proportionally
 
 **Scenario 3: Upgrade Failure**
+
 - Revert to previous implementation
 - Restore from storage snapshot
 - Investigate root cause
@@ -713,14 +748,14 @@ pool.setEmergencyMode(true);
 
 ## Appendix: Contract Addresses (Mainnet TBD)
 
-| Contract | Address | Proxy Type |
-|----------|---------|------------|
-| IndividualPoolV3 | TBD | UUPS |
-| CooperativePoolV3 | TBD | UUPS |
-| LotteryPool | TBD | Non-upgradeable |
-| RotatingPool | TBD | Non-upgradeable |
-| MezoIntegrationV3 | TBD | UUPS |
-| YieldAggregatorV3 | TBD | UUPS |
+| Contract          | Address | Proxy Type      |
+| ----------------- | ------- | --------------- |
+| IndividualPoolV3  | TBD     | UUPS            |
+| CooperativePoolV3 | TBD     | UUPS            |
+| LotteryPool       | TBD     | Non-upgradeable |
+| RotatingPool      | TBD     | Non-upgradeable |
+| MezoIntegrationV3 | TBD     | UUPS            |
+| YieldAggregatorV3 | TBD     | UUPS            |
 
 ---
 

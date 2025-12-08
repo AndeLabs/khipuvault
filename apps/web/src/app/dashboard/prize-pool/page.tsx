@@ -12,15 +12,15 @@
  * - Claim prizes/capital
  */
 
-'use client'
+"use client";
 
-export const dynamic = 'force-dynamic'
+export const dynamic = "force-dynamic";
 
-import * as React from 'react'
-import { PageHeader, PageSection } from '@/components/layout'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { Button } from '@/components/ui/button'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import * as React from "react";
+import { PageHeader, PageSection } from "@/components/layout";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Trophy,
   Ticket,
@@ -30,10 +30,10 @@ import {
   AlertCircle,
   Loader2,
   RefreshCw,
-} from 'lucide-react'
-import { useAccount } from 'wagmi'
-import { useQueryClient } from '@tanstack/react-query'
-import { useToast } from '@/hooks/use-toast'
+} from "lucide-react";
+import { useAccount } from "wagmi";
+import { useQueryClient } from "@tanstack/react-query";
+import { useToast } from "@/hooks/use-toast";
 
 // Hooks
 import {
@@ -45,8 +45,8 @@ import {
   useUserLotteryStats,
   useClaimPrize,
   useWithdrawCapital,
-} from '@/hooks/web3/use-lottery-pool'
-import { useLotteryPoolEvents } from '@/hooks/web3/use-lottery-pool-events'
+} from "@/hooks/web3/use-lottery-pool";
+import { useLotteryPoolEvents } from "@/hooks/web3/use-lottery-pool-events";
 
 // Components
 import {
@@ -57,7 +57,7 @@ import {
   DrawHistory,
   HowItWorks,
   LotteryStats,
-} from '@/features/prize-pool'
+} from "@/features/prize-pool";
 
 /**
  * Prize Pool Page - No-Loss Lottery System
@@ -76,101 +76,127 @@ import {
  * ✅ Proper error handling and loading states
  */
 export default function PrizePoolPage() {
-  const { isConnected, address } = useAccount()
-  const queryClient = useQueryClient()
-  const { toast } = useToast()
+  const { isConnected, address } = useAccount();
+  const queryClient = useQueryClient();
+  const { toast } = useToast();
 
   // Real contract data - current round
-  const { roundInfo: currentRound, currentRoundId, isLoading: isLoadingRound, error: roundError } = useCurrentRound()
+  const {
+    roundInfo: currentRound,
+    currentRoundId,
+    isLoading: isLoadingRound,
+    error: roundError,
+  } = useCurrentRound();
 
   // User data for current round
-  const { ticketCount, isLoading: isLoadingTickets } = useUserTickets(currentRoundId ? Number(currentRoundId) : undefined)
-  const { investment, isLoading: isLoadingInvestment } = useUserInvestment(currentRoundId ? Number(currentRoundId) : undefined)
-  const { probability, isLoading: isLoadingProbability } = useUserProbability(currentRoundId ? Number(currentRoundId) : undefined)
+  const { ticketCount, isLoading: isLoadingTickets } = useUserTickets(
+    currentRoundId ? Number(currentRoundId) : undefined,
+  );
+  const { investment, isLoading: isLoadingInvestment } = useUserInvestment(
+    currentRoundId ? Number(currentRoundId) : undefined,
+  );
+  const { probability, isLoading: isLoadingProbability } = useUserProbability(
+    currentRoundId ? Number(currentRoundId) : undefined,
+  );
 
   // All rounds for history
-  const { rounds, isLoading: isLoadingRounds } = useAllRounds()
+  const { rounds, isLoading: isLoadingRounds } = useAllRounds();
 
   // User stats across all rounds
-  const { stats, isLoading: isLoadingStats } = useUserLotteryStats()
+  const { stats, isLoading: isLoadingStats } = useUserLotteryStats();
 
   // Claim/withdraw hooks
-  const { claimPrize, isPending: isClaiming, isSuccess: isClaimSuccess } = useClaimPrize()
-  const { withdrawCapital, isPending: isWithdrawing, isSuccess: isWithdrawSuccess } = useWithdrawCapital()
+  const {
+    claimPrize,
+    isPending: isClaiming,
+    isSuccess: isClaimSuccess,
+  } = useClaimPrize();
+  const {
+    withdrawCapital,
+    isPending: isWithdrawing,
+    isSuccess: isWithdrawSuccess,
+  } = useWithdrawCapital();
 
   // Watch for events and auto-refetch
-  useLotteryPoolEvents()
+  useLotteryPoolEvents();
 
   // UI state
-  const [isBuyModalOpen, setIsBuyModalOpen] = React.useState(false)
-  const [activeTab, setActiveTab] = React.useState('overview')
+  const [isBuyModalOpen, setIsBuyModalOpen] = React.useState(false);
+  const [activeTab, setActiveTab] = React.useState("overview");
 
   // Check if user is winner
-  const isWinner = currentRound && address
-    ? currentRound.winner.toLowerCase() === address.toLowerCase()
-    : false
+  const isWinner =
+    currentRound && address
+      ? currentRound.winner.toLowerCase() === address.toLowerCase()
+      : false;
 
   // Check if user can claim/withdraw
-  const canClaim = currentRound && currentRound.status === 1 && ticketCount && ticketCount > BigInt(0)
-  const hasClaimedOrWithdrawn = false // Would need to track this via events
+  const canClaim =
+    currentRound &&
+    currentRound.status === 1 &&
+    ticketCount &&
+    ticketCount > BigInt(0);
+  const hasClaimedOrWithdrawn = false; // Would need to track this via events
 
   // Handle claim prize (for winners)
   const handleClaimPrize = async () => {
-    if (!currentRoundId) return
+    if (!currentRoundId) return;
 
     try {
-      await claimPrize(Number(currentRoundId))
+      await claimPrize(Number(currentRoundId));
       toast({
-        title: 'Prize Claimed!',
-        description: 'Your prize has been transferred to your wallet',
-      })
+        title: "Prize Claimed!",
+        description: "Your prize has been transferred to your wallet",
+      });
       // Refetch is handled by useLotteryPoolEvents hook and useEffect below
     } catch (error) {
-      console.error('Claim error:', error)
+      console.error("Claim error:", error);
       toast({
-        title: 'Claim Failed',
-        description: error instanceof Error ? error.message : 'Failed to claim prize',
-        variant: 'destructive',
-      })
+        title: "Claim Failed",
+        description:
+          error instanceof Error ? error.message : "Failed to claim prize",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
   // Handle withdraw capital (for non-winners)
   const handleWithdrawCapital = async () => {
-    if (!currentRoundId) return
+    if (!currentRoundId) return;
 
     try {
-      await withdrawCapital(Number(currentRoundId))
+      await withdrawCapital(Number(currentRoundId));
       toast({
-        title: 'Capital Withdrawn!',
-        description: 'Your capital has been returned to your wallet',
-      })
+        title: "Capital Withdrawn!",
+        description: "Your capital has been returned to your wallet",
+      });
       // Refetch is handled by useLotteryPoolEvents hook and useEffect below
     } catch (error) {
-      console.error('Withdraw error:', error)
+      console.error("Withdraw error:", error);
       toast({
-        title: 'Withdraw Failed',
-        description: error instanceof Error ? error.message : 'Failed to withdraw capital',
-        variant: 'destructive',
-      })
+        title: "Withdraw Failed",
+        description:
+          error instanceof Error ? error.message : "Failed to withdraw capital",
+        variant: "destructive",
+      });
     }
-  }
+  };
 
   // Manual refetch
   const handleRefresh = () => {
-    queryClient.refetchQueries({ type: 'active' })
+    queryClient.refetchQueries({ type: "active" });
     toast({
-      title: 'Refreshing...',
-      description: 'Fetching latest lottery data',
-    })
-  }
+      title: "Refreshing...",
+      description: "Fetching latest lottery data",
+    });
+  };
 
   // Watch for claim/withdraw success
   React.useEffect(() => {
     if (isClaimSuccess || isWithdrawSuccess) {
-      queryClient.refetchQueries({ type: 'active' })
+      queryClient.refetchQueries({ type: "active" });
     }
-  }, [isClaimSuccess, isWithdrawSuccess, queryClient])
+  }, [isClaimSuccess, isWithdrawSuccess, queryClient]);
 
   // Not connected state
   if (!isConnected) {
@@ -188,7 +214,7 @@ export default function PrizePoolPage() {
           </p>
         </div>
       </div>
-    )
+    );
   }
 
   // Error state
@@ -206,7 +232,7 @@ export default function PrizePoolPage() {
           </AlertDescription>
         </Alert>
       </div>
-    )
+    );
   }
 
   return (
@@ -237,7 +263,11 @@ export default function PrizePoolPage() {
               size="sm"
               className="bg-success hover:bg-success/90"
             >
-              {isClaiming ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Claim Prize'}
+              {isClaiming ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Claim Prize"
+              )}
             </Button>
           </AlertDescription>
         </Alert>
@@ -248,7 +278,8 @@ export default function PrizePoolPage() {
           <AlertCircle className="h-4 w-4 text-info" />
           <AlertDescription className="flex items-center justify-between">
             <span className="text-info-foreground">
-              Round ended. Withdraw your capital to participate in the next round.
+              Round ended. Withdraw your capital to participate in the next
+              round.
             </span>
             <Button
               onClick={handleWithdrawCapital}
@@ -256,7 +287,11 @@ export default function PrizePoolPage() {
               size="sm"
               variant="outline"
             >
-              {isWithdrawing ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Withdraw Capital'}
+              {isWithdrawing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                "Withdraw Capital"
+              )}
             </Button>
           </AlertDescription>
         </Alert>
@@ -274,7 +309,10 @@ export default function PrizePoolPage() {
 
       {/* Statistics Cards */}
       <PageSection>
-        <LotteryStats roundInfo={currentRound ?? null} isLoading={isLoadingRound} />
+        <LotteryStats
+          roundInfo={currentRound ?? null}
+          isLoading={isLoadingRound}
+        />
       </PageSection>
 
       {/* Main Content - Tabs */}
@@ -307,7 +345,11 @@ export default function PrizePoolPage() {
                 investment={investment ?? undefined}
                 probability={probability ?? undefined}
                 isWinner={isWinner}
-                isLoading={isLoadingTickets || isLoadingInvestment || isLoadingProbability}
+                isLoading={
+                  isLoadingTickets ||
+                  isLoadingInvestment ||
+                  isLoadingProbability
+                }
               />
 
               <ProbabilityCalculator roundInfo={currentRound ?? null} />
@@ -318,27 +360,39 @@ export default function PrizePoolPage() {
               <div className="grid gap-4 md:grid-cols-4">
                 <div className="p-4 rounded-lg bg-surface-elevated border border-border text-center">
                   <div className="text-2xl font-bold text-lavanda">
-                    {isLoadingStats ? '-' : stats.roundsPlayed}
+                    {isLoadingStats ? "-" : stats.roundsPlayed}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">Rounds Played</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Rounds Played
+                  </div>
                 </div>
                 <div className="p-4 rounded-lg bg-surface-elevated border border-border text-center">
                   <div className="text-2xl font-bold text-accent">
-                    {isLoadingStats ? '-' : stats.totalTickets}
+                    {isLoadingStats ? "-" : stats.totalTickets}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">Total Tickets</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Total Tickets
+                  </div>
                 </div>
                 <div className="p-4 rounded-lg bg-surface-elevated border border-border text-center">
                   <div className="text-2xl font-bold text-success">
-                    {isLoadingStats ? '-' : `${Number(stats.totalInvested) / 1e18} BTC`}
+                    {isLoadingStats
+                      ? "-"
+                      : `${Number(stats.totalInvested) / 1e18} BTC`}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">Total Invested</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Total Invested
+                  </div>
                 </div>
                 <div className="p-4 rounded-lg bg-surface-elevated border border-border text-center">
                   <div className="text-2xl font-bold text-warning">
-                    {isLoadingStats ? '-' : `${Number(stats.totalWinnings) / 1e18} BTC`}
+                    {isLoadingStats
+                      ? "-"
+                      : `${Number(stats.totalWinnings) / 1e18} BTC`}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">Total Winnings</div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    Total Winnings
+                  </div>
                 </div>
               </div>
             )}
@@ -352,7 +406,11 @@ export default function PrizePoolPage() {
                 investment={investment ?? undefined}
                 probability={probability ?? undefined}
                 isWinner={isWinner}
-                isLoading={isLoadingTickets || isLoadingInvestment || isLoadingProbability}
+                isLoading={
+                  isLoadingTickets ||
+                  isLoadingInvestment ||
+                  isLoadingProbability
+                }
               />
 
               <ProbabilityCalculator roundInfo={currentRound ?? null} />
@@ -383,5 +441,5 @@ export default function PrizePoolPage() {
         currentUserTickets={ticketCount ?? undefined}
       />
     </div>
-  )
+  );
 }

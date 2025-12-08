@@ -1,5 +1,9 @@
-import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
-import { TESTNET_ADDRESSES } from '../addresses'
+import {
+  useReadContract,
+  useWriteContract,
+  useWaitForTransactionReceipt,
+} from "wagmi";
+import { TESTNET_ADDRESSES } from "../addresses";
 
 /**
  * Hook para interactuar con CooperativePool V3
@@ -9,24 +13,30 @@ export function useCooperativePool() {
   const { data: poolInfo } = useReadContract({
     address: TESTNET_ADDRESSES.COOPERATIVE_POOL,
     abi: [], // TODO: Add ABI
-    functionName: 'getPool',
-  })
+    functionName: "getPool",
+  });
 
   const { data: memberInfo } = useReadContract({
     address: TESTNET_ADDRESSES.COOPERATIVE_POOL,
     abi: [], // TODO: Add ABI
-    functionName: 'getMemberInfo',
-  })
+    functionName: "getMemberInfo",
+  });
 
   // Write functions
-  const { writeContract: createPool, data: createHash } = useWriteContract()
-  const { writeContract: joinPool, data: joinHash } = useWriteContract()
-  const { writeContract: leavePool, data: leaveHash } = useWriteContract()
+  const { writeContract: createPool, data: createHash } = useWriteContract();
+  const { writeContract: joinPool, data: joinHash } = useWriteContract();
+  const { writeContract: leavePool, data: leaveHash } = useWriteContract();
 
   // Transaction confirmations
-  const { isLoading: isCreateConfirming } = useWaitForTransactionReceipt({ hash: createHash })
-  const { isLoading: isJoinConfirming } = useWaitForTransactionReceipt({ hash: joinHash })
-  const { isLoading: isLeaveConfirming } = useWaitForTransactionReceipt({ hash: leaveHash })
+  const { isLoading: isCreateConfirming } = useWaitForTransactionReceipt({
+    hash: createHash,
+  });
+  const { isLoading: isJoinConfirming } = useWaitForTransactionReceipt({
+    hash: joinHash,
+  });
+  const { isLoading: isLeaveConfirming } = useWaitForTransactionReceipt({
+    hash: leaveHash,
+  });
 
   return {
     // Read data
@@ -47,5 +57,5 @@ export function useCooperativePool() {
     createHash,
     joinHash,
     leaveHash,
-  }
+  };
 }

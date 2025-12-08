@@ -9,9 +9,9 @@
  * - Transaction execution
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
+import * as React from "react";
 import {
   Dialog,
   DialogContent,
@@ -19,115 +19,139 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Card, CardContent } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
-import { Loader2, Bitcoin, Users, Shield, AlertTriangle, TrendingUp } from 'lucide-react'
-import { useCooperativePool, formatBTCCompact } from '@/hooks/web3/use-cooperative-pool'
-import { usePoolInfo } from '@/hooks/web3/use-cooperative-pool'
-import { useToast } from '@/hooks/use-toast'
-import { parseEther, formatEther } from 'viem'
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Separator } from "@/components/ui/separator";
+import {
+  Loader2,
+  Bitcoin,
+  Users,
+  Shield,
+  AlertTriangle,
+  TrendingUp,
+} from "lucide-react";
+import {
+  useCooperativePool,
+  formatBTCCompact,
+} from "@/hooks/web3/use-cooperative-pool";
+import { usePoolInfo } from "@/hooks/web3/use-cooperative-pool";
+import { useToast } from "@/hooks/use-toast";
+import { parseEther, formatEther } from "viem";
 
 interface JoinPoolModalV3Props {
-  poolId: number | null
-  open: boolean
-  onClose: () => void
-  onSuccess?: () => void
+  poolId: number | null;
+  open: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolModalV3Props) {
-  const { toast } = useToast()
-  const { joinPool, state, error, reset } = useCooperativePool()
-  const { poolInfo, isLoading: loadingPool } = usePoolInfo(poolId || 0)
+export function JoinPoolModalV3({
+  poolId,
+  open,
+  onClose,
+  onSuccess,
+}: JoinPoolModalV3Props) {
+  const { toast } = useToast();
+  const { joinPool, state, error, reset } = useCooperativePool();
+  const { poolInfo, isLoading: loadingPool } = usePoolInfo(poolId || 0);
 
-  const [btcAmount, setBtcAmount] = React.useState('')
-  const [validationError, setValidationError] = React.useState('')
+  const [btcAmount, setBtcAmount] = React.useState("");
+  const [validationError, setValidationError] = React.useState("");
 
   // Validate amount
   const validate = React.useCallback(() => {
-    if (!poolInfo) return false
+    if (!poolInfo) return false;
 
-    const amount = parseFloat(btcAmount)
+    const amount = parseFloat(btcAmount);
 
     if (isNaN(amount) || amount <= 0) {
-      setValidationError('Please enter a valid BTC amount')
-      return false
+      setValidationError("Please enter a valid BTC amount");
+      return false;
     }
 
-    const minBtc = Number(formatEther(poolInfo.minContribution))
-    const maxBtc = Number(formatEther(poolInfo.maxContribution))
+    const minBtc = Number(formatEther(poolInfo.minContribution));
+    const maxBtc = Number(formatEther(poolInfo.maxContribution));
 
     if (amount < minBtc) {
-      setValidationError(`Amount must be at least ${formatBTCCompact(poolInfo.minContribution)} BTC`)
-      return false
+      setValidationError(
+        `Amount must be at least ${formatBTCCompact(poolInfo.minContribution)} BTC`,
+      );
+      return false;
     }
 
     if (amount > maxBtc) {
-      setValidationError(`Amount must not exceed ${formatBTCCompact(poolInfo.maxContribution)} BTC`)
-      return false
+      setValidationError(
+        `Amount must not exceed ${formatBTCCompact(poolInfo.maxContribution)} BTC`,
+      );
+      return false;
     }
 
-    setValidationError('')
-    return true
-  }, [btcAmount, poolInfo])
+    setValidationError("");
+    return true;
+  }, [btcAmount, poolInfo]);
 
   // Handle join
   const handleJoin = async () => {
-    if (!poolId || !validate()) return
+    if (!poolId || !validate()) return;
 
     try {
-      await joinPool(poolId, btcAmount)
+      await joinPool(poolId, btcAmount);
     } catch (err) {
-      console.error('Join pool error:', err)
+      console.error("Join pool error:", err);
       toast({
-        variant: 'destructive',
-        title: 'Error',
-        description: err instanceof Error ? err.message : 'Failed to join pool. Please try again.',
-      })
+        variant: "destructive",
+        title: "Error",
+        description:
+          err instanceof Error
+            ? err.message
+            : "Failed to join pool. Please try again.",
+      });
     }
-  }
+  };
 
   // Handle success
   React.useEffect(() => {
-    if (state === 'success') {
+    if (state === "success") {
       toast({
-        title: 'Joined Pool!',
-        description: 'You have successfully joined the cooperative pool.',
-      })
-      onSuccess?.()
-      handleClose()
+        title: "Joined Pool!",
+        description: "You have successfully joined the cooperative pool.",
+      });
+      onSuccess?.();
+      handleClose();
     }
-  }, [state])
+  }, [state]);
 
   // Handle close
   const handleClose = () => {
-    setBtcAmount('')
-    setValidationError('')
-    reset()
-    onClose()
-  }
+    setBtcAmount("");
+    setValidationError("");
+    reset();
+    onClose();
+  };
 
   // Auto-fill min amount
   React.useEffect(() => {
     if (poolInfo && !btcAmount) {
-      setBtcAmount(formatEther(poolInfo.minContribution))
+      setBtcAmount(formatEther(poolInfo.minContribution));
     }
-  }, [poolInfo])
+  }, [poolInfo]);
 
-  const isProcessing = state === 'executing' || state === 'processing'
-  const canSubmit = !isProcessing && btcAmount && poolInfo
+  const isProcessing = state === "executing" || state === "processing";
+  const canSubmit = !isProcessing && btcAmount && poolInfo;
 
-  if (!poolId) return null
+  if (!poolId) return null;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-heading">Join Cooperative Pool</DialogTitle>
+          <DialogTitle className="text-2xl font-heading">
+            Join Cooperative Pool
+          </DialogTitle>
           <DialogDescription>
             Contribute BTC to join this pool and start earning yields together
           </DialogDescription>
@@ -186,8 +210,12 @@ export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolMo
                   />
                 </div>
                 <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <span>Min: {formatBTCCompact(poolInfo.minContribution)} BTC</span>
-                  <span>Max: {formatBTCCompact(poolInfo.maxContribution)} BTC</span>
+                  <span>
+                    Min: {formatBTCCompact(poolInfo.minContribution)} BTC
+                  </span>
+                  <span>
+                    Max: {formatBTCCompact(poolInfo.maxContribution)} BTC
+                  </span>
                 </div>
               </div>
 
@@ -196,7 +224,9 @@ export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolMo
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setBtcAmount(formatEther(poolInfo.minContribution))}
+                  onClick={() =>
+                    setBtcAmount(formatEther(poolInfo.minContribution))
+                  }
                   disabled={isProcessing}
                 >
                   Min
@@ -205,9 +235,11 @@ export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolMo
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    const mid = (Number(formatEther(poolInfo.minContribution)) +
-                      Number(formatEther(poolInfo.maxContribution))) / 2
-                    setBtcAmount(mid.toFixed(8))
+                    const mid =
+                      (Number(formatEther(poolInfo.minContribution)) +
+                        Number(formatEther(poolInfo.maxContribution))) /
+                      2;
+                    setBtcAmount(mid.toFixed(8));
                   }}
                   disabled={isProcessing}
                 >
@@ -216,7 +248,9 @@ export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolMo
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setBtcAmount(formatEther(poolInfo.maxContribution))}
+                  onClick={() =>
+                    setBtcAmount(formatEther(poolInfo.maxContribution))
+                  }
                   disabled={isProcessing}
                 >
                   Max
@@ -230,15 +264,17 @@ export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolMo
                 <p className="text-sm font-medium">Transaction Summary</p>
                 <div className="space-y-1.5 text-sm">
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground">You contribute</span>
+                    <span className="text-muted-foreground">
+                      You contribute
+                    </span>
                     <span className="font-mono font-semibold">
-                      {btcAmount || '0'} BTC
+                      {btcAmount || "0"} BTC
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Your shares</span>
                     <span className="font-mono font-semibold">
-                      {btcAmount ? parseEther(btcAmount).toString() : '0'}
+                      {btcAmount ? parseEther(btcAmount).toString() : "0"}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -260,7 +296,7 @@ export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolMo
               )}
 
               {/* Transaction Error */}
-              {error && state === 'error' && (
+              {error && state === "error" && (
                 <Alert variant="destructive">
                   <AlertTriangle className="h-4 w-4" />
                   <AlertDescription>{error}</AlertDescription>
@@ -271,8 +307,9 @@ export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolMo
               <Alert>
                 <Bitcoin className="h-4 w-4" />
                 <AlertDescription className="text-sm">
-                  Your BTC will be deposited into the Mezo protocol to mint MUSD and generate yields.
-                  You can leave the pool at any time to withdraw your contribution plus earned yields.
+                  Your BTC will be deposited into the Mezo protocol to mint MUSD
+                  and generate yields. You can leave the pool at any time to
+                  withdraw your contribution plus earned yields.
                 </AlertDescription>
               </Alert>
             </>
@@ -280,18 +317,20 @@ export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolMo
         </div>
 
         <DialogFooter>
-          <Button variant="outline" onClick={handleClose} disabled={isProcessing}>
+          <Button
+            variant="outline"
+            onClick={handleClose}
+            disabled={isProcessing}
+          >
             Cancel
           </Button>
-          <Button
-            variant="accent"
-            onClick={handleJoin}
-            disabled={!canSubmit}
-          >
+          <Button variant="accent" onClick={handleJoin} disabled={!canSubmit}>
             {isProcessing ? (
               <>
                 <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {state === 'executing' ? 'Confirm in Wallet...' : 'Joining Pool...'}
+                {state === "executing"
+                  ? "Confirm in Wallet..."
+                  : "Joining Pool..."}
               </>
             ) : (
               <>
@@ -303,5 +342,5 @@ export function JoinPoolModalV3({ poolId, open, onClose, onSuccess }: JoinPoolMo
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }

@@ -15,5 +15,11 @@
     "verify": "forge verify-contract",
     "generate:abis": "node scripts/generate-abis.js"
   },
-  "keywords": ["solidity", "smart-contracts", "defi", "bitcoin", "mezo"]
+  "keywords": [
+    "solidity",
+    "smart-contracts",
+    "defi",
+    "bitcoin",
+    "mezo"
+  ]
 }

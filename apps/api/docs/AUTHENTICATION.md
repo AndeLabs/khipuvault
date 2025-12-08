@@ -21,6 +21,7 @@ GET /api/auth/nonce
 ```
 
 **Response:**
+
 ```json
 {
   "nonce": "abc123...xyz"
@@ -42,6 +43,7 @@ Content-Type: application/json
 ```
 
 **Response:**
+
 ```json
 {
   "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
@@ -51,6 +53,7 @@ Content-Type: application/json
 ```
 
 **Error Response:**
+
 ```json
 {
   "error": "Authentication failed",
@@ -70,6 +73,7 @@ Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "address": "0x1234567890123456789012345678901234567890",
@@ -89,6 +93,7 @@ Authorization: Bearer <token>
 ```
 
 **Response:**
+
 ```json
 {
   "success": true,
@@ -101,117 +106,117 @@ Authorization: Bearer <token>
 ### Using ethers.js
 
 ```typescript
-import { ethers } from 'ethers'
-import { SiweMessage } from 'siwe'
+import { ethers } from "ethers";
+import { SiweMessage } from "siwe";
 
 async function authenticateWithSIWE() {
   // 1. Get provider and signer
-  const provider = new ethers.BrowserProvider(window.ethereum)
-  const signer = await provider.getSigner()
-  const address = await signer.getAddress()
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const address = await signer.getAddress();
 
   // 2. Request nonce from server
-  const nonceResponse = await fetch('http://localhost:3001/api/auth/nonce')
-  const { nonce } = await nonceResponse.json()
+  const nonceResponse = await fetch("http://localhost:3001/api/auth/nonce");
+  const { nonce } = await nonceResponse.json();
 
   // 3. Create SIWE message
   const message = new SiweMessage({
     domain: window.location.host,
     address: address,
-    statement: 'Sign in with Ethereum to KhipuVault',
+    statement: "Sign in with Ethereum to KhipuVault",
     uri: window.location.origin,
-    version: '1',
+    version: "1",
     chainId: 1, // Ethereum mainnet
     nonce: nonce,
-  })
+  });
 
   // 4. Sign the message
-  const messageString = message.prepareMessage()
-  const signature = await signer.signMessage(messageString)
+  const messageString = message.prepareMessage();
+  const signature = await signer.signMessage(messageString);
 
   // 5. Verify with server
-  const verifyResponse = await fetch('http://localhost:3001/api/auth/verify', {
-    method: 'POST',
+  const verifyResponse = await fetch("http://localhost:3001/api/auth/verify", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       message: messageString,
       signature: signature,
     }),
-  })
+  });
 
-  const { token, address: verifiedAddress } = await verifyResponse.json()
+  const { token, address: verifiedAddress } = await verifyResponse.json();
 
   // 6. Store token for future requests
-  localStorage.setItem('auth_token', token)
+  localStorage.setItem("auth_token", token);
 
-  return { token, address: verifiedAddress }
+  return { token, address: verifiedAddress };
 }
 
 // Use the token in subsequent requests
 async function makeAuthenticatedRequest(endpoint: string) {
-  const token = localStorage.getItem('auth_token')
+  const token = localStorage.getItem("auth_token");
 
   const response = await fetch(`http://localhost:3001${endpoint}`, {
     headers: {
-      'Authorization': `Bearer ${token}`,
+      Authorization: `Bearer ${token}`,
     },
-  })
+  });
 
-  return response.json()
+  return response.json();
 }
 ```
 
 ### Using wagmi + viem
 
 ```typescript
-import { useAccount, useSignMessage } from 'wagmi'
-import { SiweMessage } from 'siwe'
+import { useAccount, useSignMessage } from "wagmi";
+import { SiweMessage } from "siwe";
 
 function useAuth() {
-  const { address } = useAccount()
-  const { signMessageAsync } = useSignMessage()
+  const { address } = useAccount();
+  const { signMessageAsync } = useSignMessage();
 
   const signIn = async () => {
-    if (!address) throw new Error('No wallet connected')
+    if (!address) throw new Error("No wallet connected");
 
     // 1. Get nonce
-    const nonceRes = await fetch('/api/auth/nonce')
-    const { nonce } = await nonceRes.json()
+    const nonceRes = await fetch("/api/auth/nonce");
+    const { nonce } = await nonceRes.json();
 
     // 2. Create and sign message
     const message = new SiweMessage({
       domain: window.location.host,
       address,
-      statement: 'Sign in with Ethereum to KhipuVault',
+      statement: "Sign in with Ethereum to KhipuVault",
       uri: window.location.origin,
-      version: '1',
+      version: "1",
       chainId: 1,
       nonce,
-    })
+    });
 
     const signature = await signMessageAsync({
       message: message.prepareMessage(),
-    })
+    });
 
     // 3. Verify
-    const verifyRes = await fetch('/api/auth/verify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    const verifyRes = await fetch("/api/auth/verify", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         message: message.prepareMessage(),
         signature,
       }),
-    })
+    });
 
-    const { token } = await verifyRes.json()
-    localStorage.setItem('auth_token', token)
+    const { token } = await verifyRes.json();
+    localStorage.setItem("auth_token", token);
 
-    return token
-  }
+    return token;
+  };
 
-  return { signIn }
+  return { signIn };
 }
 ```
 
@@ -220,29 +225,29 @@ function useAuth() {
 To protect routes, use the `requireAuth` middleware:
 
 ```typescript
-import { Router } from 'express'
-import { requireAuth } from '../middleware/auth'
+import { Router } from "express";
+import { requireAuth } from "../middleware/auth";
 
-const router = Router()
+const router = Router();
 
 // Public route
-router.get('/public', (req, res) => {
-  res.json({ message: 'This is public' })
-})
+router.get("/public", (req, res) => {
+  res.json({ message: "This is public" });
+});
 
 // Protected route
-router.get('/protected', requireAuth, (req, res) => {
+router.get("/protected", requireAuth, (req, res) => {
   // req.user is available and contains:
   // - address: string
   // - iat: number (issued at)
   // - exp: number (expires at)
   res.json({
-    message: 'This is protected',
+    message: "This is protected",
     user: req.user,
-  })
-})
+  });
+});
 
-export default router
+export default router;
 ```
 
 ## Security Features
@@ -288,12 +293,12 @@ openssl rand -base64 32
 
 Common error responses:
 
-| Status | Error | Description |
-|--------|-------|-------------|
-| 401 | Unauthorized | No token provided or invalid token |
-| 401 | Authentication failed | Invalid signature or nonce |
-| 400 | Validation Error | Invalid request body format |
-| 500 | Internal Server Error | Server error during authentication |
+| Status | Error                 | Description                        |
+| ------ | --------------------- | ---------------------------------- |
+| 401    | Unauthorized          | No token provided or invalid token |
+| 401    | Authentication failed | Invalid signature or nonce         |
+| 400    | Validation Error      | Invalid request body format        |
+| 500    | Internal Server Error | Server error during authentication |
 
 ## Best Practices
 
@@ -327,20 +332,20 @@ For production deployments, consider:
 Example Redis nonce storage:
 
 ```typescript
-import Redis from 'ioredis'
+import Redis from "ioredis";
 
-const redis = new Redis()
+const redis = new Redis();
 
 async function storeNonce(nonce: string) {
-  await redis.setex(`nonce:${nonce}`, 600, 'unused') // 10 minutes TTL
+  await redis.setex(`nonce:${nonce}`, 600, "unused"); // 10 minutes TTL
 }
 
 async function verifyAndConsumeNonce(nonce: string): Promise<boolean> {
-  const value = await redis.get(`nonce:${nonce}`)
-  if (value === 'unused') {
-    await redis.set(`nonce:${nonce}`, 'used')
-    return true
+  const value = await redis.get(`nonce:${nonce}`);
+  if (value === "unused") {
+    await redis.set(`nonce:${nonce}`, "used");
+    return true;
   }
-  return false
+  return false;
 }
 ```

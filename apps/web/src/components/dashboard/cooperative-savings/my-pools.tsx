@@ -1,7 +1,7 @@
 /**
  * @fileoverview My Pools Component - Production Ready
  * @module components/dashboard/cooperative-savings/my-pools
- * 
+ *
  * Shows all pools where the user is a member
  * Fetches real data from blockchain
  */
@@ -14,16 +14,23 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Settings, Loader2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { 
-  useCooperativePools, 
-  useMemberInfo, 
+import {
+  useCooperativePools,
+  useMemberInfo,
   usePoolMembers,
   useMemberYield,
   useLeavePool,
   useClaimYield,
-  formatBTC 
+  formatBTC,
 } from "@/hooks/web3/use-cooperative-pools";
 import { useAccount } from "wagmi";
 import { useToast } from "@/hooks/use-toast";
@@ -40,11 +47,13 @@ export function MyPools() {
 
     const fetchUserPools = async () => {
       const memberPools = [];
-      
+
       for (const pool of pools) {
         // Check if user is a member by trying to get member info
         try {
-          const memberInfo = await fetch(`/api/pool/${pool.poolId}/member/${address}`).catch(() => null);
+          const memberInfo = await fetch(
+            `/api/pool/${pool.poolId}/member/${address}`,
+          ).catch(() => null);
           if (memberInfo) {
             memberPools.push(pool);
           }
@@ -52,7 +61,7 @@ export function MyPools() {
           // Not a member, skip
         }
       }
-      
+
       setUserPools(memberPools);
     };
 
@@ -63,7 +72,9 @@ export function MyPools() {
     return (
       <div className="flex items-center justify-center py-12">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
-        <span className="ml-3 text-muted-foreground">Cargando tus pools...</span>
+        <span className="ml-3 text-muted-foreground">
+          Cargando tus pools...
+        </span>
       </div>
     );
   }
@@ -83,8 +94,12 @@ export function MyPools() {
   if (userPools.length === 0) {
     return (
       <div className="text-center py-12 bg-card rounded-lg border border-primary/20">
-        <h3 className="text-xl font-semibold">No estás en ningún pool cooperativo.</h3>
-        <p className="text-muted-foreground mt-2">¡Explora los pools existentes o crea el tuyo!</p>
+        <h3 className="text-xl font-semibold">
+          No estás en ningún pool cooperativo.
+        </h3>
+        <p className="text-muted-foreground mt-2">
+          ¡Explora los pools existentes o crea el tuyo!
+        </p>
       </div>
     );
   }
@@ -92,7 +107,11 @@ export function MyPools() {
   return (
     <div className="space-y-6">
       {userPools.map((pool) => (
-        <PoolCard key={Number(pool.poolId)} pool={pool} userAddress={address!} />
+        <PoolCard
+          key={Number(pool.poolId)}
+          pool={pool}
+          userAddress={address!}
+        />
       ))}
     </div>
   );
@@ -102,17 +121,28 @@ export function MyPools() {
  * Individual Pool Card Component
  */
 function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
-  const { memberInfo } = useMemberInfo(Number(pool.poolId), userAddress as `0x${string}`);
+  const { memberInfo } = useMemberInfo(
+    Number(pool.poolId),
+    userAddress as `0x${string}`,
+  );
   const { members } = usePoolMembers(Number(pool.poolId));
-  const { yieldAmount } = useMemberYield(Number(pool.poolId), userAddress as `0x${string}`);
+  const { yieldAmount } = useMemberYield(
+    Number(pool.poolId),
+    userAddress as `0x${string}`,
+  );
   const { leavePool, isPending: isLeaving } = useLeavePool();
   const { claimYield, isPending: isClaiming } = useClaimYield();
   const { toast } = useToast();
 
   const isCreator = pool.creator.toLowerCase() === userAddress.toLowerCase();
-  const userShare = pool.totalBtcDeposited > 0n 
-    ? ((Number(memberInfo?.btcContributed || 0n) / Number(pool.totalBtcDeposited)) * 100).toFixed(2)
-    : '0';
+  const userShare =
+    pool.totalBtcDeposited > 0n
+      ? (
+          (Number(memberInfo?.btcContributed || 0n) /
+            Number(pool.totalBtcDeposited)) *
+          100
+        ).toFixed(2)
+      : "0";
 
   const handleLeavePool = async () => {
     try {
@@ -167,7 +197,9 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
         <Tabs defaultValue="summary" className="w-full">
           <TabsList className="grid w-full grid-cols-3 bg-background">
             <TabsTrigger value="summary">Resumen</TabsTrigger>
-            <TabsTrigger value="members">Miembros ({members.length})</TabsTrigger>
+            <TabsTrigger value="members">
+              Miembros ({members.length})
+            </TabsTrigger>
             <TabsTrigger value="activity">Actividad</TabsTrigger>
           </TabsList>
 
@@ -185,7 +217,9 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
                 <p className="text-lg font-bold font-code">{userShare}%</p>
               </div>
               <div className="bg-background/50 p-4 rounded-lg">
-                <p className="text-sm text-muted-foreground">Yield Disponible</p>
+                <p className="text-sm text-muted-foreground">
+                  Yield Disponible
+                </p>
                 <p className="text-lg font-bold font-code text-secondary">
                   {formatBTC(yieldAmount || 0n)} MUSD
                 </p>
@@ -199,8 +233,8 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
             </div>
 
             <div className="flex gap-2 mt-6">
-              <Button 
-                variant="default" 
+              <Button
+                variant="default"
                 className="w-full"
                 onClick={handleClaimYield}
                 disabled={isClaiming || !yieldAmount || yieldAmount === 0n}
@@ -214,8 +248,8 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
                   <>🎁 Reclamar Yield</>
                 )}
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full text-red-500 border-red-500 hover:bg-red-500/10 hover:text-red-500"
                 onClick={handleLeavePool}
                 disabled={isLeaving}
@@ -244,9 +278,11 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
               </TableHeader>
               <TableBody>
                 {members.map((memberAddr, i) => {
-                  const isPoolCreator = pool.creator.toLowerCase() === memberAddr.toLowerCase();
-                  const isCurrentUser = memberAddr.toLowerCase() === userAddress.toLowerCase();
-                  
+                  const isPoolCreator =
+                    pool.creator.toLowerCase() === memberAddr.toLowerCase();
+                  const isCurrentUser =
+                    memberAddr.toLowerCase() === userAddress.toLowerCase();
+
                   return (
                     <TableRow key={i}>
                       <TableCell className="flex items-center gap-2">
@@ -259,7 +295,10 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
                           {memberAddr.slice(0, 6)}...{memberAddr.slice(-4)}
                         </span>
                         {isPoolCreator && (
-                          <Badge variant="outline" className="text-xs ml-1 border-yellow-500 text-yellow-500">
+                          <Badge
+                            variant="outline"
+                            className="text-xs ml-1 border-yellow-500 text-yellow-500"
+                          >
                             👑
                           </Badge>
                         )}

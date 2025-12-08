@@ -14,12 +14,12 @@ This directory contains comprehensive technical and security documentation for t
 
 ### Documents
 
-| Document | Purpose | Audience |
-|----------|---------|----------|
-| [SECURITY_AUDIT.md](./SECURITY_AUDIT.md) | Main audit documentation | Auditors, Security Researchers |
-| [INDIVIDUAL_POOL.md](./INDIVIDUAL_POOL.md) | IndividualPoolV3 technical specs | Auditors, Developers |
-| [COOPERATIVE_POOL.md](./COOPERATIVE_POOL.md) | CooperativePoolV3 technical specs | Auditors, Developers |
-| [THREAT_MODEL.md](./THREAT_MODEL.md) | Security threats and mitigations | Auditors, Security Team |
+| Document                                     | Purpose                           | Audience                       |
+| -------------------------------------------- | --------------------------------- | ------------------------------ |
+| [SECURITY_AUDIT.md](./SECURITY_AUDIT.md)     | Main audit documentation          | Auditors, Security Researchers |
+| [INDIVIDUAL_POOL.md](./INDIVIDUAL_POOL.md)   | IndividualPoolV3 technical specs  | Auditors, Developers           |
+| [COOPERATIVE_POOL.md](./COOPERATIVE_POOL.md) | CooperativePoolV3 technical specs | Auditors, Developers           |
+| [THREAT_MODEL.md](./THREAT_MODEL.md)         | Security threats and mitigations  | Auditors, Security Team        |
 
 ---
 
@@ -30,6 +30,7 @@ This directory contains comprehensive technical and security documentation for t
 Start here: **[SECURITY_AUDIT.md](./SECURITY_AUDIT.md)**
 
 This document provides:
+
 - Executive summary
 - System architecture
 - Contract roles and permissions
@@ -49,6 +50,7 @@ This document provides:
 After understanding the system, dive into specific contracts:
 
 #### Individual Pool
+
 **Document:** [INDIVIDUAL_POOL.md](./INDIVIDUAL_POOL.md)
 
 - Personal savings accounts
@@ -58,6 +60,7 @@ After understanding the system, dive into specific contracts:
 - Edge cases and error handling
 
 **Key Areas to Audit:**
+
 - Yield calculation logic
 - Partial withdrawal mechanics
 - Auto-compound trigger conditions
@@ -66,6 +69,7 @@ After understanding the system, dive into specific contracts:
 ---
 
 #### Cooperative Pool
+
 **Document:** [COOPERATIVE_POOL.md](./COOPERATIVE_POOL.md)
 
 - Multi-member pools
@@ -74,6 +78,7 @@ After understanding the system, dive into specific contracts:
 - Proportional withdrawal logic
 
 **Key Areas to Audit:**
+
 - Share calculation fairness
 - Yield distribution accuracy
 - Member join/leave mechanics
@@ -86,6 +91,7 @@ After understanding the system, dive into specific contracts:
 **Document:** [THREAT_MODEL.md](./THREAT_MODEL.md)
 
 Comprehensive threat analysis including:
+
 - Malicious actor profiles
 - Attack vectors with code examples
 - Threat scenarios
@@ -93,6 +99,7 @@ Comprehensive threat analysis including:
 - Recommended tests
 
 **Critical Focus Areas:**
+
 - Reentrancy attack vectors
 - Flash loan protection effectiveness
 - Oracle manipulation risks
@@ -104,14 +111,14 @@ Comprehensive threat analysis including:
 
 ### Core Contracts
 
-| Contract | Type | Features | Risk Level |
-|----------|------|----------|------------|
-| **IndividualPoolV3** | UUPS Upgradeable | Personal savings, auto-compound, referrals | MEDIUM |
-| **CooperativePoolV3** | UUPS Upgradeable | Multi-member, share-based yields | MEDIUM |
-| **LotteryPool** | Non-upgradeable | Chainlink VRF lottery, no-loss | MEDIUM-HIGH |
-| **RotatingPool** | Non-upgradeable | ROSCA implementation | MEDIUM |
-| **MezoIntegrationV3** | UUPS Upgradeable | BTC→MUSD minting | HIGH |
-| **YieldAggregatorV3** | UUPS Upgradeable | Multi-vault yield farming | MEDIUM |
+| Contract              | Type             | Features                                   | Risk Level  |
+| --------------------- | ---------------- | ------------------------------------------ | ----------- |
+| **IndividualPoolV3**  | UUPS Upgradeable | Personal savings, auto-compound, referrals | MEDIUM      |
+| **CooperativePoolV3** | UUPS Upgradeable | Multi-member, share-based yields           | MEDIUM      |
+| **LotteryPool**       | Non-upgradeable  | Chainlink VRF lottery, no-loss             | MEDIUM-HIGH |
+| **RotatingPool**      | Non-upgradeable  | ROSCA implementation                       | MEDIUM      |
+| **MezoIntegrationV3** | UUPS Upgradeable | BTC→MUSD minting                           | HIGH        |
+| **YieldAggregatorV3** | UUPS Upgradeable | Multi-vault yield farming                  | MEDIUM      |
 
 ---
 
@@ -120,30 +127,37 @@ Comprehensive threat analysis including:
 ### Implemented Protections
 
 ✅ **Reentrancy Protection**
+
 - `nonReentrant` modifier on all state-changing functions
 - Checks-Effects-Interactions pattern
 
 ✅ **Flash Loan Defense**
+
 - `tx.origin != msg.sender` check
 - Authorized caller whitelist for pool interactions
 
 ✅ **Access Control**
+
 - OpenZeppelin `Ownable` on admin functions
 - Fee caps enforced in code (max 10%)
 
 ✅ **Circuit Breaker**
+
 - `Pausable` pattern for emergency stops
 - Emergency mode for crisis scenarios
 
 ✅ **Cryptographic Randomness**
+
 - Chainlink VRF for lottery draws
 - Verifiable and tamper-proof
 
 ✅ **Safe Arithmetic**
+
 - Solidity 0.8.25 automatic overflow checks
 - No SafeMath library needed
 
 ✅ **Safe Token Transfers**
+
 - OpenZeppelin `SafeERC20`
 - Handles non-standard tokens
 
@@ -154,6 +168,7 @@ Comprehensive threat analysis including:
 Auditors should verify these invariants hold:
 
 ### Balance Invariants
+
 ```solidity
 // Individual Pool
 totalMusdDeposited == Σ userDeposits[i].musdAmount
@@ -166,6 +181,7 @@ totalValueLocked == Σ vault.totalDeposited
 ```
 
 ### Collateral Invariants
+
 ```solidity
 // Mezo Integration
 collateralRatio >= 110% for all positions
@@ -175,6 +191,7 @@ totalMusdMinted <= btcCollateral * btcPrice * targetLTV
 ```
 
 ### Share Invariants
+
 ```solidity
 // Cooperative Pool
 Σ member.shares == totalShares
@@ -271,12 +288,12 @@ memberYield = (totalYield * memberShares) / totalShares
 
 ## External Dependencies
 
-| Dependency | Version | Security Status | Risk Level |
-|------------|---------|-----------------|------------|
-| OpenZeppelin Contracts | 5.x (upgradeable) | Audited | LOW |
-| Chainlink VRF | v2 | Audited | LOW |
-| Mezo Protocol | Latest | Assumed Secure | MEDIUM |
-| DeFi Vaults (Aave, etc.) | Various | Varies | MEDIUM |
+| Dependency               | Version           | Security Status | Risk Level |
+| ------------------------ | ----------------- | --------------- | ---------- |
+| OpenZeppelin Contracts   | 5.x (upgradeable) | Audited         | LOW        |
+| Chainlink VRF            | v2                | Audited         | LOW        |
+| Mezo Protocol            | Latest            | Assumed Secure  | MEDIUM     |
+| DeFi Vaults (Aave, etc.) | Various           | Varies          | MEDIUM     |
 
 ---
 
@@ -324,14 +341,14 @@ forge test --invariant-runs 1000
 
 ### Mainnet Addresses (TBD)
 
-| Contract | Address | Proxy Type |
-|----------|---------|------------|
-| IndividualPoolV3 | TBD | UUPS |
-| CooperativePoolV3 | TBD | UUPS |
-| LotteryPool | TBD | - |
-| RotatingPool | TBD | - |
-| MezoIntegrationV3 | TBD | UUPS |
-| YieldAggregatorV3 | TBD | UUPS |
+| Contract          | Address | Proxy Type |
+| ----------------- | ------- | ---------- |
+| IndividualPoolV3  | TBD     | UUPS       |
+| CooperativePoolV3 | TBD     | UUPS       |
+| LotteryPool       | TBD     | -          |
+| RotatingPool      | TBD     | -          |
+| MezoIntegrationV3 | TBD     | UUPS       |
+| YieldAggregatorV3 | TBD     | UUPS       |
 
 ---
 
@@ -340,6 +357,7 @@ forge test --invariant-runs 1000
 Use this checklist during the audit:
 
 ### Smart Contract Security
+
 - [ ] No reentrancy vulnerabilities
 - [ ] No integer overflow/underflow
 - [ ] No unchecked external calls
@@ -350,6 +368,7 @@ Use this checklist during the audit:
 - [ ] Safe compiler version (0.8.25)
 
 ### Access Control
+
 - [ ] All admin functions protected
 - [ ] No privilege escalation paths
 - [ ] Emergency functions properly restricted
@@ -357,6 +376,7 @@ Use this checklist during the audit:
 - [ ] Multi-sig recommended for owner
 
 ### Upgradeability
+
 - [ ] Storage layout documented
 - [ ] No storage collisions
 - [ ] Upgrade authorization secure
@@ -364,6 +384,7 @@ Use this checklist during the audit:
 - [ ] Gap slots for future storage
 
 ### Economic Security
+
 - [ ] Fee calculations correct
 - [ ] No precision loss in critical math
 - [ ] Share distribution fair
@@ -371,6 +392,7 @@ Use this checklist during the audit:
 - [ ] Collateral ratios enforced
 
 ### External Integrations
+
 - [ ] Oracle failures handled
 - [ ] Third-party reverts caught
 - [ ] Chainlink VRF secure
@@ -392,22 +414,26 @@ Use this checklist during the audit:
 ## Audit Timeline
 
 **Phase 1: Pre-Audit** (Current)
+
 - ✅ Documentation complete
 - ✅ Test coverage > 80%
 - ✅ Internal security review
 
 **Phase 2: External Audit** (Pending)
+
 - Engage professional auditor
 - 2-4 week audit period
 - Address findings
 
 **Phase 3: Post-Audit**
+
 - Implement fixes
 - Retest thoroughly
 - Publish audit report
 - Launch bug bounty
 
 **Phase 4: Mainnet Launch**
+
 - Deploy to mainnet
 - Monitor closely
 - Gradual TVL ramp
@@ -423,6 +449,7 @@ MIT License - See individual contracts for details
 ## Changelog
 
 ### Version 3.0.0 (2025-11-27)
+
 - Initial audit documentation
 - SECURITY_AUDIT.md created
 - INDIVIDUAL_POOL.md created

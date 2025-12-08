@@ -12,13 +12,13 @@ Shared Web3 package for KhipuVault monorepo.
 ## Usage
 
 ```typescript
-import { TESTNET_ADDRESSES, useIndividualPool, khipuApi } from '@khipu/web3'
+import { TESTNET_ADDRESSES, useIndividualPool, khipuApi } from "@khipu/web3";
 
 // In your React component
-const { deposit, userInfo } = useIndividualPool()
+const { deposit, userInfo } = useIndividualPool();
 
 // Call backend API
-const portfolio = await khipuApi.getUserPortfolio('0x...')
+const portfolio = await khipuApi.getUserPortfolio("0x...");
 ```
 
 ## Development
@@ -37,6 +37,7 @@ pnpm typecheck
 ## Generate ABIs
 
 Run from contracts package:
+
 ```bash
 pnpm contracts:generate-abis
 ```

@@ -7,6 +7,7 @@ Después de migrar a monorepo, Vercel no sabía dónde encontrar el frontend por
 ## Solución Implementada
 
 Se han creado dos configuraciones de Vercel:
+
 1. **Root `vercel.json`** - Configuración principal del monorepo
 2. **`apps/web/vercel.json`** - Configuración específica del proyecto web
 
@@ -30,16 +31,19 @@ Esta es la forma más simple y recomendada para monorepos.
    - Seleccionar: `Next.js`
 
    **Build Command (Override):**
+
    ```bash
    cd ../.. && pnpm install && pnpm build:web
    ```
 
    **Install Command (Override):**
+
    ```bash
    pnpm install
    ```
 
    **Output Directory:**
+
    ```
    .next
    ```
@@ -47,6 +51,7 @@ Esta es la forma más simple y recomendada para monorepos.
 4. **Settings → Environment Variables**
 
    Asegúrate de tener estas variables:
+
    ```
    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=tu_project_id
    NEXT_PUBLIC_ALCHEMY_API_KEY=tu_api_key
@@ -64,6 +69,7 @@ Esta es la forma más simple y recomendada para monorepos.
 Si prefieres configuración por código, ya está listo:
 
 ### Root `/vercel.json`
+
 ```json
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
@@ -76,6 +82,7 @@ Si prefieres configuración por código, ya está listo:
 ```
 
 ### `apps/web/vercel.json`
+
 ```json
 {
   "framework": "nextjs",
@@ -142,6 +149,7 @@ KhipuVault/
 **Causa:** Vercel está buscando en la raíz en lugar de `apps/web`
 
 **Solución:**
+
 - Opción 1: Configurar Root Directory en Vercel Dashboard
 - Opción 2: Usar `--cwd apps/web` con Vercel CLI
 
@@ -150,6 +158,7 @@ KhipuVault/
 **Causa:** Las dependencias de los packages no se están instalando
 
 **Solución:**
+
 ```bash
 # El build command debe instalar desde la raíz
 cd ../.. && pnpm install && pnpm build:web
@@ -158,6 +167,7 @@ cd ../.. && pnpm install && pnpm build:web
 ### Error: "pnpm: command not found"
 
 **Solución:** Agregar en Vercel Dashboard → Settings → Environment Variables:
+
 ```
 ENABLE_EXPERIMENTAL_COREPACK=1
 ```
@@ -167,6 +177,7 @@ Esto hace que Vercel use pnpm automáticamente.
 ### Build muy lento o timeout
 
 **Solución:** Agregar estas variables de entorno:
+
 ```
 NODE_OPTIONS=--max-old-space-size=4096
 NEXT_TELEMETRY_DISABLED=1
@@ -194,6 +205,7 @@ vercel --cwd apps/web --prod
 ### En Vercel Dashboard
 
 **Production:**
+
 ```env
 NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=xxxxx
 NEXT_PUBLIC_ALCHEMY_API_KEY=xxxxx
@@ -204,6 +216,7 @@ ENABLE_EXPERIMENTAL_COREPACK=1
 ```
 
 **Preview:**
+
 ```env
 # Mismas que production pero con valores de testnet
 ```
@@ -249,6 +262,7 @@ cd ../.. && pnpm install && pnpm build:web
    ```
 
 Esto asegura que:
+
 - Se instalen los packages compartidos (`@khipu/ui`, `@khipu/web3`, etc.)
 - Turborepo optimice el build con cache
 - Se construya solo `apps/web` y sus dependencias

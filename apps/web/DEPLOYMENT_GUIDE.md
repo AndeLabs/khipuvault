@@ -3,6 +3,7 @@
 ## ✅ Pre-Deployment Checklist
 
 ### Smart Contracts Status
+
 - [x] IndividualPoolV3 deployed (0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393)
 - [x] CooperativePoolV3 deployed (0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88)
 - [x] YieldAggregatorV3 deployed (0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6)
@@ -11,6 +12,7 @@
 - [x] Vault configured in YieldAggregator
 
 ### Frontend Features Ready
+
 - [x] useIndividualPoolSimple (core reads)
 - [x] useSimpleDeposit (deposit flow)
 - [x] useSimpleWithdraw (full/partial withdrawals)
@@ -22,6 +24,7 @@
 ## 📦 Deployment Steps
 
 ### 1. Install Dependencies
+
 ```bash
 cd /Users/munay/dev/KhipuVault/frontend
 npm install
@@ -34,6 +37,7 @@ Go to your Vercel project → Settings → Environment Variables
 Copy all variables from `.env.vercel` file:
 
 **Critical Variables:**
+
 ```bash
 NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS=0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
 NEXT_PUBLIC_YIELD_AGGREGATOR_ADDRESS=0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6
@@ -66,6 +70,7 @@ npm run start
 ```
 
 Test all features:
+
 - [ ] Connect wallet (MetaMask/Coinbase)
 - [ ] View position (principal, yields, APR)
 - [ ] Toggle auto-compound
@@ -80,6 +85,7 @@ vercel --prod
 ```
 
 Or via Git push:
+
 ```bash
 git add .
 git commit -m "feat: V3 frontend with auto-compound & referrals"
@@ -89,6 +95,7 @@ git push origin main
 ## 🧪 Post-Deployment Testing
 
 ### Test Checklist
+
 1. **Connection**
    - [ ] Wallet connects successfully
    - [ ] Network switches to Mezo Testnet
@@ -120,6 +127,7 @@ git push origin main
 ## 🎯 Key User Flows
 
 ### New User Flow
+
 1. Connect wallet
 2. Get MUSD from faucet (https://faucet.test.mezo.org)
 3. Approve MUSD
@@ -129,6 +137,7 @@ git push origin main
 7. Claim yields or withdraw
 
 ### Existing User Flow (from V1)
+
 1. Users with V1 deposits continue to work
 2. New deposits go to V3 contracts
 3. No migration needed (no users yet in production)
@@ -136,6 +145,7 @@ git push origin main
 ## 📊 Monitoring
 
 ### Key Metrics to Watch
+
 - Deposit transactions per day
 - Total Value Locked (TVL)
 - Average deposit size
@@ -144,12 +154,13 @@ git push origin main
 - Yields claimed vs auto-compounded
 
 ### Analytics Events (if implemented)
+
 ```typescript
 // Track key actions
-analytics.track('deposit', { amount, hasReferral })
-analytics.track('auto_compound_enabled', { userId })
-analytics.track('yields_claimed', { amount })
-analytics.track('referral_used', { referrer })
+analytics.track("deposit", { amount, hasReferral });
+analytics.track("auto_compound_enabled", { userId });
+analytics.track("yields_claimed", { amount });
+analytics.track("referral_used", { referrer });
 ```
 
 ## 🐛 Troubleshooting
@@ -157,21 +168,25 @@ analytics.track('referral_used', { referrer })
 ### Common Issues
 
 **"Transaction failed"**
+
 - Check user has enough BTC for gas
 - Verify MUSD balance > deposit amount
 - Check minimum deposit (10 MUSD)
 
 **"Yields not showing"**
+
 - Yields accrue after ~1 minute
 - Check StabilityPoolStrategy has deposits
 - Verify vault is active in YieldAggregator
 
 **"Auto-compound not working"**
+
 - Requires active deposit
 - Threshold is 1 MUSD of yields
 - Check transaction confirmed
 
 **"Referral link not working"**
+
 - Ensure user has active deposit
 - Check address is valid
 - Verify not using own address

@@ -1,6 +1,6 @@
-import { prisma } from '@khipu/database'
-import type { EventLog } from '@prisma/client'
-import { cache, CACHE_TTL, CACHE_KEYS } from '../lib/cache'
+import { prisma } from "@khipu/database";
+import type { EventLog } from "@prisma/client";
+import { cache, CACHE_TTL, CACHE_KEYS } from "../lib/cache";
 
 export class AnalyticsService {
   async getGlobalStats() {
@@ -10,20 +10,23 @@ export class AnalyticsService {
       async () => {
         const [totalUsers, activePools, totalTransactions] = await Promise.all([
           prisma.user.count(),
-          prisma.pool.count({ where: { status: 'ACTIVE' } }),
+          prisma.pool.count({ where: { status: "ACTIVE" } }),
           prisma.deposit.count(),
-        ])
+        ]);
 
         // Calculate total TVL across all pools
         const pools = await prisma.pool.findMany({
-          where: { status: 'ACTIVE' },
-        })
+          where: { status: "ACTIVE" },
+        });
 
-        const totalTVL = pools.reduce((sum, pool) => sum + BigInt(pool.tvl), BigInt(0))
+        const totalTVL = pools.reduce(
+          (sum, pool) => sum + BigInt(pool.tvl),
+          BigInt(0),
+        );
 
         // Get average APR
         const avgAPR =
-          pools.reduce((sum, pool) => sum + pool.apr, 0) / (pools.length || 1)
+          pools.reduce((sum, pool) => sum + pool.apr, 0) / (pools.length || 1);
 
         return {
           totalUsers,
@@ -31,27 +34,29 @@ export class AnalyticsService {
           totalTransactions,
           totalTVL: totalTVL.toString(),
           avgAPR: avgAPR.toFixed(2),
-        }
+        };
       },
-      CACHE_TTL.GLOBAL_STATS
-    )
+      CACHE_TTL.GLOBAL_STATS,
+    );
   }
 
   async getActivityTimeline(days: number = 30) {
     // Validate days parameter (max 365 days)
-    const safeDays = Math.min(Math.max(1, days), 365)
-    const startDate = new Date()
-    startDate.setDate(startDate.getDate() - safeDays)
+    const safeDays = Math.min(Math.max(1, days), 365);
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - safeDays);
 
     // OPTIMIZED: Use database aggregation instead of loading all records
     // This scales efficiently regardless of transaction volume
-    const dailyStats = await prisma.$queryRaw<Array<{
-      date: string
-      deposits: bigint
-      withdrawals: bigint
-      deposit_volume: string
-      withdraw_volume: string
-    }>>`
+    const dailyStats = await prisma.$queryRaw<
+      Array<{
+        date: string;
+        deposits: bigint;
+        withdrawals: bigint;
+        deposit_volume: string;
+        withdraw_volume: string;
+      }>
+    >`
       SELECT
         DATE(timestamp) as date,
         COUNT(CASE WHEN type = 'DEPOSIT' THEN 1 END) as deposits,
@@ -63,14 +68,16 @@ export class AnalyticsService {
         AND status = 'CONFIRMED'
       GROUP BY DATE(timestamp)
       ORDER BY DATE(timestamp) ASC
-    `
+    `;
 
-    return dailyStats.map(day => ({
+    return dailyStats.map((day) => ({
       date: day.date,
       deposits: Number(day.deposits),
       withdrawals: Number(day.withdrawals),
-      volume: (BigInt(day.deposit_volume) + BigInt(day.withdraw_volume)).toString(),
-    }))
+      volume: (
+        BigInt(day.deposit_volume) + BigInt(day.withdraw_volume)
+      ).toString(),
+    }));
   }
 
   async getTopPools(limit: number = 10) {
@@ -79,31 +86,33 @@ export class AnalyticsService {
       CACHE_KEYS.topPools(limit),
       async () => {
         const pools = await prisma.pool.findMany({
-          where: { status: 'ACTIVE' },
-          orderBy: { tvl: 'desc' },
+          where: { status: "ACTIVE" },
+          orderBy: { tvl: "desc" },
           take: limit,
-        })
-        return pools
+        });
+        return pools;
       },
-      CACHE_TTL.TOP_POOLS
-    )
+      CACHE_TTL.TOP_POOLS,
+    );
   }
 
   async getTopUsers(limit: number = 10) {
     // Defense in depth: validate limit even though routes already validate
     // This prevents issues if service is called from other contexts
-    const safeLimit = Math.min(Math.max(1, Math.floor(limit)), 100)
+    const safeLimit = Math.min(Math.max(1, Math.floor(limit)), 100);
 
     // OPTIMIZED: Use raw SQL aggregation instead of loading all users into memory
     // This scales from O(n*m) to O(n) where n=users, m=deposits per user
 
-    const topUsers = await prisma.$queryRaw<Array<{
-      address: string
-      ensName: string | null
-      avatar: string | null
-      totalDeposited: string
-      totalWithdrawn: string
-    }>>`
+    const topUsers = await prisma.$queryRaw<
+      Array<{
+        address: string;
+        ensName: string | null;
+        avatar: string | null;
+        totalDeposited: string;
+        totalWithdrawn: string;
+      }>
+    >`
       SELECT
         u.address,
         u."ensName",
@@ -120,28 +129,38 @@ export class AnalyticsService {
         COALESCE(SUM(CASE WHEN d.type = 'WITHDRAW' THEN CAST(d.amount AS DECIMAL(78,0)) ELSE 0 END), 0)
       ) DESC
       LIMIT ${safeLimit}
-    `
+    `;
 
-    return topUsers.map(u => ({
+    return topUsers.map((u) => ({
       address: u.address,
       ensName: u.ensName,
       avatar: u.avatar,
       totalDeposited: u.totalDeposited,
-      currentBalance: (BigInt(u.totalDeposited) - BigInt(u.totalWithdrawn)).toString(),
-    }))
+      currentBalance: (
+        BigInt(u.totalDeposited) - BigInt(u.totalWithdrawn)
+      ).toString(),
+    }));
   }
 
-  async getEventLogs(limit: number = 100, offset: number = 0): Promise<{
-    logs: EventLog[]
-    pagination: { total: number; limit: number; offset: number; hasMore: boolean }
+  async getEventLogs(
+    limit: number = 100,
+    offset: number = 0,
+  ): Promise<{
+    logs: EventLog[];
+    pagination: {
+      total: number;
+      limit: number;
+      offset: number;
+      hasMore: boolean;
+    };
   }> {
     const logs = await prisma.eventLog.findMany({
-      orderBy: { timestamp: 'desc' },
+      orderBy: { timestamp: "desc" },
       take: limit,
       skip: offset,
-    })
+    });
 
-    const total = await prisma.eventLog.count()
+    const total = await prisma.eventLog.count();
 
     return {
       logs,
@@ -151,6 +170,6 @@ export class AnalyticsService {
         offset,
         hasMore: offset + limit < total,
       },
-    }
+    };
   }
 }

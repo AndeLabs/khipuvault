@@ -1,307 +1,319 @@
+"use client";
 
-
-'use client'
-
-import { useAccount, useConfig } from 'wagmi'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { readContract } from 'wagmi/actions'
-import { 
-  MEZO_TESTNET_ADDRESSES, 
-  INDIVIDUAL_POOL_ABI, 
+import { useAccount, useConfig } from "wagmi";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { readContract } from "wagmi/actions";
+import {
+  MEZO_TESTNET_ADDRESSES,
+  INDIVIDUAL_POOL_ABI,
   ERC20_ABI,
   V3_FEATURES,
   type UserInfoV3,
   type ReferralStats,
-} from '@/lib/web3/contracts-v3'
+} from "@/lib/web3/contracts-v3";
 
 /**
  * Production hook for IndividualPoolV3 with all V3 features
- * 
+ *
  * V3 Features:
  * ✅ Auto-Compound
- * ✅ Referral System  
+ * ✅ Referral System
  * ✅ Incremental Deposits
  * ✅ Partial Withdrawals
  * ✅ Enhanced View Functions
  */
 export function useIndividualPoolV3() {
-  const { address, isConnected } = useAccount()
-  const config = useConfig()
-  const queryClient = useQueryClient()
+  const { address, isConnected } = useAccount();
+  const config = useConfig();
+  const queryClient = useQueryClient();
 
-  const poolAddress = MEZO_TESTNET_ADDRESSES.individualPoolV3 as `0x${string}`
-  const musdAddress = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`
+  const poolAddress = MEZO_TESTNET_ADDRESSES.individualPoolV3 as `0x${string}`;
+  const musdAddress = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`;
 
   // ========================================================================
   // POOL STATISTICS
   // ========================================================================
 
   const { data: totalMusdDeposited } = useQuery({
-    queryKey: ['individual-pool-v3', 'total-musd'],
+    queryKey: ["individual-pool-v3", "total-musd"],
     queryFn: async () => {
       return await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
-        functionName: 'totalMusdDeposited',
+        functionName: "totalMusdDeposited",
         args: [],
-      })
+      });
     },
     enabled: isConnected,
     staleTime: 10_000,
-  })
+  });
 
   const { data: totalYieldsGenerated } = useQuery({
-    queryKey: ['individual-pool-v3', 'total-yields'],
+    queryKey: ["individual-pool-v3", "total-yields"],
     queryFn: async () => {
       return await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
-        functionName: 'totalYieldsGenerated',
+        functionName: "totalYieldsGenerated",
         args: [],
-      })
+      });
     },
     enabled: isConnected,
     staleTime: 10_000,
-  })
+  });
 
   const { data: totalReferralRewards } = useQuery({
-    queryKey: ['individual-pool-v3', 'total-referral-rewards'],
+    queryKey: ["individual-pool-v3", "total-referral-rewards"],
     queryFn: async () => {
       return await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
-        functionName: 'totalReferralRewards',
+        functionName: "totalReferralRewards",
         args: [],
-      })
+      });
     },
     enabled: isConnected,
     staleTime: 10_000,
-  })
+  });
 
   // ========================================================================
   // USER DATA (V3 Enhanced)
   // ========================================================================
 
   // Use getUserInfo() instead of userDeposits - V3 feature!
-  const { 
-    data: userInfoRaw, 
+  const {
+    data: userInfoRaw,
     isLoading: loadingUserInfo,
     refetch: refetchUserInfo,
   } = useQuery({
-    queryKey: ['individual-pool-v3', 'user-info', address],
+    queryKey: ["individual-pool-v3", "user-info", address],
     queryFn: async () => {
-      if (!address) return null
-      console.log('🔄 [V3] Fetching user info for:', address)
+      if (!address) return null;
       try {
         const result = await readContract(config, {
           address: poolAddress,
           abi: INDIVIDUAL_POOL_ABI,
-          functionName: 'getUserInfo',
+          functionName: "getUserInfo",
           args: [address],
-        })
+        });
         if (!result || !Array.isArray(result)) {
-          console.warn('⚠️ [V3] Invalid user info result:', result)
-          return null
+          return null;
         }
-        console.log('📊 [V3] User info fetched:', result)
-        console.log('  - Deposit:', result[0]?.toString() || '0', 'wei')
-        console.log('  - Yields:', result[1]?.toString() || '0', 'wei')
-        return result as unknown as [bigint, bigint, bigint, bigint, bigint, boolean]
+        return result as unknown as [
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+          bigint,
+          boolean,
+        ];
       } catch (error) {
-        console.error('❌ [V3] Error fetching user info:', error)
-        return null
+        return null;
       }
     },
     enabled: isConnected && !!address,
     staleTime: 5_000,
     refetchInterval: 10_000,
-  })
+  });
 
   // Parse getUserInfo result
-  const userInfo: UserInfoV3 | null = userInfoRaw ? {
-    deposit: userInfoRaw[0],
-    yields: userInfoRaw[1],
-    netYields: userInfoRaw[2],
-    daysActive: userInfoRaw[3],
-    estimatedAPR: userInfoRaw[4],
-    autoCompoundEnabled: userInfoRaw[5],
-  } : null
+  const userInfo: UserInfoV3 | null = userInfoRaw
+    ? {
+        deposit: userInfoRaw[0],
+        yields: userInfoRaw[1],
+        netYields: userInfoRaw[2],
+        daysActive: userInfoRaw[3],
+        estimatedAPR: userInfoRaw[4],
+        autoCompoundEnabled: userInfoRaw[5],
+      }
+    : null;
 
   // Get user total balance (principal + net yields)
   const { data: userTotalBalance } = useQuery({
-    queryKey: ['individual-pool-v3', 'user-total-balance', address],
+    queryKey: ["individual-pool-v3", "user-total-balance", address],
     queryFn: async () => {
-      if (!address) return null
+      if (!address) return null;
       return await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
-        functionName: 'getUserTotalBalance',
+        functionName: "getUserTotalBalance",
         args: [address],
-      })
+      });
     },
     enabled: isConnected && !!address,
     staleTime: 5_000,
-  })
+  });
 
   // ========================================================================
   // REFERRAL SYSTEM
   // ========================================================================
 
   const { data: referralStatsRaw } = useQuery({
-    queryKey: ['individual-pool-v3', 'referral-stats', address],
+    queryKey: ["individual-pool-v3", "referral-stats", address],
     queryFn: async () => {
-      if (!address) return null
+      if (!address) return null;
       const result = await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
-        functionName: 'getReferralStats',
+        functionName: "getReferralStats",
         args: [address],
-      })
-      return result as unknown as [bigint, bigint, string]
+      });
+      return result as unknown as [bigint, bigint, string];
     },
     enabled: isConnected && !!address,
     staleTime: 30_000,
-  })
+  });
 
-  const referralStats: ReferralStats | null = referralStatsRaw ? {
-    count: referralStatsRaw[0],
-    rewards: referralStatsRaw[1],
-    referrer: referralStatsRaw[2],
-  } : null
+  const referralStats: ReferralStats | null = referralStatsRaw
+    ? {
+        count: referralStatsRaw[0],
+        rewards: referralStatsRaw[1],
+        referrer: referralStatsRaw[2],
+      }
+    : null;
 
   // ========================================================================
   // WALLET BALANCES
   // ========================================================================
 
   const { data: musdBalance } = useQuery({
-    queryKey: ['individual-pool-v3', 'musd-balance', address],
+    queryKey: ["individual-pool-v3", "musd-balance", address],
     queryFn: async () => {
-      if (!address) return null
+      if (!address) return null;
       return await readContract(config, {
         address: musdAddress,
         abi: ERC20_ABI,
-        functionName: 'balanceOf',
+        functionName: "balanceOf",
         args: [address],
-      })
+      });
     },
     enabled: isConnected && !!address,
     staleTime: 10_000,
-  })
+  });
 
   // ========================================================================
   // CONTRACT CONFIGURATION
   // ========================================================================
 
   const { data: performanceFee } = useQuery({
-    queryKey: ['individual-pool-v3', 'performance-fee'],
+    queryKey: ["individual-pool-v3", "performance-fee"],
     queryFn: async () => {
       return await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
-        functionName: 'performanceFee',
+        functionName: "performanceFee",
         args: [],
-      })
+      });
     },
     enabled: isConnected,
     staleTime: 60_000,
-  })
+  });
 
   const { data: emergencyMode } = useQuery({
-    queryKey: ['individual-pool-v3', 'emergency-mode'],
+    queryKey: ["individual-pool-v3", "emergency-mode"],
     queryFn: async () => {
       return await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
-        functionName: 'emergencyMode',
+        functionName: "emergencyMode",
         args: [],
-      })
+      });
     },
     enabled: isConnected,
     staleTime: 30_000,
-  })
+  });
 
   // ========================================================================
   // COMPUTED VALUES
   // ========================================================================
 
   const poolStats = {
-    totalMusdDeposited: BigInt(totalMusdDeposited as unknown as bigint || 0n),
-    totalYields: BigInt(totalYieldsGenerated as unknown as bigint || 0n),
-    totalReferralRewards: BigInt(totalReferralRewards as unknown as bigint || 0n),
+    totalMusdDeposited: BigInt((totalMusdDeposited as unknown as bigint) || 0n),
+    totalYields: BigInt((totalYieldsGenerated as unknown as bigint) || 0n),
+    totalReferralRewards: BigInt(
+      (totalReferralRewards as unknown as bigint) || 0n,
+    ),
     poolAPR: userInfo?.estimatedAPR ? Number(userInfo.estimatedAPR) / 100 : 6.2,
     emergencyMode: Boolean(emergencyMode),
-  }
+  };
 
   const walletBalances = {
-    musdBalance: BigInt(musdBalance as unknown as bigint || 0n),
-  }
+    musdBalance: BigInt((musdBalance as unknown as bigint) || 0n),
+  };
 
-  const hasActiveDeposit = userInfo ? userInfo.deposit > BigInt(0) : false
-  const canWithdrawPartial = hasActiveDeposit && userInfo ? 
-    userInfo.deposit >= BigInt(V3_FEATURES.individualPool.minWithdrawal) : false
-  const shouldShowAutoCompound = hasActiveDeposit && userInfo ?
-    userInfo.yields >= BigInt(V3_FEATURES.individualPool.autoCompoundThreshold) : false
+  const hasActiveDeposit = userInfo ? userInfo.deposit > BigInt(0) : false;
+  const canWithdrawPartial =
+    hasActiveDeposit && userInfo
+      ? userInfo.deposit >= BigInt(V3_FEATURES.individualPool.minWithdrawal)
+      : false;
+  const shouldShowAutoCompound =
+    hasActiveDeposit && userInfo
+      ? userInfo.yields >=
+        BigInt(V3_FEATURES.individualPool.autoCompoundThreshold)
+      : false;
 
   // ========================================================================
   // HELPER FUNCTIONS
   // ========================================================================
 
   const refetchAll = () => {
-    console.log('🔄 [V3] Refetching all data...')
-    return queryClient.refetchQueries({ queryKey: ['individual-pool-v3'] })
-  }
+    return queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
+  };
 
   const invalidateAll = () => {
-    console.log('🗑️ [V3] Invalidating all data...')
-    return queryClient.invalidateQueries({ queryKey: ['individual-pool-v3'] })
-  }
+    return queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
+  };
 
   return {
     // Pool Statistics
     poolStats,
-    poolTVL: BigInt(totalMusdDeposited as unknown as bigint || 0n),
+    poolTVL: BigInt((totalMusdDeposited as unknown as bigint) || 0n),
 
     // User Data
     userInfo,
-    userTotalBalance: BigInt(userTotalBalance as unknown as bigint || 0n),
+    userTotalBalance: BigInt((userTotalBalance as unknown as bigint) || 0n),
     hasActiveDeposit,
 
     // Referral System
     referralStats,
-    hasReferralRewards: referralStats ? referralStats.rewards > BigInt(0) : false,
+    hasReferralRewards: referralStats
+      ? referralStats.rewards > BigInt(0)
+      : false,
     referralCount: referralStats?.count || BigInt(0),
 
     // Wallet
     walletBalances,
 
     // Contract Config
-    performanceFee: Number(performanceFee as unknown as bigint || 0n) || V3_FEATURES.individualPool.performanceFee,
+    performanceFee:
+      Number((performanceFee as unknown as bigint) || 0n) ||
+      V3_FEATURES.individualPool.performanceFee,
     emergencyMode: poolStats.emergencyMode,
-    
+
     // UI Helpers
     canWithdrawPartial,
     shouldShowAutoCompound,
     autoCompoundEnabled: userInfo?.autoCompoundEnabled || false,
-    
+
     // V3 Features Info
     features: V3_FEATURES.individualPool,
-    
+
     // Loading States
     isLoading: loadingUserInfo,
     isConnected,
     address,
-    
+
     // Actions
     refetchAll,
     invalidateAll,
     refetchUserInfo,
-    
+
     // Contract Addresses
     contracts: {
       pool: poolAddress,
       musd: musdAddress,
     },
-  }
+  };
 }
 
 // ============================================================================
@@ -309,46 +321,46 @@ export function useIndividualPoolV3() {
 // ============================================================================
 
 export function formatMUSD(value: bigint | undefined): string {
-  if (!value) return '0.00'
-  const num = Number(value) / 1e18
-  return num.toLocaleString('en-US', {
+  if (!value) return "0.00";
+  const num = Number(value) / 1e18;
+  return num.toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  })
+  });
 }
 
 export function formatMUSDCompact(value: bigint | undefined): string {
-  if (!value) return '0'
-  const num = Number(value) / 1e18
-  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`
-  if (num >= 1_000) return `${(num / 1_000).toFixed(2)}K`
-  return num.toFixed(2)
+  if (!value) return "0";
+  const num = Number(value) / 1e18;
+  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`;
+  if (num >= 1_000) return `${(num / 1_000).toFixed(2)}K`;
+  return num.toFixed(2);
 }
 
 export function formatAPR(apr: bigint | number): string {
-  const value = typeof apr === 'bigint' ? Number(apr) / 100 : apr
-  return `${value.toFixed(2)}%`
+  const value = typeof apr === "bigint" ? Number(apr) / 100 : apr;
+  return `${value.toFixed(2)}%`;
 }
 
 export function formatDays(days: bigint | number): string {
-  const value = typeof days === 'bigint' ? Number(days) : days
-  if (value === 0) return 'Hoy'
-  if (value === 1) return '1 día'
-  return `${value} días`
+  const value = typeof days === "bigint" ? Number(days) : days;
+  if (value === 0) return "Hoy";
+  if (value === 1) return "1 día";
+  return `${value} días`;
 }
 
 export function formatReferralBonus(): string {
-  return `${(V3_FEATURES.individualPool.referralBonus / 100).toFixed(2)}%`
+  return `${(V3_FEATURES.individualPool.referralBonus / 100).toFixed(2)}%`;
 }
 
 export function calculateFee(amount: bigint, feeBps: number): bigint {
-  return (amount * BigInt(feeBps)) / BigInt(10000)
+  return (amount * BigInt(feeBps)) / BigInt(10000);
 }
 
 export function calculateNetAmount(gross: bigint, feeBps: number): bigint {
-  const fee = calculateFee(gross, feeBps)
-  return gross - fee
+  const fee = calculateFee(gross, feeBps);
+  return gross - fee;
 }
 
 // Backward compatibility
-export { useIndividualPoolV3 as useIndividualPoolData }
+export { useIndividualPoolV3 as useIndividualPoolData };

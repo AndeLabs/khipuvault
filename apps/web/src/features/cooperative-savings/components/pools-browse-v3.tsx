@@ -9,23 +9,31 @@
  * - Responsive grid layout
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
-import { PoolCardV3 } from './pool-card-v3'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Badge } from '@/components/ui/badge'
-import { Card, CardContent } from '@/components/ui/card'
+import * as React from "react";
+import { PoolCardV3 } from "./pool-card-v3";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Search, Filter, Plus, Users, Bitcoin, TrendingUp, Sparkles } from 'lucide-react'
-import { SkeletonCard } from '@/components/ui/skeleton'
+} from "@/components/ui/select";
+import {
+  Search,
+  Filter,
+  Plus,
+  Users,
+  Bitcoin,
+  TrendingUp,
+  Sparkles,
+} from "lucide-react";
+import { SkeletonCard } from "@/components/ui/skeleton";
 import {
   useAllCooperativePools,
   sortPools,
@@ -33,14 +41,14 @@ import {
   searchPools,
   type SortBy,
   type FilterStatus,
-} from '@/hooks/web3/use-all-cooperative-pools'
-import { formatBTCCompact } from '@/hooks/web3/use-cooperative-pool'
+} from "@/hooks/web3/use-all-cooperative-pools";
+import { formatBTCCompact } from "@/hooks/web3/use-cooperative-pool";
 
 interface PoolsBrowseV3Props {
-  onJoinPool?: (poolId: number) => void
-  onViewDetails?: (poolId: number) => void
-  onManagePool?: (poolId: number) => void
-  onCreatePool?: () => void
+  onJoinPool?: (poolId: number) => void;
+  onViewDetails?: (poolId: number) => void;
+  onManagePool?: (poolId: number) => void;
+  onCreatePool?: () => void;
 }
 
 export function PoolsBrowseV3({
@@ -49,27 +57,27 @@ export function PoolsBrowseV3({
   onManagePool,
   onCreatePool,
 }: PoolsBrowseV3Props) {
-  const { pools, statistics, isLoading } = useAllCooperativePools()
+  const { pools, statistics, isLoading } = useAllCooperativePools();
 
-  const [searchQuery, setSearchQuery] = React.useState('')
-  const [filterStatus, setFilterStatus] = React.useState<FilterStatus>('all')
-  const [sortBy, setSortBy] = React.useState<SortBy>('newest')
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [filterStatus, setFilterStatus] = React.useState<FilterStatus>("all");
+  const [sortBy, setSortBy] = React.useState<SortBy>("newest");
 
   // Apply filters and sorting
   const filteredPools = React.useMemo(() => {
-    let result = pools
+    let result = pools;
 
     // Search
-    result = searchPools(result, searchQuery)
+    result = searchPools(result, searchQuery);
 
     // Filter by status
-    result = filterPoolsByStatus(result, filterStatus)
+    result = filterPoolsByStatus(result, filterStatus);
 
     // Sort
-    result = sortPools(result, sortBy)
+    result = sortPools(result, sortBy);
 
-    return result
-  }, [pools, searchQuery, filterStatus, sortBy])
+    return result;
+  }, [pools, searchQuery, filterStatus, sortBy]);
 
   if (isLoading) {
     return (
@@ -77,7 +85,10 @@ export function PoolsBrowseV3({
         {/* Statistics Skeleton */}
         <div className="grid gap-4 md:grid-cols-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-24 bg-surface-elevated animate-shimmer rounded-lg" />
+            <div
+              key={i}
+              className="h-24 bg-surface-elevated animate-shimmer rounded-lg"
+            />
           ))}
         </div>
 
@@ -95,7 +106,7 @@ export function PoolsBrowseV3({
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -170,12 +181,10 @@ export function PoolsBrowseV3({
       {/* Header with Actions */}
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-heading font-semibold">
-            Browse Pools
-          </h2>
+          <h2 className="text-2xl font-heading font-semibold">Browse Pools</h2>
           <div className="flex items-center gap-2">
             <Badge variant="secondary">{filteredPools.length} Pools</Badge>
-            {filterStatus !== 'all' && (
+            {filterStatus !== "all" && (
               <Badge variant="outline" className="capitalize">
                 {filterStatus}
               </Badge>
@@ -202,7 +211,10 @@ export function PoolsBrowseV3({
         </div>
 
         {/* Status Filter */}
-        <Select value={filterStatus} onValueChange={(value) => setFilterStatus(value as FilterStatus)}>
+        <Select
+          value={filterStatus}
+          onValueChange={(value) => setFilterStatus(value as FilterStatus)}
+        >
           <SelectTrigger className="w-full sm:w-[160px]">
             <Filter className="h-4 w-4 mr-2" />
             <SelectValue />
@@ -216,7 +228,10 @@ export function PoolsBrowseV3({
         </Select>
 
         {/* Sort */}
-        <Select value={sortBy} onValueChange={(value) => setSortBy(value as SortBy)}>
+        <Select
+          value={sortBy}
+          onValueChange={(value) => setSortBy(value as SortBy)}
+        >
           <SelectTrigger className="w-full sm:w-[160px]">
             <SelectValue />
           </SelectTrigger>
@@ -234,11 +249,11 @@ export function PoolsBrowseV3({
       {filteredPools.length === 0 ? (
         <div className="text-center py-12">
           <p className="text-muted-foreground mb-4">
-            {searchQuery || filterStatus !== 'all'
-              ? 'No pools match your filters'
-              : 'No pools available yet'}
+            {searchQuery || filterStatus !== "all"
+              ? "No pools match your filters"
+              : "No pools available yet"}
           </p>
-          {!searchQuery && filterStatus === 'all' && (
+          {!searchQuery && filterStatus === "all" && (
             <Button variant="accent" onClick={onCreatePool}>
               <Plus className="h-4 w-4 mr-2" />
               Create First Pool
@@ -259,5 +274,5 @@ export function PoolsBrowseV3({
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -1,6 +1,7 @@
 # DeFi Best Practices Research - KhipuVault Improvements
 
 ## 🔍 Research Sources
+
 - Aave V3 Architecture
 - Compound V3 (Comet)
 - Yearn V3 Vaults
@@ -11,14 +12,17 @@
 ## 📊 Key Findings & Improvements to Implement
 
 ### 1. **EIP-4626 Standard (Tokenized Vault)**
+
 **What**: Standard interface for yield-bearing vaults
 **Benefits**:
+
 - Composability with other DeFi protocols
 - Users get ERC20 tokens representing their share
 - Automatic yield accrual without manual claims
 - Compatible with DEXs, lending platforms, etc.
 
 **Implementation for KhipuVault**:
+
 ```solidity
 // Users receive kvMUSD tokens when depositing
 // 1 kvMUSD = 1 MUSD + accrued yield
@@ -26,8 +30,10 @@
 ```
 
 ### 2. **Gradual Interest Accrual (like Aave)**
+
 **Problem**: Current system requires manual yield updates
 **Solution**: Interest accrues per-second automatically
+
 ```solidity
 // Calculate yield based on block.timestamp
 // No need for updateYield() calls
@@ -41,6 +47,7 @@ function _accruedYield(address user) internal view returns (uint256) {
 ### 3. **Gas Optimization Techniques**
 
 #### a) **Packed Storage (saves ~20k gas per transaction)**
+
 ```solidity
 struct UserDeposit {
     uint128 musdAmount;        // Pack into single slot
@@ -52,9 +59,11 @@ struct UserDeposit {
 ```
 
 #### b) **Custom Errors (saves ~50 gas per error)**
+
 Already implemented ✅
 
 #### c) **Unchecked Math for Safe Operations**
+
 ```solidity
 unchecked {
     totalDeposits += amount; // Safe: checked before
@@ -62,6 +71,7 @@ unchecked {
 ```
 
 ### 4. **Flash Loan Protection**
+
 ```solidity
 modifier noFlashLoan() {
     require(tx.origin == msg.sender, "No flash loans");
@@ -70,6 +80,7 @@ modifier noFlashLoan() {
 ```
 
 ### 5. **Circuit Breakers & Rate Limiting**
+
 ```solidity
 // Limit withdrawals per time period
 mapping(address => uint256) public lastWithdrawal;
@@ -86,6 +97,7 @@ function withdraw() external {
 ```
 
 ### 6. **Multi-Signature Admin Operations**
+
 ```solidity
 // Critical operations require multiple approvers
 // Use Gnosis Safe or custom multisig
@@ -94,6 +106,7 @@ function withdraw() external {
 ### 7. **Yield Optimization Strategies**
 
 #### a) **Auto-Compounding**
+
 ```solidity
 // Automatically reinvest claimed yields
 function _autoCompound(address user) internal {
@@ -106,12 +119,14 @@ function _autoCompound(address user) internal {
 ```
 
 #### b) **Yield Tokenization**
+
 ```solidity
 // Separate principal and yield tokens
 // Users can sell future yields (like Pendle Finance)
 ```
 
 ### 8. **Advanced Access Control (OpenZeppelin)**
+
 ```solidity
 import "@openzeppelin/contracts/access/AccessControl.sol";
 
@@ -123,6 +138,7 @@ bytes32 public constant ADMIN_ROLE = keccak256("ADMIN");
 ```
 
 ### 9. **Oracle Integration for Dynamic APR**
+
 ```solidity
 // Use Chainlink or Mezo oracles to get real-time APR
 // Adjust strategy based on market conditions
@@ -132,6 +148,7 @@ interface IAPROracle {
 ```
 
 ### 10. **Referral System**
+
 ```solidity
 mapping(address => address) public referrers;
 uint256 public constant REFERRAL_BONUS = 50; // 0.5% bonus
@@ -145,6 +162,7 @@ function depositWithReferral(uint256 amount, address referrer) external {
 ```
 
 ### 11. **Withdrawal Queue (for high liquidity events)**
+
 ```solidity
 struct WithdrawalRequest {
     address user;
@@ -159,6 +177,7 @@ WithdrawalRequest[] public withdrawalQueue;
 ```
 
 ### 12. **Insurance Fund**
+
 ```solidity
 uint256 public insuranceFund;
 uint256 public constant INSURANCE_FEE = 10; // 0.1% of yields
@@ -171,6 +190,7 @@ function _collectInsuranceFee(uint256 yield) internal {
 ```
 
 ### 13. **Health Factor (like Aave)**
+
 ```solidity
 // Monitor pool health
 function getHealthFactor() external view returns (uint256) {
@@ -181,6 +201,7 @@ function getHealthFactor() external view returns (uint256) {
 ```
 
 ### 14. **Events for Better Indexing (The Graph)**
+
 ```solidity
 // Emit detailed events for easy querying
 event Deposited(
@@ -194,6 +215,7 @@ event Deposited(
 ```
 
 ### 15. **Upgradeable Contracts (with care)**
+
 ```solidity
 // Use UUPS pattern (cheaper than Transparent Proxy)
 import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
@@ -205,13 +227,15 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 ## 🎯 Priority Implementation Order
 
 ### Phase 1: Core Improvements (This Week)
+
 1. ✅ Incremental deposits
-2. ✅ Partial withdrawals  
+2. ✅ Partial withdrawals
 3. ✅ Emergency mode
 4. 🔄 Packed storage for gas optimization
 5. 🔄 Gradual interest accrual
 
 ### Phase 2: Advanced Features (Next Week)
+
 6. EIP-4626 tokenization (kvMUSD tokens)
 7. Auto-compounding
 8. Referral system
@@ -219,6 +243,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 10. Flash loan protection
 
 ### Phase 3: Scalability (Week 3)
+
 11. Oracle integration
 12. Withdrawal queue
 13. Insurance fund
@@ -226,6 +251,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 15. Multi-signature for admin ops
 
 ### Phase 4: Polish & Audit (Week 4)
+
 16. Complete test coverage
 17. Gas optimization audit
 18. External security audit
@@ -235,6 +261,7 @@ import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
 ## 📚 Technical References
 
 ### EIP-4626 Implementation Example
+
 ```solidity
 interface IERC4626 {
     function asset() external view returns (address);
@@ -247,6 +274,7 @@ interface IERC4626 {
 ```
 
 ### Gas Optimization Example (Storage Packing)
+
 ```solidity
 // Before: 3 storage slots (3 * 20k gas = 60k gas)
 uint256 amount;      // slot 0
@@ -262,18 +290,22 @@ bool active;         // slot 0
 ## 🔐 Security Considerations
 
 ### Reentrancy Protection
+
 - ✅ Already using ReentrancyGuard
 - Consider: Checks-Effects-Interactions pattern
 
 ### Integer Overflow
+
 - ✅ Solidity 0.8.x has built-in protection
 - Consider: Unchecked blocks for gas savings where safe
 
 ### Access Control
+
 - ✅ Using Ownable
 - Upgrade to: AccessControl for granular permissions
 
 ### Front-Running Protection
+
 - Consider: Commit-reveal schemes
 - Consider: Time-locks for sensitive operations
 
@@ -299,6 +331,7 @@ bool active;         // slot 0
 ## 📊 Frontend Integration Requirements
 
 ### New View Functions Needed
+
 ```solidity
 function getUserDashboard(address user) external view returns (
     uint256 totalBalance,
@@ -318,8 +351,8 @@ function getPoolStats() external view returns (
 ```
 
 ## 🎓 Learning Resources
+
 - Aave V3 Docs: https://docs.aave.com/developers/
 - EIP-4626 Spec: https://eips.ethereum.org/EIPS/eip-4626
 - Solidity Patterns: https://fravoll.github.io/solidity-patterns/
 - Gas Optimization: https://www.alchemy.com/overviews/solidity-gas-optimization
-

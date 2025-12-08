@@ -1,122 +1,160 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
-import { ExternalLink, Code, Shield, Users, Gift, RotateCw, TrendingUp, Copy, Check } from 'lucide-react'
-import { Button, buttonVariants } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { CONTRACT_ADDRESSES, formatAddress } from '@/contracts/addresses'
-import { cn } from '@/lib/utils'
+import { useState } from "react";
+import {
+  ExternalLink,
+  Code,
+  Shield,
+  Users,
+  Gift,
+  RotateCw,
+  TrendingUp,
+  Copy,
+  Check,
+} from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { CONTRACT_ADDRESSES, formatAddress } from "@/contracts/addresses";
+import { cn } from "@/lib/utils";
 
 interface ContractInfo {
-  name: string
-  description: string
-  address: string
-  icon: React.ReactNode
-  status: 'deployed' | 'pending' | 'testnet'
-  features: string[]
-  explorerUrl?: string
-  docsUrl?: string
-  category: 'pools' | 'integrations' | 'tokens'
+  name: string;
+  description: string;
+  address: string;
+  icon: React.ReactNode;
+  status: "deployed" | "pending" | "testnet";
+  features: string[];
+  explorerUrl?: string;
+  docsUrl?: string;
+  category: "pools" | "integrations" | "tokens";
 }
 
 const contractsInfo: ContractInfo[] = [
   {
-    name: 'IndividualPool V3',
-    description: 'Ahorros personales con auto-compound y referidos',
+    name: "IndividualPool V3",
+    description: "Ahorros personales con auto-compound y referidos",
     address: CONTRACT_ADDRESSES.INDIVIDUAL_POOL,
     icon: <TrendingUp className="h-5 w-5" />,
-    status: 'deployed',
-    features: ['Auto-compound', 'Referidos', 'Depósitos incrementales'],
+    status: "deployed",
+    features: ["Auto-compound", "Referidos", "Depósitos incrementales"],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.INDIVIDUAL_POOL}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/IndividualPoolV3.sol',
-    category: 'pools'
+    docsUrl:
+      "https://github.com/KhipuVault/contracts/blob/main/src/pools/IndividualPoolV3.sol",
+    category: "pools",
   },
   {
-    name: 'CooperativePool V3',
-    description: 'Ahorros cooperativos para metas grupales',
+    name: "CooperativePool V3",
+    description: "Ahorros cooperativos para metas grupales",
     address: CONTRACT_ADDRESSES.COOPERATIVE_POOL,
     icon: <Users className="h-5 w-5" />,
-    status: 'deployed',
-    features: ['Ahorros grupales', 'Metas comunes', 'Gobernanza'],
+    status: "deployed",
+    features: ["Ahorros grupales", "Metas comunes", "Gobernanza"],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.COOPERATIVE_POOL}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/CooperativePoolV3.sol',
-    category: 'pools'
+    docsUrl:
+      "https://github.com/KhipuVault/contracts/blob/main/src/pools/CooperativePoolV3.sol",
+    category: "pools",
   },
   {
-    name: 'LotteryPool',
-    description: 'Lotería sin pérdida con premios',
+    name: "LotteryPool",
+    description: "Lotería sin pérdida con premios",
     address: CONTRACT_ADDRESSES.LOTTERY_POOL,
     icon: <Gift className="h-5 w-5" />,
-    status: 'pending',
-    features: ['Lotería sin pérdida', 'Premios', 'Chainlink VRF'],
-    explorerUrl: CONTRACT_ADDRESSES.LOTTERY_POOL !== '0x0000000000000000000000000000000000000000' 
-      ? `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.LOTTERY_POOL}` 
-      : undefined,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/LotteryPool.sol',
-    category: 'pools'
+    status: "pending",
+    features: ["Lotería sin pérdida", "Premios", "Chainlink VRF"],
+    explorerUrl:
+      CONTRACT_ADDRESSES.LOTTERY_POOL !==
+      "0x0000000000000000000000000000000000000000"
+        ? `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.LOTTERY_POOL}`
+        : undefined,
+    docsUrl:
+      "https://github.com/KhipuVault/contracts/blob/main/src/pools/LotteryPool.sol",
+    category: "pools",
   },
   {
-    name: 'RotatingPool',
-    description: 'Sistema ROSCA/Pasanaku',
+    name: "RotatingPool",
+    description: "Sistema ROSCA/Pasanaku",
     address: CONTRACT_ADDRESSES.ROTATING_POOL,
     icon: <RotateCw className="h-5 w-5" />,
-    status: 'pending',
-    features: ['Turnos rotativos', 'Metas corto plazo'],
-    explorerUrl: CONTRACT_ADDRESSES.ROTATING_POOL !== '0x0000000000000000000000000000000000000000' 
-      ? `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.ROTATING_POOL}` 
-      : undefined,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/pools/RotatingPool.sol',
-    category: 'pools'
+    status: "pending",
+    features: ["Turnos rotativos", "Metas corto plazo"],
+    explorerUrl:
+      CONTRACT_ADDRESSES.ROTATING_POOL !==
+      "0x0000000000000000000000000000000000000000"
+        ? `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.ROTATING_POOL}`
+        : undefined,
+    docsUrl:
+      "https://github.com/KhipuVault/contracts/blob/main/src/pools/RotatingPool.sol",
+    category: "pools",
   },
   {
-    name: 'MezoIntegration V3',
-    description: 'Puente BTC-MUSD con seguridad',
+    name: "MezoIntegration V3",
+    description: "Puente BTC-MUSD con seguridad",
     address: CONTRACT_ADDRESSES.MEZO_INTEGRATION,
     icon: <Shield className="h-5 w-5" />,
-    status: 'deployed',
-    features: ['Puente BTC-MUSD', 'Seguridad', 'Optimización'],
+    status: "deployed",
+    features: ["Puente BTC-MUSD", "Seguridad", "Optimización"],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.MEZO_INTEGRATION}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/integrations/MezoIntegrationV3.sol',
-    category: 'integrations'
+    docsUrl:
+      "https://github.com/KhipuVault/contracts/blob/main/src/integrations/MezoIntegrationV3.sol",
+    category: "integrations",
   },
   {
-    name: 'YieldAggregator V3',
-    description: 'Distribución inteligente de rendimientos',
+    name: "YieldAggregator V3",
+    description: "Distribución inteligente de rendimientos",
     address: CONTRACT_ADDRESSES.YIELD_AGGREGATOR,
     icon: <Code className="h-5 w-5" />,
-    status: 'deployed',
-    features: ['Diversificación', 'Rebalanceo', 'Múltiples estrategias'],
+    status: "deployed",
+    features: ["Diversificación", "Rebalanceo", "Múltiples estrategias"],
     explorerUrl: `https://explorer.mezo.org/address/${CONTRACT_ADDRESSES.YIELD_AGGREGATOR}`,
-    docsUrl: 'https://github.com/KhipuVault/contracts/blob/main/src/integrations/YieldAggregatorV3.sol',
-    category: 'integrations'
-  }
-]
+    docsUrl:
+      "https://github.com/KhipuVault/contracts/blob/main/src/integrations/YieldAggregatorV3.sol",
+    category: "integrations",
+  },
+];
 
-function getStatusBadge(status: ContractInfo['status']) {
+function getStatusBadge(status: ContractInfo["status"]) {
   switch (status) {
-    case 'deployed':
-      return <Badge variant="default" className="bg-green-500 text-xs">Activo</Badge>
-    case 'pending':
-      return <Badge variant="secondary" className="text-xs">Pendiente</Badge>
-    case 'testnet':
-      return <Badge variant="outline" className="text-xs">Testnet</Badge>
+    case "deployed":
+      return (
+        <Badge variant="default" className="bg-green-500 text-xs">
+          Activo
+        </Badge>
+      );
+    case "pending":
+      return (
+        <Badge variant="secondary" className="text-xs">
+          Pendiente
+        </Badge>
+      );
+    case "testnet":
+      return (
+        <Badge variant="outline" className="text-xs">
+          Testnet
+        </Badge>
+      );
   }
 }
 
 function CopyAddress({ address }: { address: string }) {
-  const [copied, setCopied] = useState(false)
+  const [copied, setCopied] = useState(false);
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(address)
-      setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
+      await navigator.clipboard.writeText(address);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     } catch (err) {
-      console.error('Failed to copy address:', err)
+      console.error("Failed to copy address:", err);
     }
-  }
+  };
 
   return (
     <Button
@@ -126,14 +164,20 @@ function CopyAddress({ address }: { address: string }) {
       onClick={copyToClipboard}
       title={copied ? "¡Copiado!" : "Copiar dirección"}
     >
-      {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
+      {copied ? (
+        <Check className="h-3 w-3 text-green-500" />
+      ) : (
+        <Copy className="h-3 w-3" />
+      )}
     </Button>
-  )
+  );
 }
 
 export function ContractsInfo() {
-  const poolsContracts = contractsInfo.filter(c => c.category === 'pools')
-  const integrationsContracts = contractsInfo.filter(c => c.category === 'integrations')
+  const poolsContracts = contractsInfo.filter((c) => c.category === "pools");
+  const integrationsContracts = contractsInfo.filter(
+    (c) => c.category === "integrations",
+  );
 
   return (
     <div className="space-y-6">
@@ -163,19 +207,25 @@ export function ContractsInfo() {
                         {contract.icon}
                       </div>
                       <div>
-                        <CardTitle className="text-lg">{contract.name}</CardTitle>
-                        <CardDescription>{contract.description}</CardDescription>
+                        <CardTitle className="text-lg">
+                          {contract.name}
+                        </CardTitle>
+                        <CardDescription>
+                          {contract.description}
+                        </CardDescription>
                       </div>
                     </div>
                     {getStatusBadge(contract.status)}
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="pt-0">
                   <div className="space-y-3">
                     {/* Address */}
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Dirección</p>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Dirección
+                      </p>
                       <div className="flex items-center gap-2">
                         <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
                           {formatAddress(contract.address)}
@@ -203,10 +253,16 @@ export function ContractsInfo() {
 
                     {/* Features */}
                     <div>
-                      <p className="text-xs text-muted-foreground mb-2">Características</p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Características
+                      </p>
                       <div className="flex flex-wrap gap-1">
                         {contract.features.map((feature, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {feature}
                           </Badge>
                         ))}
@@ -220,23 +276,33 @@ export function ContractsInfo() {
                           href={contract.docsUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}
+                          className={cn(
+                            buttonVariants({ variant: "outline", size: "sm" }),
+                            "flex-1",
+                          )}
                         >
                           <Code className="h-4 w-4 mr-2" />
                           Código
                         </a>
                       )}
-                      {contract.explorerUrl && contract.status === 'deployed' && (
-                        <a
-                          href={contract.explorerUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}
-                        >
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          Explorador
-                        </a>
-                      )}
+                      {contract.explorerUrl &&
+                        contract.status === "deployed" && (
+                          <a
+                            href={contract.explorerUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={cn(
+                              buttonVariants({
+                                variant: "outline",
+                                size: "sm",
+                              }),
+                              "flex-1",
+                            )}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Explorador
+                          </a>
+                        )}
                     </div>
                   </div>
                 </CardContent>
@@ -256,19 +322,25 @@ export function ContractsInfo() {
                         {contract.icon}
                       </div>
                       <div>
-                        <CardTitle className="text-lg">{contract.name}</CardTitle>
-                        <CardDescription>{contract.description}</CardDescription>
+                        <CardTitle className="text-lg">
+                          {contract.name}
+                        </CardTitle>
+                        <CardDescription>
+                          {contract.description}
+                        </CardDescription>
                       </div>
                     </div>
                     {getStatusBadge(contract.status)}
                   </div>
                 </CardHeader>
-                
+
                 <CardContent className="pt-0">
                   <div className="space-y-3">
                     {/* Address */}
                     <div>
-                      <p className="text-xs text-muted-foreground mb-1">Dirección</p>
+                      <p className="text-xs text-muted-foreground mb-1">
+                        Dirección
+                      </p>
                       <div className="flex items-center gap-2">
                         <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
                           {formatAddress(contract.address)}
@@ -296,10 +368,16 @@ export function ContractsInfo() {
 
                     {/* Features */}
                     <div>
-                      <p className="text-xs text-muted-foreground mb-2">Características</p>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Características
+                      </p>
                       <div className="flex flex-wrap gap-1">
                         {contract.features.map((feature, index) => (
-                          <Badge key={index} variant="outline" className="text-xs">
+                          <Badge
+                            key={index}
+                            variant="outline"
+                            className="text-xs"
+                          >
                             {feature}
                           </Badge>
                         ))}
@@ -313,23 +391,33 @@ export function ContractsInfo() {
                           href={contract.docsUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}
+                          className={cn(
+                            buttonVariants({ variant: "outline", size: "sm" }),
+                            "flex-1",
+                          )}
                         >
                           <Code className="h-4 w-4 mr-2" />
                           Código
                         </a>
                       )}
-                      {contract.explorerUrl && contract.status === 'deployed' && (
-                        <a
-                          href={contract.explorerUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={cn(buttonVariants({ variant: "outline", size: "sm" }), "flex-1")}
-                        >
-                          <ExternalLink className="h-4 w-4 mr-2" />
-                          Explorador
-                        </a>
-                      )}
+                      {contract.explorerUrl &&
+                        contract.status === "deployed" && (
+                          <a
+                            href={contract.explorerUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={cn(
+                              buttonVariants({
+                                variant: "outline",
+                                size: "sm",
+                              }),
+                              "flex-1",
+                            )}
+                          >
+                            <ExternalLink className="h-4 w-4 mr-2" />
+                            Explorador
+                          </a>
+                        )}
                     </div>
                   </div>
                 </CardContent>
@@ -371,5 +459,5 @@ export function ContractsInfo() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

@@ -1,8 +1,8 @@
-import * as React from "react"
-import { Slot } from "@radix-ui/react-slot"
-import { cva, type VariantProps } from "class-variance-authority"
+import * as React from "react";
+import { Slot } from "@radix-ui/react-slot";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-fast focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-95 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
@@ -10,22 +10,31 @@ const buttonVariants = cva(
     variants: {
       variant: {
         // Brand variants
-        default: "bg-lavanda text-btn-primary-fg hover:opacity-90 focus-visible:ring-lavanda",
-        primary: "bg-lavanda text-btn-primary-fg hover:opacity-90 focus-visible:ring-lavanda",
-        accent: "bg-accent text-btn-accent-fg hover:opacity-90 focus-visible:ring-accent",
+        default:
+          "bg-lavanda text-btn-primary-fg hover:opacity-90 focus-visible:ring-lavanda",
+        primary:
+          "bg-lavanda text-btn-primary-fg hover:opacity-90 focus-visible:ring-lavanda",
+        accent:
+          "bg-accent text-btn-accent-fg hover:opacity-90 focus-visible:ring-accent",
 
         // Semantic variants
-        success: "bg-success text-white hover:opacity-90 focus-visible:ring-success",
-        destructive: "bg-error text-white hover:opacity-90 focus-visible:ring-error",
-        warning: "bg-warning text-white hover:opacity-90 focus-visible:ring-warning",
+        success:
+          "bg-success text-white hover:opacity-90 focus-visible:ring-success",
+        destructive:
+          "bg-error text-white hover:opacity-90 focus-visible:ring-error",
+        warning:
+          "bg-warning text-white hover:opacity-90 focus-visible:ring-warning",
 
         // Utility variants
-        outline: "border border-border bg-transparent text-foreground hover:bg-surface-elevated hover:border-primary focus-visible:ring-primary",
-        ghost: "bg-transparent text-foreground hover:bg-surface-elevated focus-visible:ring-primary",
+        outline:
+          "border border-border bg-transparent text-foreground hover:bg-surface-elevated hover:border-primary focus-visible:ring-primary",
+        ghost:
+          "bg-transparent text-foreground hover:bg-surface-elevated focus-visible:ring-primary",
         link: "text-lavanda underline-offset-4 hover:underline hover:opacity-80",
 
         // Surface variant
-        secondary: "bg-surface text-foreground hover:bg-surface-elevated focus-visible:ring-primary",
+        secondary:
+          "bg-surface text-foreground hover:bg-surface-elevated focus-visible:ring-primary",
       },
       size: {
         default: "h-10 px-4 py-2",
@@ -39,19 +48,31 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
-)
+  },
+);
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
-  loading?: boolean
+  asChild?: boolean;
+  loading?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, loading, children, disabled, ...props }, ref) => {
-    const Comp = asChild ? Slot : "button"
+  (
+    {
+      className,
+      variant,
+      size,
+      asChild = false,
+      loading,
+      children,
+      disabled,
+      ...props
+    },
+    ref,
+  ) => {
+    const Comp = asChild ? Slot : "button";
     return (
       <Comp
         className={cn(buttonVariants({ variant, size, className }))}
@@ -83,9 +104,9 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         )}
         {children}
       </Comp>
-    )
-  }
-)
-Button.displayName = "Button"
+    );
+  },
+);
+Button.displayName = "Button";
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };

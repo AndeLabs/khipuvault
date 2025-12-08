@@ -1,28 +1,35 @@
-'use client'
+"use client";
 
-import * as React from 'react'
-import { AlertTriangle, RefreshCw, Home } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card'
-import { Alert, AlertDescription } from '@/components/ui/alert'
+import * as React from "react";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ErrorBoundaryProps {
-  children: React.ReactNode
-  fallback?: React.ComponentType<ErrorFallbackProps>
-  onError?: (error: Error, errorInfo: React.ErrorInfo) => void
-  onReset?: () => void
+  children: React.ReactNode;
+  fallback?: React.ComponentType<ErrorFallbackProps>;
+  onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+  onReset?: () => void;
 }
 
 interface ErrorBoundaryState {
-  hasError: boolean
-  error: Error | null
-  errorInfo: React.ErrorInfo | null
+  hasError: boolean;
+  error: Error | null;
+  errorInfo: React.ErrorInfo | null;
 }
 
 export interface ErrorFallbackProps {
-  error: Error | null
-  errorInfo: React.ErrorInfo | null
-  resetError: () => void
+  error: Error | null;
+  errorInfo: React.ErrorInfo | null;
+  resetError: () => void;
 }
 
 /**
@@ -45,14 +52,17 @@ export interface ErrorFallbackProps {
  * </ErrorBoundary>
  * ```
  */
-export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
-    super(props)
+    super(props);
     this.state = {
       hasError: false,
       error: null,
       errorInfo: null,
-    }
+    };
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
@@ -60,20 +70,20 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     return {
       hasError: true,
       error,
-    }
+    };
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error details to console for debugging
-    console.error('ErrorBoundary caught an error:', error, errorInfo)
+    console.error("ErrorBoundary caught an error:", error, errorInfo);
 
     // Update state with error info
     this.setState({
       errorInfo,
-    })
+    });
 
     // Call custom error handler if provided
-    this.props.onError?.(error, errorInfo)
+    this.props.onError?.(error, errorInfo);
 
     // You can also log the error to an error reporting service here
     // Example: logErrorToService(error, errorInfo)
@@ -84,31 +94,33 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
       hasError: false,
       error: null,
       errorInfo: null,
-    })
+    });
 
     // Call custom reset handler if provided
-    this.props.onReset?.()
-  }
+    this.props.onReset?.();
+  };
 
   render() {
     if (this.state.hasError) {
       // Use custom fallback if provided
       if (this.props.fallback) {
-        const FallbackComponent = this.props.fallback
+        const FallbackComponent = this.props.fallback;
         return (
           <FallbackComponent
             error={this.state.error}
             errorInfo={this.state.errorInfo}
             resetError={this.resetError}
           />
-        )
+        );
       }
 
       // Default fallback UI
-      return <DefaultErrorFallback {...this.state} resetError={this.resetError} />
+      return (
+        <DefaultErrorFallback {...this.state} resetError={this.resetError} />
+      );
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }
 
@@ -117,8 +129,12 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
  *
  * A user-friendly error page with retry functionality
  */
-function DefaultErrorFallback({ error, errorInfo, resetError }: ErrorFallbackProps) {
-  const isDevelopment = process.env.NODE_ENV === 'development'
+function DefaultErrorFallback({
+  error,
+  errorInfo,
+  resetError,
+}: ErrorFallbackProps) {
+  const isDevelopment = process.env.NODE_ENV === "development";
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-background">
@@ -141,7 +157,7 @@ function DefaultErrorFallback({ error, errorInfo, resetError }: ErrorFallbackPro
           {/* Error Message */}
           <Alert variant="destructive">
             <AlertDescription className="font-mono text-sm">
-              {error?.message || 'Error desconocido'}
+              {error?.message || "Error desconocido"}
             </AlertDescription>
           </Alert>
 
@@ -194,7 +210,7 @@ function DefaultErrorFallback({ error, errorInfo, resetError }: ErrorFallbackPro
           </Button>
           <Button
             variant="outline"
-            onClick={() => (window.location.href = '/')}
+            onClick={() => (window.location.href = "/")}
             className="gap-2"
             size="lg"
           >
@@ -204,7 +220,7 @@ function DefaultErrorFallback({ error, errorInfo, resetError }: ErrorFallbackPro
         </CardFooter>
       </Card>
     </div>
-  )
+  );
 }
 
 /**
@@ -214,21 +230,21 @@ function DefaultErrorFallback({ error, errorInfo, resetError }: ErrorFallbackPro
  * but it provides a way to manually trigger error boundaries.
  */
 export function useErrorHandler() {
-  const [error, setError] = React.useState<Error | null>(null)
+  const [error, setError] = React.useState<Error | null>(null);
 
   React.useEffect(() => {
     if (error) {
-      throw error
+      throw error;
     }
-  }, [error])
+  }, [error]);
 
   const handleError = React.useCallback((error: Error) => {
-    setError(error)
-  }, [])
+    setError(error);
+  }, []);
 
   const resetError = React.useCallback(() => {
-    setError(null)
-  }, [])
+    setError(null);
+  }, []);
 
-  return { handleError, resetError }
+  return { handleError, resetError };
 }

@@ -26,34 +26,34 @@
  */
 
 interface ErrorContext {
-  tags?: Record<string, string>
-  extra?: Record<string, unknown>
-  level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug'
-  fingerprint?: string[]
+  tags?: Record<string, string>;
+  extra?: Record<string, unknown>;
+  level?: "fatal" | "error" | "warning" | "info" | "debug";
+  fingerprint?: string[];
 }
 
 interface UserContext {
-  id?: string
-  address?: string
-  email?: string
-  username?: string
+  id?: string;
+  address?: string;
+  email?: string;
+  username?: string;
 }
 
 interface Breadcrumb {
-  category?: string
-  message: string
-  level?: 'fatal' | 'error' | 'warning' | 'info' | 'debug'
-  data?: Record<string, unknown>
+  category?: string;
+  message: string;
+  level?: "fatal" | "error" | "warning" | "info" | "debug";
+  data?: Record<string, unknown>;
 }
 
 // Flag to check if Sentry is available
-const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN
-const IS_PRODUCTION = process.env.NODE_ENV === 'production'
-const IS_SENTRY_ENABLED = !!SENTRY_DSN
+const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
+const IS_PRODUCTION = process.env.NODE_ENV === "production";
+const IS_SENTRY_ENABLED = !!SENTRY_DSN;
 
 // Simple in-memory breadcrumbs for non-Sentry mode (limited to 50)
-const breadcrumbs: Breadcrumb[] = []
-const MAX_BREADCRUMBS = 50
+const breadcrumbs: Breadcrumb[] = [];
+const MAX_BREADCRUMBS = 50;
 
 /**
  * Initialize error tracking
@@ -61,17 +61,19 @@ const MAX_BREADCRUMBS = 50
  */
 export async function initErrorTracking(): Promise<void> {
   if (!IS_SENTRY_ENABLED) {
-    console.info('[ErrorTracking] Sentry DSN not configured. Errors will be logged to console.')
-    return
+    console.info(
+      "[ErrorTracking] Sentry DSN not configured. Errors will be logged to console.",
+    );
+    return;
   }
 
   try {
     // Dynamic import to avoid bundling Sentry if not used
-    const Sentry = await import('@sentry/nextjs')
+    const Sentry = await import("@sentry/nextjs");
 
     Sentry.init({
       dsn: SENTRY_DSN,
-      environment: IS_PRODUCTION ? 'production' : 'development',
+      environment: IS_PRODUCTION ? "production" : "development",
 
       // Performance monitoring
       tracesSampleRate: IS_PRODUCTION ? 0.1 : 1.0,
@@ -83,16 +85,16 @@ export async function initErrorTracking(): Promise<void> {
       // Filter out noisy errors
       ignoreErrors: [
         // Ignore benign browser/extension errors
-        'ResizeObserver loop limit exceeded',
-        'ResizeObserver loop completed with undelivered notifications',
-        'Non-Error promise rejection captured',
+        "ResizeObserver loop limit exceeded",
+        "ResizeObserver loop completed with undelivered notifications",
+        "Non-Error promise rejection captured",
         // Ignore wallet connection errors (expected during normal usage)
-        'User rejected the request',
-        'User denied transaction signature',
-        'The user rejected the request',
+        "User rejected the request",
+        "User denied transaction signature",
+        "The user rejected the request",
         // Ignore network errors that are expected
-        'Network request failed',
-        'Failed to fetch',
+        "Network request failed",
+        "Failed to fetch",
       ],
 
       // Sanitize sensitive data
@@ -104,91 +106,103 @@ export async function initErrorTracking(): Promise<void> {
               // Partially redact Ethereum addresses
               exception.value = exception.value.replace(
                 /0x[a-fA-F0-9]{40}/g,
-                (match) => `${match.slice(0, 6)}...${match.slice(-4)}`
-              )
+                (match) => `${match.slice(0, 6)}...${match.slice(-4)}`,
+              );
             }
           }
         }
-        return event
+        return event;
       },
 
       // Integration options
       integrations: (integrations) => {
         return integrations.filter((integration) => {
           // Disable integrations that might cause issues
-          return integration.name !== 'GlobalHandlers' || IS_PRODUCTION
-        })
+          return integration.name !== "GlobalHandlers" || IS_PRODUCTION;
+        });
       },
-    })
+    });
 
-    console.info('[ErrorTracking] Sentry initialized successfully')
+    console.info("[ErrorTracking] Sentry initialized successfully");
   } catch (error) {
-    console.error('[ErrorTracking] Failed to initialize Sentry:', error)
+    console.error("[ErrorTracking] Failed to initialize Sentry:", error);
   }
 }
 
 /**
  * Capture an error and send to error tracking service
  */
-export async function captureError(error: Error | unknown, context?: ErrorContext): Promise<void> {
-  const errorObj = error instanceof Error ? error : new Error(String(error))
+export async function captureError(
+  error: Error | unknown,
+  context?: ErrorContext,
+): Promise<void> {
+  const errorObj = error instanceof Error ? error : new Error(String(error));
 
   // Always log to console in development
   if (!IS_PRODUCTION) {
-    console.error('[ErrorTracking] Captured error:', errorObj, context)
+    console.error("[ErrorTracking] Captured error:", errorObj, context);
   }
 
   if (!IS_SENTRY_ENABLED) {
     // Store error info for potential debugging
     addBreadcrumb({
-      category: 'error',
+      category: "error",
       message: errorObj.message,
-      level: 'error',
+      level: "error",
       data: { stack: errorObj.stack, ...context?.extra },
-    })
-    return
+    });
+    return;
   }
 
   try {
-    const Sentry = await import('@sentry/nextjs')
+    const Sentry = await import("@sentry/nextjs");
     Sentry.captureException(errorObj, {
       tags: context?.tags,
       extra: context?.extra,
       level: context?.level,
       fingerprint: context?.fingerprint,
-    })
+    });
   } catch (sentryError) {
-    console.error('[ErrorTracking] Failed to send error to Sentry:', sentryError)
+    console.error(
+      "[ErrorTracking] Failed to send error to Sentry:",
+      sentryError,
+    );
   }
 }
 
 /**
  * Capture a message (non-error event)
  */
-export async function captureMessage(message: string, context?: ErrorContext): Promise<void> {
+export async function captureMessage(
+  message: string,
+  context?: ErrorContext,
+): Promise<void> {
   if (!IS_PRODUCTION) {
-    console.info('[ErrorTracking] Captured message:', message, context)
+    console.info("[ErrorTracking] Captured message:", message, context);
   }
 
   if (!IS_SENTRY_ENABLED) {
     addBreadcrumb({
-      category: 'message',
+      category: "message",
       message,
-      level: context?.level || 'info',
+      level: context?.level || "info",
       data: context?.extra,
-    })
-    return
+    });
+    return;
   }
 
   try {
-    const Sentry = await import('@sentry/nextjs')
+    const Sentry = await import("@sentry/nextjs");
     Sentry.captureMessage(message, {
       tags: context?.tags,
       extra: context?.extra,
-      level: context?.level || 'info',
-    })
+      level: context?.level || "info",
+    });
   } catch (sentryError) {
-    console.error('[ErrorTracking] Failed to send message to Sentry:', sentryError)
+    console.error(
+      "[ErrorTracking] Failed to send message to Sentry:",
+      sentryError,
+    );
   }
 }
 
@@ -198,23 +212,23 @@ export async function captureMessage(message: string, context?: ErrorContext): P
  */
 export async function setUser(user: UserContext | null): Promise<void> {
   if (!IS_SENTRY_ENABLED) {
-    console.debug('[ErrorTracking] Set user:', user?.address || 'null')
-    return
+    console.debug("[ErrorTracking] Set user:", user?.address || "null");
+    return;
   }
 
   try {
-    const Sentry = await import('@sentry/nextjs')
+    const Sentry = await import("@sentry/nextjs");
     if (user) {
       Sentry.setUser({
         id: user.id || user.address,
         email: user.email,
         username: user.username || user.address,
-      })
+      });
     } else {
-      Sentry.setUser(null)
+      Sentry.setUser(null);
     }
   } catch (sentryError) {
-    console.error('[ErrorTracking] Failed to set user:', sentryError)
+    console.error("[ErrorTracking] Failed to set user:", sentryError);
   }
 }
 
@@ -227,30 +241,30 @@ export function addBreadcrumb(breadcrumb: Breadcrumb): void {
   breadcrumbs.push({
     ...breadcrumb,
     data: { ...breadcrumb.data, timestamp: Date.now() },
-  })
+  });
 
   // Keep only last MAX_BREADCRUMBS
   if (breadcrumbs.length > MAX_BREADCRUMBS) {
-    breadcrumbs.shift()
+    breadcrumbs.shift();
   }
 
   if (!IS_SENTRY_ENABLED) {
-    return
+    return;
   }
 
   // Async add to Sentry
-  import('@sentry/nextjs')
+  import("@sentry/nextjs")
     .then((Sentry) => {
       Sentry.addBreadcrumb({
         category: breadcrumb.category,
         message: breadcrumb.message,
         level: breadcrumb.level,
         data: breadcrumb.data,
-      })
+      });
     })
     .catch(() => {
       // Silently fail - breadcrumbs are not critical
-    })
+    });
 }
 
 /**
@@ -258,15 +272,15 @@ export function addBreadcrumb(breadcrumb: Breadcrumb): void {
  */
 export async function setTag(key: string, value: string): Promise<void> {
   if (!IS_SENTRY_ENABLED) {
-    console.debug('[ErrorTracking] Set tag:', key, '=', value)
-    return
+    console.debug("[ErrorTracking] Set tag:", key, "=", value);
+    return;
   }
 
   try {
-    const Sentry = await import('@sentry/nextjs')
-    Sentry.setTag(key, value)
+    const Sentry = await import("@sentry/nextjs");
+    Sentry.setTag(key, value);
   } catch (sentryError) {
-    console.error('[ErrorTracking] Failed to set tag:', sentryError)
+    console.error("[ErrorTracking] Failed to set tag:", sentryError);
   }
 }
 
@@ -274,22 +288,21 @@ export async function setTag(key: string, value: string): Promise<void> {
  * Get recent breadcrumbs (useful for debugging without Sentry)
  */
 export function getRecentBreadcrumbs(): Breadcrumb[] {
-  return [...breadcrumbs]
+  return [...breadcrumbs];
 }
 
 /**
  * Create a wrapper for async functions that captures errors
  */
-export function withErrorTracking<T extends (...args: unknown[]) => Promise<unknown>>(
-  fn: T,
-  context?: ErrorContext
-): T {
+export function withErrorTracking<
+  T extends (...args: unknown[]) => Promise<unknown>,
+>(fn: T, context?: ErrorContext): T {
   return (async (...args: Parameters<T>) => {
     try {
-      return await fn(...args)
+      return await fn(...args);
     } catch (error) {
-      await captureError(error, context)
-      throw error
+      await captureError(error, context);
+      throw error;
     }
-  }) as T
+  }) as T;
 }

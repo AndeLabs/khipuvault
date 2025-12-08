@@ -1,39 +1,39 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { PoolCard } from "./pool-card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
+import * as React from "react";
+import { PoolCard } from "./pool-card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Search, Filter, Plus } from "lucide-react"
-import { SkeletonCard } from "@/components/ui/skeleton"
+} from "@/components/ui/select";
+import { Search, Filter, Plus } from "lucide-react";
+import { SkeletonCard } from "@/components/ui/skeleton";
 
 interface Pool {
-  poolId: string
-  poolName?: string
-  totalDeposits?: string
-  memberCount?: number
-  maxMembers?: number
-  cycleLength?: number
-  currentCycle?: number
-  apy?: number
-  isActive?: boolean
-  isMember?: boolean
+  poolId: string;
+  poolName?: string;
+  totalDeposits?: string;
+  memberCount?: number;
+  maxMembers?: number;
+  cycleLength?: number;
+  currentCycle?: number;
+  apy?: number;
+  isActive?: boolean;
+  isMember?: boolean;
 }
 
 interface PoolsListProps {
-  pools?: Pool[]
-  isLoading?: boolean
-  onJoinPool?: (poolId: string) => void
-  onViewDetails?: (poolId: string) => void
-  onCreatePool?: () => void
+  pools?: Pool[];
+  isLoading?: boolean;
+  onJoinPool?: (poolId: string) => void;
+  onViewDetails?: (poolId: string) => void;
+  onCreatePool?: () => void;
 }
 
 export function PoolsList({
@@ -43,9 +43,9 @@ export function PoolsList({
   onViewDetails,
   onCreatePool,
 }: PoolsListProps) {
-  const [searchQuery, setSearchQuery] = React.useState("")
-  const [filterStatus, setFilterStatus] = React.useState<string>("all")
-  const [filterMembership, setFilterMembership] = React.useState<string>("all")
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const [filterStatus, setFilterStatus] = React.useState<string>("all");
+  const [filterMembership, setFilterMembership] = React.useState<string>("all");
 
   const filteredPools = React.useMemo(() => {
     return pools.filter((pool) => {
@@ -55,27 +55,27 @@ export function PoolsList({
         !pool.poolName?.toLowerCase().includes(searchQuery.toLowerCase()) &&
         !pool.poolId.toLowerCase().includes(searchQuery.toLowerCase())
       ) {
-        return false
+        return false;
       }
 
       // Status filter
-      if (filterStatus === "active" && !pool.isActive) return false
-      if (filterStatus === "inactive" && pool.isActive) return false
+      if (filterStatus === "active" && !pool.isActive) return false;
+      if (filterStatus === "inactive" && pool.isActive) return false;
 
       // Membership filter
-      if (filterMembership === "member" && !pool.isMember) return false
-      if (filterMembership === "available" && pool.isMember) return false
+      if (filterMembership === "member" && !pool.isMember) return false;
+      if (filterMembership === "available" && pool.isMember) return false;
 
-      return true
-    })
-  }, [pools, searchQuery, filterStatus, filterMembership])
+      return true;
+    });
+  }, [pools, searchQuery, filterStatus, filterMembership]);
 
   const stats = React.useMemo(() => {
-    const total = pools.length
-    const active = pools.filter((p) => p.isActive).length
-    const myPools = pools.filter((p) => p.isMember).length
-    return { total, active, myPools }
-  }, [pools])
+    const total = pools.length;
+    const active = pools.filter((p) => p.isActive).length;
+    const myPools = pools.filter((p) => p.isMember).length;
+    return { total, active, myPools };
+  }, [pools]);
 
   if (isLoading) {
     return (
@@ -100,7 +100,7 @@ export function PoolsList({
           ))}
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -172,12 +172,14 @@ export function PoolsList({
               ? "No pools match your filters"
               : "No pools available yet"}
           </p>
-          {!searchQuery && filterStatus === "all" && filterMembership === "all" && (
-            <Button variant="accent" onClick={onCreatePool}>
-              <Plus className="h-4 w-4 mr-2" />
-              Create First Pool
-            </Button>
-          )}
+          {!searchQuery &&
+            filterStatus === "all" &&
+            filterMembership === "all" && (
+              <Button variant="accent" onClick={onCreatePool}>
+                <Plus className="h-4 w-4 mr-2" />
+                Create First Pool
+              </Button>
+            )}
         </div>
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -192,5 +194,5 @@ export function PoolsList({
         </div>
       )}
     </div>
-  )
+  );
 }

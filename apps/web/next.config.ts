@@ -1,16 +1,18 @@
-import type { NextConfig } from 'next';
-import path from 'path';
+import type { NextConfig } from "next";
+import path from "path";
 
 // CRITICAL: Polyfill localStorage for SSR before any other imports
 // MetaMask SDK and some dependencies try to access localStorage during module initialization
-if (typeof globalThis.localStorage === 'undefined') {
+if (typeof globalThis.localStorage === "undefined") {
   const storage = new Map<string, string>();
   (globalThis as any).localStorage = {
     getItem: (key: string) => storage.get(key) || null,
     setItem: (key: string, value: string) => storage.set(key, value),
     removeItem: (key: string) => storage.delete(key),
     clear: () => storage.clear(),
-    get length() { return storage.size; },
+    get length() {
+      return storage.size;
+    },
     key: (index: number) => Array.from(storage.keys())[index] || null,
   };
   (globalThis as any).sessionStorage = (globalThis as any).localStorage;
@@ -19,52 +21,53 @@ if (typeof globalThis.localStorage === 'undefined') {
 const nextConfig: NextConfig = {
   typescript: {
     // Enable type checking during builds for production safety
-    ignoreBuildErrors: process.env.NODE_ENV !== 'production',
+    ignoreBuildErrors: process.env.NODE_ENV !== "production",
   },
   eslint: {
     // Enable linting during builds for code quality
-    ignoreDuringBuilds: process.env.NODE_ENV !== 'production',
+    ignoreDuringBuilds: process.env.NODE_ENV !== "production",
   },
   // Security headers for production
   headers: async () => {
     return [
       {
         // Apply to all routes
-        source: '/:path*',
+        source: "/:path*",
         headers: [
           // Prevent clickjacking attacks
           {
-            key: 'X-Frame-Options',
-            value: 'DENY',
+            key: "X-Frame-Options",
+            value: "DENY",
           },
           // Prevent MIME type sniffing
           {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
+            key: "X-Content-Type-Options",
+            value: "nosniff",
           },
           // Control referrer information
           {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
+            key: "Referrer-Policy",
+            value: "strict-origin-when-cross-origin",
           },
           // DNS prefetch control
           {
-            key: 'X-DNS-Prefetch-Control',
-            value: 'on',
+            key: "X-DNS-Prefetch-Control",
+            value: "on",
           },
           // Enable HSTS (HTTP Strict Transport Security)
           {
-            key: 'Strict-Transport-Security',
-            value: 'max-age=31536000; includeSubDomains; preload',
+            key: "Strict-Transport-Security",
+            value: "max-age=31536000; includeSubDomains; preload",
           },
           // Permissions Policy (disable unused features)
           {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
+            key: "Permissions-Policy",
+            value:
+              "camera=(), microphone=(), geolocation=(), interest-cohort=()",
           },
           // Content Security Policy - Allow wallet connections and essential resources
           {
-            key: 'Content-Security-Policy',
+            key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
               // Scripts: self, inline (needed for Next.js), and eval (needed for wagmi/viem)
@@ -89,7 +92,7 @@ const nextConfig: NextConfig = {
               "frame-ancestors 'none'",
               // Upgrade insecure requests in production
               "upgrade-insecure-requests",
-            ].join('; '),
+            ].join("; "),
           },
         ],
       },
@@ -97,15 +100,15 @@ const nextConfig: NextConfig = {
   },
   // Transpile Mezo Passport and dependencies for Next.js 15
   transpilePackages: [
-    '@mezo-org/passport',
-    '@mezo-org/orangekit',
-    '@mezo-org/orangekit-smart-account',
-    '@mezo-org/orangekit-contracts',
+    "@mezo-org/passport",
+    "@mezo-org/orangekit",
+    "@mezo-org/orangekit-smart-account",
+    "@mezo-org/orangekit-contracts",
   ],
   webpack: (config, { isServer }) => {
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@': path.resolve(__dirname, './src'),
+      "@": path.resolve(__dirname, "./src"),
     };
 
     // Fix for Mezo Passport modules
@@ -125,23 +128,25 @@ const nextConfig: NextConfig = {
       os: false,
       path: false,
     };
-    
+
     // Always ignore React Native modules (for both server and client)
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@react-native-async-storage/async-storage': false,
-      'react-native': false,
-      'react-native-safe-area-context': false,
-      'react-native-screens': false,
-      'react-native-gesture-handler': false,
-      'react-native-reanimated': false,
+      "@react-native-async-storage/async-storage": false,
+      "react-native": false,
+      "react-native-safe-area-context": false,
+      "react-native-screens": false,
+      "react-native-gesture-handler": false,
+      "react-native-reanimated": false,
     };
-    
+
     // Ignore React Native modules in webpack resolve
     if (!isServer) {
-      config.resolve.extensions = config.resolve.extensions.filter((ext: string) => ext !== '.native.js');
+      config.resolve.extensions = config.resolve.extensions.filter(
+        (ext: string) => ext !== ".native.js",
+      );
     }
-    
+
     // Suppress MetaMask SDK warnings about missing React Native modules
     config.ignoreWarnings = [
       ...(config.ignoreWarnings || []),
@@ -150,33 +155,33 @@ const nextConfig: NextConfig = {
         message: /Can't resolve '@react-native-async-storage\/async-storage'/,
       },
     ];
-    
+
     // External node modules for server-side
     if (isServer) {
-      config.externals.push('pino-pretty', 'encoding');
+      config.externals.push("pino-pretty", "encoding");
     }
-    
+
     return config;
   },
   images: {
     remotePatterns: [
       {
-        protocol: 'https',
-        hostname: 'placehold.co',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "placehold.co",
+        port: "",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "images.unsplash.com",
+        port: "",
+        pathname: "/**",
       },
       {
-        protocol: 'https',
-        hostname: 'picsum.photos',
-        port: '',
-        pathname: '/**',
+        protocol: "https",
+        hostname: "picsum.photos",
+        port: "",
+        pathname: "/**",
       },
     ],
   },

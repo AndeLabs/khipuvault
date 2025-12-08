@@ -12,10 +12,10 @@ Prisma database client for KhipuVault.
 ## Usage
 
 ```typescript
-import { prisma } from '@khipu/database'
+import { prisma } from "@khipu/database";
 
 // Query example
-const users = await prisma.user.findMany()
+const users = await prisma.user.findMany();
 ```
 
 ## Development

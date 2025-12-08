@@ -1,10 +1,18 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { PageHeader } from "@/components/layout"
-import { Card, CardContent } from "@/components/ui/card"
-import Link from "next/link"
-import { ChevronRight, User, Wallet, Shield, Activity, Bell, Palette } from "lucide-react"
+import * as React from "react";
+import { PageHeader } from "@/components/layout";
+import { Card, CardContent } from "@/components/ui/card";
+import Link from "next/link";
+import {
+  ChevronRight,
+  User,
+  Wallet,
+  Shield,
+  Activity,
+  Bell,
+  Palette,
+} from "lucide-react";
 
 const settingsSections = [
   {
@@ -39,7 +47,7 @@ const settingsSections = [
     color: "text-info",
     bgColor: "bg-info/20",
   },
-]
+];
 
 export default function SettingsPage() {
   return (
@@ -51,12 +59,18 @@ export default function SettingsPage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {settingsSections.map((section) => {
-          const Icon = section.icon
+          const Icon = section.icon;
           return (
             <Link key={section.href} href={section.href}>
-              <Card variant="surface" hover="glow" className="h-full cursor-pointer group">
+              <Card
+                variant="surface"
+                hover="glow"
+                className="h-full cursor-pointer group"
+              >
                 <CardContent className="pt-6">
-                  <div className={`h-12 w-12 rounded-full ${section.bgColor} flex items-center justify-center mb-4`}>
+                  <div
+                    className={`h-12 w-12 rounded-full ${section.bgColor} flex items-center justify-center mb-4`}
+                  >
                     <Icon className={`h-6 w-6 ${section.color}`} />
                   </div>
                   <div className="flex items-start justify-between mb-2">
@@ -71,9 +85,9 @@ export default function SettingsPage() {
                 </CardContent>
               </Card>
             </Link>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

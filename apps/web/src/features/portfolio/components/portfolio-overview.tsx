@@ -1,18 +1,26 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Card, CardHeader, CardTitle, CardContent, StatCard, StatValue, StatLabel } from "@/components/ui/card"
-import { AmountDisplay, PercentageDisplay } from "@/components/common"
-import { TrendingUp, Wallet, Users, Award, DollarSign } from "lucide-react"
+import * as React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardContent,
+  StatCard,
+  StatValue,
+  StatLabel,
+} from "@/components/ui/card";
+import { AmountDisplay, PercentageDisplay } from "@/components/common";
+import { TrendingUp, Wallet, Users, Award, DollarSign } from "lucide-react";
 
 interface PortfolioOverviewProps {
-  totalValue?: string
-  individualSavings?: string
-  cooperativeSavings?: string
-  totalYields?: string
-  change24h?: number
-  change7d?: number
-  isLoading?: boolean
+  totalValue?: string;
+  individualSavings?: string;
+  cooperativeSavings?: string;
+  totalYields?: string;
+  change24h?: number;
+  change7d?: number;
+  isLoading?: boolean;
 }
 
 export function PortfolioOverview({
@@ -28,10 +36,13 @@ export function PortfolioOverview({
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
-          <div key={i} className="h-32 bg-surface-elevated animate-shimmer rounded-lg" />
+          <div
+            key={i}
+            className="h-32 bg-surface-elevated animate-shimmer rounded-lg"
+          />
         ))}
       </div>
-    )
+    );
   }
 
   return (
@@ -84,7 +95,11 @@ export function PortfolioOverview({
         <StatLabel>Active Positions</StatLabel>
         <StatValue>
           <span className="text-2xl font-bold tabular-nums">
-            {Number(individualSavings) > 0 ? 1 : 0 + Number(cooperativeSavings) > 0 ? 1 : 0}
+            {Number(individualSavings) > 0
+              ? 1
+              : 0 + Number(cooperativeSavings) > 0
+                ? 1
+                : 0}
           </span>
         </StatValue>
       </StatCard>
@@ -111,5 +126,5 @@ export function PortfolioOverview({
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

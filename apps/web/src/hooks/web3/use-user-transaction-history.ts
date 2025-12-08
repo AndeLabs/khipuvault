@@ -3,41 +3,43 @@
  * @module hooks/web3/use-user-transaction-history
  */
 
-import { useQuery } from '@tanstack/react-query'
-import { useAccount, usePublicClient } from 'wagmi'
-import { MEZO_V3_ADDRESSES, INDIVIDUAL_POOL_V3_ABI } from '@/lib/web3/contracts-v3'
-import { formatUnits } from 'viem'
+import { useQuery } from "@tanstack/react-query";
+import { useAccount, usePublicClient } from "wagmi";
+import {
+  MEZO_V3_ADDRESSES,
+  INDIVIDUAL_POOL_V3_ABI,
+} from "@/lib/web3/contracts-v3";
+import { formatUnits } from "viem";
 
 export interface Transaction {
-  hash: string
-  type: 'deposit' | 'withdraw' | 'claim' | 'compound'
-  amount: bigint
-  timestamp: number
-  status: 'success' | 'failed' | 'pending'
-  blockNumber?: bigint
+  hash: string;
+  type: "deposit" | "withdraw" | "claim" | "compound";
+  amount: bigint;
+  timestamp: number;
+  status: "success" | "failed" | "pending";
+  blockNumber?: bigint;
 }
 
 /**
  * Fetch user's transaction history from contract events
  */
 export function useUserTransactionHistory() {
-  const { address } = useAccount()
-  const publicClient = usePublicClient()
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
 
   return useQuery({
-    queryKey: ['individual-pool-transactions', address],
+    queryKey: ["individual-pool-transactions", address],
     queryFn: async (): Promise<Transaction[]> => {
-      if (!address || !publicClient) return []
+      if (!address || !publicClient) return [];
 
       try {
         // Get current block number
-        const latestBlock = await publicClient.getBlockNumber()
+        const latestBlock = await publicClient.getBlockNumber();
 
         // Mezo RPC has a limit of 10,000 blocks per query
         // Query last 9,000 blocks to be safe (roughly 1-2 weeks of data)
-        const fromBlock = latestBlock > BigInt(9000)
-          ? latestBlock - BigInt(9000)
-          : BigInt(0)
+        const fromBlock =
+          latestBlock > BigInt(9000) ? latestBlock - BigInt(9000) : BigInt(0);
 
         // Get contract events for this user
         const [depositEvents, withdrawEvents, claimEvents] = await Promise.all([
@@ -45,112 +47,118 @@ export function useUserTransactionHistory() {
           publicClient.getLogs({
             address: MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`,
             event: {
-              type: 'event',
-              name: 'Deposited',
+              type: "event",
+              name: "Deposited",
               inputs: [
-                { type: 'address', indexed: true, name: 'user' },
-                { type: 'uint256', indexed: false, name: 'amount' },
-                { type: 'address', indexed: true, name: 'referrer' },
+                { type: "address", indexed: true, name: "user" },
+                { type: "uint256", indexed: false, name: "amount" },
+                { type: "address", indexed: true, name: "referrer" },
               ],
             },
             args: {
               user: address,
             },
             fromBlock,
-            toBlock: 'latest',
+            toBlock: "latest",
           }),
 
           // Withdraw events
           publicClient.getLogs({
             address: MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`,
             event: {
-              type: 'event',
-              name: 'Withdrawn',
+              type: "event",
+              name: "Withdrawn",
               inputs: [
-                { type: 'address', indexed: true, name: 'user' },
-                { type: 'uint256', indexed: false, name: 'amount' },
+                { type: "address", indexed: true, name: "user" },
+                { type: "uint256", indexed: false, name: "amount" },
               ],
             },
             args: {
               user: address,
             },
             fromBlock,
-            toBlock: 'latest',
+            toBlock: "latest",
           }),
 
           // Yield claimed events
           publicClient.getLogs({
             address: MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`,
             event: {
-              type: 'event',
-              name: 'YieldClaimed',
+              type: "event",
+              name: "YieldClaimed",
               inputs: [
-                { type: 'address', indexed: true, name: 'user' },
-                { type: 'uint256', indexed: false, name: 'amount' },
-                { type: 'uint256', indexed: false, name: 'fee' },
+                { type: "address", indexed: true, name: "user" },
+                { type: "uint256", indexed: false, name: "amount" },
+                { type: "uint256", indexed: false, name: "fee" },
               ],
             },
             args: {
               user: address,
             },
             fromBlock,
-            toBlock: 'latest',
+            toBlock: "latest",
           }),
-        ])
+        ]);
 
         // Get block timestamps
-        const transactions: Transaction[] = []
+        const transactions: Transaction[] = [];
 
         // Process deposit events
         for (const event of depositEvents) {
-          const block = await publicClient.getBlock({ blockNumber: event.blockNumber })
+          const block = await publicClient.getBlock({
+            blockNumber: event.blockNumber,
+          });
           transactions.push({
             hash: event.transactionHash,
-            type: 'deposit',
+            type: "deposit",
             amount: event.args.amount as bigint,
             timestamp: Number(block.timestamp),
-            status: 'success',
+            status: "success",
             blockNumber: event.blockNumber,
-          })
+          });
         }
 
         // Process withdraw events
         for (const event of withdrawEvents) {
-          const block = await publicClient.getBlock({ blockNumber: event.blockNumber })
+          const block = await publicClient.getBlock({
+            blockNumber: event.blockNumber,
+          });
           transactions.push({
             hash: event.transactionHash,
-            type: 'withdraw',
+            type: "withdraw",
             amount: event.args.amount as bigint,
             timestamp: Number(block.timestamp),
-            status: 'success',
+            status: "success",
             blockNumber: event.blockNumber,
-          })
+          });
         }
 
         // Process claim events
         for (const event of claimEvents) {
-          const block = await publicClient.getBlock({ blockNumber: event.blockNumber })
+          const block = await publicClient.getBlock({
+            blockNumber: event.blockNumber,
+          });
           transactions.push({
             hash: event.transactionHash,
-            type: 'claim',
+            type: "claim",
             amount: event.args.amount as bigint,
             timestamp: Number(block.timestamp),
-            status: 'success',
+            status: "success",
             blockNumber: event.blockNumber,
-          })
+          });
         }
 
         // Sort by timestamp descending (newest first)
-        return transactions.sort((a, b) => b.timestamp - a.timestamp)
+        return transactions.sort((a, b) => b.timestamp - a.timestamp);
       } catch (error) {
-        console.error('Error fetching transaction history:', error)
-        return []
+        console.error("Error fetching transaction history:", error);
+        return [];
       }
     },
     enabled: !!address && !!publicClient,
     staleTime: 30_000, // 30 seconds
     refetchInterval: 60_000, // Refetch every 60 seconds
-  })
+  });
 }
 
 /**
@@ -162,5 +170,5 @@ export function formatTransaction(tx: Transaction) {
     amountFormatted: formatUnits(tx.amount, 18),
     dateFormatted: new Date(tx.timestamp * 1000).toLocaleString(),
     typeLabel: tx.type.charAt(0).toUpperCase() + tx.type.slice(1),
-  }
+  };
 }

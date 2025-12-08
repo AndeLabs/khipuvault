@@ -1,11 +1,11 @@
-'use client'
+"use client";
 
-import * as React from 'react'
-import { AlertTriangle, RefreshCw } from 'lucide-react'
+import * as React from "react";
+import { AlertTriangle, RefreshCw } from "lucide-react";
 
 interface GlobalErrorProps {
-  error: Error & { digest?: string }
-  reset: () => void
+  error: Error & { digest?: string };
+  reset: () => void;
 }
 
 /**
@@ -27,11 +27,11 @@ interface GlobalErrorProps {
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   React.useEffect(() => {
     // Log error to console
-    console.error('Global Error:', error)
+    console.error("Global Error:", error);
 
     // You can log to an external error service here
     // Keep it simple - external services might also be failing
-  }, [error])
+  }, [error]);
 
   return (
     <html lang="es">
@@ -255,14 +255,16 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               </div>
               <div>
                 <h1 className="title">Error Critico</h1>
-                <p className="description">La aplicacion encontro un error grave</p>
+                <p className="description">
+                  La aplicacion encontro un error grave
+                </p>
               </div>
             </div>
 
             <div className="content">
               <div className="error-box">
                 <p className="error-message">
-                  {error.message || 'Error desconocido'}
+                  {error.message || "Error desconocido"}
                 </p>
               </div>
 
@@ -270,7 +272,7 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 <div className="digest">
                   <p className="digest-label">ID de Error:</p>
                   <p className="digest-value">{error.digest}</p>
-                  <p className="digest-label" style={{ marginTop: '0.5rem' }}>
+                  <p className="digest-label" style={{ marginTop: "0.5rem" }}>
                     Por favor incluye este ID al contactar soporte
                   </p>
                 </div>
@@ -280,15 +282,18 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 <p className="instructions-title">Que puedes hacer:</p>
                 <ul className="instructions-list">
                   <li>Intenta recargar la pagina usando el boton de abajo</li>
-                  <li>Si el problema persiste, limpia el cache de tu navegador</li>
+                  <li>
+                    Si el problema persiste, limpia el cache de tu navegador
+                  </li>
                   <li>Verifica tu conexion a internet</li>
                   <li>Intenta acceder desde otro navegador</li>
                 </ul>
               </div>
 
               <div className="footer-note">
-                Este es un error critico que ha afectado la carga completa de la aplicacion.
-                El equipo de KhipuVault ha sido notificado automaticamente.
+                Este es un error critico que ha afectado la carga completa de la
+                aplicacion. El equipo de KhipuVault ha sido notificado
+                automaticamente.
               </div>
             </div>
 
@@ -305,5 +310,5 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
         </div>
       </body>
     </html>
-  )
+  );
 }

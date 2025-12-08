@@ -1,5 +1,5 @@
-import * as React from "react"
-import { cn } from "@/lib/utils"
+import * as React from "react";
+import { cn } from "@/lib/utils";
 
 /**
  * Amount Display Component
@@ -7,17 +7,17 @@ import { cn } from "@/lib/utils"
  */
 
 interface AmountDisplayProps {
-  amount: string | number
-  symbol?: string
-  prefix?: string
-  suffix?: string
-  decimals?: number
-  className?: string
-  valueClassName?: string
-  symbolClassName?: string
-  showZero?: boolean
-  trend?: "up" | "down" | "neutral"
-  size?: "sm" | "md" | "lg" | "xl"
+  amount: string | number;
+  symbol?: string;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  className?: string;
+  valueClassName?: string;
+  symbolClassName?: string;
+  showZero?: boolean;
+  trend?: "up" | "down" | "neutral";
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
 export function AmountDisplay({
@@ -33,30 +33,31 @@ export function AmountDisplay({
   trend,
   size = "md",
 }: AmountDisplayProps) {
-  const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount
-  const isZero = numericAmount === 0
+  const numericAmount =
+    typeof amount === "string" ? parseFloat(amount) : amount;
+  const isZero = numericAmount === 0;
 
   if (isZero && !showZero) {
-    return <span className={cn("text-muted-foreground", className)}>-</span>
+    return <span className={cn("text-muted-foreground", className)}>-</span>;
   }
 
   const formattedAmount = new Intl.NumberFormat("en-US", {
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals,
-  }).format(numericAmount)
+  }).format(numericAmount);
 
   const sizeClasses = {
     sm: "text-sm",
     md: "text-base",
     lg: "text-lg",
     xl: "text-2xl font-bold",
-  }
+  };
 
   const trendColor = {
     up: "text-success",
     down: "text-error",
     neutral: "text-foreground",
-  }
+  };
 
   return (
     <span
@@ -64,7 +65,7 @@ export function AmountDisplay({
         "tabular-nums font-medium",
         sizeClasses[size],
         trend && trendColor[trend],
-        className
+        className,
       )}
     >
       {prefix && <span className="mr-1">{prefix}</span>}
@@ -77,7 +78,7 @@ export function AmountDisplay({
             size === "md" && "text-sm",
             size === "lg" && "text-base",
             size === "xl" && "text-lg",
-            symbolClassName
+            symbolClassName,
           )}
         >
           {symbol}
@@ -85,17 +86,17 @@ export function AmountDisplay({
       )}
       {suffix && <span className="ml-1">{suffix}</span>}
     </span>
-  )
+  );
 }
 
 /**
  * Percentage Display - Shows percentage values with trend
  */
 interface PercentageDisplayProps {
-  value: number
-  decimals?: number
-  showSign?: boolean
-  className?: string
+  value: number;
+  decimals?: number;
+  showSign?: boolean;
+  className?: string;
 }
 
 export function PercentageDisplay({
@@ -104,11 +105,11 @@ export function PercentageDisplay({
   showSign = true,
   className,
 }: PercentageDisplayProps) {
-  const isPositive = value > 0
-  const isNegative = value < 0
-  const isZero = value === 0
+  const isPositive = value > 0;
+  const isNegative = value < 0;
+  const isZero = value === 0;
 
-  const trend = isPositive ? "up" : isNegative ? "down" : "neutral"
+  const trend = isPositive ? "up" : isNegative ? "down" : "neutral";
 
   return (
     <span
@@ -117,7 +118,7 @@ export function PercentageDisplay({
         isPositive && "text-success",
         isNegative && "text-error",
         isZero && "text-muted-foreground",
-        className
+        className,
       )}
     >
       {showSign && !isZero && (
@@ -128,20 +129,20 @@ export function PercentageDisplay({
       {showSign && (isPositive ? "+" : "")}
       {value.toFixed(decimals)}%
     </span>
-  )
+  );
 }
 
 /**
  * Balance Card - Shows balance with label
  */
 interface BalanceCardProps {
-  label: string
-  amount: string | number
-  symbol?: string
-  trend?: "up" | "down" | "neutral"
-  change?: number
-  loading?: boolean
-  className?: string
+  label: string;
+  amount: string | number;
+  symbol?: string;
+  trend?: "up" | "down" | "neutral";
+  change?: number;
+  loading?: boolean;
+  className?: string;
 }
 
 export function BalanceCard({
@@ -159,16 +160,21 @@ export function BalanceCard({
         <div className="h-4 w-20 bg-surface-elevated animate-shimmer rounded" />
         <div className="h-8 w-32 bg-surface-elevated animate-shimmer rounded" />
       </div>
-    )
+    );
   }
 
   return (
     <div className={cn("space-y-1", className)}>
       <p className="label">{label}</p>
       <div className="flex items-baseline gap-2">
-        <AmountDisplay amount={amount} symbol={symbol} trend={trend} size="xl" />
+        <AmountDisplay
+          amount={amount}
+          symbol={symbol}
+          trend={trend}
+          size="xl"
+        />
         {change !== undefined && <PercentageDisplay value={change} />}
       </div>
     </div>
-  )
+  );
 }

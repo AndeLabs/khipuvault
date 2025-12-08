@@ -1,13 +1,26 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts"
+import * as React from "react";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import {
+  PieChart,
+  Pie,
+  Cell,
+  ResponsiveContainer,
+  Legend,
+  Tooltip,
+} from "recharts";
 
 interface AllocationChartProps {
-  individualSavings?: number
-  cooperativeSavings?: number
-  isLoading?: boolean
+  individualSavings?: number;
+  cooperativeSavings?: number;
+  isLoading?: boolean;
 }
 
 export function AllocationChart({
@@ -26,9 +39,9 @@ export function AllocationChart({
       value: cooperativeSavings,
       color: "rgb(255, 199, 125)", // orange
     },
-  ].filter((item) => item.value > 0)
+  ].filter((item) => item.value > 0);
 
-  const total = individualSavings + cooperativeSavings
+  const total = individualSavings + cooperativeSavings;
 
   if (isLoading) {
     return (
@@ -40,7 +53,7 @@ export function AllocationChart({
           <div className="h-64 bg-surface-elevated animate-shimmer rounded" />
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (total === 0) {
@@ -56,7 +69,7 @@ export function AllocationChart({
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -125,5 +138,5 @@ export function AllocationChart({
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }

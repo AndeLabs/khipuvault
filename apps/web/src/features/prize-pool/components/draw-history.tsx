@@ -5,13 +5,19 @@
  * Table displaying past lottery draws with winners
  */
 
-'use client'
+"use client";
 
-import * as React from 'react'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Skeleton } from '@/components/ui/skeleton'
+import * as React from "react";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
   TableBody,
@@ -19,57 +25,67 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from '@/components/ui/table'
-import { Trophy, ExternalLink, Copy, CheckCircle2, Calendar } from 'lucide-react'
-import { formatEther } from 'viem'
-import type { LotteryRound } from '@/lib/blockchain/fetch-lottery-pools'
-import { useToast } from '@/hooks/use-toast'
+} from "@/components/ui/table";
+import {
+  Trophy,
+  ExternalLink,
+  Copy,
+  CheckCircle2,
+  Calendar,
+} from "lucide-react";
+import { formatEther } from "viem";
+import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
+import { useToast } from "@/hooks/use-toast";
 
 interface DrawHistoryProps {
-  rounds: LotteryRound[]
-  isLoading?: boolean
-  userAddress?: string
+  rounds: LotteryRound[];
+  isLoading?: boolean;
+  userAddress?: string;
 }
 
-export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps) {
-  const { toast } = useToast()
-  const [copiedAddress, setCopiedAddress] = React.useState<string | null>(null)
+export function DrawHistory({
+  rounds,
+  isLoading,
+  userAddress,
+}: DrawHistoryProps) {
+  const { toast } = useToast();
+  const [copiedAddress, setCopiedAddress] = React.useState<string | null>(null);
 
   // Filter completed rounds and reverse to show newest first
   const completedRounds = rounds
-    .filter(r => r.status === 1) // COMPLETED status
-    .filter(r => r.winner !== '0x0000000000000000000000000000000000000000')
-    .reverse()
+    .filter((r) => r.status === 1) // COMPLETED status
+    .filter((r) => r.winner !== "0x0000000000000000000000000000000000000000")
+    .reverse();
 
   const formatAddress = (address: string) => {
-    return `${address.slice(0, 6)}...${address.slice(-4)}`
-  }
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
 
   const formatDate = (timestamp: bigint) => {
-    const date = new Date(Number(timestamp) * 1000)
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    })
-  }
+    const date = new Date(Number(timestamp) * 1000);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
 
   const copyAddress = (address: string) => {
-    navigator.clipboard.writeText(address)
-    setCopiedAddress(address)
+    navigator.clipboard.writeText(address);
+    setCopiedAddress(address);
     toast({
-      title: 'Address Copied',
-      description: 'Winner address copied to clipboard',
-    })
+      title: "Address Copied",
+      description: "Winner address copied to clipboard",
+    });
 
     setTimeout(() => {
-      setCopiedAddress(null)
-    }, 2000)
-  }
+      setCopiedAddress(null);
+    }, 2000);
+  };
 
   const openExplorer = (address: string) => {
-    window.open(`https://explorer.test.mezo.org/address/${address}`, '_blank')
-  }
+    window.open(`https://explorer.test.mezo.org/address/${address}`, "_blank");
+  };
 
   if (isLoading) {
     return (
@@ -86,7 +102,7 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
           </div>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   if (completedRounds.length === 0) {
@@ -106,7 +122,7 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
           </p>
         </CardContent>
       </Card>
-    )
+    );
   }
 
   return (
@@ -117,7 +133,8 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
           Draw History
         </CardTitle>
         <CardDescription>
-          Showing {completedRounds.length} completed draw{completedRounds.length !== 1 ? 's' : ''}
+          Showing {completedRounds.length} completed draw
+          {completedRounds.length !== 1 ? "s" : ""}
         </CardDescription>
       </CardHeader>
 
@@ -136,15 +153,23 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
             </TableHeader>
             <TableBody>
               {completedRounds.map((round) => {
-                const isUserWinner = userAddress && round.winner.toLowerCase() === userAddress.toLowerCase()
+                const isUserWinner =
+                  userAddress &&
+                  round.winner.toLowerCase() === userAddress.toLowerCase();
 
                 return (
-                  <TableRow key={round.roundId.toString()} className={isUserWinner ? 'bg-success/5' : ''}>
+                  <TableRow
+                    key={round.roundId.toString()}
+                    className={isUserWinner ? "bg-success/5" : ""}
+                  >
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
                         #{round.roundId.toString()}
                         {isUserWinner && (
-                          <Badge variant="default" className="bg-success text-success-foreground">
+                          <Badge
+                            variant="default"
+                            className="bg-success text-success-foreground"
+                          >
                             You Won!
                           </Badge>
                         )}
@@ -196,7 +221,7 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
                       </Button>
                     </TableCell>
                   </TableRow>
-                )
+                );
               })}
             </TableBody>
           </Table>
@@ -205,27 +230,36 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
         {/* Summary Stats */}
         <div className="grid grid-cols-3 gap-4 mt-6">
           <div className="text-center p-3 rounded-lg bg-surface-elevated border border-border">
-            <div className="text-2xl font-bold text-lavanda">{completedRounds.length}</div>
+            <div className="text-2xl font-bold text-lavanda">
+              {completedRounds.length}
+            </div>
             <div className="text-xs text-muted-foreground">Total Draws</div>
           </div>
 
           <div className="text-center p-3 rounded-lg bg-surface-elevated border border-border">
             <div className="text-2xl font-bold text-success">
               {formatEther(
-                completedRounds.reduce((sum, r) => sum + r.totalPrize, BigInt(0))
-              )} BTC
+                completedRounds.reduce(
+                  (sum, r) => sum + r.totalPrize,
+                  BigInt(0),
+                ),
+              )}{" "}
+              BTC
             </div>
             <div className="text-xs text-muted-foreground">Total Prizes</div>
           </div>
 
           <div className="text-center p-3 rounded-lg bg-surface-elevated border border-border">
             <div className="text-2xl font-bold text-accent">
-              {completedRounds.reduce((sum, r) => sum + Number(r.totalTicketsSold), 0)}
+              {completedRounds.reduce(
+                (sum, r) => sum + Number(r.totalTicketsSold),
+                0,
+              )}
             </div>
             <div className="text-xs text-muted-foreground">Total Tickets</div>
           </div>
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
