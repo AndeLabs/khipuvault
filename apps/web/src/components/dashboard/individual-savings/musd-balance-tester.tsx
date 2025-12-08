@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useAccount } from "wagmi";
-import { publicClient } from "@/lib/web3/config";
+import { getPublicClient } from "@/lib/web3/config";
 import { MEZO_TESTNET_ADDRESSES, MUSD_ABI } from "@/lib/web3/contracts";
 import { RefreshCw, CheckCircle, XCircle } from "lucide-react";
 
@@ -14,8 +14,11 @@ export function MusdBalanceTester() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Get public client lazily on client side
+  const publicClient = useMemo(() => getPublicClient(), []);
+
   const fetchDirectBalance = async () => {
-    if (!address) return;
+    if (!address || !publicClient) return;
 
     setLoading(true);
     setError(null);
@@ -27,17 +30,17 @@ export function MusdBalanceTester() {
       console.log("   Address:", address);
       console.log("   MUSD Contract:", MEZO_TESTNET_ADDRESSES.musd);
 
-      const balance = await publicClient.readContract({
+      const balance = (await publicClient.readContract({
         address: MEZO_TESTNET_ADDRESSES.musd as `0x${string}`,
         abi: MUSD_ABI,
         functionName: "balanceOf",
         args: [address],
-      });
+      })) as bigint;
 
       console.log("✅ Direct balance fetched:", balance.toString(), "wei");
       console.log("   Formatted:", (Number(balance) / 1e18).toFixed(2), "MUSD");
 
-      setDirectBalance(balance as bigint);
+      setDirectBalance(balance);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Unknown error";
       console.error("❌ Error fetching direct balance:", errorMsg);
