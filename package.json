@@ -28,6 +28,9 @@
     "docker:up": "docker-compose up -d",
     "docker:down": "docker-compose down",
     "docker:logs": "docker-compose logs -f",
+    "security:setup": "cd security/shannon && ./run-shannon.sh setup",
+    "security:scan": "cd security/shannon && ./run-shannon.sh quick",
+    "security:scan:full": "cd security/shannon && ./run-shannon.sh full",
     "format": "prettier --write \"**/*.{ts,tsx,md,json}\"",
     "prepare": "husky install || true"
   },
