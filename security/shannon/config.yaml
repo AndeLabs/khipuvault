@@ -1,0 +1,94 @@
+# Shannon AI Pentester Configuration for KhipuVault
+# https://github.com/KeygraphHQ/shannon
+
+# Authentication configuration for testing authenticated routes
+authentication:
+  login_type: wallet_connect
+  # For API testing with JWT
+  api_auth:
+    type: bearer
+    # Use a test wallet for security testing
+    # NEVER use production wallets here
+    test_jwt: "${TEST_JWT_TOKEN}"
+
+# Login flow for web app (wallet-based)
+login_flow:
+  - "Click the 'Conectar Wallet' button"
+  - "Select MetaMask from wallet options"
+  - "Approve wallet connection"
+  - "Sign the SIWE message"
+
+success_condition:
+  type: url_contains
+  value: "/dashboard"
+
+# Rules to avoid during testing
+rules:
+  avoid:
+    # Don't test external services
+    - description: "Avoid Mezo RPC endpoints"
+      type: domain
+      domain: "rpc.test.mezo.org"
+
+    # Don't test wallet disconnect (breaks session)
+    - description: "Avoid wallet disconnect"
+      type: path
+      url_path: "/api/auth/logout"
+
+    # Don't test blockchain transactions (costs gas)
+    - description: "Avoid actual blockchain writes"
+      type: method
+      method: "POST"
+      url_path: "/api/transactions/*"
+
+  # Focus areas for testing
+  focus:
+    - description: "Test API authentication"
+      type: path
+      url_path: "/api/*"
+
+    - description: "Test user input handling"
+      type: path
+      url_path: "/dashboard/*"
+
+# Target endpoints for KhipuVault
+targets:
+  web:
+    url: "http://localhost:9002"
+    description: "Next.js frontend"
+
+  api:
+    url: "http://localhost:3001"
+    description: "Express.js API"
+    endpoints:
+      - "/api/health"
+      - "/api/auth/*"
+      - "/api/users/*"
+      - "/api/pools/*"
+      - "/api/transactions/*"
+      - "/api/analytics/*"
+
+# Vulnerability classes to test
+vulnerability_classes:
+  enabled:
+    - injection          # SQL, NoSQL, Command injection
+    - xss               # Cross-site scripting
+    - ssrf              # Server-side request forgery
+    - auth_bypass       # Authentication bypasses
+    - broken_access     # Broken access control (IDOR)
+    - sensitive_data    # Sensitive data exposure
+    - security_misconfig # Security misconfigurations
+
+  disabled:
+    - dos               # Don't test denial of service
+    - csrf              # CSRF less relevant for API-first apps
+
+# Output configuration
+output:
+  directory: "./deliverables"
+  formats:
+    - json
+    - markdown
+    - html
+  include_poc: true
+  severity_threshold: "low"  # Report all findings
