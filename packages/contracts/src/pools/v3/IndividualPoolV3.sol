@@ -354,13 +354,14 @@ contract IndividualPoolV3 is
         if (pendingYield > 0) {
             userDeposit.yieldAccrued = uint128(uint256(userDeposit.yieldAccrued) + pendingYield);
             totalYieldsGenerated += pendingYield;
-            
+
             // Auto-compound if enabled
             _maybeAutoCompound(msg.sender);
         }
 
-        // Withdraw from aggregator
-        YIELD_AGGREGATOR.withdraw(musdAmount);
+        // H-8 FIX: Capture and verify withdraw return value
+        uint256 actualWithdrawn = YIELD_AGGREGATOR.withdraw(musdAmount);
+        require(actualWithdrawn >= musdAmount, "Insufficient withdrawn");
 
         // Update state
         userDeposit.musdAmount = uint128(uint256(userDeposit.musdAmount) - musdAmount);
@@ -460,10 +461,11 @@ contract IndividualPoolV3 is
         userDeposit.yieldAccrued = 0;
         totalMusdDeposited -= musdAmount;
 
-        // Withdraw from aggregator
+        // H-8 FIX: Withdraw from aggregator and verify return value
         uint256 totalToWithdraw = musdAmount + totalYield;
         if (totalToWithdraw > 0) {
-            YIELD_AGGREGATOR.withdraw(totalToWithdraw);
+            uint256 actualWithdrawn = YIELD_AGGREGATOR.withdraw(totalToWithdraw);
+            require(actualWithdrawn >= totalToWithdraw, "Insufficient withdrawn");
         }
 
         // Transfer to user

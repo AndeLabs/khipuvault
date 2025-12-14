@@ -8,6 +8,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
 
 /**
@@ -33,6 +34,7 @@ contract YieldAggregatorV3 is
     IYieldAggregator
 {
     using SafeERC20 for IERC20;
+    using SafeCast for uint256;
 
     /*//////////////////////////////////////////////////////////////
                           STRUCTS (OPTIMIZED)
@@ -276,7 +278,7 @@ contract YieldAggregatorV3 is
                 if (pendingYield > 0) {
                     yieldAmount += pendingYield;
                     position.yieldAccrued = 0;
-                    position.lastUpdateTime = uint64(block.timestamp);
+                    position.lastUpdateTime = block.timestamp.toUint64(); // H-3 FIX: SafeCast
                 }
             }
         }
@@ -304,13 +306,14 @@ contract YieldAggregatorV3 is
         if (totalYield == 0) revert InvalidAmount();
 
         compoundedAmount = totalYield;
-        
-        UserPositionPacked storage position = userVaultPositions[msg.sender][bestVault];
-        position.principal = uint128(uint256(position.principal) + compoundedAmount);
-        position.yieldAccrued = 0;
-        position.lastUpdateTime = uint64(block.timestamp);
 
-        vaults[bestVault].totalDeposited = uint128(uint256(vaults[bestVault].totalDeposited) + compoundedAmount);
+        // H-3 FIX: Use SafeCast for all downcasting operations
+        UserPositionPacked storage position = userVaultPositions[msg.sender][bestVault];
+        position.principal = (uint256(position.principal) + compoundedAmount).toUint128();
+        position.yieldAccrued = 0;
+        position.lastUpdateTime = block.timestamp.toUint64();
+
+        vaults[bestVault].totalDeposited = (uint256(vaults[bestVault].totalDeposited) + compoundedAmount).toUint128();
         userTotalDeposited[msg.sender] += compoundedAmount;
 
         emit YieldCompounded(msg.sender, compoundedAmount);
@@ -465,13 +468,14 @@ contract YieldAggregatorV3 is
 
         shares = amount;
 
+        // H-3 FIX: Use SafeCast for all downcasting operations
         UserPositionPacked storage position = userVaultPositions[user][vaultAddress];
-        position.principal = uint128(uint256(position.principal) + amount);
-        position.shares = uint128(uint256(position.shares) + shares);
-        position.lastUpdateTime = uint64(block.timestamp);
+        position.principal = (uint256(position.principal) + amount).toUint128();
+        position.shares = (uint256(position.shares) + shares).toUint128();
+        position.lastUpdateTime = block.timestamp.toUint64();
 
         VaultInfoPacked storage vault = vaults[vaultAddress];
-        vault.totalDeposited = uint128(uint256(vault.totalDeposited) + amount);
+        vault.totalDeposited = (uint256(vault.totalDeposited) + amount).toUint128();
 
         userTotalDeposited[user] += amount;
         totalValueLocked += amount;
@@ -489,13 +493,14 @@ contract YieldAggregatorV3 is
 
         withdrawn = amount + pendingYield;
 
-        position.principal = uint128(uint256(position.principal) - amount);
+        // H-3 FIX: Use SafeCast for all downcasting operations
+        position.principal = (uint256(position.principal) - amount).toUint128();
         uint256 sharesToBurn = (uint256(position.shares) * amount) / (uint256(position.principal) + amount);
-        position.shares = uint128(uint256(position.shares) - sharesToBurn);
+        position.shares = (uint256(position.shares) - sharesToBurn).toUint128();
         position.yieldAccrued = 0;
-        position.lastUpdateTime = uint64(block.timestamp);
+        position.lastUpdateTime = block.timestamp.toUint64();
 
-        vault.totalDeposited = uint128(uint256(vault.totalDeposited) - amount);
+        vault.totalDeposited = (uint256(vault.totalDeposited) - amount).toUint128();
 
         totalValueLocked -= amount;
     }
@@ -535,14 +540,15 @@ contract YieldAggregatorV3 is
         if (vaults[vaultAddress].vaultAddress != address(0)) revert VaultAlreadyExists();
         if (activeVaultsList.length >= MAX_VAULTS) revert TooManyVaults();
 
+        // H-3 FIX: Use SafeCast for safe downcasting
         vaults[vaultAddress] = VaultInfoPacked({
             vaultAddress: vaultAddress,
             strategy: strategy,
-            apr: uint64(apr),
+            apr: apr.toUint64(),
             totalDeposited: 0,
             totalYield: 0,
             active: true,
-            minDeposit: uint64(MIN_DEPOSIT)
+            minDeposit: MIN_DEPOSIT.toUint64()
         });
 
         activeVaultsList.push(vaultAddress);
@@ -554,7 +560,7 @@ contract YieldAggregatorV3 is
         VaultInfoPacked storage vault = vaults[vaultAddress];
         if (vault.vaultAddress == address(0)) revert VaultNotFound();
 
-        vault.apr = uint64(newApr);
+        vault.apr = newApr.toUint64(); // H-3 FIX: SafeCast
 
         emit VaultUpdated(vaultAddress, newApr, vault.active);
     }

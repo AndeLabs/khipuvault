@@ -576,7 +576,9 @@ contract CooperativePoolV3 is
         uint256 musdAmount = MEZO_INTEGRATION.depositAndMintNative{value: btcAmount}();
 
         MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
-        YIELD_AGGREGATOR.deposit(musdAmount);
+        // H-8 FIX: Capture return value to verify deposit succeeded
+        (, uint256 shares) = YIELD_AGGREGATOR.deposit(musdAmount);
+        require(shares > 0, "Deposit failed");
 
         pool.totalMusdMinted += musdAmount;
 
