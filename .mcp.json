@@ -4,6 +4,27 @@
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp@latest"],
       "description": "Up-to-date documentation for any library"
+    },
+    "slither": {
+      "command": "uvx",
+      "args": [
+        "--from",
+        "git+https://github.com/trailofbits/slither-mcp",
+        "slither-mcp"
+      ],
+      "description": "Slither static analysis for Solidity smart contracts (Trail of Bits)"
+    },
+    "semgrep": {
+      "command": "semgrep",
+      "args": ["mcp"],
+      "description": "Semgrep security scanner - 5000+ rules for code vulnerabilities"
+    },
+    "codacy": {
+      "command": "node",
+      "args": [
+        "/opt/homebrew/lib/node_modules/@codacy/codacy-mcp/dist/index.js"
+      ],
+      "description": "Codacy Guardrails - real-time security and code quality scanning"
     }
   }
 }
