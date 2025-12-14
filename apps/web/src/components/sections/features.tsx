@@ -5,24 +5,24 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 const featureData = [
   {
     icon: <ShieldCheck className="h-12 w-12 text-primary" />,
-    title: "Sin Riesgo de Capital",
+    title: "No Capital Risk",
     description:
-      "Tu Bitcoin siempre está seguro. Solo los rendimientos se distribuyen.",
+      "Your Bitcoin is always safe. Only yields are distributed as prizes.",
   },
   {
     icon: <DollarSign className="h-12 w-12 text-primary" />,
-    title: "MUSD Stablecoin",
-    description: "100% respaldado por Bitcoin en Mezo Protocol.",
+    title: "mUSD Stablecoin",
+    description: "100% backed by Bitcoin on Mezo Protocol.",
   },
   {
     icon: <Handshake className="h-12 w-12 text-primary" />,
-    title: "Tradición + Blockchain",
-    description: "Pasanaku y Tandas digitalizados con smart contracts.",
+    title: "Tradition + Blockchain",
+    description: "Pasanaku and Tandas digitized with smart contracts.",
   },
   {
     icon: <BarChart3 className="h-12 w-12 text-primary" />,
-    title: "Rendimientos Transparentes",
-    description: "Todo verificable on-chain en Mezo Testnet.",
+    title: "Transparent Yields",
+    description: "Everything verifiable on-chain on Mezo Testnet.",
   },
 ];
 
@@ -32,10 +32,10 @@ export function Features() {
       <div className="container mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <AnimateOnScroll className="text-center">
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
-            ¿Por qué KhipuVault?
+            Why KhipuVault?
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            La forma más segura e inteligente de poner a trabajar tu Bitcoin.
+            The safest and smartest way to put your Bitcoin to work.
           </p>
         </AnimateOnScroll>
 

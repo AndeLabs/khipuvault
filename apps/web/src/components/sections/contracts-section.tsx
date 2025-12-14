@@ -40,15 +40,15 @@ const contractsInfo: ContractInfo[] = [
   {
     name: "Individual Pool",
     description:
-      "Ahorro personal de BTC con auto-reinversión de yields y sistema de referidos. Depósitos MUSD con rendimientos automáticos. Retiros flexibles sin restricciones.",
+      "Personal BTC savings with auto-compounding yields and referral system. mUSD deposits with automatic returns. Flexible withdrawals without restrictions.",
     address: CONTRACT_ADDRESSES.INDIVIDUAL_POOL,
     icon: <TrendingUp className="h-6 w-6" />,
     status: "deployed",
     features: [
-      "Auto-reinversión de yields",
-      "0.5% por cada referido",
-      "Retiros sin penalización",
-      "Optimizado en gas",
+      "Auto-compounding yields",
+      "0.5% per referral",
+      "No withdrawal penalties",
+      "Gas optimized",
     ],
     explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.INDIVIDUAL_POOL}`,
     docsUrl:
@@ -57,15 +57,15 @@ const contractsInfo: ContractInfo[] = [
   {
     name: "Cooperative Pool",
     description:
-      "Pools cooperativos donde múltiples usuarios juntan BTC nativo para alcanzar metas comunes. Distribución justa de yields basada en participación.",
+      "Cooperative pools where multiple users pool native BTC to achieve common goals. Fair yield distribution based on participation.",
     address: CONTRACT_ADDRESSES.COOPERATIVE_POOL,
     icon: <Users className="h-6 w-6" />,
     status: "deployed",
     features: [
-      "BTC nativo",
-      "Distribución por shares",
-      "Gobernanza simple",
-      "Seguridad multinivel",
+      "Native BTC",
+      "Share-based distribution",
+      "Simple governance",
+      "Multi-level security",
     ],
     explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.COOPERATIVE_POOL}`,
     docsUrl:
@@ -74,12 +74,12 @@ const contractsInfo: ContractInfo[] = [
   {
     name: "Mezo Integration",
     description:
-      "Puente entre Bitcoin nativo y MUSD. Gestiona depósitos BTC, acuñación de MUSD y retiro de fondos. Integración segura con Mezo.",
+      "Bridge between native Bitcoin and mUSD. Manages BTC deposits, mUSD minting, and fund withdrawals. Secure integration with Mezo.",
     address: CONTRACT_ADDRESSES.MEZO_INTEGRATION,
     icon: <Shield className="h-6 w-6" />,
     status: "deployed",
     features: [
-      "BTC → MUSD conversión",
+      "BTC → mUSD conversion",
       "Flash loan protection",
       "Reentrancy guard",
       "Upgradeable",
@@ -91,15 +91,15 @@ const contractsInfo: ContractInfo[] = [
   {
     name: "Yield Aggregator",
     description:
-      "Distribuye fondos entre múltiples estrategias de yield. Rebalanceo inteligente y reclamación de rendimientos. Maximiza APR para todos.",
+      "Distributes funds across multiple yield strategies. Smart rebalancing and yield claiming. Maximizes APR for everyone.",
     address: CONTRACT_ADDRESSES.YIELD_AGGREGATOR,
     icon: <Zap className="h-6 w-6" />,
     status: "deployed",
     features: [
-      "Multi-estrategia",
-      "Rebalanceo automático",
-      "Claim flexible",
-      "APR optimizado",
+      "Multi-strategy",
+      "Auto rebalancing",
+      "Flexible claiming",
+      "Optimized APR",
     ],
     explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.YIELD_AGGREGATOR}`,
     docsUrl:
@@ -108,15 +108,15 @@ const contractsInfo: ContractInfo[] = [
   {
     name: "Stability Pool Strategy",
     description:
-      "Estrategia de inversión en Stability Pool de Mezo. Genera yields mediante lending de MUSD. Componente central de rendimientos.",
+      "Investment strategy in Mezo's Stability Pool. Generates yields through mUSD lending. Core component for returns.",
     address: CONTRACT_ADDRESSES.STABILITY_POOL_STRATEGY,
     icon: <TrendingUp className="h-6 w-6" />,
     status: "deployed",
     features: [
       "6% APR target",
       "Mezo integration",
-      "Retiros seguros",
-      "Transparencia total",
+      "Safe withdrawals",
+      "Full transparency",
     ],
     explorerUrl: `https://explorer.test.mezo.org/address/${CONTRACT_ADDRESSES.STABILITY_POOL_STRATEGY}`,
     docsUrl:
@@ -129,11 +129,11 @@ function getStatusBadge(status: ContractInfo["status"]) {
     case "deployed":
       return (
         <Badge variant="default" className="bg-green-500">
-          Desplegado
+          Deployed
         </Badge>
       );
     case "pending":
-      return <Badge variant="secondary">Pendiente</Badge>;
+      return <Badge variant="secondary">Pending</Badge>;
     case "testnet":
       return <Badge variant="outline">Testnet</Badge>;
   }
@@ -149,15 +149,15 @@ export function ContractsSection() {
   };
 
   return (
-    <section className="py-20 bg-background">
+    <section id="contracts" className="py-20 bg-background">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
           <h2 className="text-4xl font-bold tracking-tight mb-4">
-            Nuestros Contratos Inteligentes
+            Our Smart Contracts
           </h2>
           <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-            Infraestructura auditada y optimizada. Ahorros en Bitcoin con yields
-            del 5-8% APR a través de Mezo Integration.
+            Audited and optimized infrastructure. Bitcoin savings with 5-8% APR
+            yields through Mezo Integration.
           </p>
         </div>
 
@@ -189,7 +189,7 @@ export function ContractsSection() {
                   {/* Contract Address */}
                   <div>
                     <p className="text-xs text-muted-foreground mb-1">
-                      Dirección del Contrato
+                      Contract Address
                     </p>
                     <div className="flex items-center gap-2">
                       <code className="text-xs bg-muted px-2 py-1 rounded font-mono">
@@ -200,7 +200,7 @@ export function ContractsSection() {
                           href={contract.explorerUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          title="Ver en explorador"
+                          title="View in explorer"
                           className={cn(
                             buttonVariants({ variant: "ghost", size: "sm" }),
                             "h-6 w-6 p-0",
@@ -220,9 +220,7 @@ export function ContractsSection() {
                       className="w-full justify-between p-0 h-auto text-primary"
                       onClick={() => toggleContract(contract.name)}
                     >
-                      <span className="text-sm font-medium">
-                        Características
-                      </span>
+                      <span className="text-sm font-medium">Features</span>
                       {expandedContract === contract.name ? (
                         <ChevronUp className="h-4 w-4" />
                       ) : (
@@ -257,7 +255,7 @@ export function ContractsSection() {
                         )}
                       >
                         <Code className="h-4 w-4 mr-2" />
-                        Código
+                        Code
                       </a>
                     )}
                     {contract.explorerUrl && contract.status === "deployed" && (
@@ -271,7 +269,7 @@ export function ContractsSection() {
                         )}
                       >
                         <ExternalLink className="h-4 w-4 mr-2" />
-                        Explorador
+                        Explorer
                       </a>
                     )}
                   </div>
@@ -284,35 +282,29 @@ export function ContractsSection() {
         {/* Additional Info */}
         <div className="mt-16 text-center">
           <div className="rounded-lg border border-primary/20 bg-card p-8 max-w-4xl mx-auto">
-            <h3 className="text-2xl font-bold mb-4">
-              Seguridad y Transparencia
-            </h3>
+            <h3 className="text-2xl font-bold mb-4">Security & Transparency</h3>
             <div className="grid md:grid-cols-3 gap-6 text-left">
               <div>
-                <h4 className="font-semibold mb-2 text-primary">
-                  🔐 Auditorías
-                </h4>
+                <h4 className="font-semibold mb-2 text-primary">Audited</h4>
                 <p className="text-sm text-muted-foreground">
-                  Todos nuestros contratos están auditados para garantizar la
-                  máxima protección de los fondos de nuestros usuarios.
+                  All our contracts are audited to ensure maximum protection of
+                  our users' funds.
                 </p>
               </div>
               <div>
                 <h4 className="font-semibold mb-2 text-primary">
-                  📊 Código Verificado
+                  Verified Code
                 </h4>
                 <p className="text-sm text-muted-foreground">
-                  El código fuente está verificado en el explorador de bloques
-                  para máxima transparencia y auditoría pública.
+                  Source code is verified on the block explorer for maximum
+                  transparency and public audit.
                 </p>
               </div>
               <div>
-                <h4 className="font-semibold mb-2 text-primary">
-                  ⚡ Optimizado
-                </h4>
+                <h4 className="font-semibold mb-2 text-primary">Optimized</h4>
                 <p className="text-sm text-muted-foreground">
-                  Contratos optimizados para reducir costos de gas y mejorar la
-                  experiencia del usuario final.
+                  Contracts optimized to reduce gas costs and improve the end
+                  user experience.
                 </p>
               </div>
             </div>

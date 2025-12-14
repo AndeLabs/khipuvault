@@ -19,7 +19,16 @@ import {
   CardContent,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Wallet, Users, Trophy, ArrowRight } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import {
+  Wallet,
+  Users,
+  Trophy,
+  ArrowRight,
+  Coins,
+  ExternalLink,
+  Sparkles,
+} from "lucide-react";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import {
   useCooperativePools,
@@ -63,6 +72,7 @@ export default function DashboardPage() {
     : 0;
 
   const totalValue = individualSavings + cooperativeSavings;
+  const hasNoSavings = totalValue === 0;
 
   const portfolioData = {
     totalValue: totalValue.toFixed(2),
@@ -120,6 +130,34 @@ export default function DashboardPage() {
         title="Dashboard"
         description="Welcome to KhipuVault - Your Bitcoin Savings Platform"
       />
+
+      {/* Getting Started Alert - Show when user has no savings */}
+      {hasNoSavings && (
+        <Alert className="border-lavanda/50 bg-lavanda/5">
+          <Sparkles className="h-4 w-4 text-lavanda" />
+          <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div>
+              <span className="font-medium text-foreground">
+                Ready to start saving?
+              </span>{" "}
+              <span className="text-muted-foreground">
+                Get testnet mUSD tokens to make your first deposit.
+              </span>
+            </div>
+            <a
+              href="https://faucet.mezo.org"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Button size="sm" variant="secondary" className="gap-2 shrink-0">
+                <Coins className="h-4 w-4" />
+                Get Test Tokens
+                <ExternalLink className="h-3 w-3" />
+              </Button>
+            </a>
+          </AlertDescription>
+        </Alert>
+      )}
 
       {/* Portfolio Overview - REAL DATA */}
       <PortfolioOverview

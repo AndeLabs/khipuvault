@@ -14,3 +14,5 @@ export {
   PercentageDisplay,
   BalanceCard,
 } from "./amount-display";
+
+export { EmptyState } from "./empty-state";

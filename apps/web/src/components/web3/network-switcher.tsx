@@ -71,26 +71,26 @@ export function NetworkSwitcher() {
               });
 
               toast({
-                title: "Red agregada",
+                title: "Network Added",
                 description:
-                  "Mezo Testnet agregado a tu wallet. Por favor intenta cambiar de nuevo.",
+                  "Mezo Testnet added to your wallet. Please try switching again.",
               });
             }
           } catch (addError) {
             console.error("Failed to add network:", addError);
 
             toast({
-              title: "Acción requerida",
+              title: "Action Required",
               description:
-                "Por favor agrega Mezo Testnet manualmente a tu wallet (Chain ID: 31611)",
+                "Please add Mezo Testnet manually to your wallet (Chain ID: 31611)",
               variant: "destructive",
             });
           }
         },
         onSuccess: () => {
           toast({
-            title: "Red cambiada",
-            description: "Conectado a Mezo Testnet",
+            title: "Network Switched",
+            description: "Connected to Mezo Testnet",
           });
         },
       },
@@ -130,11 +130,11 @@ export function NetworkSwitcher() {
           <AlertTriangle className="h-5 w-5 text-warning-foreground shrink-0" />
           <div className="text-sm font-medium text-warning-foreground">
             <span className="hidden sm:inline">
-              Estás conectado a <strong>{chain.name}</strong>. KhipuVault solo
-              funciona en <strong>Mezo Testnet</strong>.
+              You're connected to <strong>{chain.name}</strong>. KhipuVault only
+              works on <strong>Mezo Testnet</strong>.
             </span>
             <span className="sm:hidden">
-              Red incorrecta. Cambia a Mezo Testnet.
+              Wrong network. Switch to Mezo Testnet.
             </span>
           </div>
         </div>
@@ -150,12 +150,12 @@ export function NetworkSwitcher() {
             {isSwitching ? (
               <>
                 <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
-                Cambiando...
+                Switching...
               </>
             ) : (
               <>
                 <RefreshCw className="h-4 w-4 mr-2" />
-                Cambiar a Mezo
+                Switch to Mezo
               </>
             )}
           </Button>
@@ -165,7 +165,7 @@ export function NetworkSwitcher() {
             variant="ghost"
             onClick={() => setIsDismissed(true)}
             className="text-warning-foreground hover:bg-warning-foreground/10 p-2"
-            aria-label="Cerrar aviso de red"
+            aria-label="Close network warning"
           >
             <X className="h-4 w-4" />
           </Button>
