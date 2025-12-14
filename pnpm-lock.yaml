@@ -246,6 +246,9 @@ importers:
       date-fns:
         specifier: ^3.6.0
         version: 3.6.0
+      dompurify:
+        specifier: ^3.3.1
+        version: 3.3.1
       dotenv:
         specifier: ^16.5.0
         version: 16.6.1
@@ -316,9 +319,15 @@ importers:
       '@khipu/eslint-config':
         specifier: workspace:*
         version: link:../../tooling/eslint
+      '@types/dompurify':
+        specifier: ^3.2.0
+        version: 3.2.0
       eslint:
         specifier: ^8.56.0
         version: 8.57.1
+      eslint-plugin-security:
+        specifier: ^3.0.1
+        version: 3.0.1
       genkit-cli:
         specifier: ^1.20.0
         version: 1.24.0(@types/node@20.19.25)
@@ -473,6 +482,9 @@ importers:
       eslint-plugin-react-hooks:
         specifier: ^4.6.0
         version: 4.6.2(eslint@8.57.1)
+      eslint-plugin-security:
+        specifier: ^3.0.1
+        version: 3.0.1
       typescript:
         specifier: ^5.0.0
         version: 5.9.3
@@ -3525,6 +3537,10 @@ packages:
   '@types/deep-eql@4.0.2':
     resolution: {integrity: sha512-c9h9dVVMigMPc4bwTvC5dxqtqJZwQPePsWjPlpSOnojbor6pGqdk541lfA7AqFQr5pB1BRdq0juY9db81BwyFw==}
 
+  '@types/dompurify@3.2.0':
+    resolution: {integrity: sha512-Fgg31wv9QbLDA0SpTOXO3MaxySc4DKGLi8sna4/Utjo4r3ZRPdCt4UQee8BWr+Q5z21yifghREPJGYaEOEIACg==}
+    deprecated: This is a stub types definition. dompurify provides its own type definitions, so you do not need this installed.
+
   '@types/estree@1.0.8':
     resolution: {integrity: sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==}
 
@@ -4783,6 +4799,9 @@ packages:
   dompurify@3.3.0:
     resolution: {integrity: sha512-r+f6MYR1gGN1eJv0TVQbhA7if/U7P87cdPl3HN5rikqaBSBxLiCb/b9O+2eG0cxz0ghyU+mU1QkbsOwERMYlWQ==}
 
+  dompurify@3.3.1:
+    resolution: {integrity: sha512-qkdCKzLNtrgPFP1Vo+98FRzJnBRGe4ffyCea9IwHB1fyxPOeNTHpLKYGd4Uk9xvNoH0ZoOjwZxNptyMwqrId1Q==}
+
   dot-prop@5.3.0:
     resolution: {integrity: sha512-QM8q3zDe58hqUqjraQOmzZ1LIH9SWQJTlEKCH4kJ2oQvLZk7RbQXvtDM2XEq3fwkV9CCvvH4LA0AV+ogFsBM2Q==}
     engines: {node: '>=8'}
@@ -5018,6 +5037,10 @@ packages:
     engines: {node: '>=4'}
     peerDependencies:
       eslint: ^3 || ^4 || ^5 || ^6 || ^7 || ^8 || ^9.7
+
+  eslint-plugin-security@3.0.1:
+    resolution: {integrity: sha512-XjVGBhtDZJfyuhIxnQ/WMm385RbX3DBu7H1J7HNNhmB2tnGxMeqVSnYv79oAj992ayvIBZghsymwkYFS6cGH4Q==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   eslint-scope@7.2.2:
     resolution: {integrity: sha512-dOt21O7lTMhDM+X9mB4GX+DZrZtCUJPL/wlcTqxyrx5IvO0IYtILdtrQGQp+8n5S0gwSVmOf9NQrjMOgfQZlIg==}
@@ -6968,6 +6991,10 @@ packages:
     resolution: {integrity: sha512-00o4I+DVrefhv+nX0ulyi3biSHCPDe+yLv5o/p6d/UVlirijB8E16FtfwSAi4g3tcqrQ4lRAqQSoFEZJehYEcw==}
     engines: {node: '>= 0.4'}
 
+  regexp-tree@0.1.27:
+    resolution: {integrity: sha512-iETxpjK6YoRWJG5o6hXLwvjYAoW+FEZn9os0PD/b6AP6xQwsa/Y7lCVgIixBbUPMfhu+i2LtdeAqVTgGlQarfA==}
+    hasBin: true
+
   regexp.prototype.flags@1.5.4:
     resolution: {integrity: sha512-dYqgNSZbDwkaJ2ceRd9ojCGjBq+mOm9LmtXnAnEGyHhN/5R7iDW2TRw3h+o/jCFxus3P2LfWIIiwowAjANm7IA==}
     engines: {node: '>= 0.4'}
@@ -7060,6 +7087,9 @@ packages:
   safe-regex-test@1.1.0:
     resolution: {integrity: sha512-x/+Cz4YrimQxQccJf5mKEbIa1NzeCRNI5Ecl/ekmlYaampdNLPalVyIcCZNNH3MvmqBugV5TMYZXv0ljslUlaw==}
     engines: {node: '>= 0.4'}
+
+  safe-regex@2.1.1:
+    resolution: {integrity: sha512-rx+x8AMzKb5Q5lQ95Zoi6ZbJqwCLkqi3XuJXp5P3rT8OEc6sZCJG5AE5dU3lsgRr/F4Bs31jSlVN+j5KrsGu9A==}
 
   safe-stable-stringify@2.5.0:
     resolution: {integrity: sha512-b3rppTKm9T+PsVCBEOUR46GWI7fdOs00VKZ1+9c1EWDaDMvjQc6tUwuFyIprgGgTcWoVHSKrU8H31ZHA2e0RHA==}
@@ -12297,6 +12327,10 @@ snapshots:
 
   '@types/deep-eql@4.0.2': {}
 
+  '@types/dompurify@3.2.0':
+    dependencies:
+      dompurify: 3.3.1
+
   '@types/estree@1.0.8': {}
 
   '@types/express-serve-static-core@4.19.7':
@@ -14104,6 +14138,10 @@ snapshots:
     optionalDependencies:
       '@types/trusted-types': 2.0.7
 
+  dompurify@3.3.1:
+    optionalDependencies:
+      '@types/trusted-types': 2.0.7
+
   dot-prop@5.3.0:
     dependencies:
       is-obj: 2.0.0
@@ -14507,6 +14545,10 @@ snapshots:
       semver: 6.3.1
       string.prototype.matchall: 4.0.12
       string.prototype.repeat: 1.0.0
+
+  eslint-plugin-security@3.0.1:
+    dependencies:
+      safe-regex: 2.1.1
 
   eslint-scope@7.2.2:
     dependencies:
@@ -16852,6 +16894,8 @@ snapshots:
       get-proto: 1.0.1
       which-builtin-type: 1.2.1
 
+  regexp-tree@0.1.27: {}
+
   regexp.prototype.flags@1.5.4:
     dependencies:
       call-bind: 1.0.8
@@ -16993,6 +17037,10 @@ snapshots:
       call-bound: 1.0.4
       es-errors: 1.3.0
       is-regex: 1.2.1
+
+  safe-regex@2.1.1:
+    dependencies:
+      regexp-tree: 0.1.27
 
   safe-stable-stringify@2.5.0: {}
 
