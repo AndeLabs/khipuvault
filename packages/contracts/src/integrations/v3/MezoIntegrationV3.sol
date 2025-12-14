@@ -232,7 +232,7 @@ contract MezoIntegrationV3 is
         returns (uint256 btcAmount)
     {
         if (musdAmount == 0) revert InvalidAmount();
-        
+
         UserPosition storage position = userPositions[msg.sender];
         if (position.musdDebt < musdAmount) revert InsufficientBalance();
 
@@ -248,20 +248,42 @@ contract MezoIntegrationV3 is
         MUSD_TOKEN.forceApprove(address(BORROWER_OPERATIONS), musdAmount);
 
         if (musdAmount >= position.musdDebt) {
-            BORROWER_OPERATIONS.closeTrove();
-            btcAmount = position.btcCollateral;
-            
-            totalBtcDeposited -= position.btcCollateral;
-            totalMusdMinted -= position.musdDebt;
+            // H-04 FIX: CEI Pattern - Update state BEFORE external call
+            // Cache values for state update
+            uint256 collateralToReturn = position.btcCollateral;
+            uint256 debtToRepay = position.musdDebt;
+
+            // Effects: Update internal state first
             position.btcCollateral = 0;
             position.musdDebt = 0;
+            totalBtcDeposited -= collateralToReturn;
+            totalMusdMinted -= debtToRepay;
+            btcAmount = collateralToReturn;
+
+            // Interactions: External call after state updates
+            // closeTrove reverts on failure, which will undo state changes
+            BORROWER_OPERATIONS.closeTrove();
         } else {
+            // H-04 FIX: CEI Pattern - Update state BEFORE external call
+            // Cache values for state update
+            uint256 newCollateral = uint256(position.btcCollateral) - btcAmount;
+            uint256 newDebt = uint256(position.musdDebt) - musdAmount;
+
+            // Effects: Update internal state first
+            position.btcCollateral = uint128(newCollateral);
+            position.musdDebt = uint128(newDebt);
+            totalBtcDeposited -= btcAmount;
+            totalMusdMinted -= musdAmount;
+
+            // Calculate hints after state update (uses new values)
             (address upperHint, address lowerHint) = _getAdjustHints(
-                uint256(position.btcCollateral) - btcAmount,
-                uint256(position.musdDebt) - musdAmount,
+                newCollateral,
+                newDebt,
                 currentPrice
             );
 
+            // Interactions: External call after state updates
+            // adjustTrove reverts on failure, which will undo state changes
             BORROWER_OPERATIONS.adjustTrove{value: 0}(
                 btcAmount,
                 musdAmount,
@@ -269,13 +291,9 @@ contract MezoIntegrationV3 is
                 upperHint,
                 lowerHint
             );
-
-            position.btcCollateral = uint128(uint256(position.btcCollateral) - btcAmount);
-            position.musdDebt = uint128(uint256(position.musdDebt) - musdAmount);
-            totalBtcDeposited -= btcAmount;
-            totalMusdMinted -= musdAmount;
         }
 
+        // Final interaction: Transfer BTC to user
         (bool success, ) = msg.sender.call{value: btcAmount}("");
         require(success, "BTC transfer failed");
 
