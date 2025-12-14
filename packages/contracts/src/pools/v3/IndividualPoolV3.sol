@@ -73,6 +73,12 @@ contract IndividualPoolV3 is
     uint256 public totalYieldsGenerated;
     uint256 public totalReferralRewards;
 
+    // C-01 FIX: Track actual reserved funds for referral rewards
+    uint256 public referralRewardsReserve;
+
+    // H-01 FIX: Block-based flash loan protection
+    mapping(address => uint256) public depositBlock;
+
     // Constants
     uint256 public constant MIN_DEPOSIT = 10 ether;
     uint256 public constant MAX_DEPOSIT = 100_000 ether;
@@ -170,6 +176,8 @@ contract IndividualPoolV3 is
     error FlashLoanDetected();
     error SelfReferralNotAllowed();
     error NoReferralRewards();
+    error InsufficientReferralReserve();
+    error SameBlockWithdrawal();
 
     /*//////////////////////////////////////////////////////////////
                             INITIALIZATION
@@ -207,26 +215,17 @@ contract IndividualPoolV3 is
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Prevents flash loan attacks (can be disabled in emergency mode)
-     * @dev Uses block-based check instead of tx.origin for better compatibility
-     *      with meta-transactions and account abstraction
-     * Note: This is a soft protection. The primary protection is the MIN_DEPOSIT
-     *       requirement and the fact that yields are distributed proportionally.
+     * @notice Prevents flash loan attacks using block-based delay
+     * @dev H-01 FIX: Uses block.number instead of extcodesize for robust protection
+     *      - Deposits record the block number
+     *      - Withdrawals require a different block than deposit
+     *      - This prevents single-transaction flash loan attacks
      */
     modifier noFlashLoan() {
         if (!emergencyMode) {
-            // Check if caller has code (is a contract)
-            // Note: This allows EOAs and contracts that are not in their constructor
-            uint256 size;
-            address sender = msg.sender;
-            assembly {
-                size := extcodesize(sender)
-            }
-            // If it's a contract, verify it existed before this transaction
-            // by checking if user already has a deposit (returning users are allowed)
-            if (size > 0 && !userDeposits[sender].active) {
-                // New contract callers need to wait (prevents single-tx attacks)
-                revert FlashLoanDetected();
+            // H-01 FIX: Block-based protection - withdrawals must be in different block
+            if (depositBlock[msg.sender] == block.number) {
+                revert SameBlockWithdrawal();
             }
         }
         _;
@@ -259,68 +258,79 @@ contract IndividualPoolV3 is
         internal
         nonReentrant
         whenNotPaused
-        noFlashLoan
     {
         if (musdAmount == 0) revert InvalidAmount();
         if (musdAmount < MIN_DEPOSIT) revert MinimumDepositNotMet();
-        
+
         UserDeposit storage userDeposit = userDeposits[msg.sender];
-        
+
         uint256 newTotalDeposit = uint256(userDeposit.musdAmount) + musdAmount;
         if (newTotalDeposit > MAX_DEPOSIT) revert MaximumDepositExceeded();
 
-        // Handle referral system
+        // H-01 FIX: Record deposit block for flash loan protection
+        depositBlock[msg.sender] = block.number;
+
+        // Transfer MUSD from user FIRST (CEI pattern)
+        MUSD.safeTransferFrom(msg.sender, address(this), musdAmount);
+
+        // C-01 FIX: Handle referral system with proper reserve funding
+        // Referral bonus is funded from the deposit itself, not from thin air
         address actualReferrer = address(0);
+        uint256 bonus = 0;
+        uint256 netDeposit = musdAmount;
+
         if (referrer != address(0) && referrer != msg.sender) {
             if (referrers[msg.sender] == address(0)) {
                 referrers[msg.sender] = referrer;
                 referralCount[referrer]++;
                 actualReferrer = referrer;
-                
-                // Calculate referral bonus (from protocol fees, not user funds)
-                uint256 bonus = (musdAmount * referralBonus) / 10000;
+
+                // C-01 FIX: Calculate bonus and reserve actual funds
+                bonus = (musdAmount * referralBonus) / 10000;
+                netDeposit = musdAmount - bonus; // User deposits slightly less
+
                 referralRewards[referrer] += bonus;
                 totalReferralRewards += bonus;
-                
+                referralRewardsReserve += bonus; // Track actual reserved funds
+
                 emit ReferralRecorded(msg.sender, referrer, bonus);
             } else {
                 actualReferrer = referrers[msg.sender];
             }
         }
 
-        // Transfer MUSD from user
-        MUSD.safeTransferFrom(msg.sender, address(this), musdAmount);
-
-        // Approve and deposit to yield aggregator
-        MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
-        YIELD_AGGREGATOR.deposit(musdAmount);
+        // C-01 FIX: Only deposit the net amount (after referral bonus) to yield aggregator
+        MUSD.forceApprove(address(YIELD_AGGREGATOR), netDeposit);
+        YIELD_AGGREGATOR.deposit(netDeposit);
 
         if (!userDeposit.active) {
-            // New deposit
-            userDeposit.musdAmount = uint128(musdAmount);
+            // New deposit - C-01 FIX: Record net deposit amount
+            userDeposit.musdAmount = uint128(netDeposit);
             userDeposit.yieldAccrued = 0;
             userDeposit.depositTimestamp = uint64(block.timestamp);
             userDeposit.lastYieldUpdate = uint64(block.timestamp);
             userDeposit.active = true;
-            userDeposit.autoCompound = false; // Default: disabled
+            userDeposit.autoCompound = false;
         } else {
             // Incremental deposit - update pending yields first
             uint256 pendingYield = _calculateUserYield(msg.sender);
             if (pendingYield > 0) {
                 userDeposit.yieldAccrued = uint128(uint256(userDeposit.yieldAccrued) + pendingYield);
                 totalYieldsGenerated += pendingYield;
-                
+
                 // Auto-compound if enabled
                 _maybeAutoCompound(msg.sender);
             }
-            
-            userDeposit.musdAmount = uint128(newTotalDeposit);
+
+            // C-01 FIX: Update with net deposit
+            userDeposit.musdAmount = uint128(uint256(userDeposit.musdAmount) + netDeposit);
             userDeposit.lastYieldUpdate = uint64(block.timestamp);
         }
 
-        totalMusdDeposited += musdAmount;
+        // C-01 FIX: Track net deposited amount
+        totalMusdDeposited += netDeposit;
 
-        emit Deposited(msg.sender, musdAmount, newTotalDeposit, actualReferrer, block.timestamp);
+        emit Deposited(msg.sender, netDeposit, userDeposit.musdAmount, actualReferrer, block.timestamp);
     }
 
     /**
@@ -503,14 +513,20 @@ contract IndividualPoolV3 is
 
     /**
      * @notice Reclama recompensas de referidos
+     * @dev C-01 FIX: Now uses reserved funds that were set aside during deposits
      */
     function claimReferralRewards() external nonReentrant returns (uint256) {
         uint256 rewards = referralRewards[msg.sender];
         if (rewards == 0) revert NoReferralRewards();
 
+        // C-01 FIX: Verify we have sufficient reserves
+        if (referralRewardsReserve < rewards) revert InsufficientReferralReserve();
+
+        // Update state before transfer (CEI pattern)
         referralRewards[msg.sender] = 0;
-        
-        // Transfer from fee reserves (collected separately)
+        referralRewardsReserve -= rewards;
+
+        // Transfer from reserved funds (now guaranteed to exist)
         MUSD.safeTransfer(msg.sender, rewards);
 
         emit ReferralRewardsClaimed(msg.sender, rewards);
@@ -534,34 +550,34 @@ contract IndividualPoolV3 is
                             VIEW FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function getUserInfo(address user) 
-        external 
-        view 
+    function getUserInfo(address user)
+        external
+        view
         returns (
-            uint256 deposit,
+            uint256 userDeposit_,
             uint256 yields,
             uint256 netYields,
             uint256 daysActive,
             uint256 estimatedAPR,
             bool autoCompoundEnabled
-        ) 
+        )
     {
         UserDeposit memory userDeposit = userDeposits[user];
-        
-        deposit = userDeposit.musdAmount;
+
+        userDeposit_ = userDeposit.musdAmount;
         yields = uint256(userDeposit.yieldAccrued) + _calculateUserYieldView(user);
-        
+
         uint256 feeAmount = (yields * performanceFee) / 10000;
         netYields = yields - feeAmount;
-        
+
         if (userDeposit.depositTimestamp > 0) {
             daysActive = (block.timestamp - userDeposit.depositTimestamp) / 1 days;
-            
-            if (daysActive > 0 && deposit > 0) {
-                estimatedAPR = (yields * 365 * 100) / (deposit * daysActive);
+
+            if (daysActive > 0 && userDeposit_ > 0) {
+                estimatedAPR = (yields * 365 * 100) / (userDeposit_ * daysActive);
             }
         }
-        
+
         autoCompoundEnabled = userDeposit.autoCompound;
     }
 

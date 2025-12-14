@@ -12,10 +12,11 @@ import {CooperativePoolV3} from "../../src/pools/v3/CooperativePoolV3.sol";
 contract MockCooperativePoolV3 is CooperativePoolV3 {
     /**
      * @notice Override the noFlashLoan modifier to allow testing
-     * @dev In tests, tx.origin != msg.sender because the test contract calls the pool
+     * @dev In tests, we need to allow same-block operations for testing purposes
      *      This mock removes that restriction for testing purposes only
+     * @param poolId The pool ID (unused in mock)
      */
-    modifier noFlashLoan() override {
+    modifier noFlashLoan(uint256 poolId) override {
         // No flash loan check in tests
         _;
     }

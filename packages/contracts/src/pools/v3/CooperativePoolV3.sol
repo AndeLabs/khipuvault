@@ -83,6 +83,12 @@ contract CooperativePoolV3 is
     mapping(uint256 => mapping(address => MemberInfo)) public poolMembers;
     mapping(uint256 => address[]) public poolMembersList;
 
+    // H-02 FIX: Cache total shares per pool to avoid O(n) loop
+    mapping(uint256 => uint256) public poolTotalShares;
+
+    // H-01 FIX: Block-based flash loan protection per pool
+    mapping(uint256 => mapping(address => uint256)) public memberJoinBlock;
+
     uint256 public poolCounter;
     uint256 public performanceFee;
     address public feeCollector;
@@ -171,6 +177,7 @@ contract CooperativePoolV3 is
     error InvalidFee();
     error InsufficientPoolSize();
     error FlashLoanDetected();
+    error SameBlockWithdrawal();
     error Unauthorized();
 
     /*//////////////////////////////////////////////////////////////
@@ -211,22 +218,18 @@ contract CooperativePoolV3 is
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Prevents flash loan attacks
-     * @dev Uses contract code check instead of tx.origin for better compatibility
-     *      with meta-transactions and account abstraction
+     * @notice H-01 FIX: Block-based flash loan protection
+     * @dev Uses block.number instead of extcodesize for robust protection
+     *      - Join operations record the block number
+     *      - Leave/withdraw operations require a different block
+     *      - This prevents single-transaction flash loan attacks
+     * @param poolId The pool to check flash loan protection for
      */
-    modifier noFlashLoan() virtual {
-        // Check if caller has code (is a contract)
-        uint256 size;
-        address sender = msg.sender;
-        assembly {
-            size := extcodesize(sender)
-        }
-        // If it's a contract, it must be an existing member
-        if (size > 0) {
-            // Check if this contract is already a member of any pool
-            // This is a simplified check - in production you might want pool-specific checks
-            revert FlashLoanDetected();
+    modifier noFlashLoan(uint256 poolId) virtual {
+        if (!emergencyMode) {
+            if (memberJoinBlock[poolId][msg.sender] == block.number) {
+                revert SameBlockWithdrawal();
+            }
         }
         _;
     }
@@ -274,7 +277,6 @@ contract CooperativePoolV3 is
         payable
         nonReentrant
         whenNotPaused
-        noFlashLoan
     {
         uint256 btcAmount = msg.value;
 
@@ -286,6 +288,11 @@ contract CooperativePoolV3 is
         if (btcAmount > pool.maxContribution) revert ContributionTooHigh();
 
         MemberInfo storage member = poolMembers[poolId][msg.sender];
+
+        // H-01 FIX: Record join block for flash loan protection
+        memberJoinBlock[poolId][msg.sender] = block.number;
+
+        uint256 oldShares = member.shares;
 
         if (!member.active) {
             member.btcContributed = uint128(btcAmount);
@@ -304,6 +311,9 @@ contract CooperativePoolV3 is
             member.shares = uint128(newContribution);
         }
 
+        // H-02 FIX: Update cached total shares
+        poolTotalShares[poolId] = poolTotalShares[poolId] - oldShares + member.shares;
+
         pool.totalBtcDeposited += btcAmount;
 
         if (pool.totalBtcDeposited >= MIN_POOL_SIZE) {
@@ -316,7 +326,7 @@ contract CooperativePoolV3 is
     function leavePool(uint256 poolId)
         external
         nonReentrant
-        noFlashLoan
+        noFlashLoan(poolId)
     {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
@@ -329,7 +339,8 @@ contract CooperativePoolV3 is
         uint256 originalBtcContribution = member.btcContributed;
         uint256 btcAmount = originalBtcContribution;
 
-        uint256 oldTotalShares = _getTotalShares(poolId);
+        // H-02 FIX: Use cached total shares instead of loop
+        uint256 oldTotalShares = poolTotalShares[poolId];
         uint256 memberShare = (uint256(member.shares) * 1e18) / oldTotalShares;
         uint256 memberShares = member.shares;
 
@@ -341,6 +352,9 @@ contract CooperativePoolV3 is
         member.shares = 0;
         pool.currentMembers--;
         pool.totalBtcDeposited -= originalBtcContribution;
+
+        // H-02 FIX: Update cached total shares
+        poolTotalShares[poolId] -= memberShares;
 
         // Calculate fee upfront
         uint256 feeAmount = 0;
@@ -407,7 +421,7 @@ contract CooperativePoolV3 is
     function withdrawPartial(uint256 poolId, uint256 withdrawAmount)
         external
         nonReentrant
-        noFlashLoan
+        noFlashLoan(poolId)
     {
         if (withdrawAmount == 0) revert InvalidAmount();
 
@@ -423,13 +437,16 @@ contract CooperativePoolV3 is
         uint256 remainingContribution = currentContribution - withdrawAmount;
         if (remainingContribution < pool.minContribution) revert ContributionTooLow();
 
-        uint256 oldTotalShares = _getTotalShares(poolId);
+        // H-02 FIX: Use cached total shares
         uint256 withdrawShare = (withdrawAmount * 1e18) / currentContribution;
         uint256 sharesToBurn = (uint256(member.shares) * withdrawShare) / 1e18;
 
         member.btcContributed = uint128(remainingContribution);
         member.shares = uint128(uint256(member.shares) - sharesToBurn);
         pool.totalBtcDeposited -= withdrawAmount;
+
+        // H-02 FIX: Update cached total shares
+        poolTotalShares[poolId] -= sharesToBurn;
 
         uint256 btcAmount = withdrawAmount;
 
@@ -467,7 +484,7 @@ contract CooperativePoolV3 is
     function claimYield(uint256 poolId)
         external
         nonReentrant
-        noFlashLoan
+        noFlashLoan(poolId)
     {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
@@ -581,7 +598,8 @@ contract CooperativePoolV3 is
         if (pool.totalMusdMinted == 0) return 0;
 
         uint256 totalPoolYield = YIELD_AGGREGATOR.getPendingYield(address(this));
-        uint256 totalShares = _getTotalShares(poolId);
+        // H-02 FIX: Use cached total shares instead of loop
+        uint256 totalShares = poolTotalShares[poolId];
         if (totalShares == 0) return 0;
 
         uint256 memberShare = (uint256(memberInfo.shares) * 1e18) / totalShares;
@@ -594,14 +612,12 @@ contract CooperativePoolV3 is
         }
     }
 
-    function _getTotalShares(uint256 poolId) internal view returns (uint256 total) {
-        address[] memory members = poolMembersList[poolId];
-        for (uint256 i = 0; i < members.length; i++) {
-            MemberInfo memory member = poolMembers[poolId][members[i]];
-            if (member.active) {
-                total += member.shares;
-            }
-        }
+    /**
+     * @notice H-02 FIX: Returns cached total shares for O(1) lookup
+     * @dev Replaced the O(n) loop with cached value that updates on join/leave/withdraw
+     */
+    function _getTotalShares(uint256 poolId) internal view returns (uint256) {
+        return poolTotalShares[poolId];
     }
 
     /*//////////////////////////////////////////////////////////////
