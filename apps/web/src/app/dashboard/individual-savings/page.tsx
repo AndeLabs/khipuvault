@@ -14,6 +14,7 @@ import {
   PoolStatistics,
   TransactionHistory,
   YieldAnalytics,
+  GetMusdGuide,
 } from "@/features/individual-savings";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import { useDepositWithApprove } from "@/hooks/web3/use-deposit-with-approve";
@@ -223,13 +224,19 @@ export default function IndividualSavingsPage() {
                 {isDepositing && (
                   <div className="mt-4 p-4 rounded-lg bg-surface-elevated border border-border">
                     <p className="text-sm text-muted-foreground">
-                      {depositStep === "checking" && "🔍 Checking allowance..."}
-                      {depositStep === "approving" && "✍️ Approving mUSD..."}
-                      {depositStep === "depositing" &&
-                        "💰 Depositing to pool..."}
+                      {depositStep === "checking" && "Checking allowance..."}
+                      {depositStep === "approving" && "Approving mUSD..."}
+                      {depositStep === "depositing" && "Depositing to pool..."}
                     </p>
                   </div>
                 )}
+                {/* Guide for getting testnet mUSD */}
+                <GetMusdGuide
+                  walletBalance={
+                    poolData.walletBalances.musdBalance?.toString() || "0"
+                  }
+                  className="mt-6"
+                />
               </TabsContent>
               <TabsContent value="withdraw" className="mt-6">
                 <WithdrawCard

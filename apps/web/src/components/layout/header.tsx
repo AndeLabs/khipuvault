@@ -9,9 +9,8 @@ import { ConnectButton } from "@/components/wallet/connect-button";
 import { useState, useEffect } from "react";
 
 const navLinks = [
-  { href: "#features", label: "Características" },
-  { href: "#pools", label: "Pools" },
-  { href: "#how-it-works", label: "Cómo Funciona" },
+  { href: "#features", label: "Features" },
+  { href: "#contracts", label: "Contracts" },
 ];
 
 export function Header() {
@@ -66,7 +65,7 @@ export function Header() {
             <SheetTrigger asChild className="md:hidden">
               <Button variant="ghost" size="icon">
                 <Menu className="h-6 w-6" />
-                <span className="sr-only">Abrir menú</span>
+                <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
             <SheetContent

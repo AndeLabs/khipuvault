@@ -26,7 +26,7 @@ export default function Home() {
             href="/dashboard"
             className={cn(buttonVariants({ size: "lg", variant: "secondary" }))}
           >
-            Ir al Dashboard
+            Go to Dashboard
           </Link>
         </div>
       </main>

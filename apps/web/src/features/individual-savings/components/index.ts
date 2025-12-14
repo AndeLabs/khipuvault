@@ -10,3 +10,4 @@ export { ReferralDashboard } from "./referral-dashboard";
 export { PoolStatistics } from "./pool-statistics";
 export { TransactionHistory } from "./transaction-history";
 export { YieldAnalytics } from "./yield-analytics";
+export { GetMusdGuide } from "./get-musd-guide";

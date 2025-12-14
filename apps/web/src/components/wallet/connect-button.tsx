@@ -79,7 +79,7 @@ export function ConnectButton() {
 
           <DropdownMenuContent align="end" className="w-56">
             <div className="px-2 py-1.5 text-sm">
-              <div className="font-medium">Wallet Conectada</div>
+              <div className="font-medium">Connected Wallet</div>
               <div className="text-muted-foreground font-mono text-xs">
                 {address}
               </div>
@@ -91,7 +91,7 @@ export function ConnectButton() {
               onClick={() => navigator.clipboard.writeText(address)}
             >
               <Copy className="h-4 w-4 mr-2" />
-              Copiar Dirección
+              Copy Address
             </DropdownMenuItem>
 
             <DropdownMenuItem asChild>
@@ -101,7 +101,7 @@ export function ConnectButton() {
                 rel="noopener noreferrer"
               >
                 <ExternalLink className="h-4 w-4 mr-2" />
-                Ver en Explorer
+                View in Explorer
               </a>
             </DropdownMenuItem>
 
@@ -111,7 +111,7 @@ export function ConnectButton() {
               onClick={() => disconnect()}
               className="text-destructive focus:text-destructive"
             >
-              Desconectar
+              Disconnect
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -125,14 +125,14 @@ export function ConnectButton() {
       <DropdownMenuTrigger asChild>
         <Button disabled={isPending} className="gap-2">
           <Wallet className="h-4 w-4" />
-          {isPending ? "Conectando..." : "Conectar Wallet"}
+          {isPending ? "Connecting..." : "Connect Wallet"}
           <ChevronDown className="h-4 w-4" />
         </Button>
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56">
         <div className="px-2 py-1.5 text-sm font-medium">
-          Selecciona tu wallet
+          Select your wallet
         </div>
 
         <DropdownMenuSeparator />
@@ -157,7 +157,7 @@ export function ConnectButton() {
                 <div>{connector.name}</div>
                 {!isAvailable && (
                   <div className="text-xs text-muted-foreground">
-                    No detectada - Instala la extensión
+                    Not detected - Install extension
                   </div>
                 )}
               </div>
@@ -247,7 +247,7 @@ export function WalletStatus() {
       <div className="flex items-center gap-2">
         <div className="h-2 w-2 rounded-full bg-muted animate-pulse" />
         <span className="text-sm font-medium text-muted-foreground">
-          Cargando...
+          Loading...
         </span>
       </div>
     );
@@ -261,7 +261,7 @@ export function WalletStatus() {
         }`}
       />
       <span className="text-sm font-medium text-muted-foreground">
-        {isConnected ? "Conectado" : "Desconectado"}
+        {isConnected ? "Connected" : "Disconnected"}
       </span>
     </div>
   );

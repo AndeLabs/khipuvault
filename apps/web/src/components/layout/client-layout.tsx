@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic";
 import { ReactNode } from "react";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { OnboardingModal } from "@/components/onboarding";
 
 // Dynamically import ClientProviders with ssr: false to avoid MetaMask SDK localStorage issues
 const ClientProviders = dynamic(
@@ -16,7 +17,7 @@ const ClientProviders = dynamic(
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lavanda mx-auto mb-4"></div>
-          <p className="text-muted-foreground">Cargando...</p>
+          <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
     ),
@@ -46,7 +47,10 @@ export function ClientLayout({ children, initialState }: ClientLayoutProps) {
         }
       }}
     >
-      <ClientProviders initialState={initialState}>{children}</ClientProviders>
+      <ClientProviders initialState={initialState}>
+        {children}
+        <OnboardingModal />
+      </ClientProviders>
     </ErrorBoundary>
   );
 }
