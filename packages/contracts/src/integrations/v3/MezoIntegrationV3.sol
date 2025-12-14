@@ -8,6 +8,7 @@ import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/ut
 import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
+import {SafeCast} from "@openzeppelin/contracts/utils/math/SafeCast.sol";
 import {IMezoIntegration} from "../../interfaces/IMezoIntegration.sol";
 import {IMezoBorrowerOperations} from "../../interfaces/IMezoBorrowerOperations.sol";
 import {IMezoPriceFeed} from "../../interfaces/IMezoPriceFeed.sol";
@@ -36,6 +37,7 @@ contract MezoIntegrationV3 is
     IMezoIntegration
 {
     using SafeERC20 for IERC20;
+    using SafeCast for uint256;
     /*//////////////////////////////////////////////////////////////
                           STRUCTS (OPTIMIZED)
     //////////////////////////////////////////////////////////////*/
@@ -200,8 +202,9 @@ contract MezoIntegrationV3 is
         }
 
         UserPosition storage position = userPositions[msg.sender];
-        position.btcCollateral = uint128(uint256(position.btcCollateral) + btcAmount);
-        position.musdDebt = uint128(uint256(position.musdDebt) + musdAmount);
+        // H-3 FIX: Use SafeCast for safe downcasting
+        position.btcCollateral = (uint256(position.btcCollateral) + btcAmount).toUint128();
+        position.musdDebt = (uint256(position.musdDebt) + musdAmount).toUint128();
 
         totalBtcDeposited += btcAmount;
         totalMusdMinted += musdAmount;
@@ -269,9 +272,9 @@ contract MezoIntegrationV3 is
             uint256 newCollateral = uint256(position.btcCollateral) - btcAmount;
             uint256 newDebt = uint256(position.musdDebt) - musdAmount;
 
-            // Effects: Update internal state first
-            position.btcCollateral = uint128(newCollateral);
-            position.musdDebt = uint128(newDebt);
+            // Effects: Update internal state first (H-3 FIX: SafeCast)
+            position.btcCollateral = newCollateral.toUint128();
+            position.musdDebt = newDebt.toUint128();
             totalBtcDeposited -= btcAmount;
             totalMusdMinted -= musdAmount;
 

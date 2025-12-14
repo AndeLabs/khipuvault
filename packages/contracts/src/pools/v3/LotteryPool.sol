@@ -646,8 +646,9 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
         // Aprobar yield aggregator
         MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
 
-        // Depositar en yield vault
-        YIELD_AGGREGATOR.deposit(musdAmount);
+        // H-8 FIX: Depositar en yield vault y verificar retorno
+        (, uint256 shares) = YIELD_AGGREGATOR.deposit(musdAmount);
+        require(shares > 0, "Deposit failed");
 
         // Actualizar stats
         lottery.totalMusdMinted += musdAmount;
