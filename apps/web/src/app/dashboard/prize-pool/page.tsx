@@ -45,7 +45,11 @@ import {
   useUserLotteryStats,
   useClaimPrize,
   useWithdrawCapital,
+  useLotteryPoolOwner,
+  useDrawWinner,
+  useCreateRound,
 } from "@/hooks/web3/use-lottery-pool";
+import { parseEther } from "viem";
 import { useLotteryPoolEvents } from "@/hooks/web3/use-lottery-pool-events";
 
 // Components
@@ -117,11 +121,26 @@ export default function PrizePoolPage() {
     isSuccess: isWithdrawSuccess,
   } = useWithdrawCapital();
 
+  // Admin hooks
+  const { isOwner: isAdmin } = useLotteryPoolOwner();
+  const {
+    drawWinner,
+    isPending: isDrawing,
+    isSuccess: isDrawSuccess,
+  } = useDrawWinner();
+  const {
+    createRound,
+    isPending: isCreatingRound,
+    isSuccess: isCreateSuccess,
+  } = useCreateRound();
+
   // Watch for events and auto-refetch
   useLotteryPoolEvents();
 
   // UI state
   const [isBuyModalOpen, setIsBuyModalOpen] = React.useState(false);
+  const [isCreateRoundModalOpen, setIsCreateRoundModalOpen] =
+    React.useState(false);
   const [activeTab, setActiveTab] = React.useState("overview");
 
   // Check if user is winner
@@ -191,12 +210,72 @@ export default function PrizePoolPage() {
     });
   };
 
-  // Watch for claim/withdraw success
+  // Handle draw winner (admin)
+  const handleDrawWinner = async () => {
+    if (!currentRoundId) return;
+
+    try {
+      await drawWinner(Number(currentRoundId));
+      toast({
+        title: "Drawing Winner...",
+        description: "Transaction submitted. Winner will be selected shortly.",
+      });
+    } catch (error) {
+      console.error("Draw error:", error);
+      toast({
+        title: "Draw Failed",
+        description:
+          error instanceof Error ? error.message : "Failed to draw winner",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Handle create new round (admin)
+  const handleCreateNewRound = () => {
+    setIsCreateRoundModalOpen(true);
+  };
+
+  // Quick create round with defaults (7 days, 0.001 BTC/ticket, 1000 max)
+  const handleQuickCreateRound = async () => {
+    try {
+      const ticketPrice = parseEther("0.001"); // 0.001 BTC per ticket
+      const maxTickets = 1000;
+      const duration = 7 * 24 * 60 * 60; // 7 days
+
+      await createRound(ticketPrice, maxTickets, duration);
+      toast({
+        title: "Creating New Round...",
+        description: "Transaction submitted. New lottery round starting soon.",
+      });
+    } catch (error) {
+      console.error("Create round error:", error);
+      toast({
+        title: "Failed to Create Round",
+        description:
+          error instanceof Error ? error.message : "Failed to create new round",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Watch for claim/withdraw/admin success
   React.useEffect(() => {
-    if (isClaimSuccess || isWithdrawSuccess) {
+    if (
+      isClaimSuccess ||
+      isWithdrawSuccess ||
+      isDrawSuccess ||
+      isCreateSuccess
+    ) {
       queryClient.refetchQueries({ type: "active" });
     }
-  }, [isClaimSuccess, isWithdrawSuccess, queryClient]);
+  }, [
+    isClaimSuccess,
+    isWithdrawSuccess,
+    isDrawSuccess,
+    isCreateSuccess,
+    queryClient,
+  ]);
 
   // Not connected state
   if (!isConnected) {
@@ -304,6 +383,10 @@ export default function PrizePoolPage() {
           userTicketCount={ticketCount ?? undefined}
           isLoading={isLoadingRound}
           onBuyTickets={() => setIsBuyModalOpen(true)}
+          isAdmin={isAdmin}
+          onDrawWinner={handleDrawWinner}
+          onCreateNewRound={handleQuickCreateRound}
+          isDrawing={isDrawing || isCreatingRound}
         />
       </PageSection>
 

@@ -3,6 +3,7 @@
  * @module features/prize-pool/components/active-lottery-hero
  *
  * Large hero card showcasing the current active lottery round
+ * Handles all edge cases: no participants, expired, admin actions
  */
 
 "use client";
@@ -13,7 +14,17 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Trophy, Ticket, Users, Clock, TrendingUp } from "lucide-react";
+import {
+  Trophy,
+  Ticket,
+  Users,
+  Clock,
+  TrendingUp,
+  AlertTriangle,
+  PlayCircle,
+  PlusCircle,
+  Loader2,
+} from "lucide-react";
 import { formatEther } from "viem";
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 import {
@@ -26,6 +37,11 @@ interface ActiveLotteryHeroProps {
   userTicketCount?: bigint;
   isLoading?: boolean;
   onBuyTickets: () => void;
+  /** Admin functions */
+  isAdmin?: boolean;
+  onDrawWinner?: () => Promise<void>;
+  onCreateNewRound?: () => void;
+  isDrawing?: boolean;
 }
 
 export function ActiveLotteryHero({
@@ -33,6 +49,10 @@ export function ActiveLotteryHero({
   userTicketCount = BigInt(0),
   isLoading,
   onBuyTickets,
+  isAdmin = false,
+  onDrawWinner,
+  onCreateNewRound,
+  isDrawing = false,
 }: ActiveLotteryHeroProps) {
   const [timeRemaining, setTimeRemaining] = React.useState(
     roundInfo
@@ -198,7 +218,7 @@ export function ActiveLotteryHero({
           </div>
         </div>
 
-        {/* CTA Button */}
+        {/* CTA Button - Active round */}
         {roundInfo.status === 0 && !isExpired && (
           <Button
             onClick={onBuyTickets}
@@ -209,31 +229,129 @@ export function ActiveLotteryHero({
           </Button>
         )}
 
-        {isExpired && roundInfo.status === 0 && (
-          <div className="text-center p-4 rounded-lg bg-warning/10 border border-warning/20">
-            <p className="text-sm text-warning-foreground">
-              This lottery has ended. Waiting for draw to complete.
-            </p>
-          </div>
-        )}
-
-        {roundInfo.status === 1 && (
-          <div className="text-center p-4 rounded-lg bg-info/10 border border-info/20">
-            <p className="text-sm text-info-foreground">
-              Drawing in progress... Winner will be announced soon!
-            </p>
-          </div>
-        )}
-
-        {roundInfo.status === 2 &&
-          roundInfo.winner !== "0x0000000000000000000000000000000000000000" && (
-            <div className="text-center p-4 rounded-lg bg-success/10 border border-success/20">
-              <p className="text-sm text-success-foreground font-medium">
-                Winner: {roundInfo.winner.slice(0, 6)}...
-                {roundInfo.winner.slice(-4)}
-              </p>
+        {/* Expired with NO participants - needs new round */}
+        {isExpired &&
+          roundInfo.status === 0 &&
+          Number(roundInfo.totalTicketsSold) === 0 && (
+            <div className="space-y-4">
+              <div className="text-center p-4 rounded-lg bg-muted/50 border border-border">
+                <AlertTriangle className="h-6 w-6 text-muted-foreground mx-auto mb-2" />
+                <p className="text-sm text-muted-foreground font-medium">
+                  Round ended without participants
+                </p>
+                <p className="text-xs text-muted-foreground mt-1">
+                  No tickets were sold. A new round needs to be created.
+                </p>
+              </div>
+              {isAdmin && onCreateNewRound && (
+                <Button
+                  onClick={onCreateNewRound}
+                  className="w-full h-12 bg-gradient-to-r from-accent to-accent/80"
+                >
+                  <PlusCircle className="h-5 w-5 mr-2" />
+                  Create New Round
+                </Button>
+              )}
             </div>
           )}
+
+        {/* Expired WITH participants - needs draw */}
+        {isExpired &&
+          roundInfo.status === 0 &&
+          Number(roundInfo.totalTicketsSold) > 0 && (
+            <div className="space-y-4">
+              <div className="text-center p-4 rounded-lg bg-warning/10 border border-warning/20">
+                <Clock className="h-6 w-6 text-warning mx-auto mb-2" />
+                <p className="text-sm text-warning-foreground font-medium">
+                  Round ended - Draw pending
+                </p>
+                <p className="text-xs text-warning-foreground/80 mt-1">
+                  {roundInfo.totalTicketsSold.toString()} tickets sold. Waiting
+                  for winner selection.
+                </p>
+              </div>
+              {isAdmin && onDrawWinner && (
+                <Button
+                  onClick={onDrawWinner}
+                  disabled={isDrawing}
+                  className="w-full h-12 bg-gradient-to-r from-success to-success/80"
+                >
+                  {isDrawing ? (
+                    <>
+                      <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                      Drawing...
+                    </>
+                  ) : (
+                    <>
+                      <PlayCircle className="h-5 w-5 mr-2" />
+                      Draw Winner
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          )}
+
+        {/* Drawing in progress */}
+        {roundInfo.status === 1 && (
+          <div className="text-center p-4 rounded-lg bg-info/10 border border-info/20">
+            <Loader2 className="h-6 w-6 text-info mx-auto mb-2 animate-spin" />
+            <p className="text-sm text-info-foreground font-medium">
+              Drawing in progress...
+            </p>
+            <p className="text-xs text-info-foreground/80 mt-1">
+              Winner will be announced soon!
+            </p>
+          </div>
+        )}
+
+        {/* Completed - show winner */}
+        {roundInfo.status === 2 &&
+          roundInfo.winner !== "0x0000000000000000000000000000000000000000" && (
+            <div className="space-y-4">
+              <div className="text-center p-4 rounded-lg bg-success/10 border border-success/20">
+                <Trophy className="h-6 w-6 text-success mx-auto mb-2" />
+                <p className="text-sm text-success-foreground font-medium">
+                  Winner: {roundInfo.winner.slice(0, 6)}...
+                  {roundInfo.winner.slice(-4)}
+                </p>
+                <p className="text-xs text-success-foreground/80 mt-1">
+                  Prize: {formatEther(roundInfo.totalPrize)} BTC
+                </p>
+              </div>
+              {isAdmin && onCreateNewRound && (
+                <Button
+                  onClick={onCreateNewRound}
+                  variant="outline"
+                  className="w-full h-12"
+                >
+                  <PlusCircle className="h-5 w-5 mr-2" />
+                  Start Next Round
+                </Button>
+              )}
+            </div>
+          )}
+
+        {/* Cancelled */}
+        {roundInfo.status === 3 && (
+          <div className="space-y-4">
+            <div className="text-center p-4 rounded-lg bg-destructive/10 border border-destructive/20">
+              <AlertTriangle className="h-6 w-6 text-destructive mx-auto mb-2" />
+              <p className="text-sm text-destructive font-medium">
+                Round Cancelled
+              </p>
+              <p className="text-xs text-destructive/80 mt-1">
+                Participants can withdraw their capital.
+              </p>
+            </div>
+            {isAdmin && onCreateNewRound && (
+              <Button onClick={onCreateNewRound} className="w-full h-12">
+                <PlusCircle className="h-5 w-5 mr-2" />
+                Create New Round
+              </Button>
+            )}
+          </div>
+        )}
       </CardContent>
     </Card>
   );
