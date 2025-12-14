@@ -423,6 +423,110 @@ export function useWithdrawCapital() {
   };
 }
 
+// ============================================================================
+// ADMIN HOOKS
+// ============================================================================
+
+/**
+ * Hook to check if current user is lottery pool owner
+ */
+export function useLotteryPoolOwner() {
+  const { address } = useAccount();
+  const publicClient = usePublicClient();
+
+  const { data: owner, isLoading } = useQuery({
+    queryKey: ["lottery-pool", "owner"],
+    queryFn: async () => {
+      if (!publicClient) return null;
+      try {
+        const result = await publicClient.readContract({
+          address: LOTTERY_POOL_ADDRESS,
+          abi: LOTTERY_POOL_ABI,
+          functionName: "owner",
+        });
+        return result as `0x${string}`;
+      } catch {
+        return null;
+      }
+    },
+    enabled: !!publicClient,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const isOwner =
+    address && owner ? address.toLowerCase() === owner.toLowerCase() : false;
+
+  return { owner, isOwner, isLoading };
+}
+
+/**
+ * Hook to draw winner (admin only)
+ */
+export function useDrawWinner() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  const drawWinner = async (roundId: number) => {
+    writeContract({
+      address: LOTTERY_POOL_ADDRESS,
+      abi: LOTTERY_POOL_ABI,
+      functionName: "drawWinner",
+      args: [BigInt(roundId)],
+    });
+  };
+
+  return {
+    drawWinner,
+    hash,
+    isPending: isPending || isConfirming,
+    isSuccess,
+    error,
+  };
+}
+
+/**
+ * Hook to create a new lottery round (admin only)
+ */
+export function useCreateRound() {
+  const { writeContract, data: hash, isPending, error } = useWriteContract();
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  /**
+   * Create a new lottery round
+   * @param ticketPrice - Price per ticket in wei (e.g., parseEther("0.001"))
+   * @param maxTickets - Maximum number of tickets for the round
+   * @param durationInSeconds - Duration of the round in seconds (e.g., 7 * 24 * 60 * 60 for 7 days)
+   */
+  const createRound = async (
+    ticketPrice: bigint,
+    maxTickets: number,
+    durationInSeconds: number,
+  ) => {
+    writeContract({
+      address: LOTTERY_POOL_ADDRESS,
+      abi: LOTTERY_POOL_ABI,
+      functionName: "createRound",
+      args: [ticketPrice, BigInt(maxTickets), BigInt(durationInSeconds)],
+    });
+  };
+
+  return {
+    createRound,
+    hash,
+    isPending: isPending || isConfirming,
+    isSuccess,
+    error,
+  };
+}
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
 /**
  * Helper: Format BTC amount
  */
