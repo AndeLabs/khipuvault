@@ -74,6 +74,9 @@ contract YieldAggregatorV3 is
     
     mapping(address => bool) public authorizedCallers;
 
+    // H-01 FIX: Block-based flash loan protection
+    mapping(address => uint256) public depositBlock;
+
     uint256 public constant MIN_DEPOSIT = 1e18;
     uint256 public constant MAX_VAULTS = 10;
 
@@ -97,6 +100,7 @@ contract YieldAggregatorV3 is
     error TooManyVaults();
     error InvalidAddress();
     error FlashLoanDetected();
+    error SameBlockWithdrawal();
 
     /*//////////////////////////////////////////////////////////////
                            INITIALIZATION
@@ -123,22 +127,17 @@ contract YieldAggregatorV3 is
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Prevents flash loan attacks
-     * @dev Uses contract code check instead of tx.origin for better compatibility
-     *      with meta-transactions, account abstraction, and to avoid phishing risks.
-     *      Authorized callers (pools) are allowed to interact as contracts.
+     * @notice H-01 FIX: Block-based flash loan protection
+     * @dev Uses block.number instead of extcodesize for robust protection
+     *      - Deposit operations record the block number
+     *      - Withdraw operations require a different block
+     *      - Authorized callers (pools) skip this check as they have their own protection
      */
     modifier noFlashLoan() {
         if (!emergencyMode && !authorizedCallers[msg.sender]) {
-            // Check if caller has code (is a contract)
-            uint256 size;
-            address sender = msg.sender;
-            assembly {
-                size := extcodesize(sender)
-            }
-            // Block new contract callers that aren't authorized
-            if (size > 0) {
-                revert FlashLoanDetected();
+            // Block-based protection: withdrawals must be in a different block than deposit
+            if (depositBlock[msg.sender] == block.number) {
+                revert SameBlockWithdrawal();
             }
         }
         _;
@@ -153,11 +152,13 @@ contract YieldAggregatorV3 is
         override
         nonReentrant
         whenNotPaused
-        noFlashLoan
         returns (address vaultAddress, uint256 shares)
     {
         if (depositsPaused) revert DepositsPaused();
         if (amount < MIN_DEPOSIT) revert InvalidAmount();
+
+        // H-01 FIX: Record deposit block for flash loan protection
+        depositBlock[msg.sender] = block.number;
 
         (vaultAddress, ) = getBestVault();
         if (vaultAddress == address(0)) revert VaultNotFound();
@@ -172,12 +173,14 @@ contract YieldAggregatorV3 is
         override
         nonReentrant
         whenNotPaused
-        noFlashLoan
         returns (uint256 shares)
     {
         if (depositsPaused) revert DepositsPaused();
         if (amount < MIN_DEPOSIT) revert InvalidAmount();
-        
+
+        // H-01 FIX: Record deposit block for flash loan protection
+        depositBlock[msg.sender] = block.number;
+
         VaultInfoPacked storage vault = vaults[vaultAddress];
         if (!vault.active) revert VaultInactive();
 

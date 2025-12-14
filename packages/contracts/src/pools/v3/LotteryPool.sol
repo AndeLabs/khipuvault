@@ -90,6 +90,7 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
         uint256 firstTicketIndex;       // Índice del primer ticket
         uint256 lastTicketIndex;        // Índice del último ticket
         bool claimed;                   // Si ya reclamó su premio/capital
+        bool refundClaimed;             // M-06: Si ya reclamó reembolso (lotería cancelada)
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -201,6 +202,19 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
         string reason
     );
 
+    // H-05 FIX: Add event for fee collector changes
+    event FeeCollectorUpdated(
+        address indexed oldCollector,
+        address indexed newCollector
+    );
+
+    // M-06: Event for refund claims
+    event RefundClaimed(
+        uint256 indexed roundId,
+        address indexed participant,
+        uint256 btcAmount
+    );
+
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
     //////////////////////////////////////////////////////////////*/
@@ -220,6 +234,8 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
     error TooManyTickets();
     error InvalidDuration();
     error VRFRequestFailed();
+    error RefundAlreadyClaimed();
+    error LotteryNotCancelled();
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
@@ -364,16 +380,26 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
             lottery.currentParticipants++;
         }
 
-        // Calcular índices de tickets
+        // C-02 FIX: Calculate ticket indices correctly
+        // Only set firstTicketIndex on FIRST purchase to avoid orphaning tickets
         uint256 totalTicketsSold = _getTotalTicketsSold(roundId);
-        uint256 firstTicket = participant.ticketCount == 0 ? totalTicketsSold : participant.lastTicketIndex + 1;
-        uint256 lastTicket = firstTicket + ticketCount - 1;
+        uint256 firstTicket;
+        uint256 lastTicket;
+
+        if (participant.ticketCount == 0) {
+            // First purchase - set firstTicketIndex
+            firstTicket = totalTicketsSold;
+            participant.firstTicketIndex = firstTicket;
+        } else {
+            // Subsequent purchase - use existing firstTicketIndex, calculate from last
+            firstTicket = participant.lastTicketIndex + 1;
+        }
+        lastTicket = firstTicket + ticketCount - 1;
 
         // Actualizar participante
         participant.ticketCount += ticketCount;
         participant.btcContributed += btcAmount;
-        participant.firstTicketIndex = firstTicket;
-        participant.lastTicketIndex = lastTicket;
+        participant.lastTicketIndex = lastTicket; // Only update lastTicketIndex, never overwrite firstTicketIndex
 
         // Actualizar lotería
         lottery.totalBtcCollected += btcAmount;
@@ -699,11 +725,44 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
     }
 
     /**
-     * @notice Actualiza fee collector
+     * @notice H-05 FIX: Actualiza fee collector with event emission
      */
     function setFeeCollector(address newCollector) external onlyOwner {
         if (newCollector == address(0)) revert InvalidAddress();
+        address oldCollector = feeCollector;
         feeCollector = newCollector;
+        emit FeeCollectorUpdated(oldCollector, newCollector);
+    }
+
+    /**
+     * @notice M-06 FIX: Allows participants to claim refund when lottery is cancelled
+     * @param roundId ID of the cancelled lottery round
+     * @return btcAmount Amount of BTC refunded
+     */
+    function claimRefund(uint256 roundId)
+        external
+        nonReentrant
+        returns (uint256 btcAmount)
+    {
+        LotteryRound storage lottery = lotteryRounds[roundId];
+        Participant storage participant = roundParticipants[roundId][msg.sender];
+
+        // Validate state
+        if (lottery.roundId == 0) revert InvalidRoundId();
+        if (lottery.status != LotteryStatus.CANCELLED) revert LotteryNotCancelled();
+        if (participant.ticketCount == 0) revert NotParticipant();
+        if (participant.refundClaimed) revert RefundAlreadyClaimed();
+
+        // Mark as claimed FIRST (CEI pattern)
+        participant.refundClaimed = true;
+        btcAmount = participant.btcContributed;
+
+        // Transfer BTC back to participant
+        if (btcAmount > 0) {
+            WBTC.safeTransfer(msg.sender, btcAmount);
+        }
+
+        emit RefundClaimed(roundId, msg.sender, btcAmount);
     }
 
     /**
