@@ -14,7 +14,7 @@
   "dependencies": {
     "@genkit-ai/google-genai": "^1.20.0",
     "@genkit-ai/next": "^1.20.0",
-    "@hookform/resolvers": "^4.1.3",
+    "@hookform/resolvers": "^5.2.2",
     "@khipu/shared": "workspace:*",
     "@khipu/ui": "workspace:*",
     "@khipu/web3": "workspace:*",
