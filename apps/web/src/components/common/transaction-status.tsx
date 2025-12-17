@@ -189,7 +189,7 @@ export function TransactionSteps({ steps, className }: TransactionStepsProps) {
         const isLast = index === steps.length - 1;
         return (
           <div
-            key={`step-${index}-${step.label}`}
+            key={`step-${step.label}-${index}`}
             className="flex items-start gap-3"
           >
             <div className="flex flex-col items-center">
@@ -203,13 +203,15 @@ export function TransactionSteps({ steps, className }: TransactionStepsProps) {
                     "bg-surface border-2 border-border text-muted-foreground",
                 )}
               >
-                {step.status === "complete" ? (
-                  <CheckCircle2 className="h-4 w-4" />
-                ) : step.status === "error" ? (
-                  <XCircle className="h-4 w-4" />
-                ) : (
-                  index + 1
-                )}
+                {(() => {
+                  if (step.status === "complete") {
+                    return <CheckCircle2 className="h-4 w-4" />;
+                  }
+                  if (step.status === "error") {
+                    return <XCircle className="h-4 w-4" />;
+                  }
+                  return index + 1;
+                })()}
               </div>
               {!isLast && (
                 <div

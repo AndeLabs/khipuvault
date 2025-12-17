@@ -88,7 +88,7 @@ export function PoolsBrowseV3({
         <div className="grid gap-4 md:grid-cols-4">
           {["pools", "members", "btc", "user"].map((key) => (
             <div
-              key={`stat-${key}`}
+              key={key}
               className="h-24 bg-surface-elevated animate-shimmer rounded-lg"
             />
           ))}
@@ -104,7 +104,7 @@ export function PoolsBrowseV3({
         {/* Cards Skeleton */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {["card1", "card2", "card3", "card4", "card5", "card6"].map((key) => (
-            <SkeletonCard key={`skeleton-${key}`} />
+            <SkeletonCard key={key} />
           ))}
         </div>
       </div>

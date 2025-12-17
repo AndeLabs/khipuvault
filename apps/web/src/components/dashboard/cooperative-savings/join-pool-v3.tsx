@@ -175,11 +175,15 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
             Pool no disponible
           </h3>
           <p className="text-muted-foreground mb-4">
-            {poolInfo.status === PoolStatus.CLOSED
-              ? "Este pool está cerrado y no acepta nuevos miembros"
-              : poolInfo.currentMembers >= poolInfo.maxMembers
-                ? "Este pool está lleno"
-                : "Este pool no está aceptando nuevos miembros"}
+            {(() => {
+              if (poolInfo.status === PoolStatus.CLOSED) {
+                return "Este pool está cerrado y no acepta nuevos miembros";
+              }
+              if (poolInfo.currentMembers >= poolInfo.maxMembers) {
+                return "Este pool está lleno";
+              }
+              return "Este pool no está aceptando nuevos miembros";
+            })()}
           </p>
           <Button onClick={onBack} variant="outline">
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -422,19 +426,25 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
                 className="flex-1 bg-primary hover:bg-primary/90"
                 size="lg"
               >
-                {isProcessing ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Procesando...
-                  </>
-                ) : !address ? (
-                  "Conecta tu Wallet"
-                ) : (
-                  <>
-                    <Users className="h-4 w-4 mr-2" />
-                    Unirse al Pool
-                  </>
-                )}
+                {(() => {
+                  if (isProcessing) {
+                    return (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        Procesando...
+                      </>
+                    );
+                  }
+                  if (!address) {
+                    return "Conecta tu Wallet";
+                  }
+                  return (
+                    <>
+                      <Users className="h-4 w-4 mr-2" />
+                      Unirse al Pool
+                    </>
+                  );
+                })()}
               </Button>
 
               <Button

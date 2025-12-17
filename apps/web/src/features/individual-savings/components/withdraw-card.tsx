@@ -261,11 +261,15 @@ export function WithdrawCard({
                 Number(amount) > Number(formattedBalance)
               }
             >
-              {!amount || Number(amount) <= 0
-                ? "Enter amount"
-                : Number(amount) > Number(formattedBalance)
-                  ? "Insufficient balance"
-                  : `Withdraw ${amount} mUSD`}
+              {(() => {
+                if (!amount || Number(amount) <= 0) {
+                  return "Enter amount";
+                }
+                if (Number(amount) > Number(formattedBalance)) {
+                  return "Insufficient balance";
+                }
+                return `Withdraw ${amount} mUSD`;
+              })()}
             </Button>
 
             {/* Help Text */}

@@ -84,7 +84,7 @@ export function PoolsListV3({ onJoinPool }: PoolsListV3Props) {
             { value: "closed", label: "Cerrados" },
           ].map(({ value, label }) => (
             <Button
-              key={value}
+              key={`filter-${value}`}
               variant={filter === value ? "default" : "outline"}
               size="sm"
               onClick={() => setFilter(value as FilterType)}
@@ -266,18 +266,23 @@ function PoolCard({ poolId, searchQuery, filter, onJoinPool }: PoolCardProps) {
           className="w-full"
           variant={canJoin ? "default" : "outline"}
         >
-          {canJoin ? (
-            <>
-              Unirse al Pool
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </>
-          ) : poolInfo.status === PoolStatus.CLOSED ? (
-            "Pool Cerrado"
-          ) : poolInfo.currentMembers >= poolInfo.maxMembers ? (
-            "Pool Lleno"
-          ) : (
-            "No Acepta Miembros"
-          )}
+          {(() => {
+            if (canJoin) {
+              return (
+                <>
+                  Unirse al Pool
+                  <ArrowRight className="h-4 w-4 ml-2" />
+                </>
+              );
+            }
+            if (poolInfo.status === PoolStatus.CLOSED) {
+              return "Pool Cerrado";
+            }
+            if (poolInfo.currentMembers >= poolInfo.maxMembers) {
+              return "Pool Lleno";
+            }
+            return "No Acepta Miembros";
+          })()}
         </Button>
       </CardContent>
     </Card>

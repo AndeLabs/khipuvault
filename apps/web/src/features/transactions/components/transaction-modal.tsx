@@ -53,46 +53,43 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
   const steps: Array<{ label: string; status: StepStatus }> = [
     {
       label: "Initialize Transaction",
-      status:
-        activeTransaction.status === "idle"
-          ? "active"
-          : activeTransaction.status === "error" ||
-              activeTransaction.status === "rejected"
-            ? "error"
-            : "complete",
+      status: (() => {
+        if (activeTransaction.status === "idle") return "active";
+        if (activeTransaction.status === "error" || activeTransaction.status === "rejected") {
+          return "error";
+        }
+        return "complete";
+      })(),
     },
     {
       label: "Sign with Wallet",
-      status:
-        activeTransaction.status === "signing"
-          ? "active"
-          : activeTransaction.status === "error" ||
-              activeTransaction.status === "rejected"
-            ? "error"
-            : activeTransaction.status === "idle" ||
-                activeTransaction.status === "pending"
-              ? "pending"
-              : "complete",
+      status: (() => {
+        if (activeTransaction.status === "signing") return "active";
+        if (activeTransaction.status === "error" || activeTransaction.status === "rejected") {
+          return "error";
+        }
+        if (activeTransaction.status === "idle" || activeTransaction.status === "pending") {
+          return "pending";
+        }
+        return "complete";
+      })(),
     },
     {
       label: "Confirm on Blockchain",
-      status:
-        activeTransaction.status === "confirming"
-          ? "active"
-          : activeTransaction.status === "error"
-            ? "error"
-            : activeTransaction.status === "success"
-              ? "complete"
-              : "pending",
+      status: (() => {
+        if (activeTransaction.status === "confirming") return "active";
+        if (activeTransaction.status === "error") return "error";
+        if (activeTransaction.status === "success") return "complete";
+        return "pending";
+      })(),
     },
     {
       label: "Transaction Complete",
-      status:
-        activeTransaction.status === "success"
-          ? "complete"
-          : activeTransaction.status === "error"
-            ? "error"
-            : "pending",
+      status: (() => {
+        if (activeTransaction.status === "success") return "complete";
+        if (activeTransaction.status === "error") return "error";
+        return "pending";
+      })(),
     },
   ];
 

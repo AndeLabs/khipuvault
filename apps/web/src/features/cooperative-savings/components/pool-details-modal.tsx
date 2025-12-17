@@ -107,16 +107,23 @@ export function PoolDetailsModal({
           </DialogDescription>
         </DialogHeader>
 
-        {isLoading ? (
-          <div className="px-6 pb-6">
-            <SkeletonCard />
-          </div>
-        ) : !poolInfo ? (
-          <div className="px-6 pb-6 text-center py-12">
-            <p className="text-muted-foreground">Pool not found</p>
-          </div>
-        ) : (
-          <ScrollArea className="max-h-[calc(90vh-120px)]">
+        {(() => {
+          if (isLoading) {
+            return (
+              <div className="px-6 pb-6">
+                <SkeletonCard />
+              </div>
+            );
+          }
+          if (!poolInfo) {
+            return (
+              <div className="px-6 pb-6 text-center py-12">
+                <p className="text-muted-foreground">Pool not found</p>
+              </div>
+            );
+          }
+          return (
+            <ScrollArea className="max-h-[calc(90vh-120px)]">
             <div className="px-6 pb-6 space-y-6">
               {/* Pool Header */}
               <div className="space-y-3">
@@ -479,13 +486,14 @@ export function PoolDetailsModal({
                       </CardHeader>
                       <CardContent>
                         <p className="text-2xl font-mono font-bold text-success">
-                          {poolInfo.totalBtcDeposited > BigInt(0) &&
-                          poolInfo.totalYieldGenerated > BigInt(0)
-                            ? formatMUSD(
-                                (poolInfo.totalYieldGenerated * BigInt(1e18)) /
-                                  poolInfo.totalBtcDeposited,
-                              )
-                            : "0"}
+                          {(() => {
+                            if (poolInfo.totalBtcDeposited > BigInt(0) && poolInfo.totalYieldGenerated > BigInt(0)) {
+                              return formatMUSD(
+                                (poolInfo.totalYieldGenerated * BigInt(1e18)) / poolInfo.totalBtcDeposited
+                              );
+                            }
+                            return "0";
+                          })()}
                         </p>
                       </CardContent>
                     </Card>
@@ -524,7 +532,8 @@ export function PoolDetailsModal({
               </Tabs>
             </div>
           </ScrollArea>
-        )}
+          );
+        })()}
       </DialogContent>
     </Dialog>
   );

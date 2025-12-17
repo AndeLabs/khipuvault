@@ -84,7 +84,7 @@ export function RecentActivity({
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
               <div
-                key={i}
+                key={`skeleton-${i}`}
                 className="h-16 bg-surface-elevated animate-shimmer rounded"
               />
             ))}
@@ -116,14 +116,14 @@ export function RecentActivity({
 
               return (
                 <div
-                  key={activity.id}
+                  key={`activity-${activity.id}`}
                   className={cn(
                     "flex items-center gap-4 p-4 rounded-lg border transition-colors",
-                    activity.status === "success"
-                      ? "border-border bg-surface-elevated"
-                      : activity.status === "error"
-                        ? "border-error/30 bg-error/5"
-                        : "border-border bg-surface-elevated",
+                    (() => {
+                      if (activity.status === "success") return "border-border bg-surface-elevated";
+                      if (activity.status === "error") return "border-error/30 bg-error/5";
+                      return "border-border bg-surface-elevated";
+                    })()
                   )}
                 >
                   {/* Icon */}
@@ -172,12 +172,15 @@ export function RecentActivity({
                         symbol="mUSD"
                         size="sm"
                         className={cn(
-                          activity.type === "deposit" ||
-                            activity.type === "claim"
-                            ? "text-success"
-                            : activity.type === "withdraw"
-                              ? "text-accent"
-                              : "",
+                          (() => {
+                            if (activity.type === "deposit" || activity.type === "claim") {
+                              return "text-success";
+                            }
+                            if (activity.type === "withdraw") {
+                              return "text-accent";
+                            }
+                            return "";
+                          })()
                         )}
                       />
                     )}

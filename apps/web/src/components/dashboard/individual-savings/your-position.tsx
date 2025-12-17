@@ -53,7 +53,7 @@ export function YourPosition() {
         <CardContent className="p-6">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="flex flex-col gap-2">
+              <div key={`skeleton-${i}`} className="flex flex-col gap-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-6 w-32" />
               </div>
@@ -135,8 +135,8 @@ export function YourPosition() {
     <Card className="bg-card border-2 border-primary shadow-custom shadow-primary/20 animate-pulse-glow">
       <CardContent className="p-6">
         <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {positionData.map((item, index) => (
-            <div key={index} className="flex flex-col gap-1">
+          {positionData.map((item) => (
+            <div key={item.label} className="flex flex-col gap-1">
               <p className="text-sm text-muted-foreground flex items-center">
                 {item.icon ?? ""}
                 {item.label}

@@ -33,30 +33,40 @@ export function TransactionStatus({
       <CardContent className="p-4">
         <div className="flex items-start gap-3">
           <div className="flex-shrink-0 mt-1">
-            {isSuccess ? (
-              <CheckCircle className="h-5 w-5 text-green-500" />
-            ) : isConfirming ? (
-              <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
-            ) : (
-              <Clock className="h-5 w-5 text-yellow-500" />
-            )}
+            {(() => {
+              if (isSuccess) {
+                return <CheckCircle className="h-5 w-5 text-green-500" />;
+              }
+              if (isConfirming) {
+                return <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />;
+              }
+              return <Clock className="h-5 w-5 text-yellow-500" />;
+            })()}
           </div>
 
           <div className="flex-1 space-y-2">
             <div>
               <p className="text-sm font-semibold text-white">
-                {isSuccess
-                  ? `✅ ${typeLabels[type]} Confirmado`
-                  : isConfirming
-                    ? `⏳ Confirmando ${typeLabels[type]}...`
-                    : `📤 ${typeLabels[type]} Enviado`}
+                {(() => {
+                  if (isSuccess) {
+                    return `✅ ${typeLabels[type]} Confirmado`;
+                  }
+                  if (isConfirming) {
+                    return `⏳ Confirmando ${typeLabels[type]}...`;
+                  }
+                  return `📤 ${typeLabels[type]} Enviado`;
+                })()}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                {isSuccess
-                  ? "La transacción se ha completado exitosamente. Los balances se actualizarán en breve."
-                  : isConfirming
-                    ? "Esperando confirmación del blockchain de Mezo..."
-                    : "Transacción enviada al blockchain."}
+                {(() => {
+                  if (isSuccess) {
+                    return "La transacción se ha completado exitosamente. Los balances se actualizarán en breve.";
+                  }
+                  if (isConfirming) {
+                    return "Esperando confirmación del blockchain de Mezo...";
+                  }
+                  return "Transacción enviada al blockchain.";
+                })()}
               </p>
             </div>
 

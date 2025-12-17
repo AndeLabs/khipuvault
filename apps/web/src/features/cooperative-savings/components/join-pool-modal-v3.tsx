@@ -106,10 +106,9 @@ export function JoinPoolModalV3({
       toast({
         variant: "destructive",
         title: "Error",
-        description:
-          err instanceof Error
-            ? err.message
-            : "Failed to join pool. Please try again.",
+        description: err instanceof Error
+          ? err.message
+          : "Failed to join pool. Please try again.",
       });
     }
   };
@@ -159,16 +158,23 @@ export function JoinPoolModalV3({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {loadingPool ? (
-            <div className="py-8 text-center">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
-            </div>
-          ) : !poolInfo ? (
-            <div className="py-8 text-center text-muted-foreground">
-              Pool not found
-            </div>
-          ) : (
-            <>
+          {(() => {
+            if (loadingPool) {
+              return (
+                <div className="py-8 text-center">
+                  <Loader2 className="h-8 w-8 animate-spin mx-auto text-muted-foreground" />
+                </div>
+              );
+            }
+            if (!poolInfo) {
+              return (
+                <div className="py-8 text-center text-muted-foreground">
+                  Pool not found
+                </div>
+              );
+            }
+            return (
+              <>
               {/* Pool Info */}
               <Card className="border-accent/20 bg-accent/5">
                 <CardContent className="p-4 space-y-3">
@@ -313,8 +319,9 @@ export function JoinPoolModalV3({
                   withdraw your contribution plus earned yields.
                 </AlertDescription>
               </Alert>
-            </>
-          )}
+              </>
+            );
+          })()}
         </div>
 
         <DialogFooter>

@@ -125,13 +125,11 @@ export function ActiveLotteryHero({
               </CardTitle>
             </div>
             <Badge
-              variant={
-                roundInfo.status === 0
-                  ? "default"
-                  : roundInfo.status === 1
-                    ? "secondary"
-                    : "outline"
-              }
+              variant={(() => {
+                if (roundInfo.status === 0) return "default";
+                if (roundInfo.status === 1) return "secondary";
+                return "outline";
+              })()}
             >
               {statusText}
             </Badge>

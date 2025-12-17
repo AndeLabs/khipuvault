@@ -94,8 +94,8 @@ export function AllocationChart({
               fill="#8884d8"
               dataKey="value"
             >
-              {data.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+              {data.map((entry) => (
+                <Cell key={`cell-${entry.name}`} fill={entry.color} />
               ))}
             </Pie>
             <Tooltip
@@ -114,9 +114,9 @@ export function AllocationChart({
 
         {/* Legend with amounts */}
         <div className="mt-6 space-y-3">
-          {data.map((item, index) => (
+          {data.map((item) => (
             <div
-              key={index}
+              key={item.name}
               className="flex items-center justify-between p-3 rounded-lg bg-surface-elevated"
             >
               <div className="flex items-center gap-2">

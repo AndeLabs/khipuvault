@@ -50,14 +50,13 @@ export function BuyTicketsModal({ children }: { children: React.ReactNode }) {
   const subtotal = ticketCount * ticketPriceBTC;
 
   // Calculate discount based on ticket count
-  const discountRate =
-    ticketCount >= 20
-      ? 0.15
-      : ticketCount >= 10
-        ? 0.1
-        : ticketCount >= 5
-          ? 0.05
-          : 0;
+  const getDiscountRate = () => {
+    if (ticketCount >= 20) return 0.15;
+    if (ticketCount >= 10) return 0.1;
+    if (ticketCount >= 5) return 0.05;
+    return 0;
+  };
+  const discountRate = getDiscountRate();
   const discountAmount = subtotal * discountRate;
   const total = subtotal - discountAmount;
 
