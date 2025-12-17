@@ -335,8 +335,8 @@ function Web3ErrorFallback({
           <div className="pt-4 space-y-2">
             <p className="text-sm font-medium">Que puedes hacer:</p>
             <ul className="text-sm text-muted-foreground space-y-1.5">
-              {getInstructions().map((instruction, index) => (
-                <li key={index} className="flex items-start gap-2">
+              {getInstructions().map((instruction) => (
+                <li key={instruction} className="flex items-start gap-2">
                   <span className="text-primary mt-0.5">•</span>
                   <span>{instruction}</span>
                 </li>

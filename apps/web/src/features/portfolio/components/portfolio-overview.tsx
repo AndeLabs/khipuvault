@@ -38,7 +38,7 @@ export function PortfolioOverview({
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, _i) => (
           <div
-            key={_i}
+            key={`skeleton-${_i}`}
             className="h-32 bg-surface-elevated animate-shimmer rounded-lg"
           />
         ))}
@@ -96,11 +96,11 @@ export function PortfolioOverview({
         <StatLabel>Active Positions</StatLabel>
         <StatValue>
           <span className="text-2xl font-bold tabular-nums">
-            {Number(individualSavings) > 0
-              ? 1
-              : 0 + Number(cooperativeSavings) > 0
-                ? 1
-                : 0}
+            {(() => {
+              const individualCount = Number(individualSavings) > 0 ? 1 : 0;
+              const cooperativeCount = Number(cooperativeSavings) > 0 ? 1 : 0;
+              return individualCount + cooperativeCount;
+            })()}
           </span>
         </StatValue>
       </StatCard>

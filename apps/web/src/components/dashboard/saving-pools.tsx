@@ -61,9 +61,9 @@ export function SavingPools() {
         Elige tu Pool de Ahorro
       </h2>
       <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-        {pools.map((pool, index) => (
+        {pools.map((pool) => (
           <Card
-            key={index}
+            key={pool.title}
             className={`flex flex-col ${pool.primary ? "bg-card border-primary/50" : "bg-card border-primary/20"} shadow-custom hover:border-primary/60 transition-all`}
           >
             <CardHeader className="flex-row items-start gap-4 space-y-0">
@@ -83,8 +83,8 @@ export function SavingPools() {
             </CardHeader>
             <CardContent className="flex flex-col flex-grow">
               <ul className="space-y-2 text-sm text-muted-foreground flex-grow">
-                {pool.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-2">
+                {pool.features.map((feature) => (
+                  <li key={feature} className="flex items-center gap-2">
                     <span className="text-primary">✓</span>
                     <span>{feature}</span>
                   </li>

@@ -34,7 +34,7 @@ export function RulesFaq() {
       <CardContent>
         <Accordion type="single" collapsible className="w-full">
           {faqs.map((faq, index) => (
-            <AccordionItem value={`item-${index}`} key={index}>
+            <AccordionItem value={`item-${index}`} key={`faq-${index}`}>
               <AccordionTrigger>{faq.q}</AccordionTrigger>
               <AccordionContent>{faq.a}</AccordionContent>
             </AccordionItem>

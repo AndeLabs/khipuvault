@@ -175,7 +175,7 @@ export function TransactionHistory({
         <CardContent>
           <div className="space-y-4">
             {[...Array(5)].map((_, i) => (
-              <div key={i} className="flex items-center gap-4">
+              <div key={`skeleton-${i}`} className="flex items-center gap-4">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="flex-1 space-y-2">
                   <Skeleton className="h-4 w-32" />
@@ -317,13 +317,11 @@ export function TransactionHistory({
                           </TableCell>
                           <TableCell>
                             <Badge
-                              variant={
-                                tx.status === "success"
-                                  ? "success"
-                                  : tx.status === "pending"
-                                    ? "secondary"
-                                    : "error"
-                              }
+                              variant={(() => {
+                                if (tx.status === "success") return "success";
+                                if (tx.status === "pending") return "secondary";
+                                return "error";
+                              })()}
                               className="text-xs"
                             >
                               {tx.status}
@@ -377,13 +375,11 @@ export function TransactionHistory({
                           </div>
                         </div>
                         <Badge
-                          variant={
-                            tx.status === "success"
-                              ? "success"
-                              : tx.status === "pending"
-                                ? "secondary"
-                                : "error"
-                          }
+                          variant={(() => {
+                            if (tx.status === "success") return "success";
+                            if (tx.status === "pending") return "secondary";
+                            return "error";
+                          })()}
                           className="text-xs"
                         >
                           {tx.status}

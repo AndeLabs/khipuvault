@@ -333,8 +333,8 @@ export function YieldAnalytics({
                   </div>
 
                   <div className="h-64 flex items-end gap-1 p-4 rounded-lg bg-surface-elevated border border-border">
-                    {yieldHistory.map((data, i) => (
-                      <TooltipProvider key={i}>
+                    {yieldHistory.map((data) => (
+                      <TooltipProvider key={data.date}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <div className="flex-1 flex flex-col justify-end h-full">
@@ -362,8 +362,8 @@ export function YieldAnalytics({
                   <div className="flex justify-between text-xs text-muted-foreground px-4">
                     {yieldHistory
                       .filter((_, i) => i % 7 === 0)
-                      .map((data, i) => (
-                        <span key={i}>{data.date}</span>
+                      .map((data) => (
+                        <span key={`label-${data.date}`}>{data.date}</span>
                       ))}
                   </div>
                 </div>

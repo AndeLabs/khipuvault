@@ -94,7 +94,7 @@ export function MyPoolsDashboard({
         <div className="grid gap-4 md:grid-cols-3">
           {[...Array(3)].map((_, i) => (
             <div
-              key={i}
+              key={`stat-skeleton-${i}`}
               className="h-24 bg-surface-elevated animate-shimmer rounded-lg"
             />
           ))}
@@ -103,7 +103,7 @@ export function MyPoolsDashboard({
         {/* Cards Skeleton */}
         <div className="grid gap-6">
           {[...Array(3)].map((_, i) => (
-            <SkeletonCard key={i} />
+            <SkeletonCard key={`card-skeleton-${i}`} />
           ))}
         </div>
       </div>

@@ -278,14 +278,14 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {members.map((memberAddr, i) => {
+                {members.map((memberAddr) => {
                   const isPoolCreator =
                     pool.creator.toLowerCase() === memberAddr.toLowerCase();
                   const isCurrentUser =
                     memberAddr.toLowerCase() === userAddress.toLowerCase();
 
                   return (
-                    <TableRow key={i}>
+                    <TableRow key={memberAddr}>
                       <TableCell className="flex items-center gap-2">
                         <Avatar className="h-8 w-8">
                           <AvatarFallback>

@@ -258,9 +258,9 @@ export function ContractsInfo() {
                         Características
                       </p>
                       <div className="flex flex-wrap gap-1">
-                        {contract.features.map((feature, index) => (
+                        {contract.features.map((feature) => (
                           <Badge
-                            key={index}
+                            key={feature}
                             variant="outline"
                             className="text-xs"
                           >
@@ -373,9 +373,9 @@ export function ContractsInfo() {
                         Características
                       </p>
                       <div className="flex flex-wrap gap-1">
-                        {contract.features.map((feature, index) => (
+                        {contract.features.map((feature) => (
                           <Badge
-                            key={index}
+                            key={feature}
                             variant="outline"
                             className="text-xs"
                           >

@@ -100,12 +100,11 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
         timeRemaining.total > 0
           ? `${timeRemaining.days}d ${timeRemaining.hours}h ${timeRemaining.minutes}m`
           : "Ended",
-      subtitle:
-        roundInfo.status === 0
-          ? "Open for entries"
-          : roundInfo.status === 1
-            ? "Drawing..."
-            : "Completed",
+      subtitle: (() => {
+        if (roundInfo.status === 0) return "Open for entries";
+        if (roundInfo.status === 1) return "Drawing...";
+        return "Completed";
+      })(),
       icon: Clock,
       color: timeRemaining.total > 0 ? "text-warning" : "text-muted-foreground",
       bgColor: timeRemaining.total > 0 ? "bg-warning/10" : "bg-muted/10",
@@ -114,11 +113,11 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {stats.map((stat, index) => {
+      {stats.map((stat) => {
         const Icon = stat.icon;
 
         return (
-          <Card key={index}>
+          <Card key={stat.title}>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {stat.title}

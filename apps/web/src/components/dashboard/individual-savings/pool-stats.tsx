@@ -26,7 +26,7 @@ export function PoolStats() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="flex justify-between">
+              <div key={`skeleton-${i}`} className="flex justify-between">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-20" />
               </div>

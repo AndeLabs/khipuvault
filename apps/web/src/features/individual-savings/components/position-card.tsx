@@ -74,7 +74,7 @@ export function PositionCard({
         <CardContent>
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             {[...Array(4)].map((_, i) => (
-              <div key={i} className="space-y-2">
+              <div key={`skeleton-${i}`} className="space-y-2">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-8 w-32" />
               </div>

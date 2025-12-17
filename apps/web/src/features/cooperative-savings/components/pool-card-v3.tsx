@@ -203,20 +203,25 @@ export const PoolCardV3 = React.memo(function PoolCardV3({
           >
             Manage
           </Button>
-        ) : canJoin ? (
-          <Button
-            variant="accent"
-            size="sm"
-            className="flex-1"
-            onClick={() => onJoin?.(pool.poolId)}
-          >
-            Join Pool
-          </Button>
-        ) : (
-          <Button variant="ghost" size="sm" className="flex-1" disabled>
-            {pool.currentMembers >= pool.maxMembers ? "Full" : "Closed"}
-          </Button>
-        )}
+        ) : (() => {
+          if (canJoin) {
+            return (
+              <Button
+                variant="accent"
+                size="sm"
+                className="flex-1"
+                onClick={() => onJoin?.(pool.poolId)}
+              >
+                Join Pool
+              </Button>
+            );
+          }
+          return (
+            <Button variant="ghost" size="sm" className="flex-1" disabled>
+              {pool.currentMembers >= pool.maxMembers ? "Full" : "Closed"}
+            </Button>
+          );
+        })()}
       </CardFooter>
     </Card>
   );

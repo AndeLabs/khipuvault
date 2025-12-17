@@ -34,9 +34,9 @@ export function UpcomingDraws() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          {upcoming.map((item, index) => (
+          {upcoming.map((item) => (
             <div
-              key={index}
+              key={item.name}
               className="p-3 bg-background/50 rounded-lg space-y-2"
             >
               <div className="flex justify-between items-center">

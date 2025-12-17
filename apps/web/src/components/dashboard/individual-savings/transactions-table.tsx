@@ -77,7 +77,7 @@ export function TransactionsTable() {
         <CardContent>
           <div className="space-y-2">
             {[...Array(3)].map((_, i) => (
-              <Skeleton key={i} className="h-12 w-full" />
+              <Skeleton key={`skeleton-${i}`} className="h-12 w-full" />
             ))}
           </div>
         </CardContent>
@@ -126,9 +126,9 @@ export function TransactionsTable() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {transactions.map((tx, index) => (
+            {transactions.map((tx) => (
               <TableRow
-                key={index}
+                key={tx.hash}
                 className="border-primary/10 hover:bg-primary/10"
               >
                 <TableCell>{formatTransactionDate(tx.timestamp)}</TableCell>

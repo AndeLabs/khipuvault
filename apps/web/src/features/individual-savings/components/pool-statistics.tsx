@@ -80,14 +80,19 @@ export function PoolStatistics({
     return Math.round(depositsScore + aprScore + depositorsScore);
   }, [totalDeposits, poolAPR, activeDepositors, emergencyMode]);
 
-  const healthColor =
-    healthScore >= 70
-      ? "text-success"
-      : healthScore >= 40
-        ? "text-warning"
-        : "text-error";
-  const healthLabel =
-    healthScore >= 70 ? "Excellent" : healthScore >= 40 ? "Good" : "Fair";
+  const getHealthColor = () => {
+    if (healthScore >= 70) return "text-success";
+    if (healthScore >= 40) return "text-warning";
+    return "text-error";
+  };
+  const healthColor = getHealthColor();
+
+  const getHealthLabel = () => {
+    if (healthScore >= 70) return "Excellent";
+    if (healthScore >= 40) return "Good";
+    return "Fair";
+  };
+  const healthLabel = getHealthLabel();
 
   if (isLoading) {
     return (
@@ -99,7 +104,7 @@ export function PoolStatistics({
         <CardContent>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {[...Array(6)].map((_, i) => (
-              <div key={i} className="space-y-2">
+              <div key={`skeleton-${i}`} className="space-y-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-8 w-32" />
                 <Skeleton className="h-3 w-20" />
