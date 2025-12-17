@@ -9,7 +9,6 @@ import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import { useMusdApproval } from "@/hooks/web3/use-musd-approval";
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 
-
 export function DebugPanel() {
   const { address, isConnected } = useAccount();
   const chainId = useChainId();
@@ -23,7 +22,9 @@ export function DebugPanel() {
     window.location.reload();
   };
 
-  if (!isConnected) {return null;}
+  if (!isConnected) {
+    return null;
+  }
 
   return (
     <Card className="bg-card border border-yellow-500/50">

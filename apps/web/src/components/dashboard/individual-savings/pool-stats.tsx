@@ -1,11 +1,6 @@
 "use client";
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import { formatMUSD } from "@/hooks/web3/use-musd-approval";

@@ -23,7 +23,6 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-
 interface PositionCardProps {
   totalDeposited?: string;
   currentValue?: string;
@@ -50,7 +49,9 @@ export function PositionCard({
   // Format values from wei to decimal
   const formatBalance = (value: string) => {
     try {
-      if (!value || value === "0") {return "0.00";}
+      if (!value || value === "0") {
+        return "0.00";
+      }
       const valueBigInt = typeof value === "bigint" ? value : BigInt(value);
       return Number(formatUnits(valueBigInt, 18)).toFixed(2);
     } catch (error) {

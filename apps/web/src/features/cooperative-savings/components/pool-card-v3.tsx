@@ -38,7 +38,8 @@ import {
   formatMUSD,
   getPoolStatusBadge,
   formatDate,
- PoolStatus } from "@/hooks/web3/use-cooperative-pool";
+  PoolStatus,
+} from "@/hooks/web3/use-cooperative-pool";
 
 interface PoolCardV3Props {
   pool: PoolWithMembership;
@@ -203,25 +204,27 @@ export const PoolCardV3 = React.memo(function PoolCardV3({
           >
             Manage
           </Button>
-        ) : (() => {
-          if (canJoin) {
+        ) : (
+          (() => {
+            if (canJoin) {
+              return (
+                <Button
+                  variant="accent"
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => onJoin?.(pool.poolId)}
+                >
+                  Join Pool
+                </Button>
+              );
+            }
             return (
-              <Button
-                variant="accent"
-                size="sm"
-                className="flex-1"
-                onClick={() => onJoin?.(pool.poolId)}
-              >
-                Join Pool
+              <Button variant="ghost" size="sm" className="flex-1" disabled>
+                {pool.currentMembers >= pool.maxMembers ? "Full" : "Closed"}
               </Button>
             );
-          }
-          return (
-            <Button variant="ghost" size="sm" className="flex-1" disabled>
-              {pool.currentMembers >= pool.maxMembers ? "Full" : "Closed"}
-            </Button>
-          );
-        })()}
+          })()
+        )}
       </CardFooter>
     </Card>
   );

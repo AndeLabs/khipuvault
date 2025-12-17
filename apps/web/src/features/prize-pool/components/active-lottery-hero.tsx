@@ -64,7 +64,9 @@ export function ActiveLotteryHero({
 
   // Update countdown every second
   React.useEffect(() => {
-    if (!roundInfo) {return;}
+    if (!roundInfo) {
+      return;
+    }
 
     const interval = setInterval(() => {
       setTimeRemaining(getTimeRemaining(roundInfo.endTime));
@@ -126,8 +128,12 @@ export function ActiveLotteryHero({
             </div>
             <Badge
               variant={(() => {
-                if (roundInfo.status === 0) {return "default";}
-                if (roundInfo.status === 1) {return "secondary";}
+                if (roundInfo.status === 0) {
+                  return "default";
+                }
+                if (roundInfo.status === 1) {
+                  return "secondary";
+                }
                 return "outline";
               })()}
             >

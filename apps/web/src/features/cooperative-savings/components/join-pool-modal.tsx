@@ -51,7 +51,9 @@ export function JoinPoolModal({
   const isFull = spotsLeft <= 0;
 
   const handleJoin = async () => {
-    if (!poolId || !onJoinPool) {return;}
+    if (!poolId || !onJoinPool) {
+      return;
+    }
 
     setIsSubmitting(true);
     try {

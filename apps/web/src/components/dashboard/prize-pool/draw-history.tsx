@@ -28,7 +28,6 @@ import {
   getRoundStatus,
 } from "@/hooks/web3/use-lottery-pool";
 
-
 export function DrawHistory() {
   const { address } = useAccount();
   const { rounds, isLoading } = useAllRounds();

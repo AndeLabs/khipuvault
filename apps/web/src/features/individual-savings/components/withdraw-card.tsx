@@ -1,10 +1,7 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  AlertCircle,
-  AlertTriangle,
-} from "lucide-react";
+import { AlertCircle, AlertTriangle } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { formatUnits } from "viem";
@@ -79,7 +76,9 @@ export function WithdrawCard({
   // Format balance for display
   const formattedBalance = React.useMemo(() => {
     try {
-      if (!availableBalance || availableBalance === "0") {return "0.00";}
+      if (!availableBalance || availableBalance === "0") {
+        return "0.00";
+      }
       const balanceBigInt =
         typeof availableBalance === "bigint"
           ? availableBalance
@@ -171,7 +170,8 @@ export function WithdrawCard({
                 className={cn(
                   "relative p-4 rounded-xl border-2 transition-all",
                   "bg-surface-elevated hover:border-accent/50",
-                  (errors.amount ?? (amount && Number(amount) > Number(formattedBalance)))
+                  (errors.amount ??
+                    (amount && Number(amount) > Number(formattedBalance)))
                     ? "border-error focus-within:border-error"
                     : "border-border focus-within:border-accent",
                 )}

@@ -14,8 +14,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useWatchContractEvent } from "wagmi";
 
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
-import { COOPERATIVE_POOL_ABI } from "@/lib/web3/cooperative-pool-abi";
+import {
+  MEZO_TESTNET_ADDRESSES,
+  COOPERATIVE_POOL_ABI,
+} from "@/lib/web3/contracts-v3";
 
 /**
  * Hook to watch for CooperativePool contract events and auto-refetch queries
@@ -34,7 +36,7 @@ import { COOPERATIVE_POOL_ABI } from "@/lib/web3/cooperative-pool-abi";
  */
 export function useCooperativePoolEvents() {
   const queryClient = useQueryClient();
-  const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePool as `0x${string}`;
+  const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePoolV3;
 
   // Watch for PoolCreated events
   useWatchContractEvent({
@@ -102,6 +104,20 @@ export function useCooperativePoolEvents() {
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console
         console.log("🔔 YieldClaimed event detected:", logs);
+      }
+      void queryClient.refetchQueries({ type: "active" });
+    },
+  });
+
+  // Watch for PartialWithdrawal events (V3)
+  useWatchContractEvent({
+    address: poolAddress,
+    abi: COOPERATIVE_POOL_ABI,
+    eventName: "PartialWithdrawal",
+    onLogs(logs) {
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("🔔 PartialWithdrawal event detected:", logs);
       }
       void queryClient.refetchQueries({ type: "active" });
     },

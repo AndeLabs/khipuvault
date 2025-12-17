@@ -14,6 +14,7 @@ const COOPERATIVE_POOL_ABI = [
   "event PoolCreated(uint256 indexed poolId, address indexed creator, string name, uint256 minContribution, uint256 maxMembers, uint256 timestamp)",
   "event MemberJoined(uint256 indexed poolId, address indexed member, uint256 btcAmount, uint256 shares, uint256 timestamp)",
   "event MemberLeft(uint256 indexed poolId, address indexed member, uint256 btcAmount, uint256 yieldAmount, uint256 timestamp)",
+  "event PartialWithdrawal(uint256 indexed poolId, address indexed member, uint256 btcAmount, uint256 remainingContribution, uint256 timestamp)",
   "event PoolClosed(uint256 indexed poolId, uint256 finalBalance)",
   "event PoolStatusUpdated(uint256 indexed poolId, uint8 newStatus)",
   "event YieldClaimed(uint256 indexed poolId, address indexed member, uint256 grossYield, uint256 feeAmount, uint256 netYield, uint256 timestamp)",
@@ -161,6 +162,26 @@ export class CooperativePoolListener extends BaseEventListener {
       }
     });
 
+    // Listen to PartialWithdrawal events (V3: btcAmount, remainingContribution, timestamp)
+    this.contract.on("PartialWithdrawal", async (...args) => {
+      const event = args[args.length - 1];
+      try {
+        const parsedLog = this.contract.interface.parseLog({
+          topics: [...event.topics],
+          data: event.data,
+        });
+        if (parsedLog) {
+          await this.processEventWithRetry(
+            "PartialWithdrawal",
+            event,
+            parsedLog,
+          );
+        }
+      } catch (error) {
+        console.error("❌ Error parsing PartialWithdrawal event:", error);
+      }
+    });
+
     // Listen to PoolClosed events (V3: finalBalance)
     this.contract.on("PoolClosed", async (...args) => {
       const event = args[args.length - 1];
@@ -301,6 +322,9 @@ export class CooperativePoolListener extends BaseEventListener {
           break;
         case "MemberLeft":
           await this.handleMemberLeft(event, parsedLog, blockTimestamp);
+          break;
+        case "PartialWithdrawal":
+          await this.handlePartialWithdrawal(event, parsedLog, blockTimestamp);
           break;
         case "PoolClosed":
           await this.handlePoolClosed(event, parsedLog, blockTimestamp);
@@ -528,6 +552,90 @@ export class CooperativePoolListener extends BaseEventListener {
 
     console.log(
       `🚪 Member Left: ${member} left pool ${poolId} with ${btcAmount} BTC + ${yieldAmount} yield`,
+    );
+  }
+
+  private async handlePartialWithdrawal(
+    event: ethers.Log,
+    parsedLog: ethers.LogDescription,
+    blockTimestamp: number,
+  ): Promise<void> {
+    const poolId = parsedLog.args.poolId.toString();
+    const member = parsedLog.args.member.toLowerCase();
+    const btcAmount = parsedLog.args.btcAmount.toString();
+    const remainingContribution =
+      parsedLog.args.remainingContribution.toString();
+    const txHash = event.transactionHash;
+    const logIndex = event.index;
+
+    // Use transaction for atomicity - all or nothing
+    await prisma.$transaction(async (tx) => {
+      // Ensure user exists
+      const user = await tx.user.upsert({
+        where: { address: member },
+        update: { lastActiveAt: new Date() },
+        create: { address: member },
+      });
+
+      // Upsert partial withdrawal record for idempotency
+      await tx.deposit.upsert({
+        where: {
+          txHash_logIndex: { txHash, logIndex },
+        },
+        update: {
+          status: "CONFIRMED",
+        },
+        create: {
+          userId: user.id,
+          userAddress: member,
+          poolAddress: event.address.toLowerCase(),
+          poolType: "COOPERATIVE",
+          poolId: poolId,
+          amount: btcAmount,
+          type: "WITHDRAW",
+          status: "CONFIRMED",
+          txHash,
+          blockNumber: event.blockNumber,
+          blockHash: event.blockHash,
+          logIndex,
+          timestamp: new Date(blockTimestamp * 1000),
+          metadata: {
+            withdrawalType: "PARTIAL",
+            remainingContribution,
+          },
+        },
+      });
+
+      // Upsert event log for idempotency
+      await tx.eventLog.upsert({
+        where: {
+          txHash_logIndex: { txHash, logIndex },
+        },
+        update: {
+          processed: true,
+        },
+        create: {
+          eventName: "PartialWithdrawal",
+          contractAddress: event.address.toLowerCase(),
+          txHash,
+          blockNumber: event.blockNumber,
+          blockHash: event.blockHash,
+          logIndex,
+          transactionIndex: event.transactionIndex,
+          processed: true,
+          args: JSON.stringify({
+            poolId,
+            member,
+            btcAmount,
+            remainingContribution,
+          }),
+          timestamp: new Date(blockTimestamp * 1000),
+        },
+      });
+    });
+
+    console.log(
+      `📤 Partial Withdrawal: ${member} withdrew ${btcAmount} BTC from pool ${poolId} (remaining: ${remainingContribution})`,
     );
   }
 

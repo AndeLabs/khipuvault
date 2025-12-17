@@ -36,7 +36,6 @@ import {
   PoolStatus,
 } from "@/hooks/web3/use-cooperative-pool";
 
-
 interface JoinPoolV3Props {
   poolId: number;
   onBack?: () => void;
@@ -102,13 +101,17 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateAmount()) {return;}
+    if (!validateAmount()) {
+      return;
+    }
 
     await joinPool(poolId, btcAmount);
   };
 
   const handleSetMax = () => {
-    if (!btcBalance || !poolInfo) {return;}
+    if (!btcBalance || !poolInfo) {
+      return;
+    }
 
     const maxAllowed = poolInfo.maxContribution;
     const userBalance = btcBalance.value;
@@ -380,7 +383,9 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    if (!btcBalance || !poolInfo) {return;}
+                    if (!btcBalance || !poolInfo) {
+                      return;
+                    }
                     const maxAllowed = poolInfo.maxContribution;
                     const userBalance = btcBalance.value;
                     const gasReserve = parseEther("0.0001");

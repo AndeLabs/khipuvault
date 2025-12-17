@@ -124,7 +124,10 @@ export function PoolCard({
         {memberCount > 0 && (
           <div className="flex items-center gap-1">
             {[...Array(Math.min(memberCount, 5))].map((_, i) => (
-              <Avatar key={`member-${i}`} className="h-8 w-8 border-2 border-surface">
+              <Avatar
+                key={`member-${i}`}
+                className="h-8 w-8 border-2 border-surface"
+              >
                 <AvatarFallback className="bg-lavanda/20 text-lavanda text-xs">
                   M{i + 1}
                 </AvatarFallback>

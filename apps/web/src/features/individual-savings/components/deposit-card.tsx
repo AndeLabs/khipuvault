@@ -84,7 +84,9 @@ export function DepositCard({
   // Format balance for display
   const formattedBalance = React.useMemo(() => {
     try {
-      if (!balance || balance === "0") {return "0.00";}
+      if (!balance || balance === "0") {
+        return "0.00";
+      }
       const balanceBigInt =
         typeof balance === "bigint" ? balance : BigInt(balance);
       return Number(formatUnits(balanceBigInt, 18)).toFixed(2);

@@ -76,7 +76,9 @@ export function ReferralDashboard({
 
   // Copy to clipboard
   const handleCopyLink = async () => {
-    if (!referralLink) {return;}
+    if (!referralLink) {
+      return;
+    }
 
     try {
       await navigator.clipboard.writeText(referralLink);
@@ -88,7 +90,9 @@ export function ReferralDashboard({
   };
 
   const handleCopyAddress = async () => {
-    if (!address) {return;}
+    if (!address) {
+      return;
+    }
 
     try {
       await navigator.clipboard.writeText(address);

@@ -7,12 +7,7 @@
 
 "use client";
 
-import {
-  Trophy,
-  Ticket,
-  Clock,
-  DollarSign,
-} from "lucide-react";
+import { Trophy, Ticket, Clock, DollarSign } from "lucide-react";
 import * as React from "react";
 import { formatEther } from "viem";
 
@@ -36,7 +31,9 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
 
   // Update countdown
   React.useEffect(() => {
-    if (!roundInfo) {return;}
+    if (!roundInfo) {
+      return;
+    }
 
     const interval = setInterval(() => {
       setTimeRemaining(getTimeRemaining(roundInfo.endTime));
@@ -88,8 +85,7 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
     {
       title: "Ticket Price",
       value: `${formatEther(roundInfo.ticketPrice)} BTC`,
-      subtitle:
-        `≈ $${  (Number(formatEther(roundInfo.ticketPrice)) * 95000).toFixed(2)}`,
+      subtitle: `≈ $${(Number(formatEther(roundInfo.ticketPrice)) * 95000).toFixed(2)}`,
       icon: DollarSign,
       color: "text-success",
       bgColor: "bg-success/10",
@@ -101,8 +97,12 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
           ? `${timeRemaining.days}d ${timeRemaining.hours}h ${timeRemaining.minutes}m`
           : "Ended",
       subtitle: (() => {
-        if (roundInfo.status === 0) {return "Open for entries";}
-        if (roundInfo.status === 1) {return "Drawing...";}
+        if (roundInfo.status === 0) {
+          return "Open for entries";
+        }
+        if (roundInfo.status === 1) {
+          return "Drawing...";
+        }
         return "Completed";
       })(),
       icon: Clock,

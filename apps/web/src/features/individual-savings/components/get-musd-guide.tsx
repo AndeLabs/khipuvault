@@ -1,10 +1,6 @@
 "use client";
 
-import {
-  Coins,
-  ExternalLink,
-  ChevronDown,
-} from "lucide-react";
+import { Coins, ExternalLink, ChevronDown } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
@@ -37,7 +33,9 @@ export function GetMusdGuide({
   const hasBalance = Number(walletBalance) > 0;
 
   // Don't show if user already has balance
-  if (hasBalance) {return null;}
+  if (hasBalance) {
+    return null;
+  }
 
   return (
     <Card
