@@ -15,19 +15,17 @@
 
 "use client";
 
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { parseEther } from "viem";
 import {
   useBlockNumber,
   useAccount,
-  usePublicClient,
   useWriteContract,
   useWaitForTransactionReceipt,
   useReadContract,
 } from "wagmi";
 
-import { normalizeBigInt } from "@/lib/query-utils";
 import { MEZO_TESTNET_ADDRESSES, MUSD_ABI } from "@/lib/web3/contracts";
 
 const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`;
@@ -56,7 +54,6 @@ const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`;
  */
 export function useMusdApproval() {
   const { address, isConnected } = useAccount();
-  const publicClient = usePublicClient();
   const queryClient = useQueryClient();
 
   // Watch block number for real-time updates

@@ -47,7 +47,6 @@ export function ReferralDashboard({
   referralCount = BigInt(0),
   totalRewards = BigInt(0),
   referrerAddress,
-  isLoading,
   onRefresh,
   className,
 }: ReferralDashboardProps) {
@@ -292,7 +291,7 @@ export function ReferralDashboard({
             <div className="flex-1 relative">
               <Input
                 readOnly
-                value={address || ""}
+                value={address ?? ""}
                 className="pr-10 font-mono text-xs"
                 placeholder="Your wallet address"
               />

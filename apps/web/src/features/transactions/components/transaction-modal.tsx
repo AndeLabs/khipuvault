@@ -50,12 +50,6 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
 
   type StepStatus = "pending" | "active" | "complete" | "error";
 
-  const getStepStatus = (
-    condition: boolean,
-    active: StepStatus,
-    fallback: StepStatus,
-  ): StepStatus => (condition ? active : fallback);
-
   const steps: Array<{ label: string; status: StepStatus }> = [
     {
       label: "Initialize Transaction",

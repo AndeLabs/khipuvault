@@ -9,8 +9,6 @@ import {
   Users,
   Search,
   TrendingUp,
-  Shield,
-  Info,
   Loader2,
   ArrowRight,
   Clock,
@@ -27,7 +25,6 @@ import {
   useCooperativePool,
   usePoolInfo,
   PoolStatus,
-  type PoolInfo,
 } from "@/hooks/web3/use-cooperative-pool";
 
 

@@ -112,18 +112,6 @@ export function PercentageDisplay({
   const isNegative = value < 0;
   const isZero = value === 0;
 
-  const getTrend = (): "up" | "down" | "neutral" => {
-    if (isPositive) {
-      return "up";
-    }
-    if (isNegative) {
-      return "down";
-    }
-    return "neutral";
-  };
-
-  const trend = getTrend();
-
   return (
     <span
       className={cn(

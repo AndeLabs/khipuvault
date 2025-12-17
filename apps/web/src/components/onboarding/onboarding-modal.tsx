@@ -37,7 +37,7 @@ interface OnboardingStep {
 }
 
 export function OnboardingModal() {
-  const { isConnected, address } = useAccount();
+  const { isConnected } = useAccount();
   const [isOpen, setIsOpen] = React.useState(false);
   const [currentStep, setCurrentStep] = React.useState(0);
   const [mounted, setMounted] = React.useState(false);

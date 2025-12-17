@@ -3,7 +3,7 @@
 import { Users, Calendar, TrendingUp, Clock } from "lucide-react";
 import * as React from "react";
 
-import { AmountDisplay, PercentageDisplay } from "@/components/common";
+import { AmountDisplay } from "@/components/common";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";

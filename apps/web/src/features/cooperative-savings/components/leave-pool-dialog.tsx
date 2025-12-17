@@ -51,9 +51,9 @@ export function LeavePoolDialog({
   const { toast } = useToast();
   const { leavePool, state, error, reset, performanceFee } =
     useCooperativePool();
-  const { poolInfo } = usePoolInfo(poolId || 0);
-  const { memberInfo } = useMemberInfo(poolId || 0);
-  const { pendingYield } = useMemberYield(poolId || 0);
+  const { poolInfo } = usePoolInfo(poolId ?? 0);
+  const { memberInfo } = useMemberInfo(poolId ?? 0);
+  const { pendingYield } = useMemberYield(poolId ?? 0);
 
   // Handle leave
   const handleLeave = async () => {
@@ -100,7 +100,6 @@ export function LeavePoolDialog({
   const grossYield = pendingYield;
   const netYield = calculateNetYield(grossYield, performanceFee);
   const feeAmount = grossYield - netYield;
-  const totalWithdrawal = memberInfo.btcContributed;
 
   return (
     <AlertDialog open={open} onOpenChange={handleClose}>

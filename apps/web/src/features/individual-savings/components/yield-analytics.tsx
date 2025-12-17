@@ -4,7 +4,6 @@ import { TrendingUp, Calculator, BarChart3, Info } from "lucide-react";
 import * as React from "react";
 
 import { AmountDisplay } from "@/components/common";
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
@@ -84,7 +83,6 @@ export function YieldAnalytics({
 
     // Simple interest (no auto-compound)
     const simpleInterest = principal * apr * years;
-    const simpleFinal = principal + simpleInterest;
 
     // Compound interest (monthly compounding with auto-compound)
     const compoundingPeriods = years * 12; // Monthly
@@ -92,7 +90,6 @@ export function YieldAnalytics({
       principal * Math.pow(1 + apr / 12, compoundingPeriods);
     const compoundInterest = compoundFinal - principal;
 
-    const finalAmount = autoCompound ? compoundFinal : simpleFinal;
     const totalYield = autoCompound ? compoundInterest : simpleInterest;
 
     // Performance fee (1%)

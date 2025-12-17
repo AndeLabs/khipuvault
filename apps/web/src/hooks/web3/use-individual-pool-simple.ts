@@ -7,7 +7,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { formatUnits, type Address } from "viem";
-import { useAccount, usePublicClient, useConfig } from "wagmi";
+import { useAccount, useConfig } from "wagmi";
 import { readContract } from "wagmi/actions";
 
 // Contract addresses

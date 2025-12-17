@@ -17,10 +17,8 @@ import {
   Coins,
   TrendingUp,
   Calendar,
-  User,
   Crown,
   Copy,
-  ExternalLink,
   Shield,
 } from "lucide-react";
 import * as React from "react";
@@ -37,7 +35,6 @@ import {
 } from "@/components/ui/dialog";
 import { Progress } from "@/components/ui/progress";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { Separator } from "@/components/ui/separator";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import {
   Table,
@@ -79,13 +76,13 @@ export function PoolDetailsModal({
   onClaim,
 }: PoolDetailsModalProps) {
   const { toast } = useToast();
-  const { poolInfo, isLoading: loadingPool } = usePoolInfo(poolId || 0);
-  const { members, isLoading: loadingMembers } = usePoolMembers(poolId || 0);
-  const { memberInfo, isLoading: loadingMember } = useMemberInfo(poolId || 0);
-  const { pendingYield } = useMemberYield(poolId || 0);
+  const { poolInfo, isLoading: loadingPool } = usePoolInfo(poolId ?? 0);
+  const { members, isLoading: loadingMembers } = usePoolMembers(poolId ?? 0);
+  const { memberInfo, isLoading: loadingMember } = useMemberInfo(poolId ?? 0);
+  const { pendingYield } = useMemberYield(poolId ?? 0);
 
   const isLoading = loadingPool || loadingMembers || loadingMember;
-  const isMember = memberInfo?.active || false;
+  const isMember = memberInfo?.active ?? false;
   const totalShares = members.reduce((sum, m) => sum + m.shares, BigInt(0));
 
   const copyAddress = (address: string) => {

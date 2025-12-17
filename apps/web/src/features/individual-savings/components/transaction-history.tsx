@@ -7,7 +7,6 @@ import {
   RefreshCw,
   FileText,
   Filter,
-  Download,
 } from "lucide-react";
 import * as React from "react";
 import { formatUnits } from "viem";

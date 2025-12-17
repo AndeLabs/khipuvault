@@ -13,7 +13,6 @@ import {
 import * as React from "react";
 import { formatUnits } from "viem";
 
-import { AmountDisplay, PercentageDisplay } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import {
   Card,

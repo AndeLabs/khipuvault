@@ -2,10 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
-  ArrowUp,
   AlertCircle,
-  Info,
-  TrendingDown,
   AlertTriangle,
 } from "lucide-react";
 import * as React from "react";
@@ -13,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { formatUnits } from "viem";
 import * as z from "zod";
 
-import { AmountDisplay } from "@/components/common";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
@@ -33,14 +29,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useTransactionExecute } from "@/features/transactions";
 import { cn } from "@/lib/utils";
 
@@ -183,8 +171,7 @@ export function WithdrawCard({
                 className={cn(
                   "relative p-4 rounded-xl border-2 transition-all",
                   "bg-surface-elevated hover:border-accent/50",
-                  errors.amount ||
-                    (amount && Number(amount) > Number(formattedBalance))
+                  (errors.amount ?? (amount && Number(amount) > Number(formattedBalance)))
                     ? "border-error focus-within:border-error"
                     : "border-border focus-within:border-accent",
                 )}

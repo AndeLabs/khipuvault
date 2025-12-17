@@ -12,9 +12,7 @@ import {
   DollarSign,
   Info,
   Loader2,
-  AlertTriangle,
   CheckCircle2,
-  Clock,
 } from "lucide-react";
 import { useState, useMemo } from "react";
 import { formatEther } from "viem";
@@ -41,7 +39,6 @@ import {
 
 
 export function MyPoolsV3() {
-  const { address } = useAccount();
   const {
     poolCounter,
     claimYield,
@@ -91,7 +88,7 @@ export function MyPoolsV3() {
     setShowSuccessDialog(true);
   }
 
-  const myPools = poolIds.filter((poolId) => {
+  const myPools = poolIds.filter((_poolId) => {
     return true;
   });
 

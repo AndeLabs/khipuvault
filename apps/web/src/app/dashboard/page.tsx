@@ -61,10 +61,9 @@ export default function DashboardPage() {
 
   // Fetch REAL blockchain data
   const { userInfo, isLoading: isLoadingIndividual } = useIndividualPoolV3();
-  const { pools, isLoading: isLoadingPools } = useCooperativePools();
+  const { isLoading: isLoadingPools } = useCooperativePools();
   const {
     totalContribution: cooperativeContribution,
-    poolsParticipated,
     isLoading: isLoadingCoopTotal,
   } = useUserCooperativeTotal(address as `0x${string}` | undefined);
 

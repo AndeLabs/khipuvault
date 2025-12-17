@@ -163,7 +163,7 @@ export function PoolDetailsCard({
                 No members yet
               </p>
             ) : (
-              members.map((member, index) => (
+              members.map((member) => (
                 <div
                   key={member.address}
                   className={cn(

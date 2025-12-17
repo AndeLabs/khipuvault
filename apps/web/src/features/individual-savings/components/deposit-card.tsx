@@ -1,13 +1,12 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowDown, Info, TrendingUp, Gift } from "lucide-react";
+import { TrendingUp, Gift } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { formatUnits, isAddress } from "viem";
 import * as z from "zod";
 
-import { AmountDisplay } from "@/components/common";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,7 +14,6 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  CardFooter,
 } from "@/components/ui/card";
 import {
   Collapsible,
@@ -24,12 +22,6 @@ import {
 } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
 import { useTransactionExecute } from "@/features/transactions";
 import { cn } from "@/lib/utils";
 
@@ -63,7 +55,6 @@ export function DepositCard({
   isLoading,
   className,
 }: DepositCardProps) {
-  const [isApproving, setIsApproving] = React.useState(false);
   const [showReferral, setShowReferral] = React.useState(false);
   const { execute } = useTransactionExecute({ type: "Deposit mUSD" });
 
