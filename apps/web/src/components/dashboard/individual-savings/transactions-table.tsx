@@ -1,13 +1,9 @@
 "use client";
 
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { CheckCircle2, Clock, ExternalLink, XCircle } from "lucide-react";
+import Link from "next/link";
+import { useAccount } from "wagmi";
+
 import { Badge } from "@/components/ui/badge";
 import {
   Card,
@@ -16,16 +12,21 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CheckCircle2, Clock, ExternalLink, XCircle } from "lucide-react";
-import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import {
   useUserTransactions,
   formatTransactionDate,
   shortenTxHash,
   getExplorerUrl,
 } from "@/hooks/web3/use-user-transactions";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useAccount } from "wagmi";
 
 const statusConfig = {
   Confirmado: {

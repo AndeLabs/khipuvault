@@ -7,9 +7,6 @@
 
 "use client";
 
-import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Trophy,
   Ticket,
@@ -18,9 +15,14 @@ import {
   TrendingUp,
   DollarSign,
 } from "lucide-react";
+import * as React from "react";
 import { formatEther } from "viem";
-import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
+
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getTimeRemaining } from "@/hooks/web3/use-lottery-pool";
+
+import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
 interface LotteryStatsProps {
   roundInfo: LotteryRound | null;
@@ -36,7 +38,7 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
 
   // Update countdown
   React.useEffect(() => {
-    if (!roundInfo) return;
+    if (!roundInfo) {return;}
 
     const interval = setInterval(() => {
       setTimeRemaining(getTimeRemaining(roundInfo.endTime));
@@ -89,7 +91,7 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
       title: "Ticket Price",
       value: `${formatEther(roundInfo.ticketPrice)} BTC`,
       subtitle:
-        "≈ $" + (Number(formatEther(roundInfo.ticketPrice)) * 95000).toFixed(2),
+        `≈ $${  (Number(formatEther(roundInfo.ticketPrice)) * 95000).toFixed(2)}`,
       icon: DollarSign,
       color: "text-success",
       bgColor: "bg-success/10",

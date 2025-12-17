@@ -2,6 +2,15 @@
 
 import { useState } from "react";
 import {
+  Bar,
+  BarChart,
+  ResponsiveContainer,
+  XAxis,
+  YAxis,
+  Tooltip,
+} from "recharts";
+
+import {
   Card,
   CardContent,
   CardHeader,
@@ -11,14 +20,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import {
-  Bar,
-  BarChart,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
 
 export function ProbabilityCalculator() {
   const [tickets, setTickets] = useState(5);

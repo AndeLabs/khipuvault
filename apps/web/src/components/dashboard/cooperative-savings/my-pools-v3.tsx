@@ -5,11 +5,25 @@
 
 "use client";
 
+import {
+  Users,
+  TrendingUp,
+  LogOut,
+  DollarSign,
+  Info,
+  Loader2,
+  AlertTriangle,
+  CheckCircle2,
+  Clock,
+} from "lucide-react";
 import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { formatEther } from "viem";
+import { useAccount } from "wagmi";
+
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -24,19 +38,7 @@ import {
   useMemberInfo,
   PoolStatus,
 } from "@/hooks/web3/use-cooperative-pool";
-import {
-  Users,
-  TrendingUp,
-  LogOut,
-  DollarSign,
-  Info,
-  Loader2,
-  AlertTriangle,
-  CheckCircle2,
-  Clock,
-} from "lucide-react";
-import { formatEther } from "viem";
-import { useAccount } from "wagmi";
+
 
 export function MyPoolsV3() {
   const { address } = useAccount();

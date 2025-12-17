@@ -1,6 +1,10 @@
 "use client";
 
+import { X } from "lucide-react";
 import * as React from "react";
+
+import { TransactionStatus, TransactionSteps } from "@/components/common";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -8,11 +12,9 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Button, buttonVariants } from "@/components/ui/button";
-import { TransactionStatus, TransactionSteps } from "@/components/common";
-import { useTransaction } from "../context/transaction-context";
-import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+
+import { useTransaction } from "../context/transaction-context";
 
 /**
  * Transaction Modal
@@ -44,7 +46,7 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
     }
   };
 
-  if (!activeTransaction) return null;
+  if (!activeTransaction) {return null;}
 
   type StepStatus = "pending" | "active" | "complete" | "error";
 

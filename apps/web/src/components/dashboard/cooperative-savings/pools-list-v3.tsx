@@ -5,18 +5,6 @@
 
 "use client";
 
-import { useState, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  useCooperativePool,
-  usePoolInfo,
-  PoolStatus,
-  type PoolInfo,
-} from "@/hooks/web3/use-cooperative-pool";
 import {
   Users,
   Search,
@@ -27,7 +15,21 @@ import {
   ArrowRight,
   Clock,
 } from "lucide-react";
+import { useState, useMemo } from "react";
 import { formatEther } from "viem";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  useCooperativePool,
+  usePoolInfo,
+  PoolStatus,
+  type PoolInfo,
+} from "@/hooks/web3/use-cooperative-pool";
+
 
 interface PoolsListV3Props {
   onJoinPool?: (poolId: number) => void;
@@ -122,14 +124,14 @@ function PoolCard({ poolId, searchQuery, filter, onJoinPool }: PoolCardProps) {
   const { poolInfo, isLoading } = usePoolInfo(poolId);
 
   const matchesSearch = useMemo(() => {
-    if (!searchQuery) return true;
-    if (!poolInfo) return false;
+    if (!searchQuery) {return true;}
+    if (!poolInfo) {return false;}
     return poolInfo.name.toLowerCase().includes(searchQuery.toLowerCase());
   }, [poolInfo, searchQuery]);
 
   const matchesFilter = useMemo(() => {
-    if (filter === "all") return true;
-    if (!poolInfo) return false;
+    if (filter === "all") {return true;}
+    if (!poolInfo) {return false;}
 
     switch (filter) {
       case "accepting":
@@ -322,9 +324,9 @@ function getTimeAgo(timestamp: number): string {
   const now = Date.now() / 1000;
   const diff = now - timestamp;
 
-  if (diff < 60) return "menos de 1 min";
-  if (diff < 3600) return `${Math.floor(diff / 60)} min`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} h`;
-  if (diff < 2592000) return `${Math.floor(diff / 86400)} días`;
+  if (diff < 60) {return "menos de 1 min";}
+  if (diff < 3600) {return `${Math.floor(diff / 60)} min`;}
+  if (diff < 86400) {return `${Math.floor(diff / 3600)} h`;}
+  if (diff < 2592000) {return `${Math.floor(diff / 86400)} días`;}
   return `${Math.floor(diff / 2592000)} meses`;
 }

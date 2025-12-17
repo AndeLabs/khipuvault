@@ -7,14 +7,6 @@
 
 "use client";
 
-import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 import {
   ShieldCheck,
   Ticket,
@@ -23,6 +15,15 @@ import {
   Zap,
   HelpCircle,
 } from "lucide-react";
+import * as React from "react";
+
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export function HowItWorks() {
   return (

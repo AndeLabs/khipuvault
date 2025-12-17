@@ -8,12 +8,6 @@
 
 "use client";
 
-import * as React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Trophy,
   Ticket,
@@ -25,12 +19,20 @@ import {
   PlusCircle,
   Loader2,
 } from "lucide-react";
+import * as React from "react";
 import { formatEther } from "viem";
-import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Skeleton } from "@/components/ui/skeleton";
 import {
   getTimeRemaining,
   getRoundStatus,
 } from "@/hooks/web3/use-lottery-pool";
+
+import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
 interface ActiveLotteryHeroProps {
   roundInfo: LotteryRound | null | undefined;
@@ -62,7 +64,7 @@ export function ActiveLotteryHero({
 
   // Update countdown every second
   React.useEffect(() => {
-    if (!roundInfo) return;
+    if (!roundInfo) {return;}
 
     const interval = setInterval(() => {
       setTimeRemaining(getTimeRemaining(roundInfo.endTime));

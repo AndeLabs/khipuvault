@@ -12,7 +12,13 @@
 
 "use client";
 
+import { Loader2, Users, Bitcoin, Shield, AlertTriangle } from "lucide-react";
 import * as React from "react";
+import { parseEther } from "viem";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 import {
   Dialog,
   DialogContent,
@@ -21,16 +27,12 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2, Users, Bitcoin, Shield, AlertTriangle } from "lucide-react";
-import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
 import { useToast } from "@/hooks/use-toast";
-import { parseEther } from "viem";
+import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
+
 
 interface CreatePoolModalV3Props {
   open: boolean;
@@ -94,7 +96,7 @@ export function CreatePoolModalV3({
 
   // Handle create
   const handleCreate = async () => {
-    if (!validate()) return;
+    if (!validate()) {return;}
 
     try {
       await createPool(

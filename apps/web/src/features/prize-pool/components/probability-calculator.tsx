@@ -7,7 +7,11 @@
 
 "use client";
 
+import { Calculator, TrendingUp, DollarSign, Percent } from "lucide-react";
 import * as React from "react";
+import { formatEther } from "viem";
+
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -18,9 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Badge } from "@/components/ui/badge";
-import { Calculator, TrendingUp, DollarSign, Percent } from "lucide-react";
-import { formatEther } from "viem";
+
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
 interface ProbabilityCalculatorProps {

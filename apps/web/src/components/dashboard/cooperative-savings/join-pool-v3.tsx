@@ -5,24 +5,6 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
-import {
-  useCooperativePool,
-  usePoolInfo,
-  PoolStatus,
-} from "@/hooks/web3/use-cooperative-pool";
 import {
   Users,
   TrendingUp,
@@ -32,8 +14,28 @@ import {
   CheckCircle2,
   ArrowLeft,
 } from "lucide-react";
+import { useState, useEffect } from "react";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useBalance } from "wagmi";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  useCooperativePool,
+  usePoolInfo,
+  PoolStatus,
+} from "@/hooks/web3/use-cooperative-pool";
+
 
 interface JoinPoolV3Props {
   poolId: number;
@@ -100,13 +102,13 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateAmount()) return;
+    if (!validateAmount()) {return;}
 
     await joinPool(poolId, btcAmount);
   };
 
   const handleSetMax = () => {
-    if (!btcBalance || !poolInfo) return;
+    if (!btcBalance || !poolInfo) {return;}
 
     const maxAllowed = poolInfo.maxContribution;
     const userBalance = btcBalance.value;
@@ -374,7 +376,7 @@ export function JoinPoolV3({ poolId, onBack, onSuccess }: JoinPoolV3Props) {
                   variant="outline"
                   size="sm"
                   onClick={() => {
-                    if (!btcBalance || !poolInfo) return;
+                    if (!btcBalance || !poolInfo) {return;}
                     const maxAllowed = poolInfo.maxContribution;
                     const userBalance = btcBalance.value;
                     const gasReserve = parseEther("0.0001");

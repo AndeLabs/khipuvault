@@ -1,5 +1,7 @@
 "use client";
 
+import { useAccount } from "wagmi";
+
 import {
   Card,
   CardContent,
@@ -7,7 +9,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { useAccount } from "wagmi";
 import { useUserLotteryStats, formatBTC } from "@/hooks/web3/use-lottery-pool";
 
 export function YourStats() {
@@ -42,7 +43,7 @@ export function YourStats() {
           </CardDescription>
         </CardHeader>
         <CardContent className="py-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
         </CardContent>
       </Card>
     );

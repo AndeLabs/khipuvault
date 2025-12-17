@@ -8,12 +8,14 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
 import { Settings, Loader2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAccount } from "wagmi";
+
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -22,7 +24,8 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import {
   useCooperativePools,
   useMemberInfo,
@@ -32,8 +35,7 @@ import {
   useClaimYield,
   formatBTC,
 } from "@/hooks/web3/use-cooperative-pools";
-import { useAccount } from "wagmi";
-import { useToast } from "@/hooks/use-toast";
+
 
 export function MyPools() {
   const { address } = useAccount();
@@ -43,7 +45,7 @@ export function MyPools() {
 
   // Filter pools where user is a member
   useEffect(() => {
-    if (!address || !pools) return;
+    if (!address || !pools) {return;}
 
     const fetchUserPools = async () => {
       const memberPools = [];

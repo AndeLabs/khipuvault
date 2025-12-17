@@ -9,7 +9,10 @@
 
 "use client";
 
+import { Loader2, AlertTriangle, Bitcoin, TrendingUp } from "lucide-react";
 import * as React from "react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,21 +23,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, AlertTriangle, Bitcoin, TrendingUp } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 import {
   useCooperativePool,
   formatBTCCompact,
   formatMUSD,
   calculateNetYield,
-} from "@/hooks/web3/use-cooperative-pool";
-import {
+
   useMemberInfo,
   useMemberYield,
-  usePoolInfo,
-} from "@/hooks/web3/use-cooperative-pool";
-import { useToast } from "@/hooks/use-toast";
+  usePoolInfo} from "@/hooks/web3/use-cooperative-pool";
 
 interface LeavePoolDialogProps {
   poolId: number | null;
@@ -58,7 +57,7 @@ export function LeavePoolDialog({
 
   // Handle leave
   const handleLeave = async () => {
-    if (!poolId) return;
+    if (!poolId) {return;}
 
     try {
       await leavePool(poolId);
@@ -96,7 +95,7 @@ export function LeavePoolDialog({
 
   const isProcessing = state === "executing" || state === "processing";
 
-  if (!poolId || !memberInfo) return null;
+  if (!poolId || !memberInfo) {return null;}
 
   const grossYield = pendingYield;
   const netYield = calculateNetYield(grossYield, performanceFee);

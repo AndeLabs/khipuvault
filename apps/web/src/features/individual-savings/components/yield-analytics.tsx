@@ -1,6 +1,10 @@
 "use client";
 
+import { TrendingUp, Calculator, BarChart3, Info } from "lucide-react";
 import * as React from "react";
+
+import { AmountDisplay } from "@/components/common";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
@@ -8,11 +12,8 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AmountDisplay } from "@/components/common";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Select,
   SelectContent,
@@ -20,14 +21,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TrendingUp, Calculator, BarChart3, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { cn } from "@/lib/utils";
 
 interface YieldAnalyticsProps {
   currentAPR?: number;

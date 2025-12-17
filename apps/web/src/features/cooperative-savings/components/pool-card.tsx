@@ -1,6 +1,12 @@
 "use client";
 
+import { Users, Calendar, TrendingUp, Clock } from "lucide-react";
 import * as React from "react";
+
+import { AmountDisplay, PercentageDisplay } from "@/components/common";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
@@ -9,11 +15,6 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { AmountDisplay, PercentageDisplay } from "@/components/common";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Users, Calendar, TrendingUp, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface PoolCardProps {

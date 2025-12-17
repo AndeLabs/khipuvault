@@ -1,9 +1,14 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { ArrowDown, Info, TrendingUp, Gift } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { formatUnits, isAddress } from "viem";
 import * as z from "zod";
+
+import { AmountDisplay } from "@/components/common";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardHeader,
@@ -12,25 +17,21 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { AmountDisplay } from "@/components/common";
-import { useTransactionExecute } from "@/features/transactions";
-import { ArrowDown, Info, TrendingUp, Gift } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatUnits, isAddress } from "viem";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { useTransactionExecute } from "@/features/transactions";
+import { cn } from "@/lib/utils";
 
 const depositSchema = z.object({
   amount: z
@@ -92,7 +93,7 @@ export function DepositCard({
   // Format balance for display
   const formattedBalance = React.useMemo(() => {
     try {
-      if (!balance || balance === "0") return "0.00";
+      if (!balance || balance === "0") {return "0.00";}
       const balanceBigInt =
         typeof balance === "bigint" ? balance : BigInt(balance);
       return Number(formatUnits(balanceBigInt, 18)).toFixed(2);

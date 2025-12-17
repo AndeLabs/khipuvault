@@ -1,8 +1,9 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
 import { CheckCircle, Clock, Loader2, ExternalLink } from "lucide-react";
 import Link from "next/link";
+
+import { Card, CardContent } from "@/components/ui/card";
 
 interface TransactionStatusProps {
   hash?: string;
@@ -17,7 +18,7 @@ export function TransactionStatus({
   isSuccess,
   type,
 }: TransactionStatusProps) {
-  if (!hash) return null;
+  if (!hash) {return null;}
 
   const explorerUrl = `https://explorer.test.mezo.org/tx/${hash}`;
 

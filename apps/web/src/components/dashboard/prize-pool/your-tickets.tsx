@@ -1,17 +1,20 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
-import { BuyTicketsModal } from "./buy-tickets-modal";
 import { useAccount } from "wagmi";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
 import {
   useCurrentRound,
   useUserTickets,
   useClaimPrize,
   useWithdrawCapital,
 } from "@/hooks/web3/use-lottery-pool";
-import { useToast } from "@/hooks/use-toast";
+
+import { BuyTicketsModal } from "./buy-tickets-modal";
+
 
 export function YourTickets() {
   const { address } = useAccount();

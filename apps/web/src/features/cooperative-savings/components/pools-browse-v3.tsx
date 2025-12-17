@@ -11,19 +11,6 @@
 
 "use client";
 
-import * as React from "react";
-import { PoolCardV3 } from "./pool-card-v3";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Search,
   Filter,
@@ -33,6 +20,19 @@ import {
   TrendingUp,
   Sparkles,
 } from "lucide-react";
+import * as React from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { SkeletonCard } from "@/components/ui/skeleton";
 import {
   useAllCooperativePools,
@@ -43,6 +43,8 @@ import {
   type FilterStatus,
 } from "@/hooks/web3/use-all-cooperative-pools";
 import { formatBTCCompact } from "@/hooks/web3/use-cooperative-pool";
+
+import { PoolCardV3 } from "./pool-card-v3";
 
 interface PoolsBrowseV3Props {
   onJoinPool?: (poolId: number) => void;

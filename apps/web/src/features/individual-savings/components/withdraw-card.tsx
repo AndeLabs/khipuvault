@@ -1,21 +1,6 @@
 "use client";
 
-import * as React from "react";
-import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { AmountDisplay } from "@/components/common";
-import { useTransactionExecute } from "@/features/transactions";
 import {
   ArrowUp,
   AlertCircle,
@@ -23,15 +8,13 @@ import {
   TrendingDown,
   AlertTriangle,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import * as React from "react";
+import { useForm } from "react-hook-form";
 import { formatUnits } from "viem";
+import * as z from "zod";
+
+import { AmountDisplay } from "@/components/common";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -42,6 +25,24 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useTransactionExecute } from "@/features/transactions";
+import { cn } from "@/lib/utils";
 
 const withdrawSchema = z.object({
   amount: z
@@ -90,7 +91,7 @@ export function WithdrawCard({
   // Format balance for display
   const formattedBalance = React.useMemo(() => {
     try {
-      if (!availableBalance || availableBalance === "0") return "0.00";
+      if (!availableBalance || availableBalance === "0") {return "0.00";}
       const balanceBigInt =
         typeof availableBalance === "bigint"
           ? availableBalance

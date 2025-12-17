@@ -1,6 +1,9 @@
 "use client";
 
+import { TrendingUp, Wallet, Users, Award, DollarSign } from "lucide-react";
 import * as React from "react";
+
+import { AmountDisplay, PercentageDisplay } from "@/components/common";
 import {
   Card,
   CardHeader,
@@ -10,8 +13,6 @@ import {
   StatValue,
   StatLabel,
 } from "@/components/ui/card";
-import { AmountDisplay, PercentageDisplay } from "@/components/common";
-import { TrendingUp, Wallet, Users, Award, DollarSign } from "lucide-react";
 
 interface PortfolioOverviewProps {
   totalValue?: string;

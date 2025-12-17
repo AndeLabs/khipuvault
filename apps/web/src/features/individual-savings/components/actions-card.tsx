@@ -1,16 +1,5 @@
 "use client";
 
-import * as React from "react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useTransactionExecute } from "@/features/transactions";
 import {
   Zap,
   Gift,
@@ -19,13 +8,25 @@ import {
   Info,
   ArrowRight,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import * as React from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useTransactionExecute } from "@/features/transactions";
+import { cn } from "@/lib/utils";
 
 interface ActionsCardProps {
   canClaimYields?: boolean;
@@ -56,12 +57,12 @@ export function ActionsCard({
   });
 
   const handleClaimYields = async () => {
-    if (!onClaimYields) return;
+    if (!onClaimYields) {return;}
     await executeClaimYields(onClaimYields);
   };
 
   const handleToggleAutoCompound = async () => {
-    if (!onToggleAutoCompound) return;
+    if (!onToggleAutoCompound) {return;}
     await executeAutoCompound(onToggleAutoCompound);
   };
 

@@ -1,5 +1,10 @@
 "use client";
 
+import { useState } from "react";
+import { useAccount } from "wagmi";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,9 +20,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useAccount } from "wagmi";
 import {
   useAllRounds,
   useUserTickets,
@@ -25,7 +27,7 @@ import {
   formatAddress,
   getRoundStatus,
 } from "@/hooks/web3/use-lottery-pool";
-import { useState } from "react";
+
 
 export function DrawHistory() {
   const { address } = useAccount();
@@ -42,7 +44,7 @@ export function DrawHistory() {
           </CardDescription>
         </CardHeader>
         <CardContent className="py-8 text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto" />
         </CardContent>
       </Card>
     );

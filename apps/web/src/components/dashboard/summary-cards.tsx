@@ -1,8 +1,9 @@
 "use client";
 
+import { useAccount } from "wagmi";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useAccount } from "wagmi";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import {
   useMusdApproval,
