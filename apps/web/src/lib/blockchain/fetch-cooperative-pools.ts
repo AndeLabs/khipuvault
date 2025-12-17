@@ -8,8 +8,10 @@
  * - Easy integration with TanStack Query
  */
 
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
-import { COOPERATIVE_POOL_ABI } from "@/lib/web3/cooperative-pool-abi";
+import {
+  MEZO_TESTNET_ADDRESSES,
+  COOPERATIVE_POOL_ABI,
+} from "@/lib/web3/contracts-v3";
 
 import type { PublicClient } from "viem";
 
@@ -47,7 +49,7 @@ export interface MemberInfo {
   active: boolean;
 }
 
-const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePool as `0x${string}`;
+const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePoolV3;
 
 /**
  * Fetch all cooperative pools from contract

@@ -37,7 +37,6 @@ import {
   PoolStatus,
 } from "@/hooks/web3/use-cooperative-pool";
 
-
 export function MyPoolsV3() {
   const {
     poolCounter,

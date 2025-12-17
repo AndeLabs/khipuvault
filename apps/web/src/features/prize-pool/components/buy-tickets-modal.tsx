@@ -94,7 +94,9 @@ export function BuyTicketsModal({
 
   // Handle purchase
   const handlePurchase = async () => {
-    if (!roundInfo || !canPurchase) {return;}
+    if (!roundInfo || !canPurchase) {
+      return;
+    }
 
     try {
       setStep("confirming");
@@ -139,7 +141,9 @@ export function BuyTicketsModal({
     onOpenChange(false);
   };
 
-  if (!roundInfo) {return null;}
+  if (!roundInfo) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>

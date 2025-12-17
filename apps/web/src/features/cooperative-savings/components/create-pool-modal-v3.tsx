@@ -32,7 +32,6 @@ import { Slider } from "@/components/ui/slider";
 import { useToast } from "@/hooks/use-toast";
 import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
 
-
 interface CreatePoolModalV3Props {
   open: boolean;
   onClose: () => void;
@@ -95,7 +94,9 @@ export function CreatePoolModalV3({
 
   // Handle create
   const handleCreate = async () => {
-    if (!validate()) {return;}
+    if (!validate()) {
+      return;
+    }
 
     try {
       await createPool(

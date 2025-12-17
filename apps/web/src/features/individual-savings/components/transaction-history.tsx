@@ -125,7 +125,9 @@ export function TransactionHistory({
 
   // Filter transactions
   const filteredTransactions = React.useMemo(() => {
-    if (filter === "all") {return transactions;}
+    if (filter === "all") {
+      return transactions;
+    }
     return transactions.filter((tx) => tx.type === filter);
   }, [transactions, filter]);
 
@@ -158,10 +160,18 @@ export function TransactionHistory({
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) {return "Just now";}
-    if (diffMins < 60) {return `${diffMins}m ago`;}
-    if (diffHours < 24) {return `${diffHours}h ago`;}
-    if (diffDays < 7) {return `${diffDays}d ago`;}
+    if (diffMins < 1) {
+      return "Just now";
+    }
+    if (diffMins < 60) {
+      return `${diffMins}m ago`;
+    }
+    if (diffHours < 24) {
+      return `${diffHours}h ago`;
+    }
+    if (diffDays < 7) {
+      return `${diffDays}d ago`;
+    }
     return date.toLocaleDateString();
   };
 
@@ -318,8 +328,12 @@ export function TransactionHistory({
                           <TableCell>
                             <Badge
                               variant={(() => {
-                                if (tx.status === "success") {return "success";}
-                                if (tx.status === "pending") {return "secondary";}
+                                if (tx.status === "success") {
+                                  return "success";
+                                }
+                                if (tx.status === "pending") {
+                                  return "secondary";
+                                }
                                 return "error";
                               })()}
                               className="text-xs"
@@ -376,8 +390,12 @@ export function TransactionHistory({
                         </div>
                         <Badge
                           variant={(() => {
-                            if (tx.status === "success") {return "success";}
-                            if (tx.status === "pending") {return "secondary";}
+                            if (tx.status === "success") {
+                              return "success";
+                            }
+                            if (tx.status === "pending") {
+                              return "secondary";
+                            }
                             return "error";
                           })()}
                           className="text-xs"

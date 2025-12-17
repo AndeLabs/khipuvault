@@ -57,8 +57,12 @@ export function PoolStatistics({
   const formatValue = (value: bigint) => {
     try {
       const num = Number(formatUnits(value, 18));
-      if (num >= 1_000_000) {return `${(num / 1_000_000).toFixed(2)}M`;}
-      if (num >= 1_000) {return `${(num / 1_000).toFixed(2)}K`;}
+      if (num >= 1_000_000) {
+        return `${(num / 1_000_000).toFixed(2)}M`;
+      }
+      if (num >= 1_000) {
+        return `${(num / 1_000).toFixed(2)}K`;
+      }
       return num.toFixed(2);
     } catch {
       return "0.00";
@@ -72,7 +76,9 @@ export function PoolStatistics({
 
   // Calculate pool health score (0-100)
   const healthScore = React.useMemo(() => {
-    if (emergencyMode) {return 0;}
+    if (emergencyMode) {
+      return 0;
+    }
     const depositsScore =
       Math.min(Number(formatUnits(totalDeposits, 18)) / 100000, 1) * 40;
     const aprScore = Math.min(poolAPR / 10, 1) * 30;
@@ -81,15 +87,23 @@ export function PoolStatistics({
   }, [totalDeposits, poolAPR, activeDepositors, emergencyMode]);
 
   const getHealthColor = () => {
-    if (healthScore >= 70) {return "text-success";}
-    if (healthScore >= 40) {return "text-warning";}
+    if (healthScore >= 70) {
+      return "text-success";
+    }
+    if (healthScore >= 40) {
+      return "text-warning";
+    }
     return "text-error";
   };
   const healthColor = getHealthColor();
 
   const getHealthLabel = () => {
-    if (healthScore >= 70) {return "Excellent";}
-    if (healthScore >= 40) {return "Good";}
+    if (healthScore >= 70) {
+      return "Excellent";
+    }
+    if (healthScore >= 40) {
+      return "Good";
+    }
     return "Fair";
   };
   const healthLabel = getHealthLabel();

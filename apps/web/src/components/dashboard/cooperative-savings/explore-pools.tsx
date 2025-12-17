@@ -31,7 +31,6 @@ import {
   useJoinPool,
 } from "@/hooks/web3/use-cooperative-pools";
 
-
 export function ExplorePools() {
   const { pools, isLoading } = useCooperativePools();
   const { address } = useAccount();

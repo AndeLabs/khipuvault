@@ -18,7 +18,9 @@ export function TransactionStatus({
   isSuccess,
   type,
 }: TransactionStatusProps) {
-  if (!hash) {return null;}
+  if (!hash) {
+    return null;
+  }
 
   const explorerUrl = `https://explorer.test.mezo.org/tx/${hash}`;
 
@@ -38,7 +40,9 @@ export function TransactionStatus({
                 return <CheckCircle className="h-5 w-5 text-green-500" />;
               }
               if (isConfirming) {
-                return <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />;
+                return (
+                  <Loader2 className="h-5 w-5 text-blue-500 animate-spin" />
+                );
               }
               return <Clock className="h-5 w-5 text-yellow-500" />;
             })()}

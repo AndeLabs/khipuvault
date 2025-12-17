@@ -19,7 +19,9 @@ export function MusdBalanceTester() {
   const publicClient = useMemo(() => getPublicClient(), []);
 
   const fetchDirectBalance = async () => {
-    if (!address || !publicClient) {return;}
+    if (!address || !publicClient) {
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -49,7 +51,9 @@ export function MusdBalanceTester() {
     }
   }, [address, isConnected]);
 
-  if (!isConnected) {return null;}
+  if (!isConnected) {
+    return null;
+  }
 
   return (
     <Card className="bg-card border border-green-500/50">

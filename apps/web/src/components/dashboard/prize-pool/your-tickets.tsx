@@ -15,7 +15,6 @@ import {
 
 import { BuyTicketsModal } from "./buy-tickets-modal";
 
-
 export function YourTickets() {
   const { address } = useAccount();
   const { currentRoundId, roundInfo } = useCurrentRound();

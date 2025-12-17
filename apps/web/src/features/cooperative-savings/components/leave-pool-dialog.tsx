@@ -30,10 +30,10 @@ import {
   formatBTCCompact,
   formatMUSD,
   calculateNetYield,
-
   useMemberInfo,
   useMemberYield,
-  usePoolInfo} from "@/hooks/web3/use-cooperative-pool";
+  usePoolInfo,
+} from "@/hooks/web3/use-cooperative-pool";
 
 interface LeavePoolDialogProps {
   poolId: number | null;
@@ -57,7 +57,9 @@ export function LeavePoolDialog({
 
   // Handle leave
   const handleLeave = async () => {
-    if (!poolId) {return;}
+    if (!poolId) {
+      return;
+    }
 
     try {
       await leavePool(poolId);
@@ -95,7 +97,9 @@ export function LeavePoolDialog({
 
   const isProcessing = state === "executing" || state === "processing";
 
-  if (!poolId || !memberInfo) {return null;}
+  if (!poolId || !memberInfo) {
+    return null;
+  }
 
   const grossYield = pendingYield;
   const netYield = calculateNetYield(grossYield, performanceFee);

@@ -79,6 +79,19 @@ const CLOSE_POOL_ABI = [
   },
 ] as const;
 
+const WITHDRAW_PARTIAL_ABI = [
+  {
+    type: "function",
+    name: "withdrawPartial",
+    inputs: [
+      { name: "poolId", type: "uint256" },
+      { name: "withdrawAmount", type: "uint256" },
+    ],
+    outputs: [],
+    stateMutability: "nonpayable",
+  },
+] as const;
+
 // ============================================================================
 // BASE MUTATION HOOK
 // ============================================================================
@@ -383,6 +396,71 @@ export function useClosePool() {
 
   return {
     closePool,
+    ...mutation,
+  };
+}
+
+// ============================================================================
+// WITHDRAW PARTIAL
+// ============================================================================
+
+/**
+ * Withdraw a partial amount from a cooperative pool
+ *
+ * @description
+ * Allows members to withdraw a portion of their contribution while remaining
+ * in the pool. The remaining contribution must be >= pool's minContribution.
+ *
+ * @example
+ * ```tsx
+ * const { withdrawPartial, state, error } = useWithdrawPartial();
+ *
+ * // Withdraw 0.5 BTC from pool 1
+ * await withdrawPartial(1, "0.5");
+ * ```
+ */
+export function useWithdrawPartial() {
+  const mutation = usePoolMutation();
+
+  const withdrawPartial = useCallback(
+    async (poolId: number, btcAmount: string) => {
+      if (!mutation.address) {
+        mutation.setError("Please connect your wallet");
+        mutation.setState("error");
+        return;
+      }
+
+      try {
+        mutation.setState("idle");
+        mutation.setError("");
+        mutation.reset();
+
+        const amount = parseEther(btcAmount);
+
+        if (amount <= BigInt(0)) {
+          mutation.setError("Amount must be greater than 0");
+          mutation.setState("error");
+          return;
+        }
+
+        mutation.setState("executing");
+
+        mutation.write({
+          address: poolAddress,
+          abi: WITHDRAW_PARTIAL_ABI,
+          functionName: "withdrawPartial",
+          args: [BigInt(poolId), amount],
+        });
+      } catch (err) {
+        mutation.setState("error");
+        mutation.setError(err instanceof Error ? err.message : "Unknown error");
+      }
+    },
+    [mutation],
+  );
+
+  return {
+    withdrawPartial,
     ...mutation,
   };
 }

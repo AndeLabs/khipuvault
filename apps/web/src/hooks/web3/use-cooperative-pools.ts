@@ -27,10 +27,12 @@ import {
   type MemberInfo,
 } from "@/lib/blockchain/fetch-cooperative-pools";
 import { normalizeBigInt } from "@/lib/query-utils";
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
-import { COOPERATIVE_POOL_ABI } from "@/lib/web3/cooperative-pool-abi";
+import {
+  MEZO_TESTNET_ADDRESSES,
+  COOPERATIVE_POOL_ABI,
+} from "@/lib/web3/contracts-v3";
 
-const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePool as `0x${string}`;
+const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePoolV3;
 
 /**
  * Hook to get all pools using TanStack Query
@@ -59,7 +61,11 @@ export function useCooperativePools() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["cooperative-pool", "all-pools", normalizeBigInt(poolCounter)],
+    queryKey: [
+      "cooperative-pool",
+      "all-pools",
+      normalizeBigInt(poolCounter as bigint | undefined),
+    ],
     queryFn: () => {
       if (!publicClient) {
         return Promise.resolve([]);
@@ -276,13 +282,14 @@ export function useJoinPool() {
   const joinPool = async (poolId: number, btcAmount: string) => {
     const value = parseEther(btcAmount);
 
+    // Note: joinPool is payable - BTC is native on Mezo
     writeContract({
       address: poolAddress,
       abi: COOPERATIVE_POOL_ABI,
       functionName: "joinPool",
       args: [BigInt(poolId)],
-      value, // BTC is native on Mezo
-    });
+      value,
+    } as unknown as Parameters<typeof writeContract>[0]);
   };
 
   return {
@@ -432,7 +439,7 @@ export function useUserCooperativeTotal(userAddress?: `0x${string}`) {
       "cooperative-pool",
       "user-total",
       userAddress ?? "none",
-      normalizeBigInt(poolCounter),
+      normalizeBigInt(poolCounter as bigint | undefined),
     ],
     queryFn: async () => {
       if (!publicClient || !userAddress || !poolCounter) {

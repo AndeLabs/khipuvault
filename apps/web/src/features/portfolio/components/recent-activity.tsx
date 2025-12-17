@@ -120,10 +120,14 @@ export function RecentActivity({
                   className={cn(
                     "flex items-center gap-4 p-4 rounded-lg border transition-colors",
                     (() => {
-                      if (activity.status === "success") {return "border-border bg-surface-elevated";}
-                      if (activity.status === "error") {return "border-error/30 bg-error/5";}
+                      if (activity.status === "success") {
+                        return "border-border bg-surface-elevated";
+                      }
+                      if (activity.status === "error") {
+                        return "border-error/30 bg-error/5";
+                      }
                       return "border-border bg-surface-elevated";
-                    })()
+                    })(),
                   )}
                 >
                   {/* Icon */}
@@ -173,14 +177,17 @@ export function RecentActivity({
                         size="sm"
                         className={cn(
                           (() => {
-                            if (activity.type === "deposit" || activity.type === "claim") {
+                            if (
+                              activity.type === "deposit" ||
+                              activity.type === "claim"
+                            ) {
                               return "text-success";
                             }
                             if (activity.type === "withdraw") {
                               return "text-accent";
                             }
                             return "";
-                          })()
+                          })(),
                         )}
                       />
                     )}

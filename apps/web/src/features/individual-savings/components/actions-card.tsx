@@ -57,12 +57,16 @@ export function ActionsCard({
   });
 
   const handleClaimYields = async () => {
-    if (!onClaimYields) {return;}
+    if (!onClaimYields) {
+      return;
+    }
     await executeClaimYields(onClaimYields);
   };
 
   const handleToggleAutoCompound = async () => {
-    if (!onToggleAutoCompound) {return;}
+    if (!onToggleAutoCompound) {
+      return;
+    }
     await executeAutoCompound(onToggleAutoCompound);
   };
 

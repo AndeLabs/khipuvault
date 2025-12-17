@@ -51,9 +51,15 @@ export function BuyTicketsModal({ children }: { children: React.ReactNode }) {
 
   // Calculate discount based on ticket count
   const getDiscountRate = () => {
-    if (ticketCount >= 20) {return 0.15;}
-    if (ticketCount >= 10) {return 0.1;}
-    if (ticketCount >= 5) {return 0.05;}
+    if (ticketCount >= 20) {
+      return 0.15;
+    }
+    if (ticketCount >= 10) {
+      return 0.1;
+    }
+    if (ticketCount >= 5) {
+      return 0.05;
+    }
     return 0;
   };
   const discountRate = getDiscountRate();

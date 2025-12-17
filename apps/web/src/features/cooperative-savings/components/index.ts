@@ -10,6 +10,8 @@ export { PoolDetailsModal } from "./pool-details-modal";
 export { CreatePoolModalV3 } from "./create-pool-modal-v3";
 export { JoinPoolModalV3 } from "./join-pool-modal-v3";
 export { LeavePoolDialog } from "./leave-pool-dialog";
+export { WithdrawPartialModal } from "./withdraw-partial-modal";
+export { ClosePoolDialog } from "./close-pool-dialog";
 
 // Legacy Components (keep for backward compatibility)
 export { PoolCard } from "./pool-card";

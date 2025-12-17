@@ -15,7 +15,6 @@ import {
 
 import { YourTickets } from "./your-tickets";
 
-
 interface CountdownTimerProps {
   endTime: bigint;
 }
@@ -51,7 +50,9 @@ const CountdownTimer = ({ endTime }: CountdownTimerProps) => {
   });
 
   const timerComponents = Object.entries(timeLeft).map(([interval, value]) => {
-    if (value === undefined) {return null;}
+    if (value === undefined) {
+      return null;
+    }
     return (
       <span key={interval} className="font-mono text-3xl font-bold">
         {String(value).padStart(2, "0")}

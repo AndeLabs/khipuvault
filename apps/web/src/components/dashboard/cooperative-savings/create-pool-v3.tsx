@@ -29,7 +29,6 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
 
-
 export function CreatePoolV3() {
   const { createPool, state, error, txHash, isProcessing } =
     useCooperativePool();
@@ -88,7 +87,9 @@ export function CreatePoolV3() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) {return;}
+    if (!validateForm()) {
+      return;
+    }
 
     await createPool(
       formData.name,

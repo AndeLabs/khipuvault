@@ -36,7 +36,6 @@ import {
   formatBTC,
 } from "@/hooks/web3/use-cooperative-pools";
 
-
 export function MyPools() {
   const { address } = useAccount();
   const { pools, isLoading } = useCooperativePools();
@@ -44,7 +43,9 @@ export function MyPools() {
 
   // Filter pools where user is a member
   useEffect(() => {
-    if (!address || !pools) {return;}
+    if (!address || !pools) {
+      return;
+    }
 
     const fetchUserPools = async () => {
       const memberPools = [];

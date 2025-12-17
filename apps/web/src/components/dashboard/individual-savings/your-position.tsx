@@ -10,12 +10,18 @@ import { formatMUSD } from "@/hooks/web3/use-musd-approval";
 
 // Helper function to format time since timestamp
 function formatTimeSince(timestamp: bigint | undefined): string {
-  if (!timestamp) {return "N/A";}
+  if (!timestamp) {
+    return "N/A";
+  }
   const now = Date.now() / 1000;
   const diff = now - Number(timestamp);
   const days = Math.floor(diff / 86400);
-  if (days === 0) {return "Hoy";}
-  if (days === 1) {return "1 día";}
+  if (days === 0) {
+    return "Hoy";
+  }
+  if (days === 1) {
+    return "1 día";
+  }
   return `${days} días`;
 }
 
