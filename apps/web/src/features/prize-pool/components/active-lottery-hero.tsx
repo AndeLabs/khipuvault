@@ -126,8 +126,8 @@ export function ActiveLotteryHero({
             </div>
             <Badge
               variant={(() => {
-                if (roundInfo.status === 0) return "default";
-                if (roundInfo.status === 1) return "secondary";
+                if (roundInfo.status === 0) {return "default";}
+                if (roundInfo.status === 1) {return "secondary";}
                 return "outline";
               })()}
             >

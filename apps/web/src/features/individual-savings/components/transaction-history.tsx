@@ -318,8 +318,8 @@ export function TransactionHistory({
                           <TableCell>
                             <Badge
                               variant={(() => {
-                                if (tx.status === "success") return "success";
-                                if (tx.status === "pending") return "secondary";
+                                if (tx.status === "success") {return "success";}
+                                if (tx.status === "pending") {return "secondary";}
                                 return "error";
                               })()}
                               className="text-xs"
@@ -376,8 +376,8 @@ export function TransactionHistory({
                         </div>
                         <Badge
                           variant={(() => {
-                            if (tx.status === "success") return "success";
-                            if (tx.status === "pending") return "secondary";
+                            if (tx.status === "success") {return "success";}
+                            if (tx.status === "pending") {return "secondary";}
                             return "error";
                           })()}
                           className="text-xs"

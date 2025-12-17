@@ -54,7 +54,7 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
     {
       label: "Initialize Transaction",
       status: (() => {
-        if (activeTransaction.status === "idle") return "active";
+        if (activeTransaction.status === "idle") {return "active";}
         if (activeTransaction.status === "error" || activeTransaction.status === "rejected") {
           return "error";
         }
@@ -64,7 +64,7 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
     {
       label: "Sign with Wallet",
       status: (() => {
-        if (activeTransaction.status === "signing") return "active";
+        if (activeTransaction.status === "signing") {return "active";}
         if (activeTransaction.status === "error" || activeTransaction.status === "rejected") {
           return "error";
         }
@@ -77,17 +77,17 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
     {
       label: "Confirm on Blockchain",
       status: (() => {
-        if (activeTransaction.status === "confirming") return "active";
-        if (activeTransaction.status === "error") return "error";
-        if (activeTransaction.status === "success") return "complete";
+        if (activeTransaction.status === "confirming") {return "active";}
+        if (activeTransaction.status === "error") {return "error";}
+        if (activeTransaction.status === "success") {return "complete";}
         return "pending";
       })(),
     },
     {
       label: "Transaction Complete",
       status: (() => {
-        if (activeTransaction.status === "success") return "complete";
-        if (activeTransaction.status === "error") return "error";
+        if (activeTransaction.status === "success") {return "complete";}
+        if (activeTransaction.status === "error") {return "error";}
         return "pending";
       })(),
     },
