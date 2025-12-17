@@ -78,6 +78,7 @@ export const chainConfig: Record<number, Chain> = {
  * @returns Chain configuration or undefined
  */
 export function getChainConfig(chainId: number): Chain | undefined {
+  // eslint-disable-next-line security/detect-object-injection -- safe: chainId is number key
   return chainConfig[chainId];
 }
 
@@ -101,7 +102,9 @@ export function getExplorerAddressUrl(
   address: string,
 ): string | null {
   const chain = getChainConfig(chainId);
-  if (!chain?.blockExplorers?.default) return null;
+  if (!chain?.blockExplorers?.default) {
+    return null;
+  }
   return `${chain.blockExplorers.default.url}/address/${address}`;
 }
 
@@ -116,7 +119,9 @@ export function getExplorerTxUrl(
   txHash: string,
 ): string | null {
   const chain = getChainConfig(chainId);
-  if (!chain?.blockExplorers?.default) return null;
+  if (!chain?.blockExplorers?.default) {
+    return null;
+  }
   return `${chain.blockExplorers.default.url}/tx/${txHash}`;
 }
 

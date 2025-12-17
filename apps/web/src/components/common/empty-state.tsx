@@ -1,10 +1,11 @@
 "use client";
 
-import * as React from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
+import * as React from "react";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { cn } from "@/lib/utils";
 
 interface EmptyStateAction {
   label: string;
@@ -34,7 +35,7 @@ export function EmptyState({
   const renderAction = (action: EmptyStateAction, isPrimary: boolean) => {
     const buttonContent = (
       <Button
-        variant={action.variant || (isPrimary ? "default" : "outline")}
+        variant={action.variant ?? (isPrimary ? "default" : "outline")}
         onClick={action.onClick}
         className={cn(isPrimary && "min-w-[200px]")}
       >
@@ -79,7 +80,7 @@ export function EmptyState({
             {description}
           </p>
         </div>
-        {(primaryAction || secondaryAction) && (
+        {(primaryAction ?? secondaryAction) && (
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
             {primaryAction && renderAction(primaryAction, true)}
             {secondaryAction && renderAction(secondaryAction, false)}

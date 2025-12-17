@@ -1,6 +1,5 @@
 "use client";
 import {
-  Users,
   Wallet,
   Bell,
   Palette,
@@ -11,8 +10,9 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
+
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
+import { cn } from "@/lib/utils";
 
 const settingsNav = [
   { href: "/dashboard/settings", icon: User, label: "Perfil" },

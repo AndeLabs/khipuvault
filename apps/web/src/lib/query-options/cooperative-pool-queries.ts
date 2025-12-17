@@ -11,17 +11,17 @@
  */
 
 import { queryOptions } from "@tanstack/react-query";
-import { PublicClient } from "viem";
-import { normalizeBigInt } from "@/lib/query-utils";
+
 import {
   fetchCooperativePools,
   fetchPoolInfo,
   fetchMemberInfo,
   fetchPoolMembers,
   fetchMemberYield,
-  type PoolInfo,
-  type MemberInfo,
 } from "@/lib/blockchain/fetch-cooperative-pools";
+import { normalizeBigInt } from "@/lib/query-utils";
+
+import type { PublicClient } from "viem";
 
 /**
  * Query options for Cooperative Pool
@@ -51,7 +51,7 @@ export const cooperativePoolQueries = {
         if (!publicClient) {
           return [];
         }
-        return fetchCooperativePools(publicClient, Number(poolCounter || 0));
+        return fetchCooperativePools(publicClient, Number(poolCounter ?? 0));
       },
       enabled: !!publicClient && !!poolCounter && Number(poolCounter) > 0,
       staleTime: 30 * 1000, // 30 seconds
@@ -99,7 +99,7 @@ export const cooperativePoolQueries = {
         "cooperative-pool",
         "member-info",
         poolId,
-        memberAddress || "none",
+        memberAddress ?? "none",
       ],
       queryFn: async () => {
         if (!publicClient || !memberAddress) {
@@ -151,7 +151,7 @@ export const cooperativePoolQueries = {
         "cooperative-pool",
         "member-yield",
         poolId,
-        memberAddress || "none",
+        memberAddress ?? "none",
       ],
       queryFn: async () => {
         if (!publicClient || !memberAddress) {

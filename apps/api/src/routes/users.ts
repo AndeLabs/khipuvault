@@ -1,7 +1,8 @@
 import { Router, type Router as ExpressRouter } from "express";
 import { z } from "zod";
-import { validate } from "../middleware/validate";
+
 import { requireAuth } from "../middleware/auth";
+import { validate } from "../middleware/validate";
 import { UsersService } from "../services/users";
 
 const router: ExpressRouter = Router();
@@ -54,7 +55,9 @@ router.get(
   validate(addressSchema),
   async (req, res, next) => {
     try {
-      if (!verifyAddressOwnership(req, res, req.params.address)) return;
+      if (!verifyAddressOwnership(req, res, req.params.address)) {
+        return;
+      }
       const user = await usersService.getUserByAddress(req.params.address);
       res.json(user);
     } catch (error) {
@@ -70,7 +73,9 @@ router.get(
   validate(addressSchema),
   async (req, res, next) => {
     try {
-      if (!verifyAddressOwnership(req, res, req.params.address)) return;
+      if (!verifyAddressOwnership(req, res, req.params.address)) {
+        return;
+      }
       const portfolio = await usersService.getUserPortfolio(req.params.address);
       res.json(portfolio);
     } catch (error) {
@@ -86,7 +91,9 @@ router.get(
   validate(addressSchema.merge(querySchema)),
   async (req, res, next) => {
     try {
-      if (!verifyAddressOwnership(req, res, req.params.address)) return;
+      if (!verifyAddressOwnership(req, res, req.params.address)) {
+        return;
+      }
       const { limit = 50, offset = 0 } = req.query;
       const transactions = await usersService.getUserTransactions(
         req.params.address,
@@ -107,7 +114,9 @@ router.get(
   validate(addressSchema),
   async (req, res, next) => {
     try {
-      if (!verifyAddressOwnership(req, res, req.params.address)) return;
+      if (!verifyAddressOwnership(req, res, req.params.address)) {
+        return;
+      }
       const positions = await usersService.getUserPositions(req.params.address);
       res.json(positions);
     } catch (error) {

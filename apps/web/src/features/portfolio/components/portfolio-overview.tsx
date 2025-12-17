@@ -35,9 +35,9 @@ export function PortfolioOverview({
   if (isLoading) {
     return (
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-        {[...Array(4)].map((_, i) => (
+        {[...Array(4)].map((_, _i) => (
           <div
-            key={i}
+            key={_i}
             className="h-32 bg-surface-elevated animate-shimmer rounded-lg"
           />
         ))}

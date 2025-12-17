@@ -1,5 +1,7 @@
 import { Router, type Router as ExpressRouter } from "express";
 import { z } from "zod";
+
+import { requireAuth, optionalAuth } from "../middleware/auth";
 import { AnalyticsService } from "../services/analytics";
 
 const router: ExpressRouter = Router();
@@ -51,7 +53,8 @@ router.get("/top-pools", async (req, res, next) => {
 });
 
 // GET /api/analytics/top-users
-router.get("/top-users", async (req, res, next) => {
+// Protected: Requires authentication to access user wallet addresses and balances
+router.get("/top-users", requireAuth, async (req, res, next) => {
   try {
     const { limit } = paginationSchema.pick({ limit: true }).parse(req.query);
     const users = await analyticsService.getTopUsers(limit);
@@ -62,7 +65,8 @@ router.get("/top-users", async (req, res, next) => {
 });
 
 // GET /api/analytics/events
-router.get("/events", async (req, res, next) => {
+// Protected: Event logs may contain sensitive transaction details
+router.get("/events", optionalAuth, async (req, res, next) => {
   try {
     const { limit, offset } = paginationSchema.parse(req.query);
     const result = await analyticsService.getEventLogs(limit, offset);

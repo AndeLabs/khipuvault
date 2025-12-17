@@ -5,10 +5,10 @@
 
 "use client";
 
-import { useAccount, usePublicClient, useConfig } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
-import { readContract } from "wagmi/actions";
 import { formatUnits, type Address } from "viem";
+import { useAccount, usePublicClient, useConfig } from "wagmi";
+import { readContract } from "wagmi/actions";
 
 // Contract addresses
 const POOL_ADDRESS = "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393" as Address;
@@ -78,12 +78,11 @@ export function useIndividualPoolSimple() {
   } = useQuery({
     queryKey: ["pool-simple", "user-info", address],
     queryFn: async (): Promise<UserInfo | null> => {
-      if (!address) return null;
+      if (!address) {
+        return null;
+      }
 
       try {
-        console.log("🔄 [SIMPLE] Fetching user info for:", address);
-        console.log("🔄 [SIMPLE] Pool address:", POOL_ADDRESS);
-
         const result = await readContract(config, {
           address: POOL_ADDRESS,
           abi: POOL_ABI,
@@ -91,33 +90,22 @@ export function useIndividualPoolSimple() {
           args: [address],
         });
 
-        console.log("✅ [SIMPLE] Raw result:", result);
-
         if (!result || !Array.isArray(result) || result.length < 6) {
-          console.warn("⚠️ [SIMPLE] Invalid result, returning null");
           return null;
         }
 
         const userInfo: UserInfo = {
-          deposit: result[0] || BigInt(0),
-          yields: result[1] || BigInt(0),
-          netYields: result[2] || BigInt(0),
-          daysActive: result[3] || BigInt(0),
-          estimatedAPR: result[4] || BigInt(0),
-          autoCompoundEnabled: result[5] || false,
+          deposit: result[0] ?? BigInt(0),
+          yields: result[1] ?? BigInt(0),
+          netYields: result[2] ?? BigInt(0),
+          daysActive: result[3] ?? BigInt(0),
+          estimatedAPR: result[4] ?? BigInt(0),
+          autoCompoundEnabled: result[5] ?? false,
         };
-
-        console.log("📊 [SIMPLE] User info:", {
-          deposit: formatUnits(userInfo.deposit, 18),
-          yields: formatUnits(userInfo.yields, 18),
-          netYields: formatUnits(userInfo.netYields, 18),
-          daysActive: userInfo.daysActive.toString(),
-          apr: (Number(userInfo.estimatedAPR) / 100).toFixed(2) + "%",
-          autoCompound: userInfo.autoCompoundEnabled,
-        });
 
         return userInfo;
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("❌ [SIMPLE] Error fetching user info:", error);
         return null;
       }
@@ -138,9 +126,9 @@ export function useIndividualPoolSimple() {
           abi: POOL_ABI,
           functionName: "totalMusdDeposited",
         });
-        console.log("💰 [SIMPLE] Pool TVL:", formatUnits(result, 18), "MUSD");
         return result;
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("❌ [SIMPLE] Error fetching TVL:", error);
         return BigInt(0);
       }
@@ -159,13 +147,9 @@ export function useIndividualPoolSimple() {
           abi: POOL_ABI,
           functionName: "totalYieldsGenerated",
         });
-        console.log(
-          "📈 [SIMPLE] Total yields:",
-          formatUnits(result, 18),
-          "MUSD",
-        );
         return result;
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("❌ [SIMPLE] Error fetching yields:", error);
         return BigInt(0);
       }
@@ -178,7 +162,9 @@ export function useIndividualPoolSimple() {
   const { data: musdBalance } = useQuery({
     queryKey: ["pool-simple", "musd-balance", address],
     queryFn: async () => {
-      if (!address) return BigInt(0);
+      if (!address) {
+        return BigInt(0);
+      }
       try {
         const result = await readContract(config, {
           address: MUSD_ADDRESS,
@@ -186,13 +172,9 @@ export function useIndividualPoolSimple() {
           functionName: "balanceOf",
           args: [address],
         });
-        console.log(
-          "💵 [SIMPLE] MUSD balance:",
-          formatUnits(result, 18),
-          "MUSD",
-        );
         return result;
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("❌ [SIMPLE] Error fetching balance:", error);
         return BigInt(0);
       }
@@ -212,11 +194,11 @@ export function useIndividualPoolSimple() {
     canWithdraw,
 
     // Pool data
-    poolTVL: poolTVL || BigInt(0),
-    totalYields: totalYields || BigInt(0),
+    poolTVL: poolTVL ?? BigInt(0),
+    totalYields: totalYields ?? BigInt(0),
 
     // Wallet data
-    musdBalance: musdBalance || BigInt(0),
+    musdBalance: musdBalance ?? BigInt(0),
 
     // Loading states
     isLoading: loadingUserInfo,
@@ -235,7 +217,9 @@ export function useIndividualPoolSimple() {
 
 // Format helpers
 export function formatMUSD(value: bigint | undefined): string {
-  if (!value) return "0.00";
+  if (!value) {
+    return "0.00";
+  }
   return Number(formatUnits(value, 18)).toLocaleString("en-US", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,

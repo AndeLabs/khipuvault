@@ -1,10 +1,12 @@
+import * as crypto from "crypto";
+
 import { Request, Response, NextFunction } from "express";
 import * as jwt from "jsonwebtoken";
 import { SiweMessage } from "siwe";
 import { verifyMessage } from "viem";
-import * as crypto from "crypto";
-import { logger } from "../lib/logger";
+
 import { tokenBlacklist } from "../lib/cache";
+import { logger } from "../lib/logger";
 
 // Extend Express Request type to include auth data
 declare global {
@@ -33,7 +35,9 @@ const MAX_NONCES = 10000;
 // Automatic cleanup interval (every 5 minutes)
 let cleanupInterval: NodeJS.Timeout | null = null;
 function startPeriodicCleanup(): void {
-  if (cleanupInterval) return; // Already started
+  if (cleanupInterval) {
+    return;
+  } // Already started
   cleanupInterval = setInterval(
     () => {
       cleanupExpiredNonces();

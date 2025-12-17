@@ -8,16 +8,17 @@
 
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
+import { useEffect, useCallback, useState, useRef } from "react";
+import { parseEther, maxUint256 } from "viem";
 import {
   useWriteContract,
   useWaitForTransactionReceipt,
   useAccount,
+  useConfig,
 } from "wagmi";
-import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useCallback, useState, useRef } from "react";
-import { parseEther, maxUint256 } from "viem";
 import { readContract } from "wagmi/actions";
-import { useConfig } from "wagmi";
+
 import {
   MEZO_TESTNET_ADDRESSES,
   INDIVIDUAL_POOL_ABI,
@@ -183,7 +184,7 @@ export function useDepositWithApprove() {
         }
       };
 
-      verifyAndDeposit();
+      void verifyAndDeposit();
     }
   }, [
     isApproveSuccess,
@@ -198,8 +199,8 @@ export function useDepositWithApprove() {
   // After deposit succeeds, cleanup and refetch
   useEffect(() => {
     if (isDepositSuccess && depositHash) {
-      queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
-      queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
       operationLockRef.current = false;
       setLocalState((prev) => ({
         ...prev,

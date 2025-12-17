@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import {
   generateNonce,
   generateJWT,
@@ -7,6 +8,7 @@ import {
   requireAuth,
   getNonceStats,
 } from "../../middleware/auth";
+
 import type { Request, Response, NextFunction } from "express";
 
 // Mock viem
@@ -135,7 +137,7 @@ describe("Auth Middleware", () => {
       mockNext = vi.fn();
     });
 
-    it("should authenticate valid Bearer token", () => {
+    it("should authenticate valid Bearer token", async () => {
       const address = "0x1234567890123456789012345678901234567890";
       const token = generateJWT(address);
 
@@ -143,15 +145,15 @@ describe("Auth Middleware", () => {
         authorization: `Bearer ${token}`,
       };
 
-      requireAuth(mockReq as Request, mockRes as Response, mockNext);
+      await requireAuth(mockReq as Request, mockRes as Response, mockNext);
 
       expect(mockNext).toHaveBeenCalledWith();
       expect((mockReq as any).user).toBeTruthy();
       expect((mockReq as any).user.address).toBe(address.toLowerCase());
     });
 
-    it("should reject request without authorization header", () => {
-      requireAuth(mockReq as Request, mockRes as Response, mockNext);
+    it("should reject request without authorization header", async () => {
+      await requireAuth(mockReq as Request, mockRes as Response, mockNext);
 
       expect(statusMock).toHaveBeenCalledWith(401);
       expect(jsonMock).toHaveBeenCalledWith(
@@ -163,12 +165,12 @@ describe("Auth Middleware", () => {
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it("should reject invalid authorization header format", () => {
+    it("should reject invalid authorization header format", async () => {
       mockReq.headers = {
         authorization: "InvalidFormat token",
       };
 
-      requireAuth(mockReq as Request, mockRes as Response, mockNext);
+      await requireAuth(mockReq as Request, mockRes as Response, mockNext);
 
       expect(statusMock).toHaveBeenCalledWith(401);
       expect(jsonMock).toHaveBeenCalledWith(
@@ -182,12 +184,12 @@ describe("Auth Middleware", () => {
       expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it("should reject malformed Bearer token", () => {
+    it("should reject malformed Bearer token", async () => {
       mockReq.headers = {
         authorization: "Bearer invalid-token",
       };
 
-      requireAuth(mockReq as Request, mockRes as Response, mockNext);
+      await requireAuth(mockReq as Request, mockRes as Response, mockNext);
 
       expect(statusMock).toHaveBeenCalledWith(401);
       expect(mockNext).not.toHaveBeenCalled();

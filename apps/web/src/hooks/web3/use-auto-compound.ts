@@ -9,14 +9,15 @@
 
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { type Address } from "viem";
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { useQueryClient } from "@tanstack/react-query";
-import { type Address } from "viem";
+
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address;
@@ -69,13 +70,17 @@ export function useAutoCompound() {
 
   useEffect(() => {
     if (isSuccess && state === "processing") {
-      console.log("✅ Auto-compound setting updated!");
-      console.log("📝 Transaction hash:", receipt?.transactionHash);
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("✅ Auto-compound setting updated!");
+        // eslint-disable-next-line no-console
+        console.log("📝 Transaction hash:", receipt?.transactionHash);
+      }
 
       // Immediately invalidate pool queries to update UI
       // The usePoolEvents hook also listens for AutoCompounded events
-      queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
-      queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
 
       setState("success");
     }
@@ -84,10 +89,13 @@ export function useAutoCompound() {
   // Handle errors
   useEffect(() => {
     if (txError) {
-      console.error("❌ Auto-compound error:", txError);
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.error("❌ Auto-compound error:", txError);
+      }
       setState("error");
 
-      const msg = txError.message || "";
+      const msg = txError.message ?? "";
       if (msg.includes("User rejected") || msg.includes("user rejected")) {
         setError("Rechazaste la transacción en tu wallet");
       } else if (msg.includes("NoActiveDeposit")) {
@@ -111,7 +119,10 @@ export function useAutoCompound() {
       setError("");
       resetTx();
 
-      console.log(`🔄 Setting auto-compound to: ${enabled}`);
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log(`🔄 Setting auto-compound to: ${enabled}`);
+      }
       setState("confirming");
 
       writeContract({
@@ -121,7 +132,10 @@ export function useAutoCompound() {
         args: [enabled],
       });
     } catch (err) {
-      console.error("❌ Error:", err);
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.error("❌ Error:", err);
+      }
       setState("error");
       setError(err instanceof Error ? err.message : "Error desconocido");
     }
@@ -138,7 +152,7 @@ export function useAutoCompound() {
     reset,
     state,
     error,
-    txHash: receipt?.transactionHash || txHash,
+    txHash: receipt?.transactionHash ?? txHash,
     isProcessing: state === "confirming" || state === "processing",
     canToggle: state === "idle" || state === "error" || state === "success",
   };

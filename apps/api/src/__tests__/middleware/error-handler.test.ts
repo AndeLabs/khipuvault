@@ -1,11 +1,13 @@
+import { Prisma } from "@prisma/client";
 import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
+import { ZodError, ZodIssue } from "zod";
+
 import {
   errorHandler,
   AppError,
   asyncHandler,
 } from "../../middleware/error-handler";
-import { ZodError, ZodIssue } from "zod";
-import { Prisma } from "@prisma/client";
+
 import type { Request, Response, NextFunction } from "express";
 
 // Mock the logger

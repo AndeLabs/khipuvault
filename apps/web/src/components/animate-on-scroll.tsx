@@ -1,5 +1,6 @@
 "use client";
 import { useRef, useEffect, useState, type ReactNode } from "react";
+
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -11,10 +12,32 @@ type Props = {
 export function AnimateOnScroll({ children, className, delay = "0ms" }: Props) {
   const ref = useRef<HTMLDivElement>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+
+  // Check for prefers-reduced-motion accessibility setting
+  useEffect(() => {
+    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setPrefersReducedMotion(mediaQuery.matches);
+
+    const handleChange = (e: MediaQueryListEvent) => {
+      setPrefersReducedMotion(e.matches);
+    };
+
+    mediaQuery.addEventListener("change", handleChange);
+    return () => mediaQuery.removeEventListener("change", handleChange);
+  }, []);
 
   useEffect(() => {
+    // Skip animation if user prefers reduced motion
+    if (prefersReducedMotion) {
+      setIsVisible(true);
+      return;
+    }
+
     const element = ref.current;
-    if (!element) return;
+    if (!element) {
+      return;
+    }
 
     const observer = new IntersectionObserver(
       ([entry]) => {
@@ -33,7 +56,16 @@ export function AnimateOnScroll({ children, className, delay = "0ms" }: Props) {
         observer.unobserve(element);
       }
     };
-  }, []);
+  }, [prefersReducedMotion]);
+
+  // If user prefers reduced motion, render without animation classes
+  if (prefersReducedMotion) {
+    return (
+      <div ref={ref} className={className}>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div

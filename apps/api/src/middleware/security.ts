@@ -1,7 +1,34 @@
+import crypto from "crypto";
+
 import { Request, Response, NextFunction } from "express";
 import mongoSanitize from "express-mongo-sanitize";
 import DOMPurify from "isomorphic-dompurify";
+
 import { logger } from "../lib/logger";
+
+/**
+ * Parse size string to bytes
+ * Supports formats: "10mb", "1gb", "500kb", "1024" (bytes)
+ */
+function parseSize(size: string): number {
+  const units: Record<string, number> = {
+    b: 1,
+    kb: 1024,
+    mb: 1024 * 1024,
+    gb: 1024 * 1024 * 1024,
+  };
+
+  const match = size.toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(b|kb|mb|gb)?$/);
+  if (!match) {
+    // Default to 10MB if parsing fails
+    return 10 * 1024 * 1024;
+  }
+
+  const value = parseFloat(match[1]);
+  const unit = match[2] || "b";
+
+  return Math.floor(value * units[unit]);
+}
 
 /**
  * MongoDB query sanitization middleware
@@ -29,16 +56,31 @@ export const sanitizeMongoQueries = mongoSanitize({
 /**
  * Request size limiter middleware
  * Prevents large payload attacks
+ * @param maxSize - Maximum size in format "10mb", "1gb", "500kb"
  */
 export function requestSizeLimiter(maxSize: string = "10mb") {
+  const maxSizeBytes = parseSize(maxSize);
+
   return (req: Request, res: Response, next: NextFunction) => {
     const contentLength = req.headers["content-length"];
 
     if (contentLength) {
-      const sizeMB = parseInt(contentLength) / (1024 * 1024);
-      const maxSizeMB = parseInt(maxSize);
+      const sizeBytes = parseInt(contentLength, 10);
 
-      if (sizeMB > maxSizeMB) {
+      if (!isNaN(sizeBytes) && sizeBytes > maxSizeBytes) {
+        logger.warn(
+          {
+            security: {
+              type: "payload_too_large",
+              contentLength: sizeBytes,
+              maxSize: maxSizeBytes,
+              path: req.path,
+              method: req.method,
+              ip: req.ip,
+            },
+          },
+          "Request payload exceeds size limit",
+        );
         return res.status(413).json({
           error: "Payload Too Large",
           message: `Request body must be less than ${maxSize}`,
@@ -208,6 +250,7 @@ export function securityHeaders(
 
 /**
  * API key validation middleware (for internal services)
+ * Uses timing-safe comparison to prevent timing attacks
  */
 export function validateApiKey(
   req: Request,
@@ -222,7 +265,24 @@ export function validateApiKey(
     return next();
   }
 
-  if (!apiKey || apiKey !== expectedApiKey) {
+  // Use timing-safe comparison to prevent timing attacks
+  const isValid =
+    apiKey &&
+    apiKey.length === expectedApiKey.length &&
+    crypto.timingSafeEqual(Buffer.from(apiKey), Buffer.from(expectedApiKey));
+
+  if (!isValid) {
+    logger.warn(
+      {
+        security: {
+          type: "invalid_api_key",
+          path: req.path,
+          method: req.method,
+          ip: req.ip,
+        },
+      },
+      "Invalid or missing API key",
+    );
     return res.status(401).json({
       error: "Unauthorized",
       message: "Invalid or missing API key",

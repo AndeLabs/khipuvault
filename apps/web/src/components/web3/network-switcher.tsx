@@ -1,12 +1,13 @@
 "use client";
 
+import { AlertTriangle, X, RefreshCw } from "lucide-react";
 import { useEffect, useState, useCallback } from "react";
 import { useAccount, useSwitchChain, useWalletClient } from "wagmi";
-import { mezoTestnet } from "@/lib/web3/chains";
-import { useToast } from "@/hooks/use-toast";
-import { AlertTriangle, X, RefreshCw } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
+import { mezoTestnet } from "@/lib/web3/chains";
 
 /**
  * NetworkSwitcher Component
@@ -42,13 +43,18 @@ export function NetworkSwitcher() {
   }, [isConnected]);
 
   const handleSwitchNetwork = useCallback(async () => {
-    if (!switchChain) return;
+    if (!switchChain) {
+      return;
+    }
 
     switchChain(
       { chainId: mezoTestnet.id },
       {
         onError: async (error) => {
-          console.log("Switch failed, trying to add network:", error);
+          if (process.env.NODE_ENV === "development") {
+            // eslint-disable-next-line no-console
+            console.log("Switch failed, trying to add network:", error);
+          }
 
           // If switch fails, try to add the network
           try {
@@ -77,6 +83,7 @@ export function NetworkSwitcher() {
               });
             }
           } catch (addError) {
+            // eslint-disable-next-line no-console
             console.error("Failed to add network:", addError);
 
             toast({
@@ -130,8 +137,8 @@ export function NetworkSwitcher() {
           <AlertTriangle className="h-5 w-5 text-warning-foreground shrink-0" />
           <div className="text-sm font-medium text-warning-foreground">
             <span className="hidden sm:inline">
-              You're connected to <strong>{chain.name}</strong>. KhipuVault only
-              works on <strong>Mezo Testnet</strong>.
+              You&apos;re connected to <strong>{chain.name}</strong>. KhipuVault
+              only works on <strong>Mezo Testnet</strong>.
             </span>
             <span className="sm:hidden">
               Wrong network. Switch to Mezo Testnet.

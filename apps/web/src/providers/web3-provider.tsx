@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * @fileoverview Simplified Web3Provider with Pure Wagmi
  * @module providers/web3-provider
@@ -14,47 +16,48 @@
  * - Error handling and recovery
  */
 
-"use client";
-
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { ReactNode, useEffect, useState } from "react";
 import { WagmiProvider } from "wagmi";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
 import { getWagmiConfig } from "@/lib/web3/config";
 
 /**
- * Query client configuration
- * Optimized for Web3 operations with proper caching and retry logic
+ * Create QueryClient with optimized settings for Web3 operations
+ * Factory function ensures fresh client per component instance
  */
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      // Cache data for 1 minute
-      staleTime: 60 * 1000,
+function createQueryClient() {
+  return new QueryClient({
+    defaultOptions: {
+      queries: {
+        // Cache data for 1 minute
+        staleTime: 60 * 1000,
 
-      // Retry failed queries up to 3 times
-      retry: 3,
+        // Retry failed queries up to 3 times
+        retry: 3,
 
-      // Exponential backoff for retries
-      retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+        // Exponential backoff for retries
+        retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
 
-      // Don't refetch on window focus (too aggressive for blockchain data)
-      refetchOnWindowFocus: false,
+        // Don't refetch on window focus (too aggressive for blockchain data)
+        refetchOnWindowFocus: false,
 
-      // Refetch on reconnect (network came back)
-      refetchOnReconnect: true,
+        // Refetch on reconnect (network came back)
+        refetchOnReconnect: true,
 
-      // Keep data in cache for 5 minutes after component unmount
-      gcTime: 5 * 60 * 1000,
+        // Keep data in cache for 5 minutes after component unmount
+        gcTime: 5 * 60 * 1000,
+      },
+      mutations: {
+        // Retry failed mutations once
+        retry: 1,
+
+        // Longer retry delay for mutations (transactions)
+        retryDelay: 3000,
+      },
     },
-    mutations: {
-      // Retry failed mutations once
-      retry: 1,
-
-      // Longer retry delay for mutations (transactions)
-      retryDelay: 3000,
-    },
-  },
-});
+  });
+}
 
 /**
  * Props for Web3Provider component
@@ -67,10 +70,11 @@ interface Web3ProviderProps {
   customQueryClient?: QueryClient;
 
   /** Optional: Theme (ignored, kept for backward compatibility) */
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   theme?: string;
 
   /** Optional: Initial state from cookies for SSR hydration */
-  initialState?: any;
+  initialState?: Parameters<typeof WagmiProvider>[0]["initialState"];
 }
 
 /**
@@ -98,26 +102,26 @@ interface Web3ProviderProps {
 export function Web3Provider({
   children,
   customQueryClient,
-  theme,
+  theme: _theme,
   initialState,
 }: Web3ProviderProps) {
   // Get wagmi config
   const [config] = useState(() => getWagmiConfig());
 
-  const finalQueryClient = customQueryClient || queryClient;
+  // Create QueryClient inside component for proper SSR/lifecycle management
+  const [defaultQueryClient] = useState(() => createQueryClient());
+  const finalQueryClient = customQueryClient ?? defaultQueryClient;
 
-  // Log initialization on mount
+  // Log initialization on mount (only in development)
   useEffect(() => {
-    console.log("🔌 Web3Provider Initialized");
-    console.log("   Network: Mezo Testnet (Chain ID: 31611)");
-    console.log("   Currency: BTC (native)");
-    console.log("   Wallet Support: MetaMask + Unisat");
-    console.log("   SSR: Enabled with cookieStorage");
+    if (process.env.NODE_ENV !== "development") {
+      return;
+    }
+    // eslint-disable-next-line no-console
     console.log(
-      "   Initial State:",
-      initialState ? "Hydrated from cookies" : "No initial state",
+      "🔌 Web3Provider Initialized | Network: Mezo Testnet (31611) | Wallets: MetaMask + Unisat",
     );
-  }, [initialState]);
+  }, []);
 
   // Render providers with config and initialState for SSR hydration
   return (
@@ -160,12 +164,16 @@ export class Web3ErrorBoundary extends React.Component<
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error("❌ Web3 Error Caught by Boundary:", {
-      error: error.message,
-      stack: error.stack,
-      componentStack: errorInfo.componentStack,
-      timestamp: new Date().toISOString(),
-    });
+    // Log errors in development only
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.error("❌ Web3 Error Caught by Boundary:", {
+        error: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+        timestamp: new Date().toISOString(),
+      });
+    }
 
     // Store error info for display
     this.setState({
@@ -184,7 +192,7 @@ export class Web3ErrorBoundary extends React.Component<
   render() {
     if (this.state.hasError) {
       const isDev = process.env.NODE_ENV === "development";
-      const errorMessage = this.state.error?.message || "Error desconocido";
+      const errorMessage = this.state.error?.message ?? "Error desconocido";
 
       // Check error types
       const isWagmiError =
@@ -210,28 +218,7 @@ export class Web3ErrorBoundary extends React.Component<
                 </h2>
 
                 <p className="text-foreground/80 mb-4">
-                  {isMultiWalletConflict ? (
-                    <>
-                      <strong className="text-destructive">
-                        Conflicto de múltiples wallets detectado.
-                      </strong>
-                      <br />
-                      Tienes varias extensiones de wallet activas (MetaMask,
-                      OKX, Yoroi, etc.) que están compitiendo por el control de
-                      la conexión Web3.
-                    </>
-                  ) : isWagmiError ? (
-                    <>
-                      Ocurrió un error en la configuración de wallet. El
-                      componente está intentando usar hooks de Wagmi fuera del
-                      contexto del provider.
-                    </>
-                  ) : (
-                    <>
-                      Ocurrió un error en la conexión de wallet. Por favor
-                      recarga la página para intentar nuevamente.
-                    </>
-                  )}
+                  {getErrorMessage(isMultiWalletConflict, isWagmiError)}
                 </p>
 
                 {isMultiWalletConflict && (
@@ -324,4 +311,36 @@ export class Web3ErrorBoundary extends React.Component<
 
     return this.props.children;
   }
+}
+
+function getErrorMessage(
+  isMultiWalletConflict: boolean,
+  isWagmiError: boolean,
+): React.ReactNode {
+  if (isMultiWalletConflict) {
+    return (
+      <>
+        <strong className="text-destructive">
+          Conflicto de múltiples wallets detectado.
+        </strong>
+        <br />
+        Tienes varias extensiones de wallet activas (MetaMask, OKX, Yoroi, etc.)
+        que están compitiendo por el control de la conexión Web3.
+      </>
+    );
+  }
+  if (isWagmiError) {
+    return (
+      <>
+        Ocurrió un error en la configuración de wallet. El componente está
+        intentando usar hooks de Wagmi fuera del contexto del provider.
+      </>
+    );
+  }
+  return (
+    <>
+      Ocurrió un error en la conexión de wallet. Por favor recarga la página
+      para intentar nuevamente.
+    </>
+  );
 }

@@ -1,9 +1,9 @@
 import "dotenv/config";
-import express, { type Application } from "express";
 import cors from "cors";
+import express, { type Application } from "express";
 import helmet from "helmet";
+
 import { logger } from "./lib/logger";
-import { requestLogger } from "./middleware/request-logger";
 import { errorHandler } from "./middleware/error-handler";
 import { notFoundHandler } from "./middleware/not-found";
 import {
@@ -11,6 +11,7 @@ import {
   speedLimiter,
   writeRateLimiter,
 } from "./middleware/rate-limit";
+import { requestLogger } from "./middleware/request-logger";
 import {
   sanitizeMongoQueries,
   requestSizeLimiter,
@@ -21,12 +22,12 @@ import {
 } from "./middleware/security";
 
 // Routes
+import analyticsRouter from "./routes/analytics";
 import authRouter from "./routes/auth";
-import usersRouter from "./routes/users";
+import healthRouter from "./routes/health";
 import poolsRouter from "./routes/pools";
 import transactionsRouter from "./routes/transactions";
-import analyticsRouter from "./routes/analytics";
-import healthRouter from "./routes/health";
+import usersRouter from "./routes/users";
 
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
@@ -83,7 +84,9 @@ app.use(
       }
 
       // In development: allow localhost origins and requests without origin
-      if (!origin) return callback(null, true);
+      if (!origin) {
+        return callback(null, true);
+      }
 
       const devOrigins = [
         "http://localhost:3000",
@@ -226,13 +229,13 @@ const gracefulShutdown = async (signal: string) => {
   }, 30000);
 };
 
-process.on("SIGTERM", () => gracefulShutdown("SIGTERM"));
-process.on("SIGINT", () => gracefulShutdown("SIGINT"));
+process.on("SIGTERM", () => void gracefulShutdown("SIGTERM"));
+process.on("SIGINT", () => void gracefulShutdown("SIGINT"));
 
 // Handle uncaught errors
 process.on("uncaughtException", (error) => {
   logger.fatal({ error }, "Uncaught Exception detected");
-  gracefulShutdown("UNCAUGHT_EXCEPTION");
+  void gracefulShutdown("UNCAUGHT_EXCEPTION");
 });
 
 process.on("unhandledRejection", (reason, promise) => {
@@ -240,7 +243,7 @@ process.on("unhandledRejection", (reason, promise) => {
     { reason, promise },
     "Unhandled Promise Rejection detected - initiating shutdown",
   );
-  gracefulShutdown("UNHANDLED_REJECTION");
+  void gracefulShutdown("UNHANDLED_REJECTION");
 });
 
 export default app;

@@ -15,19 +15,20 @@
 
 "use client";
 
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useEffect } from "react";
+import { parseEther } from "viem";
 import {
+  useBlockNumber,
   useAccount,
   usePublicClient,
   useWriteContract,
   useWaitForTransactionReceipt,
   useReadContract,
 } from "wagmi";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useBlockNumber } from "wagmi";
-import { useEffect } from "react";
-import { parseEther } from "viem";
-import { MEZO_TESTNET_ADDRESSES, MUSD_ABI } from "@/lib/web3/contracts";
+
 import { normalizeBigInt } from "@/lib/query-utils";
+import { MEZO_TESTNET_ADDRESSES, MUSD_ABI } from "@/lib/web3/contracts";
 
 const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`;
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`;
@@ -88,7 +89,7 @@ export function useMusdApproval() {
   // Refetch allowance on block changes
   useEffect(() => {
     if (blockNumber) {
-      refetchAllowance();
+      void refetchAllowance();
     }
   }, [blockNumber, refetchAllowance]);
 
@@ -112,7 +113,9 @@ export function useMusdApproval() {
    * Returns true if current allowance < amount
    */
   function isApprovalNeeded(amountWei: bigint): boolean {
-    if (!allowance) return true;
+    if (!allowance) {
+      return true;
+    }
     const currentAllowance = BigInt((allowance as unknown as bigint) || 0n);
     return currentAllowance < amountWei;
   }
@@ -165,9 +168,9 @@ export function useMusdApproval() {
     if (isApproveConfirmed) {
       // Small delay to ensure blockchain state is updated
       const timer = setTimeout(() => {
-        refetchAllowance();
+        void refetchAllowance();
         // Invalidate all relevant queries
-        queryClient.invalidateQueries({
+        void queryClient.invalidateQueries({
           queryKey: ["individual-pool-v3"],
         });
       }, 2000);
@@ -202,7 +205,7 @@ export function useMusdApproval() {
     isApprovePending: isApprovePending || isApproveConfirming,
 
     // Errors and states
-    error: approveError?.message || null,
+    error: approveError?.message ?? null,
     isLoading: balanceLoading,
     isConnected: isConnected && !!address,
   };
@@ -213,7 +216,9 @@ export function useMusdApproval() {
  * MUSD has 18 decimals
  */
 export function formatMUSDFromWei(amount: bigint | number | undefined): string {
-  if (!amount) return "0.00";
+  if (!amount) {
+    return "0.00";
+  }
   const musd = Number(amount) / 1e18;
   return musd.toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -225,10 +230,12 @@ export function formatMUSDFromWei(amount: bigint | number | undefined): string {
  * Helper: Format MUSD (short version)
  */
 export function formatMUSDShort(amount: bigint | number | undefined): string {
-  if (!amount) return "0";
+  if (!amount) {
+    return "0";
+  }
   const musd = Number(amount) / 1e18;
   if (musd >= 1000) {
-    return (musd / 1000).toFixed(1) + "k";
+    return `${(musd / 1000).toFixed(1)}k`;
   }
   return musd.toFixed(0);
 }
@@ -237,6 +244,8 @@ export function formatMUSDShort(amount: bigint | number | undefined): string {
  * Helper: Format full MUSD amount
  */
 export function formatMUSD(amount: bigint | number | undefined): string {
-  if (!amount) return "0.00 MUSD";
-  return formatMUSDFromWei(amount) + " MUSD";
+  if (!amount) {
+    return "0.00 MUSD";
+  }
+  return `${formatMUSDFromWei(amount)} MUSD`;
 }

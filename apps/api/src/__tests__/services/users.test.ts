@@ -1,7 +1,8 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { UsersService } from "../../services/users";
-import { AppError } from "../../middleware/error-handler";
 import type { User, Deposit, DepositType } from "@prisma/client";
+
+import { AppError } from "../../middleware/error-handler";
+import { UsersService } from "../../services/users";
 
 // Mock Prisma
 vi.mock("@khipu/database", () => ({

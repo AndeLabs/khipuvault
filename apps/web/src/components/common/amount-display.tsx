@@ -1,4 +1,5 @@
 import * as React from "react";
+
 import { cn } from "@/lib/utils";
 
 /**
@@ -63,7 +64,9 @@ export function AmountDisplay({
     <span
       className={cn(
         "tabular-nums font-medium",
+        // eslint-disable-next-line security/detect-object-injection -- safe: size is typed enum
         sizeClasses[size],
+        // eslint-disable-next-line security/detect-object-injection -- safe: trend is typed enum
         trend && trendColor[trend],
         className,
       )}
@@ -109,7 +112,17 @@ export function PercentageDisplay({
   const isNegative = value < 0;
   const isZero = value === 0;
 
-  const trend = isPositive ? "up" : isNegative ? "down" : "neutral";
+  const getTrend = (): "up" | "down" | "neutral" => {
+    if (isPositive) {
+      return "up";
+    }
+    if (isNegative) {
+      return "down";
+    }
+    return "neutral";
+  };
+
+  const trend = getTrend();
 
   return (
     <span
@@ -123,7 +136,8 @@ export function PercentageDisplay({
     >
       {showSign && !isZero && (
         <span className="text-xs">
-          {isPositive ? "▲" : isNegative ? "▼" : ""}
+          {isPositive && "▲"}
+          {isNegative && "▼"}
         </span>
       )}
       {showSign && (isPositive ? "+" : "")}

@@ -1,4 +1,5 @@
 import { ShieldCheck, DollarSign, Handshake, BarChart3 } from "lucide-react";
+
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -40,8 +41,8 @@ export function Features() {
         </AnimateOnScroll>
 
         <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {featureData.map((feature, index) => (
-            <AnimateOnScroll key={index} delay={`${150 + index * 150}ms`}>
+          {featureData.map((feature) => (
+            <AnimateOnScroll key={feature.title} delay="150ms">
               <Card className="h-full bg-card border border-primary/20 text-center transition-all duration-300 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10">
                 <CardHeader className="items-center">{feature.icon}</CardHeader>
                 <CardContent>

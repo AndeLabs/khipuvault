@@ -1,9 +1,11 @@
 "use client";
 
 import * as React from "react";
+
+import { cn } from "@/lib/utils";
+
 import { DashboardHeader } from "./dashboard-header";
 import { Sidebar } from "./sidebar";
-import { cn } from "@/lib/utils";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -27,10 +29,13 @@ export function AppShell({ children, className }: AppShellProps) {
 
         {/* Main Content */}
         <main
+          id="main-content"
+          tabIndex={-1}
           className={cn(
             "flex-1 w-full md:ml-0",
             "px-4 md:px-6 py-6",
             "max-w-[1600px] mx-auto",
+            "focus:outline-none",
             className,
           )}
         >
@@ -94,7 +99,7 @@ export function PageSection({
 }: PageSectionProps) {
   return (
     <section className={cn("space-y-4", className)}>
-      {(title || description) && (
+      {(title ?? description) && (
         <div className="space-y-1">
           {title && (
             <h2 className="text-xl md:text-2xl font-heading font-semibold">

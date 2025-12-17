@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   ExternalLink,
   ChevronDown,
@@ -8,11 +7,12 @@ import {
   Code,
   Shield,
   Users,
-  Gift,
-  RotateCw,
   TrendingUp,
   Zap,
 } from "lucide-react";
+import { useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -21,7 +21,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { CONTRACT_ADDRESSES, formatAddress } from "@/contracts/addresses";
 import { cn } from "@/lib/utils";
 
@@ -230,8 +229,11 @@ export function ContractsSection() {
 
                     {expandedContract === contract.name && (
                       <div className="mt-3 space-y-2">
-                        {contract.features.map((feature, index) => (
-                          <div key={index} className="flex items-center gap-2">
+                        {contract.features.map((feature) => (
+                          <div
+                            key={feature}
+                            className="flex items-center gap-2"
+                          >
                             <div className="w-1.5 h-1.5 rounded-full bg-primary" />
                             <span className="text-sm text-muted-foreground">
                               {feature}
@@ -288,7 +290,7 @@ export function ContractsSection() {
                 <h4 className="font-semibold mb-2 text-primary">Audited</h4>
                 <p className="text-sm text-muted-foreground">
                   All our contracts are audited to ensure maximum protection of
-                  our users' funds.
+                  our users&apos; funds.
                 </p>
               </div>
               <div>

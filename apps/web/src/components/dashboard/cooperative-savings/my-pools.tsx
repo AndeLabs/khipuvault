@@ -65,7 +65,7 @@ export function MyPools() {
       setUserPools(memberPools);
     };
 
-    fetchUserPools();
+    void fetchUserPools();
   }, [address, pools]);
 
   if (isLoading) {

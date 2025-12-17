@@ -1,5 +1,3 @@
-import * as React from "react";
-import { cva, type VariantProps } from "class-variance-authority";
 import {
   CheckCircle2,
   XCircle,
@@ -7,8 +5,10 @@ import {
   Loader2,
   AlertCircle,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import * as React from "react";
+
 import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
 
 /**
  * Transaction Status Component
@@ -118,7 +118,7 @@ export function TransactionStatus({
           )}
         />
         <span className={cn("text-sm font-medium", config.color)}>
-          {message || config.label}
+          {message ?? config.label}
         </span>
       </div>
     );
@@ -188,7 +188,10 @@ export function TransactionSteps({ steps, className }: TransactionStepsProps) {
       {steps.map((step, index) => {
         const isLast = index === steps.length - 1;
         return (
-          <div key={index} className="flex items-start gap-3">
+          <div
+            key={`step-${index}-${step.label}`}
+            className="flex items-start gap-3"
+          >
             <div className="flex flex-col items-center">
               <div
                 className={cn(

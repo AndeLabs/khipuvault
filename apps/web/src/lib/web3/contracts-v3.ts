@@ -20,11 +20,12 @@
 // V3 CONTRACT ABIS
 // ============================================================================
 
-import type { Address } from "viem";
+import CooperativePoolV3ABI from "@/contracts/abis/CooperativePoolV3.json";
 import IndividualPoolV3ABI from "@/contracts/abis/IndividualPoolV3.json";
 import YieldAggregatorV3ABI from "@/contracts/abis/YieldAggregatorV3.json";
-import CooperativePoolV3ABI from "@/contracts/abis/CooperativePoolV3.json";
 import MUSDABI from "@/contracts/mezo-abis/MUSD.json";
+
+import type { Address } from "viem";
 
 // Extract ABIs safely - Foundry exports as {"abi": [...], "bytecode": {...}}
 // CRITICAL: Throws error instead of returning empty array to fail fast on invalid ABIs
@@ -96,7 +97,8 @@ function getAddress(
   defaultAddress: string,
   name: string,
 ): Address {
-  const address = process.env[envKey] || defaultAddress;
+  // eslint-disable-next-line security/detect-object-injection -- safe: envKey is hardcoded string
+  const address = process.env[envKey] ?? defaultAddress;
   return validateAddress(address, name);
 }
 
@@ -207,7 +209,9 @@ export function isV3Contract(address: string): boolean {
  * Get contract version
  */
 export function getContractVersion(address: string): "v1" | "v3" | "unknown" {
-  if (isV3Contract(address)) return "v3";
+  if (isV3Contract(address)) {
+    return "v3";
+  }
   // Add V1 check here if needed
   return "unknown";
 }

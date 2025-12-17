@@ -15,14 +15,15 @@
  * ✅ Responsive tabbed layout
  */
 
-import * as React from "react";
-import { PageHeader } from "@/components/layout";
-import { Web3ErrorBoundary } from "@/components/web3-error-boundary";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Info, Wallet } from "lucide-react";
+import * as React from "react";
 import { useAccount } from "wagmi";
+
+import { PageHeader } from "@/components/layout";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Web3ErrorBoundary } from "@/components/web3-error-boundary";
 import {
   PoolsBrowseV3,
   MyPoolsDashboard,
@@ -31,9 +32,9 @@ import {
   JoinPoolModalV3,
   LeavePoolDialog,
 } from "@/features/cooperative-savings";
+import { useToast } from "@/hooks/use-toast";
 import { useAllCooperativePools } from "@/hooks/web3/use-all-cooperative-pools";
 import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
-import { useToast } from "@/hooks/use-toast";
 
 export default function CooperativeSavingsPage() {
   const { isConnected } = useAccount();
@@ -78,6 +79,7 @@ export default function CooperativeSavingsPage() {
       await claimYield(poolId);
       // Success handled by hook
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Claim yield error:", err);
     }
   };
@@ -101,7 +103,7 @@ export default function CooperativeSavingsPage() {
       title: "Pool Created!",
       description: "Your cooperative pool has been created successfully.",
     });
-    refetch();
+    void refetch();
   };
 
   const handleJoinSuccess = () => {
@@ -109,7 +111,7 @@ export default function CooperativeSavingsPage() {
       title: "Joined Pool!",
       description: "You have successfully joined the cooperative pool.",
     });
-    refetch();
+    void refetch();
     setActiveTab("my-pools");
   };
 
@@ -119,7 +121,7 @@ export default function CooperativeSavingsPage() {
       description:
         "You have successfully left the pool and withdrawn your funds.",
     });
-    refetch();
+    void refetch();
   };
 
   // Handle claim success
@@ -129,7 +131,7 @@ export default function CooperativeSavingsPage() {
         title: "Yield Claimed!",
         description: "Your yields have been successfully claimed.",
       });
-      refetch();
+      void refetch();
     }
   }, [claimState, refetch, toast]);
 
@@ -159,6 +161,7 @@ export default function CooperativeSavingsPage() {
   return (
     <Web3ErrorBoundary
       onError={(error, errorInfo) => {
+        // eslint-disable-next-line no-console
         console.error("Cooperative Savings Error:", error, errorInfo);
       }}
     >
@@ -175,8 +178,8 @@ export default function CooperativeSavingsPage() {
           <AlertDescription>
             <strong>How it works:</strong> Create or join a pool with friends.
             Each member contributes BTC which is deposited into Mezo to generate
-            yields. Yields are distributed proportionally based on each member's
-            contribution.
+            yields. Yields are distributed proportionally based on each
+            member&apos;s contribution.
           </AlertDescription>
         </Alert>
 

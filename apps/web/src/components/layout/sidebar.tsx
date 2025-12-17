@@ -1,8 +1,5 @@
 "use client";
 
-import * as React from "react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Wallet,
@@ -10,16 +7,18 @@ import {
   Trophy,
   Settings,
   ChevronDown,
-  TrendingUp,
-  DollarSign,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import * as React from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { cn } from "@/lib/utils";
 
 interface NavItem {
   title: string;
@@ -118,12 +117,12 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-64 border-r border-border bg-surface transition-transform duration-base md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-[280px] sm:w-64 border-r border-border bg-surface transition-transform duration-base md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:translate-x-0",
           !open && "-translate-x-full",
           className,
         )}
       >
-        <nav className="flex flex-col gap-2 p-4 h-full overflow-y-auto">
+        <nav className="flex flex-col gap-2 p-3 md:p-4 h-full overflow-y-auto">
           {/* Navigation Items */}
           <div className="space-y-1 flex-1">
             {navItems.map((item) => {

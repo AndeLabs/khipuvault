@@ -84,9 +84,9 @@ export function PoolsBrowseV3({
       <div className="space-y-6 animate-fade-in">
         {/* Statistics Skeleton */}
         <div className="grid gap-4 md:grid-cols-4">
-          {[...Array(4)].map((_, i) => (
+          {["pools", "members", "btc", "user"].map((key) => (
             <div
-              key={i}
+              key={`stat-${key}`}
               className="h-24 bg-surface-elevated animate-shimmer rounded-lg"
             />
           ))}
@@ -101,8 +101,8 @@ export function PoolsBrowseV3({
 
         {/* Cards Skeleton */}
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {[...Array(6)].map((_, i) => (
-            <SkeletonCard key={i} />
+          {["card1", "card2", "card3", "card4", "card5", "card6"].map((key) => (
+            <SkeletonCard key={`skeleton-${key}`} />
           ))}
         </div>
       </div>

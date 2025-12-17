@@ -6,9 +6,11 @@
 "use client";
 
 import { ExternalLink, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
-import { buttonVariants } from "./button";
+
 import { useTransactionVerification } from "@/hooks/web3/use-transaction-verification";
 import { cn } from "@/lib/utils";
+
+import { buttonVariants } from "./button";
 
 interface TransactionLinkProps {
   txHash: string;
@@ -40,7 +42,7 @@ export function TransactionLink({
       case "loading":
         return "Verificando transacción...";
       case "verified":
-        return `✅ Confirmada en bloque ${parseInt(verification.blockNumber || "0", 16)}`;
+        return `✅ Confirmada en bloque ${parseInt(verification.blockNumber ?? "0", 16)}`;
       case "error":
         return "❌ Error al verificar transacción";
       case "not_found":
@@ -51,7 +53,7 @@ export function TransactionLink({
   return (
     <div className={`space-y-2 ${className}`}>
       <a
-        href={`${process.env.NEXT_PUBLIC_EXPLORER_URL || "https://explorer.mezo.org"}/tx/${txHash}`}
+        href={`${process.env.NEXT_PUBLIC_EXPLORER_URL ?? "https://explorer.mezo.org"}/tx/${txHash}`}
         target="_blank"
         rel="noopener noreferrer"
         className={cn(

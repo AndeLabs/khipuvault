@@ -156,7 +156,9 @@ function toast({ ...props }: Toast) {
       id,
       open: true,
       onOpenChange: (open) => {
-        if (!open) dismiss();
+        if (!open) {
+          dismiss();
+        }
       },
     },
   });
@@ -179,7 +181,8 @@ function useToast() {
         listeners.splice(index, 1);
       }
     };
-  }, [state]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Only subscribe/unsubscribe on mount/unmount
 
   return {
     ...state,

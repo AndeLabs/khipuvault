@@ -4,16 +4,18 @@
  *
  * Production-ready dashboard header with wallet integration
  * Safe client-side rendering with proper hydration handling
+ * Supports both Privy and basic wallet connection
  */
 
 "use client";
 
-import { Button } from "@/components/ui/button";
-import { Icons } from "@/components/icons";
-import { Menu, LogOut } from "lucide-react";
-import { ConnectButton } from "@/components/wallet/connect-button";
-import { useAccount, useBalance, useDisconnect } from "wagmi";
+import { Menu } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useAccount, useBalance } from "wagmi";
+
+import { Icons } from "@/components/icons";
+import { Button } from "@/components/ui/button";
+import { SmartConnectButton } from "@/components/wallet/smart-connect-button";
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -21,7 +23,6 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ onMenuClick }: DashboardHeaderProps = {}) {
   const { address, isConnected } = useAccount();
-  const { disconnect } = useDisconnect();
   const { data: balanceData } = useBalance({
     address: address as `0x${string}` | undefined,
   });
@@ -55,9 +56,9 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps = {}) {
       )}
 
       <div className="flex items-center gap-3 ml-auto">
-        {/* BTC Balance Display (cuando está conectado) */}
+        {/* BTC Balance Display (when connected) - Hidden on mobile as SmartConnectButton shows it */}
         {isConnected && balanceData && (
-          <div className="hidden md:flex items-center gap-2 px-3 py-2 rounded-lg bg-background/50 border border-primary/10">
+          <div className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-lg bg-background/50 border border-primary/10">
             <Icons.bitcoin className="h-5 w-5" style={{ color: "#F7931A" }} />
             <span className="font-code font-semibold text-sm">
               {Number(balanceData.formatted).toFixed(6)} BTC
@@ -65,24 +66,8 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps = {}) {
           </div>
         )}
 
-        {/* Custom Connect Button */}
-        <ConnectButton />
-
-        {/* Botón de desconexión manual como respaldo */}
-        {isConnected && (
-          <Button
-            onClick={() => {
-              console.log("🔌 Desconectando wallet manualmente...");
-              disconnect();
-            }}
-            variant="outline"
-            size="sm"
-            className="gap-2"
-          >
-            <LogOut className="h-4 w-4" />
-            <span className="hidden sm:inline">Desconectar</span>
-          </Button>
-        )}
+        {/* Smart Connect Button - handles Privy or basic wallet */}
+        <SmartConnectButton />
       </div>
     </header>
   );

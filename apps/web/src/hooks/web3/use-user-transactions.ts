@@ -1,7 +1,8 @@
 "use client";
 
-import { useAccount, usePublicClient } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
+import { useAccount, usePublicClient } from "wagmi";
+
 import {
   fetchUserTransactions,
   type Transaction,
@@ -57,7 +58,9 @@ export type { Transaction };
  * Format timestamp to readable date
  */
 export function formatTransactionDate(timestamp: number): string {
-  if (!timestamp) return "-";
+  if (!timestamp) {
+    return "-";
+  }
   const date = new Date(timestamp * 1000);
   return date.toLocaleDateString("es-ES", {
     year: "numeric",
@@ -70,7 +73,9 @@ export function formatTransactionDate(timestamp: number): string {
  * Shorten transaction hash for display
  */
 export function shortenTxHash(hash: string): string {
-  if (!hash || hash === "0x") return "-";
+  if (!hash || hash === "0x") {
+    return "-";
+  }
   return `${hash.slice(0, 6)}...${hash.slice(-4)}`;
 }
 

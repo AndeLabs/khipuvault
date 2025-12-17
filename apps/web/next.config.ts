@@ -1,5 +1,6 @@
 import type { NextConfig } from "next";
 import path from "path";
+import withPWAInit from "next-pwa";
 
 // CRITICAL: Polyfill localStorage for SSR before any other imports
 // MetaMask SDK and some dependencies try to access localStorage during module initialization
@@ -187,4 +188,45 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default nextConfig;
+/**
+ * PWA Configuration
+ * Enables Progressive Web App features for mobile installation
+ */
+const withPWA = withPWAInit({
+  dest: "public",
+  disable: process.env.NODE_ENV === "development",
+  register: true,
+  skipWaiting: true,
+  // Don't precache API routes or dynamic pages
+  buildExcludes: [/middleware-manifest\.json$/],
+  // Runtime caching for blockchain data
+  runtimeCaching: [
+    {
+      // Cache RPC responses briefly
+      urlPattern: /^https:\/\/rpc\.test\.mezo\.org\/.*/i,
+      handler: "NetworkFirst",
+      options: {
+        cacheName: "rpc-cache",
+        expiration: {
+          maxEntries: 32,
+          maxAgeSeconds: 60, // 1 minute
+        },
+        networkTimeoutSeconds: 10,
+      },
+    },
+    {
+      // Cache static assets
+      urlPattern: /^https:\/\/.*\.(png|jpg|jpeg|svg|gif|ico|webp)$/i,
+      handler: "CacheFirst",
+      options: {
+        cacheName: "image-cache",
+        expiration: {
+          maxEntries: 64,
+          maxAgeSeconds: 7 * 24 * 60 * 60, // 1 week
+        },
+      },
+    },
+  ],
+});
+
+export default withPWA(nextConfig);

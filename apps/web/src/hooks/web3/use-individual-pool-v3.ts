@@ -1,8 +1,9 @@
 "use client";
 
-import { useAccount, useConfig } from "wagmi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useAccount, useConfig } from "wagmi";
 import { readContract } from "wagmi/actions";
+
 import {
   MEZO_TESTNET_ADDRESSES,
   INDIVIDUAL_POOL_ABI,
@@ -88,7 +89,9 @@ export function useIndividualPoolV3() {
   } = useQuery({
     queryKey: ["individual-pool-v3", "user-info", address],
     queryFn: async () => {
-      if (!address) return null;
+      if (!address) {
+        return null;
+      }
       try {
         const result = await readContract(config, {
           address: poolAddress,
@@ -132,7 +135,9 @@ export function useIndividualPoolV3() {
   const { data: userTotalBalance } = useQuery({
     queryKey: ["individual-pool-v3", "user-total-balance", address],
     queryFn: async () => {
-      if (!address) return null;
+      if (!address) {
+        return null;
+      }
       return await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
@@ -151,7 +156,9 @@ export function useIndividualPoolV3() {
   const { data: referralStatsRaw } = useQuery({
     queryKey: ["individual-pool-v3", "referral-stats", address],
     queryFn: async () => {
-      if (!address) return null;
+      if (!address) {
+        return null;
+      }
       const result = await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
@@ -179,7 +186,9 @@ export function useIndividualPoolV3() {
   const { data: musdBalance } = useQuery({
     queryKey: ["individual-pool-v3", "musd-balance", address],
     queryFn: async () => {
-      if (!address) return null;
+      if (!address) {
+        return null;
+      }
       return await readContract(config, {
         address: musdAddress,
         abi: ERC20_ABI,
@@ -279,7 +288,7 @@ export function useIndividualPoolV3() {
     hasReferralRewards: referralStats
       ? referralStats.rewards > BigInt(0)
       : false,
-    referralCount: referralStats?.count || BigInt(0),
+    referralCount: referralStats?.count ?? BigInt(0),
 
     // Wallet
     walletBalances,
@@ -293,7 +302,7 @@ export function useIndividualPoolV3() {
     // UI Helpers
     canWithdrawPartial,
     shouldShowAutoCompound,
-    autoCompoundEnabled: userInfo?.autoCompoundEnabled || false,
+    autoCompoundEnabled: userInfo?.autoCompoundEnabled ?? false,
 
     // V3 Features Info
     features: V3_FEATURES.individualPool,
@@ -321,7 +330,9 @@ export function useIndividualPoolV3() {
 // ============================================================================
 
 export function formatMUSD(value: bigint | undefined): string {
-  if (!value) return "0.00";
+  if (!value) {
+    return "0.00";
+  }
   const num = Number(value) / 1e18;
   return num.toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -330,10 +341,16 @@ export function formatMUSD(value: bigint | undefined): string {
 }
 
 export function formatMUSDCompact(value: bigint | undefined): string {
-  if (!value) return "0";
+  if (!value) {
+    return "0";
+  }
   const num = Number(value) / 1e18;
-  if (num >= 1_000_000) return `${(num / 1_000_000).toFixed(2)}M`;
-  if (num >= 1_000) return `${(num / 1_000).toFixed(2)}K`;
+  if (num >= 1_000_000) {
+    return `${(num / 1_000_000).toFixed(2)}M`;
+  }
+  if (num >= 1_000) {
+    return `${(num / 1_000).toFixed(2)}K`;
+  }
   return num.toFixed(2);
 }
 
@@ -344,8 +361,12 @@ export function formatAPR(apr: bigint | number): string {
 
 export function formatDays(days: bigint | number): string {
   const value = typeof days === "bigint" ? Number(days) : days;
-  if (value === 0) return "Hoy";
-  if (value === 1) return "1 día";
+  if (value === 0) {
+    return "Hoy";
+  }
+  if (value === 1) {
+    return "1 día";
+  }
   return `${value} días`;
 }
 

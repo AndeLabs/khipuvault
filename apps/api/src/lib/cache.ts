@@ -41,7 +41,9 @@ class CacheService {
    * Evict least recently used entries when at capacity
    */
   private evictLRU(): void {
-    if (this.cache.size < MAX_CACHE_SIZE) return;
+    if (this.cache.size < MAX_CACHE_SIZE) {
+      return;
+    }
 
     const entries = Array.from(this.cache.entries()).sort(
       (a, b) => a[1].lastAccessed - b[1].lastAccessed,

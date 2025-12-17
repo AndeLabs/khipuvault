@@ -150,7 +150,7 @@ export class ReorgHandler {
             continue;
           }
 
-          if (chainBlock.hash !== storedHash) {
+          if (chainBlock.hash && chainBlock.hash !== storedHash) {
             console.warn(`🔄 Reorg detected at block ${blockNumber}`);
             console.warn(`  Stored: ${storedHash}`);
             console.warn(`  Chain:  ${chainBlock.hash}`);
@@ -290,7 +290,8 @@ export class ReorgHandler {
     const reorgedEvents = await prisma.eventLog.findMany({
       where: {
         args: {
-          contains: "reorgDetected",
+          path: ["reorgDetected"],
+          not: undefined,
         },
       },
       select: {

@@ -5,14 +5,15 @@
 
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { parseEther, type Address } from "viem";
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { useQueryClient } from "@tanstack/react-query";
-import { parseEther, type Address } from "viem";
+
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address;
@@ -78,10 +79,10 @@ export function useSimpleWithdraw() {
   useEffect(() => {
     if (isWithdrawSuccess && state === "processing") {
       // Invalidate all pool-related queries to update UI
-      queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
-      queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
       // Also invalidate MUSD balance queries
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         predicate: (query) =>
           Array.isArray(query.queryKey) &&
           query.queryKey.some(
@@ -98,7 +99,7 @@ export function useSimpleWithdraw() {
     if (withdrawError) {
       setState("error");
 
-      const msg = withdrawError.message || "";
+      const msg = withdrawError.message ?? "";
       if (msg.includes("User rejected") || msg.includes("user rejected")) {
         setError("Rechazaste la transacción en tu wallet");
       } else if (msg.includes("insufficient funds")) {
@@ -171,7 +172,7 @@ export function useSimpleWithdraw() {
     reset,
     state,
     error,
-    withdrawTxHash: withdrawReceipt?.transactionHash || withdrawTxHash,
+    withdrawTxHash: withdrawReceipt?.transactionHash ?? withdrawTxHash,
     isProcessing: state === "confirming" || state === "processing",
     canWithdraw: state === "idle" || state === "error" || state === "success",
   };

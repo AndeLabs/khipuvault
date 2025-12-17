@@ -7,14 +7,16 @@
 
 "use client";
 
-import { useAccount, useConfig } from "wagmi";
 import { useQuery } from "@tanstack/react-query";
 import { readContract } from "@wagmi/core";
 import { formatEther, type Address } from "viem";
+import { useAccount, useConfig } from "wagmi";
+
 import {
   MEZO_TESTNET_ADDRESSES,
   COOPERATIVE_POOL_V3_ABI as POOL_ABI,
 } from "@/lib/web3/contracts-v3";
+
 import {
   PoolInfo,
   MemberInfo,
@@ -114,7 +116,9 @@ export function usePoolInfo(poolId: number) {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.POOL_INFO(poolId),
     queryFn: async () => {
-      if (poolId <= 0) return null;
+      if (poolId <= 0) {
+        return null;
+      }
 
       try {
         const result = await readContract(config, {
@@ -171,7 +175,9 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.MEMBER_INFO(poolId, userAddress as Address),
     queryFn: async () => {
-      if (poolId <= 0 || !userAddress) return null;
+      if (poolId <= 0 || !userAddress) {
+        return null;
+      }
 
       try {
         const result = await readContract(config, {
@@ -187,11 +193,11 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
 
         // Contract returns object, not array
         const memberInfo: MemberInfo = {
-          btcContributed: (result as any).btcContributed || BigInt(0),
-          shares: (result as any).shares || BigInt(0),
-          joinedAt: Number((result as any).joinedAt || 0),
+          btcContributed: (result as any).btcContributed ?? BigInt(0),
+          shares: (result as any).shares ?? BigInt(0),
+          joinedAt: Number((result as any).joinedAt ?? 0),
           active: (result as any).active ?? false,
-          yieldClaimed: (result as any).yieldClaimed || BigInt(0),
+          yieldClaimed: (result as any).yieldClaimed ?? BigInt(0),
         };
 
         return memberInfo;
@@ -218,7 +224,9 @@ export function usePoolMembers(poolId: number) {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.POOL_MEMBERS(poolId),
     queryFn: async () => {
-      if (poolId <= 0) return [];
+      if (poolId <= 0) {
+        return [];
+      }
 
       try {
         const addresses = (await readContract(config, {
@@ -250,11 +258,11 @@ export function usePoolMembers(poolId: number) {
               // Contract returns object, not array
               const memberInfo: MemberWithAddress = {
                 address: addr,
-                btcContributed: (result as any).btcContributed || BigInt(0),
-                shares: (result as any).shares || BigInt(0),
-                joinedAt: Number((result as any).joinedAt || 0),
+                btcContributed: (result as any).btcContributed ?? BigInt(0),
+                shares: (result as any).shares ?? BigInt(0),
+                joinedAt: Number((result as any).joinedAt ?? 0),
                 active: (result as any).active ?? false,
-                yieldClaimed: (result as any).yieldClaimed || BigInt(0),
+                yieldClaimed: (result as any).yieldClaimed ?? BigInt(0),
               };
 
               return memberInfo;
@@ -279,7 +287,7 @@ export function usePoolMembers(poolId: number) {
     retry: 2,
   });
 
-  return { members: data || [], isLoading, error, refetch };
+  return { members: data ?? [], isLoading, error, refetch };
 }
 
 /**
@@ -295,7 +303,9 @@ export function useMemberYield(poolId: number, memberAddress?: Address) {
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.MEMBER_YIELD(poolId, userAddress as Address),
     queryFn: async () => {
-      if (poolId <= 0 || !userAddress) return BigInt(0);
+      if (poolId <= 0 || !userAddress) {
+        return BigInt(0);
+      }
 
       try {
         const result = await readContract(config, {
@@ -316,5 +326,5 @@ export function useMemberYield(poolId: number, memberAddress?: Address) {
     retry: 2,
   });
 
-  return { pendingYield: data || BigInt(0), isLoading, error, refetch };
+  return { pendingYield: data ?? BigInt(0), isLoading, error, refetch };
 }

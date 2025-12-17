@@ -8,17 +8,15 @@
 
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { parseEther, formatEther } from "viem";
 import {
   usePublicClient,
   useReadContract,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { useQuery } from "@tanstack/react-query";
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
-import { COOPERATIVE_POOL_ABI } from "@/lib/web3/cooperative-pool-abi";
-import { parseEther, formatEther } from "viem";
-import { normalizeBigInt } from "@/lib/query-utils";
+
 import {
   fetchCooperativePools,
   fetchPoolInfo,
@@ -28,6 +26,9 @@ import {
   type PoolInfo,
   type MemberInfo,
 } from "@/lib/blockchain/fetch-cooperative-pools";
+import { normalizeBigInt } from "@/lib/query-utils";
+import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
+import { COOPERATIVE_POOL_ABI } from "@/lib/web3/cooperative-pool-abi";
 
 const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePool as `0x${string}`;
 
@@ -63,7 +64,7 @@ export function useCooperativePools() {
       if (!publicClient) {
         return Promise.resolve([]);
       }
-      return fetchCooperativePools(publicClient, Number(poolCounter || 0));
+      return fetchCooperativePools(publicClient, Number(poolCounter ?? 0));
     },
     enabled: !!publicClient && !!poolCounter && Number(poolCounter) > 0,
     staleTime: 30000, // 30 seconds
@@ -76,7 +77,7 @@ export function useCooperativePools() {
     pools,
     isLoading,
     error,
-    poolCounter: Number(poolCounter || 0),
+    poolCounter: Number(poolCounter ?? 0),
   };
 }
 
@@ -132,7 +133,7 @@ export function useMemberInfo(poolId: number, memberAddress?: `0x${string}`) {
       "cooperative-pool",
       "member-info",
       poolId,
-      memberAddress || "none",
+      memberAddress ?? "none",
     ],
     queryFn: () => {
       if (!publicClient || !memberAddress) {
@@ -204,7 +205,7 @@ export function useMemberYield(poolId: number, memberAddress?: `0x${string}`) {
       "cooperative-pool",
       "member-yield",
       poolId,
-      memberAddress || "none",
+      memberAddress ?? "none",
     ],
     queryFn: () => {
       if (!publicClient || !memberAddress) {
@@ -241,19 +242,15 @@ export function useCreatePool() {
     maxContribution: string,
     maxMembers: number,
   ) => {
-    try {
-      const minBtc = parseEther(minContribution);
-      const maxBtc = parseEther(maxContribution);
+    const minBtc = parseEther(minContribution);
+    const maxBtc = parseEther(maxContribution);
 
-      writeContract({
-        address: poolAddress,
-        abi: COOPERATIVE_POOL_ABI,
-        functionName: "createPool",
-        args: [name, minBtc, maxBtc, BigInt(maxMembers)],
-      });
-    } catch (err) {
-      throw err;
-    }
+    writeContract({
+      address: poolAddress,
+      abi: COOPERATIVE_POOL_ABI,
+      functionName: "createPool",
+      args: [name, minBtc, maxBtc, BigInt(maxMembers)],
+    });
   };
 
   return {
@@ -277,19 +274,15 @@ export function useJoinPool() {
   });
 
   const joinPool = async (poolId: number, btcAmount: string) => {
-    try {
-      const value = parseEther(btcAmount);
+    const value = parseEther(btcAmount);
 
-      writeContract({
-        address: poolAddress,
-        abi: COOPERATIVE_POOL_ABI,
-        functionName: "joinPool",
-        args: [BigInt(poolId)],
-        value, // BTC is native on Mezo
-      });
-    } catch (err) {
-      throw err;
-    }
+    writeContract({
+      address: poolAddress,
+      abi: COOPERATIVE_POOL_ABI,
+      functionName: "joinPool",
+      args: [BigInt(poolId)],
+      value, // BTC is native on Mezo
+    });
   };
 
   return {
@@ -313,16 +306,12 @@ export function useLeavePool() {
   });
 
   const leavePool = async (poolId: number) => {
-    try {
-      writeContract({
-        address: poolAddress,
-        abi: COOPERATIVE_POOL_ABI,
-        functionName: "leavePool",
-        args: [BigInt(poolId)],
-      });
-    } catch (err) {
-      throw err;
-    }
+    writeContract({
+      address: poolAddress,
+      abi: COOPERATIVE_POOL_ABI,
+      functionName: "leavePool",
+      args: [BigInt(poolId)],
+    });
   };
 
   return {
@@ -346,16 +335,12 @@ export function useClaimYield() {
   });
 
   const claimYield = async (poolId: number) => {
-    try {
-      writeContract({
-        address: poolAddress,
-        abi: COOPERATIVE_POOL_ABI,
-        functionName: "claimYield",
-        args: [BigInt(poolId)],
-      });
-    } catch (err) {
-      throw err;
-    }
+    writeContract({
+      address: poolAddress,
+      abi: COOPERATIVE_POOL_ABI,
+      functionName: "claimYield",
+      args: [BigInt(poolId)],
+    });
   };
 
   return {
@@ -414,7 +399,9 @@ export function calculatePoolAPR(
   totalBtc: bigint,
   daysActive: number,
 ): string {
-  if (totalBtc === 0n || daysActive === 0) return "0";
+  if (totalBtc === 0n || daysActive === 0) {
+    return "0";
+  }
 
   const yieldPercent = Number(totalYield) / Number(totalBtc);
   const annualizedYield = (yieldPercent / daysActive) * 365;
@@ -444,7 +431,7 @@ export function useUserCooperativeTotal(userAddress?: `0x${string}`) {
     queryKey: [
       "cooperative-pool",
       "user-total",
-      userAddress || "none",
+      userAddress ?? "none",
       normalizeBigInt(poolCounter),
     ],
     queryFn: async () => {
@@ -500,9 +487,9 @@ export function useUserCooperativeTotal(userAddress?: `0x${string}`) {
   });
 
   return {
-    totalContribution: data?.totalContribution || 0n,
-    poolsParticipated: data?.poolsParticipated || 0,
-    memberInfos: data?.memberInfos || [],
+    totalContribution: data?.totalContribution ?? 0n,
+    poolsParticipated: data?.poolsParticipated ?? 0,
+    memberInfos: data?.memberInfos ?? [],
     isLoading,
     error,
   };

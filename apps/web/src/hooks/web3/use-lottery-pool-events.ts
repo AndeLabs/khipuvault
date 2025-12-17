@@ -11,10 +11,12 @@
 
 "use client";
 
-import { useWatchContractEvent } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
-import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
+import { useWatchContractEvent } from "wagmi";
+
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
+import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
+
 import type { Address } from "viem";
 
 // Use centralized contract address config
@@ -43,8 +45,11 @@ export function useLotteryPoolEvents() {
     abi: LOTTERY_POOL_ABI,
     eventName: "RoundCreated",
     onLogs(logs) {
-      console.log("🔔 RoundCreated event detected:", logs);
-      queryClient.refetchQueries({ type: "active" });
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("🔔 RoundCreated event detected:", logs);
+      }
+      void queryClient.refetchQueries({ type: "active" });
     },
   });
 
@@ -54,8 +59,11 @@ export function useLotteryPoolEvents() {
     abi: LOTTERY_POOL_ABI,
     eventName: "TicketsPurchased",
     onLogs(logs) {
-      console.log("🔔 TicketsPurchased event detected:", logs);
-      queryClient.refetchQueries({ type: "active" });
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("🔔 TicketsPurchased event detected:", logs);
+      }
+      void queryClient.refetchQueries({ type: "active" });
     },
   });
 
@@ -65,8 +73,11 @@ export function useLotteryPoolEvents() {
     abi: LOTTERY_POOL_ABI,
     eventName: "WinnerSelected",
     onLogs(logs) {
-      console.log("🔔 WinnerSelected event detected:", logs);
-      queryClient.refetchQueries({ type: "active" });
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("🔔 WinnerSelected event detected:", logs);
+      }
+      void queryClient.refetchQueries({ type: "active" });
     },
   });
 
@@ -76,8 +87,11 @@ export function useLotteryPoolEvents() {
     abi: LOTTERY_POOL_ABI,
     eventName: "PrizeClaimed",
     onLogs(logs) {
-      console.log("🔔 PrizeClaimed event detected:", logs);
-      queryClient.refetchQueries({ type: "active" });
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("🔔 PrizeClaimed event detected:", logs);
+      }
+      void queryClient.refetchQueries({ type: "active" });
     },
   });
 }

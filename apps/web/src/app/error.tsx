@@ -1,7 +1,9 @@
 "use client";
 
-import * as React from "react";
 import { AlertTriangle, RefreshCw, Home, Mail } from "lucide-react";
+import * as React from "react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { captureError, addBreadcrumb } from "@/lib/error-tracking";
 
 interface ErrorProps {
@@ -42,13 +43,14 @@ export default function Error({ error, reset }: ErrorProps) {
 
   React.useEffect(() => {
     // Log error to console for debugging
+    // eslint-disable-next-line no-console
     console.error("Page Error:", error);
 
     // Report error to error tracking service (Sentry if configured)
-    captureError(error, {
+    void captureError(error, {
       tags: {
         errorBoundary: "page",
-        digest: error.digest || "unknown",
+        digest: error.digest ?? "unknown",
       },
       extra: {
         pathname:
@@ -91,7 +93,7 @@ export default function Error({ error, reset }: ErrorProps) {
           {/* Error Message */}
           <Alert variant="destructive">
             <AlertDescription className="font-mono text-sm">
-              {error.message || "Error desconocido"}
+              {error.message ?? "Error desconocido"}
             </AlertDescription>
           </Alert>
 

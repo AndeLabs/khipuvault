@@ -2,24 +2,6 @@
 
 export const dynamic = "force-dynamic";
 
-import * as React from "react";
-import { useAccount } from "wagmi";
-import Link from "next/link";
-import { PageHeader } from "@/components/layout";
-import {
-  PortfolioOverview,
-  AllocationChart,
-  RecentActivity,
-} from "@/features/portfolio";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Wallet,
   Users,
@@ -29,12 +11,41 @@ import {
   ExternalLink,
   Sparkles,
 } from "lucide-react";
-import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
+import nextDynamic from "next/dynamic";
+import Link from "next/link";
+import * as React from "react";
+import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
+
+import { PageHeader } from "@/components/layout";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { PortfolioOverview, RecentActivity } from "@/features/portfolio";
+
+// Lazy load chart component to reduce initial bundle size (recharts is ~300KB)
+const AllocationChart = nextDynamic(
+  () =>
+    import("@/features/portfolio/components/allocation-chart").then(
+      (mod) => mod.AllocationChart,
+    ),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="p-6 rounded-lg border border-border bg-card">
+        <Skeleton className="h-6 w-40 mb-2" />
+        <Skeleton className="h-4 w-60 mb-4" />
+        <Skeleton className="h-[200px] w-full rounded-lg" />
+      </div>
+    ),
+  },
+);
 import {
   useCooperativePools,
   useUserCooperativeTotal,
 } from "@/hooks/web3/use-cooperative-pools";
-import { formatUnits } from "viem";
+import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 
 /**
  * Dashboard Page - V4 Redesign
@@ -74,15 +85,19 @@ export default function DashboardPage() {
   const totalValue = individualSavings + cooperativeSavings;
   const hasNoSavings = totalValue === 0;
 
-  const portfolioData = {
-    totalValue: totalValue.toFixed(2),
-    individualSavings: individualSavings.toFixed(2),
-    cooperativeSavings: cooperativeSavings.toFixed(2),
-    totalYields: totalYields.toFixed(6),
-    change24h: 0, // TODO: Implement 24h change calculation
-    change7d: 0, // TODO: Implement 7d change calculation
-    recentActivities: [], // TODO: Fetch from user transactions
-  };
+  // Memoize portfolio data to prevent unnecessary re-renders
+  const portfolioData = React.useMemo(
+    () => ({
+      totalValue: totalValue.toFixed(2),
+      individualSavings: individualSavings.toFixed(2),
+      cooperativeSavings: cooperativeSavings.toFixed(2),
+      totalYields: totalYields.toFixed(6),
+      change24h: 0, // TODO: Implement 24h change calculation
+      change7d: 0, // TODO: Implement 7d change calculation
+      recentActivities: [], // TODO: Fetch from user transactions
+    }),
+    [totalValue, individualSavings, cooperativeSavings, totalYields],
+  );
 
   if (!isConnected) {
     return (
@@ -170,7 +185,7 @@ export default function DashboardPage() {
       />
 
       {/* Charts & Activity */}
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {/* Allocation Chart - REAL DATA */}
         <AllocationChart
           individualSavings={Number(portfolioData.individualSavings)}
@@ -178,7 +193,7 @@ export default function DashboardPage() {
         />
 
         {/* Recent Activity */}
-        <div className="lg:col-span-2">
+        <div className="md:col-span-1 lg:col-span-2">
           <RecentActivity activities={portfolioData.recentActivities} />
         </div>
       </div>

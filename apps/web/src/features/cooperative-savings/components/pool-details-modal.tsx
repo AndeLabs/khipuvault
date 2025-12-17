@@ -90,7 +90,7 @@ export function PoolDetailsModal({
   const totalShares = members.reduce((sum, m) => sum + m.shares, BigInt(0));
 
   const copyAddress = (address: string) => {
-    navigator.clipboard.writeText(address);
+    void navigator.clipboard.writeText(address);
     toast({
       title: "Copied!",
       description: "Address copied to clipboard",

@@ -5,14 +5,16 @@
 
 "use client";
 
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback, useState } from "react";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+
 import {
   MEZO_V3_ADDRESSES,
   YIELD_AGGREGATOR_V3_ABI,
   V3_FEATURES,
 } from "@/lib/web3/contracts-v3";
+
 import { QUERY_KEYS, INITIAL_TX_STATE, TransactionState } from "./constants";
 
 const YIELD_AGGREGATOR_ADDRESS =
@@ -72,8 +74,10 @@ export function useYieldAggregatorDeposit() {
   // Refetch data on success
   useEffect(() => {
     if (isSuccess) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.YIELD_AGGREGATOR });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.YIELD_AGGREGATOR,
+      });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
     }
   }, [isSuccess, queryClient]);
 
@@ -130,8 +134,10 @@ export function useYieldAggregatorWithdraw() {
   // Refetch data on success
   useEffect(() => {
     if (isSuccess) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.YIELD_AGGREGATOR });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.YIELD_AGGREGATOR,
+      });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
     }
   }, [isSuccess, queryClient]);
 
@@ -189,7 +195,9 @@ export function useCompoundYields() {
   // Refetch data on success
   useEffect(() => {
     if (isSuccess) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.YIELD_AGGREGATOR });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.YIELD_AGGREGATOR,
+      });
     }
   }, [isSuccess, queryClient]);
 

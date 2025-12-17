@@ -43,7 +43,9 @@ const ENV_KEYS = {
 function getEnvAddress(key: string, fallback?: string): ContractAddress {
   const value = process.env[key];
   if (!value) {
-    if (fallback) return fallback as ContractAddress;
+    if (fallback) {
+      return fallback as ContractAddress;
+    }
     throw new Error(
       `Contract address not configured: ${key}. ` +
         `Please set it in your .env.local file.`,
@@ -60,7 +62,9 @@ function getEnvAddress(key: string, fallback?: string): ContractAddress {
 export function isValidAddress(
   address: string | undefined,
 ): address is Address {
-  if (!address) return false;
+  if (!address) {
+    return false;
+  }
   return /^0x[a-fA-F0-9]{40}$/.test(address);
 }
 
@@ -281,7 +285,9 @@ export function getIntegrationAddresses(): ContractAddress[] {
  * @returns Formatted address (e.g., "0x1234...5678")
  */
 export function formatAddress(address: string, chars: number = 4): string {
-  if (!isValidAddress(address)) return address;
+  if (!isValidAddress(address)) {
+    return address;
+  }
   return `${address.slice(0, chars + 2)}...${address.slice(-chars)}`;
 }
 
@@ -295,7 +301,9 @@ export function addressesEqual(
   address1: string | undefined,
   address2: string | undefined,
 ): boolean {
-  if (!address1 || !address2) return false;
+  if (!address1 || !address2) {
+    return false;
+  }
   return address1.toLowerCase() === address2.toLowerCase();
 }
 
@@ -304,7 +312,9 @@ export function addressesEqual(
  * Returns true if running in development and addresses are not configured
  */
 export function isDevelopmentMode(): boolean {
-  if (typeof process === "undefined") return false;
+  if (typeof process === "undefined") {
+    return false;
+  }
   return process.env.NODE_ENV === "development";
 }
 
@@ -341,8 +351,11 @@ export function getAddressesSummary(): string {
  */
 export function logContractAddresses(): void {
   if (isDevelopmentMode()) {
+    // eslint-disable-next-line no-console
     console.group("🏗️ KhipuVault Contract Addresses");
+    // eslint-disable-next-line no-console
     console.log(getAddressesSummary());
+    // eslint-disable-next-line no-console
     console.groupEnd();
   }
 }

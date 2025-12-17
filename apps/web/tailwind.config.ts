@@ -18,13 +18,14 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ["Inter", "system-ui", "sans-serif"],
-        heading: ["Satoshi", "Inter", "sans-serif"],
-        mono: ["IBM Plex Mono", "monospace"],
+        // Use CSS variables from next/font for optimized loading
+        sans: ["var(--font-inter)", "Inter", "system-ui", "sans-serif"],
+        heading: ["Satoshi", "var(--font-inter)", "sans-serif"],
+        mono: ["var(--font-roboto-mono)", "IBM Plex Mono", "monospace"],
         // Keep aliases for compatibility
-        body: ["Inter", "sans-serif"],
-        headline: ["Inter", "sans-serif"],
-        code: ["IBM Plex Mono", "monospace"],
+        body: ["var(--font-inter)", "Inter", "sans-serif"],
+        headline: ["var(--font-inter)", "Inter", "sans-serif"],
+        code: ["var(--font-roboto-mono)", "IBM Plex Mono", "monospace"],
       },
       colors: {
         // Brand colors

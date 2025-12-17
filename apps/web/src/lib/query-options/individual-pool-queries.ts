@@ -11,11 +11,10 @@
  */
 
 import { queryOptions } from "@tanstack/react-query";
-import { PublicClient } from "viem";
-import {
-  fetchUserTransactions,
-  type Transaction,
-} from "@/lib/blockchain/fetch-user-transactions";
+
+import { fetchUserTransactions } from "@/lib/blockchain/fetch-user-transactions";
+
+import type { PublicClient } from "viem";
 
 /**
  * Query options for user transactions in Individual Pool

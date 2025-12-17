@@ -1,10 +1,10 @@
 "use client";
 
-import { useWatchContractEvent } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
-import { MEZO_V3_ADDRESSES } from "@/lib/web3/contracts-v3";
-import { useAccount } from "wagmi";
+import { useWatchContractEvent, useAccount } from "wagmi";
+
 import IndividualPoolV3ABI from "@/contracts/abis/IndividualPoolV3.json";
+import { MEZO_V3_ADDRESSES } from "@/lib/web3/contracts-v3";
 
 const POOL_ABI = (IndividualPoolV3ABI as any).abi;
 
@@ -16,7 +16,7 @@ const POOL_ABI = (IndividualPoolV3ABI as any).abi;
  * Source: https://tanstack.com/query/v5/docs/reference/QueryClient
  */
 export function usePoolEvents() {
-  const { address } = useAccount();
+  useAccount(); // Hook must be called for Wagmi context
   const queryClient = useQueryClient();
   const poolAddress = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
 
@@ -25,9 +25,9 @@ export function usePoolEvents() {
     address: poolAddress,
     abi: POOL_ABI,
     eventName: "Deposited",
-    onLogs(logs) {
+    onLogs(_logs) {
       // Only refetch individual pool queries to reduce RPC load
-      queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
+      void queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
     },
   });
 
@@ -36,8 +36,8 @@ export function usePoolEvents() {
     address: poolAddress,
     abi: POOL_ABI,
     eventName: "PartialWithdrawn",
-    onLogs(logs) {
-      queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
+    onLogs(_logs) {
+      void queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
     },
   });
 
@@ -46,8 +46,8 @@ export function usePoolEvents() {
     address: poolAddress,
     abi: POOL_ABI,
     eventName: "FullWithdrawal",
-    onLogs(logs) {
-      queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
+    onLogs(_logs) {
+      void queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
     },
   });
 
@@ -56,8 +56,8 @@ export function usePoolEvents() {
     address: poolAddress,
     abi: POOL_ABI,
     eventName: "YieldClaimed",
-    onLogs(logs) {
-      queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
+    onLogs(_logs) {
+      void queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
     },
   });
 
@@ -66,8 +66,8 @@ export function usePoolEvents() {
     address: poolAddress,
     abi: POOL_ABI,
     eventName: "AutoCompounded",
-    onLogs(logs) {
-      queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
+    onLogs(_logs) {
+      void queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
     },
   });
 }

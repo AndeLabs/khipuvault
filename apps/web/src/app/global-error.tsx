@@ -1,7 +1,7 @@
 "use client";
 
-import * as React from "react";
 import { AlertTriangle, RefreshCw } from "lucide-react";
+import * as React from "react";
 
 interface GlobalErrorProps {
   error: Error & { digest?: string };
@@ -27,6 +27,7 @@ interface GlobalErrorProps {
 export default function GlobalError({ error, reset }: GlobalErrorProps) {
   React.useEffect(() => {
     // Log error to console
+    // eslint-disable-next-line no-console
     console.error("Global Error:", error);
 
     // You can log to an external error service here

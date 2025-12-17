@@ -1,6 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { PoolsService } from "../../services/pools";
-import { AppError } from "../../middleware/error-handler";
 import type {
   Pool,
   PoolAnalytics,
@@ -10,6 +8,9 @@ import type {
   DepositType,
   TransactionStatus,
 } from "@prisma/client";
+
+import { AppError } from "../../middleware/error-handler";
+import { PoolsService } from "../../services/pools";
 
 // Mock Prisma
 vi.mock("@khipu/database", () => ({

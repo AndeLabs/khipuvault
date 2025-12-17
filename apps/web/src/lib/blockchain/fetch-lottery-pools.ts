@@ -8,9 +8,19 @@
  * - Easy integration with TanStack Query
  */
 
-import { PublicClient } from "viem";
-import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
+import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
+
+import type { PublicClient } from "viem";
+
+// Development-only logging
+const isDev = process.env.NODE_ENV === "development";
+// eslint-disable-next-line no-console
+const devLog = isDev ? console.log.bind(console) : () => {};
+// eslint-disable-next-line no-console
+const devWarn = isDev ? console.warn.bind(console) : () => {};
+// eslint-disable-next-line no-console
+const devError = isDev ? console.error.bind(console) : () => {};
 
 // Use centralized contract addresses - falls back to zero address if not deployed
 const LOTTERY_POOL_ADDRESS =
@@ -58,7 +68,7 @@ export async function fetchCurrentRoundId(
 
     return currentRoundId as bigint;
   } catch (error) {
-    console.error("Error fetching current round ID:", error);
+    devError("Error fetching current round ID:", error);
     return null;
   }
 }
@@ -85,7 +95,7 @@ export async function fetchRoundCounter(
 
     return Number(roundCounter || 0);
   } catch (error) {
-    console.error("Error fetching round counter:", error);
+    devError("Error fetching round counter:", error);
     return 0;
   }
 }
@@ -115,7 +125,7 @@ export async function fetchRoundInfo(
 
     return roundInfo as LotteryRound;
   } catch (error) {
-    console.error(`Error fetching round ${roundId}:`, error);
+    devError(`Error fetching round ${roundId}:`, error);
     return null;
   }
 }
@@ -137,7 +147,7 @@ export async function fetchAllRounds(
     return [];
   }
 
-  console.log(`🔄 Fetching ${roundCounter} lottery rounds`);
+  devLog(`🔄 Fetching ${roundCounter} lottery rounds`);
 
   try {
     const roundsData: LotteryRound[] = [];
@@ -160,17 +170,17 @@ export async function fetchAllRounds(
         try {
           roundsData.push(result.value as LotteryRound);
         } catch (error) {
-          console.warn(`⚠️ Failed to parse round ${i + 1}:`, error);
+          devWarn(`⚠️ Failed to parse round ${i + 1}:`, error);
         }
       } else {
-        console.warn(`⚠️ Failed to fetch round ${i + 1}:`, result.reason);
+        devWarn(`⚠️ Failed to fetch round ${i + 1}:`, result.reason);
       }
     }
 
-    console.log(`✅ Fetched ${roundsData.length} lottery rounds`);
+    devLog(`✅ Fetched ${roundsData.length} lottery rounds`);
     return roundsData;
   } catch (error) {
-    console.error("Error fetching all rounds:", error);
+    devError("Error fetching all rounds:", error);
     return [];
   }
 }
@@ -202,7 +212,7 @@ export async function fetchUserTickets(
 
     return ticketCount as bigint;
   } catch (error) {
-    console.error(`Error fetching user tickets for round ${roundId}:`, error);
+    devError(`Error fetching user tickets for round ${roundId}:`, error);
     return null;
   }
 }
@@ -234,10 +244,7 @@ export async function fetchUserInvestment(
 
     return investment as bigint;
   } catch (error) {
-    console.error(
-      `Error fetching user investment for round ${roundId}:`,
-      error,
-    );
+    devError(`Error fetching user investment for round ${roundId}:`, error);
     return null;
   }
 }
@@ -269,10 +276,7 @@ export async function fetchUserProbability(
 
     return probability as bigint;
   } catch (error) {
-    console.error(
-      `Error fetching user probability for round ${roundId}:`,
-      error,
-    );
+    devError(`Error fetching user probability for round ${roundId}:`, error);
     return null;
   }
 }
@@ -302,7 +306,7 @@ export async function fetchUserLotteryStats(
     };
   }
 
-  console.log(
+  devLog(
     `🔄 Fetching lottery stats for ${userAddress} across ${roundCounter} rounds`,
   );
 
@@ -356,10 +360,7 @@ export async function fetchUserLotteryStats(
 
             totalTickets += Number(ticketCount || 0n);
           } catch (error) {
-            console.warn(
-              `⚠️ Failed to fetch tickets for round ${i + 1}:`,
-              error,
-            );
+            devWarn(`⚠️ Failed to fetch tickets for round ${i + 1}:`, error);
           }
 
           // Check if user won this round
@@ -377,17 +378,14 @@ export async function fetchUserLotteryStats(
                 totalWinnings += prize;
               }
             } catch (error) {
-              console.warn(
-                `⚠️ Failed to check winner for round ${i + 1}:`,
-                error,
-              );
+              devWarn(`⚠️ Failed to check winner for round ${i + 1}:`, error);
             }
           }
         }
       }
     }
 
-    console.log(
+    devLog(
       `✅ Fetched lottery stats: ${roundsPlayed} rounds, ${totalTickets} tickets`,
     );
 
@@ -398,7 +396,7 @@ export async function fetchUserLotteryStats(
       totalWinnings,
     };
   } catch (error) {
-    console.error("Error fetching user lottery stats:", error);
+    devError("Error fetching user lottery stats:", error);
     return {
       totalInvested: 0n,
       roundsPlayed: 0,

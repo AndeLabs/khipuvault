@@ -1,15 +1,16 @@
 "use client";
 
-import { useAccount, useConfig } from "wagmi";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { readContract } from "wagmi/actions";
 import { useState, useEffect } from "react";
+import { useAccount, useConfig } from "wagmi";
+import { readContract } from "wagmi/actions";
+
+import { ZERO_ADDRESS } from "@/contracts/addresses";
 import {
   MEZO_TESTNET_ADDRESSES,
   INDIVIDUAL_POOL_ABI,
   ERC20_ABI,
 } from "@/lib/web3/contracts";
-import { ZERO_ADDRESS } from "@/contracts/addresses";
 
 /**
  * Production hook for Individual Pool data on Mezo Testnet
@@ -57,9 +58,11 @@ export function useIndividualPool() {
 
   // Read user's specific deposit - MIGRATED TO TANSTACK QUERY
   const { data: userDepositData, isLoading: loadingUserDeposit } = useQuery({
-    queryKey: ["individual-pool", "user-deposit", address || "none"],
+    queryKey: ["individual-pool", "user-deposit", address ?? "none"],
     queryFn: async () => {
-      if (!address) return null;
+      if (!address) {
+        return null;
+      }
       return await readContract(config, {
         address: poolAddress,
         abi: INDIVIDUAL_POOL_ABI,
@@ -73,9 +76,11 @@ export function useIndividualPool() {
 
   // Get user's MUSD balance - MIGRATED TO TANSTACK QUERY
   const { data: musdBalanceData, isLoading: loadingMusdBalance } = useQuery({
-    queryKey: ["individual-pool", "musd-balance", address || "none"],
+    queryKey: ["individual-pool", "musd-balance", address ?? "none"],
     queryFn: async () => {
-      if (!address) return null;
+      if (!address) {
+        return null;
+      }
       return await readContract(config, {
         address: musdAddress,
         abi: ERC20_ABI,
@@ -136,11 +141,11 @@ export function useIndividualPool() {
   // UserDeposit struct: {musdAmount, yieldAccrued, depositTimestamp, lastYieldUpdate, active}
   const userDeposit = userDepositData
     ? {
-        musdAmount: ((userDepositData as any)[0] as bigint) || BigInt(0),
-        yieldAccrued: ((userDepositData as any)[1] as bigint) || BigInt(0),
-        depositTimestamp: Number((userDepositData as any)[2] as bigint) || 0,
-        lastYieldUpdate: Number((userDepositData as any)[3] as bigint) || 0,
-        active: ((userDepositData as any)[4] as boolean) || false,
+        musdAmount: ((userDepositData as any)[0] as bigint) ?? BigInt(0),
+        yieldAccrued: ((userDepositData as any)[1] as bigint) ?? BigInt(0),
+        depositTimestamp: Number((userDepositData as any)[2] as bigint) ?? 0,
+        lastYieldUpdate: Number((userDepositData as any)[3] as bigint) ?? 0,
+        active: ((userDepositData as any)[4] as boolean) ?? false,
       }
     : null;
 
@@ -196,7 +201,9 @@ export function useIndividualPool() {
  * Format BTC with proper decimals (18 on Mezo, not 8)
  */
 export function formatBTC(value: bigint | undefined): string {
-  if (!value) return "0.000000";
+  if (!value) {
+    return "0.000000";
+  }
   return (Number(value) / 1e18).toFixed(6);
 }
 
@@ -204,9 +211,13 @@ export function formatBTC(value: bigint | undefined): string {
  * Format BTC to display (shorter version)
  */
 export function formatBTCDisplay(value: bigint | undefined): string {
-  if (!value) return "0.00";
+  if (!value) {
+    return "0.00";
+  }
   const num = Number(value) / 1e18;
-  if (num < 0.01) return num.toFixed(6);
+  if (num < 0.01) {
+    return num.toFixed(6);
+  }
   return num.toFixed(2);
 }
 
@@ -214,7 +225,9 @@ export function formatBTCDisplay(value: bigint | undefined): string {
  * Format MUSD with comma separators
  */
 export function formatMUSD(value: bigint | undefined): string {
-  if (!value) return "0";
+  if (!value) {
+    return "0";
+  }
   const num = Number(value) / 1e18;
   return num.toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -226,7 +239,9 @@ export function formatMUSD(value: bigint | undefined): string {
  * Format MUSD for display (shorter)
  */
 export function formatMUSDDisplay(value: bigint | undefined): string {
-  if (!value) return "0";
+  if (!value) {
+    return "0";
+  }
   const num = Number(value) / 1e18;
   if (num < 1000) {
     return num.toLocaleString("en-US", {
@@ -283,7 +298,9 @@ export function calculateYieldAfterFee(
  * Calculate time since deposit
  */
 export function formatTimeSince(timestamp: number): string {
-  if (!timestamp || timestamp === 0) return "Sin depósito";
+  if (!timestamp || timestamp === 0) {
+    return "Sin depósito";
+  }
 
   const now = Math.floor(Date.now() / 1000);
   const diff = now - timestamp;
