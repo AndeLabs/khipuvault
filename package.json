@@ -35,7 +35,7 @@
     "prepare": "husky install || true"
   },
   "devDependencies": {
-    "@types/node": "^20.10.0",
+    "@types/node": "^25.0.3",
     "@vitest/coverage-v8": "^4.0.14",
     "autoprefixer": "^10.4.21",
     "prettier": "^3.1.0",
