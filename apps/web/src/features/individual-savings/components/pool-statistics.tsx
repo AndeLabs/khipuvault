@@ -81,15 +81,15 @@ export function PoolStatistics({
   }, [totalDeposits, poolAPR, activeDepositors, emergencyMode]);
 
   const getHealthColor = () => {
-    if (healthScore >= 70) return "text-success";
-    if (healthScore >= 40) return "text-warning";
+    if (healthScore >= 70) {return "text-success";}
+    if (healthScore >= 40) {return "text-warning";}
     return "text-error";
   };
   const healthColor = getHealthColor();
 
   const getHealthLabel = () => {
-    if (healthScore >= 70) return "Excellent";
-    if (healthScore >= 40) return "Good";
+    if (healthScore >= 70) {return "Excellent";}
+    if (healthScore >= 40) {return "Good";}
     return "Fair";
   };
   const healthLabel = getHealthLabel();

@@ -101,8 +101,8 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
           ? `${timeRemaining.days}d ${timeRemaining.hours}h ${timeRemaining.minutes}m`
           : "Ended",
       subtitle: (() => {
-        if (roundInfo.status === 0) return "Open for entries";
-        if (roundInfo.status === 1) return "Drawing...";
+        if (roundInfo.status === 0) {return "Open for entries";}
+        if (roundInfo.status === 1) {return "Drawing...";}
         return "Completed";
       })(),
       icon: Clock,
