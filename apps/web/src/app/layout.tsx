@@ -1,6 +1,24 @@
 import type { Metadata } from "next";
+
+import { Inter, Roboto_Mono } from "next/font/google";
+
 import "./globals.css";
 import { ClientLayout } from "@/components/layout/client-layout";
+
+// Optimized font loading with next/font (auto font-display: swap, self-hosting)
+const inter = Inter({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  variable: "--font-inter",
+  display: "swap",
+});
+
+const robotoMono = Roboto_Mono({
+  subsets: ["latin"],
+  weight: ["700"],
+  variable: "--font-roboto-mono",
+  display: "swap",
+});
 
 export const revalidate = 0;
 
@@ -66,20 +84,15 @@ export default function RootLayout({
   // No need to pass initialState - cookieStorage works without it
 
   return (
-    <html lang="es" className="dark">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Roboto+Mono:wght@700&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html lang="es" className={`dark ${inter.variable} ${robotoMono.variable}`}>
       <body className="font-body antialiased">
+        {/* Skip navigation link for accessibility */}
+        <a
+          href="#main-content"
+          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+        >
+          Ir al contenido principal
+        </a>
         <ClientLayout>{children}</ClientLayout>
       </body>
     </html>

@@ -2,6 +2,8 @@
 
 export const dynamic = "force-dynamic";
 
+import { RefreshCw, Unplug, Eye } from "lucide-react";
+
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,7 +21,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { RefreshCw, Unplug, Eye } from "lucide-react";
 
 export default function WalletsPage() {
   return (
@@ -85,7 +86,7 @@ export default function WalletsPage() {
                     <path
                       d="M16.5 6.43v-3.9a.53.53 0 00-.53-.53H8.03a.53.53 0 00-.53.53v3.9L3.71 10.2a.53.53 0 000 .7L7.5 14.57v3.9c0 .3.24.53.53.53h7.94c.3 0 .53-.24.53-.53v-3.9l3.79-3.67a.53.53 0 000-.7l-3.79-3.77zM8.56 2.56h6.88v3.23L12 9.22 8.56 5.8V2.56zM12 11.08l4.3 4.18-1.57 1.52h-5.46L7.7 15.26l4.3-4.18zM15.44 18.44H8.56v-3.23L12 11.78l3.44 3.43v3.23z"
                       fill="#F7931A"
-                    ></path>
+                    />
                   </svg>
                   Xverse
                 </CardTitle>

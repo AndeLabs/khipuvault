@@ -1,18 +1,11 @@
 "use client";
 
+import { ChevronRight, User, Wallet, Shield, Activity } from "lucide-react";
+import Link from "next/link";
 import * as React from "react";
+
 import { PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
-import Link from "next/link";
-import {
-  ChevronRight,
-  User,
-  Wallet,
-  Shield,
-  Activity,
-  Bell,
-  Palette,
-} from "lucide-react";
 
 const settingsSections = [
   {

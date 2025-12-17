@@ -31,7 +31,7 @@ export function useTransactionVerification(txHash?: string) {
         setVerification({ status: "loading" });
 
         const RPC_URL =
-          process.env.NEXT_PUBLIC_RPC_URL || "https://rpc.test.mezo.org";
+          process.env.NEXT_PUBLIC_RPC_URL ?? "https://rpc.test.mezo.org";
 
         // First check transaction details
         const txResponse = await fetch(RPC_URL, {
@@ -92,11 +92,13 @@ export function useTransactionVerification(txHash?: string) {
     let intervalId: NodeJS.Timeout | null = null;
 
     const verifyWithAbort = async () => {
-      if (abortController.signal.aborted) return;
+      if (abortController.signal.aborted) {
+        return;
+      }
       await verifyTransaction();
     };
 
-    verifyWithAbort();
+    void verifyWithAbort();
 
     // Set up polling for pending transactions - stops when verified
     intervalId = setInterval(() => {
@@ -107,17 +109,21 @@ export function useTransactionVerification(txHash?: string) {
           prev.status === "error" ||
           prev.status === "not_found"
         ) {
-          if (intervalId) clearInterval(intervalId);
+          if (intervalId) {
+            clearInterval(intervalId);
+          }
           return prev;
         }
-        verifyWithAbort();
+        void verifyWithAbort();
         return prev;
       });
     }, 5000);
 
     return () => {
       abortController.abort();
-      if (intervalId) clearInterval(intervalId);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
     };
   }, [txHash]);
 

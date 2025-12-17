@@ -1,5 +1,7 @@
 import { prisma } from "@khipu/database";
+
 import { AppError } from "../middleware/error-handler";
+
 import type { Deposit } from "@prisma/client";
 
 export class TransactionsService {

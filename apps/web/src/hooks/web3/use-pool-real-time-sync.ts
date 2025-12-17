@@ -11,9 +11,11 @@
 
 "use client";
 
-import { useBlockNumber } from "wagmi";
+/* eslint-env browser */
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { useBlockNumber } from "wagmi";
+
 import { usePoolEvents } from "./use-pool-events";
 
 /**
@@ -55,15 +57,21 @@ export function usePoolRealTimeSync() {
 
   // Refetch data when block changes
   useEffect(() => {
-    if (!blockNumber || isLoading) return;
+    if (!blockNumber || isLoading) {
+      return;
+    }
 
     // Refetch all active pool queries
-    queryClient.refetchQueries({
+    void queryClient.refetchQueries({
       queryKey: ["individual-pool-v3"],
       type: "active",
     });
 
-    console.log(`🔄 Block ${blockNumber}: Syncing pool data...`);
+    // Dev-only log - production builds will tree-shake this
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.log(`🔄 Block ${blockNumber}: Syncing pool data...`);
+    }
   }, [blockNumber, queryClient, isLoading]);
 }
 
@@ -72,7 +80,6 @@ export function usePoolRealTimeSync() {
  * Useful for showing "live" indicators or sync status
  */
 export function useIsSyncing() {
-  const queryClient = useQueryClient();
   const { data: blockNumber, isLoading } = useBlockNumber({
     watch: true,
   });

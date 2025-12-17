@@ -52,7 +52,7 @@ export function MusdBalanceTester() {
 
   useEffect(() => {
     if (isConnected && address) {
-      fetchDirectBalance();
+      void fetchDirectBalance();
     }
   }, [address, isConnected]);
 

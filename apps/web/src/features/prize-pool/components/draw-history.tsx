@@ -71,7 +71,7 @@ export function DrawHistory({
   };
 
   const copyAddress = (address: string) => {
-    navigator.clipboard.writeText(address);
+    void navigator.clipboard.writeText(address);
     setCopiedAddress(address);
     toast({
       title: "Address Copied",

@@ -9,8 +9,8 @@
 
 "use client";
 
-import { useAccount, useBalance, useChainId, useConfig } from "wagmi";
 import { useEffect, useState } from "react";
+import { useAccount, useBalance, useChainId, useConfig } from "wagmi";
 
 /**
  * Safe wrapper around useAccount hook
@@ -43,7 +43,10 @@ export function useSafeAccount() {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return useAccount();
   } catch (error) {
-    console.warn("useAccount called outside Web3Provider:", error);
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.warn("useAccount called outside Web3Provider:", error);
+    }
     return defaultValue;
   }
 }
@@ -70,7 +73,10 @@ export function useSafeBalance(address?: `0x${string}`) {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return useBalance({ address });
   } catch (error) {
-    console.warn("useBalance called outside Web3Provider:", error);
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.warn("useBalance called outside Web3Provider:", error);
+    }
     return { data: undefined, isLoading: false, isError: true, error };
   }
 }
@@ -96,7 +102,10 @@ export function useSafeChainId() {
     // eslint-disable-next-line react-hooks/rules-of-hooks
     return useChainId();
   } catch (error) {
-    console.warn("useChainId called outside Web3Provider:", error);
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.warn("useChainId called outside Web3Provider:", error);
+    }
     return undefined;
   }
 }
@@ -116,7 +125,9 @@ export function useWeb3Available(): boolean {
   }, []);
 
   useEffect(() => {
-    if (!isClient) return;
+    if (!isClient) {
+      return;
+    }
 
     try {
       // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -141,13 +152,34 @@ export function useConnectionStatus() {
     isConnected,
     isConnecting,
     isReconnecting,
-    statusText: isConnecting
-      ? "Conectando..."
-      : isReconnecting
-        ? "Reconectando..."
-        : isConnected
-          ? "Conectado"
-          : "Desconectado",
-    statusColor: isConnected ? "green" : isConnecting ? "yellow" : "red",
+    statusText: getStatusText(isConnecting, isReconnecting, isConnected),
+    statusColor: getStatusColor(isConnected, isConnecting),
   };
+}
+
+function getStatusText(
+  isConnecting: boolean,
+  isReconnecting: boolean,
+  isConnected: boolean,
+): string {
+  if (isConnecting) {
+    return "Conectando...";
+  }
+  if (isReconnecting) {
+    return "Reconectando...";
+  }
+  if (isConnected) {
+    return "Conectado";
+  }
+  return "Desconectado";
+}
+
+function getStatusColor(isConnected: boolean, isConnecting: boolean): string {
+  if (isConnected) {
+    return "green";
+  }
+  if (isConnecting) {
+    return "yellow";
+  }
+  return "red";
 }

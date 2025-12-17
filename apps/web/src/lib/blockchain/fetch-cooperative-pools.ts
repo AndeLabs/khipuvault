@@ -8,9 +8,19 @@
  * - Easy integration with TanStack Query
  */
 
-import { PublicClient } from "viem";
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 import { COOPERATIVE_POOL_ABI } from "@/lib/web3/cooperative-pool-abi";
+
+import type { PublicClient } from "viem";
+
+// Development-only logging
+const isDev = process.env.NODE_ENV === "development";
+// eslint-disable-next-line no-console
+const devLog = isDev ? console.log.bind(console) : () => {};
+// eslint-disable-next-line no-console
+const devWarn = isDev ? console.warn.bind(console) : () => {};
+// eslint-disable-next-line no-console
+const devError = isDev ? console.error.bind(console) : () => {};
 
 // Types matching contract interface
 export interface PoolInfo {
@@ -54,7 +64,7 @@ export async function fetchCooperativePools(
     return [];
   }
 
-  console.log(`🔄 Fetching ${poolCounter} cooperative pools`);
+  devLog(`🔄 Fetching ${poolCounter} cooperative pools`);
 
   try {
     const poolsData: PoolInfo[] = [];
@@ -77,17 +87,17 @@ export async function fetchCooperativePools(
         try {
           poolsData.push(result.value as PoolInfo);
         } catch (error) {
-          console.warn(`⚠️ Failed to parse pool ${i + 1}:`, error);
+          devWarn(`⚠️ Failed to parse pool ${i + 1}:`, error);
         }
       } else {
-        console.warn(`⚠️ Failed to fetch pool ${i + 1}:`, result.reason);
+        devWarn(`⚠️ Failed to fetch pool ${i + 1}:`, result.reason);
       }
     }
 
-    console.log(`✅ Fetched ${poolsData.length} cooperative pools`);
+    devLog(`✅ Fetched ${poolsData.length} cooperative pools`);
     return poolsData;
   } catch (error) {
-    console.error("Error fetching cooperative pools:", error);
+    devError("Error fetching cooperative pools:", error);
     return [];
   }
 }
@@ -114,7 +124,7 @@ export async function fetchPoolCounter(
 
     return Number(counter || 0);
   } catch (error) {
-    console.error("Error fetching pool counter:", error);
+    devError("Error fetching pool counter:", error);
     return 0;
   }
 }
@@ -144,7 +154,7 @@ export async function fetchPoolInfo(
 
     return poolInfo as PoolInfo;
   } catch (error) {
-    console.error(`Error fetching pool ${poolId}:`, error);
+    devError(`Error fetching pool ${poolId}:`, error);
     return null;
   }
 }
@@ -176,7 +186,7 @@ export async function fetchMemberInfo(
 
     return memberInfo as MemberInfo;
   } catch (error) {
-    console.error(`Error fetching member info for pool ${poolId}:`, error);
+    devError(`Error fetching member info for pool ${poolId}:`, error);
     return null;
   }
 }
@@ -206,7 +216,7 @@ export async function fetchPoolMembers(
 
     return (members as string[]) || [];
   } catch (error) {
-    console.error(`Error fetching pool members for pool ${poolId}:`, error);
+    devError(`Error fetching pool members for pool ${poolId}:`, error);
     return [];
   }
 }
@@ -238,7 +248,7 @@ export async function fetchMemberYield(
 
     return yieldAmount as bigint;
   } catch (error) {
-    console.error(`Error calculating member yield:`, error);
+    devError(`Error calculating member yield:`, error);
     return null;
   }
 }

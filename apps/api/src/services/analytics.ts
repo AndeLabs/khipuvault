@@ -1,6 +1,8 @@
 import { prisma } from "@khipu/database";
-import type { EventLog } from "@prisma/client";
+
 import { cache, CACHE_TTL, CACHE_KEYS } from "../lib/cache";
+
+import type { EventLog } from "@prisma/client";
 
 export class AnalyticsService {
   async getGlobalStats() {

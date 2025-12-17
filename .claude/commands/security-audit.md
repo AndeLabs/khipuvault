@@ -10,7 +10,9 @@ Perform a security review of KhipuVault code using automated tools and manual an
 ## Automated Tools Available
 
 ### Smart Contracts (Solidity)
+
 1. **Aderyn** (Cyfrin) - Rust-based static analyzer with 63 detectors
+
    ```bash
    cd packages/contracts && aderyn . --output security/scans/aderyn-$(date +%Y%m%d).md
    ```
@@ -21,6 +23,7 @@ Perform a security review of KhipuVault code using automated tools and manual an
    ```
 
 ### General Code (TypeScript/JavaScript)
+
 3. **Semgrep** - Security scanner with 5000+ rules
    ```bash
    semgrep scan --config auto apps/ packages/ --output security/scans/semgrep-$(date +%Y%m%d).json
@@ -29,6 +32,7 @@ Perform a security review of KhipuVault code using automated tools and manual an
 ## Smart Contract Security Checklist
 
 Check for:
+
 - Reentrancy vulnerabilities
 - Integer overflow/underflow (Solidity 0.8+ safe, but verify)
 - Access control issues
@@ -43,6 +47,7 @@ Check for:
 ## Backend Security (apps/api)
 
 Check for:
+
 - SQL injection (Prisma parameterized queries)
 - Authentication bypass
 - Authorization flaws
@@ -54,6 +59,7 @@ Check for:
 ## Frontend Security (apps/web)
 
 Check for:
+
 - XSS vulnerabilities
 - CSP headers configuration
 - Wallet connection security
@@ -62,6 +68,7 @@ Check for:
 ## Instructions
 
 For the argument provided (or all if none):
+
 1. Run available automated scanners
 2. Review the generated reports
 3. Perform manual code review for complex logic

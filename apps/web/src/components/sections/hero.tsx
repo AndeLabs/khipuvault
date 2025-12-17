@@ -1,8 +1,11 @@
 "use client";
 
+import { X } from "lucide-react";
+import Link from "next/link";
 import { useState } from "react";
-import { Button, buttonVariants } from "@/components/ui/button";
+
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,8 +13,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { X } from "lucide-react";
-import Link from "next/link";
 import { cn } from "@/lib/utils";
 
 export function Hero() {
@@ -30,7 +31,7 @@ export function Hero() {
             </h1>
             <p className="mx-auto mt-6 max-w-3xl text-lg text-muted-foreground md:text-xl">
               Digitizing Latin American financial traditions. Pasanaku, Tandas
-              and Roscas on blockchain powered by Mezo's mUSD.
+              and Roscas on blockchain powered by Mezo&apos;s mUSD.
             </p>
             <div className="mt-10 flex flex-col items-center justify-center gap-4 sm:flex-row">
               <Link

@@ -10,6 +10,7 @@ Run a quick automated security scan on the smart contracts using Aderyn.
 ## Instructions
 
 1. Run Aderyn on the contracts:
+
 ```bash
 cd /Users/munay/dev/KhipuVault/packages/contracts && aderyn . --output /Users/munay/dev/KhipuVault/security/scans/aderyn-$(date +%Y%m%d-%H%M).md 2>&1
 ```

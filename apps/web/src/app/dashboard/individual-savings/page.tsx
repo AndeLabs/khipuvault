@@ -2,8 +2,19 @@
 
 export const dynamic = "force-dynamic";
 
+import {
+  ArrowDownCircle,
+  ArrowUpCircle,
+  BarChart3,
+  Gift,
+  Database,
+} from "lucide-react";
 import * as React from "react";
+import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
+
 import { PageHeader, PageSection } from "@/components/layout";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Web3ErrorBoundary } from "@/components/web3-error-boundary";
 import {
   DepositCard,
@@ -16,25 +27,14 @@ import {
   YieldAnalytics,
   GetMusdGuide,
 } from "@/features/individual-savings";
-import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
-import { useDepositWithApprove } from "@/hooks/web3/use-deposit-with-approve";
-import { useSimpleWithdraw } from "@/hooks/web3/use-simple-withdraw";
-import { useClaimYields } from "@/hooks/web3/use-claim-yields";
 import { useAutoCompound } from "@/hooks/web3/use-auto-compound";
-import { useUserTransactionHistory } from "@/hooks/web3/use-user-transaction-history";
+import { useClaimYields } from "@/hooks/web3/use-claim-yields";
+import { useDepositWithApprove } from "@/hooks/web3/use-deposit-with-approve";
+import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import { usePoolEvents } from "@/hooks/web3/use-pool-events";
-import { useAccount } from "wagmi";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  ArrowDownCircle,
-  ArrowUpCircle,
-  BarChart3,
-  Users,
-  Gift,
-  Database,
-} from "lucide-react";
+import { useSimpleWithdraw } from "@/hooks/web3/use-simple-withdraw";
+import { useUserTransactionHistory } from "@/hooks/web3/use-user-transaction-history";
 import { V3_FEATURES } from "@/lib/web3/contracts-v3";
-import { formatUnits } from "viem";
 
 /**
  * Individual Savings Page - V4 Production Ready with ALL V3 Features
@@ -74,19 +74,13 @@ export default function IndividualSavingsPage() {
     useUserTransactionHistory();
 
   // Real deposit handler - with optional referral code support
-  const handleDeposit = async (amount: string, referralCode?: string) => {
+  const handleDeposit = async (amount: string, _referralCode?: string) => {
     try {
-      console.log(
-        "💰 Depositing:",
-        amount,
-        "mUSD",
-        referralCode ? `with referral: ${referralCode}` : "",
-      );
       await deposit(amount);
-      console.log("✅ Deposit successful!");
       // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
       // and by the deposit hook's onSuccess callback - no setTimeout needed
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("❌ Deposit error:", error);
       throw error;
     }
@@ -95,11 +89,10 @@ export default function IndividualSavingsPage() {
   // Real withdraw handler - connected to blockchain
   const handleWithdraw = async (amount: string) => {
     try {
-      console.log("💸 Withdrawing:", amount, "mUSD");
       await withdraw(amount);
-      console.log("✅ Withdraw successful!");
       // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("❌ Withdraw error:", error);
       throw error;
     }
@@ -108,11 +101,10 @@ export default function IndividualSavingsPage() {
   // Real claim yields handler - connected to blockchain
   const handleClaimYields = async () => {
     try {
-      console.log("🎁 Claiming yields...");
       await claimYields();
-      console.log("✅ Yields claimed!");
       // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("❌ Claim error:", error);
       throw error;
     }
@@ -122,11 +114,10 @@ export default function IndividualSavingsPage() {
   const handleToggleAutoCompound = async () => {
     try {
       const newState = !poolData.autoCompoundEnabled;
-      console.log("🔄 Toggling auto-compound to:", newState);
       await setAutoCompound(newState);
-      console.log("✅ Auto-compound toggled!");
       // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error("❌ Auto-compound toggle error:", error);
       throw error;
     }
@@ -170,8 +161,9 @@ export default function IndividualSavingsPage() {
 
   return (
     <Web3ErrorBoundary
-      onError={(error, errorInfo) => {
-        console.error("Individual Savings Error:", error, errorInfo);
+      onError={(error, _errorInfo) => {
+        // eslint-disable-next-line no-console
+        console.error("Individual Savings Error:", error, _errorInfo);
       }}
     >
       <div className="space-y-8 animate-slide-up">
@@ -184,10 +176,10 @@ export default function IndividualSavingsPage() {
         {/* Position Overview - Real Data */}
         <PageSection>
           <PositionCard
-            totalDeposited={poolData.userInfo?.deposit?.toString() || "0"}
-            currentValue={poolData.userTotalBalance?.toString() || "0"}
-            totalYields={poolData.userInfo?.netYields?.toString() || "0"}
-            referralRewards={poolData.referralStats?.rewards?.toString() || "0"}
+            totalDeposited={poolData.userInfo?.deposit?.toString() ?? "0"}
+            currentValue={poolData.userTotalBalance?.toString() ?? "0"}
+            totalYields={poolData.userInfo?.netYields?.toString() ?? "0"}
+            referralRewards={poolData.referralStats?.rewards?.toString() ?? "0"}
             apy={apy}
             change24h={0} // Not available from contract - would need historical data API
             isLoading={poolData.isLoading}
@@ -213,7 +205,7 @@ export default function IndividualSavingsPage() {
               <TabsContent value="deposit" className="mt-6">
                 <DepositCard
                   balance={
-                    poolData.walletBalances.musdBalance?.toString() || "0"
+                    poolData.walletBalances.musdBalance?.toString() ?? "0"
                   }
                   minDeposit={minDeposit}
                   apy={apy}
@@ -233,7 +225,7 @@ export default function IndividualSavingsPage() {
                 {/* Guide for getting testnet mUSD */}
                 <GetMusdGuide
                   walletBalance={
-                    poolData.walletBalances.musdBalance?.toString() || "0"
+                    poolData.walletBalances.musdBalance?.toString() ?? "0"
                   }
                   className="mt-6"
                 />
@@ -241,7 +233,7 @@ export default function IndividualSavingsPage() {
               <TabsContent value="withdraw" className="mt-6">
                 <WithdrawCard
                   availableBalance={
-                    poolData.userTotalBalance?.toString() || "0"
+                    poolData.userTotalBalance?.toString() ?? "0"
                   }
                   onWithdraw={handleWithdraw}
                   isLoading={isWithdrawing}
@@ -251,8 +243,8 @@ export default function IndividualSavingsPage() {
 
             {/* Referral Dashboard */}
             <ReferralDashboard
-              referralCount={poolData.referralStats?.count || BigInt(0)}
-              totalRewards={poolData.referralStats?.rewards || BigInt(0)}
+              referralCount={poolData.referralStats?.count ?? BigInt(0)}
+              totalRewards={poolData.referralStats?.rewards ?? BigInt(0)}
               referrerAddress={poolData.referralStats?.referrer}
               isLoading={poolData.isLoading}
               onRefresh={poolData.refetchAll}

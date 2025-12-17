@@ -5,14 +5,16 @@
 
 "use client";
 
-import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback, useState } from "react";
+import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+
 import {
   MEZO_V3_ADDRESSES,
   INDIVIDUAL_POOL_V3_ABI,
   V3_FEATURES,
 } from "@/lib/web3/contracts-v3";
+
 import { QUERY_KEYS, INITIAL_TX_STATE, TransactionState } from "./constants";
 
 const INDIVIDUAL_POOL_ADDRESS =
@@ -92,8 +94,10 @@ export function useDeposit() {
   // Refetch data on success
   useEffect(() => {
     if (isSuccess) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.INDIVIDUAL_POOL });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.INDIVIDUAL_POOL,
+      });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
     }
   }, [isSuccess, queryClient]);
 
@@ -161,8 +165,10 @@ export function usePartialWithdraw() {
   // Refetch data on success
   useEffect(() => {
     if (isSuccess) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.INDIVIDUAL_POOL });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.INDIVIDUAL_POOL,
+      });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
     }
   }, [isSuccess, queryClient]);
 
@@ -216,8 +222,10 @@ export function useFullWithdraw() {
   // Refetch data on success
   useEffect(() => {
     if (isSuccess) {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.INDIVIDUAL_POOL });
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
+      void queryClient.invalidateQueries({
+        queryKey: QUERY_KEYS.INDIVIDUAL_POOL,
+      });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
     }
   }, [isSuccess, queryClient]);
 

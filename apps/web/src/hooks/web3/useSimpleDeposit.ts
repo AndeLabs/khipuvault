@@ -11,15 +11,16 @@
 
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { parseEther, type Address } from "viem";
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
   useReadContract,
 } from "wagmi";
-import { useQueryClient } from "@tanstack/react-query";
-import { parseEther, type Address } from "viem";
+
 import { MEZO_V3_ADDRESSES } from "@/lib/web3/contracts-v3";
 
 const MUSD_ADDRESS = MEZO_V3_ADDRESSES.musd as Address;
@@ -126,7 +127,6 @@ export function useSimpleDeposit() {
     isLoading: isDepositPending,
     isSuccess: isDepositSuccess,
     isError: isDepositError,
-    data: depositReceipt,
   } = useWaitForTransactionReceipt({
     hash: depositTxHash,
   });
@@ -151,12 +151,13 @@ export function useSimpleDeposit() {
             args: [amountToDeposit],
           });
         } catch (err) {
+          // eslint-disable-next-line no-console
           console.error("Error proceeding with deposit after approval:", err);
           setState("error");
         }
       };
 
-      proceedWithDeposit();
+      void proceedWithDeposit();
     }
   }, [
     isApproveSuccess,
@@ -170,10 +171,10 @@ export function useSimpleDeposit() {
   useEffect(() => {
     if (isDepositSuccess && state === "waitingDeposit") {
       // Invalidate all pool-related queries to ensure UI updates
-      queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
-      queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
       // Also invalidate MUSD balance queries
-      queryClient.invalidateQueries({
+      void queryClient.invalidateQueries({
         predicate: (query) =>
           Array.isArray(query.queryKey) &&
           query.queryKey.some(
@@ -203,7 +204,7 @@ export function useSimpleDeposit() {
     if (approveError) {
       setState("error");
 
-      const msg = approveError.message || "";
+      const msg = approveError.message ?? "";
       if (msg.includes("User rejected") || msg.includes("user rejected")) {
         setError("Rechazaste la transacción en tu wallet");
       } else if (msg.includes("insufficient funds")) {
@@ -218,7 +219,7 @@ export function useSimpleDeposit() {
     if (depositError) {
       setState("error");
 
-      const msg = depositError.message || "";
+      const msg = depositError.message ?? "";
       if (msg.includes("User rejected") || msg.includes("user rejected")) {
         setError("Rechazaste la transacción en tu wallet");
       } else if (msg.includes("insufficient funds")) {

@@ -1,6 +1,5 @@
 "use client";
 
-import * as React from "react";
 import {
   Wallet,
   WifiOff,
@@ -9,6 +8,10 @@ import {
   RefreshCw,
   Home,
 } from "lucide-react";
+import * as React from "react";
+import { useConnect, useAccount } from "wagmi";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -18,8 +21,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useConnect, useAccount } from "wagmi";
+
 import { ErrorBoundary, ErrorFallbackProps } from "./error-boundary";
 
 interface Web3ErrorBoundaryProps {
@@ -183,7 +185,7 @@ function parseWeb3Error(error: Error | null): ParsedWeb3Error {
  */
 function Web3ErrorFallback({
   error,
-  errorInfo,
+  errorInfo: _errorInfo,
   resetError,
 }: ErrorFallbackProps) {
   const parsedError = parseWeb3Error(error);
@@ -192,31 +194,26 @@ function Web3ErrorFallback({
   const isDevelopment = process.env.NODE_ENV === "development";
 
   // Get icon and color based on error type
-  const getErrorIcon = () => {
-    switch (parsedError.type) {
-      case Web3ErrorType.WALLET_DISCONNECTED:
-        return <Wallet className="h-6 w-6" />;
-      case Web3ErrorType.NETWORK_ERROR:
-        return <WifiOff className="h-6 w-6" />;
-      case Web3ErrorType.TRANSACTION_REJECTED:
-        return <XCircle className="h-6 w-6" />;
-      default:
-        return <AlertTriangle className="h-6 w-6" />;
-    }
+  const errorIconMap = {
+    [Web3ErrorType.WALLET_DISCONNECTED]: <Wallet className="h-6 w-6" />,
+    [Web3ErrorType.NETWORK_ERROR]: <WifiOff className="h-6 w-6" />,
+    [Web3ErrorType.TRANSACTION_REJECTED]: <XCircle className="h-6 w-6" />,
+    [Web3ErrorType.INSUFFICIENT_FUNDS]: <AlertTriangle className="h-6 w-6" />,
+    [Web3ErrorType.CONTRACT_ERROR]: <AlertTriangle className="h-6 w-6" />,
+    [Web3ErrorType.UNKNOWN]: <AlertTriangle className="h-6 w-6" />,
   };
 
-  const getErrorColor = () => {
-    switch (parsedError.type) {
-      case Web3ErrorType.TRANSACTION_REJECTED:
-        return "text-yellow-500 bg-yellow-500/10";
-      case Web3ErrorType.WALLET_DISCONNECTED:
-        return "text-blue-500 bg-blue-500/10";
-      case Web3ErrorType.NETWORK_ERROR:
-        return "text-orange-500 bg-orange-500/10";
-      default:
-        return "text-destructive bg-destructive/10";
-    }
+  const errorColorMap = {
+    [Web3ErrorType.TRANSACTION_REJECTED]: "text-yellow-500 bg-yellow-500/10",
+    [Web3ErrorType.WALLET_DISCONNECTED]: "text-blue-500 bg-blue-500/10",
+    [Web3ErrorType.NETWORK_ERROR]: "text-orange-500 bg-orange-500/10",
+    [Web3ErrorType.INSUFFICIENT_FUNDS]: "text-destructive bg-destructive/10",
+    [Web3ErrorType.CONTRACT_ERROR]: "text-destructive bg-destructive/10",
+    [Web3ErrorType.UNKNOWN]: "text-destructive bg-destructive/10",
   };
+
+  const getErrorIcon = () => errorIconMap[parsedError.type];
+  const getErrorColor = () => errorColorMap[parsedError.type];
 
   const handleReconnectWallet = async () => {
     try {
@@ -226,6 +223,7 @@ function Web3ErrorFallback({
         resetError(); // Reset error after successful connection
       }
     } catch (err) {
+      // eslint-disable-next-line no-console
       console.error("Error reconnecting wallet:", err);
     }
   };
@@ -284,13 +282,18 @@ function Web3ErrorFallback({
             </div>
             <div>
               <CardTitle className="text-2xl">
-                {parsedError.type === Web3ErrorType.TRANSACTION_REJECTED
-                  ? "Transaccion Rechazada"
-                  : parsedError.type === Web3ErrorType.WALLET_DISCONNECTED
-                    ? "Wallet Desconectada"
-                    : parsedError.type === Web3ErrorType.NETWORK_ERROR
-                      ? "Error de Red"
-                      : "Error Web3"}
+                {(() => {
+                  if (parsedError.type === Web3ErrorType.TRANSACTION_REJECTED) {
+                    return "Transaccion Rechazada";
+                  }
+                  if (parsedError.type === Web3ErrorType.WALLET_DISCONNECTED) {
+                    return "Wallet Desconectada";
+                  }
+                  if (parsedError.type === Web3ErrorType.NETWORK_ERROR) {
+                    return "Error de Red";
+                  }
+                  return "Error Web3";
+                })()}
               </CardTitle>
               <CardDescription>
                 {parsedError.type === Web3ErrorType.TRANSACTION_REJECTED
@@ -321,7 +324,7 @@ function Web3ErrorFallback({
               </summary>
               <div className="mt-2 p-4 bg-muted/50 rounded-lg overflow-x-auto">
                 <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
-                  {parsedError.originalError.stack ||
+                  {parsedError.originalError.stack ??
                     parsedError.originalError.message}
                 </pre>
               </div>

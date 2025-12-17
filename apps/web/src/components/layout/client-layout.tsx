@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { ReactNode } from "react";
+
 import { ErrorBoundary } from "@/components/error-boundary";
 import { OnboardingModal } from "@/components/onboarding";
 
@@ -16,7 +17,7 @@ const ClientProviders = dynamic(
     loading: () => (
       <div className="min-h-screen flex items-center justify-center bg-background">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lavanda mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-lavanda mx-auto mb-4" />
           <p className="text-muted-foreground">Loading...</p>
         </div>
       </div>
@@ -43,6 +44,7 @@ export function ClientLayout({ children, initialState }: ClientLayoutProps) {
       onError={(error, errorInfo) => {
         // Log to error reporting service in production
         if (process.env.NODE_ENV === "production") {
+          // eslint-disable-next-line no-console
           console.error("Application Error:", error, errorInfo);
         }
       }}

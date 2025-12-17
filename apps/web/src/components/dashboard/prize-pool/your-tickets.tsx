@@ -55,7 +55,7 @@ export function YourTickets() {
         title: "¡Premio reclamado!",
         description: "El premio ha sido transferido a tu wallet",
       });
-      refetch();
+      void refetch();
     } catch (error: any) {
       toast({
         title: "Error al reclamar premio",
@@ -72,7 +72,7 @@ export function YourTickets() {
         title: "Capital retirado",
         description: "Tu capital ha sido devuelto",
       });
-      refetch();
+      void refetch();
     } catch (error: any) {
       toast({
         title: "Error al retirar capital",

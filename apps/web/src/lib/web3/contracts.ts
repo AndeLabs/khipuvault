@@ -16,13 +16,14 @@
 // ============================================================================
 // These ABIs are generated from the Mezo protocol interfaces in contracts/src/interfaces
 
+import IndividualPoolV3ABI from "@/contracts/abis/IndividualPoolV3.json";
 import BorrowerOperationsABI from "@/contracts/mezo-abis/BorrowerOperations.json";
-import TroveManagerABI from "@/contracts/mezo-abis/TroveManager.json";
-import PriceFeedABI from "@/contracts/mezo-abis/PriceFeed.json";
 import HintHelpersABI from "@/contracts/mezo-abis/HintHelpers.json";
-import SortedTrovesABI from "@/contracts/mezo-abis/SortedTroves.json";
 import MUSDABI from "@/contracts/mezo-abis/MUSD.json";
+import PriceFeedABI from "@/contracts/mezo-abis/PriceFeed.json";
+import SortedTrovesABI from "@/contracts/mezo-abis/SortedTroves.json";
 import StabilityPoolABI from "@/contracts/mezo-abis/StabilityPool.json";
+import TroveManagerABI from "@/contracts/mezo-abis/TroveManager.json";
 
 // Ensure ABIs are arrays (some bundlers might wrap them in {default: ...})
 export const MEZO_BORROWER_OPERATIONS_ABI = Array.isArray(BorrowerOperationsABI)
@@ -79,7 +80,10 @@ export function getContractAddress(
 ): string {
   const address = MEZO_TESTNET_ADDRESSES[key];
   if (address === "0x0000000000000000000000000000000000000000") {
-    console.warn(`⚠️ Contract "${key}" not deployed yet on Mezo Testnet`);
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.warn(`⚠️ Contract "${key}" not deployed yet on Mezo Testnet`);
+    }
   }
   return address;
 }
@@ -99,9 +103,6 @@ export const MUSD_ABI = MEZO_MUSD_ABI;
 // INDIVIDUAL POOL ABI - V3 (UUPS Upgradeable)
 // ============================================================================
 // Updated: Nov 2, 2025 - V3 with auto-compound, referrals, flash loan protection
-// Import V3 ABI from contracts/abis
-
-import IndividualPoolV3ABI from "@/contracts/abis/IndividualPoolV3.json";
 
 export const INDIVIDUAL_POOL_ABI = (IndividualPoolV3ABI as any).abi;
 
@@ -174,6 +175,8 @@ export function formatMUSD(amount: bigint): string {
  */
 export function parseBTC(amount: string): bigint {
   const btcFloat = parseFloat(amount);
-  if (isNaN(btcFloat)) return 0n;
+  if (isNaN(btcFloat)) {
+    return 0n;
+  }
   return BigInt(Math.floor(btcFloat * 1e18));
 }

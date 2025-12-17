@@ -1,6 +1,7 @@
-import pinoHttp, { type HttpLogger } from "pino-http";
-import { logger } from "../lib/logger";
 import type { Request, Response } from "express";
+import pinoHttp, { type HttpLogger } from "pino-http";
+
+import { logger } from "../lib/logger";
 
 /**
  * Custom serializer for request logging

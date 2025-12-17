@@ -1,12 +1,13 @@
 "use client";
 
+import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
+
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-import { Menu } from "lucide-react";
-import { ConnectButton } from "@/components/wallet/connect-button";
-import { useState, useEffect } from "react";
+import { SmartConnectButton } from "@/components/wallet/smart-connect-button";
 
 const navLinks = [
   { href: "#features", label: "Features" },
@@ -51,7 +52,7 @@ export function Header() {
 
         <div className="flex items-center gap-3">
           {/* Connect Wallet Button */}
-          {mounted && <ConnectButton />}
+          {mounted && <SmartConnectButton />}
 
           <div className="hidden md:flex">
             <Link href="/dashboard">
@@ -100,7 +101,7 @@ export function Header() {
                   {/* Connect Wallet Button en mobile */}
                   {mounted && (
                     <div className="w-full">
-                      <ConnectButton />
+                      <SmartConnectButton />
                     </div>
                   )}
                   <Link href="/dashboard">

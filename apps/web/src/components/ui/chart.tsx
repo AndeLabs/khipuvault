@@ -44,7 +44,7 @@ const ChartContainer = React.forwardRef<
   }
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId();
-  const chartId = `chart-${id || uniqueId.replace(/:/g, "")}`;
+  const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`;
 
   return (
     <ChartContext.Provider value={{ config }}>
@@ -67,14 +67,79 @@ const ChartContainer = React.forwardRef<
 });
 ChartContainer.displayName = "Chart";
 
+/**
+ * Validates CSS color values to prevent XSS injection
+ * Allows: hex colors, rgb/rgba, hsl/hsla, named colors, CSS variables
+ */
+function isValidCssColor(color: string): boolean {
+  // Hex colors: #rgb, #rrggbb, #rrggbbaa
+  if (/^#[0-9A-Fa-f]{3,8}$/.test(color)) {
+    return true;
+  }
+  // RGB/RGBA: rgb(r,g,b) or rgba(r,g,b,a)
+  if (/^rgba?\([^)]+\)$/.test(color)) {
+    return true;
+  }
+  // HSL/HSLA: hsl(h,s,l) or hsla(h,s,l,a)
+  if (/^hsla?\([^)]+\)$/.test(color)) {
+    return true;
+  }
+  // CSS variables: var(--name) or var(--name, fallback)
+  if (/^var\(--[a-zA-Z0-9-]+(?:,\s*[^)]+)?\)$/.test(color)) {
+    return true;
+  }
+  // Named colors (common ones) - whitelist approach
+  const namedColors = [
+    "transparent",
+    "currentColor",
+    "inherit",
+    "initial",
+    "unset",
+    "black",
+    "white",
+    "red",
+    "green",
+    "blue",
+    "yellow",
+    "orange",
+    "purple",
+    "pink",
+    "gray",
+    "grey",
+  ];
+  if (namedColors.includes(color.toLowerCase())) {
+    return true;
+  }
+  return false;
+}
+
+/**
+ * Sanitizes CSS key names to prevent injection
+ */
+function sanitizeCssKey(key: string): string {
+  // Only allow alphanumeric and hyphens
+  return key.replace(/[^a-zA-Z0-9-]/g, "");
+}
+
 const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
   const colorConfig = Object.entries(config).filter(
-    ([, config]) => config.theme || config.color,
+    ([, config]) => config.theme ?? config.color,
   );
 
   if (!colorConfig.length) {
     return null;
   }
+
+  // Build CSS using safe inline styles instead of dangerouslySetInnerHTML
+  const cssVariables: Record<string, string> = {};
+
+  colorConfig.forEach(([key, itemConfig]) => {
+    const color =
+      itemConfig.theme?.light ?? itemConfig.theme?.dark ?? itemConfig.color;
+    if (color && isValidCssColor(color)) {
+      cssVariables[`--color-${sanitizeCssKey(key)}`] = color;
+    }
+  });
 
   return (
     <style
@@ -86,10 +151,15 @@ ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
     const color =
-      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ||
+      itemConfig.theme?.[theme as keyof typeof itemConfig.theme] ??
       itemConfig.color;
-    return color ? `  --color-${key}: ${color};` : null;
+    // Validate color to prevent XSS injection
+    if (color && isValidCssColor(color)) {
+      return `  --color-${sanitizeCssKey(key)}: ${color};`;
+    }
+    return null;
   })
+  .filter(Boolean)
   .join("\n")}
 }
 `,
@@ -139,11 +209,11 @@ const ChartTooltipContent = React.forwardRef<
       }
 
       const [item] = payload;
-      const key = `${labelKey || item.dataKey || item.name || "value"}`;
+      const key = `${labelKey ?? item.dataKey ?? item.name ?? "value"}`;
       const itemConfig = getPayloadConfigFromPayload(config, item, key);
       const value =
         !labelKey && typeof label === "string"
-          ? config[label as keyof typeof config]?.label || label
+          ? (config[label as keyof typeof config]?.label ?? label)
           : itemConfig?.label;
 
       if (labelFormatter) {
@@ -186,9 +256,9 @@ const ChartTooltipContent = React.forwardRef<
         {!nestLabel ? tooltipLabel : null}
         <div className="grid gap-1.5">
           {payload.map((item, index) => {
-            const key = `${nameKey || item.name || item.dataKey || "value"}`;
+            const key = `${nameKey ?? item.name ?? item.dataKey ?? "value"}`;
             const itemConfig = getPayloadConfigFromPayload(config, item, key);
-            const indicatorColor = color || item.payload.fill || item.color;
+            const indicatorColor = color ?? item.payload.fill ?? item.color;
 
             return (
               <div
@@ -235,7 +305,7 @@ const ChartTooltipContent = React.forwardRef<
                       <div className="grid gap-1.5">
                         {nestLabel ? tooltipLabel : null}
                         <span className="text-muted-foreground">
-                          {itemConfig?.label || item.name}
+                          {itemConfig?.label ?? item.name}
                         </span>
                       </div>
                       {item.value && (
@@ -286,7 +356,7 @@ const ChartLegendContent = React.forwardRef<
         )}
       >
         {payload.map((item) => {
-          const key = `${nameKey || item.dataKey || "value"}`;
+          const key = `${nameKey ?? item.dataKey ?? "value"}`;
           const itemConfig = getPayloadConfigFromPayload(config, item, key);
 
           return (

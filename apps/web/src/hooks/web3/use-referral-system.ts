@@ -11,15 +11,16 @@
 
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { parseEther, type Address } from "viem";
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
   useReadContract,
 } from "wagmi";
-import { useQueryClient } from "@tanstack/react-query";
-import { parseEther, type Address } from "viem";
+
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address;
@@ -159,7 +160,7 @@ export function useReferralSystem() {
   // Handle approval flow
   useEffect(() => {
     if (isApproveSuccess && state === "waitingApproval") {
-      refetchAllowance().then(() => {
+      void refetchAllowance().then(() => {
         setState("claiming");
 
         claimWrite({
@@ -183,8 +184,8 @@ export function useReferralSystem() {
   useEffect(() => {
     if (isClaimSuccess && state === "processing") {
       // Invalidate specific queries instead of all
-      queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
-      refetchStats();
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
+      void refetchStats();
 
       setState("success");
     }
@@ -205,11 +206,11 @@ export function useReferralSystem() {
 
   // Handle errors
   useEffect(() => {
-    if (approveError || claimError) {
-      const err = approveError || claimError;
+    if (approveError ?? claimError) {
+      const err = approveError ?? claimError;
       setState("error");
 
-      const msg = err?.message || "";
+      const msg = err?.message ?? "";
       if (msg.includes("User rejected") || msg.includes("user rejected")) {
         setError("Rechazaste la transacción en tu wallet");
       } else if (msg.includes("NoReferralRewards")) {
@@ -345,7 +346,7 @@ export function useReferralSystem() {
     // State
     state,
     error,
-    txHash: claimReceipt?.transactionHash || claimTxHash || approveTxHash,
+    txHash: claimReceipt?.transactionHash ?? claimTxHash ?? approveTxHash,
     isProcessing: state !== "idle" && state !== "success" && state !== "error",
     canClaim:
       (state === "idle" || state === "error" || state === "success") &&

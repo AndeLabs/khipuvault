@@ -1,5 +1,4 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { AnalyticsService } from "../../services/analytics";
 import type {
   User,
   Pool,
@@ -9,6 +8,8 @@ import type {
   DepositType,
   TransactionStatus,
 } from "@prisma/client";
+
+import { AnalyticsService } from "../../services/analytics";
 
 // Mock Prisma
 vi.mock("@khipu/database", () => ({

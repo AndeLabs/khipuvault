@@ -47,8 +47,16 @@ module.exports = {
   },
   overrides: [
     {
-      // Relax rules for test files
-      files: ['**/*.test.ts', '**/*.spec.ts', '**/__tests__/**'],
+      // Relax rules for test files and test setup
+      files: [
+        '**/*.test.ts',
+        '**/*.spec.ts',
+        '**/__tests__/**',
+        '**/test/**',
+        '**/tests/**',
+        '**/setup.ts',
+        '**/vitest.setup.ts',
+      ],
       env: {
         jest: true,
         node: true,
@@ -57,6 +65,7 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'off',
         '@typescript-eslint/no-non-null-assertion': 'off',
         'no-console': 'off',
+        'no-undef': 'off', // Vitest/Jest globals handled by types
       },
     },
     {

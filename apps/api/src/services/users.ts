@@ -1,6 +1,8 @@
 import { prisma } from "@khipu/database";
-import { AppError } from "../middleware/error-handler";
+
 import { cache, CACHE_TTL, CACHE_KEYS } from "../lib/cache";
+import { AppError } from "../middleware/error-handler";
+
 import type { User, Deposit, PoolType } from "@prisma/client";
 
 // Ethereum address validation regex
@@ -259,7 +261,7 @@ export class UsersService {
   ) {
     // Validate address before database operation
     const normalizedAddress = validateAndNormalizeAddress(address);
-    return await prisma.user.upsert({
+    return prisma.user.upsert({
       where: { address: normalizedAddress },
       update: {
         ...data,

@@ -1,4 +1,5 @@
 import { Router, type Router as ExpressRouter } from "express";
+
 import { prisma } from "@khipu/database";
 
 const router: ExpressRouter = Router();

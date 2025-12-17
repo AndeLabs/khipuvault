@@ -1,16 +1,5 @@
 "use client";
 
-import * as React from "react";
-import { useAccount } from "wagmi";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import {
   Wallet,
   Coins,
@@ -21,8 +10,19 @@ import {
   ExternalLink,
   ArrowRight,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
+import * as React from "react";
+import { useAccount } from "wagmi";
+
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
 
 const ONBOARDING_STORAGE_KEY = "khipuvault_onboarding_completed";
 const MEZO_FAUCET_URL = "https://faucet.mezo.org";
@@ -171,7 +171,9 @@ export function OnboardingModal() {
   const currentStepData = steps[currentStep];
   const progress = ((currentStep + 1) / steps.length) * 100;
 
-  if (!mounted) return null;
+  if (!mounted) {
+    return null;
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>

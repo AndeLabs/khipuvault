@@ -120,7 +120,7 @@ export function BuyTicketsModal({
 
       // Refetch lottery data after successful purchase
       setTimeout(() => {
-        queryClient.refetchQueries({ type: "active" });
+        void queryClient.refetchQueries({ type: "active" });
       }, 3000);
 
       toast({

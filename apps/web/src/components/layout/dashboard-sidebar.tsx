@@ -1,11 +1,12 @@
+import { Home, Settings, Handshake, Lightbulb, Trophy } from "lucide-react";
 import Link from "next/link";
+
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { Home, Settings, Handshake, Lightbulb, Trophy } from "lucide-react";
 
 export const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },
@@ -36,8 +37,8 @@ export function DashboardSidebar() {
             </span>
             <span className="sr-only">KhipuVault</span>
           </Link>
-          {navItems.map((item, index) => (
-            <Tooltip key={index}>
+          {navItems.map((item) => (
+            <Tooltip key={item.href}>
               <TooltipTrigger asChild>
                 <Link
                   href={item.href}

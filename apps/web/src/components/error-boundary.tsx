@@ -1,7 +1,9 @@
 "use client";
 
-import * as React from "react";
 import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import * as React from "react";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -11,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -75,6 +76,7 @@ export class ErrorBoundary extends React.Component<
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
     // Log error details to console for debugging
+    // eslint-disable-next-line no-console
     console.error("ErrorBoundary caught an error:", error, errorInfo);
 
     // Update state with error info
@@ -157,7 +159,7 @@ function DefaultErrorFallback({
           {/* Error Message */}
           <Alert variant="destructive">
             <AlertDescription className="font-mono text-sm">
-              {error?.message || "Error desconocido"}
+              {error?.message ?? "Error desconocido"}
             </AlertDescription>
           </Alert>
 

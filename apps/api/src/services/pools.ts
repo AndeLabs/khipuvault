@@ -1,4 +1,5 @@
 import { prisma } from "@khipu/database";
+
 import { AppError } from "../middleware/error-handler";
 
 /**
@@ -150,9 +151,15 @@ export class PoolsService {
       const isYieldClaim = deposit.type === "YIELD_CLAIM";
 
       if (existing) {
-        if (isDeposit) existing.deposited += amount;
-        if (isWithdraw) existing.withdrawn += amount;
-        if (isYieldClaim) existing.yieldClaimed += amount;
+        if (isDeposit) {
+          existing.deposited += amount;
+        }
+        if (isWithdraw) {
+          existing.withdrawn += amount;
+        }
+        if (isYieldClaim) {
+          existing.yieldClaimed += amount;
+        }
         if (deposit.timestamp > existing.lastActivity) {
           existing.lastActivity = deposit.timestamp;
         }
@@ -187,8 +194,12 @@ export class PoolsService {
         // Sort by balance descending
         const balanceA = BigInt(a.balance);
         const balanceB = BigInt(b.balance);
-        if (balanceA > balanceB) return -1;
-        if (balanceA < balanceB) return 1;
+        if (balanceA > balanceB) {
+          return -1;
+        }
+        if (balanceA < balanceB) {
+          return 1;
+        }
         return 0;
       });
 
@@ -237,7 +248,7 @@ export class PoolsService {
     const result = stats[0];
     if (!result) {
       // No transactions yet, just update lastSyncAt
-      return await prisma.pool.update({
+      return prisma.pool.update({
         where: { contractAddress: normalizedAddress },
         data: { lastSyncAt: new Date() },
       });
@@ -247,7 +258,7 @@ export class PoolsService {
     const totalWithdrawn = BigInt(result.total_withdrawn);
     const tvl = totalDeposited - totalWithdrawn;
 
-    return await prisma.pool.update({
+    return prisma.pool.update({
       where: { contractAddress: normalizedAddress },
       data: {
         tvl: tvl.toString(),

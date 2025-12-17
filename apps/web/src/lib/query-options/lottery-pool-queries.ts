@@ -11,10 +11,7 @@
  */
 
 import { queryOptions } from "@tanstack/react-query";
-import { normalizeBigInt } from "@/lib/query-utils";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type PublicClient = any;
 import {
   fetchCurrentRoundId,
   fetchRoundCounter,
@@ -24,9 +21,10 @@ import {
   fetchUserInvestment,
   fetchUserProbability,
   fetchUserLotteryStats,
-  type LotteryRound,
-  type UserLotteryStats,
 } from "@/lib/blockchain/fetch-lottery-pools";
+import { normalizeBigInt } from "@/lib/query-utils";
+
+import type { PublicClient } from "viem";
 
 /**
  * Query options for Lottery Pool
@@ -144,7 +142,7 @@ export const lotteryPoolQueries = {
         "lottery-pool",
         "user-tickets",
         roundId,
-        userAddress || "none",
+        userAddress ?? "none",
       ],
       queryFn: async () => {
         if (!publicClient || !roundId || !userAddress) {
@@ -175,7 +173,7 @@ export const lotteryPoolQueries = {
         "lottery-pool",
         "user-investment",
         roundId,
-        userAddress || "none",
+        userAddress ?? "none",
       ],
       queryFn: async () => {
         if (!publicClient || !roundId || !userAddress) {
@@ -206,7 +204,7 @@ export const lotteryPoolQueries = {
         "lottery-pool",
         "user-probability",
         roundId,
-        userAddress || "none",
+        userAddress ?? "none",
       ],
       queryFn: async () => {
         if (!publicClient || !roundId || !userAddress) {
@@ -236,7 +234,7 @@ export const lotteryPoolQueries = {
       queryKey: [
         "lottery-pool",
         "user-stats",
-        userAddress || "none",
+        userAddress ?? "none",
         roundCounter,
       ],
       queryFn: async () => {

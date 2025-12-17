@@ -9,6 +9,8 @@
 
 "use client";
 
+import { useQuery } from "@tanstack/react-query";
+import { parseEther, formatEther, type Address } from "viem";
 import {
   useAccount,
   usePublicClient,
@@ -16,11 +18,7 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { useQuery } from "@tanstack/react-query";
-import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
-import { parseEther, formatEther, type Address } from "viem";
-import { normalizeBigInt } from "@/lib/query-utils";
+
 import {
   fetchCurrentRoundId,
   fetchRoundCounter,
@@ -33,6 +31,9 @@ import {
   type LotteryRound,
   type UserLotteryStats,
 } from "@/lib/blockchain/fetch-lottery-pools";
+import { normalizeBigInt } from "@/lib/query-utils";
+import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
+import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
 
 // Use centralized contract address config
 const LOTTERY_POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.lotteryPool as Address;
@@ -146,7 +147,7 @@ export function useAllRounds() {
 export function useUserTickets(roundId?: number, userAddress?: `0x${string}`) {
   const { address } = useAccount();
   const publicClient = usePublicClient();
-  const targetAddress = userAddress || address;
+  const targetAddress = userAddress ?? address;
 
   const {
     data: ticketCount,
@@ -158,7 +159,7 @@ export function useUserTickets(roundId?: number, userAddress?: `0x${string}`) {
       "lottery-pool",
       "user-tickets",
       roundId,
-      targetAddress || "none",
+      targetAddress ?? "none",
     ],
     queryFn: () => {
       if (!publicClient || !roundId || !targetAddress) {
@@ -200,7 +201,7 @@ export function useUserInvestment(roundId?: number) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["lottery-pool", "user-investment", roundId, address || "none"],
+    queryKey: ["lottery-pool", "user-investment", roundId, address ?? "none"],
     queryFn: () => {
       if (!publicClient || !roundId || !address) {
         return Promise.resolve(null);
@@ -234,7 +235,7 @@ export function useUserProbability(roundId?: number) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["lottery-pool", "user-probability", roundId, address || "none"],
+    queryKey: ["lottery-pool", "user-probability", roundId, address ?? "none"],
     queryFn: () => {
       if (!publicClient || !roundId || !address) {
         return Promise.resolve(null);
@@ -264,7 +265,7 @@ export function useUserProbability(roundId?: number) {
 export function useUserLotteryStats(userAddress?: `0x${string}`) {
   const { address } = useAccount();
   const publicClient = usePublicClient();
-  const targetAddress = userAddress || address;
+  const targetAddress = userAddress ?? address;
 
   // Get round counter first
   const { data: roundCounter = 0, isLoading: isLoadingCounter } = useQuery({
@@ -289,7 +290,7 @@ export function useUserLotteryStats(userAddress?: `0x${string}`) {
     queryKey: [
       "lottery-pool",
       "user-stats",
-      targetAddress || "none",
+      targetAddress ?? "none",
       normalizeBigInt(roundCounter),
     ],
     queryFn: () => {
@@ -333,19 +334,15 @@ export function useBuyTickets() {
     ticketCount: number,
     ticketPrice: bigint,
   ) => {
-    try {
-      const totalCost = ticketPrice * BigInt(ticketCount);
+    const totalCost = ticketPrice * BigInt(ticketCount);
 
-      writeContract({
-        address: LOTTERY_POOL_ADDRESS,
-        abi: LOTTERY_POOL_ABI,
-        functionName: "buyTickets",
-        args: [BigInt(roundId), BigInt(ticketCount)],
-        value: totalCost, // BTC is native on Mezo
-      });
-    } catch (err) {
-      throw err;
-    }
+    writeContract({
+      address: LOTTERY_POOL_ADDRESS,
+      abi: LOTTERY_POOL_ABI,
+      functionName: "buyTickets",
+      args: [BigInt(roundId), BigInt(ticketCount)],
+      value: totalCost, // BTC is native on Mezo
+    });
   };
 
   return {
@@ -369,16 +366,12 @@ export function useClaimPrize() {
   });
 
   const claimPrize = async (roundId: number) => {
-    try {
-      writeContract({
-        address: LOTTERY_POOL_ADDRESS,
-        abi: LOTTERY_POOL_ABI,
-        functionName: "claimPrize",
-        args: [BigInt(roundId)],
-      });
-    } catch (err) {
-      throw err;
-    }
+    writeContract({
+      address: LOTTERY_POOL_ADDRESS,
+      abi: LOTTERY_POOL_ABI,
+      functionName: "claimPrize",
+      args: [BigInt(roundId)],
+    });
   };
 
   return {
@@ -402,16 +395,12 @@ export function useWithdrawCapital() {
   });
 
   const withdrawCapital = async (roundId: number) => {
-    try {
-      writeContract({
-        address: LOTTERY_POOL_ADDRESS,
-        abi: LOTTERY_POOL_ABI,
-        functionName: "withdrawCapital",
-        args: [BigInt(roundId)],
-      });
-    } catch (err) {
-      throw err;
-    }
+    writeContract({
+      address: LOTTERY_POOL_ADDRESS,
+      abi: LOTTERY_POOL_ABI,
+      functionName: "withdrawCapital",
+      args: [BigInt(roundId)],
+    });
   };
 
   return {
@@ -437,7 +426,9 @@ export function useLotteryPoolOwner() {
   const { data: owner, isLoading } = useQuery({
     queryKey: ["lottery-pool", "owner"],
     queryFn: async () => {
-      if (!publicClient) return null;
+      if (!publicClient) {
+        return null;
+      }
       try {
         const result = await publicClient.readContract({
           address: LOTTERY_POOL_ADDRESS,
@@ -636,7 +627,9 @@ export function formatUSD(amount: number): string {
  * Helper: Format Ethereum address
  */
 export function formatAddress(address: string): string {
-  if (!address || address.length < 10) return address;
+  if (!address || address.length < 10) {
+    return address;
+  }
   return `${address.slice(0, 6)}...${address.slice(-4)}`;
 }
 

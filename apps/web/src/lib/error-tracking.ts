@@ -47,7 +47,7 @@ interface Breadcrumb {
 }
 
 // Flag to check if Sentry is available
-const SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN;
+const _SENTRY_DSN = process.env.NEXT_PUBLIC_SENTRY_DSN; // Reserved for future Sentry integration
 const IS_PRODUCTION = process.env.NODE_ENV === "production";
 const IS_SENTRY_ENABLED = false; // Disabled - Sentry not installed
 
@@ -61,6 +61,7 @@ const MAX_BREADCRUMBS = 50;
  */
 export async function initErrorTracking(): Promise<void> {
   if (!IS_SENTRY_ENABLED) {
+    // eslint-disable-next-line no-console
     console.info(
       "[ErrorTracking] Sentry not installed. Errors will be logged to console.",
     );
@@ -80,6 +81,7 @@ export async function captureError(
 
   // Always log to console in development
   if (!IS_PRODUCTION) {
+    // eslint-disable-next-line no-console
     console.error("[ErrorTracking] Captured error:", errorObj, context);
   }
 
@@ -100,13 +102,14 @@ export async function captureMessage(
   context?: ErrorContext,
 ): Promise<void> {
   if (!IS_PRODUCTION) {
+    // eslint-disable-next-line no-console
     console.info("[ErrorTracking] Captured message:", message, context);
   }
 
   addBreadcrumb({
     category: "message",
     message,
-    level: context?.level || "info",
+    level: context?.level ?? "info",
     data: context?.extra,
   });
 }
@@ -116,7 +119,10 @@ export async function captureMessage(
  * Call this when user connects their wallet
  */
 export async function setUser(user: UserContext | null): Promise<void> {
-  console.debug("[ErrorTracking] Set user:", user?.address || "null");
+  if (process.env.NODE_ENV === "development") {
+    // eslint-disable-next-line no-console
+    console.debug("[ErrorTracking] Set user:", user?.address ?? "null");
+  }
 }
 
 /**
@@ -140,7 +146,10 @@ export function addBreadcrumb(breadcrumb: Breadcrumb): void {
  * Set a tag that will be sent with all future errors
  */
 export async function setTag(key: string, value: string): Promise<void> {
-  console.debug("[ErrorTracking] Set tag:", key, "=", value);
+  if (process.env.NODE_ENV === "development") {
+    // eslint-disable-next-line no-console
+    console.debug("[ErrorTracking] Set tag:", key, "=", value);
+  }
 }
 
 /**

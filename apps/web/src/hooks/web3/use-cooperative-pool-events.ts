@@ -11,8 +11,9 @@
 
 "use client";
 
-import { useWatchContractEvent } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
+import { useWatchContractEvent } from "wagmi";
+
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 import { COOPERATIVE_POOL_ABI } from "@/lib/web3/cooperative-pool-abi";
 
@@ -41,9 +42,12 @@ export function useCooperativePoolEvents() {
     abi: COOPERATIVE_POOL_ABI,
     eventName: "PoolCreated",
     onLogs(logs) {
-      console.log("🔔 PoolCreated event detected:", logs);
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("🔔 PoolCreated event detected:", logs);
+      }
       // Refetch ALL active queries immediately
-      queryClient.refetchQueries({ type: "active" });
+      void queryClient.refetchQueries({ type: "active" });
     },
   });
 
@@ -53,8 +57,11 @@ export function useCooperativePoolEvents() {
     abi: COOPERATIVE_POOL_ABI,
     eventName: "PoolClosed",
     onLogs(logs) {
-      console.log("🔔 PoolClosed event detected:", logs);
-      queryClient.refetchQueries({ type: "active" });
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("🔔 PoolClosed event detected:", logs);
+      }
+      void queryClient.refetchQueries({ type: "active" });
     },
   });
 
@@ -64,8 +71,11 @@ export function useCooperativePoolEvents() {
     abi: COOPERATIVE_POOL_ABI,
     eventName: "MemberJoined",
     onLogs(logs) {
-      console.log("🔔 MemberJoined event detected:", logs);
-      queryClient.refetchQueries({ type: "active" });
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("🔔 MemberJoined event detected:", logs);
+      }
+      void queryClient.refetchQueries({ type: "active" });
     },
   });
 
@@ -75,8 +85,11 @@ export function useCooperativePoolEvents() {
     abi: COOPERATIVE_POOL_ABI,
     eventName: "MemberLeft",
     onLogs(logs) {
-      console.log("🔔 MemberLeft event detected:", logs);
-      queryClient.refetchQueries({ type: "active" });
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("🔔 MemberLeft event detected:", logs);
+      }
+      void queryClient.refetchQueries({ type: "active" });
     },
   });
 
@@ -86,8 +99,11 @@ export function useCooperativePoolEvents() {
     abi: COOPERATIVE_POOL_ABI,
     eventName: "YieldClaimed",
     onLogs(logs) {
-      console.log("🔔 YieldClaimed event detected:", logs);
-      queryClient.refetchQueries({ type: "active" });
+      if (process.env.NODE_ENV === "development") {
+        // eslint-disable-next-line no-console
+        console.log("🔔 YieldClaimed event detected:", logs);
+      }
+      void queryClient.refetchQueries({ type: "active" });
     },
   });
 }

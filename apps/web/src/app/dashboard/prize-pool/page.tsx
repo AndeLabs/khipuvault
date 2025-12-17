@@ -16,11 +16,7 @@
 
 export const dynamic = "force-dynamic";
 
-import * as React from "react";
-import { PageHeader, PageSection } from "@/components/layout";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Button } from "@/components/ui/button";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Trophy,
   Ticket,
@@ -31,8 +27,22 @@ import {
   Loader2,
   RefreshCw,
 } from "lucide-react";
+import * as React from "react";
 import { useAccount } from "wagmi";
-import { useQueryClient } from "@tanstack/react-query";
+
+import { PageHeader, PageSection } from "@/components/layout";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  ActiveLotteryHero,
+  BuyTicketsModal,
+  YourTickets,
+  ProbabilityCalculator,
+  DrawHistory,
+  HowItWorks,
+  LotteryStats,
+} from "@/features/prize-pool";
 import { useToast } from "@/hooks/use-toast";
 
 // Hooks
@@ -49,19 +59,9 @@ import {
   useDrawWinner,
   useCreateRound,
 } from "@/hooks/web3/use-lottery-pool";
-import { parseEther } from "viem";
 import { useLotteryPoolEvents } from "@/hooks/web3/use-lottery-pool-events";
 
 // Components
-import {
-  ActiveLotteryHero,
-  BuyTicketsModal,
-  YourTickets,
-  ProbabilityCalculator,
-  DrawHistory,
-  HowItWorks,
-  LotteryStats,
-} from "@/features/prize-pool";
 
 /**
  * Prize Pool Page - No-Loss Lottery System
@@ -159,7 +159,9 @@ export default function PrizePoolPage() {
 
   // Handle claim prize (for winners)
   const handleClaimPrize = async () => {
-    if (!currentRoundId) return;
+    if (!currentRoundId) {
+      return;
+    }
 
     try {
       await claimPrize(Number(currentRoundId));
@@ -168,12 +170,15 @@ export default function PrizePoolPage() {
         description: "Your prize has been transferred to your wallet",
       });
       // Refetch is handled by useLotteryPoolEvents hook and useEffect below
-    } catch (error) {
-      console.error("Claim error:", error);
+    } catch (_errorInfo) {
+      // eslint-disable-next-line no-console
+      console.error("Claim error:", _errorInfo);
       toast({
         title: "Claim Failed",
         description:
-          error instanceof Error ? error.message : "Failed to claim prize",
+          _errorInfo instanceof Error
+            ? _errorInfo.message
+            : "Failed to claim prize",
         variant: "destructive",
       });
     }
@@ -181,7 +186,9 @@ export default function PrizePoolPage() {
 
   // Handle withdraw capital (for non-winners)
   const handleWithdrawCapital = async () => {
-    if (!currentRoundId) return;
+    if (!currentRoundId) {
+      return;
+    }
 
     try {
       await withdrawCapital(Number(currentRoundId));
@@ -190,12 +197,15 @@ export default function PrizePoolPage() {
         description: "Your capital has been returned to your wallet",
       });
       // Refetch is handled by useLotteryPoolEvents hook and useEffect below
-    } catch (error) {
-      console.error("Withdraw error:", error);
+    } catch (_errorInfo) {
+      // eslint-disable-next-line no-console
+      console.error("Withdraw error:", _errorInfo);
       toast({
         title: "Withdraw Failed",
         description:
-          error instanceof Error ? error.message : "Failed to withdraw capital",
+          _errorInfo instanceof Error
+            ? _errorInfo.message
+            : "Failed to withdraw capital",
         variant: "destructive",
       });
     }
@@ -203,7 +213,7 @@ export default function PrizePoolPage() {
 
   // Manual refetch
   const handleRefresh = () => {
-    queryClient.refetchQueries({ type: "active" });
+    void queryClient.refetchQueries({ type: "active" });
     toast({
       title: "Refreshing...",
       description: "Fetching latest lottery data",
@@ -212,7 +222,9 @@ export default function PrizePoolPage() {
 
   // Handle draw winner (admin)
   const handleDrawWinner = async () => {
-    if (!currentRoundId) return;
+    if (!currentRoundId) {
+      return;
+    }
 
     try {
       await drawWinner(Number(currentRoundId));
@@ -220,12 +232,15 @@ export default function PrizePoolPage() {
         title: "Drawing Winner...",
         description: "Transaction submitted. Winner will be selected shortly.",
       });
-    } catch (error) {
-      console.error("Draw error:", error);
+    } catch (_errorInfo) {
+      // eslint-disable-next-line no-console
+      console.error("Draw error:", _errorInfo);
       toast({
         title: "Draw Failed",
         description:
-          error instanceof Error ? error.message : "Failed to draw winner",
+          _errorInfo instanceof Error
+            ? _errorInfo.message
+            : "Failed to draw winner",
         variant: "destructive",
       });
     }
@@ -239,7 +254,7 @@ export default function PrizePoolPage() {
   // Quick create round with defaults (7 days, 0.001 BTC/ticket, 1000 max)
   const handleQuickCreateRound = async () => {
     try {
-      const ticketPrice = parseEther("0.001"); // 0.001 BTC per ticket
+      const ticketPrice = BigInt("1000000000000000"); // 0.001 BTC per ticket
       const maxTickets = 1000;
       const duration = 7 * 24 * 60 * 60; // 7 days
 
@@ -248,12 +263,15 @@ export default function PrizePoolPage() {
         title: "Creating New Round...",
         description: "Transaction submitted. New lottery round starting soon.",
       });
-    } catch (error) {
-      console.error("Create round error:", error);
+    } catch (_errorInfo) {
+      // eslint-disable-next-line no-console
+      console.error("Create round error:", _errorInfo);
       toast({
         title: "Failed to Create Round",
         description:
-          error instanceof Error ? error.message : "Failed to create new round",
+          _errorInfo instanceof Error
+            ? _errorInfo.message
+            : "Failed to create new round",
         variant: "destructive",
       });
     }
@@ -267,7 +285,7 @@ export default function PrizePoolPage() {
       isDrawSuccess ||
       isCreateSuccess
     ) {
-      queryClient.refetchQueries({ type: "active" });
+      void queryClient.refetchQueries({ type: "active" });
     }
   }, [
     isClaimSuccess,
@@ -401,22 +419,37 @@ export default function PrizePoolPage() {
       {/* Main Content - Tabs */}
       <PageSection>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-4 max-w-2xl">
-            <TabsTrigger value="overview" className="gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Overview
+          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 max-w-2xl h-auto gap-1">
+            <TabsTrigger
+              value="overview"
+              className="gap-1 md:gap-2 text-xs md:text-sm py-2"
+            >
+              <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Overview</span>
+              <span className="sm:hidden">Stats</span>
             </TabsTrigger>
-            <TabsTrigger value="tickets" className="gap-2">
-              <Ticket className="h-4 w-4" />
-              Your Tickets
+            <TabsTrigger
+              value="tickets"
+              className="gap-1 md:gap-2 text-xs md:text-sm py-2"
+            >
+              <Ticket className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">Your Tickets</span>
+              <span className="sm:hidden">Tickets</span>
             </TabsTrigger>
-            <TabsTrigger value="history" className="gap-2">
-              <History className="h-4 w-4" />
+            <TabsTrigger
+              value="history"
+              className="gap-1 md:gap-2 text-xs md:text-sm py-2"
+            >
+              <History className="h-3 w-3 md:h-4 md:w-4" />
               History
             </TabsTrigger>
-            <TabsTrigger value="how-it-works" className="gap-2">
-              <HelpCircle className="h-4 w-4" />
-              How It Works
+            <TabsTrigger
+              value="how-it-works"
+              className="gap-1 md:gap-2 text-xs md:text-sm py-2"
+            >
+              <HelpCircle className="h-3 w-3 md:h-4 md:w-4" />
+              <span className="hidden sm:inline">How It Works</span>
+              <span className="sm:hidden">Info</span>
             </TabsTrigger>
           </TabsList>
 
@@ -440,41 +473,41 @@ export default function PrizePoolPage() {
 
             {/* User Stats */}
             {stats && (stats.roundsPlayed > 0 || isLoadingStats) && (
-              <div className="grid gap-4 md:grid-cols-4">
-                <div className="p-4 rounded-lg bg-surface-elevated border border-border text-center">
-                  <div className="text-2xl font-bold text-lavanda">
+              <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
+                <div className="p-3 md:p-4 rounded-lg bg-surface-elevated border border-border text-center">
+                  <div className="text-xl md:text-2xl font-bold text-lavanda">
                     {isLoadingStats ? "-" : stats.roundsPlayed}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    Rounds Played
+                    Rounds
                   </div>
                 </div>
-                <div className="p-4 rounded-lg bg-surface-elevated border border-border text-center">
-                  <div className="text-2xl font-bold text-accent">
+                <div className="p-3 md:p-4 rounded-lg bg-surface-elevated border border-border text-center">
+                  <div className="text-xl md:text-2xl font-bold text-accent">
                     {isLoadingStats ? "-" : stats.totalTickets}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    Total Tickets
+                    Tickets
                   </div>
                 </div>
-                <div className="p-4 rounded-lg bg-surface-elevated border border-border text-center">
-                  <div className="text-2xl font-bold text-success">
+                <div className="p-3 md:p-4 rounded-lg bg-surface-elevated border border-border text-center">
+                  <div className="text-xl md:text-2xl font-bold text-success">
                     {isLoadingStats
                       ? "-"
-                      : `${Number(stats.totalInvested) / 1e18} BTC`}
+                      : `${Number(stats.totalInvested) / 1e18}`}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    Total Invested
+                    Invested (BTC)
                   </div>
                 </div>
-                <div className="p-4 rounded-lg bg-surface-elevated border border-border text-center">
-                  <div className="text-2xl font-bold text-warning">
+                <div className="p-3 md:p-4 rounded-lg bg-surface-elevated border border-border text-center">
+                  <div className="text-xl md:text-2xl font-bold text-warning">
                     {isLoadingStats
                       ? "-"
-                      : `${Number(stats.totalWinnings) / 1e18} BTC`}
+                      : `${Number(stats.totalWinnings) / 1e18}`}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    Total Winnings
+                    Won (BTC)
                   </div>
                 </div>
               </div>

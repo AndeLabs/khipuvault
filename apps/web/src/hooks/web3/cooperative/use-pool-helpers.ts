@@ -4,6 +4,7 @@
  */
 
 import { formatEther } from "viem";
+
 import { PoolStatus } from "./constants";
 
 // ============================================================================
@@ -14,7 +15,9 @@ import { PoolStatus } from "./constants";
  * Format BTC amount with full precision (8 decimals)
  */
 export function formatBTC(value: bigint | undefined): string {
-  if (!value) return "0.00000000";
+  if (!value) {
+    return "0.00000000";
+  }
   return formatEther(value);
 }
 
@@ -22,10 +25,16 @@ export function formatBTC(value: bigint | undefined): string {
  * Format BTC amount with compact precision
  */
 export function formatBTCCompact(value: bigint | undefined): string {
-  if (!value) return "0";
+  if (!value) {
+    return "0";
+  }
   const num = Number(formatEther(value));
-  if (num >= 1) return num.toFixed(4);
-  if (num >= 0.001) return num.toFixed(6);
+  if (num >= 1) {
+    return num.toFixed(4);
+  }
+  if (num >= 0.001) {
+    return num.toFixed(6);
+  }
   return num.toFixed(8);
 }
 
@@ -33,7 +42,9 @@ export function formatBTCCompact(value: bigint | undefined): string {
  * Format MUSD amount with 2 decimal places
  */
 export function formatMUSD(value: bigint | undefined): string {
-  if (!value) return "0.00";
+  if (!value) {
+    return "0.00";
+  }
   const num = Number(formatEther(value));
   return num.toLocaleString("en-US", {
     minimumFractionDigits: 2,
@@ -45,7 +56,9 @@ export function formatMUSD(value: bigint | undefined): string {
  * Format date from Unix timestamp
  */
 export function formatDate(timestamp: number): string {
-  if (!timestamp) return "Unknown";
+  if (!timestamp) {
+    return "Unknown";
+  }
   return new Date(timestamp * 1000).toLocaleDateString("en-US", {
     year: "numeric",
     month: "short",
@@ -57,7 +70,9 @@ export function formatDate(timestamp: number): string {
  * Format date and time from Unix timestamp
  */
 export function formatDateTime(timestamp: number): string {
-  if (!timestamp) return "Unknown";
+  if (!timestamp) {
+    return "Unknown";
+  }
   return new Date(timestamp * 1000).toLocaleString("en-US", {
     year: "numeric",
     month: "short",
@@ -96,7 +111,9 @@ export function calculateNetYield(grossYield: bigint, feeBps: number): bigint {
  * @param totalShares - Total shares in pool
  */
 export function formatPercentage(shares: bigint, totalShares: bigint): string {
-  if (totalShares === BigInt(0)) return "0%";
+  if (totalShares === BigInt(0)) {
+    return "0%";
+  }
   const percentage = (Number(shares) * 100) / Number(totalShares);
   return `${percentage.toFixed(2)}%`;
 }

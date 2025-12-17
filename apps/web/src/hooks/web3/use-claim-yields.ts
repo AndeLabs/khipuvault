@@ -7,14 +7,15 @@
 
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
+import { type Address } from "viem";
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";
-import { useQueryClient } from "@tanstack/react-query";
-import { type Address } from "viem";
+
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address;
@@ -64,8 +65,8 @@ export function useClaimYields() {
     if (isSuccess && state === "processing") {
       // Immediately invalidate pool queries to update UI
       // The usePoolEvents hook also listens for YieldClaimed events
-      queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
-      queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
+      void queryClient.invalidateQueries({ queryKey: ["individual-pool"] });
 
       setState("success");
     }
@@ -76,7 +77,7 @@ export function useClaimYields() {
     if (txError) {
       setState("error");
 
-      const msg = txError.message || "";
+      const msg = txError.message ?? "";
       if (msg.includes("User rejected") || msg.includes("user rejected")) {
         setError("Rechazaste la transacción en tu wallet");
       } else if (msg.includes("NoActiveDeposit")) {
@@ -126,7 +127,7 @@ export function useClaimYields() {
     reset,
     state,
     error,
-    txHash: receipt?.transactionHash || txHash,
+    txHash: receipt?.transactionHash ?? txHash,
     isProcessing: state === "confirming" || state === "processing",
     canClaim: state === "idle" || state === "error" || state === "success",
   };

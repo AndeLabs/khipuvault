@@ -7,16 +7,18 @@
 
 "use client";
 
+import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
+import { parseEther, type Address } from "viem";
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
   useConfig,
 } from "wagmi";
-import { useQueryClient } from "@tanstack/react-query";
-import { parseEther, type Address } from "viem";
+
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";
+
 import { ActionState, QUERY_KEYS } from "./constants";
 import { parsePoolError } from "./use-pool-helpers";
 
@@ -110,7 +112,7 @@ function usePoolMutation() {
   // Handle transaction success
   useEffect(() => {
     if (isSuccess && state === "processing") {
-      queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BASE });
+      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BASE });
       setState("success");
     }
   }, [isSuccess, state, queryClient]);
@@ -145,7 +147,7 @@ function usePoolMutation() {
     setError,
     write,
     reset,
-    txHash: receipt?.transactionHash || txHash,
+    txHash: receipt?.transactionHash ?? txHash,
     isProcessing: state !== "idle" && state !== "success" && state !== "error",
   };
 }

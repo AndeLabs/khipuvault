@@ -4,12 +4,10 @@
  */
 
 import { useQuery } from "@tanstack/react-query";
-import { useAccount, usePublicClient } from "wagmi";
-import {
-  MEZO_V3_ADDRESSES,
-  INDIVIDUAL_POOL_V3_ABI,
-} from "@/lib/web3/contracts-v3";
 import { formatUnits } from "viem";
+import { useAccount, usePublicClient } from "wagmi";
+
+import { MEZO_V3_ADDRESSES } from "@/lib/web3/contracts-v3";
 
 export interface Transaction {
   hash: string;
@@ -30,7 +28,9 @@ export function useUserTransactionHistory() {
   return useQuery({
     queryKey: ["individual-pool-transactions", address],
     queryFn: async (): Promise<Transaction[]> => {
-      if (!address || !publicClient) return [];
+      if (!address || !publicClient) {
+        return [];
+      }
 
       try {
         // Get current block number
@@ -151,6 +151,7 @@ export function useUserTransactionHistory() {
         // Sort by timestamp descending (newest first)
         return transactions.sort((a, b) => b.timestamp - a.timestamp);
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.error("Error fetching transaction history:", error);
         return [];
       }

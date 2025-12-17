@@ -7,13 +7,12 @@ import {
   CardTitle,
   CardDescription,
   CardContent,
-  StatCard,
   StatValue,
   StatLabel,
 } from "@/components/ui/card";
 import { AmountDisplay, PercentageDisplay } from "@/components/common";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Wallet, Clock, Award, Info } from "lucide-react";
+import { TrendingUp, Wallet, Clock, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Tooltip,

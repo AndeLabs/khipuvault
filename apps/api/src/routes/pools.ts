@@ -1,7 +1,8 @@
 import { Router, type Router as ExpressRouter } from "express";
 import { z } from "zod";
-import { validate } from "../middleware/validate";
+
 import { requireAuth } from "../middleware/auth";
+import { validate } from "../middleware/validate";
 import { PoolsService } from "../services/pools";
 
 const router: ExpressRouter = Router();

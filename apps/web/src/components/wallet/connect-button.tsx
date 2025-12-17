@@ -9,8 +9,10 @@
 
 "use client";
 
-import { useAccount, useConnect, useDisconnect, useBalance } from "wagmi";
+import { Wallet, ChevronDown, Copy, ExternalLink } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAccount, useConnect, useDisconnect, useBalance } from "wagmi";
+
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -21,7 +23,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useIndividualPoolData } from "@/hooks/web3/use-individual-pool";
 import { getWalletAvailability } from "@/lib/web3/config";
-import { Wallet, ChevronDown, Copy, ExternalLink } from "lucide-react";
 
 /**
  * Custom Connect Button Component
@@ -88,9 +89,15 @@ export function ConnectButton() {
             <DropdownMenuSeparator />
 
             <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(address)}
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(address);
+                } catch {
+                  // Clipboard API may fail on HTTP or when denied
+                }
+              }}
             >
-              <Copy className="h-4 w-4 mr-2" />
+              <Copy className="h-4 w-4 mr-2" aria-hidden="true" />
               Copy Address
             </DropdownMenuItem>
 
@@ -138,12 +145,7 @@ export function ConnectButton() {
         <DropdownMenuSeparator />
 
         {connectors.map((connector) => {
-          const isAvailable =
-            connector.id === "metaMask"
-              ? getWalletAvailability().metaMask
-              : connector.id === "unisat"
-                ? getWalletAvailability().unisat
-                : true;
+          const isAvailable = getConnectorAvailability(connector.id);
 
           return (
             <DropdownMenuItem
@@ -167,6 +169,16 @@ export function ConnectButton() {
       </DropdownMenuContent>
     </DropdownMenu>
   );
+}
+
+function getConnectorAvailability(connectorId: string): boolean {
+  if (connectorId === "metaMask") {
+    return getWalletAvailability().metaMask;
+  }
+  if (connectorId === "unisat") {
+    return getWalletAvailability().unisat;
+  }
+  return true;
 }
 
 /**

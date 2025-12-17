@@ -17,10 +17,11 @@
  * to function calls that are only invoked on the client side.
  */
 
+import { createPublicClient } from "viem";
 import { createConfig, http, createStorage } from "wagmi";
 import { metaMask } from "wagmi/connectors";
+
 import { mezoTestnet } from "./chains";
-import { createPublicClient } from "viem";
 
 // Type for the config instance
 type WagmiConfigInstance = ReturnType<typeof createConfig>;

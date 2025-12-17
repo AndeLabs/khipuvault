@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
+
 import {
   xssProtection,
   sanitizeMongoQueries,
@@ -9,6 +10,7 @@ import {
   securityHeaders,
   validateApiKey,
 } from "../../middleware/security";
+
 import type { Request, Response, NextFunction } from "express";
 
 describe("Security Middleware", () => {

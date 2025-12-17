@@ -1,6 +1,6 @@
 import { Router, Request, Response } from "express";
-import type { Router as ExpressRouter } from "express";
 import { z } from "zod";
+
 import {
   generateNonce,
   verifySiweMessage,
@@ -10,8 +10,10 @@ import {
   invalidateToken,
 } from "../middleware/auth";
 import { asyncHandler, AppError } from "../middleware/error-handler";
-import { validate } from "../middleware/validate";
 import { authRateLimiter } from "../middleware/rate-limit";
+import { validate } from "../middleware/validate";
+
+import type { Router as ExpressRouter } from "express";
 
 const router: ExpressRouter = Router();
 

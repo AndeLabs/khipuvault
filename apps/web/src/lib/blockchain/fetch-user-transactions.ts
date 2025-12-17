@@ -8,9 +8,19 @@
  * - Keep logic separate from React concerns
  */
 
-import { PublicClient } from "viem";
-import { MEZO_V3_ADDRESSES } from "@/lib/web3/contracts-v3";
 import { formatMUSD } from "@/lib/web3/contracts";
+import { MEZO_V3_ADDRESSES } from "@/lib/web3/contracts-v3";
+
+import type { PublicClient } from "viem";
+
+// Development-only logging
+const isDev = process.env.NODE_ENV === "development";
+// eslint-disable-next-line no-console
+const devLog = isDev ? console.log.bind(console) : () => {};
+// eslint-disable-next-line no-console
+const devWarn = isDev ? console.warn.bind(console) : () => {};
+// eslint-disable-next-line no-console
+const devError = isDev ? console.error.bind(console) : () => {};
 
 export interface Transaction {
   hash: string;
@@ -40,7 +50,7 @@ export async function fetchUserTransactions(
 ): Promise<Transaction[]> {
   const poolAddress = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
 
-  console.log("🔄 [V3] Fetching transactions for", address);
+  devLog("🔄 [V3] Fetching transactions for", address);
 
   try {
     // Get current block number
@@ -53,7 +63,7 @@ export async function fetchUserTransactions(
     const fromBlock =
       currentBlock > lookbackBlocks ? currentBlock - lookbackBlocks : BigInt(0);
 
-    console.log(
+    devLog(
       `📊 Fetching transactions from block ${fromBlock} to ${currentBlock}`,
     );
 
@@ -74,7 +84,7 @@ export async function fetchUserTransactions(
           toBlock: "latest",
         });
       } catch (error: any) {
-        console.warn(`⚠️ Error fetching ${eventName} logs:`, error.message);
+        devWarn(`⚠️ Error fetching ${eventName} logs:`, error.message);
         return [];
       }
     };
@@ -115,13 +125,13 @@ export async function fetchUserTransactions(
         blockCache.set(blockNumber, block);
         return block.timestamp;
       } catch (error) {
-        console.warn(`⚠️ Error fetching block ${blockNumber}:`, error);
+        devWarn(`⚠️ Error fetching block ${blockNumber}:`, error);
         return BigInt(0);
       }
     };
 
     // Process deposits (MUSD-only)
-    console.log(`✅ Found ${depositLogs.length} deposit events`);
+    devLog(`✅ Found ${depositLogs.length} deposit events`);
     for (const log of depositLogs) {
       try {
         const args = log.args as any;
@@ -135,12 +145,12 @@ export async function fetchUserTransactions(
           blockNumber: log.blockNumber,
         });
       } catch (error) {
-        console.warn("Error processing deposit log:", error);
+        devWarn("Error processing deposit log:", error);
       }
     }
 
     // Process withdrawals (MUSD-only)
-    console.log(`✅ Found ${withdrawalLogs.length} withdrawal events`);
+    devLog(`✅ Found ${withdrawalLogs.length} withdrawal events`);
     for (const log of withdrawalLogs) {
       try {
         const args = log.args as any;
@@ -155,12 +165,12 @@ export async function fetchUserTransactions(
           blockNumber: log.blockNumber,
         });
       } catch (error) {
-        console.warn("Error processing withdrawal log:", error);
+        devWarn("Error processing withdrawal log:", error);
       }
     }
 
     // Process yield claims (MUSD-only)
-    console.log(`✅ Found ${yieldLogs.length} yield claim events`);
+    devLog(`✅ Found ${yieldLogs.length} yield claim events`);
     for (const log of yieldLogs) {
       try {
         const args = log.args as any;
@@ -175,7 +185,7 @@ export async function fetchUserTransactions(
           blockNumber: log.blockNumber,
         });
       } catch (error) {
-        console.warn("Error processing yield log:", error);
+        devWarn("Error processing yield log:", error);
       }
     }
 
@@ -184,10 +194,10 @@ export async function fetchUserTransactions(
       (a, b) => Number(b.blockNumber) - Number(a.blockNumber),
     );
 
-    console.log(`✅ Total transactions fetched: ${allTransactions.length}`);
+    devLog(`✅ Total transactions fetched: ${allTransactions.length}`);
     return allTransactions;
   } catch (error) {
-    console.error("Error fetching transactions:", error);
+    devError("Error fetching transactions:", error);
     return [];
   }
 }
