@@ -11,21 +11,6 @@
 
 "use client";
 
-import * as React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Card, CardContent } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Separator } from "@/components/ui/separator";
 import {
   Loader2,
   Bitcoin,
@@ -34,13 +19,29 @@ import {
   AlertTriangle,
   TrendingUp,
 } from "lucide-react";
+import * as React from "react";
+import { parseEther, formatEther } from "viem";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { useToast } from "@/hooks/use-toast";
 import {
   useCooperativePool,
   formatBTCCompact,
-} from "@/hooks/web3/use-cooperative-pool";
-import { usePoolInfo } from "@/hooks/web3/use-cooperative-pool";
-import { useToast } from "@/hooks/use-toast";
-import { parseEther, formatEther } from "viem";
+ usePoolInfo } from "@/hooks/web3/use-cooperative-pool";
+
 
 interface JoinPoolModalV3Props {
   poolId: number | null;
@@ -64,7 +65,7 @@ export function JoinPoolModalV3({
 
   // Validate amount
   const validate = React.useCallback(() => {
-    if (!poolInfo) return false;
+    if (!poolInfo) {return false;}
 
     const amount = parseFloat(btcAmount);
 
@@ -96,7 +97,7 @@ export function JoinPoolModalV3({
 
   // Handle join
   const handleJoin = async () => {
-    if (!poolId || !validate()) return;
+    if (!poolId || !validate()) {return;}
 
     try {
       await joinPool(poolId, btcAmount);
@@ -143,7 +144,7 @@ export function JoinPoolModalV3({
   const isProcessing = state === "executing" || state === "processing";
   const canSubmit = !isProcessing && btcAmount && poolInfo;
 
-  if (!poolId) return null;
+  if (!poolId) {return null;}
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>

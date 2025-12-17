@@ -1,6 +1,14 @@
 "use client";
 
+import { ArrowDown, ArrowUp, Users, Award, ExternalLink } from "lucide-react";
 import * as React from "react";
+
+import {
+  AmountDisplay,
+  TransactionStatus,
+  type TransactionState,
+} from "@/components/common";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardHeader,
@@ -8,13 +16,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import {
-  AmountDisplay,
-  TransactionStatus,
-  type TransactionState,
-} from "@/components/common";
-import { ArrowDown, ArrowUp, Users, Award, ExternalLink } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Activity {

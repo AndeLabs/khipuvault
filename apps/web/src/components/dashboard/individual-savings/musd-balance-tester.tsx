@@ -1,12 +1,13 @@
 "use client";
 
+import { RefreshCw, CheckCircle, XCircle } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { useAccount } from "wagmi";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { getPublicClient } from "@/lib/web3/config";
 import { MEZO_TESTNET_ADDRESSES, MUSD_ABI } from "@/lib/web3/contracts";
-import { RefreshCw, CheckCircle, XCircle } from "lucide-react";
 
 export function MusdBalanceTester() {
   const { address, isConnected } = useAccount();
@@ -18,7 +19,7 @@ export function MusdBalanceTester() {
   const publicClient = useMemo(() => getPublicClient(), []);
 
   const fetchDirectBalance = async () => {
-    if (!address || !publicClient) return;
+    if (!address || !publicClient) {return;}
 
     setLoading(true);
     setError(null);
@@ -56,7 +57,7 @@ export function MusdBalanceTester() {
     }
   }, [address, isConnected]);
 
-  if (!isConnected) return null;
+  if (!isConnected) {return null;}
 
   return (
     <Card className="bg-card border border-green-500/50">

@@ -12,17 +12,6 @@
 
 "use client";
 
-import * as React from "react";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
 import {
   Users,
   Bitcoin,
@@ -31,14 +20,25 @@ import {
   Calendar,
   Shield,
 } from "lucide-react";
+import * as React from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardFooter,
+  CardHeader,
+} from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
 import { type PoolWithMembership } from "@/hooks/web3/use-all-cooperative-pools";
 import {
   formatBTCCompact,
   formatMUSD,
   getPoolStatusBadge,
   formatDate,
-} from "@/hooks/web3/use-cooperative-pool";
-import { PoolStatus } from "@/hooks/web3/use-cooperative-pool";
+ PoolStatus } from "@/hooks/web3/use-cooperative-pool";
 
 interface PoolCardV3Props {
   pool: PoolWithMembership;

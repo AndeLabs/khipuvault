@@ -1,10 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
+import { useAccount } from "wagmi";
+
 import {
   getUserPortfolio,
   getUserTransactions,
   getAllPools,
 } from "../api/client";
-import { useAccount } from "wagmi";
 
 export function usePortfolio() {
   const { address } = useAccount();

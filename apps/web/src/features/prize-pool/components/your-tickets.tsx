@@ -7,7 +7,11 @@
 
 "use client";
 
+import { Ticket, TrendingUp, Trophy, Wallet } from "lucide-react";
 import * as React from "react";
+import { formatEther } from "viem";
+
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardContent,
@@ -15,10 +19,7 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Ticket, TrendingUp, Trophy, Wallet } from "lucide-react";
-import { formatEther } from "viem";
 import { formatProbability } from "@/hooks/web3/use-lottery-pool";
 
 interface YourTicketsProps {

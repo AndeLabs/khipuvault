@@ -1,10 +1,11 @@
 "use client";
 
+import { Search, Filter, Plus } from "lucide-react";
 import * as React from "react";
-import { PoolCard } from "./pool-card";
+
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -12,8 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Filter, Plus } from "lucide-react";
 import { SkeletonCard } from "@/components/ui/skeleton";
+
+import { PoolCard } from "./pool-card";
 
 interface Pool {
   poolId: string;
@@ -59,12 +61,12 @@ export function PoolsList({
       }
 
       // Status filter
-      if (filterStatus === "active" && !pool.isActive) return false;
-      if (filterStatus === "inactive" && pool.isActive) return false;
+      if (filterStatus === "active" && !pool.isActive) {return false;}
+      if (filterStatus === "inactive" && pool.isActive) {return false;}
 
       // Membership filter
-      if (filterMembership === "member" && !pool.isMember) return false;
-      if (filterMembership === "available" && pool.isMember) return false;
+      if (filterMembership === "member" && !pool.isMember) {return false;}
+      if (filterMembership === "available" && pool.isMember) {return false;}
 
       return true;
     });

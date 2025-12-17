@@ -1,6 +1,10 @@
 "use client";
 
+import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Dialog,
   DialogContent,
@@ -10,19 +14,16 @@ import {
   DialogFooter,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
-import { Minus, Plus } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { useBTCPrice } from "@/hooks/use-btc-price";
+import { useToast } from "@/hooks/use-toast";
 import {
   useCurrentRound,
   useBuyTickets,
   formatBTC,
 } from "@/hooks/web3/use-lottery-pool";
-import { useBTCPrice } from "@/hooks/use-btc-price";
-import { useToast } from "@/hooks/use-toast";
 
 export function BuyTicketsModal({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);

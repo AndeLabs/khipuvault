@@ -1,19 +1,5 @@
 "use client";
 
-import * as React from "react";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
 import {
   Coins,
   ExternalLink,
@@ -22,6 +8,21 @@ import {
   ArrowRight,
   CheckCircle2,
 } from "lucide-react";
+import * as React from "react";
+
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 const MEZO_FAUCET_URL = "https://faucet.mezo.org";
@@ -39,7 +40,7 @@ export function GetMusdGuide({
   const hasBalance = Number(walletBalance) > 0;
 
   // Don't show if user already has balance
-  if (hasBalance) return null;
+  if (hasBalance) {return null;}
 
   return (
     <Card

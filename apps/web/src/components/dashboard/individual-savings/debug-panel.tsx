@@ -1,12 +1,14 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { RefreshCw } from "lucide-react";
 import { useAccount, useChainId, useBalance } from "wagmi";
+
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import { useMusdApproval } from "@/hooks/web3/use-musd-approval";
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
-import { RefreshCw } from "lucide-react";
+
 
 export function DebugPanel() {
   const { address, isConnected } = useAccount();
@@ -21,7 +23,7 @@ export function DebugPanel() {
     window.location.reload();
   };
 
-  if (!isConnected) return null;
+  if (!isConnected) {return null;}
 
   return (
     <Card className="bg-card border border-yellow-500/50">

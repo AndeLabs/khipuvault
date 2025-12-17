@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import {
   ExternalLink,
   Code,
@@ -12,6 +11,9 @@ import {
   Copy,
   Check,
 } from "lucide-react";
+import { useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Card,
@@ -20,7 +22,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CONTRACT_ADDRESSES, formatAddress } from "@/contracts/addresses";
 import { cn } from "@/lib/utils";

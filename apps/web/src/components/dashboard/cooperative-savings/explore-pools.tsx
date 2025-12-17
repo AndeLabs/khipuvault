@@ -8,27 +8,29 @@
 
 "use client";
 
+import { Search, ChevronDown, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { useAccount } from "wagmi";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { Search, ChevronDown, Loader2 } from "lucide-react";
+import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/hooks/use-toast";
 import {
   useCooperativePools,
   formatBTC,
   getPoolStatusText,
   useJoinPool,
 } from "@/hooks/web3/use-cooperative-pools";
-import { useToast } from "@/hooks/use-toast";
-import { useAccount } from "wagmi";
+
 
 export function ExplorePools() {
   const { pools, isLoading } = useCooperativePools();

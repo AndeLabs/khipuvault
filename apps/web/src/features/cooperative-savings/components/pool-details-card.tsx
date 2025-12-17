@@ -1,6 +1,11 @@
 "use client";
 
+import { Users, Calendar, TrendingUp, Award, Clock } from "lucide-react";
 import * as React from "react";
+
+import { AmountDisplay } from "@/components/common";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import {
   Card,
   CardHeader,
@@ -8,10 +13,6 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { AmountDisplay } from "@/components/common";
-import { Users, Calendar, TrendingUp, Award, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Member {

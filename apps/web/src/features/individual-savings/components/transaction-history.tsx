@@ -1,26 +1,5 @@
 "use client";
 
-import * as React from "react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import {
-  Table,
-  TableHeader,
-  TableRow,
-  TableHead,
-  TableBody,
-  TableCell,
-} from "@/components/ui/table";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { TransactionLink } from "@/components/ui/transaction-link";
-import { AmountDisplay } from "@/components/common";
 import {
   ArrowDownCircle,
   ArrowUpCircle,
@@ -30,8 +9,19 @@ import {
   Filter,
   Download,
 } from "lucide-react";
+import * as React from "react";
 import { formatUnits } from "viem";
-import { cn } from "@/lib/utils";
+
+import { AmountDisplay } from "@/components/common";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -39,6 +29,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableHeader,
+  TableRow,
+  TableHead,
+  TableBody,
+  TableCell,
+} from "@/components/ui/table";
+import { TransactionLink } from "@/components/ui/transaction-link";
+import { cn } from "@/lib/utils";
 
 export type TransactionType =
   | "deposit"
@@ -125,7 +126,7 @@ export function TransactionHistory({
 
   // Filter transactions
   const filteredTransactions = React.useMemo(() => {
-    if (filter === "all") return transactions;
+    if (filter === "all") {return transactions;}
     return transactions.filter((tx) => tx.type === filter);
   }, [transactions, filter]);
 
@@ -158,10 +159,10 @@ export function TransactionHistory({
     const diffHours = Math.floor(diffMs / 3600000);
     const diffDays = Math.floor(diffMs / 86400000);
 
-    if (diffMins < 1) return "Just now";
-    if (diffMins < 60) return `${diffMins}m ago`;
-    if (diffHours < 24) return `${diffHours}h ago`;
-    if (diffDays < 7) return `${diffDays}d ago`;
+    if (diffMins < 1) {return "Just now";}
+    if (diffMins < 60) {return `${diffMins}m ago`;}
+    if (diffHours < 24) {return `${diffHours}h ago`;}
+    if (diffDays < 7) {return `${diffDays}d ago`;}
     return date.toLocaleDateString();
   };
 

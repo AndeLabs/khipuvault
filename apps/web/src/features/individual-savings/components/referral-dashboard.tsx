@@ -1,20 +1,5 @@
 "use client";
 
-import * as React from "react";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
-import { AmountDisplay } from "@/components/common";
-import { useAccount } from "wagmi";
-import { formatUnits } from "viem";
-import { useClaimReferralRewards } from "@/hooks/web3/use-pool-transactions";
 import {
   Copy,
   Check,
@@ -24,13 +9,29 @@ import {
   Share2,
   ExternalLink,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import * as React from "react";
+import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
+
+import { AmountDisplay } from "@/components/common";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useClaimReferralRewards } from "@/hooks/web3/use-pool-transactions";
+import { cn } from "@/lib/utils";
 import { V3_FEATURES } from "@/lib/web3/contracts-v3";
 
 interface ReferralDashboardProps {
@@ -76,7 +77,7 @@ export function ReferralDashboard({
 
   // Copy to clipboard
   const handleCopyLink = async () => {
-    if (!referralLink) return;
+    if (!referralLink) {return;}
 
     try {
       await navigator.clipboard.writeText(referralLink);
@@ -88,7 +89,7 @@ export function ReferralDashboard({
   };
 
   const handleCopyAddress = async () => {
-    if (!address) return;
+    if (!address) {return;}
 
     try {
       await navigator.clipboard.writeText(address);

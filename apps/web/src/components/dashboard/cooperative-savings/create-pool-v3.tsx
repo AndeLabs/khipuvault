@@ -5,20 +5,6 @@
 
 "use client";
 
-import { useState } from "react";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
 import {
   Users,
   TrendingUp,
@@ -27,7 +13,23 @@ import {
   Loader2,
   CheckCircle2,
 } from "lucide-react";
+import { useState } from "react";
 import { formatEther } from "viem";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
+
 
 export function CreatePoolV3() {
   const { createPool, state, error, txHash, isProcessing } =
@@ -87,7 +89,7 @@ export function CreatePoolV3() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!validateForm()) return;
+    if (!validateForm()) {return;}
 
     await createPool(
       formData.name,

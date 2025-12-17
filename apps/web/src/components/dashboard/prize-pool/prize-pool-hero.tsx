@@ -1,8 +1,9 @@
 "use client";
 
-import { AnimateOnScroll } from "@/components/animate-on-scroll";
-import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
+import Link from "next/link";
+
+import { AnimateOnScroll } from "@/components/animate-on-scroll";
 
 export function PrizePoolHero() {
   return (

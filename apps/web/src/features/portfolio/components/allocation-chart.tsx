@@ -2,13 +2,6 @@
 
 import * as React from "react";
 import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import {
   PieChart,
   Pie,
   Cell,
@@ -16,6 +9,14 @@ import {
   Legend,
   Tooltip,
 } from "recharts";
+
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from "@/components/ui/card";
 
 interface AllocationChartProps {
   individualSavings?: number;

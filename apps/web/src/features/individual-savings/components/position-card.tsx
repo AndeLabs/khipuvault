@@ -1,6 +1,10 @@
 "use client";
 
+import { TrendingUp, Wallet, Clock, Info } from "lucide-react";
 import * as React from "react";
+import { formatUnits } from "viem";
+
+import { AmountDisplay, PercentageDisplay } from "@/components/common";
 import {
   Card,
   CardHeader,
@@ -10,17 +14,15 @@ import {
   StatValue,
   StatLabel,
 } from "@/components/ui/card";
-import { AmountDisplay, PercentageDisplay } from "@/components/common";
 import { Skeleton } from "@/components/ui/skeleton";
-import { TrendingUp, Wallet, Clock, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatUnits } from "viem";
+import { cn } from "@/lib/utils";
+
 
 interface PositionCardProps {
   totalDeposited?: string;
@@ -48,7 +50,7 @@ export function PositionCard({
   // Format values from wei to decimal
   const formatBalance = (value: string) => {
     try {
-      if (!value || value === "0") return "0.00";
+      if (!value || value === "0") {return "0.00";}
       const valueBigInt = typeof value === "bigint" ? value : BigInt(value);
       return Number(formatUnits(valueBigInt, 18)).toFixed(2);
     } catch (error) {

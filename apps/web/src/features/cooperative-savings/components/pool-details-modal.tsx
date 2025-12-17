@@ -11,29 +11,6 @@
 
 "use client";
 
-import * as React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
-import { Progress } from "@/components/ui/progress";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import {
   Users,
   Bitcoin,
@@ -46,21 +23,43 @@ import {
   ExternalLink,
   Shield,
 } from "lucide-react";
+import * as React from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Separator } from "@/components/ui/separator";
+import { SkeletonCard } from "@/components/ui/skeleton";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
 import {
   usePoolInfo,
   usePoolMembers,
   useMemberInfo,
   useMemberYield,
-} from "@/hooks/web3/use-cooperative-pool";
-import {
+
   formatBTCCompact,
   formatMUSD,
   getPoolStatusBadge,
   formatDate,
-  formatPercentage,
-} from "@/hooks/web3/use-cooperative-pool";
-import { useToast } from "@/hooks/use-toast";
-import { SkeletonCard } from "@/components/ui/skeleton";
+  formatPercentage} from "@/hooks/web3/use-cooperative-pool";
 
 interface PoolDetailsModalProps {
   poolId: number | null;
@@ -97,7 +96,7 @@ export function PoolDetailsModal({
     });
   };
 
-  if (!poolId) return null;
+  if (!poolId) {return null;}
 
   return (
     <Dialog open={open} onOpenChange={onClose}>

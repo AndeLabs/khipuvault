@@ -7,20 +7,7 @@
 
 "use client";
 
-import * as React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Badge } from "@/components/ui/badge";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   Ticket,
   AlertCircle,
@@ -29,15 +16,30 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
+import * as React from "react";
 import { formatEther, parseEther } from "viem";
 import { useAccount, useBalance } from "wagmi";
+
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import {
   useBuyTickets,
   formatProbability,
 } from "@/hooks/web3/use-lottery-pool";
+
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
-import { useQueryClient } from "@tanstack/react-query";
-import { useToast } from "@/hooks/use-toast";
 
 interface BuyTicketsModalProps {
   open: boolean;
@@ -92,7 +94,7 @@ export function BuyTicketsModal({
 
   // Handle purchase
   const handlePurchase = async () => {
-    if (!roundInfo || !canPurchase) return;
+    if (!roundInfo || !canPurchase) {return;}
 
     try {
       setStep("confirming");
@@ -137,7 +139,7 @@ export function BuyTicketsModal({
     onOpenChange(false);
   };
 
-  if (!roundInfo) return null;
+  if (!roundInfo) {return null;}
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>

@@ -1,17 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { YourTickets } from "./your-tickets";
+import { useBTCPrice } from "@/hooks/use-btc-price";
 import {
   useCurrentRound,
   formatBTC,
   formatUSD,
   getRoundStatus,
 } from "@/hooks/web3/use-lottery-pool";
-import { useBTCPrice } from "@/hooks/use-btc-price";
+
+import { YourTickets } from "./your-tickets";
+
 
 interface CountdownTimerProps {
   endTime: bigint;
@@ -48,7 +51,7 @@ const CountdownTimer = ({ endTime }: CountdownTimerProps) => {
   });
 
   const timerComponents = Object.entries(timeLeft).map(([interval, value]) => {
-    if (value === undefined) return null;
+    if (value === undefined) {return null;}
     return (
       <span key={interval} className="font-mono text-3xl font-bold">
         {String(value).padStart(2, "0")}
@@ -79,7 +82,7 @@ export function ActiveRound() {
     return (
       <Card className="border-primary/50">
         <CardContent className="py-12 text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
           <p className="text-muted-foreground">Cargando sorteo activo...</p>
         </CardContent>
       </Card>

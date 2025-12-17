@@ -1,6 +1,12 @@
 "use client";
 
+import { Users, Calendar, TrendingUp, Info, AlertCircle } from "lucide-react";
 import * as React from "react";
+
+import { AmountDisplay } from "@/components/common";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -9,12 +15,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
-import { AmountDisplay } from "@/components/common";
-import { Badge } from "@/components/ui/badge";
 import { useTransactionExecute } from "@/features/transactions";
-import { Users, Calendar, TrendingUp, Info, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface JoinPoolModalProps {
   open: boolean;
@@ -50,7 +51,7 @@ export function JoinPoolModal({
   const isFull = spotsLeft <= 0;
 
   const handleJoin = async () => {
-    if (!poolId || !onJoinPool) return;
+    if (!poolId || !onJoinPool) {return;}
 
     setIsSubmitting(true);
     try {

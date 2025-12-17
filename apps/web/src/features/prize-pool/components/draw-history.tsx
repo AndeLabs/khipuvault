@@ -7,7 +7,18 @@
 
 "use client";
 
+import {
+  Trophy,
+  ExternalLink,
+  Copy,
+  CheckCircle2,
+  Calendar,
+} from "lucide-react";
 import * as React from "react";
+import { formatEther } from "viem";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -15,8 +26,6 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -26,16 +35,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Trophy,
-  ExternalLink,
-  Copy,
-  CheckCircle2,
-  Calendar,
-} from "lucide-react";
-import { formatEther } from "viem";
-import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 import { useToast } from "@/hooks/use-toast";
+
+import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
 interface DrawHistoryProps {
   rounds: LotteryRound[];
