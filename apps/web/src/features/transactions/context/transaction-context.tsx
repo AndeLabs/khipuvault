@@ -65,7 +65,7 @@ export function TransactionProvider({
           tx.status === "pending" ||
           tx.status === "signing" ||
           tx.status === "confirming",
-      ) || null,
+      ) ?? null,
     [transactions],
   );
 

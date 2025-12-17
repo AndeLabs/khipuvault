@@ -9,7 +9,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { readContract } from "@wagmi/core";
-import { formatEther, type Address } from "viem";
+import { type Address } from "viem";
 import { useAccount, useConfig } from "wagmi";
 
 import {
@@ -170,7 +170,7 @@ export function usePoolInfo(poolId: number) {
 export function useMemberInfo(poolId: number, memberAddress?: Address) {
   const { address } = useAccount();
   const config = useConfig();
-  const userAddress = memberAddress || address;
+  const userAddress = memberAddress ?? address;
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.MEMBER_INFO(poolId, userAddress as Address),
@@ -298,7 +298,7 @@ export function usePoolMembers(poolId: number) {
 export function useMemberYield(poolId: number, memberAddress?: Address) {
   const { address } = useAccount();
   const config = useConfig();
-  const userAddress = memberAddress || address;
+  const userAddress = memberAddress ?? address;
 
   const { data, isLoading, error, refetch } = useQuery({
     queryKey: QUERY_KEYS.MEMBER_YIELD(poolId, userAddress as Address),

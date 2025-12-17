@@ -10,9 +10,7 @@
 import {
   Trophy,
   Ticket,
-  Users,
   Clock,
-  TrendingUp,
   DollarSign,
 } from "lucide-react";
 import * as React from "react";

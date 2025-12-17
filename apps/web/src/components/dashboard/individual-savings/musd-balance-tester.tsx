@@ -25,12 +25,6 @@ export function MusdBalanceTester() {
     setError(null);
 
     try {
-      console.log(
-        "🔍 Fetching MUSD balance directly with viem publicClient...",
-      );
-      console.log("   Address:", address);
-      console.log("   MUSD Contract:", MEZO_TESTNET_ADDRESSES.musd);
-
       const balance = (await publicClient.readContract({
         address: MEZO_TESTNET_ADDRESSES.musd as `0x${string}`,
         abi: MUSD_ABI,
@@ -38,12 +32,10 @@ export function MusdBalanceTester() {
         args: [address],
       })) as bigint;
 
-      console.log("✅ Direct balance fetched:", balance.toString(), "wei");
-      console.log("   Formatted:", (Number(balance) / 1e18).toFixed(2), "MUSD");
-
       setDirectBalance(balance);
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : "Unknown error";
+      // eslint-disable-next-line no-console
       console.error("❌ Error fetching direct balance:", errorMsg);
       setError(errorMsg);
     } finally {

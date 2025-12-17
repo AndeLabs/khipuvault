@@ -20,7 +20,7 @@ function formatTimeSince(timestamp: bigint | undefined): string {
 }
 
 export function YourPosition() {
-  const { userInfo, poolTVL, isLoading, address } = useIndividualPoolV3();
+  const { userInfo, isLoading, address } = useIndividualPoolV3();
   const [timeLeft, setTimeLeft] = useState("23:59:59");
   const isConnected = !!address;
 
@@ -138,10 +138,10 @@ export function YourPosition() {
           {positionData.map((item, index) => (
             <div key={index} className="flex flex-col gap-1">
               <p className="text-sm text-muted-foreground flex items-center">
-                {item.icon || ""}
+                {item.icon ?? ""}
                 {item.label}
               </p>
-              <p className={`font-code ${item.valueColor || "text-white"}`}>
+              <p className={`font-code ${item.valueColor ?? "text-white"}`}>
                 {item.value}
               </p>
               {item.subValue && (

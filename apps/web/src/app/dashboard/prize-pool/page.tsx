@@ -139,8 +139,6 @@ export default function PrizePoolPage() {
 
   // UI state
   const [isBuyModalOpen, setIsBuyModalOpen] = React.useState(false);
-  const [isCreateRoundModalOpen, setIsCreateRoundModalOpen] =
-    React.useState(false);
   const [activeTab, setActiveTab] = React.useState("overview");
 
   // Check if user is winner
@@ -244,11 +242,6 @@ export default function PrizePoolPage() {
         variant: "destructive",
       });
     }
-  };
-
-  // Handle create new round (admin)
-  const handleCreateNewRound = () => {
-    setIsCreateRoundModalOpen(true);
   };
 
   // Quick create round with defaults (7 days, 0.001 BTC/ticket, 1000 max)

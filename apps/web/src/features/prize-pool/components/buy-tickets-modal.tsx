@@ -17,7 +17,7 @@ import {
   Loader2,
 } from "lucide-react";
 import * as React from "react";
-import { formatEther, parseEther } from "viem";
+import { formatEther } from "viem";
 import { useAccount, useBalance } from "wagmi";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";

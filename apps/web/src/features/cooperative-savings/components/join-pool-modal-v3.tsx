@@ -58,7 +58,7 @@ export function JoinPoolModalV3({
 }: JoinPoolModalV3Props) {
   const { toast } = useToast();
   const { joinPool, state, error, reset } = useCooperativePool();
-  const { poolInfo, isLoading: loadingPool } = usePoolInfo(poolId || 0);
+  const { poolInfo, isLoading: loadingPool } = usePoolInfo(poolId ?? 0);
 
   const [btcAmount, setBtcAmount] = React.useState("");
   const [validationError, setValidationError] = React.useState("");

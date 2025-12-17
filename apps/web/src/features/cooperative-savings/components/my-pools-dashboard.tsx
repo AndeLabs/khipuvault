@@ -14,7 +14,6 @@ import {
   Users,
   Bitcoin,
   TrendingUp,
-  Calendar,
   Crown,
   ArrowRight,
   Coins,
@@ -25,7 +24,7 @@ import * as React from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { SkeletonCard } from "@/components/ui/skeleton";

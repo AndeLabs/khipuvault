@@ -1,7 +1,7 @@
 import { KhipuApiClient } from "@khipu/web3";
 
 const apiClient = new KhipuApiClient(
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api",
+  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api",
 );
 
 export async function getUserPortfolio(address: string) {

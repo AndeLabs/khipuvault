@@ -10,11 +10,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { parseEther, formatEther, type Address } from "viem";
+import { formatEther, type Address } from "viem";
 import {
   useAccount,
   usePublicClient,
-  useReadContract,
   useWriteContract,
   useWaitForTransactionReceipt,
 } from "wagmi";

@@ -62,7 +62,7 @@ export function PrivyConnectButton() {
   const { logout } = useLogout();
 
   // Wagmi hooks for balance
-  const { address, isConnected } = useAccount();
+  const { address } = useAccount();
   const { data: btcBalance } = useBalance({
     address: address as `0x${string}` | undefined,
   });

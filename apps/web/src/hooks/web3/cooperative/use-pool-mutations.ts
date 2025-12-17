@@ -9,12 +9,11 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
-import { parseEther, type Address } from "viem";
+import { parseEther } from "viem";
 import {
   useAccount,
   useWriteContract,
   useWaitForTransactionReceipt,
-  useConfig,
 } from "wagmi";
 
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";

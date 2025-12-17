@@ -34,7 +34,7 @@ export function usePortfolio() {
 
   return {
     portfolio,
-    transactions: transactionsData || [],
+    transactions: transactionsData ?? [],
     pools,
     isLoading: isLoadingPortfolio || isLoadingTransactions || isLoadingPools,
   };

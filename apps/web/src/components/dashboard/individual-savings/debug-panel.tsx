@@ -75,11 +75,11 @@ export function DebugPanel() {
             MUSD Balance (from useMusdApproval):
           </p>
           <p className="text-white">
-            Raw Wei: {musdBalance?.toString() || "0"}
+            Raw Wei: {musdBalance?.toString() ?? "0"}
           </p>
           <p className="text-white">Formatted: {balanceFormatted} MUSD</p>
           <p className="text-white">
-            Allowance: {allowance?.toString() || "0"} wei
+            Allowance: {allowance?.toString() ?? "0"} wei
           </p>
         </div>
 
@@ -90,13 +90,13 @@ export function DebugPanel() {
             {userInfo && userInfo.deposit > BigInt(0) ? "✅ Yes" : "❌ No"}
           </p>
           <p className="text-white">
-            MUSD Amount: {userInfo?.deposit.toString() || "0"} wei
+            MUSD Amount: {userInfo?.deposit.toString() ?? "0"} wei
           </p>
           <p className="text-white">
-            Yield Accrued: {userInfo?.yields.toString() || "0"} wei
+            Yield Accrued: {userInfo?.yields.toString() ?? "0"} wei
           </p>
           <p className="text-white">
-            Days Active: {userInfo?.daysActive.toString() || "0"}
+            Days Active: {userInfo?.daysActive.toString() ?? "0"}
           </p>
           <p className="text-white">
             Auto-Compound: {userInfo?.autoCompoundEnabled ? "✅ On" : "❌ Off"}
@@ -106,10 +106,10 @@ export function DebugPanel() {
         <div>
           <p className="text-muted-foreground mb-1">Pool Stats (V3):</p>
           <p className="text-white">
-            Pool TVL: {poolTVL?.toString() || "0"} wei
+            Pool TVL: {poolTVL?.toString() ?? "0"} wei
           </p>
           <p className="text-white">
-            TVL (formatted): {(Number(poolTVL || 0) / 1e18).toFixed(2)} MUSD
+            TVL (formatted): {(Number(poolTVL ?? 0) / 1e18).toFixed(2)} MUSD
           </p>
         </div>
 

@@ -40,7 +40,6 @@ import {
 export function MyPools() {
   const { address } = useAccount();
   const { pools, isLoading } = useCooperativePools();
-  const { toast } = useToast();
   const [userPools, setUserPools] = useState<any[]>([]);
 
   // Filter pools where user is a member
@@ -140,7 +139,7 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
   const userShare =
     pool.totalBtcDeposited > 0n
       ? (
-          (Number(memberInfo?.btcContributed || 0n) /
+          (Number(memberInfo?.btcContributed ?? 0n) /
             Number(pool.totalBtcDeposited)) *
           100
         ).toFixed(2)
@@ -211,7 +210,7 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
               <div className="bg-background/50 p-4 rounded-lg">
                 <p className="text-sm text-muted-foreground">Tu Contribución</p>
                 <p className="text-lg font-bold font-code text-primary">
-                  {formatBTC(memberInfo?.btcContributed || 0n)} BTC
+                  {formatBTC(memberInfo?.btcContributed ?? 0n)} BTC
                 </p>
               </div>
               <div className="bg-background/50 p-4 rounded-lg">
@@ -223,7 +222,7 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
                   Yield Disponible
                 </p>
                 <p className="text-lg font-bold font-code text-secondary">
-                  {formatBTC(yieldAmount || 0n)} MUSD
+                  {formatBTC(yieldAmount ?? 0n)} MUSD
                 </p>
               </div>
               <div className="bg-background/50 p-4 rounded-lg">
