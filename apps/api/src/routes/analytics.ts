@@ -2,6 +2,7 @@ import { Router, type Router as ExpressRouter } from "express";
 import { z } from "zod";
 
 import { requireAuth, optionalAuth } from "../middleware/auth";
+import { expensiveOperationLimiter } from "../middleware/rate-limit";
 import { AnalyticsService } from "../services/analytics";
 
 const router: ExpressRouter = Router();
@@ -21,7 +22,7 @@ const timelineSchema = z.object({
 });
 
 // GET /api/analytics/global
-router.get("/global", async (req, res, next) => {
+router.get("/global", expensiveOperationLimiter, async (req, res, next) => {
   try {
     const stats = await analyticsService.getGlobalStats();
     res.json(stats);
@@ -31,7 +32,7 @@ router.get("/global", async (req, res, next) => {
 });
 
 // GET /api/analytics/timeline
-router.get("/timeline", async (req, res, next) => {
+router.get("/timeline", expensiveOperationLimiter, async (req, res, next) => {
   try {
     const { days } = timelineSchema.parse(req.query);
     const timeline = await analyticsService.getActivityTimeline(days);
@@ -42,7 +43,7 @@ router.get("/timeline", async (req, res, next) => {
 });
 
 // GET /api/analytics/top-pools
-router.get("/top-pools", async (req, res, next) => {
+router.get("/top-pools", expensiveOperationLimiter, async (req, res, next) => {
   try {
     const { limit } = paginationSchema.pick({ limit: true }).parse(req.query);
     const pools = await analyticsService.getTopPools(limit);
@@ -54,26 +55,36 @@ router.get("/top-pools", async (req, res, next) => {
 
 // GET /api/analytics/top-users
 // Protected: Requires authentication to access user wallet addresses and balances
-router.get("/top-users", requireAuth, async (req, res, next) => {
-  try {
-    const { limit } = paginationSchema.pick({ limit: true }).parse(req.query);
-    const users = await analyticsService.getTopUsers(limit);
-    res.json(users);
-  } catch (error) {
-    next(error);
-  }
-});
+router.get(
+  "/top-users",
+  expensiveOperationLimiter,
+  requireAuth,
+  async (req, res, next) => {
+    try {
+      const { limit } = paginationSchema.pick({ limit: true }).parse(req.query);
+      const users = await analyticsService.getTopUsers(limit);
+      res.json(users);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 // GET /api/analytics/events
 // Protected: Event logs may contain sensitive transaction details
-router.get("/events", optionalAuth, async (req, res, next) => {
-  try {
-    const { limit, offset } = paginationSchema.parse(req.query);
-    const result = await analyticsService.getEventLogs(limit, offset);
-    res.json(result);
-  } catch (error) {
-    next(error);
-  }
-});
+router.get(
+  "/events",
+  expensiveOperationLimiter,
+  optionalAuth,
+  async (req, res, next) => {
+    try {
+      const { limit, offset } = paginationSchema.parse(req.query);
+      const result = await analyticsService.getEventLogs(limit, offset);
+      res.json(result);
+    } catch (error) {
+      next(error);
+    }
+  },
+);
 
 export default router;

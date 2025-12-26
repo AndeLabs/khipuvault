@@ -14,6 +14,7 @@ import {
   poolAnalyticsSchema,
 } from "../lib/validation-schemas";
 import { requireAuth } from "../middleware/auth";
+import { writeRateLimiter } from "../middleware/rate-limit";
 import { validate } from "../middleware/validate";
 import { PoolsService } from "../services/pools";
 
@@ -85,6 +86,7 @@ router.get(
 // Any authenticated user can refresh pool stats (public data)
 router.post(
   "/address/:address/refresh",
+  writeRateLimiter,
   requireAuth,
   validate(addressParamSchema),
   asyncHandler(async (req, res) => {

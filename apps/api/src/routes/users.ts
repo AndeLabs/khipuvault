@@ -20,6 +20,7 @@ import {
   ethereumAddressSchema,
 } from "../lib/validation-schemas";
 import { requireAuth } from "../middleware/auth";
+import { writeRateLimiter } from "../middleware/rate-limit";
 import { validate } from "../middleware/validate";
 import { UsersService } from "../services/users";
 
@@ -127,6 +128,7 @@ const createUserBodySchema = z.object({
 
 router.post(
   "/",
+  writeRateLimiter,
   requireAuth,
   validate(createUserBodySchema),
   asyncHandler(async (req, res) => {
