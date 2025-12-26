@@ -49,6 +49,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps = {}) {
           variant="ghost"
           className="md:hidden"
           onClick={onMenuClick}
+          aria-label="Toggle navigation menu"
         >
           <Menu className="h-5 w-5" />
           <span className="sr-only">Toggle Menu</span>

@@ -26,8 +26,20 @@ export const MEZO_MAINNET = {
     symbol: "BTC",
   },
   rpcUrls: {
-    default: { http: ["https://rpc.mezo.org"] },
-    public: { http: ["https://rpc.mezo.org"] },
+    default: {
+      http: [
+        "https://rpc-http.mezo.boar.network",
+        "https://mainnet.mezo.public.validationcloud.io",
+        "https://rpc.mezo.org",
+      ],
+    },
+    public: {
+      http: [
+        "https://rpc-http.mezo.boar.network",
+        "https://mainnet.mezo.public.validationcloud.io",
+        "https://rpc.mezo.org",
+      ],
+    },
   },
   blockExplorers: {
     default: { name: "Mezo Explorer", url: "https://explorer.mezo.org" },

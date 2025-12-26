@@ -145,6 +145,7 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                           "w-full justify-between",
                           isActive && "bg-surface-elevated text-lavanda",
                         )}
+                        aria-label={`${isExpanded || isActive ? "Collapse" : "Expand"} ${item.title} menu`}
                       >
                         <div className="flex items-center gap-3">
                           <Icon className="h-5 w-5" />
@@ -155,6 +156,7 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                             "h-4 w-4 transition-transform duration-fast",
                             (isExpanded || isActive) && "rotate-180",
                           )}
+                          aria-hidden="true"
                         />
                       </Button>
                     </CollapsibleTrigger>

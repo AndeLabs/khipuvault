@@ -270,8 +270,9 @@ export function PrivyConnectButtonCompact() {
 
   if (authenticated && address) {
     return (
-      <Button variant="ghost" size="icon" onClick={logout}>
+      <Button variant="ghost" size="icon" onClick={logout} aria-label="Logout">
         <LogOut className="h-4 w-4" />
+        <span className="sr-only">Logout</span>
       </Button>
     );
   }

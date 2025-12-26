@@ -164,12 +164,14 @@ function CopyAddress({ address }: { address: string }) {
       className="h-6 w-6 p-0"
       onClick={copyToClipboard}
       title={copied ? "¡Copiado!" : "Copiar dirección"}
+      aria-label={copied ? "Address copied" : "Copy contract address"}
     >
       {copied ? (
         <Check className="h-3 w-3 text-green-500" />
       ) : (
         <Copy className="h-3 w-3" />
       )}
+      <span className="sr-only">{copied ? "Copied" : "Copy"}</span>
     </Button>
   );
 }
@@ -244,8 +246,10 @@ export function ContractsInfo() {
                               target="_blank"
                               rel="noopener noreferrer"
                               title="Ver en explorador"
+                              aria-label="View contract in block explorer"
                             >
                               <ExternalLink className="h-3 w-3" />
+                              <span className="sr-only">View in explorer</span>
                             </a>
                           </Button>
                         )}
@@ -359,8 +363,10 @@ export function ContractsInfo() {
                               target="_blank"
                               rel="noopener noreferrer"
                               title="Ver en explorador"
+                              aria-label="View contract in block explorer"
                             >
                               <ExternalLink className="h-3 w-3" />
+                              <span className="sr-only">View in explorer</span>
                             </a>
                           </Button>
                         )}

@@ -1,12 +1,18 @@
 "use client";
 
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
 import { Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { SmartConnectButton } from "@/components/wallet/smart-connect-button";
 
 const navLinks = [
@@ -64,7 +70,11 @@ export function Header() {
 
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon">
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="Open navigation menu"
+              >
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Open menu</span>
               </Button>
@@ -73,6 +83,9 @@ export function Header() {
               side="right"
               className="bg-background border-l-primary/20"
             >
+              <VisuallyHidden.Root>
+                <SheetTitle>Navigation Menu</SheetTitle>
+              </VisuallyHidden.Root>
               <div className="flex h-full flex-col">
                 <div className="border-b border-primary/20 pb-4">
                   <Link href="/" className="flex items-center gap-2">

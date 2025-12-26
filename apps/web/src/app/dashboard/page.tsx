@@ -41,6 +41,7 @@ const AllocationChart = nextDynamic(
     ),
   },
 );
+import { usePortfolioAnalytics } from "@/hooks/use-portfolio-analytics";
 import {
   useCooperativePools,
   useUserCooperativeTotal,
@@ -84,6 +85,9 @@ export default function DashboardPage() {
   const totalValue = individualSavings + cooperativeSavings;
   const hasNoSavings = totalValue === 0;
 
+  // Get portfolio analytics (24h/7d changes and recent activities)
+  const analytics = usePortfolioAnalytics(totalValue);
+
   // Memoize portfolio data to prevent unnecessary re-renders
   const portfolioData = React.useMemo(
     () => ({
@@ -91,11 +95,19 @@ export default function DashboardPage() {
       individualSavings: individualSavings.toFixed(2),
       cooperativeSavings: cooperativeSavings.toFixed(2),
       totalYields: totalYields.toFixed(6),
-      change24h: 0, // TODO: Implement 24h change calculation
-      change7d: 0, // TODO: Implement 7d change calculation
-      recentActivities: [], // TODO: Fetch from user transactions
+      change24h: analytics.percentChange24h,
+      change7d: analytics.percentChange7d,
+      recentActivities: analytics.recentActivities,
     }),
-    [totalValue, individualSavings, cooperativeSavings, totalYields],
+    [
+      totalValue,
+      individualSavings,
+      cooperativeSavings,
+      totalYields,
+      analytics.percentChange24h,
+      analytics.percentChange7d,
+      analytics.recentActivities,
+    ],
   );
 
   if (!isConnected) {
