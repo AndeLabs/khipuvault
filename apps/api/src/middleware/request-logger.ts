@@ -28,8 +28,8 @@ function customReqSerializer(req: Request) {
       authorization: req.headers.authorization,
       cookie: req.headers.cookie,
     },
-    remoteAddress: req.ip || req.socket.remoteAddress,
-    remotePort: req.socket.remotePort,
+    remoteAddress: req.ip || req.socket?.remoteAddress || "unknown",
+    remotePort: req.socket?.remotePort,
   };
 }
 
@@ -137,7 +137,7 @@ export const requestLogger: HttpLogger<Request, Response> = pinoHttp({
   customProps: (req: Request, res: Response) => {
     return {
       userAgent: req.headers["user-agent"],
-      ip: req.ip || req.socket.remoteAddress,
+      ip: req.ip || req.socket?.remoteAddress || "unknown",
     };
   },
 
