@@ -1,8 +1,15 @@
 import { ethers } from "ethers";
 import { retryWithBackoff } from "./utils/retry";
+import {
+  getRpcUrl,
+  getAllRpcUrls,
+  getChainId,
+  getNetworkName,
+} from "@khipu/shared";
 
-export const MEZO_TESTNET_RPC = "https://rpc.test.mezo.org";
-export const MEZO_TESTNET_CHAIN_ID = 31611;
+// For backward compatibility - these will be set from environment
+export const MEZO_TESTNET_RPC = getRpcUrl();
+export const MEZO_TESTNET_CHAIN_ID = getChainId();
 
 // Health check configuration
 const HEALTH_CHECK_INTERVAL = 30000; // 30 seconds
@@ -29,8 +36,8 @@ class ResilientProvider {
   private isShuttingDown = false;
 
   constructor(
-    private rpcUrl: string = process.env.RPC_URL || MEZO_TESTNET_RPC,
-    private chainId: number = MEZO_TESTNET_CHAIN_ID,
+    private rpcUrl: string = process.env.RPC_URL || getRpcUrl(),
+    private chainId: number = getChainId(),
   ) {
     this.initializeProvider();
     this.startHealthCheck();
@@ -39,10 +46,11 @@ class ResilientProvider {
   private initializeProvider(): void {
     try {
       console.log("🔌 Initializing RPC provider:", this.rpcUrl);
+      console.log("🌐 Network:", getNetworkName(), "Chain ID:", this.chainId);
 
       this.provider = new ethers.JsonRpcProvider(this.rpcUrl, {
         chainId: this.chainId,
-        name: "mezo-testnet",
+        name: getNetworkName().toLowerCase().replace(" ", "-"),
       });
 
       // Listen to provider errors

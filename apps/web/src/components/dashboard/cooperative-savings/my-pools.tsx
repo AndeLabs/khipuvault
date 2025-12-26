@@ -190,8 +190,9 @@ function PoolCard({ pool, userAddress }: { pool: any; userAddress: string }) {
           )}
         </CardTitle>
         {isCreator && (
-          <Button variant="ghost" size="icon">
+          <Button variant="ghost" size="icon" aria-label="Pool settings">
             <Settings className="h-5 w-5" />
+            <span className="sr-only">Settings</span>
           </Button>
         )}
       </CardHeader>

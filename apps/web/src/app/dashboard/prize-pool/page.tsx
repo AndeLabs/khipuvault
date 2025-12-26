@@ -46,6 +46,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 // Hooks
+import { useLotteryClaimStatus } from "@/hooks/web3/use-lottery-claim-status";
+import { useLotteryPoolEvents } from "@/hooks/web3/use-lottery-pool-events";
 import {
   useCurrentRound,
   useAllRounds,
@@ -59,7 +61,6 @@ import {
   useDrawWinner,
   useCreateRound,
 } from "@/hooks/web3/use-lottery-pool";
-import { useLotteryPoolEvents } from "@/hooks/web3/use-lottery-pool-events";
 
 // Components
 
@@ -109,6 +110,10 @@ export default function PrizePoolPage() {
   // User stats across all rounds
   const { stats, isLoading: isLoadingStats } = useUserLotteryStats();
 
+  // Check if user has already claimed/withdrawn for current round
+  const { hasClaimed: hasClaimedOrWithdrawn, isLoading: isLoadingClaimStatus } =
+    useLotteryClaimStatus(currentRoundId ? Number(currentRoundId) : undefined);
+
   // Claim/withdraw hooks
   const {
     claimPrize,
@@ -153,7 +158,6 @@ export default function PrizePoolPage() {
     currentRound.status === 1 &&
     ticketCount &&
     ticketCount > BigInt(0);
-  const hasClaimedOrWithdrawn = false; // Would need to track this via events
 
   // Handle claim prize (for winners)
   const handleClaimPrize = async () => {

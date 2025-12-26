@@ -6,24 +6,23 @@
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     },
-    "./types": {
-      "types": "./dist/types/index.d.ts",
-      "import": "./dist/types/index.js"
+    "./constants/chains": {
+      "types": "./dist/constants/chains.d.ts",
+      "import": "./dist/constants/chains.mjs",
+      "require": "./dist/constants/chains.js"
     },
-    "./constants": {
-      "types": "./dist/constants/index.d.ts",
-      "import": "./dist/constants/index.js"
-    },
-    "./utils": {
-      "types": "./dist/utils/index.d.ts",
-      "import": "./dist/utils/index.js"
+    "./config/network": {
+      "types": "./dist/config/network.d.ts",
+      "import": "./dist/config/network.mjs",
+      "require": "./dist/config/network.js"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts --format esm --dts",
-    "dev": "tsup src/index.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts src/constants/chains.ts src/config/network.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts src/constants/chains.ts src/config/network.ts --format esm,cjs --dts --watch",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },
