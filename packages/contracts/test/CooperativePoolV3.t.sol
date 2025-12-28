@@ -32,7 +32,7 @@ contract CooperativePoolV3Test is Test {
     function setUp() public {
         // Deploy mocks
         musd = new MockMUSD();
-        mezoIntegration = new MockMezoIntegration(address(musd));
+        mezoIntegration = new MockMezoIntegration(address(musd), address(0));
         yieldAggregator = new MockYieldAggregator(address(musd));
 
         musd.mint(address(mezoIntegration), 10_000_000 ether);

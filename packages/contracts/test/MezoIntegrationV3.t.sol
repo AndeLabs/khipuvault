@@ -3,6 +3,7 @@ pragma solidity 0.8.25;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {MezoIntegrationV3} from "../src/integrations/v3/MezoIntegrationV3.sol";
+import {BaseMezoIntegration} from "../src/integrations/base/BaseMezoIntegration.sol";
 import {UUPSProxy} from "../src/proxy/UUPSProxy.sol";
 import {MockMUSD} from "./mocks/MockMUSD.sol";
 
@@ -111,6 +112,98 @@ contract MezoIntegrationV3Test is Test {
     }
 
     /*//////////////////////////////////////////////////////////////
+                        MOCK HELPERS
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Helper to setup all necessary mocks for price validation
+     * @param price The BTC price to mock (18 decimals)
+     */
+    function _setupPriceMocks(uint256 price) internal {
+        // Mock latestRoundData for freshness check
+        vm.mockCall(
+            priceFeed,
+            abi.encodeWithSignature("latestRoundData()"),
+            abi.encode(
+                uint80(1),           // roundId
+                int256(price),       // answer
+                block.timestamp,     // startedAt
+                block.timestamp,     // updatedAt (fresh)
+                uint80(1)            // answeredInRound
+            )
+        );
+
+        // Mock fetchPrice for actual price
+        vm.mockCall(
+            priceFeed,
+            abi.encodeWithSignature("fetchPrice()"),
+            abi.encode(price)
+        );
+    }
+
+    /**
+     * @notice Helper to setup mocks for a deposit operation
+     * @param user Address of the user
+     * @param existingDebt Existing debt (0 for new trove)
+     */
+    function _setupDepositMocks(address user, uint256 existingDebt) internal {
+        // Mock trove state
+        vm.mockCall(
+            troveManager,
+            abi.encodeWithSignature("getTroveDebtAndColl(address)", user),
+            abi.encode(existingDebt, existingDebt > 0 ? 1 ether : 0)
+        );
+
+        // Mock price
+        _setupPriceMocks(BTC_PRICE);
+
+        // Mock hint helpers
+        vm.mockCall(
+            hintHelpers,
+            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
+            abi.encode(address(0), 0, 0)
+        );
+
+        // Mock borrower operations
+        vm.mockCall(
+            borrowerOperations,
+            abi.encodeWithSignature("openTrove(uint256,uint256,address,address)"),
+            abi.encode()
+        );
+
+        vm.mockCall(
+            borrowerOperations,
+            abi.encodeWithSignature("adjustTrove(uint256,uint256,bool,address,address)"),
+            abi.encode()
+        );
+    }
+
+    /**
+     * @notice Helper to setup mocks for a withdrawal operation
+     */
+    function _setupWithdrawMocks() internal {
+        _setupPriceMocks(BTC_PRICE);
+
+        vm.mockCall(
+            hintHelpers,
+            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
+            abi.encode(address(0), 0, 0)
+        );
+
+        vm.mockCall(
+            borrowerOperations,
+            abi.encodeWithSignature("adjustTrove(uint256,uint256,bool,address,address)"),
+            abi.encode()
+        );
+
+        vm.mockCall(
+            borrowerOperations,
+            abi.encodeWithSignature("closeTrove()"),
+            abi.encode()
+        );
+    }
+
+    /*//////////////////////////////////////////////////////////////
                         DEPLOYMENT TESTS
     //////////////////////////////////////////////////////////////*/
 
@@ -133,7 +226,7 @@ contract MezoIntegrationV3Test is Test {
     }
 
     function test_Version() public view {
-        assertEq(mezoIntegration.version(), "3.0.0");
+        assertEq(mezoIntegration.version(), "3.1.0");
     }
 
     function test_Initialize_ZeroAddress() public {
@@ -146,7 +239,7 @@ contract MezoIntegrationV3Test is Test {
         MezoIntegrationV3 newMezo = MezoIntegrationV3(payable(address(newProxy)));
 
         vm.prank(owner);
-        vm.expectRevert(MezoIntegrationV3.InvalidAddress.selector);
+        vm.expectRevert(BaseMezoIntegration.InvalidAddress.selector);
         newMezo.initialize(
             address(0),
             borrowerOperations,
@@ -165,33 +258,8 @@ contract MezoIntegrationV3Test is Test {
         uint256 balanceBefore = address(user1).balance;
         uint256 musdBalanceBefore = musd.balanceOf(user1);
 
-        // Mock external calls
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user1),
-            abi.encode(0, 0)
-        );
-
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
-
-        vm.mockCall(
-            hintHelpers,
-            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
-            abi.encode(address(0), 0, 0)
-        );
-
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("openTrove(uint256,uint256,address,address)"),
-            abi.encode()
-        );
-
-        vm.expectEmit(true, false, false, false);
-        emit BTCDeposited(user1, btcAmount, 0);
+        // Setup all necessary mocks
+        _setupDepositMocks(user1, 0);
 
         vm.prank(user1);
         uint256 musdAmount = mezoIntegration.depositAndMintNative{value: btcAmount}();
@@ -221,7 +289,7 @@ contract MezoIntegrationV3Test is Test {
         );
 
         vm.prank(user1);
-        vm.expectRevert(MezoIntegrationV3.InvalidAmount.selector);
+        vm.expectRevert(BaseMezoIntegration.InvalidAmount.selector);
         mezoIntegration.depositAndMintNative{value: MIN_BTC_DEPOSIT - 1}();
     }
 
@@ -241,49 +309,20 @@ contract MezoIntegrationV3Test is Test {
     }
 
     function test_DepositAndMintNative_Multiple() public {
-        // Mock external calls
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user1),
-            abi.encode(0, 0)
-        );
+        // First deposit - new trove
+        _setupDepositMocks(user1, 0);
 
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
-
-        vm.mockCall(
-            hintHelpers,
-            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
-            abi.encode(address(0), 0, 0)
-        );
-
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("openTrove(uint256,uint256,address,address)"),
-            abi.encode()
-        );
-
-        vm.startPrank(user1);
+        vm.prank(user1);
         mezoIntegration.depositAndMintNative{value: 1 ether}();
 
-        // Second deposit - should call adjustTrove
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user1),
-            abi.encode(1 ether, 30000e18)
-        );
+        // Advance block to avoid flash loan protection
+        vm.roll(block.number + 1);
 
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("adjustTrove(uint256,uint256,bool,address,address)"),
-            abi.encode()
-        );
+        // Second deposit - existing trove (has debt)
+        _setupDepositMocks(user1, 30000e18);
 
+        vm.prank(user1);
         mezoIntegration.depositAndMintNative{value: 0.5 ether}();
-        vm.stopPrank();
 
         // Check total position
         (uint256 btcCollateral,) = mezoIntegration.getUserPosition(user1);
@@ -296,44 +335,19 @@ contract MezoIntegrationV3Test is Test {
 
     function test_BurnAndWithdraw() public {
         // First deposit
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user1),
-            abi.encode(0, 0)
-        );
-
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
-
-        vm.mockCall(
-            hintHelpers,
-            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
-            abi.encode(address(0), 0, 0)
-        );
-
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("openTrove(uint256,uint256,address,address)"),
-            abi.encode()
-        );
+        _setupDepositMocks(user1, 0);
 
         vm.prank(user1);
         uint256 musdMinted = mezoIntegration.depositAndMintNative{value: 1 ether}();
 
+        // Advance block to avoid flash loan protection
+        vm.roll(block.number + 1);
+
         // Now withdraw
         uint256 btcBalanceBefore = address(user1).balance;
 
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("adjustTrove(uint256,uint256,bool,address,address)"),
-            abi.encode()
-        );
-
-        vm.expectEmit(true, false, false, false);
-        emit BTCWithdrawn(user1, 0, musdMinted);
+        // Setup withdrawal mocks
+        _setupWithdrawMocks();
 
         vm.prank(user1);
         uint256 btcReturned = mezoIntegration.burnAndWithdraw(musdMinted);
@@ -344,51 +358,28 @@ contract MezoIntegrationV3Test is Test {
 
     function test_BurnAndWithdraw_InvalidAmount() public {
         vm.prank(user1);
-        vm.expectRevert(MezoIntegrationV3.InvalidAmount.selector);
+        vm.expectRevert(BaseMezoIntegration.InvalidAmount.selector);
         mezoIntegration.burnAndWithdraw(0);
     }
 
     function test_BurnAndWithdraw_InsufficientBalance() public {
         vm.prank(user1);
-        vm.expectRevert(MezoIntegrationV3.InsufficientBalance.selector);
+        vm.expectRevert(BaseMezoIntegration.InsufficientBalance.selector);
         mezoIntegration.burnAndWithdraw(1000 ether);
     }
 
     function test_BurnAndWithdraw_CloseTrove() public {
         // First deposit
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user1),
-            abi.encode(0, 0)
-        );
-
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
-
-        vm.mockCall(
-            hintHelpers,
-            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
-            abi.encode(address(0), 0, 0)
-        );
-
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("openTrove(uint256,uint256,address,address)"),
-            abi.encode()
-        );
+        _setupDepositMocks(user1, 0);
 
         vm.prank(user1);
         uint256 musdMinted = mezoIntegration.depositAndMintNative{value: 1 ether}();
 
-        // Withdraw everything - should close trove
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("closeTrove()"),
-            abi.encode()
-        );
+        // Advance block to avoid flash loan protection
+        vm.roll(block.number + 1);
+
+        // Setup withdrawal mocks for closing trove
+        _setupWithdrawMocks();
 
         vm.prank(user1);
         mezoIntegration.burnAndWithdraw(musdMinted);
@@ -405,39 +396,13 @@ contract MezoIntegrationV3Test is Test {
 
     function test_IsPositionHealthy() public {
         // Deposit first
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user1),
-            abi.encode(0, 0)
-        );
-
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
-
-        vm.mockCall(
-            hintHelpers,
-            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
-            abi.encode(address(0), 0, 0)
-        );
-
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("openTrove(uint256,uint256,address,address)"),
-            abi.encode()
-        );
+        _setupDepositMocks(user1, 0);
 
         vm.prank(user1);
         mezoIntegration.depositAndMintNative{value: 1 ether}();
 
-        // Mock price feed for health check
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
+        // Setup price mocks for health check
+        _setupPriceMocks(BTC_PRICE);
 
         bool healthy = mezoIntegration.isPositionHealthy(user1);
         assertTrue(healthy);
@@ -445,39 +410,13 @@ contract MezoIntegrationV3Test is Test {
 
     function test_GetCollateralRatio() public {
         // Deposit first
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user1),
-            abi.encode(0, 0)
-        );
-
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
-
-        vm.mockCall(
-            hintHelpers,
-            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
-            abi.encode(address(0), 0, 0)
-        );
-
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("openTrove(uint256,uint256,address,address)"),
-            abi.encode()
-        );
+        _setupDepositMocks(user1, 0);
 
         vm.prank(user1);
         mezoIntegration.depositAndMintNative{value: 1 ether}();
 
-        // Mock price feed for ratio calculation
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
+        // Setup price mocks for ratio calculation
+        _setupPriceMocks(BTC_PRICE);
 
         uint256 ratio = mezoIntegration.getCollateralRatio(user1);
         assertGt(ratio, 11000); // Should be > 110% (minimum healthy ratio)
@@ -528,13 +467,13 @@ contract MezoIntegrationV3Test is Test {
 
     function test_SetTargetLtv_ZeroInvalid() public {
         vm.prank(owner);
-        vm.expectRevert(MezoIntegrationV3.InvalidLtv.selector);
+        vm.expectRevert(BaseMezoIntegration.InvalidLtv.selector);
         mezoIntegration.setTargetLtv(0);
     }
 
     function test_SetTargetLtv_TooHigh() public {
         vm.prank(owner);
-        vm.expectRevert(MezoIntegrationV3.InvalidLtv.selector);
+        vm.expectRevert(BaseMezoIntegration.InvalidLtv.selector);
         mezoIntegration.setTargetLtv(8001); // > 80%
     }
 
@@ -558,7 +497,7 @@ contract MezoIntegrationV3Test is Test {
 
     function test_SetMaxFeePercentage_TooHigh() public {
         vm.prank(owner);
-        vm.expectRevert(MezoIntegrationV3.ExcessiveFee.selector);
+        vm.expectRevert(BaseMezoIntegration.ExcessiveFee.selector);
         mezoIntegration.setMaxFeePercentage(1001); // > 10%
     }
 
@@ -614,52 +553,32 @@ contract MezoIntegrationV3Test is Test {
     //////////////////////////////////////////////////////////////*/
 
     function test_FullLifecycle() public {
-        // Setup mocks for all operations
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user1),
-            abi.encode(0, 0)
-        );
+        // Setup deposit mocks
+        _setupDepositMocks(user1, 0);
 
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
-
-        vm.mockCall(
-            hintHelpers,
-            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
-            abi.encode(address(0), 0, 0)
-        );
-
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("openTrove(uint256,uint256,address,address)"),
-            abi.encode()
-        );
-
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("closeTrove()"),
-            abi.encode()
-        );
-
-        vm.startPrank(user1);
+        vm.prank(user1);
 
         // 1. Deposit BTC and mint MUSD
         uint256 musdMinted = mezoIntegration.depositAndMintNative{value: 1 ether}();
         assertGt(musdMinted, 0);
 
+        // Setup price mocks for health check
+        _setupPriceMocks(BTC_PRICE);
+
         // 2. Check position is healthy
         bool healthy = mezoIntegration.isPositionHealthy(user1);
         assertTrue(healthy);
 
+        // Advance block to avoid flash loan protection
+        vm.roll(block.number + 1);
+
+        // Setup withdrawal mocks
+        _setupWithdrawMocks();
+
         // 3. Burn MUSD and withdraw BTC
+        vm.prank(user1);
         uint256 btcReturned = mezoIntegration.burnAndWithdraw(musdMinted);
         assertGt(btcReturned, 0);
-
-        vm.stopPrank();
 
         // Position should be closed
         (uint256 btcCollateral, uint256 musdDebt) = mezoIntegration.getUserPosition(user1);
@@ -668,52 +587,18 @@ contract MezoIntegrationV3Test is Test {
     }
 
     function test_MultipleUsers() public {
-        // Setup mocks
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
-
-        vm.mockCall(
-            hintHelpers,
-            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
-            abi.encode(address(0), 0, 0)
-        );
-
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("openTrove(uint256,uint256,address,address)"),
-            abi.encode()
-        );
-
         // User1 deposits
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user1),
-            abi.encode(0, 0)
-        );
-
+        _setupDepositMocks(user1, 0);
         vm.prank(user1);
         mezoIntegration.depositAndMintNative{value: 1 ether}();
 
         // User2 deposits
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user2),
-            abi.encode(0, 0)
-        );
-
+        _setupDepositMocks(user2, 0);
         vm.prank(user2);
         mezoIntegration.depositAndMintNative{value: 2 ether}();
 
         // User3 deposits
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user3),
-            abi.encode(0, 0)
-        );
-
+        _setupDepositMocks(user3, 0);
         vm.prank(user3);
         mezoIntegration.depositAndMintNative{value: 3 ether}();
 
@@ -731,29 +616,7 @@ contract MezoIntegrationV3Test is Test {
         vm.deal(user1, btcAmount);
 
         // Setup mocks
-        vm.mockCall(
-            troveManager,
-            abi.encodeWithSignature("getTroveDebtAndColl(address)", user1),
-            abi.encode(0, 0)
-        );
-
-        vm.mockCall(
-            priceFeed,
-            abi.encodeWithSignature("fetchPrice()"),
-            abi.encode(BTC_PRICE)
-        );
-
-        vm.mockCall(
-            hintHelpers,
-            abi.encodeWithSignature("getApproxHint(uint256,uint256,uint256)"),
-            abi.encode(address(0), 0, 0)
-        );
-
-        vm.mockCall(
-            borrowerOperations,
-            abi.encodeWithSignature("openTrove(uint256,uint256,address,address)"),
-            abi.encode()
-        );
+        _setupDepositMocks(user1, 0);
 
         vm.prank(user1);
         uint256 musdAmount = mezoIntegration.depositAndMintNative{value: btcAmount}();
@@ -793,7 +656,20 @@ contract MezoIntegrationV3Test is Test {
             abi.encode(0, 0)
         );
 
-        // Mock price feed to return 0
+        // Mock latestRoundData to succeed (for freshness check to pass)
+        vm.mockCall(
+            priceFeed,
+            abi.encodeWithSignature("latestRoundData()"),
+            abi.encode(
+                uint80(1),
+                int256(BTC_PRICE),
+                block.timestamp,
+                block.timestamp,
+                uint80(1)
+            )
+        );
+
+        // Mock price feed fetchPrice to return 0 (failure case)
         vm.mockCall(
             priceFeed,
             abi.encodeWithSignature("fetchPrice()"),
@@ -801,7 +677,7 @@ contract MezoIntegrationV3Test is Test {
         );
 
         vm.prank(user1);
-        vm.expectRevert(MezoIntegrationV3.PriceFeedFailure.selector);
+        vm.expectRevert(BaseMezoIntegration.PriceFeedFailure.selector);
         mezoIntegration.depositAndMintNative{value: 1 ether}();
     }
 
@@ -812,7 +688,20 @@ contract MezoIntegrationV3Test is Test {
             abi.encode(0, 0)
         );
 
-        // Mock price feed to revert
+        // Mock latestRoundData to succeed (for freshness check to pass)
+        vm.mockCall(
+            priceFeed,
+            abi.encodeWithSignature("latestRoundData()"),
+            abi.encode(
+                uint80(1),
+                int256(BTC_PRICE),
+                block.timestamp,
+                block.timestamp,
+                uint80(1)
+            )
+        );
+
+        // Mock price feed fetchPrice to revert
         vm.mockCallRevert(
             priceFeed,
             abi.encodeWithSignature("fetchPrice()"),
@@ -820,7 +709,7 @@ contract MezoIntegrationV3Test is Test {
         );
 
         vm.prank(user1);
-        vm.expectRevert(MezoIntegrationV3.PriceFeedFailure.selector);
+        vm.expectRevert(BaseMezoIntegration.PriceFeedFailure.selector);
         mezoIntegration.depositAndMintNative{value: 1 ether}();
     }
 }

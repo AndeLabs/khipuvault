@@ -3,6 +3,7 @@ pragma solidity 0.8.25;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {IndividualPoolV3} from "../src/pools/v3/IndividualPoolV3.sol";
+import {BasePoolV3} from "../src/pools/v3/BasePoolV3.sol";
 import {UUPSProxy} from "../src/proxy/UUPSProxy.sol";
 import {MockYieldAggregator} from "./mocks/MockYieldAggregator.sol";
 import {MockMUSD} from "./mocks/MockMUSD.sol";
@@ -120,12 +121,13 @@ contract IndividualPoolV3Test is Test {
         // Wrap proxy as IndividualPoolV3
         pool = IndividualPoolV3(address(proxy));
 
-        // Initialize
+        // Initialize (new signature: _musd, _yieldAggregator, _feeCollector, _performanceFee)
         vm.prank(owner);
         pool.initialize(
-            address(yieldAggregator),
             address(musd),
-            feeCollector
+            address(yieldAggregator),
+            feeCollector,
+            100 // 1% performance fee
         );
 
         // Enable emergency mode to bypass flash loan protection in tests
@@ -631,8 +633,8 @@ contract IndividualPoolV3Test is Test {
 
     function test_SetPerformanceFee_MaxLimit() public {
         vm.prank(owner);
-        vm.expectRevert(IndividualPoolV3.InvalidFee.selector);
-        pool.setPerformanceFee(1001); // > 10%
+        vm.expectRevert(BasePoolV3.InvalidFee.selector); // InvalidFee is now in BasePoolV3
+        pool.setPerformanceFee(2001); // > 20% (MAX_PERFORMANCE_FEE in BasePoolV3)
     }
 
     function test_SetReferralBonus() public {
@@ -646,7 +648,7 @@ contract IndividualPoolV3Test is Test {
 
     function test_SetReferralBonus_MaxLimit() public {
         vm.prank(owner);
-        vm.expectRevert(IndividualPoolV3.InvalidFee.selector);
+        vm.expectRevert(BasePoolV3.InvalidFee.selector); // InvalidFee is now in BasePoolV3
         pool.setReferralBonus(501); // > 5%
     }
 
@@ -661,7 +663,7 @@ contract IndividualPoolV3Test is Test {
 
     function test_SetFeeCollector_ZeroAddress() public {
         vm.prank(owner);
-        vm.expectRevert(IndividualPoolV3.InvalidAddress.selector);
+        vm.expectRevert(BasePoolV3.ZeroAddress.selector); // ZeroAddress is now in BasePoolV3
         pool.setFeeCollector(address(0));
     }
 
