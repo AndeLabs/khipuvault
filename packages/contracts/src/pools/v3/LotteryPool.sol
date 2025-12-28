@@ -348,11 +348,12 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
      * @notice Compra tickets para una ronda
      * @param roundId ID de la ronda
      * @param ticketCount Número de tickets a comprar
+     * @dev CEI PATTERN: State updates BEFORE external calls
      */
-    function buyTickets(uint256 roundId, uint256 ticketCount) 
-        external 
-        nonReentrant 
-        whenNotPaused 
+    function buyTickets(uint256 roundId, uint256 ticketCount)
+        external
+        nonReentrant
+        whenNotPaused
     {
         LotteryRound storage lottery = lotteryRounds[roundId];
         if (lottery.roundId == 0) revert InvalidRoundId();
@@ -362,7 +363,7 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
         if (ticketCount == 0) revert InvalidAmount();
 
         Participant storage participant = roundParticipants[roundId][msg.sender];
-        
+
         // Verificar límite de tickets por usuario
         if (participant.ticketCount + ticketCount > MAX_TICKETS_PER_USER) {
             revert TooManyTickets();
@@ -370,23 +371,16 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
 
         uint256 btcAmount = lottery.ticketPrice * ticketCount;
 
-        // Transferir BTC del usuario
-        WBTC.safeTransferFrom(msg.sender, address(this), btcAmount);
-
-        // Si es la primera compra del usuario en esta ronda
-        if (!participant.claimed && participant.ticketCount == 0) {
-            participant.participant = msg.sender;
-            roundParticipantsList[roundId].push(msg.sender);
-            lottery.currentParticipants++;
-        }
-
         // C-02 FIX: Calculate ticket indices correctly
-        // Only set firstTicketIndex on FIRST purchase to avoid orphaning tickets
         uint256 totalTicketsSold = _getTotalTicketsSold(roundId);
         uint256 firstTicket;
         uint256 lastTicket;
 
-        if (participant.ticketCount == 0) {
+        // CEI FIX: Update ALL state BEFORE external calls
+        if (!participant.claimed && participant.ticketCount == 0) {
+            participant.participant = msg.sender;
+            roundParticipantsList[roundId].push(msg.sender);
+            lottery.currentParticipants++;
             // First purchase - set firstTicketIndex
             firstTicket = totalTicketsSold;
             participant.firstTicketIndex = firstTicket;
@@ -399,14 +393,12 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
         // Actualizar participante
         participant.ticketCount += ticketCount;
         participant.btcContributed += btcAmount;
-        participant.lastTicketIndex = lastTicket; // Only update lastTicketIndex, never overwrite firstTicketIndex
+        participant.lastTicketIndex = lastTicket;
 
         // Actualizar lotería
         lottery.totalBtcCollected += btcAmount;
 
-        // Depositar en Mezo y generar yields
-        _depositToMezo(roundId, btcAmount);
-
+        // Emit event before external calls (state is already updated)
         emit TicketPurchased(
             roundId,
             msg.sender,
@@ -415,6 +407,10 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
             firstTicket,
             lastTicket
         );
+
+        // External calls AFTER all state updates
+        WBTC.safeTransferFrom(msg.sender, address(this), btcAmount);
+        _depositToMezo(roundId, btcAmount);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -685,11 +681,12 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
 
     /**
      * @notice Calcula total de yields generados
+     * @dev roundId is reserved for future per-round yield tracking
      */
-    function _calculateTotalYield(uint256 roundId) 
-        internal 
-        view 
-        returns (uint256 totalYield) 
+    function _calculateTotalYield(uint256 /* roundId */)
+        internal
+        view
+        returns (uint256 totalYield)
     {
         return YIELD_AGGREGATOR.getPendingYield(address(this));
     }

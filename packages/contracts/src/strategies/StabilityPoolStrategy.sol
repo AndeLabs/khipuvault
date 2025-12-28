@@ -474,6 +474,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @return feeAmount Fee collected
      *
      * @dev Internal function called before deposits/withdrawals
+     * @dev CEI PATTERN: State updates BEFORE external calls
      */
     function _harvestCollateralGains()
         internal
@@ -481,7 +482,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
     {
         // Get pending collateral from Stability Pool
         uint256 pendingCollateral = STABILITY_POOL.getDepositorCollateralGain(address(this));
-        
+
         if (pendingCollateral == 0) return (0, 0);
 
         // Trigger distribution to realize gains
@@ -492,25 +493,28 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
             return (0, 0);
         }
 
-        // Calculate and transfer performance fee
+        // Calculate fee
         feeAmount = (pendingCollateral * performanceFee) / 10000;
-        if (feeAmount > 0) {
-            (bool success, ) = feeCollector.call{value: feeAmount}("");
-            if (!success) revert TransferFailed();
-        }
-
-        // Update global state
         totalGains = pendingCollateral - feeAmount;
+
+        // CEI FIX: Update global state BEFORE external calls
         totalPendingCollateral += totalGains;
         totalCollateralClaimed += totalGains;
 
         emit CollateralGainsHarvested(totalGains, feeAmount, block.timestamp);
+
+        // External call AFTER state updates
+        if (feeAmount > 0) {
+            (bool success, ) = feeCollector.call{value: feeAmount}("");
+            if (!success) revert TransferFailed();
+        }
     }
 
     /**
      * @notice Claim collateral gains for a user
      * @param _user User address
      * @return collateralGains Amount claimed
+     * @dev CEI PATTERN: All state updates BEFORE external transfer
      */
     function _claimCollateralGains(address _user)
         internal
@@ -531,6 +535,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
 
         if (collateralGains == 0) return 0;
 
+        // CEI FIX: ALL state updates BEFORE external call
         // Reset user's pending gains and update snapshot
         position.pendingCollateralGains = 0;
         position.lastCollateralSnapshot = totalPendingCollateral;
@@ -538,11 +543,11 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
         // Update global pending collateral
         totalPendingCollateral -= collateralGains;
 
-        // Transfer collateral (BTC) to user
+        emit CollateralGainsClaimed(_user, collateralGains, 0, block.timestamp);
+
+        // External call AFTER all state updates
         (bool success, ) = _user.call{value: collateralGains}("");
         if (!success) revert TransferFailed();
-
-        emit CollateralGainsClaimed(_user, collateralGains, 0, block.timestamp);
     }
 
     /*//////////////////////////////////////////////////////////////

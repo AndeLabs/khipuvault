@@ -142,8 +142,8 @@ contract MezoIntegrationV3 is BaseMezoIntegration, IMezoIntegration {
         MUSD_TOKEN.safeTransferFrom(msg.sender, address(this), musdAmount);
 
         // Calculate BTC to return (proportional)
-        uint256 debtReductionRatio = (musdAmount * 1e18) / uint256(position.musdDebt);
-        btcAmount = (uint256(position.btcCollateral) * debtReductionRatio) / 1e18;
+        // FIX: Single operation to avoid divide-before-multiply precision loss
+        btcAmount = (uint256(position.btcCollateral) * musdAmount) / uint256(position.musdDebt);
 
         // Get validated price for hints
         uint256 currentPrice = _getCurrentPrice();
