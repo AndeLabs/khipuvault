@@ -6,8 +6,8 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 /**
  * @title MockMezoIntegration
- * @notice Mock implementation for testing - NATIVE BTC version
- * @dev Simulates native BTC deposits and MUSD minting
+ * @notice Mock implementation for testing - supports both NATIVE BTC and WBTC
+ * @dev Simulates BTC deposits and MUSD minting for testing
  */
 contract MockMezoIntegration is IMezoIntegration {
     /*//////////////////////////////////////////////////////////////
@@ -15,6 +15,7 @@ contract MockMezoIntegration is IMezoIntegration {
     //////////////////////////////////////////////////////////////*/
 
     IERC20 public immutable musdToken;
+    IERC20 public immutable wbtcToken;
 
     // User position tracking
     mapping(address => uint256) public userBtcCollateral;
@@ -48,8 +49,9 @@ contract MockMezoIntegration is IMezoIntegration {
                             CONSTRUCTOR
     //////////////////////////////////////////////////////////////*/
 
-    constructor(address _musdToken) {
+    constructor(address _musdToken, address _wbtcToken) {
         musdToken = IERC20(_musdToken);
+        wbtcToken = IERC20(_wbtcToken);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -89,14 +91,34 @@ contract MockMezoIntegration is IMezoIntegration {
     }
 
     /**
-     * @notice Legacy function - reverts
+     * @notice Deposits WBTC (ERC20) and mints MUSD
+     * @param btcAmount Amount of WBTC to deposit
+     * @return musdAmount Amount of MUSD minted
      */
-    function depositAndMint(uint256) 
-        external 
-        pure
-        returns (uint256) 
+    function depositAndMint(uint256 btcAmount)
+        external
+        returns (uint256 musdAmount)
     {
-        revert("Use depositAndMintNative() with payable BTC");
+        if (btcAmount == 0) revert InvalidAmount();
+
+        // Transfer WBTC from sender
+        require(wbtcToken.transferFrom(msg.sender, address(this), btcAmount), "WBTC transfer failed");
+
+        // Calculate MUSD to mint based on LTV
+        musdAmount = (btcAmount * btcPrice * LTV_RATIO) / (1e18 * 10000);
+
+        // Update user position
+        userBtcCollateral[msg.sender] += btcAmount;
+        userMusdDebt[msg.sender] += musdAmount;
+
+        // Update totals
+        totalBtcDeposited += btcAmount;
+        totalMusdMinted += musdAmount;
+
+        // Transfer MUSD to sender
+        require(musdToken.transfer(msg.sender, musdAmount), "MUSD transfer failed");
+
+        emit BTCDeposited(msg.sender, btcAmount, musdAmount);
     }
 
     /**

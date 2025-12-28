@@ -1,15 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {BasePoolV3} from "./BasePoolV3.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IMezoIntegration} from "../../interfaces/IMezoIntegration.sol";
 import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
+import {YieldCalculations} from "../../libraries/YieldCalculations.sol";
 
 /**
  * @title CooperativePoolV3 - Production Grade with UUPS Proxy
@@ -17,21 +14,15 @@ import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
  * @dev Features:
  *      ✅ UUPS Upgradeable Pattern
  *      ✅ Storage Packing (saves ~60k gas)
- *      ✅ Flash loan protection
- *      ✅ Emergency mode
+ *      ✅ Flash loan protection (inherited from BasePoolV3)
+ *      ✅ Emergency mode (inherited from BasePoolV3)
  *      ✅ Incremental contributions
  *      ✅ Flexible governance
- * 
+ *
  * @custom:security-contact security@khipuvault.com
  * @author KhipuVault Team
  */
-contract CooperativePoolV3 is
-    Initializable,
-    UUPSUpgradeable,
-    OwnableUpgradeable,
-    ReentrancyGuardUpgradeable,
-    PausableUpgradeable
-{
+contract CooperativePoolV3 is BasePoolV3 {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
@@ -75,9 +66,10 @@ contract CooperativePoolV3 is
                           STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
 
+    /// @custom:oz-upgrades-unsafe-allow state-variable-immutable
     IMezoIntegration public MEZO_INTEGRATION;
+    /// @custom:oz-upgrades-unsafe-allow state-variable-immutable
     IYieldAggregator public YIELD_AGGREGATOR;
-    IERC20 public MUSD;
 
     mapping(uint256 => PoolInfo) public pools;
     mapping(uint256 => mapping(address => MemberInfo)) public poolMembers;
@@ -90,10 +82,8 @@ contract CooperativePoolV3 is
     mapping(uint256 => mapping(address => uint256)) public memberJoinBlock;
 
     uint256 public poolCounter;
-    uint256 public performanceFee;
-    address public feeCollector;
-    bool public emergencyMode;
 
+    // Cooperative pool specific constants
     uint256 public constant MIN_POOL_SIZE = 0.01 ether;
     uint256 public constant MAX_POOL_SIZE = 100 ether;
     uint256 public constant MIN_CONTRIBUTION = 0.001 ether;
@@ -102,9 +92,9 @@ contract CooperativePoolV3 is
     /**
      * @dev Storage gap for future upgrades
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
-     * Size: 50 slots - current slots used = slots reserved for future state variables
+     * Size: 50 slots - base pool slots (5) - cooperative pool slots (6) = 39 slots reserved
      */
-    uint256[42] private __gap;
+    uint256[39] private __gap;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
@@ -154,9 +144,8 @@ contract CooperativePoolV3 is
 
     event PoolStatusUpdated(uint256 indexed poolId, PoolStatus newStatus);
     event PoolClosed(uint256 indexed poolId, uint256 finalBalance);
-    event EmergencyModeUpdated(bool enabled);
-    event PerformanceFeeUpdated(uint256 oldFee, uint256 newFee);
-    event FeeCollectorUpdated(address indexed oldCollector, address indexed newCollector);
+
+    // Note: EmergencyModeUpdated, PerformanceFeeUpdated, FeeCollectorUpdated inherited from BasePoolV3
 
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -164,7 +153,6 @@ contract CooperativePoolV3 is
 
     error InvalidPoolId();
     error InvalidAmount();
-    error InvalidAddress();
     error PoolFull();
     error PoolNotAcceptingMembers();
     error NotMember();
@@ -174,11 +162,11 @@ contract CooperativePoolV3 is
     error InvalidMaxMembers();
     error PoolNotActive();
     error NoYieldToClaim();
-    error InvalidFee();
     error InsufficientPoolSize();
     error FlashLoanDetected();
-    error SameBlockWithdrawal();
     error Unauthorized();
+
+    // Note: InvalidAddress, InvalidFee, ZeroAddress, SameBlockWithdrawal, EmergencyModeActive inherited from BasePoolV3
 
     /*//////////////////////////////////////////////////////////////
                            INITIALIZATION
@@ -189,28 +177,27 @@ contract CooperativePoolV3 is
         _disableInitializers();
     }
 
+    /**
+     * @notice Initialize the CooperativePoolV3 contract
+     * @param _mezoIntegration Address of Mezo integration contract
+     * @param _yieldAggregator Address of yield aggregator
+     * @param _musd Address of MUSD token
+     * @param _feeCollector Address to receive fees
+     */
     function initialize(
         address _mezoIntegration,
         address _yieldAggregator,
         address _musd,
         address _feeCollector
     ) public initializer {
-        if (_mezoIntegration == address(0) ||
-            _yieldAggregator == address(0) ||
-            _musd == address(0) ||
-            _feeCollector == address(0)
-        ) revert InvalidAddress();
+        if (_mezoIntegration == address(0) || _yieldAggregator == address(0)) revert ZeroAddress();
 
-        __Ownable_init(msg.sender);
-        __UUPSUpgradeable_init();
-        __ReentrancyGuard_init();
-        __Pausable_init();
+        // Initialize base pool (handles _musd and _feeCollector validation)
+        __BasePool_init(_musd, _feeCollector, 100); // 1% default fee
 
+        // Initialize cooperative pool specific state
         MEZO_INTEGRATION = IMezoIntegration(_mezoIntegration);
         YIELD_AGGREGATOR = IYieldAggregator(_yieldAggregator);
-        MUSD = IERC20(_musd);
-        feeCollector = _feeCollector;
-        performanceFee = 100;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -218,14 +205,14 @@ contract CooperativePoolV3 is
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice H-01 FIX: Block-based flash loan protection
+     * @notice H-01 FIX: Block-based flash loan protection for cooperative pools
      * @dev Uses block.number instead of extcodesize for robust protection
      *      - Join operations record the block number
      *      - Leave/withdraw operations require a different block
      *      - This prevents single-transaction flash loan attacks
      * @param poolId The pool to check flash loan protection for
      */
-    modifier noFlashLoan(uint256 poolId) virtual {
+    modifier noPoolFlashLoan(uint256 poolId) virtual {
         if (!emergencyMode) {
             if (memberJoinBlock[poolId][msg.sender] == block.number) {
                 revert SameBlockWithdrawal();
@@ -326,7 +313,7 @@ contract CooperativePoolV3 is
     function leavePool(uint256 poolId)
         external
         nonReentrant
-        noFlashLoan(poolId)
+        noPoolFlashLoan(poolId)
     {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
@@ -341,7 +328,8 @@ contract CooperativePoolV3 is
 
         // H-02 FIX: Use cached total shares instead of loop
         uint256 oldTotalShares = poolTotalShares[poolId];
-        uint256 memberShare = (uint256(member.shares) * 1e18) / oldTotalShares;
+        // Use library for share percentage calculation
+        uint256 memberShare = YieldCalculations.calculateSharePercentage(uint256(member.shares), oldTotalShares);
         uint256 memberShares = member.shares;
 
         uint256 oldTotalMusd = pool.totalMusdMinted;
@@ -356,17 +344,17 @@ contract CooperativePoolV3 is
         // H-02 FIX: Update cached total shares
         poolTotalShares[poolId] -= memberShares;
 
-        // Calculate fee upfront
+        // Calculate fee upfront using base function (handles emergency mode)
         uint256 feeAmount = 0;
         uint256 netYield = 0;
         if (memberYield > 0) {
-            feeAmount = emergencyMode ? 0 : (memberYield * performanceFee) / 10000;
-            netYield = memberYield - feeAmount;
+            (feeAmount, netYield) = _calculateFee(memberYield);
         }
 
         // CEI Pattern: External interactions AFTER all state changes
         if (oldTotalMusd > 0) {
-            uint256 musdToRepay = (oldTotalMusd * memberShare) / 1e18;
+            // Use library for applying share percentage
+            uint256 musdToRepay = YieldCalculations.applySharePercentage(oldTotalMusd, memberShare);
 
             pool.totalMusdMinted -= musdToRepay;
 
@@ -377,9 +365,10 @@ contract CooperativePoolV3 is
                 (uint256 aggregatorPrincipal, uint256 aggregatorYields) = YIELD_AGGREGATOR.getUserPosition(address(this));
                 uint256 aggregatorBalance = aggregatorPrincipal + aggregatorYields;
 
-                uint256 proportionalShare = (aggregatorBalance * memberShares) / oldTotalShares;
+                // Use library for proportional share calculation
+                uint256 proportionalShare = YieldCalculations.calculateProportionalYield(aggregatorBalance, memberShares, oldTotalShares);
                 uint256 amountToWithdraw = totalNeeded - poolMusdBalance;
-                uint256 safeWithdraw = amountToWithdraw < proportionalShare ? amountToWithdraw : proportionalShare;
+                uint256 safeWithdraw = YieldCalculations.min(amountToWithdraw, proportionalShare);
 
                 if (safeWithdraw > 0) {
                     try YIELD_AGGREGATOR.withdraw(safeWithdraw) {
@@ -388,8 +377,7 @@ contract CooperativePoolV3 is
                         if (poolMusdBalance >= musdToRepay) {
                             uint256 availableForYield = poolMusdBalance - musdToRepay;
                             memberYield = availableForYield < memberYield ? availableForYield : memberYield;
-                            feeAmount = emergencyMode ? 0 : (memberYield * performanceFee) / 10000;
-                            netYield = memberYield - feeAmount;
+                            (feeAmount, netYield) = _calculateFee(memberYield);
                         } else {
                             memberYield = 0;
                             netYield = 0;
@@ -421,7 +409,7 @@ contract CooperativePoolV3 is
     function withdrawPartial(uint256 poolId, uint256 withdrawAmount)
         external
         nonReentrant
-        noFlashLoan(poolId)
+        noPoolFlashLoan(poolId)
     {
         if (withdrawAmount == 0) revert InvalidAmount();
 
@@ -437,9 +425,9 @@ contract CooperativePoolV3 is
         uint256 remainingContribution = currentContribution - withdrawAmount;
         if (remainingContribution < pool.minContribution) revert ContributionTooLow();
 
-        // H-02 FIX: Use cached total shares
-        uint256 withdrawShare = (withdrawAmount * 1e18) / currentContribution;
-        uint256 sharesToBurn = (uint256(member.shares) * withdrawShare) / 1e18;
+        // H-02 FIX: Use library for share calculations
+        uint256 withdrawShare = YieldCalculations.calculateWithdrawalShare(withdrawAmount, currentContribution);
+        uint256 sharesToBurn = YieldCalculations.calculateSharesToBurn(uint256(member.shares), withdrawShare);
 
         member.btcContributed = uint128(remainingContribution);
         member.shares = uint128(uint256(member.shares) - sharesToBurn);
@@ -451,7 +439,8 @@ contract CooperativePoolV3 is
         uint256 btcAmount = withdrawAmount;
 
         if (pool.totalMusdMinted > 0) {
-            uint256 musdToRepay = (pool.totalMusdMinted * withdrawShare) / 1e18;
+            // Use library for share application
+            uint256 musdToRepay = YieldCalculations.applySharePercentage(pool.totalMusdMinted, withdrawShare);
             pool.totalMusdMinted -= musdToRepay;
 
             uint256 poolMusdBalance = MUSD.balanceOf(address(this));
@@ -459,9 +448,10 @@ contract CooperativePoolV3 is
             if (poolMusdBalance < musdToRepay) {
                 (uint256 aggregatorPrincipal, uint256 aggregatorYields) = YIELD_AGGREGATOR.getUserPosition(address(this));
                 uint256 aggregatorBalance = aggregatorPrincipal + aggregatorYields;
-                uint256 proportionalShare = (aggregatorBalance * withdrawShare) / 1e18;
+                // Use library for proportional and min calculations
+                uint256 proportionalShare = YieldCalculations.applySharePercentage(aggregatorBalance, withdrawShare);
                 uint256 amountToWithdraw = musdToRepay - poolMusdBalance;
-                uint256 safeWithdraw = amountToWithdraw < proportionalShare ? amountToWithdraw : proportionalShare;
+                uint256 safeWithdraw = YieldCalculations.min(amountToWithdraw, proportionalShare);
 
                 if (safeWithdraw > 0) {
                     try YIELD_AGGREGATOR.withdraw(safeWithdraw) {
@@ -484,7 +474,7 @@ contract CooperativePoolV3 is
     function claimYield(uint256 poolId)
         external
         nonReentrant
-        noFlashLoan(poolId)
+        noPoolFlashLoan(poolId)
     {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
@@ -495,8 +485,8 @@ contract CooperativePoolV3 is
         uint256 memberYield = _calculateMemberYield(poolId, msg.sender);
         if (memberYield == 0) revert NoYieldToClaim();
 
-        uint256 feeAmount = emergencyMode ? 0 : (memberYield * performanceFee) / 10000;
-        uint256 netYield = memberYield - feeAmount;
+        // Calculate fee using base function (handles emergency mode)
+        (uint256 feeAmount, uint256 netYield) = _calculateFee(memberYield);
 
         member.yieldClaimed += memberYield;
 
@@ -509,8 +499,7 @@ contract CooperativePoolV3 is
                 poolMusdBalance = MUSD.balanceOf(address(this));
                 if (poolMusdBalance > 0) {
                     memberYield = poolMusdBalance;
-                    feeAmount = emergencyMode ? 0 : (memberYield * performanceFee) / 10000;
-                    netYield = memberYield - feeAmount;
+                    (feeAmount, netYield) = _calculateFee(memberYield);
                 } else {
                     revert NoYieldToClaim();
                 }
@@ -604,8 +593,9 @@ contract CooperativePoolV3 is
         uint256 totalShares = poolTotalShares[poolId];
         if (totalShares == 0) return 0;
 
-        uint256 memberShare = (uint256(memberInfo.shares) * 1e18) / totalShares;
-        yield = (totalPoolYield * memberShare) / 1e18;
+        // Use library for share and yield calculations
+        uint256 memberShare = YieldCalculations.calculateSharePercentage(uint256(memberInfo.shares), totalShares);
+        yield = YieldCalculations.applySharePercentage(totalPoolYield, memberShare);
 
         if (yield > memberInfo.yieldClaimed) {
             yield -= memberInfo.yieldClaimed;
@@ -626,25 +616,12 @@ contract CooperativePoolV3 is
                          ADMIN FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function setEmergencyMode(bool _enabled) external onlyOwner {
-        emergencyMode = _enabled;
-        emit EmergencyModeUpdated(_enabled);
-    }
+    // Note: setEmergencyMode, setPerformanceFee, setFeeCollector, pause, unpause inherited from BasePoolV3
 
-    function setPerformanceFee(uint256 newFee) external onlyOwner {
-        if (newFee > 1000) revert InvalidFee();
-        uint256 oldFee = performanceFee;
-        performanceFee = newFee;
-        emit PerformanceFeeUpdated(oldFee, newFee);
-    }
-
-    function setFeeCollector(address newCollector) external onlyOwner {
-        if (newCollector == address(0)) revert InvalidAddress();
-        address oldCollector = feeCollector;
-        feeCollector = newCollector;
-        emit FeeCollectorUpdated(oldCollector, newCollector);
-    }
-
+    /**
+     * @notice Close a pool to new members
+     * @param poolId Pool identifier
+     */
     function closePool(uint256 poolId) external {
         PoolInfo storage pool = pools[poolId];
         if (pool.createdAt == 0) revert InvalidPoolId();
@@ -656,20 +633,15 @@ contract CooperativePoolV3 is
         emit PoolClosed(poolId, pool.totalBtcDeposited);
     }
 
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    function unpause() external onlyOwner {
-        _unpause();
-    }
-
     /*//////////////////////////////////////////////////////////////
                        UPGRADE AUTHORIZATION
     //////////////////////////////////////////////////////////////*/
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    // Note: _authorizeUpgrade inherited from BasePoolV3
 
+    /**
+     * @notice Returns the current version of the contract
+     */
     function version() external pure returns (string memory) {
         return "3.1.0";
     }

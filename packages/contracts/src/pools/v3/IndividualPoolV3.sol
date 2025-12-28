@@ -1,14 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
-import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
-import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
-import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
-import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
+import {BasePoolV3} from "./BasePoolV3.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
+import {YieldCalculations} from "../../libraries/YieldCalculations.sol";
 
 /**
  * @title IndividualPool V3 - Production Grade with UUPS Proxy
@@ -17,22 +14,16 @@ import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
  *      ✅ UUPS Upgradeable Pattern
  *      ✅ Storage Packing (saves 40k gas)
  *      ✅ Auto-compounding
- *      ✅ Flash loan protection
+ *      ✅ Flash loan protection (inherited from BasePoolV3)
  *      ✅ Referral system
  *      ✅ Incremental deposits
  *      ✅ Partial withdrawals
- *      ✅ Emergency mode
- * 
+ *      ✅ Emergency mode (inherited from BasePoolV3)
+ *
  * @custom:security-contact security@khipuvault.com
  * @author KhipuVault Team
  */
-contract IndividualPoolV3 is 
-    Initializable,
-    UUPSUpgradeable,
-    OwnableUpgradeable,
-    ReentrancyGuardUpgradeable,
-    PausableUpgradeable 
-{
+contract IndividualPoolV3 is BasePoolV3 {
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
@@ -58,12 +49,9 @@ contract IndividualPoolV3 is
 
     /// @custom:oz-upgrades-unsafe-allow state-variable-immutable
     IYieldAggregator public YIELD_AGGREGATOR;
-    
-    /// @custom:oz-upgrades-unsafe-allow state-variable-immutable
-    IERC20 public MUSD;
 
     mapping(address => UserDeposit) public userDeposits;
-    
+
     // Referral system
     mapping(address => address) public referrers;
     mapping(address => uint256) public referralRewards;
@@ -76,27 +64,21 @@ contract IndividualPoolV3 is
     // C-01 FIX: Track actual reserved funds for referral rewards
     uint256 public referralRewardsReserve;
 
-    // H-01 FIX: Block-based flash loan protection
-    mapping(address => uint256) public depositBlock;
-
-    // Constants
+    // Constants - Individual pool specific
     uint256 public constant MIN_DEPOSIT = 10 ether;
     uint256 public constant MAX_DEPOSIT = 100_000 ether;
     uint256 public constant MIN_WITHDRAWAL = 1 ether;
     uint256 public constant AUTO_COMPOUND_THRESHOLD = 1 ether; // Auto-compound if yield > 1 MUSD
 
-    // Configurable parameters
-    uint256 public performanceFee; // Basis points (100 = 1%)
+    // Configurable parameters - Individual pool specific
     uint256 public referralBonus; // Basis points (50 = 0.5%)
-    address public feeCollector;
-    bool public emergencyMode;
 
     /**
      * @dev Storage gap for future upgrades
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
-     * Size: 50 slots - current slots used = slots reserved for future state variables
+     * Size: 50 slots - base pool slots (5) - individual pool slots (8) = 37 slots reserved
      */
-    uint256[44] private __gap;
+    uint256[37] private __gap;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
@@ -155,10 +137,9 @@ contract IndividualPoolV3 is
         bool enabled
     );
 
-    event EmergencyModeUpdated(bool enabled);
-    event PerformanceFeeUpdated(uint256 oldFee, uint256 newFee);
     event ReferralBonusUpdated(uint256 oldBonus, uint256 newBonus);
-    event FeeCollectorUpdated(address indexed oldCollector, address indexed newCollector);
+
+    // Note: EmergencyModeUpdated, PerformanceFeeUpdated, FeeCollectorUpdated inherited from BasePoolV3
 
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -170,14 +151,13 @@ contract IndividualPoolV3 is
     error MinimumWithdrawalNotMet();
     error MaximumDepositExceeded();
     error InvalidAmount();
-    error InvalidAddress();
-    error InvalidFee();
     error WithdrawalExceedsBalance();
     error FlashLoanDetected();
     error SelfReferralNotAllowed();
     error NoReferralRewards();
     error InsufficientReferralReserve();
-    error SameBlockWithdrawal();
+
+    // Note: InvalidAddress, InvalidFee, ZeroAddress, SameBlockWithdrawal, EmergencyModeActive inherited from BasePoolV3
 
     /*//////////////////////////////////////////////////////////////
                             INITIALIZATION
@@ -188,25 +168,26 @@ contract IndividualPoolV3 is
         _disableInitializers();
     }
 
+    /**
+     * @notice Initialize the IndividualPoolV3 contract
+     * @param _musd Address of MUSD token
+     * @param _yieldAggregator Address of yield aggregator
+     * @param _feeCollector Address to receive fees
+     * @param _performanceFee Initial performance fee in basis points
+     */
     function initialize(
-        address _yieldAggregator,
         address _musd,
-        address _feeCollector
+        address _yieldAggregator,
+        address _feeCollector,
+        uint256 _performanceFee
     ) public initializer {
-        if (_yieldAggregator == address(0) ||
-            _musd == address(0) ||
-            _feeCollector == address(0)
-        ) revert InvalidAddress();
+        if (_yieldAggregator == address(0)) revert ZeroAddress();
 
-        __Ownable_init(msg.sender);
-        __UUPSUpgradeable_init();
-        __ReentrancyGuard_init();
-        __Pausable_init();
+        // Initialize base pool
+        __BasePool_init(_musd, _feeCollector, _performanceFee);
 
+        // Initialize individual pool specific state
         YIELD_AGGREGATOR = IYieldAggregator(_yieldAggregator);
-        MUSD = IERC20(_musd);
-        feeCollector = _feeCollector;
-        performanceFee = 100; // 1%
         referralBonus = 50;   // 0.5%
     }
 
@@ -214,22 +195,7 @@ contract IndividualPoolV3 is
                             MODIFIERS
     //////////////////////////////////////////////////////////////*/
 
-    /**
-     * @notice Prevents flash loan attacks using block-based delay
-     * @dev H-01 FIX: Uses block.number instead of extcodesize for robust protection
-     *      - Deposits record the block number
-     *      - Withdrawals require a different block than deposit
-     *      - This prevents single-transaction flash loan attacks
-     */
-    modifier noFlashLoan() {
-        if (!emergencyMode) {
-            // H-01 FIX: Block-based protection - withdrawals must be in different block
-            if (depositBlock[msg.sender] == block.number) {
-                revert SameBlockWithdrawal();
-            }
-        }
-        _;
-    }
+    // Note: noFlashLoan modifier inherited from BasePoolV3
 
     /*//////////////////////////////////////////////////////////////
                             CORE FUNCTIONS
@@ -267,8 +233,8 @@ contract IndividualPoolV3 is
         uint256 newTotalDeposit = uint256(userDeposit.musdAmount) + musdAmount;
         if (newTotalDeposit > MAX_DEPOSIT) revert MaximumDepositExceeded();
 
-        // H-01 FIX: Record deposit block for flash loan protection
-        depositBlock[msg.sender] = block.number;
+        // H-01 FIX: Record deposit block for flash loan protection (from BasePoolV3)
+        _recordDeposit();
 
         // Transfer MUSD from user FIRST (CEI pattern)
         MUSD.safeTransferFrom(msg.sender, address(this), musdAmount);
@@ -285,9 +251,8 @@ contract IndividualPoolV3 is
                 referralCount[referrer]++;
                 actualReferrer = referrer;
 
-                // C-01 FIX: Calculate bonus and reserve actual funds
-                bonus = (musdAmount * referralBonus) / 10000;
-                netDeposit = musdAmount - bonus; // User deposits slightly less
+                // C-01 FIX: Calculate bonus and reserve actual funds using library
+                (bonus, netDeposit) = YieldCalculations.calculateReferralBonus(musdAmount, referralBonus);
 
                 referralRewards[referrer] += bonus;
                 totalReferralRewards += bonus;
@@ -408,9 +373,9 @@ contract IndividualPoolV3 is
         uint256 totalYield = userDeposit.yieldAccrued;
         if (totalYield == 0) revert InvalidAmount();
 
-        // Calculate fee (skip in emergency mode)
-        uint256 feeAmount = emergencyMode ? 0 : (totalYield * performanceFee) / 10000;
-        netYield = totalYield - feeAmount;
+        // Calculate fee using base function (handles emergency mode)
+        (uint256 feeAmount, uint256 netYieldCalc) = _calculateFee(totalYield);
+        netYield = netYieldCalc;
 
         // Claim from aggregator if needed
         uint256 poolYield = YIELD_AGGREGATOR.getPendingYield(address(this));
@@ -452,8 +417,10 @@ contract IndividualPoolV3 is
         }
 
         uint256 totalYield = userDeposit.yieldAccrued;
-        uint256 feeAmount = emergencyMode ? 0 : (totalYield * performanceFee) / 10000;
-        netYield = totalYield - feeAmount;
+
+        // Calculate fee using base function (handles emergency mode)
+        (uint256 feeAmount, uint256 netYieldCalc) = _calculateFee(totalYield);
+        netYield = netYieldCalc;
 
         // Update state before withdrawal
         userDeposit.active = false;
@@ -569,14 +536,17 @@ contract IndividualPoolV3 is
         userDeposit_ = userDeposit.musdAmount;
         yields = uint256(userDeposit.yieldAccrued) + _calculateUserYieldView(user);
 
-        uint256 feeAmount = (yields * performanceFee) / 10000;
-        netYields = yields - feeAmount;
+        // Use library for fee calculation
+        (uint256 feeAmount, uint256 netYieldCalc) = YieldCalculations.calculatePerformanceFee(yields, performanceFee);
+        netYields = netYieldCalc;
 
         if (userDeposit.depositTimestamp > 0) {
             daysActive = (block.timestamp - userDeposit.depositTimestamp) / 1 days;
 
             if (daysActive > 0 && userDeposit_ > 0) {
-                estimatedAPR = (yields * 365 * 100) / (userDeposit_ * daysActive);
+                // Use library for APR calculation (convert days to seconds)
+                uint256 durationSeconds = daysActive * 1 days;
+                estimatedAPR = YieldCalculations.calculateAPR(yields, userDeposit_, durationSeconds);
             }
         }
 
@@ -586,46 +556,26 @@ contract IndividualPoolV3 is
     function getUserTotalBalance(address user) external view returns (uint256 total) {
         UserDeposit memory userDeposit = userDeposits[user];
         uint256 yields = uint256(userDeposit.yieldAccrued) + _calculateUserYieldView(user);
-        uint256 feeAmount = (yields * performanceFee) / 10000;
-        total = uint256(userDeposit.musdAmount) + yields - feeAmount;
+        // Use library for fee calculation
+        (, uint256 netYield) = YieldCalculations.calculatePerformanceFee(yields, performanceFee);
+        total = uint256(userDeposit.musdAmount) + netYield;
     }
 
     /*//////////////////////////////////////////////////////////////
                         ADMIN FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function setEmergencyMode(bool _enabled) external onlyOwner {
-        emergencyMode = _enabled;
-        emit EmergencyModeUpdated(_enabled);
-    }
+    // Note: setEmergencyMode, setPerformanceFee, setFeeCollector, pause, unpause inherited from BasePoolV3
 
-    function setPerformanceFee(uint256 newFee) external onlyOwner {
-        if (newFee > 1000) revert InvalidFee(); // Max 10%
-        uint256 oldFee = performanceFee;
-        performanceFee = newFee;
-        emit PerformanceFeeUpdated(oldFee, newFee);
-    }
-
+    /**
+     * @notice Set referral bonus percentage
+     * @param newBonus New bonus in basis points (max 500 = 5%)
+     */
     function setReferralBonus(uint256 newBonus) external onlyOwner {
         if (newBonus > 500) revert InvalidFee(); // Max 5%
         uint256 oldBonus = referralBonus;
         referralBonus = newBonus;
         emit ReferralBonusUpdated(oldBonus, newBonus);
-    }
-
-    function setFeeCollector(address newCollector) external onlyOwner {
-        if (newCollector == address(0)) revert InvalidAddress();
-        address oldCollector = feeCollector;
-        feeCollector = newCollector;
-        emit FeeCollectorUpdated(oldCollector, newCollector);
-    }
-
-    function pause() external onlyOwner {
-        _pause();
-    }
-
-    function unpause() external onlyOwner {
-        _unpause();
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -641,16 +591,20 @@ contract IndividualPoolV3 is
         if (!userDeposit.active || totalMusdDeposited == 0) return 0;
 
         uint256 poolYield = YIELD_AGGREGATOR.getPendingYield(address(this));
-        uint256 userShare = (poolYield * uint256(userDeposit.musdAmount)) / totalMusdDeposited;
-        
-        return userShare;
+
+        // Use library for proportional yield calculation
+        return YieldCalculations.calculateProportionalYield(
+            poolYield,
+            uint256(userDeposit.musdAmount),
+            totalMusdDeposited
+        );
     }
 
     /*//////////////////////////////////////////////////////////////
                         UPGRADE AUTHORIZATION
     //////////////////////////////////////////////////////////////*/
 
-    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
+    // Note: _authorizeUpgrade inherited from BasePoolV3
 
     /**
      * @notice Returns the current version of the contract
