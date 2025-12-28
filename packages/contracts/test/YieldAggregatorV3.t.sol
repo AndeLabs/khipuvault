@@ -85,6 +85,9 @@ contract YieldAggregatorV3Test is Test {
         musd.mint(user2, INITIAL_BALANCE);
         musd.mint(user3, INITIAL_BALANCE);
 
+        // Mint MUSD to aggregator to cover yield payouts (simulates yield from strategies)
+        musd.mint(address(aggregator), 100_000 ether);
+
         // Approve aggregator to spend MUSD
         vm.prank(user1);
         musd.approve(address(aggregator), type(uint256).max);
@@ -686,33 +689,38 @@ contract YieldAggregatorV3Test is Test {
         vm.prank(owner);
         aggregator.addVault(vault1, IYieldAggregator.YieldStrategy.AAVE, 500);
 
-        vm.startPrank(user1);
-
-        // 1. Deposit
+        vm.prank(user1);
         aggregator.deposit(100 ether);
 
-        // 2. Wait and deposit more
-        vm.warp(block.timestamp + 30 days);
+        // 2. Wait and deposit more (use skip for reliable time advancement)
+        skip(30 days);
+        vm.prank(user1);
         aggregator.deposit(50 ether);
 
         // 3. Claim yields
-        vm.warp(block.timestamp + 30 days);
+        skip(30 days);
+        vm.roll(block.number + 1);
+        vm.prank(user1);
         uint256 yield1 = aggregator.claimYield();
         assertGt(yield1, 0);
 
         // 4. Compound yields
-        vm.warp(block.timestamp + 30 days);
+        skip(30 days);
+        vm.roll(block.number + 1);
+        vm.prank(user1);
         uint256 compounded = aggregator.compoundYields();
         assertGt(compounded, 0);
 
         // 5. Partial withdrawal
-        aggregator.withdraw(50 ether);
+        vm.prank(user1);
+        uint256 partialWithdraw = aggregator.withdraw(50 ether);
+        assertGt(partialWithdraw, 0);
 
-        // 6. Final withdrawal
-        uint256 finalWithdrawal = aggregator.withdraw(0);
+        // 6. Full withdrawal - withdraw all remaining
+        uint256 remaining = aggregator.userTotalDeposited(user1);
+        vm.prank(user1);
+        uint256 finalWithdrawal = aggregator.withdraw(remaining);
         assertGt(finalWithdrawal, 0);
-
-        vm.stopPrank();
 
         assertEq(aggregator.userTotalDeposited(user1), 0);
     }
@@ -823,25 +831,32 @@ contract YieldAggregatorV3Test is Test {
         vm.prank(owner);
         aggregator.addVault(vault1, IYieldAggregator.YieldStrategy.AAVE, 500);
 
-        vm.startPrank(user1);
+        vm.prank(user1);
         aggregator.deposit(100 ether);
 
-        // Claim 1
-        vm.warp(block.timestamp + 30 days);
+        // Advance block to bypass flash loan protection
+        vm.roll(block.number + 1);
+
+        // Claim 1 - after 30 days (use skip instead of warp for relative time)
+        skip(30 days);
+        vm.roll(block.number + 1);
+        vm.prank(user1);
         uint256 yield1 = aggregator.claimYield();
 
-        // Claim 2
-        vm.warp(block.timestamp + 30 days);
+        // Claim 2 - after another 30 days
+        skip(30 days);
+        vm.roll(block.number + 1);
+        vm.prank(user1);
         uint256 yield2 = aggregator.claimYield();
 
-        // Claim 3
-        vm.warp(block.timestamp + 30 days);
+        // Claim 3 - after another 30 days
+        skip(30 days);
+        vm.roll(block.number + 1);
+        vm.prank(user1);
         uint256 yield3 = aggregator.claimYield();
 
-        vm.stopPrank();
-
-        assertGt(yield1, 0);
-        assertGt(yield2, 0);
-        assertGt(yield3, 0);
+        assertGt(yield1, 0, "First yield should be > 0");
+        assertGt(yield2, 0, "Second yield should be > 0");
+        assertGt(yield3, 0, "Third yield should be > 0");
     }
 }

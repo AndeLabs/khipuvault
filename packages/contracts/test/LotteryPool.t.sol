@@ -87,7 +87,7 @@ contract LotteryPoolTest is Test {
         // Deploy mocks
         musd = new MockMUSD();
         wbtc = new MockERC20("Wrapped BTC", "WBTC", 18);
-        mezoIntegration = new MockMezoIntegration(address(musd));
+        mezoIntegration = new MockMezoIntegration(address(musd), address(wbtc));
         yieldAggregator = new MockYieldAggregator(address(musd));
 
         // Fund contracts

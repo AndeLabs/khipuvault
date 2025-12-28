@@ -432,9 +432,11 @@ contract LotteryPool is VRFConsumerBaseV2, Ownable, ReentrancyGuard, Pausable {
     {
         LotteryRound storage lottery = lotteryRounds[roundId];
         if (lottery.roundId == 0) revert InvalidRoundId();
+        // Check if draw already requested BEFORE checking status
+        // (because requestDraw changes status to DRAWING)
+        if (lottery.vrfRequestId != 0) revert DrawAlreadyRequested();
         if (lottery.status != LotteryStatus.OPEN) revert LotteryNotOpen();
         if (block.timestamp < lottery.endTime) revert LotteryNotEnded();
-        if (lottery.vrfRequestId != 0) revert DrawAlreadyRequested();
         if (lottery.currentParticipants == 0) revert NotParticipant();
 
         // Request random number from Chainlink VRF
