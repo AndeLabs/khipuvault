@@ -315,6 +315,7 @@ contract YieldAggregatorV3 is
 
         vaults[bestVault].totalDeposited = (uint256(vaults[bestVault].totalDeposited) + compoundedAmount).toUint128();
         userTotalDeposited[msg.sender] += compoundedAmount;
+        totalValueLocked += compoundedAmount; // BUG FIX: Update TVL to match principal
 
         emit YieldCompounded(msg.sender, compoundedAmount);
     }
@@ -470,6 +471,13 @@ contract YieldAggregatorV3 is
 
         // H-3 FIX: Use SafeCast for all downcasting operations
         UserPositionPacked storage position = userVaultPositions[user][vaultAddress];
+
+        // FIX: Accrue pending yield BEFORE updating lastUpdateTime to prevent yield loss
+        if (position.principal > 0) {
+            uint256 pendingYield = _calculatePendingYield(user, vaultAddress);
+            position.yieldAccrued = (uint256(position.yieldAccrued) + pendingYield).toUint64();
+        }
+
         position.principal = (uint256(position.principal) + amount).toUint128();
         position.shares = (uint256(position.shares) + shares).toUint128();
         position.lastUpdateTime = block.timestamp.toUint64();
