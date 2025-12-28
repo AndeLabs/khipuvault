@@ -361,11 +361,12 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     /**
      * @notice Make contribution for current period
      * @param poolId Pool ID
+     * @dev CEI PATTERN: State updates BEFORE external calls where possible
      */
-    function makeContribution(uint256 poolId) 
-        external 
-        nonReentrant 
-        whenNotPaused 
+    function makeContribution(uint256 poolId)
+        external
+        nonReentrant
+        whenNotPaused
     {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
@@ -377,20 +378,22 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
 
         uint256 amount = pool.contributionAmount;
 
-        // Transfer BTC from member
-        WBTC.safeTransferFrom(msg.sender, address(this), amount);
-
-        // Update member info
+        // CEI FIX: Update member and pool state BEFORE external calls
         member.contributionsMade++;
         member.totalContributed += amount;
-
-        // Update pool info
         pool.totalBtcCollected += amount;
+
+        // Cache current period for event before potential state changes
+        uint256 currentPeriodCache = pool.currentPeriod;
+
+        // External calls AFTER state updates
+        // Transfer BTC from member
+        WBTC.safeTransferFrom(msg.sender, address(this), amount);
 
         // Deposit to Mezo and generate yields
         _depositToMezo(poolId, amount);
 
-        emit ContributionMade(poolId, msg.sender, pool.currentPeriod, amount);
+        emit ContributionMade(poolId, msg.sender, currentPeriodCache, amount);
 
         // Check if period can be completed
         _checkAndCompletePeriod(poolId);
@@ -399,10 +402,11 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     /**
      * @notice Claim payout for your turn
      * @param poolId Pool ID
+     * @dev CEI PATTERN: State updates BEFORE external transfers
      */
-    function claimPayout(uint256 poolId) 
-        external 
-        nonReentrant 
+    function claimPayout(uint256 poolId)
+        external
+        nonReentrant
     {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
@@ -422,17 +426,15 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         uint256 feeAmount = (yieldAmount * performanceFee) / 10000;
         uint256 netYield = yieldAmount - feeAmount;
 
-        // Retirar yields del aggregator si es necesario
+        // Try to claim yields from aggregator if needed (read operation + claim)
         if (yieldAmount > 0) {
             uint256 poolMusdBalance = MUSD.balanceOf(address(this));
-            
+
             if (poolMusdBalance < yieldAmount) {
-                // Intentar retirar del aggregator
-                uint256 amountToWithdraw = yieldAmount - poolMusdBalance;
                 try YIELD_AGGREGATOR.claimYield() {
-                    // Claim exitoso
+                    // Claim successful
                 } catch {
-                    // Si falla, ajustar yields a lo disponible
+                    // If fails, adjust yields to available balance
                     poolMusdBalance = MUSD.balanceOf(address(this));
                     if (poolMusdBalance > 0) {
                         yieldAmount = poolMusdBalance;
@@ -447,28 +449,27 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
             }
         }
 
-        // Update member info
+        // CEI FIX: Update ALL state BEFORE external transfers
         member.hasReceivedPayout = true;
         member.payoutReceived = payoutAmount;
         member.yieldReceived = netYield;
-
-        // Update period info
         period.paid = true;
 
-        // Transfer payout (in BTC)
+        // Cache member index for event
+        uint256 memberIndex = member.memberIndex;
+
+        emit PayoutDistributed(poolId, memberIndex, msg.sender, payoutAmount, netYield);
+
+        // External transfers AFTER all state updates
         WBTC.safeTransfer(msg.sender, payoutAmount);
 
-        // Transfer yield (in MUSD)
         if (netYield > 0) {
             MUSD.safeTransfer(msg.sender, netYield);
         }
 
-        // Transfer fee
         if (feeAmount > 0) {
             MUSD.safeTransfer(feeCollector, feeAmount);
         }
-
-        emit PayoutDistributed(poolId, member.memberIndex, msg.sender, payoutAmount, netYield);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -572,11 +573,12 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
 
     /**
      * @notice Calculate pending yield for pool
+     * @dev poolId is reserved for future per-pool yield tracking
      */
-    function getPendingYield(uint256 poolId) 
-        external 
-        view 
-        returns (uint256) 
+    function getPendingYield(uint256 /* poolId */)
+        external
+        view
+        returns (uint256)
     {
         return YIELD_AGGREGATOR.getPendingYield(address(this));
     }

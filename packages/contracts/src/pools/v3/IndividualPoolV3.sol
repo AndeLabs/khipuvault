@@ -537,15 +537,15 @@ contract IndividualPoolV3 is BasePoolV3 {
         yields = uint256(userDeposit.yieldAccrued) + _calculateUserYieldView(user);
 
         // Use library for fee calculation
-        (uint256 feeAmount, uint256 netYieldCalc) = YieldCalculations.calculatePerformanceFee(yields, performanceFee);
-        netYields = netYieldCalc;
+        (, netYields) = YieldCalculations.calculatePerformanceFee(yields, performanceFee);
 
         if (userDeposit.depositTimestamp > 0) {
-            daysActive = (block.timestamp - userDeposit.depositTimestamp) / 1 days;
+            // FIX: Calculate durationSeconds directly to avoid divide-before-multiply precision loss
+            uint256 durationSeconds = block.timestamp - userDeposit.depositTimestamp;
+            daysActive = durationSeconds / 1 days;
 
-            if (daysActive > 0 && userDeposit_ > 0) {
-                // Use library for APR calculation (convert days to seconds)
-                uint256 durationSeconds = daysActive * 1 days;
+            if (durationSeconds > 0 && userDeposit_ > 0) {
+                // Use library for APR calculation with exact duration
                 estimatedAPR = YieldCalculations.calculateAPR(yields, userDeposit_, durationSeconds);
             }
         }
