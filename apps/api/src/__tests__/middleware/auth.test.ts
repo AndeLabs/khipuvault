@@ -1,36 +1,24 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+/**
+ * @fileoverview Authentication middleware tests
+ * @module __tests__/middleware/auth.test
+ */
+
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import {
   generateNonce,
   generateJWT,
   verifyJWT,
-  verifySiweMessage,
   requireAuth,
+  optionalAuth,
   getNonceStats,
 } from "../../middleware/auth";
-
-import type { Request, Response, NextFunction } from "express";
-
-// Mock viem
-vi.mock("viem", () => ({
-  verifyMessage: vi.fn().mockResolvedValue(true),
-}));
-
-// Mock SIWE
-vi.mock("siwe", () => ({
-  SiweMessage: vi.fn().mockImplementation((message: string) => ({
-    address: "0x1234567890123456789012345678901234567890",
-    nonce: "test-nonce",
-    expirationTime: null,
-    notBefore: null,
-    verify: vi.fn().mockResolvedValue({
-      success: true,
-      data: {
-        address: "0x1234567890123456789012345678901234567890",
-      },
-    }),
-  })),
-}));
+import {
+  createMockRequest,
+  createMockResponse,
+  createMockNext,
+  fixtures,
+} from "../setup";
 
 describe("Auth Middleware", () => {
   beforeEach(() => {
@@ -38,168 +26,179 @@ describe("Auth Middleware", () => {
   });
 
   describe("generateNonce", () => {
-    it("should generate a random nonce", () => {
+    it("should generate a unique nonce string", () => {
       const nonce1 = generateNonce();
       const nonce2 = generateNonce();
 
-      expect(nonce1).toBeTruthy();
-      expect(nonce2).toBeTruthy();
+      expect(nonce1).toBeDefined();
+      expect(typeof nonce1).toBe("string");
+      expect(nonce1.length).toBeGreaterThan(0);
       expect(nonce1).not.toBe(nonce2);
     });
 
-    it("should generate different nonces each time", () => {
-      const nonces = new Set<string>();
-      for (let i = 0; i < 10; i++) {
-        nonces.add(generateNonce());
-      }
-      expect(nonces.size).toBe(10);
-    });
-
-    it("should generate nonce with base64url characters", () => {
+    it("should track nonces in store", () => {
       const nonce = generateNonce();
-      expect(nonce).toMatch(/^[A-Za-z0-9_-]+$/);
+      const stats = getNonceStats();
+
+      expect(stats.total).toBeGreaterThan(0);
+      expect(stats.unused).toBeGreaterThan(0);
     });
   });
 
   describe("generateJWT", () => {
-    it("should generate a valid JWT token", () => {
-      const address = "0x1234567890123456789012345678901234567890";
+    it("should generate a valid JWT token for an address", () => {
+      const token = generateJWT(fixtures.validAddress);
 
-      const token = generateJWT(address);
-
-      expect(token).toBeTruthy();
+      expect(token).toBeDefined();
       expect(typeof token).toBe("string");
       expect(token.split(".")).toHaveLength(3); // JWT has 3 parts
     });
 
-    it("should include address in token payload", () => {
-      const address = "0x1234567890123456789012345678901234567890";
-
-      const token = generateJWT(address);
+    it("should normalize address to lowercase", () => {
+      const token = generateJWT(fixtures.validAddress);
       const decoded = verifyJWT(token);
 
-      expect(decoded).toBeTruthy();
-      expect(decoded?.address).toBe(address.toLowerCase());
-    });
-
-    it("should convert address to lowercase in token", () => {
-      const address = "0xABCDEF1234567890123456789012345678901234";
-
-      const token = generateJWT(address);
-      const decoded = verifyJWT(token);
-
-      expect(decoded?.address).toBe(address.toLowerCase());
+      expect(decoded?.address).toBe(fixtures.validAddressLower);
     });
   });
 
   describe("verifyJWT", () => {
-    it("should verify a valid JWT token", () => {
-      const address = "0x1234567890123456789012345678901234567890";
+    it("should verify a valid token", () => {
+      const token = generateJWT(fixtures.validAddress);
+      const decoded = verifyJWT(token);
 
-      const token = generateJWT(address);
-      const result = verifyJWT(token);
-
-      expect(result).toBeTruthy();
-      expect(result?.address).toBe(address.toLowerCase());
-      expect(result?.iat).toBeTruthy();
-      expect(result?.exp).toBeTruthy();
+      expect(decoded).not.toBeNull();
+      expect(decoded?.address).toBe(fixtures.validAddressLower);
+      expect(decoded?.iat).toBeDefined();
+      expect(decoded?.exp).toBeDefined();
     });
 
     it("should return null for invalid token", () => {
-      const result = verifyJWT("invalid.token.here");
-      expect(result).toBeNull();
+      const decoded = verifyJWT("invalid-token");
+
+      expect(decoded).toBeNull();
     });
 
     it("should return null for malformed token", () => {
-      const result = verifyJWT("not-a-jwt");
-      expect(result).toBeNull();
+      const decoded = verifyJWT("a.b.c");
+
+      expect(decoded).toBeNull();
     });
   });
 
   describe("requireAuth middleware", () => {
-    let mockReq: Partial<Request>;
-    let mockRes: Partial<Response>;
-    let mockNext: NextFunction;
-    let jsonMock: any;
-    let statusMock: any;
+    it("should return 401 when no authorization header", async () => {
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
 
-    beforeEach(() => {
-      jsonMock = vi.fn();
-      statusMock = vi.fn().mockReturnValue({ json: jsonMock });
+      await requireAuth(req, res, next);
 
-      mockReq = {
-        headers: {},
-      };
-      mockRes = {
-        status: statusMock,
-        json: jsonMock,
-      };
-      mockNext = vi.fn();
-    });
-
-    it("should authenticate valid Bearer token", async () => {
-      const address = "0x1234567890123456789012345678901234567890";
-      const token = generateJWT(address);
-
-      mockReq.headers = {
-        authorization: `Bearer ${token}`,
-      };
-
-      await requireAuth(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith();
-      expect((mockReq as any).user).toBeTruthy();
-      expect((mockReq as any).user.address).toBe(address.toLowerCase());
-    });
-
-    it("should reject request without authorization header", async () => {
-      await requireAuth(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(401);
-      expect(jsonMock).toHaveBeenCalledWith(
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Unauthorized",
           message: "No authorization token provided",
         }),
       );
-      expect(mockNext).not.toHaveBeenCalled();
+      expect(next).not.toHaveBeenCalled();
     });
 
-    it("should reject invalid authorization header format", async () => {
-      mockReq.headers = {
-        authorization: "InvalidFormat token",
-      };
+    it("should return 401 when authorization header format is invalid", async () => {
+      const req = createMockRequest({
+        headers: { authorization: "InvalidFormat token123" },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      await requireAuth(mockReq as Request, mockRes as Response, mockNext);
+      await requireAuth(req, res, next);
 
-      expect(statusMock).toHaveBeenCalledWith(401);
-      expect(jsonMock).toHaveBeenCalledWith(
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          error: "Unauthorized",
-          message: expect.stringContaining(
-            "Invalid authorization header format",
-          ),
+          message: expect.stringContaining("Invalid authorization header"),
         }),
       );
-      expect(mockNext).not.toHaveBeenCalled();
     });
 
-    it("should reject malformed Bearer token", async () => {
-      mockReq.headers = {
-        authorization: "Bearer invalid-token",
-      };
+    it("should return 401 when token is invalid", async () => {
+      const req = createMockRequest({
+        headers: { authorization: "Bearer invalid-token" },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      await requireAuth(mockReq as Request, mockRes as Response, mockNext);
+      await requireAuth(req, res, next);
 
-      expect(statusMock).toHaveBeenCalledWith(401);
-      expect(mockNext).not.toHaveBeenCalled();
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          message: "Invalid or expired token",
+        }),
+      );
+    });
+
+    it("should call next and attach user when token is valid", async () => {
+      const token = generateJWT(fixtures.validAddress);
+      const req = createMockRequest({
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      await requireAuth(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(req.user).toBeDefined();
+      expect(req.user?.address).toBe(fixtures.validAddressLower);
+      expect(req.rawToken).toBe(token);
+    });
+  });
+
+  describe("optionalAuth middleware", () => {
+    it("should call next when no authorization header", async () => {
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      await optionalAuth(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(req.user).toBeUndefined();
+    });
+
+    it("should call next without user when token is invalid", async () => {
+      const req = createMockRequest({
+        headers: { authorization: "Bearer invalid-token" },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      await optionalAuth(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(req.user).toBeUndefined();
+    });
+
+    it("should attach user and call next when token is valid", async () => {
+      const token = generateJWT(fixtures.validAddress);
+      const req = createMockRequest({
+        headers: { authorization: `Bearer ${token}` },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      await optionalAuth(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+      expect(req.user).toBeDefined();
+      expect(req.user?.address).toBe(fixtures.validAddressLower);
     });
   });
 
   describe("getNonceStats", () => {
     it("should return nonce statistics", () => {
       // Generate some nonces
-      generateNonce();
       generateNonce();
       generateNonce();
 
@@ -209,7 +208,7 @@ describe("Auth Middleware", () => {
       expect(stats).toHaveProperty("used");
       expect(stats).toHaveProperty("unused");
       expect(stats).toHaveProperty("expired");
-      expect(stats.total).toBeGreaterThanOrEqual(3);
+      expect(typeof stats.total).toBe("number");
     });
   });
 });

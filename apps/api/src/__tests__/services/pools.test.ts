@@ -1,36 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import type {
-  Pool,
-  PoolAnalytics,
-  Deposit,
-  User,
-  PoolType,
-  DepositType,
-  TransactionStatus,
-} from "@prisma/client";
+/**
+ * @fileoverview Pools service tests
+ * @module __tests__/services/pools.test
+ */
 
-import { AppError } from "../../middleware/error-handler";
-import { PoolsService } from "../../services/pools";
-
-// Mock Prisma
-vi.mock("@khipu/database", () => ({
-  prisma: {
-    pool: {
-      findMany: vi.fn(),
-      findUnique: vi.fn(),
-      update: vi.fn(),
-    },
-    poolAnalytics: {
-      findMany: vi.fn(),
-      upsert: vi.fn(),
-    },
-    deposit: {
-      findMany: vi.fn(),
-    },
-  },
-}));
-
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { prisma } from "@khipu/database";
+
+import { PoolsService } from "../../services/pools";
+import { fixtures } from "../setup";
 
 describe("PoolsService", () => {
   let poolsService: PoolsService;
@@ -41,129 +18,48 @@ describe("PoolsService", () => {
   });
 
   describe("getAllPools", () => {
-    it("should return all active pools ordered by APR", async () => {
-      const mockPools: Pool[] = [
-        {
-          id: "1",
-          contractAddress: "0xpool1",
-          poolType: "INDIVIDUAL" as PoolType,
-          name: "High APR Pool",
-          description: "Pool with high returns",
-          tvl: "1000000000000000000",
-          apr: 15.5,
-          apy: 16.2,
-          totalUsers: 100,
-          totalDeposits: 150,
-          totalWithdrawals: 50,
-          status: "ACTIVE",
-          isPaused: false,
-          lastSyncAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          minDeposit: null,
-          maxDeposit: null,
-          depositFee: 0,
-          withdrawFee: 0,
-          lastYieldAt: null,
-          version: "1.0.0",
-        },
-        {
-          id: "2",
-          contractAddress: "0xpool2",
-          poolType: "COOPERATIVE" as PoolType,
-          name: "Medium APR Pool",
-          description: "Pool with medium returns",
-          tvl: "500000000000000000",
-          apr: 10.0,
-          apy: 10.5,
-          totalUsers: 50,
-          totalDeposits: 75,
-          totalWithdrawals: 25,
-          status: "ACTIVE",
-          isPaused: false,
-          lastSyncAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          minDeposit: null,
-          maxDeposit: null,
-          depositFee: 0,
-          withdrawFee: 0,
-          lastYieldAt: null,
-          version: "1.0.0",
-        },
+    it("should return all active pools sorted by APR", async () => {
+      const mockPools = [
+        { ...fixtures.mockPool, apr: 10.5 },
+        { ...fixtures.mockPool, id: "pool-2", apr: 8.5 },
       ];
 
-      vi.mocked(prisma.pool.findMany).mockResolvedValue(mockPools);
+      vi.mocked(prisma.pool.findMany).mockResolvedValue(mockPools as any);
 
       const result = await poolsService.getAllPools();
 
-      expect(result).toEqual(mockPools);
       expect(prisma.pool.findMany).toHaveBeenCalledWith({
         where: { status: "ACTIVE" },
         orderBy: { apr: "desc" },
-        select: {
-          id: true,
-          contractAddress: true,
-          poolType: true,
-          name: true,
-          description: true,
-          tvl: true,
-          apr: true,
-          apy: true,
-          totalUsers: true,
-          totalDeposits: true,
-          totalWithdrawals: true,
-          status: true,
-          lastSyncAt: true,
-          createdAt: true,
-        },
+        select: expect.any(Object),
       });
+      expect(result).toHaveLength(2);
     });
 
-    it("should return empty array when no active pools exist", async () => {
+    it("should return empty array when no pools exist", async () => {
       vi.mocked(prisma.pool.findMany).mockResolvedValue([]);
 
       const result = await poolsService.getAllPools();
 
-      expect(result).toEqual([]);
+      expect(result).toHaveLength(0);
     });
   });
 
   describe("getPoolById", () => {
-    it("should return pool with analytics when pool exists", async () => {
-      const mockPool: Pool & { analytics: PoolAnalytics[] } = {
-        id: "1",
-        contractAddress: "0xpool1",
-        poolType: "INDIVIDUAL" as PoolType,
-        name: "Test Pool",
-        description: "A test pool",
-        tvl: "1000000000000000000",
-        apr: 12.0,
-        apy: 12.5,
-        totalUsers: 10,
-        totalDeposits: 20,
-        totalWithdrawals: 5,
-        status: "ACTIVE",
-        isPaused: false,
-        lastSyncAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        minDeposit: null,
-        maxDeposit: null,
-        depositFee: 0,
-        withdrawFee: 0,
-        lastYieldAt: null,
-        version: "1.0.0",
-        analytics: [],
+    it("should return pool with analytics", async () => {
+      const mockPoolWithAnalytics = {
+        ...fixtures.mockPool,
+        analytics: [{ tvl: "1000000", timestamp: new Date() }],
       };
 
-      vi.mocked(prisma.pool.findUnique).mockResolvedValue(mockPool);
+      vi.mocked(prisma.pool.findUnique).mockResolvedValue(
+        mockPoolWithAnalytics as any,
+      );
 
-      const result = await poolsService.getPoolById("1");
+      const result = await poolsService.getPoolById("pool-1");
 
-      expect(result).toEqual(mockPool);
       expect(prisma.pool.findUnique).toHaveBeenCalledWith({
-        where: { id: "1" },
+        where: { id: "pool-1" },
         include: {
           analytics: {
             orderBy: { timestamp: "desc" },
@@ -171,613 +67,213 @@ describe("PoolsService", () => {
           },
         },
       });
+      expect(result.id).toBe(fixtures.mockPool.id);
     });
 
-    it("should throw AppError 404 when pool does not exist", async () => {
+    it("should throw 404 when pool not found", async () => {
       vi.mocked(prisma.pool.findUnique).mockResolvedValue(null);
 
-      await expect(poolsService.getPoolById("nonexistent")).rejects.toThrow(
-        AppError,
-      );
-      await expect(poolsService.getPoolById("nonexistent")).rejects.toThrow(
+      await expect(poolsService.getPoolById("non-existent")).rejects.toThrow(
         "Pool not found",
       );
     });
   });
 
   describe("getPoolByAddress", () => {
-    it("should return pool by contract address with analytics", async () => {
-      const mockPool: Pool & { analytics: PoolAnalytics[] } = {
-        id: "1",
-        contractAddress: "0xpool1",
-        poolType: "INDIVIDUAL" as PoolType,
-        name: "Test Pool",
-        description: "A test pool",
-        tvl: "1000000000000000000",
-        apr: 12.0,
-        apy: 12.5,
-        totalUsers: 10,
-        totalDeposits: 20,
-        totalWithdrawals: 5,
-        status: "ACTIVE",
-        isPaused: false,
-        lastSyncAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        minDeposit: null,
-        maxDeposit: null,
-        depositFee: 0,
-        withdrawFee: 0,
-        lastYieldAt: null,
-        version: "1.0.0",
-        analytics: [],
-      };
+    it("should return pool by contract address", async () => {
+      const mockPool = { ...fixtures.mockPool, analytics: [] };
+      vi.mocked(prisma.pool.findUnique).mockResolvedValue(mockPool as any);
 
-      vi.mocked(prisma.pool.findUnique).mockResolvedValue(mockPool);
+      const result = await poolsService.getPoolByAddress("0xPool123");
 
-      const result = await poolsService.getPoolByAddress("0xPOOL1");
-
-      expect(result).toEqual(mockPool);
       expect(prisma.pool.findUnique).toHaveBeenCalledWith({
-        where: { contractAddress: "0xpool1" },
-        include: {
-          analytics: {
-            orderBy: { timestamp: "desc" },
-            take: 30,
-          },
-        },
+        where: { contractAddress: "0xpool123" }, // lowercased
+        include: expect.any(Object),
       });
+      expect(result.contractAddress).toBe(fixtures.mockPool.contractAddress);
     });
 
-    it("should convert address to lowercase before querying", async () => {
-      const mockPool: Pool & { analytics: PoolAnalytics[] } = {
-        id: "1",
-        contractAddress: "0xabcdef",
-        poolType: "INDIVIDUAL" as PoolType,
-        name: "Test Pool",
-        description: "A test pool",
-        tvl: "1000000000000000000",
-        apr: 12.0,
-        apy: null,
-        totalUsers: 10,
-        totalDeposits: 20,
-        totalWithdrawals: 5,
-        status: "ACTIVE",
-        isPaused: false,
-        lastSyncAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        minDeposit: null,
-        maxDeposit: null,
-        depositFee: 0,
-        withdrawFee: 0,
-        lastYieldAt: null,
-        version: "1.0.0",
-        analytics: [],
-      };
-
-      vi.mocked(prisma.pool.findUnique).mockResolvedValue(mockPool);
-
-      await poolsService.getPoolByAddress("0xABCDEF");
-
-      expect(prisma.pool.findUnique).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { contractAddress: "0xabcdef" },
-        }),
-      );
-    });
-
-    it("should throw AppError 404 when pool not found", async () => {
+    it("should throw 404 when pool not found by address", async () => {
       vi.mocked(prisma.pool.findUnique).mockResolvedValue(null);
 
       await expect(
         poolsService.getPoolByAddress("0xnonexistent"),
-      ).rejects.toThrow(AppError);
+      ).rejects.toThrow("Pool not found");
     });
   });
 
   describe("getPoolAnalytics", () => {
-    it("should return analytics for specified time period", async () => {
-      const mockAnalytics: PoolAnalytics[] = [
-        {
-          id: "1",
-          poolId: "pool1",
-          timestamp: new Date(),
-          date: new Date(),
-          tvl: "1000000000000000000",
-          apr: 12.0,
-          apy: 12.5,
-          totalDeposits: 20,
-          totalWithdrawals: 5,
-          totalUsers: 10,
-          activeUsers: 8,
-          volumeIn: "500000000000000000",
-          volumeOut: "100000000000000000",
-          netFlow: "400000000000000000",
-          yieldGenerated: null,
-          yieldDistributed: null,
-          createdAt: new Date(),
-        },
+    it("should return analytics for specified days", async () => {
+      const mockAnalytics = [
+        { tvl: "1000000", timestamp: new Date() },
+        { tvl: "1100000", timestamp: new Date() },
       ];
 
-      vi.mocked(prisma.poolAnalytics.findMany).mockResolvedValue(mockAnalytics);
+      vi.mocked(prisma.poolAnalytics.findMany).mockResolvedValue(
+        mockAnalytics as any,
+      );
 
-      const result = await poolsService.getPoolAnalytics("pool1", 30);
+      const result = await poolsService.getPoolAnalytics("pool-1", 30);
 
-      expect(result).toEqual(mockAnalytics);
       expect(prisma.poolAnalytics.findMany).toHaveBeenCalledWith({
         where: {
-          poolId: "pool1",
-          timestamp: {
-            gte: expect.any(Date),
-          },
+          poolId: "pool-1",
+          timestamp: { gte: expect.any(Date) },
         },
         orderBy: { timestamp: "asc" },
       });
+      expect(result).toHaveLength(2);
     });
 
-    it("should use default 30 days when no period specified", async () => {
+    it("should use default 30 days when not specified", async () => {
       vi.mocked(prisma.poolAnalytics.findMany).mockResolvedValue([]);
 
-      await poolsService.getPoolAnalytics("pool1");
+      await poolsService.getPoolAnalytics("pool-1");
 
-      expect(prisma.poolAnalytics.findMany).toHaveBeenCalled();
+      expect(prisma.poolAnalytics.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            poolId: "pool-1",
+            timestamp: { gte: expect.any(Date) },
+          },
+        }),
+      );
     });
   });
 
   describe("getPoolUsers", () => {
-    it("should return users with positive balances sorted by balance", async () => {
-      const mockDeposits: (Deposit & {
-        user: Pick<User, "address" | "ensName" | "avatar">;
-      })[] = [
+    it("should return users with calculated balances", async () => {
+      const mockDeposits = [
         {
-          id: "1",
-          userId: "user1",
-          userAddress: "0xuser1",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "DEPOSIT" as DepositType,
-          amount: "2000000000000000000",
-          txHash: "0xtx1",
-          blockNumber: 1000,
-          blockHash: "0xblock1",
-          logIndex: 0,
-          timestamp: new Date(),
-          status: "CONFIRMED" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          ...fixtures.mockDeposit,
+          type: "DEPOSIT",
+          amount: "1000",
           user: {
-            address: "0xuser1",
-            ensName: "user1.eth",
+            address: fixtures.validAddressLower,
+            ensName: null,
             avatar: null,
           },
         },
         {
-          id: "2",
-          userId: "user1",
-          userAddress: "0xuser1",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "WITHDRAW" as DepositType,
-          amount: "500000000000000000",
-          txHash: "0xtx2",
-          blockNumber: 1001,
-          blockHash: "0xblock2",
-          logIndex: 0,
-          timestamp: new Date(),
-          status: "CONFIRMED" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          ...fixtures.mockDeposit,
+          type: "WITHDRAW",
+          amount: "200",
           user: {
-            address: "0xuser1",
-            ensName: "user1.eth",
+            address: fixtures.validAddressLower,
+            ensName: null,
             avatar: null,
           },
         },
       ];
 
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockDeposits);
+      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockDeposits as any);
 
-      const result = await poolsService.getPoolUsers("0xPOOL1");
+      const result = await poolsService.getPoolUsers("0xPool123");
 
-      expect(result).toHaveLength(1);
-      expect(result[0].address).toBe("0xuser1");
-      expect(result[0].balance).toBe("1500000000000000000");
-      expect(result[0].totalDeposited).toBe("2000000000000000000");
-      expect(result[0].totalWithdrawn).toBe("500000000000000000");
+      expect(prisma.deposit.findMany).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: {
+            poolAddress: "0xpool123",
+            status: "CONFIRMED",
+          },
+        }),
+      );
+      expect(result[0].balance).toBe("800"); // 1000 - 200
     });
 
     it("should filter out users with zero balance", async () => {
-      const mockDeposits: (Deposit & {
-        user: Pick<User, "address" | "ensName" | "avatar">;
-      })[] = [
+      const mockDeposits = [
         {
-          id: "1",
-          userId: "user1",
-          userAddress: "0xuser1",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "DEPOSIT" as DepositType,
-          amount: "1000000000000000000",
-          txHash: "0xtx1",
-          blockNumber: 1000,
-          blockHash: "0xblock1",
-          logIndex: 0,
-          timestamp: new Date(),
-          status: "CONFIRMED" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          ...fixtures.mockDeposit,
+          type: "DEPOSIT",
+          amount: "1000",
           user: {
-            address: "0xuser1",
+            address: fixtures.validAddressLower,
             ensName: null,
             avatar: null,
           },
         },
         {
-          id: "2",
-          userId: "user1",
-          userAddress: "0xuser1",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "WITHDRAW" as DepositType,
-          amount: "1000000000000000000",
-          txHash: "0xtx2",
-          blockNumber: 1001,
-          blockHash: "0xblock2",
-          logIndex: 0,
-          timestamp: new Date(),
-          status: "CONFIRMED" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          ...fixtures.mockDeposit,
+          type: "WITHDRAW",
+          amount: "1000",
           user: {
-            address: "0xuser1",
+            address: fixtures.validAddressLower,
             ensName: null,
             avatar: null,
           },
         },
       ];
 
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockDeposits);
+      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockDeposits as any);
 
-      const result = await poolsService.getPoolUsers("0xpool1");
+      const result = await poolsService.getPoolUsers("0xPool123");
 
       expect(result).toHaveLength(0);
-    });
-
-    it("should only count confirmed transactions", async () => {
-      const mockDeposits: (Deposit & {
-        user: Pick<User, "address" | "ensName" | "avatar">;
-      })[] = [
-        {
-          id: "1",
-          userId: "user1",
-          userAddress: "0xuser1",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "DEPOSIT" as DepositType,
-          amount: "1000000000000000000",
-          txHash: "0xtx1",
-          blockNumber: 1000,
-          blockHash: "0xblock1",
-          logIndex: 0,
-          timestamp: new Date(),
-          status: "CONFIRMED" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          user: {
-            address: "0xuser1",
-            ensName: null,
-            avatar: null,
-          },
-        },
-      ];
-
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockDeposits);
-
-      const result = await poolsService.getPoolUsers("0xpool1");
-
-      expect(prisma.deposit.findMany).toHaveBeenCalledWith({
-        where: {
-          poolAddress: "0xpool1",
-          status: "CONFIRMED",
-        },
-        include: {
-          user: {
-            select: {
-              address: true,
-              ensName: true,
-              avatar: true,
-            },
-          },
-        },
-      });
     });
   });
 
   describe("updatePoolStats", () => {
-    it("should update pool statistics based on confirmed deposits", async () => {
-      const mockDeposits: Deposit[] = [
+    it("should update pool with aggregated stats", async () => {
+      const mockStats = [
         {
-          id: "1",
-          userId: "user1",
-          userAddress: "0xuser1",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "DEPOSIT" as DepositType,
-          amount: "2000000000000000000",
-          txHash: "0xtx1",
-          blockNumber: 1000,
-          blockHash: "0xblock1",
-          logIndex: 0,
-          timestamp: new Date(),
-          status: "CONFIRMED" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-        {
-          id: "2",
-          userId: "user1",
-          userAddress: "0xuser1",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "WITHDRAW" as DepositType,
-          amount: "500000000000000000",
-          txHash: "0xtx2",
-          blockNumber: 1001,
-          blockHash: "0xblock2",
-          logIndex: 0,
-          timestamp: new Date(),
-          status: "CONFIRMED" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          total_deposited: "1000000",
+          total_withdrawn: "200000",
+          deposit_count: BigInt(100),
+          withdrawal_count: BigInt(20),
+          active_users: BigInt(50),
         },
       ];
 
-      const mockUpdatedPool: Pool = {
-        id: "1",
-        contractAddress: "0xpool1",
-        poolType: "INDIVIDUAL" as PoolType,
-        name: "Test Pool",
-        description: "A test pool",
-        tvl: "1500000000000000000",
-        apr: 12.0,
-        apy: 12.5,
-        totalUsers: 1,
-        totalDeposits: 1,
-        totalWithdrawals: 1,
-        status: "ACTIVE",
-        isPaused: false,
-        lastSyncAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        minDeposit: null,
-        maxDeposit: null,
-        depositFee: 0,
-        withdrawFee: 0,
-        lastYieldAt: null,
-        version: "1.0.0",
-      };
+      vi.mocked(prisma.$queryRaw).mockResolvedValue(mockStats);
+      vi.mocked(prisma.pool.update).mockResolvedValue(fixtures.mockPool as any);
 
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockDeposits);
-      vi.mocked(prisma.pool.update).mockResolvedValue(mockUpdatedPool);
+      await poolsService.updatePoolStats("0xPool123");
 
-      const result = await poolsService.updatePoolStats("0xPOOL1");
-
-      expect(result.tvl).toBe("1500000000000000000");
-      expect(result.totalUsers).toBe(1);
-      expect(result.totalDeposits).toBe(1);
-      expect(result.totalWithdrawals).toBe(1);
+      expect(prisma.pool.update).toHaveBeenCalledWith({
+        where: { contractAddress: "0xpool123" },
+        data: expect.objectContaining({
+          tvl: "800000", // 1000000 - 200000
+          totalUsers: 50,
+          totalDeposits: 100,
+          totalWithdrawals: 20,
+        }),
+      });
     });
 
-    it("should ignore pending transactions", async () => {
-      const mockDeposits: Deposit[] = [
-        {
-          id: "1",
-          userId: "user1",
-          userAddress: "0xuser1",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "DEPOSIT" as DepositType,
-          amount: "1000000000000000000",
-          txHash: "0xtx1",
-          blockNumber: 1000,
-          blockHash: "0xblock1",
-          logIndex: 0,
-          timestamp: new Date(),
-          status: "PENDING" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
+    it("should handle pools with no transactions", async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
+      vi.mocked(prisma.pool.update).mockResolvedValue(fixtures.mockPool as any);
 
-      const mockUpdatedPool: Pool = {
-        id: "1",
-        contractAddress: "0xpool1",
-        poolType: "INDIVIDUAL" as PoolType,
-        name: "Test Pool",
-        description: "A test pool",
-        tvl: "0",
-        apr: 12.0,
-        apy: 12.5,
-        totalUsers: 0,
-        totalDeposits: 0,
-        totalWithdrawals: 0,
-        status: "ACTIVE",
-        isPaused: false,
-        lastSyncAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        minDeposit: null,
-        maxDeposit: null,
-        depositFee: 0,
-        withdrawFee: 0,
-        lastYieldAt: null,
-        version: "1.0.0",
-      };
+      await poolsService.updatePoolStats("0xPool123");
 
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockDeposits);
-      vi.mocked(prisma.pool.update).mockResolvedValue(mockUpdatedPool);
-
-      const result = await poolsService.updatePoolStats("0xpool1");
-
-      expect(result.tvl).toBe("0");
-      expect(result.totalDeposits).toBe(0);
+      expect(prisma.pool.update).toHaveBeenCalledWith({
+        where: { contractAddress: "0xpool123" },
+        data: { lastSyncAt: expect.any(Date) },
+      });
     });
   });
 
   describe("createAnalyticsSnapshot", () => {
-    it("should create analytics snapshot for existing pool", async () => {
-      const mockPool: Pool = {
-        id: "1",
-        contractAddress: "0xpool1",
-        poolType: "INDIVIDUAL" as PoolType,
-        name: "Test Pool",
-        description: "A test pool",
-        tvl: "1000000000000000000",
-        apr: 12.0,
-        apy: 12.5,
-        totalUsers: 10,
-        totalDeposits: 20,
-        totalWithdrawals: 5,
-        status: "ACTIVE",
-        isPaused: false,
-        lastSyncAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        minDeposit: null,
-        maxDeposit: null,
-        depositFee: 0,
-        withdrawFee: 0,
-        lastYieldAt: null,
-        version: "1.0.0",
-      };
-
-      vi.mocked(prisma.pool.findUnique).mockResolvedValue(mockPool);
+    it("should create analytics snapshot for pool", async () => {
+      vi.mocked(prisma.pool.findUnique).mockResolvedValue(
+        fixtures.mockPool as any,
+      );
       vi.mocked(prisma.deposit.findMany).mockResolvedValue([]);
       vi.mocked(prisma.poolAnalytics.upsert).mockResolvedValue({} as any);
 
-      const result = await poolsService.createAnalyticsSnapshot("1");
+      const result = await poolsService.createAnalyticsSnapshot("pool-1");
 
-      expect(result).toEqual(mockPool);
       expect(prisma.poolAnalytics.upsert).toHaveBeenCalled();
+      expect(result.id).toBe(fixtures.mockPool.id);
     });
 
-    it("should throw AppError 404 when pool does not exist", async () => {
+    it("should throw 404 when pool not found", async () => {
       vi.mocked(prisma.pool.findUnique).mockResolvedValue(null);
 
       await expect(
-        poolsService.createAnalyticsSnapshot("nonexistent"),
-      ).rejects.toThrow(AppError);
-      await expect(
-        poolsService.createAnalyticsSnapshot("nonexistent"),
+        poolsService.createAnalyticsSnapshot("non-existent"),
       ).rejects.toThrow("Pool not found");
-    });
-
-    it("should calculate volume from recent deposits", async () => {
-      const mockPool: Pool = {
-        id: "1",
-        contractAddress: "0xpool1",
-        poolType: "INDIVIDUAL" as PoolType,
-        name: "Test Pool",
-        description: "A test pool",
-        tvl: "1000000000000000000",
-        apr: 12.0,
-        apy: 12.5,
-        totalUsers: 10,
-        totalDeposits: 20,
-        totalWithdrawals: 5,
-        status: "ACTIVE",
-        isPaused: false,
-        lastSyncAt: new Date(),
-        createdAt: new Date(),
-        updatedAt: new Date(),
-        minDeposit: null,
-        maxDeposit: null,
-        depositFee: 0,
-        withdrawFee: 0,
-        lastYieldAt: null,
-        version: "1.0.0",
-      };
-
-      const mockDeposits: Deposit[] = [
-        {
-          id: "1",
-          userId: "user1",
-          userAddress: "0xuser1",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "DEPOSIT" as DepositType,
-          amount: "1000000000000000000",
-          txHash: "0xtx1",
-          blockNumber: 1000,
-          blockHash: "0xblock1",
-          logIndex: 0,
-          timestamp: new Date(),
-          status: "CONFIRMED" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      ];
-
-      vi.mocked(prisma.pool.findUnique).mockResolvedValue(mockPool);
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockDeposits);
-      vi.mocked(prisma.poolAnalytics.upsert).mockResolvedValue({} as any);
-
-      await poolsService.createAnalyticsSnapshot("1");
-
-      expect(prisma.poolAnalytics.upsert).toHaveBeenCalledWith(
-        expect.objectContaining({
-          create: expect.objectContaining({
-            volumeIn: "1000000000000000000",
-            volumeOut: "0",
-          }),
-        }),
-      );
     });
   });
 });

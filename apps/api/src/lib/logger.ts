@@ -23,14 +23,21 @@ const SENSITIVE_FIELDS = [
 
 /**
  * Redact sensitive information from objects
+ * Handles circular references to prevent infinite recursion
  */
-function redactSensitiveData(obj: unknown): unknown {
+function redactSensitiveData(obj: unknown, seen = new WeakSet()): unknown {
   if (!obj || typeof obj !== "object") {
     return obj;
   }
 
+  // Detect circular references
+  if (seen.has(obj as object)) {
+    return "[Circular]";
+  }
+  seen.add(obj as object);
+
   if (Array.isArray(obj)) {
-    return obj.map(redactSensitiveData);
+    return obj.map((item) => redactSensitiveData(item, seen));
   }
 
   const redacted: Record<string, unknown> = {};
@@ -43,7 +50,7 @@ function redactSensitiveData(obj: unknown): unknown {
     if (isSensitive) {
       redacted[key] = "[REDACTED]";
     } else if (typeof value === "object" && value !== null) {
-      redacted[key] = redactSensitiveData(value);
+      redacted[key] = redactSensitiveData(value, seen);
     } else {
       redacted[key] = value;
     }

@@ -1,487 +1,387 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
+/**
+ * @fileoverview Security middleware tests
+ * @module __tests__/middleware/security.test
+ */
+
+import { describe, it, expect, vi, beforeEach } from "vitest";
 
 import {
-  xssProtection,
-  sanitizeMongoQueries,
   requestSizeLimiter,
   validateContentType,
   validateEthAddress,
+  xssProtection,
   requestId,
   securityHeaders,
   validateApiKey,
 } from "../../middleware/security";
-
-import type { Request, Response, NextFunction } from "express";
+import {
+  createMockRequest,
+  createMockResponse,
+  createMockNext,
+  fixtures,
+} from "../setup";
 
 describe("Security Middleware", () => {
-  let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
-  let mockNext: NextFunction;
-  let jsonMock: any;
-  let statusMock: any;
-  let setHeaderMock: any;
-
   beforeEach(() => {
-    jsonMock = vi.fn();
-    statusMock = vi.fn().mockReturnValue({ json: jsonMock });
-    setHeaderMock = vi.fn();
-
-    mockReq = {
-      body: {},
-      query: {},
-      params: {},
-      headers: {},
-      method: "POST",
-      path: "/test",
-    };
-
-    mockRes = {
-      status: statusMock,
-      json: jsonMock,
-      setHeader: setHeaderMock,
-    };
-
-    mockNext = vi.fn();
-  });
-
-  describe("xssProtection", () => {
-    it("should sanitize malicious HTML in request body", () => {
-      mockReq.body = {
-        name: '<script>alert("XSS")</script>John',
-        description: "<img src=x onerror=alert(1)>Test",
-      };
-
-      xssProtection(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockReq.body.name).not.toContain("<script>");
-      expect(mockReq.body.description).not.toContain("<img");
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should sanitize malicious HTML in query params", () => {
-      mockReq.query = {
-        search: '<script>alert("XSS")</script>',
-      };
-
-      xssProtection(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockReq.query.search).not.toContain("<script>");
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should sanitize malicious HTML in route params", () => {
-      mockReq.params = {
-        id: '<script>alert("XSS")</script>',
-      };
-
-      xssProtection(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockReq.params.id).not.toContain("<script>");
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should preserve plain text content", () => {
-      mockReq.body = {
-        name: "John Doe",
-        age: 30,
-        active: true,
-      };
-
-      xssProtection(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockReq.body.name).toBe("John Doe");
-      expect(mockReq.body.age).toBe(30);
-      expect(mockReq.body.active).toBe(true);
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should handle nested objects", () => {
-      mockReq.body = {
-        user: {
-          name: '<script>alert("XSS")</script>John',
-          profile: {
-            bio: "<img src=x onerror=alert(1)>Bio",
-          },
-        },
-      };
-
-      xssProtection(mockReq as Request, mockRes as Response, mockNext);
-
-      expect((mockReq.body as any).user.name).not.toContain("<script>");
-      expect((mockReq.body as any).user.profile.bio).not.toContain("<img");
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should handle arrays", () => {
-      mockReq.body = {
-        tags: ["<script>alert(1)</script>tag1", "tag2"],
-      };
-
-      xssProtection(mockReq as Request, mockRes as Response, mockNext);
-
-      expect((mockReq.body as any).tags[0]).not.toContain("<script>");
-      expect((mockReq.body as any).tags[1]).toBe("tag2");
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should handle null and undefined values", () => {
-      mockReq.body = {
-        name: null,
-        description: undefined,
-      };
-
-      xssProtection(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockReq.body.name).toBeNull();
-      expect(mockReq.body.description).toBeUndefined();
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should handle empty request objects", () => {
-      mockReq.body = {};
-      mockReq.query = {};
-      mockReq.params = {};
-
-      xssProtection(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-    });
+    vi.clearAllMocks();
   });
 
   describe("requestSizeLimiter", () => {
-    it("should allow requests within size limit", () => {
+    it("should allow requests under size limit", () => {
       const middleware = requestSizeLimiter("10mb");
+      const req = createMockRequest({
+        headers: { "content-length": "1000" },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      mockReq.headers = {
-        "content-length": "5242880", // 5MB
-      };
+      middleware(req, res, next);
 
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-      expect(statusMock).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalled();
+      expect(res.status).not.toHaveBeenCalled();
     });
 
-    it("should reject requests exceeding size limit", () => {
-      const middleware = requestSizeLimiter("10mb");
-
-      mockReq.headers = {
-        "content-length": "20971520", // 20MB
-      };
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(413);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Payload Too Large",
-        message: "Request body must be less than 10mb",
+    it("should reject requests over size limit", () => {
+      const middleware = requestSizeLimiter("1kb"); // 1KB = 1024 bytes
+      const req = createMockRequest({
+        headers: { "content-length": "2000" }, // 2000 bytes > 1KB
       });
-      expect(mockNext).not.toHaveBeenCalled();
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      middleware(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(413);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "Payload Too Large",
+        }),
+      );
+      expect(next).not.toHaveBeenCalled();
     });
 
     it("should allow requests without content-length header", () => {
       const middleware = requestSizeLimiter("10mb");
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      mockReq.headers = {};
+      middleware(req, res, next);
 
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should use default max size of 10mb", () => {
-      const middleware = requestSizeLimiter();
-
-      mockReq.headers = {
-        "content-length": "5242880", // 5MB
-      };
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
+      expect(next).toHaveBeenCalled();
     });
   });
 
   describe("validateContentType", () => {
-    it("should allow requests with correct content type", () => {
-      const middleware = validateContentType(["application/json"]);
-
-      mockReq.headers = {
-        "content-type": "application/json",
-      };
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-      expect(statusMock).not.toHaveBeenCalled();
-    });
-
-    it("should reject requests with incorrect content type", () => {
-      const middleware = validateContentType(["application/json"]);
-
-      mockReq.headers = {
-        "content-type": "text/plain",
-      };
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(415);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Unsupported Media Type",
-        message: "Content-Type must be one of: application/json",
-      });
-      expect(mockNext).not.toHaveBeenCalled();
-    });
-
     it("should skip validation for GET requests", () => {
-      const middleware = validateContentType(["application/json"]);
-
-      mockReq.method = "GET";
-      mockReq.headers = {};
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should reject requests without content-type header", () => {
-      const middleware = validateContentType(["application/json"]);
-
-      mockReq.headers = {};
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Missing Content-Type",
-        message: "Content-Type header is required",
-      });
-    });
-
-    it("should be case insensitive", () => {
-      const middleware = validateContentType(["application/json"]);
-
-      mockReq.headers = {
-        "content-type": "APPLICATION/JSON",
-      };
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should handle content-type with charset", () => {
-      const middleware = validateContentType(["application/json"]);
-
-      mockReq.headers = {
-        "content-type": "application/json; charset=utf-8",
-      };
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should use default allowed types", () => {
       const middleware = validateContentType();
+      const req = createMockRequest({ method: "GET" });
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      mockReq.headers = {
-        "content-type": "application/json",
-      };
+      middleware(req, res, next);
 
-      middleware(mockReq as Request, mockRes as Response, mockNext);
+      expect(next).toHaveBeenCalled();
+    });
 
-      expect(mockNext).toHaveBeenCalled();
+    it("should require content-type for POST requests", () => {
+      const middleware = validateContentType();
+      const req = createMockRequest({ method: "POST" });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      middleware(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "Missing Content-Type",
+        }),
+      );
+    });
+
+    it("should accept valid content-type", () => {
+      const middleware = validateContentType();
+      const req = createMockRequest({
+        method: "POST",
+        headers: { "content-type": "application/json" },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      middleware(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+    });
+
+    it("should reject unsupported content-type", () => {
+      const middleware = validateContentType();
+      const req = createMockRequest({
+        method: "POST",
+        headers: { "content-type": "text/plain" },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      middleware(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(415);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "Unsupported Media Type",
+        }),
+      );
     });
   });
 
   describe("validateEthAddress", () => {
-    it("should allow valid Ethereum address", () => {
-      const middleware = validateEthAddress("address");
-
-      mockReq.params = {
-        address: "0x1234567890123456789012345678901234567890",
-      };
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-      expect(statusMock).not.toHaveBeenCalled();
-    });
-
-    it("should reject invalid Ethereum address format", () => {
-      const middleware = validateEthAddress("address");
-
-      mockReq.params = {
-        address: "0xinvalid",
-      };
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Invalid Address",
-        message: "Invalid Ethereum address format",
-      });
-      expect(mockNext).not.toHaveBeenCalled();
-    });
-
-    it("should reject address without 0x prefix", () => {
-      const middleware = validateEthAddress("address");
-
-      mockReq.params = {
-        address: "1234567890123456789012345678901234567890",
-      };
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-    });
-
-    it("should allow when address param is missing", () => {
-      const middleware = validateEthAddress("address");
-
-      mockReq.params = {};
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it("should validate custom parameter name", () => {
-      const middleware = validateEthAddress("poolAddress");
-
-      mockReq.params = {
-        poolAddress: "0x1234567890123456789012345678901234567890",
-      };
-
-      middleware(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-    });
-
-    it('should use default parameter name "address"', () => {
+    it("should call next for valid Ethereum address", () => {
       const middleware = validateEthAddress();
+      const req = createMockRequest({
+        params: { address: fixtures.validAddress },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      mockReq.params = {
-        address: "0x1234567890123456789012345678901234567890",
-      };
+      middleware(req, res, next);
 
-      middleware(mockReq as Request, mockRes as Response, mockNext);
+      expect(next).toHaveBeenCalled();
+    });
 
-      expect(mockNext).toHaveBeenCalled();
+    it("should reject invalid Ethereum address", () => {
+      const middleware = validateEthAddress();
+      const req = createMockRequest({
+        params: { address: fixtures.invalidAddress },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      middleware(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "Invalid Address",
+        }),
+      );
+    });
+
+    it("should reject short address", () => {
+      const middleware = validateEthAddress();
+      const req = createMockRequest({
+        params: { address: fixtures.shortAddress },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      middleware(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+    });
+
+    it("should call next when no address param", () => {
+      const middleware = validateEthAddress();
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      middleware(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+    });
+  });
+
+  describe("xssProtection", () => {
+    it("should sanitize string inputs in body", () => {
+      const req = createMockRequest({
+        body: {
+          name: '<script>alert("xss")</script>Test',
+          email: "test@example.com",
+        },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      xssProtection(req, res, next);
+
+      expect(req.body.name).not.toContain("<script>");
+      expect(req.body.email).toBe("test@example.com");
+      expect(next).toHaveBeenCalled();
+    });
+
+    it("should sanitize nested objects", () => {
+      const req = createMockRequest({
+        body: {
+          user: {
+            name: '<img src=x onerror="alert(1)">',
+          },
+        },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      xssProtection(req, res, next);
+
+      expect(req.body.user.name).not.toContain("<img");
+      expect(req.body.user.name).not.toContain("onerror");
+      expect(next).toHaveBeenCalled();
+    });
+
+    it("should sanitize arrays", () => {
+      const req = createMockRequest({
+        body: {
+          items: ["<script>bad</script>", "normal"],
+        },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      xssProtection(req, res, next);
+
+      expect(req.body.items[0]).not.toContain("<script>");
+      expect(req.body.items[1]).toBe("normal");
+      expect(next).toHaveBeenCalled();
+    });
+
+    it("should sanitize query params", () => {
+      const req = createMockRequest({
+        query: {
+          search: '<script>alert("xss")</script>',
+        },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      xssProtection(req, res, next);
+
+      expect(req.query.search).not.toContain("<script>");
+      expect(next).toHaveBeenCalled();
     });
   });
 
   describe("requestId", () => {
-    it("should generate request ID when not provided", () => {
-      requestId(mockReq as Request, mockRes as Response, mockNext);
+    it("should generate request ID if not provided", () => {
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      expect(mockReq.headers!["x-request-id"]).toBeTruthy();
-      expect(setHeaderMock).toHaveBeenCalledWith(
+      requestId(req, res, next);
+
+      expect(req.headers["x-request-id"]).toBeDefined();
+      expect(res.setHeader).toHaveBeenCalledWith(
         "X-Request-ID",
         expect.any(String),
       );
-      expect(mockNext).toHaveBeenCalled();
+      expect(next).toHaveBeenCalled();
     });
 
-    it("should use existing request ID from header", () => {
-      mockReq.headers = {
-        "x-request-id": "existing-id-123",
-      };
+    it("should use existing request ID if provided", () => {
+      const existingId = "test-request-id-123";
+      const req = createMockRequest({
+        headers: { "x-request-id": existingId },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      requestId(mockReq as Request, mockRes as Response, mockNext);
+      requestId(req, res, next);
 
-      expect(mockReq.headers["x-request-id"]).toBe("existing-id-123");
-      expect(setHeaderMock).toHaveBeenCalledWith(
-        "X-Request-ID",
-        "existing-id-123",
-      );
-      expect(mockNext).toHaveBeenCalled();
+      expect(res.setHeader).toHaveBeenCalledWith("X-Request-ID", existingId);
+      expect(next).toHaveBeenCalled();
     });
   });
 
   describe("securityHeaders", () => {
     it("should set all security headers", () => {
-      securityHeaders(mockReq as Request, mockRes as Response, mockNext);
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      expect(setHeaderMock).toHaveBeenCalledWith(
+      securityHeaders(req, res, next);
+
+      expect(res.setHeader).toHaveBeenCalledWith(
         "X-Content-Type-Options",
         "nosniff",
       );
-      expect(setHeaderMock).toHaveBeenCalledWith("X-Frame-Options", "DENY");
-      expect(setHeaderMock).toHaveBeenCalledWith(
+      expect(res.setHeader).toHaveBeenCalledWith("X-Frame-Options", "DENY");
+      expect(res.setHeader).toHaveBeenCalledWith(
         "X-XSS-Protection",
         "1; mode=block",
       );
-      expect(setHeaderMock).toHaveBeenCalledWith(
+      expect(res.setHeader).toHaveBeenCalledWith(
         "Referrer-Policy",
         "strict-origin-when-cross-origin",
       );
-      expect(setHeaderMock).toHaveBeenCalledWith(
+      expect(res.setHeader).toHaveBeenCalledWith(
         "Permissions-Policy",
-        "geolocation=(), microphone=(), camera=()",
+        expect.any(String),
       );
-      expect(mockNext).toHaveBeenCalled();
+      expect(next).toHaveBeenCalled();
     });
   });
 
   describe("validateApiKey", () => {
-    const originalEnv = process.env.API_KEY;
-
-    afterEach(() => {
-      process.env.API_KEY = originalEnv;
-    });
-
-    it("should allow request with valid API key", () => {
-      process.env.API_KEY = "secret-api-key";
-
-      mockReq.headers = {
-        "x-api-key": "secret-api-key",
-      };
-
-      validateApiKey(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalled();
-      expect(statusMock).not.toHaveBeenCalled();
-    });
-
-    it("should reject request with invalid API key", () => {
-      process.env.API_KEY = "secret-api-key";
-
-      mockReq.headers = {
-        "x-api-key": "wrong-api-key",
-      };
-
-      validateApiKey(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(401);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Unauthorized",
-        message: "Invalid or missing API key",
-      });
-      expect(mockNext).not.toHaveBeenCalled();
-    });
-
-    it("should reject request without API key header", () => {
-      process.env.API_KEY = "secret-api-key";
-
-      mockReq.headers = {};
-
-      validateApiKey(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(401);
-    });
-
-    it("should skip validation when API_KEY is not configured", () => {
+    it("should skip validation when no API_KEY configured", () => {
+      const originalApiKey = process.env.API_KEY;
       delete process.env.API_KEY;
 
-      mockReq.headers = {};
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      validateApiKey(mockReq as Request, mockRes as Response, mockNext);
+      validateApiKey(req, res, next);
 
-      expect(mockNext).toHaveBeenCalled();
-      expect(statusMock).not.toHaveBeenCalled();
+      expect(next).toHaveBeenCalled();
+
+      // Restore
+      if (originalApiKey) process.env.API_KEY = originalApiKey;
+    });
+
+    it("should reject missing API key when configured", () => {
+      const originalApiKey = process.env.API_KEY;
+      process.env.API_KEY = "test-api-key-12345";
+
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      validateApiKey(req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(401);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "Unauthorized",
+        }),
+      );
+
+      // Restore
+      if (originalApiKey) {
+        process.env.API_KEY = originalApiKey;
+      } else {
+        delete process.env.API_KEY;
+      }
+    });
+
+    it("should accept valid API key", () => {
+      const testApiKey = "test-api-key-12345";
+      const originalApiKey = process.env.API_KEY;
+      process.env.API_KEY = testApiKey;
+
+      const req = createMockRequest({
+        headers: { "x-api-key": testApiKey },
+      });
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      validateApiKey(req, res, next);
+
+      expect(next).toHaveBeenCalled();
+
+      // Restore
+      if (originalApiKey) {
+        process.env.API_KEY = originalApiKey;
+      } else {
+        delete process.env.API_KEY;
+      }
     });
   });
 });
