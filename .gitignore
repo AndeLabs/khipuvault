@@ -182,3 +182,7 @@ secrets/
 **/public/worker-*.js.map
 **/public/fallback-*.js
 **/public/fallback-*.js.map
+
+# Local settings and test outputs
+.claude/settings.local.json
+.playwright-mcp/
