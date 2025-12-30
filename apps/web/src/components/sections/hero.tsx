@@ -9,7 +9,7 @@ import { useProtocolStats } from "@/hooks/use-protocol-stats";
 import { cn } from "@/lib/utils";
 
 export function Hero() {
-  const { formattedTVL, averageAPY, isLoading } = useProtocolStats();
+  const { formattedTVL, isLoading } = useProtocolStats();
 
   return (
     <>
@@ -164,7 +164,7 @@ export function Hero() {
                     </div>
                   </div>
 
-                  {/* APY Card - Top Right */}
+                  {/* Yield Card - Top Right */}
                   <div className="absolute top-4 right-0 md:top-8 md:-right-4 animate-float-delayed">
                     <div className="bg-surface-elevated/90 backdrop-blur-md border border-success/20 rounded-xl p-4 shadow-xl shadow-success/10">
                       <div className="flex items-center gap-3">
@@ -173,12 +173,10 @@ export function Hero() {
                         </div>
                         <div>
                           <p className="text-xs text-muted-foreground">
-                            Current APY
+                            Yield Type
                           </p>
                           <p className="text-xl font-bold text-success">
-                            {isLoading
-                              ? "..."
-                              : `${(averageAPY / 100).toFixed(1)}%`}
+                            Real Yield
                           </p>
                         </div>
                       </div>

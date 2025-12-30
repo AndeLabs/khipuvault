@@ -132,15 +132,15 @@ export function useProtocolStats(): ProtocolStats {
   const totalTVL = (individualTVL || 0n) + (cooperativeTVL || 0n);
   const isLoading = isLoadingIndividual || isLoadingCooperative;
 
-  // For now, APY is based on Mezo protocol yields (approximately 8-15%)
-  // This should be fetched from YieldAggregator when available
-  const baseAPY = 850; // 8.5% in basis points - conservative estimate
-  const formattedAPY = `${(baseAPY / 100).toFixed(1)}%`;
+  // APY will be variable based on Mezo protocol yields
+  // Currently on testnet - show as variable until real yield data available
+  const averageAPY = 0; // Will be fetched from YieldAggregator on mainnet
+  const formattedAPY = "Variable";
 
   return {
     totalTVL,
     formattedTVL: formatTVL(totalTVL),
-    averageAPY: baseAPY,
+    averageAPY,
     formattedAPY,
     individualTVL: individualTVL || 0n,
     cooperativeTVL: cooperativeTVL || 0n,
