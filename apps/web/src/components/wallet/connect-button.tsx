@@ -21,7 +21,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { useIndividualPoolData } from "@/hooks/web3/use-individual-pool";
+import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import { getWalletAvailability } from "@/lib/web3/config";
 
 /**
@@ -193,7 +193,7 @@ export function WalletInfo() {
   const { data: btcBalance } = useBalance({
     address: address as `0x${string}` | undefined,
   });
-  const { userDeposit } = useIndividualPoolData();
+  const { userInfo } = useIndividualPoolV3();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -226,11 +226,11 @@ export function WalletInfo() {
       )}
 
       {/* MUSD Amount */}
-      {userDeposit?.musdAmount && (
+      {userInfo?.deposit && (
         <div className="flex flex-col items-end border-l border-primary/20 pl-4">
           <div className="text-sm text-muted-foreground">MUSD Generado</div>
           <div className="text-lg font-semibold font-code text-primary">
-            {Number(userDeposit.musdAmount / BigInt(1e18)).toLocaleString()}
+            {Number(userInfo.deposit / BigInt(1e18)).toLocaleString()}
           </div>
         </div>
       )}

@@ -1,15 +1,14 @@
 "use client";
 
-import Link from "next/link";
-
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
-import { ContractsSection } from "@/components/sections/contracts-section";
-import { Features } from "@/components/sections/features";
+import { Contracts } from "@/components/sections/contracts";
+import { CTA } from "@/components/sections/cta";
+import { FAQ } from "@/components/sections/faq";
 import { Hero } from "@/components/sections/hero";
-import { Stats } from "@/components/sections/stats";
-import { buttonVariants } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { HowItWorks } from "@/components/sections/how-it-works";
+import { Partners } from "@/components/sections/partners";
+import { Products } from "@/components/sections/products";
 
 export const dynamic = "force-dynamic";
 
@@ -23,17 +22,12 @@ export default function Home() {
         className="flex-grow focus:outline-none"
       >
         <Hero />
-        <Stats />
-        <Features />
-        <ContractsSection />
-        <div className="text-center py-20">
-          <Link
-            href="/dashboard"
-            className={cn(buttonVariants({ size: "lg", variant: "secondary" }))}
-          >
-            Go to Dashboard
-          </Link>
-        </div>
+        <Partners />
+        <HowItWorks />
+        <Products />
+        <FAQ />
+        <Contracts />
+        <CTA />
       </main>
       <Footer />
     </div>

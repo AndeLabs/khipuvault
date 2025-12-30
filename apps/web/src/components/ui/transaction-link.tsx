@@ -7,7 +7,7 @@
 
 import { ExternalLink, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
-import { useTransactionVerification } from "@/hooks/web3/use-transaction-verification";
+import { useTransactionVerification } from "@/hooks/web3/common/use-transaction-verification";
 import { cn } from "@/lib/utils";
 
 import { buttonVariants } from "./button";
