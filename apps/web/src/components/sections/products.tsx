@@ -1,6 +1,6 @@
 "use client";
 
-import { Wallet, Users, Trophy, ArrowRight, Sparkles } from "lucide-react";
+import { Wallet, Users, Trophy, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
@@ -17,13 +17,13 @@ const products = [
     features: [
       "Auto-compounding yields",
       "No lockup periods",
-      "Referral rewards (0.5%)",
-      "Emergency withdrawals",
+      "Referral rewards",
+      "Withdraw anytime",
     ],
     href: "/dashboard/individual-savings",
     color: "primary",
-    badge: "Most Popular",
-    apy: "~8.5%",
+    badge: "Live",
+    highlight: "Yield",
   },
   {
     icon: Users,
@@ -38,8 +38,8 @@ const products = [
     ],
     href: "/dashboard/cooperative-savings",
     color: "accent",
-    badge: null,
-    apy: "~8.5%",
+    badge: "Live",
+    highlight: "Yield",
   },
   {
     icon: Trophy,
@@ -54,8 +54,8 @@ const products = [
     ],
     href: "/dashboard/prize-pool",
     color: "success",
-    badge: "Coming Soon",
-    apy: "Prize Pool",
+    badge: "Beta",
+    highlight: "Prizes",
   },
 ];
 
@@ -98,14 +98,17 @@ export function Products() {
                   <Badge
                     className={cn(
                       "absolute -top-3 left-6",
-                      product.badge === "Most Popular" &&
-                        "bg-primary text-background",
-                      product.badge === "Coming Soon" &&
+                      product.badge === "Live" &&
                         "bg-success/20 text-success border-success/30",
+                      product.badge === "Beta" &&
+                        "bg-accent/20 text-accent border-accent/30",
                     )}
                   >
-                    {product.badge === "Most Popular" && (
-                      <Sparkles className="w-3 h-3 mr-1" />
+                    {product.badge === "Live" && (
+                      <span className="relative flex h-2 w-2 mr-1.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                      </span>
                     )}
                     {product.badge}
                   </Badge>
@@ -131,7 +134,7 @@ export function Products() {
                     />
                   </div>
 
-                  {/* APY Badge */}
+                  {/* Highlight Badge */}
                   <div
                     className={cn(
                       "px-3 py-1 rounded-full text-sm font-semibold",
@@ -142,7 +145,7 @@ export function Products() {
                         "bg-success/10 text-success",
                     )}
                   >
-                    {product.apy} APY
+                    {product.highlight}
                   </div>
                 </div>
 
@@ -196,7 +199,7 @@ export function Products() {
                       "border-success/30 hover:bg-success/10 hover:border-success/50",
                   )}
                 >
-                  {product.badge === "Coming Soon" ? "Learn More" : "Start Now"}
+                  {product.badge === "Beta" ? "Try Beta" : "Start Now"}
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
                 </Link>
               </div>

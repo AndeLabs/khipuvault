@@ -242,7 +242,7 @@ export function useIndividualPoolV3() {
     totalReferralRewards: BigInt(
       (totalReferralRewards as unknown as bigint) || 0n,
     ),
-    poolAPR: userInfo?.estimatedAPR ? Number(userInfo.estimatedAPR) / 100 : 6.2,
+    poolAPR: userInfo?.estimatedAPR ? Number(userInfo.estimatedAPR) / 100 : 0,
     emergencyMode: Boolean(emergencyMode),
   };
 

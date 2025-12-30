@@ -36,7 +36,7 @@ interface YieldAnalyticsProps {
 }
 
 export function YieldAnalytics({
-  currentAPR = 6.2,
+  currentAPR = 0,
   currentDeposit = "0",
   className,
 }: YieldAnalyticsProps) {
@@ -47,7 +47,8 @@ export function YieldAnalytics({
   >("1year");
   const [autoCompound, setAutoCompound] = React.useState(true);
 
-  // Mock yield history data (in production, fetch from contract events)
+  // Projected yield history based on user deposit and APR
+  // In production, this will show actual yield from contract events
   const yieldHistory = React.useMemo(() => {
     const now = Date.now();
     const days = 30;
