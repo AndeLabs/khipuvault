@@ -433,6 +433,7 @@ export function useLotteryPoolOwner() {
           address: LOTTERY_POOL_ADDRESS,
           abi: LOTTERY_POOL_ABI,
           functionName: "owner",
+          args: [],
         });
         return result as `0x${string}`;
       } catch {

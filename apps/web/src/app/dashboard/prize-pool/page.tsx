@@ -44,10 +44,8 @@ import {
   LotteryStats,
 } from "@/features/prize-pool";
 import { useToast } from "@/hooks/use-toast";
-
 // Hooks
-import { useLotteryClaimStatus } from "@/hooks/web3/use-lottery-claim-status";
-import { useLotteryPoolEvents } from "@/hooks/web3/use-lottery-pool-events";
+import { useLotteryClaimStatus } from "@/hooks/web3/lottery/use-lottery-claim-status";
 import {
   useCurrentRound,
   useAllRounds,
@@ -60,7 +58,8 @@ import {
   useLotteryPoolOwner,
   useDrawWinner,
   useCreateRound,
-} from "@/hooks/web3/use-lottery-pool";
+} from "@/hooks/web3/lottery/use-lottery-pool";
+import { useLotteryPoolEvents } from "@/hooks/web3/lottery/use-lottery-pool-events";
 
 // Components
 

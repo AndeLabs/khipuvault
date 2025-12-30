@@ -20,7 +20,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { formatProbability } from "@/hooks/web3/use-lottery-pool";
+import { formatProbability } from "@/hooks/web3/lottery/use-lottery-pool";
 
 interface YourTicketsProps {
   ticketCount?: bigint;

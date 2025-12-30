@@ -37,7 +37,7 @@ import { useToast } from "@/hooks/use-toast";
 import {
   useBuyTickets,
   formatProbability,
-} from "@/hooks/web3/use-lottery-pool";
+} from "@/hooks/web3/lottery/use-lottery-pool";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 

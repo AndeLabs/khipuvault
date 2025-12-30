@@ -13,7 +13,7 @@ import { formatEther } from "viem";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getTimeRemaining } from "@/hooks/web3/use-lottery-pool";
+import { getTimeRemaining } from "@/hooks/web3/lottery/use-lottery-pool";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
