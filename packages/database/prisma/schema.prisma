@@ -240,6 +240,99 @@ model EventLog {
   @@index([processed, removed])
 }
 
+// ============================================================================
+// LOTTERY POOL MODELS
+// ============================================================================
+
+enum LotteryRoundStatus {
+  OPEN
+  COMMIT
+  REVEAL
+  COMPLETED
+  CANCELLED
+}
+
+// Lottery Round - Tracks each lottery round
+model LotteryRound {
+  id        String @id @default(cuid())
+  roundId   Int    @unique // On-chain round ID
+  poolAddress String
+
+  // Round configuration
+  ticketPrice     String // BigInt as string (wei)
+  maxTickets      Int
+  startTime       DateTime
+  endTime         DateTime
+  commitDeadline  DateTime?
+  revealDeadline  DateTime?
+
+  // Round state
+  status          LotteryRoundStatus @default(OPEN)
+  totalTicketsSold Int @default(0)
+  totalMusd       String @default("0") // BigInt as string
+  totalYield      String @default("0") // BigInt as string
+
+  // Winner info (after draw)
+  winnerAddress   String?
+  winnerPrize     String? // BigInt as string
+  winningTicket   Int?
+
+  // Blockchain info
+  createdTxHash   String?
+  createdBlock    Int?
+  completedTxHash String?
+  completedBlock  Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tickets   LotteryTicket[]
+
+  @@index([poolAddress])
+  @@index([status])
+  @@index([roundId, poolAddress])
+  @@index([winnerAddress])
+  @@index([endTime])
+}
+
+// Lottery Ticket - Tracks ticket purchases
+model LotteryTicket {
+  id        String @id @default(cuid())
+  roundId   Int
+  round     LotteryRound @relation(fields: [roundId], references: [roundId], onDelete: Cascade)
+
+  // Participant info
+  userAddress     String
+  ticketCount     Int
+  musdContributed String // BigInt as string
+  firstTicketIndex Int
+  lastTicketIndex  Int
+
+  // Claim status
+  claimed         Boolean @default(false)
+  claimedAmount   String? // BigInt as string
+  isWinner        Boolean @default(false)
+
+  // Blockchain info
+  txHash          String
+  blockNumber     Int
+  timestamp       DateTime
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([roundId, userAddress])
+  @@index([userAddress])
+  @@index([roundId])
+  @@index([txHash])
+  @@index([userAddress, roundId])
+  @@index([isWinner])
+}
+
+// ============================================================================
+// INDEXER STATE
+// ============================================================================
+
 // Indexer State - Track indexing progress and health
 model IndexerState {
   id              String @id @default(cuid())
