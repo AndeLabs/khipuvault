@@ -48,6 +48,13 @@
       "status": "deployed",
       "performanceFee": 100,
       "explorerUrl": "https://explorer.test.mezo.org/address/0xe6e0608abEf8f31847C1c9367465DbF68A040Edc"
+    },
+    "lotteryPoolV3": {
+      "proxy": "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4",
+      "implementation": "0x5488C363Be17b1f76821Db1651c1A9110630416A",
+      "description": "V3 UUPS - No-loss lottery pool with commit-reveal randomness",
+      "status": "deployed",
+      "explorerUrl": "https://explorer.test.mezo.org/address/0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4"
     }
   },
 
