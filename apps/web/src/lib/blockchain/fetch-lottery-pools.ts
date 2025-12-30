@@ -1,15 +1,20 @@
 /**
- * @fileoverview Fetch functions for Lottery Pool data
+ * @fileoverview Fetch functions for LotteryPoolV3 data
  * @module lib/blockchain/fetch-lottery-pools
  *
- * Separated from hooks for:
- * - Testability and reusability
- * - Type safety with explicit return types
- * - Easy integration with TanStack Query
+ * Updated for LotteryPoolV3 contract with:
+ * - Commit/Reveal randomness scheme
+ * - mUSD-based lottery
+ * - UUPS Upgradeable pattern
  */
 
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
-import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
+import {
+  LOTTERY_POOL_ABI,
+  LotteryRoundStatus,
+  type LotteryRoundV3,
+  type LotteryParticipantV3,
+} from "@/lib/web3/lottery-pool-abi";
 
 import type { PublicClient } from "viem";
 
@@ -22,21 +27,32 @@ const devWarn = isDev ? console.warn.bind(console) : () => {};
 // eslint-disable-next-line no-console
 const devError = isDev ? console.error.bind(console) : () => {};
 
-// Use centralized contract addresses - falls back to zero address if not deployed
+// Use centralized contract addresses
 const LOTTERY_POOL_ADDRESS =
   MEZO_TESTNET_ADDRESSES.lotteryPool as `0x${string}`;
 
-// Types matching SimpleLotteryPool contract
+// Re-export types for consumers
+export type { LotteryRoundV3, LotteryParticipantV3 };
+export { LotteryRoundStatus };
+
+// Parsed round with computed fields
 export interface LotteryRound {
-  roundId: bigint;
+  roundId: number;
   ticketPrice: bigint;
-  maxTickets: bigint;
-  totalTicketsSold: bigint;
-  totalPrize: bigint;
-  startTime: bigint;
-  endTime: bigint;
+  totalMusd: bigint;
+  totalPrize: bigint; // Alias for totalMusd (V3 compatibility)
+  maxTickets: number;
+  totalTicketsSold: number;
+  startTime: bigint; // Unix timestamp
+  endTime: bigint; // Unix timestamp
+  commitDeadline: bigint; // Unix timestamp
+  revealDeadline: bigint; // Unix timestamp
   winner: string;
-  status: number; // 0=OPEN, 1=COMPLETED, 2=CANCELLED
+  winnerPrize: bigint;
+  totalYield: bigint;
+  status: number;
+  statusLabel: string;
+  isActive: boolean;
 }
 
 export interface UserLotteryStats {
@@ -47,6 +63,58 @@ export interface UserLotteryStats {
 }
 
 /**
+ * Get status label for round status
+ */
+function getStatusLabel(status: number): string {
+  switch (status) {
+    case LotteryRoundStatus.OPEN:
+      return "Open";
+    case LotteryRoundStatus.COMMIT:
+      return "Commit Phase";
+    case LotteryRoundStatus.REVEAL:
+      return "Reveal Phase";
+    case LotteryRoundStatus.COMPLETED:
+      return "Completed";
+    case LotteryRoundStatus.CANCELLED:
+      return "Cancelled";
+    default:
+      return "Unknown";
+  }
+}
+
+/**
+ * Parse raw round data from contract
+ */
+function parseRoundData(
+  roundId: number,
+  rawRound: LotteryRoundV3,
+): LotteryRound {
+  const status = Number(rawRound.status);
+  const totalMusd = BigInt(rawRound.totalMusd);
+  return {
+    roundId,
+    ticketPrice: BigInt(rawRound.ticketPrice),
+    totalMusd,
+    totalPrize: totalMusd, // Alias for backward compatibility
+    maxTickets: Number(rawRound.maxTickets),
+    totalTicketsSold: Number(rawRound.totalTicketsSold),
+    startTime: BigInt(rawRound.startTime),
+    endTime: BigInt(rawRound.endTime),
+    commitDeadline: BigInt(rawRound.commitDeadline),
+    revealDeadline: BigInt(rawRound.revealDeadline),
+    winner: rawRound.winner,
+    winnerPrize: BigInt(rawRound.winnerPrize),
+    totalYield: BigInt(rawRound.totalYield),
+    status,
+    statusLabel: getStatusLabel(status),
+    isActive:
+      status === LotteryRoundStatus.OPEN ||
+      status === LotteryRoundStatus.COMMIT ||
+      status === LotteryRoundStatus.REVEAL,
+  };
+}
+
+/**
  * Fetch current round ID
  *
  * @param publicClient - Viem PublicClient for blockchain queries
@@ -54,9 +122,9 @@ export interface UserLotteryStats {
  */
 export async function fetchCurrentRoundId(
   publicClient: PublicClient,
-): Promise<bigint | null> {
+): Promise<number> {
   if (!publicClient) {
-    return null;
+    return 0;
   }
 
   try {
@@ -64,22 +132,23 @@ export async function fetchCurrentRoundId(
       address: LOTTERY_POOL_ADDRESS,
       abi: LOTTERY_POOL_ABI,
       functionName: "currentRoundId",
+      args: [],
     });
 
-    return currentRoundId as bigint;
+    return Number(currentRoundId || 0);
   } catch (error) {
     devError("Error fetching current round ID:", error);
-    return null;
+    return 0;
   }
 }
 
 /**
- * Fetch round counter (total number of rounds)
+ * Fetch active round ID (if any)
  *
  * @param publicClient - Viem PublicClient for blockchain queries
- * @returns Total number of rounds
+ * @returns Active round ID or 0 if no active round
  */
-export async function fetchRoundCounter(
+export async function fetchActiveRoundId(
   publicClient: PublicClient,
 ): Promise<number> {
   if (!publicClient) {
@@ -87,17 +156,31 @@ export async function fetchRoundCounter(
   }
 
   try {
-    const roundCounter = await publicClient.readContract({
+    const activeRoundId = await publicClient.readContract({
       address: LOTTERY_POOL_ADDRESS,
       abi: LOTTERY_POOL_ABI,
-      functionName: "roundCounter",
+      functionName: "getActiveRound",
+      args: [],
     });
 
-    return Number(roundCounter || 0);
+    return Number(activeRoundId || 0);
   } catch (error) {
-    devError("Error fetching round counter:", error);
+    devError("Error fetching active round ID:", error);
     return 0;
   }
+}
+
+/**
+ * Fetch round counter (total number of rounds)
+ * V3 uses currentRoundId as the counter
+ *
+ * @param publicClient - Viem PublicClient for blockchain queries
+ * @returns Total number of rounds
+ */
+export async function fetchRoundCounter(
+  publicClient: PublicClient,
+): Promise<number> {
+  return fetchCurrentRoundId(publicClient);
 }
 
 /**
@@ -119,11 +202,11 @@ export async function fetchRoundInfo(
     const roundInfo = await publicClient.readContract({
       address: LOTTERY_POOL_ADDRESS,
       abi: LOTTERY_POOL_ABI,
-      functionName: "getRoundInfo",
+      functionName: "getRound",
       args: [BigInt(roundId)],
     });
 
-    return roundInfo as LotteryRound;
+    return parseRoundData(Number(roundId), roundInfo as LotteryRoundV3);
   } catch (error) {
     devError(`Error fetching round ${roundId}:`, error);
     return null;
@@ -157,7 +240,7 @@ export async function fetchAllRounds(
       publicClient.readContract({
         address: LOTTERY_POOL_ADDRESS,
         abi: LOTTERY_POOL_ABI,
-        functionName: "getRoundInfo",
+        functionName: "getRound",
         args: [BigInt(i + 1)],
       }),
     );
@@ -168,7 +251,8 @@ export async function fetchAllRounds(
       const result = results[i];
       if (result.status === "fulfilled") {
         try {
-          roundsData.push(result.value as LotteryRound);
+          const parsed = parseRoundData(i + 1, result.value as LotteryRoundV3);
+          roundsData.push(parsed);
         } catch (error) {
           devWarn(`⚠️ Failed to parse round ${i + 1}:`, error);
         }
@@ -186,7 +270,39 @@ export async function fetchAllRounds(
 }
 
 /**
- * Fetch user tickets for a specific round
+ * Fetch user participation info for a specific round
+ *
+ * @param publicClient - Viem PublicClient for blockchain queries
+ * @param roundId - ID of the round
+ * @param userAddress - Address of the user
+ * @returns Participant info or null
+ */
+export async function fetchUserParticipation(
+  publicClient: PublicClient,
+  roundId: bigint | number,
+  userAddress: `0x${string}`,
+): Promise<LotteryParticipantV3 | null> {
+  if (!publicClient || !userAddress) {
+    return null;
+  }
+
+  try {
+    const participant = await publicClient.readContract({
+      address: LOTTERY_POOL_ADDRESS,
+      abi: LOTTERY_POOL_ABI,
+      functionName: "getParticipant",
+      args: [BigInt(roundId), userAddress],
+    });
+
+    return participant as LotteryParticipantV3;
+  } catch (error) {
+    devError(`Error fetching participation for round ${roundId}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Fetch user tickets for a specific round (legacy compatibility)
  *
  * @param publicClient - Viem PublicClient for blockchain queries
  * @param roundId - ID of the round
@@ -198,27 +314,16 @@ export async function fetchUserTickets(
   roundId: bigint | number,
   userAddress: `0x${string}`,
 ): Promise<bigint | null> {
-  if (!publicClient || !userAddress) {
-    return null;
-  }
-
-  try {
-    const ticketCount = await publicClient.readContract({
-      address: LOTTERY_POOL_ADDRESS,
-      abi: LOTTERY_POOL_ABI,
-      functionName: "getUserTickets",
-      args: [BigInt(roundId), userAddress],
-    });
-
-    return ticketCount as bigint;
-  } catch (error) {
-    devError(`Error fetching user tickets for round ${roundId}:`, error);
-    return null;
-  }
+  const participant = await fetchUserParticipation(
+    publicClient,
+    roundId,
+    userAddress,
+  );
+  return participant ? BigInt(participant.ticketCount) : null;
 }
 
 /**
- * Fetch user investment for a specific round
+ * Fetch user investment for a specific round (legacy compatibility)
  *
  * @param publicClient - Viem PublicClient for blockchain queries
  * @param roundId - ID of the round
@@ -230,23 +335,12 @@ export async function fetchUserInvestment(
   roundId: bigint | number,
   userAddress: `0x${string}`,
 ): Promise<bigint | null> {
-  if (!publicClient || !userAddress) {
-    return null;
-  }
-
-  try {
-    const investment = await publicClient.readContract({
-      address: LOTTERY_POOL_ADDRESS,
-      abi: LOTTERY_POOL_ABI,
-      functionName: "getUserInvestment",
-      args: [BigInt(roundId), userAddress],
-    });
-
-    return investment as bigint;
-  } catch (error) {
-    devError(`Error fetching user investment for round ${roundId}:`, error);
-    return null;
-  }
+  const participant = await fetchUserParticipation(
+    publicClient,
+    roundId,
+    userAddress,
+  );
+  return participant ? BigInt(participant.musdContributed) : null;
 }
 
 /**
@@ -270,7 +364,7 @@ export async function fetchUserProbability(
     const probability = await publicClient.readContract({
       address: LOTTERY_POOL_ADDRESS,
       abi: LOTTERY_POOL_ABI,
-      functionName: "calculateUserProbability",
+      functionName: "getWinProbability",
       args: [BigInt(roundId), userAddress],
     });
 
@@ -316,12 +410,12 @@ export async function fetchUserLotteryStats(
     let totalTickets = 0;
     let totalWinnings = 0n;
 
-    // Fetch all investments and round info in parallel
-    const investmentPromises = Array.from({ length: roundCounter }, (_, i) =>
+    // Fetch all participant data and round info in parallel
+    const participantPromises = Array.from({ length: roundCounter }, (_, i) =>
       publicClient.readContract({
         address: LOTTERY_POOL_ADDRESS,
         abi: LOTTERY_POOL_ABI,
-        functionName: "getUserInvestment",
+        functionName: "getParticipant",
         args: [BigInt(i + 1), userAddress],
       }),
     );
@@ -330,52 +424,38 @@ export async function fetchUserLotteryStats(
       publicClient.readContract({
         address: LOTTERY_POOL_ADDRESS,
         abi: LOTTERY_POOL_ABI,
-        functionName: "getRoundInfo",
+        functionName: "getRound",
         args: [BigInt(i + 1)],
       }),
     );
 
-    const investmentResults = await Promise.allSettled(investmentPromises);
+    const participantResults = await Promise.allSettled(participantPromises);
     const roundResults = await Promise.allSettled(roundInfoPromises);
 
     // Process results
-    for (let i = 0; i < investmentResults.length; i++) {
-      const investmentResult = investmentResults[i];
+    for (let i = 0; i < participantResults.length; i++) {
+      const participantResult = participantResults[i];
 
-      if (investmentResult.status === "fulfilled") {
-        const investment = investmentResult.value as bigint;
+      if (participantResult.status === "fulfilled") {
+        const participant = participantResult.value as LotteryParticipantV3;
+        const invested = BigInt(participant.musdContributed);
+        const tickets = Number(participant.ticketCount);
 
-        if (investment > 0n) {
-          totalInvested += investment;
+        if (invested > 0n || tickets > 0) {
+          totalInvested += invested;
+          totalTickets += tickets;
           roundsPlayed++;
-
-          // Fetch ticket count for this round
-          try {
-            const ticketCount = (await publicClient.readContract({
-              address: LOTTERY_POOL_ADDRESS,
-              abi: LOTTERY_POOL_ABI,
-              functionName: "getUserTickets",
-              args: [BigInt(i + 1), userAddress],
-            })) as bigint;
-
-            totalTickets += Number(ticketCount || 0n);
-          } catch (error) {
-            devWarn(`⚠️ Failed to fetch tickets for round ${i + 1}:`, error);
-          }
 
           // Check if user won this round
           const roundResult = roundResults[i];
           if (roundResult.status === "fulfilled") {
             try {
-              const roundInfo = roundResult.value as LotteryRound;
+              const roundInfo = roundResult.value as LotteryRoundV3;
 
               if (
                 roundInfo.winner.toLowerCase() === userAddress.toLowerCase()
               ) {
-                // Get the prize amount - check if it exists in the round info
-                const prize =
-                  (roundInfo as any).winnerPrize || roundInfo.totalPrize;
-                totalWinnings += prize;
+                totalWinnings += BigInt(roundInfo.winnerPrize);
               }
             } catch (error) {
               devWarn(`⚠️ Failed to check winner for round ${i + 1}:`, error);

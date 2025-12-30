@@ -13,13 +13,13 @@
 
 ### Frontend Features Ready
 
-- [x] useIndividualPoolSimple (core reads)
-- [x] useSimpleDeposit (deposit flow)
-- [x] useSimpleWithdraw (full/partial withdrawals)
-- [x] useAutoCompound (V3 feature)
-- [x] useReferralSystem (V3 feature)
-- [x] useClaimYields (V3 feature)
-- [x] PositionV3 component (complete UI)
+- [x] useIndividualPoolV3 (unified V3 hook with all features)
+- [x] useDeposit (deposit flow with approval handling)
+- [x] usePartialWithdraw / useFullWithdraw (withdrawal flows)
+- [x] useToggleAutoCompound (V3 auto-compound feature)
+- [x] useClaimReferralRewards (V3 referral system)
+- [x] useClaimYield (V3 yield claiming)
+- [x] Individual Savings page (complete V3 UI)
 
 ## 📦 Deployment Steps
 

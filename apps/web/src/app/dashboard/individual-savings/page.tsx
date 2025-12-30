@@ -27,11 +27,11 @@ import {
   YieldAnalytics,
   GetMusdGuide,
 } from "@/features/individual-savings";
+import { usePoolEvents } from "@/hooks/web3/common/use-pool-events";
 import { useAutoCompound } from "@/hooks/web3/use-auto-compound";
 import { useClaimYields } from "@/hooks/web3/use-claim-yields";
 import { useDepositWithApprove } from "@/hooks/web3/use-deposit-with-approve";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
-import { usePoolEvents } from "@/hooks/web3/use-pool-events";
 import { useSimpleWithdraw } from "@/hooks/web3/use-simple-withdraw";
 import { useUserTransactionHistory } from "@/hooks/web3/use-user-transaction-history";
 import { V3_FEATURES } from "@/lib/web3/contracts-v3";

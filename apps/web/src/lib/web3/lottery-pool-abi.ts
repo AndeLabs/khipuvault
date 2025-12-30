@@ -1,582 +1,65 @@
 /**
- * @fileoverview ABI for SimpleLotteryPool contract
+ * @fileoverview ABI for LotteryPoolV3 contract
  * @module lib/web3/lottery-pool-abi
  *
- * SimpleLotteryPool deployed on Mezo Testnet at:
- * 0x100c3DA636C8E25b5e1661a97fa2fc4fDb35cEB7
+ * LotteryPoolV3 deployed on Mezo Testnet at:
+ * 0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4
+ *
+ * V3 Features:
+ * - Commit/Reveal randomness scheme
+ * - mUSD-based lottery (not native BTC)
+ * - UUPS Upgradeable
+ * - Yield aggregation integration
  */
 
-export const LOTTERY_POOL_ABI = [
-  {
-    type: "constructor",
-    inputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "receive",
-    stateMutability: "payable",
-  },
-  {
-    type: "function",
-    name: "MAX_TICKETS_PER_USER",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "MIN_TICKET_PRICE",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "buyTickets",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "ticketCount",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    outputs: [],
-    stateMutability: "payable",
-  },
-  {
-    type: "function",
-    name: "calculateUserProbability",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "user",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "claimPrize",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "createRound",
-    inputs: [
-      {
-        name: "ticketPrice",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "maxTickets",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "durationInSeconds",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "currentRoundId",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "drawWinner",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "function",
-    name: "getRoundInfo",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "tuple",
-        internalType: "struct SimpleLotteryPool.Round",
-        components: [
-          {
-            name: "roundId",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "ticketPrice",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "maxTickets",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "totalTicketsSold",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "totalPrize",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "startTime",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "endTime",
-            type: "uint256",
-            internalType: "uint256",
-          },
-          {
-            name: "winner",
-            type: "address",
-            internalType: "address",
-          },
-          {
-            name: "status",
-            type: "uint8",
-            internalType: "enum SimpleLotteryPool.RoundStatus",
-          },
-        ],
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "getUserInvestment",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "user",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "getUserTickets",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "user",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "owner",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "participants",
-    inputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "roundCounter",
-    inputs: [],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "rounds",
-    inputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    outputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "ticketPrice",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "maxTickets",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "totalTicketsSold",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "totalPrize",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "startTime",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "endTime",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "winner",
-        type: "address",
-        internalType: "address",
-      },
-      {
-        name: "status",
-        type: "uint8",
-        internalType: "enum SimpleLotteryPool.RoundStatus",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "userTickets",
-    inputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-      {
-        name: "",
-        type: "address",
-        internalType: "address",
-      },
-    ],
-    outputs: [
-      {
-        name: "",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    stateMutability: "view",
-  },
-  {
-    type: "function",
-    name: "withdrawCapital",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        internalType: "uint256",
-      },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-  {
-    type: "event",
-    name: "PrizeClaimed",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "user",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "amount",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "RoundCreated",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "ticketPrice",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "maxTickets",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "endTime",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "TicketsPurchased",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "user",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "ticketCount",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-      {
-        name: "btcPaid",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "event",
-    name: "WinnerSelected",
-    inputs: [
-      {
-        name: "roundId",
-        type: "uint256",
-        indexed: true,
-        internalType: "uint256",
-      },
-      {
-        name: "winner",
-        type: "address",
-        indexed: true,
-        internalType: "address",
-      },
-      {
-        name: "prize",
-        type: "uint256",
-        indexed: false,
-        internalType: "uint256",
-      },
-    ],
-    anonymous: false,
-  },
-  {
-    type: "error",
-    name: "InsufficientPayment",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidMaxTickets",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidTicketCount",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "InvalidTicketPrice",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "NoPrize",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "OnlyOwner",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "RoundNotCompleted",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "RoundNotEnded",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "RoundNotOpen",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "TooManyTickets",
-    inputs: [],
-  },
-  {
-    type: "error",
-    name: "TransferFailed",
-    inputs: [],
-  },
-] as const;
+// Import the V3 ABI from the contracts package
+import LotteryPoolV3ABI from "@/contracts/abis/LotteryPoolV3.json";
+
+// Ensure ABI is an array (handle bundler wrapping)
+export const LOTTERY_POOL_ABI = Array.isArray(LotteryPoolV3ABI)
+  ? LotteryPoolV3ABI
+  : (LotteryPoolV3ABI as any).default ||
+    (LotteryPoolV3ABI as any).abi ||
+    LotteryPoolV3ABI;
+
+// V3 Round Status enum values
+export const LotteryRoundStatus = {
+  OPEN: 0,
+  COMMIT: 1,
+  REVEAL: 2,
+  COMPLETED: 3,
+  CANCELLED: 4,
+} as const;
+
+export type LotteryRoundStatusType =
+  (typeof LotteryRoundStatus)[keyof typeof LotteryRoundStatus];
+
+// V3 Round structure type
+export interface LotteryRoundV3 {
+  ticketPrice: bigint;
+  totalMusd: bigint;
+  maxTickets: bigint;
+  totalTicketsSold: bigint;
+  startTime: bigint;
+  endTime: bigint;
+  commitDeadline: bigint;
+  revealDeadline: bigint;
+  winner: string;
+  winnerPrize: bigint;
+  totalYield: bigint;
+  status: LotteryRoundStatusType;
+  operatorCommit: string;
+  revealedSeed: bigint;
+}
+
+// V3 Participant structure type
+export interface LotteryParticipantV3 {
+  ticketCount: bigint;
+  musdContributed: bigint;
+  firstTicketIndex: bigint;
+  lastTicketIndex: bigint;
+  claimed: boolean;
+}
+
+// Export default for backwards compatibility
+export default LOTTERY_POOL_ABI;

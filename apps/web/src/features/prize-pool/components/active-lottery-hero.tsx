@@ -30,7 +30,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   getTimeRemaining,
   getRoundStatus,
-} from "@/hooks/web3/use-lottery-pool";
+} from "@/hooks/web3/lottery/use-lottery-pool";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
