@@ -18,6 +18,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
+import { useProtocolStats } from "@/hooks/use-protocol-stats";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -88,6 +89,7 @@ interface SidebarProps {
 export function Sidebar({ open = true, onClose, className }: SidebarProps) {
   const pathname = usePathname();
   const [expandedItems, setExpandedItems] = React.useState<string[]>([]);
+  const { formattedTVL, formattedAPY, isLoading } = useProtocolStats();
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) =>
@@ -215,13 +217,13 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
               <div className="flex items-center justify-between px-3">
                 <span>Total Value Locked</span>
                 <span className="font-semibold text-foreground tabular-nums">
-                  $1.2M
+                  {isLoading ? "..." : formattedTVL}
                 </span>
               </div>
               <div className="flex items-center justify-between px-3">
                 <span>APY</span>
                 <span className="font-semibold text-success tabular-nums">
-                  12.5%
+                  {isLoading ? "..." : formattedAPY}
                 </span>
               </div>
             </div>

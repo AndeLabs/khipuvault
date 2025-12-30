@@ -15,11 +15,6 @@ import {
 } from "@/components/ui/sheet";
 import { SmartConnectButton } from "@/components/wallet/smart-connect-button";
 
-const navLinks = [
-  { href: "#features", label: "Features" },
-  { href: "#contracts", label: "Contracts" },
-];
-
 export function Header() {
   const [mounted, setMounted] = useState(false);
 
@@ -43,18 +38,6 @@ export function Header() {
             KhipuVault
           </span>
         </Link>
-
-        <nav className="hidden items-center gap-8 md:flex">
-          {navLinks.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="text-base font-medium text-muted-foreground transition-colors hover:text-primary"
-            >
-              {link.label}
-            </Link>
-          ))}
-        </nav>
 
         <div className="flex items-center gap-3">
           {/* Connect Wallet Button */}
@@ -99,18 +82,7 @@ export function Header() {
                     <span className="text-2xl font-bold">KhipuVault</span>
                   </Link>
                 </div>
-                <nav className="mt-8 flex flex-col gap-6">
-                  {navLinks.map((link) => (
-                    <Link
-                      key={link.href}
-                      href={link.href}
-                      className="text-xl font-medium text-foreground transition-colors hover:text-primary"
-                    >
-                      {link.label}
-                    </Link>
-                  ))}
-                </nav>
-                <div className="mt-auto w-full space-y-4">
+                <div className="mt-8 w-full space-y-4">
                   {/* Connect Wallet Button en mobile */}
                   {mounted && (
                     <div className="w-full">

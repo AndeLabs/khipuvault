@@ -1,24 +1,48 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
 
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { Icons } from "@/components/icons";
 
+const footerLinks = {
+  product: [
+    { name: "Individual Savings", href: "/dashboard/individual-savings" },
+    { name: "Community Pools", href: "/dashboard/cooperative-savings" },
+    { name: "Prize Pool", href: "/dashboard/prize-pool" },
+    { name: "Dashboard", href: "/dashboard" },
+  ],
+  resources: [
+    { name: "Documentation", href: "#", external: true },
+    { name: "GitHub", href: "https://github.com/khipuvault", external: true },
+    { name: "Smart Contracts", href: "#contracts" },
+    { name: "Mezo Protocol", href: "https://mezo.org", external: true },
+  ],
+  company: [
+    { name: "About", href: "#" },
+    { name: "Blog", href: "#" },
+    { name: "Twitter", href: "#", external: true },
+    { name: "Discord", href: "#", external: true },
+  ],
+};
+
 const socialLinks = [
   { name: "Twitter", href: "#", icon: Icons.twitter },
   { name: "Discord", href: "#", icon: Icons.discord },
-  { name: "GitHub", href: "#", icon: Icons.github },
-  { name: "Docs", href: "#", icon: Icons.docs },
+  { name: "GitHub", href: "https://github.com/khipuvault", icon: Icons.github },
 ];
 
 export function Footer() {
   return (
     <AnimateOnScroll>
-      <footer className="bg-background border-t border-primary/20">
-        <div className="container mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="flex flex-col items-center justify-between gap-8 md:flex-row">
-            <div className="flex flex-col items-center gap-4 text-center md:items-start md:text-left">
-              <Link href="/" className="flex items-center gap-2">
+      <footer className="bg-surface border-t border-border">
+        <div className="container mx-auto max-w-7xl px-4 py-12 lg:py-16">
+          {/* Main footer content */}
+          <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:gap-12">
+            {/* Brand column */}
+            <div className="col-span-2 md:col-span-1">
+              <Link href="/" className="flex items-center gap-2 mb-4">
                 <Image
                   src="/logos/khipu-logo.png"
                   alt="KhipuVault Logo"
@@ -26,36 +50,122 @@ export function Footer() {
                   height={40}
                   className="h-10 w-10"
                 />
-                <span className="text-2xl font-bold">KhipuVault</span>
+                <span className="text-xl font-bold text-white">KhipuVault</span>
               </Link>
-              <p className="max-w-xs text-muted-foreground">
-                Ahorro en Bitcoin con rendimientos, inspirado en tradiciones
-                financieras de LATAM.
+              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
+                Decentralized Bitcoin savings platform. Earn real yields through
+                Mezo Protocol.
               </p>
+
+              {/* Social links */}
+              <div className="flex items-center gap-4">
+                {socialLinks.map((link) => (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    className="w-9 h-9 rounded-lg bg-surface-elevated flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                    aria-label={link.name}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    <link.icon className="h-4 w-4" />
+                  </a>
+                ))}
+              </div>
             </div>
-            <div className="flex items-center gap-6">
-              {socialLinks.map((link) => (
-                <Link
-                  key={link.name}
-                  href={link.href}
-                  className="text-muted-foreground transition-colors hover:text-primary"
-                  aria-label={link.name}
-                >
-                  <link.icon className="h-6 w-6" />
-                </Link>
-              ))}
+
+            {/* Product links */}
+            <div>
+              <h3 className="text-sm font-semibold text-white mb-4">Product</h3>
+              <ul className="space-y-3">
+                {footerLinks.product.map((link) => (
+                  <li key={link.name}>
+                    <Link
+                      href={link.href}
+                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                    >
+                      {link.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Resources links */}
+            <div>
+              <h3 className="text-sm font-semibold text-white mb-4">
+                Resources
+              </h3>
+              <ul className="space-y-3">
+                {footerLinks.resources.map((link) => (
+                  <li key={link.name}>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {link.name}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {link.name}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            </div>
+
+            {/* Company links */}
+            <div>
+              <h3 className="text-sm font-semibold text-white mb-4">Company</h3>
+              <ul className="space-y-3">
+                {footerLinks.company.map((link) => (
+                  <li key={link.name}>
+                    {link.external ? (
+                      <a
+                        href={link.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {link.name}
+                      </a>
+                    ) : (
+                      <Link
+                        href={link.href}
+                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                      >
+                        {link.name}
+                      </Link>
+                    )}
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
-          <div className="mt-8 border-t border-primary/10 pt-8 text-center">
+
+          {/* Bottom bar */}
+          <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} KhipuVault - Built on{" "}
+              &copy; {new Date().getFullYear()} KhipuVault. All rights reserved.
+            </p>
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span>Built on</span>
               <a
-                href="#"
-                className="font-semibold text-primary transition-colors hover:text-secondary"
+                href="https://mezo.org"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-primary hover:text-accent transition-colors"
               >
                 Mezo Protocol
               </a>
-            </p>
+            </div>
           </div>
         </div>
       </footer>
