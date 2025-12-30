@@ -7,26 +7,33 @@ import { logger } from "../lib/logger";
  * Custom serializer for request logging
  */
 function customReqSerializer(req: Request) {
+  // Handle case where req might not be a proper request object
+  if (!req || typeof req !== "object") {
+    return { method: "???", url: "/" };
+  }
+
+  const headers = req.headers ?? {};
+
   return {
-    id: req.id || req.headers["x-request-id"],
-    method: req.method,
-    url: req.url,
+    id: req.id || headers["x-request-id"],
+    method: req.method ?? "???",
+    url: req.url ?? "/",
     path: req.path,
     query: req.query,
     params: req.params,
     // Include headers but redact sensitive ones (handled by base logger redaction)
     headers: {
-      host: req.headers.host,
-      "user-agent": req.headers["user-agent"],
-      "content-type": req.headers["content-type"],
-      "content-length": req.headers["content-length"],
-      accept: req.headers.accept,
-      origin: req.headers.origin,
-      referer: req.headers.referer,
-      "x-request-id": req.headers["x-request-id"],
+      host: headers.host,
+      "user-agent": headers["user-agent"],
+      "content-type": headers["content-type"],
+      "content-length": headers["content-length"],
+      accept: headers.accept,
+      origin: headers.origin,
+      referer: headers.referer,
+      "x-request-id": headers["x-request-id"],
       // Authorization and Cookie headers will be redacted by base logger
-      authorization: req.headers.authorization,
-      cookie: req.headers.cookie,
+      authorization: headers.authorization,
+      cookie: headers.cookie,
     },
     remoteAddress: req.ip || req.socket?.remoteAddress || "unknown",
     remotePort: req.socket?.remotePort,
@@ -35,17 +42,47 @@ function customReqSerializer(req: Request) {
 
 /**
  * Custom serializer for response logging
+ * Note: pino-http may pass a ServerResponse object, not Express Response
  */
 function customResSerializer(res: Response) {
+  // Safely get headers - res might be ServerResponse without getHeader
+  const getHeader = (name: string): unknown => {
+    try {
+      // Try Express Response method first
+      if (res && typeof res.getHeader === "function") {
+        return res.getHeader(name);
+      }
+    } catch {
+      // Ignore errors from getHeader
+    }
+
+    try {
+      // Fallback for raw ServerResponse _headers
+      const headers = (res as unknown as { _headers?: Record<string, unknown> })
+        ?._headers;
+      if (headers) {
+        return headers[name.toLowerCase()];
+      }
+    } catch {
+      // Ignore errors
+    }
+
+    return undefined;
+  };
+
+  // Handle case where res might not be a proper response object
+  if (!res || typeof res !== "object") {
+    return { statusCode: 0, headers: {} };
+  }
+
   return {
-    statusCode: res.statusCode,
+    statusCode: res.statusCode ?? 0,
     headers: {
-      "content-type": res.getHeader("content-type"),
-      "content-length": res.getHeader("content-length"),
-      "x-request-id": res.getHeader("x-request-id"),
-      "ratelimit-limit": res.getHeader("ratelimit-limit"),
-      "ratelimit-remaining": res.getHeader("ratelimit-remaining"),
-      // Set-Cookie will be redacted by base logger
+      "content-type": getHeader("content-type"),
+      "content-length": getHeader("content-length"),
+      "x-request-id": getHeader("x-request-id"),
+      "ratelimit-limit": getHeader("ratelimit-limit"),
+      "ratelimit-remaining": getHeader("ratelimit-remaining"),
     },
   };
 }
@@ -53,20 +90,18 @@ function customResSerializer(res: Response) {
 /**
  * Determine log level based on response status code
  */
-function customLogLevel(req: Request, res: Response, err?: Error): pino.Level {
-  if (err || res.statusCode >= 500) {
+function customLogLevel(_req: Request, res: Response, err?: Error): pino.Level {
+  const statusCode = res?.statusCode ?? 200;
+
+  if (err || statusCode >= 500) {
     return "error";
   }
 
-  if (res.statusCode >= 400) {
+  if (statusCode >= 400) {
     return "warn";
   }
 
-  if (res.statusCode >= 300) {
-    return "info";
-  }
-
-  // Success responses
+  // All other responses (success and redirects)
   return "info";
 }
 
@@ -74,8 +109,9 @@ function customLogLevel(req: Request, res: Response, err?: Error): pino.Level {
  * Custom log message based on request and response
  */
 function customSuccessMessage(req: Request, res: Response): string {
-  const { method, url } = req;
-  const { statusCode } = res;
+  const method = req?.method ?? "???";
+  const url = req?.url ?? "/";
+  const statusCode = res?.statusCode ?? 0;
   return `${method} ${url} ${statusCode}`;
 }
 
@@ -93,15 +129,21 @@ export const requestLogger: HttpLogger<Request, Response> = pinoHttp({
 
   // Generate request ID if not present
   genReqId: (req, res) => {
-    const existingId = req.id || req.headers["x-request-id"];
-    if (existingId) {
-      return existingId as string;
-    }
+    try {
+      const existingId = req?.id || req?.headers?.["x-request-id"];
+      if (existingId) {
+        return existingId as string;
+      }
 
-    // Generate new request ID
-    const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-    res.setHeader("X-Request-ID", id);
-    return id;
+      // Generate new request ID
+      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      if (res && typeof res.setHeader === "function") {
+        res.setHeader("X-Request-ID", id);
+      }
+      return id;
+    } catch {
+      return `${Date.now()}-fallback`;
+    }
   },
 
   // Custom log level based on status code
@@ -112,9 +154,11 @@ export const requestLogger: HttpLogger<Request, Response> = pinoHttp({
 
   // Custom error message
   customErrorMessage: (req: Request, res: Response, err: Error): string => {
-    const { method, url } = req;
-    const { statusCode } = res;
-    return `${method} ${url} ${statusCode} - ${err.message}`;
+    const method = req?.method ?? "???";
+    const url = req?.url ?? "/";
+    const statusCode = res?.statusCode ?? 0;
+    const message = err?.message ?? "Unknown error";
+    return `${method} ${url} ${statusCode} - ${message}`;
   },
 
   // Custom attribute keys
@@ -129,16 +173,21 @@ export const requestLogger: HttpLogger<Request, Response> = pinoHttp({
   autoLogging: {
     // Don't log health check requests (too noisy)
     ignore: (req: Request) => {
-      return req.url === "/health" || req.url === "/health/ready";
+      const url = req?.url ?? "";
+      return url === "/health" || url === "/health/ready";
     },
   },
 
   // Custom properties to add to each log
-  customProps: (req: Request, res: Response) => {
-    return {
-      userAgent: req.headers["user-agent"],
-      ip: req.ip || req.socket?.remoteAddress || "unknown",
-    };
+  customProps: (req: Request, _res: Response) => {
+    try {
+      return {
+        userAgent: req?.headers?.["user-agent"] ?? "unknown",
+        ip: req?.ip || req?.socket?.remoteAddress || "unknown",
+      };
+    } catch {
+      return { userAgent: "unknown", ip: "unknown" };
+    }
   },
 
   // Redact sensitive information (combined with base logger redaction)

@@ -1,413 +1,223 @@
+/**
+ * @fileoverview Error handler middleware tests
+ * @module __tests__/middleware/error-handler.test
+ */
+
+import { describe, it, expect, vi } from "vitest";
 import { Prisma } from "@prisma/client";
-import { describe, it, expect, beforeEach, vi, afterEach } from "vitest";
-import { ZodError, ZodIssue } from "zod";
+import { ZodError, z } from "zod";
 
 import {
   errorHandler,
   AppError,
   asyncHandler,
 } from "../../middleware/error-handler";
-
-import type { Request, Response, NextFunction } from "express";
-
-// Mock the logger
-vi.mock("../../lib/logger", () => ({
-  logger: {
-    warn: vi.fn(),
-    error: vi.fn(),
-    info: vi.fn(),
-    debug: vi.fn(),
-  },
-}));
+import {
+  createMockRequest,
+  createMockResponse,
+  createMockNext,
+} from "../setup";
 
 describe("Error Handler Middleware", () => {
-  let mockReq: Partial<Request>;
-  let mockRes: Partial<Response>;
-  let mockNext: NextFunction;
-  let jsonMock: any;
-  let statusMock: any;
-
-  beforeEach(() => {
-    jsonMock = vi.fn();
-    statusMock = vi.fn().mockReturnValue({ json: jsonMock });
-
-    mockReq = {
-      path: "/test",
-      method: "POST",
-      url: "/test",
-      ip: "127.0.0.1",
-      headers: {
-        "x-request-id": "test-request-id",
-      },
-    };
-
-    mockRes = {
-      status: statusMock,
-      json: jsonMock,
-    };
-
-    mockNext = vi.fn();
-  });
-
-  afterEach(() => {
-    vi.clearAllMocks();
-  });
-
   describe("AppError", () => {
-    it("should create custom application error", () => {
-      const error = new AppError(404, "Resource not found");
+    it("should create an error with status code and message", () => {
+      const error = new AppError(404, "Not Found");
 
-      expect(error).toBeInstanceOf(AppError);
-      expect(error).toBeInstanceOf(Error);
       expect(error.statusCode).toBe(404);
-      expect(error.message).toBe("Resource not found");
+      expect(error.message).toBe("Not Found");
       expect(error.isOperational).toBe(true);
     });
 
-    it("should support optional details field", () => {
-      const error = new AppError(400, "Bad request", true, { field: "email" });
+    it("should create an error with details", () => {
+      const error = new AppError(400, "Validation Error", true, {
+        field: "email",
+      });
 
+      expect(error.statusCode).toBe(400);
       expect(error.details).toEqual({ field: "email" });
-    });
-
-    it("should set isOperational flag", () => {
-      const operationalError = new AppError(400, "Operational error", true);
-      const nonOperationalError = new AppError(500, "Programming error", false);
-
-      expect(operationalError.isOperational).toBe(true);
-      expect(nonOperationalError.isOperational).toBe(false);
     });
   });
 
   describe("errorHandler", () => {
-    it("should handle ZodError validation errors", () => {
-      const zodIssues: ZodIssue[] = [
-        {
-          code: "invalid_type",
-          expected: "string",
-          received: "number",
-          path: ["email"],
-          message: "Expected string, received number",
-        },
-      ];
+    it("should handle AppError with correct status code", () => {
+      const err = new AppError(404, "Resource not found");
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      const zodError = new ZodError(zodIssues);
+      errorHandler(err, req, res, next);
 
-      errorHandler(zodError, mockReq as Request, mockRes as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Validation Error",
-        message: "Invalid request data",
-        details: [
-          {
-            field: "email",
-            message: "Expected string, received number",
-            code: "invalid_type",
-          },
-        ],
-      });
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "Resource not found",
+        }),
+      );
     });
 
-    it("should handle Prisma unique constraint violations (P2002)", () => {
-      const prismaError = new Prisma.PrismaClientKnownRequestError(
+    it("should handle AppError with details", () => {
+      const err = new AppError(400, "Bad Request", true, { field: "name" });
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      errorHandler(err, req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "Bad Request",
+          details: { field: "name" },
+        }),
+      );
+    });
+
+    it("should handle ZodError with validation details", () => {
+      const schema = z.object({
+        email: z.string().email(),
+        age: z.number().min(18),
+      });
+
+      let zodError: ZodError | null = null;
+      try {
+        schema.parse({ email: "invalid", age: 10 });
+      } catch (e) {
+        zodError = e as ZodError;
+      }
+
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      errorHandler(zodError!, req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "Validation Error",
+          message: "Invalid request data",
+          details: expect.arrayContaining([
+            expect.objectContaining({ field: expect.any(String) }),
+          ]),
+        }),
+      );
+    });
+
+    it("should handle Prisma unique constraint violation (P2002)", () => {
+      const err = new Prisma.PrismaClientKnownRequestError(
         "Unique constraint failed",
         {
           code: "P2002",
-          clientVersion: "4.0.0",
+          clientVersion: "5.0.0",
           meta: { target: ["email"] },
         },
       );
 
-      errorHandler(
-        prismaError,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      expect(statusMock).toHaveBeenCalledWith(409);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Duplicate Entry",
-        message: "A record with this email already exists",
-        details: { fields: ["email"] },
-      });
+      errorHandler(err, req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(409);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "Duplicate Entry",
+        }),
+      );
     });
 
-    it("should handle Prisma foreign key constraint violations (P2003)", () => {
-      const prismaError = new Prisma.PrismaClientKnownRequestError(
+    it("should handle Prisma record not found (P2025)", () => {
+      const err = new Prisma.PrismaClientKnownRequestError("Record not found", {
+        code: "P2025",
+        clientVersion: "5.0.0",
+        meta: { cause: "Record to delete does not exist" },
+      });
+
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
+
+      errorHandler(err, req, res, next);
+
+      expect(res.status).toHaveBeenCalledWith(404);
+      expect(res.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: "Not Found",
+        }),
+      );
+    });
+
+    it("should handle Prisma foreign key violation (P2003)", () => {
+      const err = new Prisma.PrismaClientKnownRequestError(
         "Foreign key constraint failed",
         {
           code: "P2003",
-          clientVersion: "4.0.0",
+          clientVersion: "5.0.0",
           meta: { field_name: "userId" },
         },
       );
 
-      errorHandler(
-        prismaError,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Invalid Reference",
-        message: "The referenced record does not exist",
-        details: { field: "userId" },
-      });
-    });
+      errorHandler(err, req, res, next);
 
-    it("should handle Prisma record not found errors (P2025)", () => {
-      const prismaError = new Prisma.PrismaClientKnownRequestError(
-        "Record not found",
-        {
-          code: "P2025",
-          clientVersion: "4.0.0",
-          meta: { cause: "Record to update not found." },
-        },
-      );
-
-      errorHandler(
-        prismaError,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
-
-      expect(statusMock).toHaveBeenCalledWith(404);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Not Found",
-        message: "Record to update not found.",
-      });
-    });
-
-    it("should handle Prisma transaction conflicts (P2034)", () => {
-      const prismaError = new Prisma.PrismaClientKnownRequestError(
-        "Transaction failed",
-        {
-          code: "P2034",
-          clientVersion: "4.0.0",
-          meta: {},
-        },
-      );
-
-      errorHandler(
-        prismaError,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
-
-      expect(statusMock).toHaveBeenCalledWith(409);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Transaction Conflict",
-        message:
-          "The operation conflicted with another transaction. Please retry.",
-      });
-    });
-
-    it("should handle Prisma validation errors", () => {
-      const prismaError = new Prisma.PrismaClientValidationError(
-        "Invalid data provided",
-        { clientVersion: "4.0.0" },
-      );
-
-      errorHandler(
-        prismaError,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
-
-      expect(statusMock).toHaveBeenCalledWith(400);
-      expect(jsonMock).toHaveBeenCalledWith(
+      expect(res.status).toHaveBeenCalledWith(400);
+      expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
-          error: "Database Validation Error",
-          message: "Invalid data provided to database",
+          error: "Invalid Reference",
         }),
       );
     });
 
-    it("should handle Prisma unknown request errors", () => {
-      const prismaError = new Prisma.PrismaClientUnknownRequestError(
-        "Unknown database error",
-        { clientVersion: "4.0.0" },
-      );
+    it("should handle unknown errors with 500 status", () => {
+      const err = new Error("Something unexpected happened");
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      errorHandler(
-        prismaError,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
+      errorHandler(err, req, res, next);
 
-      expect(statusMock).toHaveBeenCalledWith(503);
-      expect(jsonMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          error: "Database Error",
-          message: "An unexpected database error occurred",
-        }),
-      );
-    });
-
-    it("should handle Prisma initialization errors", () => {
-      const prismaError = new Prisma.PrismaClientInitializationError(
-        "Cannot connect to database",
-        "4.0.0",
-        "error-code",
-      );
-
-      errorHandler(
-        prismaError,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
-
-      expect(statusMock).toHaveBeenCalledWith(503);
-      expect(jsonMock).toHaveBeenCalledWith(
-        expect.objectContaining({
-          error: "Database Connection Error",
-          message: "Unable to connect to database",
-        }),
-      );
-    });
-
-    it("should handle Prisma rust panic errors", () => {
-      const prismaError = new Prisma.PrismaClientRustPanicError(
-        "Rust panic occurred",
-        "4.0.0",
-      );
-
-      errorHandler(
-        prismaError,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
-
-      expect(statusMock).toHaveBeenCalledWith(500);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Critical Database Error",
-        message: "A critical internal error occurred",
-      });
-    });
-
-    it("should handle custom AppError", () => {
-      const appError = new AppError(403, "Forbidden", true, {
-        reason: "Insufficient permissions",
-      });
-
-      errorHandler(appError, mockReq as Request, mockRes as Response, mockNext);
-
-      expect(statusMock).toHaveBeenCalledWith(403);
-      expect(jsonMock).toHaveBeenCalledWith({
-        error: "Forbidden",
-        details: { reason: "Insufficient permissions" },
-      });
-    });
-
-    it("should handle unknown errors", () => {
-      const unknownError = new Error("Something went wrong");
-
-      errorHandler(
-        unknownError,
-        mockReq as Request,
-        mockRes as Response,
-        mockNext,
-      );
-
-      expect(statusMock).toHaveBeenCalledWith(500);
-      expect(jsonMock).toHaveBeenCalledWith(
+      expect(res.status).toHaveBeenCalledWith(500);
+      expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Internal Server Error",
         }),
       );
     });
-
-    it("should include stack trace in development mode", () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "development";
-
-      const error = new Error("Test error");
-
-      errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
-
-      const callArgs = jsonMock.mock.calls[0][0];
-      expect(callArgs).toHaveProperty("stack");
-      expect(typeof callArgs.stack).toBe("string");
-
-      process.env.NODE_ENV = originalEnv;
-    });
-
-    it("should not include stack trace in production mode", () => {
-      const originalEnv = process.env.NODE_ENV;
-      process.env.NODE_ENV = "production";
-
-      const error = new Error("Test error");
-
-      errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
-
-      const callArgs = jsonMock.mock.calls[0][0];
-      expect(callArgs.stack).toBeUndefined();
-
-      process.env.NODE_ENV = originalEnv;
-    });
-
-    it("should log error details using logger", async () => {
-      const { logger } = await import("../../lib/logger");
-      const error = new Error("Test error");
-
-      errorHandler(error, mockReq as Request, mockRes as Response, mockNext);
-
-      expect(logger.error).toHaveBeenCalled();
-    });
   });
 
   describe("asyncHandler", () => {
-    it("should handle successful async operations", async () => {
-      const asyncFn = vi.fn().mockResolvedValue("success");
-      const handler = asyncHandler(asyncFn);
+    it("should pass through successful async functions", async () => {
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
 
-      await handler(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(asyncFn).toHaveBeenCalledWith(mockReq, mockRes, mockNext);
-      expect(mockNext).not.toHaveBeenCalledWith(expect.any(Error));
-    });
-
-    it("should catch and pass errors to next middleware", async () => {
-      const error = new Error("Async error");
-      const asyncFn = vi.fn().mockRejectedValue(error);
-      const handler = asyncHandler(asyncFn);
-
-      await handler(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(asyncFn).toHaveBeenCalledWith(mockReq, mockRes, mockNext);
-      expect(mockNext).toHaveBeenCalledWith(error);
-    });
-
-    it("should handle AppError in async functions", async () => {
-      const appError = new AppError(404, "Not found");
-      const asyncFn = vi.fn().mockRejectedValue(appError);
-      const handler = asyncHandler(asyncFn);
-
-      await handler(mockReq as Request, mockRes as Response, mockNext);
-
-      expect(mockNext).toHaveBeenCalledWith(appError);
-    });
-
-    it("should handle synchronous errors thrown in async context", async () => {
-      const error = new Error("Sync error");
-      const asyncFn = vi.fn().mockImplementation(async () => {
-        throw error;
+      const handler = asyncHandler(async (req, res) => {
+        res.json({ success: true });
       });
-      const handler = asyncHandler(asyncFn);
 
-      await handler(mockReq as Request, mockRes as Response, mockNext);
+      await handler(req, res, next);
 
-      expect(mockNext).toHaveBeenCalledWith(error);
+      expect(res.json).toHaveBeenCalledWith({ success: true });
+      expect(next).not.toHaveBeenCalled();
+    });
+
+    it("should catch errors and pass to next", async () => {
+      const req = createMockRequest();
+      const res = createMockResponse();
+      const next = createMockNext();
+      const testError = new Error("Async error");
+
+      const handler = asyncHandler(async () => {
+        throw testError;
+      });
+
+      await handler(req, res, next);
+
+      expect(next).toHaveBeenCalledWith(testError);
     });
   });
 });

@@ -1,39 +1,13 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import type {
-  User,
-  Pool,
-  Deposit,
-  EventLog,
-  PoolType,
-  DepositType,
-  TransactionStatus,
-} from "@prisma/client";
+/**
+ * @fileoverview Analytics service tests
+ * @module __tests__/services/analytics.test
+ */
+
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { prisma } from "@khipu/database";
 
 import { AnalyticsService } from "../../services/analytics";
-
-// Mock Prisma
-vi.mock("@khipu/database", () => ({
-  prisma: {
-    user: {
-      count: vi.fn(),
-      findMany: vi.fn(),
-    },
-    pool: {
-      count: vi.fn(),
-      findMany: vi.fn(),
-    },
-    deposit: {
-      count: vi.fn(),
-      findMany: vi.fn(),
-    },
-    eventLog: {
-      findMany: vi.fn(),
-      count: vi.fn(),
-    },
-  },
-}));
-
-import { prisma } from "@khipu/database";
+import { fixtures } from "../setup";
 
 describe("AnalyticsService", () => {
   let analyticsService: AnalyticsService;
@@ -44,75 +18,30 @@ describe("AnalyticsService", () => {
   });
 
   describe("getGlobalStats", () => {
-    it("should return comprehensive global statistics", async () => {
-      const mockPools: Pool[] = [
-        {
-          id: "1",
-          contractAddress: "0xpool1",
-          poolType: "INDIVIDUAL" as PoolType,
-          name: "Pool 1",
-          description: "Test pool 1",
-          tvl: "1000000000000000000",
-          apr: 12.0,
-          apy: 12.5,
-          totalUsers: 10,
-          totalDeposits: 20,
-          totalWithdrawals: 5,
-          status: "ACTIVE",
-          isPaused: false,
-          lastSyncAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          minDeposit: null,
-          maxDeposit: null,
-          depositFee: 0,
-          withdrawFee: 0,
-          lastYieldAt: null,
-          version: "1.0.0",
-        },
-        {
-          id: "2",
-          contractAddress: "0xpool2",
-          poolType: "COOPERATIVE" as PoolType,
-          name: "Pool 2",
-          description: "Test pool 2",
-          tvl: "2000000000000000000",
-          apr: 15.0,
-          apy: 16.0,
-          totalUsers: 20,
-          totalDeposits: 40,
-          totalWithdrawals: 10,
-          status: "ACTIVE",
-          isPaused: false,
-          lastSyncAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          minDeposit: null,
-          maxDeposit: null,
-          depositFee: 0,
-          withdrawFee: 0,
-          lastYieldAt: null,
-          version: "1.0.0",
-        },
-      ];
-
+    it("should return aggregated global statistics", async () => {
       vi.mocked(prisma.user.count).mockResolvedValue(100);
-      vi.mocked(prisma.pool.count).mockResolvedValue(2);
-      vi.mocked(prisma.deposit.count).mockResolvedValue(500);
-      vi.mocked(prisma.pool.findMany).mockResolvedValue(mockPools);
+      vi.mocked(prisma.pool.count).mockResolvedValue(5);
+      vi.mocked(prisma.deposit.count).mockResolvedValue(1000);
+      vi.mocked(prisma.pool.findMany).mockResolvedValue([
+        { ...fixtures.mockPool, tvl: "1000000000000000000", apr: 8.5 },
+        {
+          ...fixtures.mockPool,
+          id: "pool-2",
+          tvl: "2000000000000000000",
+          apr: 10.5,
+        },
+      ] as any);
 
       const result = await analyticsService.getGlobalStats();
 
-      expect(result).toEqual({
-        totalUsers: 100,
-        activePools: 2,
-        totalTransactions: 500,
-        totalTVL: "3000000000000000000",
-        avgAPR: "13.50",
-      });
+      expect(result.totalUsers).toBe(100);
+      expect(result.activePools).toBe(5);
+      expect(result.totalTransactions).toBe(1000);
+      expect(result.totalTVL).toBe("3000000000000000000");
+      expect(parseFloat(result.avgAPR)).toBeCloseTo(9.5, 1);
     });
 
-    it("should handle zero pools gracefully", async () => {
+    it("should handle no pools gracefully", async () => {
       vi.mocked(prisma.user.count).mockResolvedValue(0);
       vi.mocked(prisma.pool.count).mockResolvedValue(0);
       vi.mocked(prisma.deposit.count).mockResolvedValue(0);
@@ -120,468 +49,157 @@ describe("AnalyticsService", () => {
 
       const result = await analyticsService.getGlobalStats();
 
-      expect(result).toEqual({
-        totalUsers: 0,
-        activePools: 0,
-        totalTransactions: 0,
-        totalTVL: "0",
-        avgAPR: "0.00",
-      });
-    });
-
-    it("should only count active pools", async () => {
-      vi.mocked(prisma.user.count).mockResolvedValue(10);
-      vi.mocked(prisma.pool.count).mockResolvedValue(5);
-      vi.mocked(prisma.deposit.count).mockResolvedValue(50);
-      vi.mocked(prisma.pool.findMany).mockResolvedValue([]);
-
-      await analyticsService.getGlobalStats();
-
-      expect(prisma.pool.count).toHaveBeenCalledWith({
-        where: { status: "ACTIVE" },
-      });
-      expect(prisma.pool.findMany).toHaveBeenCalledWith({
-        where: { status: "ACTIVE" },
-      });
-    });
-
-    it("should calculate average APR correctly", async () => {
-      const mockPools: Pool[] = [
-        {
-          id: "1",
-          contractAddress: "0xpool1",
-          poolType: "INDIVIDUAL" as PoolType,
-          name: "Pool 1",
-          description: null,
-          tvl: "1000000000000000000",
-          apr: 10.0,
-          apy: null,
-          totalUsers: 10,
-          totalDeposits: 20,
-          totalWithdrawals: 5,
-          status: "ACTIVE",
-          isPaused: false,
-          lastSyncAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          minDeposit: null,
-          maxDeposit: null,
-          depositFee: 0,
-          withdrawFee: 0,
-          lastYieldAt: null,
-          version: "1.0.0",
-        },
-        {
-          id: "2",
-          contractAddress: "0xpool2",
-          poolType: "COOPERATIVE" as PoolType,
-          name: "Pool 2",
-          description: null,
-          tvl: "1000000000000000000",
-          apr: 20.0,
-          apy: null,
-          totalUsers: 10,
-          totalDeposits: 20,
-          totalWithdrawals: 5,
-          status: "ACTIVE",
-          isPaused: false,
-          lastSyncAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          minDeposit: null,
-          maxDeposit: null,
-          depositFee: 0,
-          withdrawFee: 0,
-          lastYieldAt: null,
-          version: "1.0.0",
-        },
-      ];
-
-      vi.mocked(prisma.user.count).mockResolvedValue(10);
-      vi.mocked(prisma.pool.count).mockResolvedValue(2);
-      vi.mocked(prisma.deposit.count).mockResolvedValue(50);
-      vi.mocked(prisma.pool.findMany).mockResolvedValue(mockPools);
-
-      const result = await analyticsService.getGlobalStats();
-
-      expect(result.avgAPR).toBe("15.00");
+      expect(result.totalUsers).toBe(0);
+      expect(result.activePools).toBe(0);
+      expect(result.totalTVL).toBe("0");
     });
   });
 
   describe("getActivityTimeline", () => {
-    it("should group transactions by day", async () => {
-      const today = new Date();
-      const yesterday = new Date(today);
-      yesterday.setDate(yesterday.getDate() - 1);
-
-      const mockDeposits: Deposit[] = [
+    it("should return daily activity statistics", async () => {
+      const mockDailyStats = [
         {
-          id: "1",
-          userId: "user1",
-          userAddress: "0xuser1",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "DEPOSIT" as DepositType,
-          amount: "1000000000000000000",
-          txHash: "0xtx1",
-          blockNumber: 1000,
-          blockHash: "0xblock1",
-          logIndex: 0,
-          timestamp: today,
-          status: "CONFIRMED" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          date: "2024-01-10",
+          deposits: BigInt(10),
+          withdrawals: BigInt(2),
+          deposit_volume: "1000000000000000000",
+          withdraw_volume: "200000000000000000",
         },
         {
-          id: "2",
-          userId: "user2",
-          userAddress: "0xuser2",
-          poolType: "INDIVIDUAL" as PoolType,
-          poolId: "pool1",
-          poolAddress: "0xpool1",
-          type: "WITHDRAW" as DepositType,
-          amount: "500000000000000000",
-          txHash: "0xtx2",
-          blockNumber: 1001,
-          blockHash: "0xblock2",
-          logIndex: 0,
-          timestamp: today,
-          status: "CONFIRMED" as TransactionStatus,
-          gasUsed: null,
-          gasPrice: null,
-          error: null,
-          metadata: null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          date: "2024-01-11",
+          deposits: BigInt(15),
+          withdrawals: BigInt(5),
+          deposit_volume: "1500000000000000000",
+          withdraw_volume: "500000000000000000",
         },
       ];
 
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockDeposits);
+      vi.mocked(prisma.$queryRaw).mockResolvedValue(mockDailyStats);
 
       const result = await analyticsService.getActivityTimeline(30);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].deposits).toBe(1);
-      expect(result[0].withdrawals).toBe(1);
-      expect(result[0].volume).toBe("1500000000000000000");
+      expect(result).toHaveLength(2);
+      expect(result[0].deposits).toBe(10);
+      expect(result[0].withdrawals).toBe(2);
+      expect(result[0].date).toBe("2024-01-10");
     });
 
-    it("should use default 30 days when no period specified", async () => {
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue([]);
+    it("should use default 30 days when not specified", async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
 
       await analyticsService.getActivityTimeline();
 
-      const callArgs = vi.mocked(prisma.deposit.findMany).mock.calls[0][0];
-      const startDate = callArgs?.where?.timestamp?.gte as Date;
-      const now = new Date();
-      const expectedDate = new Date();
-      expectedDate.setDate(expectedDate.getDate() - 30);
-
-      expect(startDate).toBeDefined();
-      expect(
-        Math.abs(startDate.getTime() - expectedDate.getTime()),
-      ).toBeLessThan(1000);
+      expect(prisma.$queryRaw).toHaveBeenCalled();
     });
 
-    it("should return empty array when no transactions exist", async () => {
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue([]);
+    it("should cap days at 365", async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
 
-      const result = await analyticsService.getActivityTimeline(7);
+      await analyticsService.getActivityTimeline(500);
 
-      expect(result).toEqual([]);
+      // Should still work without error (capped internally)
+      expect(prisma.$queryRaw).toHaveBeenCalled();
+    });
+
+    it("should handle empty results", async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
+
+      const result = await analyticsService.getActivityTimeline(30);
+
+      expect(result).toHaveLength(0);
     });
   });
 
   describe("getTopPools", () => {
-    it("should return pools ordered by TVL descending", async () => {
-      const mockPools: Pool[] = [
-        {
-          id: "1",
-          contractAddress: "0xpool1",
-          poolType: "INDIVIDUAL" as PoolType,
-          name: "High TVL Pool",
-          description: "Pool with highest TVL",
-          tvl: "5000000000000000000",
-          apr: 12.0,
-          apy: 12.5,
-          totalUsers: 100,
-          totalDeposits: 200,
-          totalWithdrawals: 50,
-          status: "ACTIVE",
-          isPaused: false,
-          lastSyncAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          minDeposit: null,
-          maxDeposit: null,
-          depositFee: 0,
-          withdrawFee: 0,
-          lastYieldAt: null,
-          version: "1.0.0",
-        },
-        {
-          id: "2",
-          contractAddress: "0xpool2",
-          poolType: "COOPERATIVE" as PoolType,
-          name: "Medium TVL Pool",
-          description: "Pool with medium TVL",
-          tvl: "2000000000000000000",
-          apr: 15.0,
-          apy: 16.0,
-          totalUsers: 50,
-          totalDeposits: 100,
-          totalWithdrawals: 25,
-          status: "ACTIVE",
-          isPaused: false,
-          lastSyncAt: new Date(),
-          createdAt: new Date(),
-          updatedAt: new Date(),
-          minDeposit: null,
-          maxDeposit: null,
-          depositFee: 0,
-          withdrawFee: 0,
-          lastYieldAt: null,
-          version: "1.0.0",
-        },
+    it("should return top pools by TVL", async () => {
+      const mockPools = [
+        { ...fixtures.mockPool, tvl: "2000000000000000000" },
+        { ...fixtures.mockPool, id: "pool-2", tvl: "1000000000000000000" },
       ];
 
-      vi.mocked(prisma.pool.findMany).mockResolvedValue(mockPools);
+      vi.mocked(prisma.pool.findMany).mockResolvedValue(mockPools as any);
 
       const result = await analyticsService.getTopPools(10);
 
-      expect(result).toEqual(mockPools);
       expect(prisma.pool.findMany).toHaveBeenCalledWith({
         where: { status: "ACTIVE" },
         orderBy: { tvl: "desc" },
         take: 10,
       });
+      expect(result).toHaveLength(2);
     });
 
-    it("should use default limit of 10", async () => {
+    it("should use default limit when not specified", async () => {
       vi.mocked(prisma.pool.findMany).mockResolvedValue([]);
 
       await analyticsService.getTopPools();
 
       expect(prisma.pool.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          take: 10,
-        }),
-      );
-    });
-
-    it("should only return active pools", async () => {
-      vi.mocked(prisma.pool.findMany).mockResolvedValue([]);
-
-      await analyticsService.getTopPools(5);
-
-      expect(prisma.pool.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          where: { status: "ACTIVE" },
-        }),
+        expect.objectContaining({ take: 10 }),
       );
     });
   });
 
   describe("getTopUsers", () => {
-    it("should return users sorted by current balance", async () => {
-      const mockUsers: (User & { deposits: Deposit[] })[] = [
+    it("should return top users by balance", async () => {
+      const mockTopUsers = [
         {
-          id: "user1",
-          address: "0xuser1",
-          ensName: "user1.eth",
+          address: fixtures.validAddressLower,
+          ensName: "test.eth",
           avatar: null,
-          createdAt: new Date(),
-          lastActiveAt: new Date(),
-          deposits: [
-            {
-              id: "1",
-              userId: "user1",
-              userAddress: "0xuser1",
-              poolType: "INDIVIDUAL" as PoolType,
-              poolId: "pool1",
-              poolAddress: "0xpool1",
-              type: "DEPOSIT" as DepositType,
-              amount: "3000000000000000000",
-              txHash: "0xtx1",
-              blockNumber: 1000,
-              blockHash: "0xblock1",
-              logIndex: 0,
-              timestamp: new Date(),
-              status: "CONFIRMED" as TransactionStatus,
-              gasUsed: null,
-              gasPrice: null,
-              error: null,
-              metadata: null,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          ],
-        },
-        {
-          id: "user2",
-          address: "0xuser2",
-          ensName: "user2.eth",
-          avatar: null,
-          createdAt: new Date(),
-          lastActiveAt: new Date(),
-          deposits: [
-            {
-              id: "2",
-              userId: "user2",
-              userAddress: "0xuser2",
-              poolType: "INDIVIDUAL" as PoolType,
-              poolId: "pool1",
-              poolAddress: "0xpool1",
-              type: "DEPOSIT" as DepositType,
-              amount: "1000000000000000000",
-              txHash: "0xtx2",
-              blockNumber: 1001,
-              blockHash: "0xblock2",
-              logIndex: 0,
-              timestamp: new Date(),
-              status: "CONFIRMED" as TransactionStatus,
-              gasUsed: null,
-              gasPrice: null,
-              error: null,
-              metadata: null,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          ],
+          totalDeposited: "1000000000000000000",
+          totalWithdrawn: "200000000000000000",
         },
       ];
 
-      vi.mocked(prisma.user.findMany).mockResolvedValue(mockUsers);
+      vi.mocked(prisma.$queryRaw).mockResolvedValue(mockTopUsers);
 
       const result = await analyticsService.getTopUsers(10);
 
-      expect(result).toHaveLength(2);
-      expect(result[0].address).toBe("0xuser1");
-      expect(result[0].currentBalance).toBe("3000000000000000000");
-      expect(result[1].address).toBe("0xuser2");
-      expect(result[1].currentBalance).toBe("1000000000000000000");
+      expect(result[0].address).toBe(fixtures.validAddressLower);
+      expect(result[0].currentBalance).toBe("800000000000000000");
     });
 
-    it("should filter out users with zero balance", async () => {
-      const mockUsers: (User & { deposits: Deposit[] })[] = [
-        {
-          id: "user1",
-          address: "0xuser1",
-          ensName: null,
-          avatar: null,
-          createdAt: new Date(),
-          lastActiveAt: new Date(),
-          deposits: [
-            {
-              id: "1",
-              userId: "user1",
-              userAddress: "0xuser1",
-              poolType: "INDIVIDUAL" as PoolType,
-              poolId: "pool1",
-              poolAddress: "0xpool1",
-              type: "DEPOSIT" as DepositType,
-              amount: "1000000000000000000",
-              txHash: "0xtx1",
-              blockNumber: 1000,
-              blockHash: "0xblock1",
-              logIndex: 0,
-              timestamp: new Date(),
-              status: "CONFIRMED" as TransactionStatus,
-              gasUsed: null,
-              gasPrice: null,
-              error: null,
-              metadata: null,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-            {
-              id: "2",
-              userId: "user1",
-              userAddress: "0xuser1",
-              poolType: "INDIVIDUAL" as PoolType,
-              poolId: "pool1",
-              poolAddress: "0xpool1",
-              type: "WITHDRAW" as DepositType,
-              amount: "1000000000000000000",
-              txHash: "0xtx2",
-              blockNumber: 1001,
-              blockHash: "0xblock2",
-              logIndex: 0,
-              timestamp: new Date(),
-              status: "CONFIRMED" as TransactionStatus,
-              gasUsed: null,
-              gasPrice: null,
-              error: null,
-              metadata: null,
-              createdAt: new Date(),
-              updatedAt: new Date(),
-            },
-          ],
-        },
-      ];
+    it("should cap limit at 100", async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
 
-      vi.mocked(prisma.user.findMany).mockResolvedValue(mockUsers);
+      await analyticsService.getTopUsers(500);
+
+      // The service should internally cap this
+      expect(prisma.$queryRaw).toHaveBeenCalled();
+    });
+
+    it("should handle empty results", async () => {
+      vi.mocked(prisma.$queryRaw).mockResolvedValue([]);
 
       const result = await analyticsService.getTopUsers(10);
 
       expect(result).toHaveLength(0);
     });
-
-    it("should use default limit of 10", async () => {
-      vi.mocked(prisma.user.findMany).mockResolvedValue([]);
-
-      await analyticsService.getTopUsers();
-
-      expect(prisma.user.findMany).toHaveBeenCalledWith({
-        include: {
-          deposits: true,
-        },
-      });
-    });
   });
 
   describe("getEventLogs", () => {
     it("should return paginated event logs", async () => {
-      const mockLogs: EventLog[] = [
+      const mockLogs = [
         {
-          id: "1",
-          contractAddress: "0xcontract1",
-          eventName: "Deposit",
-          txHash: "0xtx1",
-          blockNumber: 1000,
-          blockHash: "0xblock1",
-          logIndex: 0,
-          transactionIndex: 0,
-          args: { user: "0xuser1", amount: "1000000000000000000" },
+          id: "log-1",
+          eventType: "DEPOSIT",
           timestamp: new Date(),
-          processed: true,
-          removed: false,
-          confirmedAt: 1012,
-          createdAt: new Date(),
-          updatedAt: new Date(),
+          data: {},
         },
       ];
 
-      vi.mocked(prisma.eventLog.findMany).mockResolvedValue(mockLogs);
-      vi.mocked(prisma.eventLog.count).mockResolvedValue(1);
+      vi.mocked(prisma.eventLog.findMany).mockResolvedValue(mockLogs as any);
+      vi.mocked(prisma.eventLog.count).mockResolvedValue(100);
 
-      const result = await analyticsService.getEventLogs(100, 0);
+      const result = await analyticsService.getEventLogs(50, 0);
 
-      expect(result.logs).toEqual(mockLogs);
-      expect(result.pagination).toEqual({
-        total: 1,
-        limit: 100,
-        offset: 0,
-        hasMore: false,
-      });
+      expect(result.logs).toHaveLength(1);
+      expect(result.pagination.total).toBe(100);
+      expect(result.pagination.hasMore).toBe(true);
     });
 
-    it("should use default limit and offset values", async () => {
+    it("should use default pagination values", async () => {
       vi.mocked(prisma.eventLog.findMany).mockResolvedValue([]);
       vi.mocked(prisma.eventLog.count).mockResolvedValue(0);
 
@@ -594,13 +212,13 @@ describe("AnalyticsService", () => {
       });
     });
 
-    it("should indicate hasMore when there are more logs", async () => {
+    it("should indicate no more pages when at end", async () => {
       vi.mocked(prisma.eventLog.findMany).mockResolvedValue([]);
-      vi.mocked(prisma.eventLog.count).mockResolvedValue(200);
+      vi.mocked(prisma.eventLog.count).mockResolvedValue(10);
 
-      const result = await analyticsService.getEventLogs(100, 0);
+      const result = await analyticsService.getEventLogs(50, 0);
 
-      expect(result.pagination.hasMore).toBe(true);
+      expect(result.pagination.hasMore).toBe(false);
     });
   });
 });

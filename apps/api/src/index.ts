@@ -25,6 +25,7 @@ import {
 import analyticsRouter from "./routes/analytics";
 import authRouter from "./routes/auth";
 import healthRouter from "./routes/health";
+import lotteryRouter from "./routes/lottery";
 import poolsRouter from "./routes/pools";
 import transactionsRouter from "./routes/transactions";
 import usersRouter from "./routes/users";
@@ -151,6 +152,7 @@ app.use("/api/users", usersRouter);
 app.use("/api/pools", poolsRouter);
 app.use("/api/transactions", transactionsRouter);
 app.use("/api/analytics", analyticsRouter);
+app.use("/api/lottery", lotteryRouter);
 
 // ===== ERROR HANDLING =====
 
@@ -234,13 +236,22 @@ process.on("SIGINT", () => void gracefulShutdown("SIGINT"));
 
 // Handle uncaught errors
 process.on("uncaughtException", (error) => {
-  logger.fatal({ error }, "Uncaught Exception detected");
+  // Use 'err' key so pino serializer properly extracts error properties
+  logger.fatal(
+    { err: error, errorMessage: error.message, errorStack: error.stack },
+    "Uncaught Exception detected",
+  );
   void gracefulShutdown("UNCAUGHT_EXCEPTION");
 });
 
 process.on("unhandledRejection", (reason, promise) => {
+  // Extract error properties if reason is an Error
+  const errorInfo =
+    reason instanceof Error
+      ? { err: reason, errorMessage: reason.message, errorStack: reason.stack }
+      : { reason };
   logger.fatal(
-    { reason, promise },
+    { ...errorInfo, promise: String(promise) },
     "Unhandled Promise Rejection detected - initiating shutdown",
   );
   void gracefulShutdown("UNHANDLED_REJECTION");
