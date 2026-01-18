@@ -12,16 +12,8 @@ import {
   useYieldAggregatorWithdraw,
   useCompoundYields,
 } from "./use-aggregator-hooks";
-import {
-  useDeposit,
-  usePartialWithdraw,
-  useFullWithdraw,
-} from "./use-deposit-hooks";
-import {
-  useClaimYield,
-  useClaimReferralRewards,
-  useToggleAutoCompound,
-} from "./use-yield-hooks";
+import { useDeposit, usePartialWithdraw, useFullWithdraw } from "./use-deposit-hooks";
+import { useClaimYield, useClaimReferralRewards, useToggleAutoCompound } from "./use-yield-hooks";
 
 /**
  * Combined hook for all V3 individual pool transactions
@@ -68,8 +60,6 @@ export function useYieldAggregatorTransactions() {
 
     // Combined loading states
     isAnyTransactionPending:
-      deposit.isDepositing ||
-      withdraw.isWithdrawing ||
-      compoundYields.isCompounding,
+      deposit.isDepositing || withdraw.isWithdrawing || compoundYields.isCompounding,
   };
 }

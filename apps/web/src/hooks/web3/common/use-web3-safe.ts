@@ -160,7 +160,7 @@ export function useConnectionStatus() {
 function getStatusText(
   isConnecting: boolean,
   isReconnecting: boolean,
-  isConnected: boolean,
+  isConnected: boolean
 ): string {
   if (isConnecting) {
     return "Conectando...";

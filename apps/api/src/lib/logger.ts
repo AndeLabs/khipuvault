@@ -43,9 +43,7 @@ function redactSensitiveData(obj: unknown, seen = new WeakSet()): unknown {
   const redacted: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
     const lowerKey = key.toLowerCase();
-    const isSensitive = SENSITIVE_FIELDS.some((field) =>
-      lowerKey.includes(field.toLowerCase()),
-    );
+    const isSensitive = SENSITIVE_FIELDS.some((field) => lowerKey.includes(field.toLowerCase()));
 
     if (isSensitive) {
       redacted[key] = "[REDACTED]";
@@ -194,7 +192,7 @@ const developmentConfig: pino.TransportTargetOptions = {
  */
 export const logger = pino(
   baseConfig,
-  isDevelopment ? pino.transport(developmentConfig) : undefined, // Production uses JSON output by default
+  isDevelopment ? pino.transport(developmentConfig) : undefined // Production uses JSON output by default
 );
 
 /**

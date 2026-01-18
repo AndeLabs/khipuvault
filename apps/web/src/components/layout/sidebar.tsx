@@ -1,23 +1,12 @@
 "use client";
 
-import {
-  LayoutDashboard,
-  Wallet,
-  Users,
-  Trophy,
-  Settings,
-  ChevronDown,
-} from "lucide-react";
+import { LayoutDashboard, Wallet, Users, Trophy, Settings, ChevronDown } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { useProtocolStats } from "@/hooks/use-protocol-stats";
 import { cn } from "@/lib/utils";
 
@@ -93,9 +82,7 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
 
   const toggleExpanded = (title: string) => {
     setExpandedItems((prev) =>
-      prev.includes(title)
-        ? prev.filter((item) => item !== title)
-        : [...prev, title],
+      prev.includes(title) ? prev.filter((item) => item !== title) : [...prev, title]
     );
   };
 
@@ -119,14 +106,14 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
       {/* Sidebar */}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-[280px] sm:w-64 border-r border-border bg-surface transition-transform duration-base md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:translate-x-0",
+          "fixed inset-y-0 left-0 z-50 w-[280px] border-r border-border bg-surface transition-transform duration-base sm:w-64 md:sticky md:top-16 md:h-[calc(100vh-4rem)] md:translate-x-0",
           !open && "-translate-x-full",
-          className,
+          className
         )}
       >
-        <nav className="flex flex-col gap-2 p-3 md:p-4 h-full overflow-y-auto">
+        <nav className="flex h-full flex-col gap-2 overflow-y-auto p-3 md:p-4">
           {/* Navigation Items */}
-          <div className="space-y-1 flex-1">
+          <div className="flex-1 space-y-1">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = isActiveRoute(item.href);
@@ -145,7 +132,7 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                         variant="ghost"
                         className={cn(
                           "w-full justify-between",
-                          isActive && "bg-surface-elevated text-lavanda",
+                          isActive && "bg-surface-elevated text-lavanda"
                         )}
                         aria-label={`${isExpanded || isActive ? "Collapse" : "Expand"} ${item.title} menu`}
                       >
@@ -156,13 +143,13 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                         <ChevronDown
                           className={cn(
                             "h-4 w-4 transition-transform duration-fast",
-                            (isExpanded || isActive) && "rotate-180",
+                            (isExpanded || isActive) && "rotate-180"
                           )}
                           aria-hidden="true"
                         />
                       </Button>
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="pl-4 mt-1 space-y-1">
+                    <CollapsibleContent className="mt-1 space-y-1 pl-4">
                       {item.children?.map((child) => {
                         const isChildActive = pathname === child.href;
                         return (
@@ -172,8 +159,7 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                               size="sm"
                               className={cn(
                                 "w-full justify-start",
-                                isChildActive &&
-                                  "bg-surface-elevated text-lavanda",
+                                isChildActive && "bg-surface-elevated text-lavanda"
                               )}
                             >
                               {child.title}
@@ -192,18 +178,14 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
                     variant="ghost"
                     className={cn(
                       "w-full justify-start gap-3",
-                      isActive && "bg-surface-elevated text-lavanda",
+                      isActive && "bg-surface-elevated text-lavanda"
                     )}
                     onClick={onClose}
                   >
                     <Icon className="h-5 w-5" />
-                    <span className="font-medium flex-1 text-left">
-                      {item.title}
-                    </span>
+                    <span className="flex-1 text-left font-medium">{item.title}</span>
                     {item.badge && (
-                      <span className="badge-orange text-[10px] px-1.5 py-0.5">
-                        {item.badge}
-                      </span>
+                      <span className="badge-orange px-1.5 py-0.5 text-[10px]">{item.badge}</span>
                     )}
                   </Button>
                 </Link>
@@ -212,17 +194,17 @@ export function Sidebar({ open = true, onClose, className }: SidebarProps) {
           </div>
 
           {/* Bottom section - Quick stats or info */}
-          <div className="border-t border-border pt-4 mt-4">
+          <div className="mt-4 border-t border-border pt-4">
             <div className="space-y-2 text-xs text-muted-foreground">
               <div className="flex items-center justify-between px-3">
                 <span>Total Value Locked</span>
-                <span className="font-semibold text-foreground tabular-nums">
+                <span className="font-semibold tabular-nums text-foreground">
                   {isLoading ? "..." : formattedTVL}
                 </span>
               </div>
               <div className="flex items-center justify-between px-3">
                 <span>APY</span>
-                <span className="font-semibold text-success tabular-nums">
+                <span className="font-semibold tabular-nums text-success">
                   {isLoading ? "..." : formattedAPY}
                 </span>
               </div>

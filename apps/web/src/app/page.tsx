@@ -16,11 +16,7 @@ export default function Home() {
   return (
     <div className="flex min-h-screen flex-col bg-background">
       <Header />
-      <main
-        id="main-content"
-        tabIndex={-1}
-        className="flex-grow focus:outline-none"
-      >
+      <main id="main-content" tabIndex={-1} className="flex-grow focus:outline-none">
         <Hero />
         <Partners />
         <HowItWorks />

@@ -11,12 +11,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { formatEther, type Address } from "viem";
-import {
-  useAccount,
-  usePublicClient,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-} from "wagmi";
+import { useAccount, usePublicClient, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 import {
   fetchCurrentRoundId,
@@ -154,12 +149,7 @@ export function useUserTickets(roundId?: number, userAddress?: `0x${string}`) {
     error,
     refetch,
   } = useQuery({
-    queryKey: [
-      "lottery-pool",
-      "user-tickets",
-      roundId,
-      targetAddress ?? "none",
-    ],
+    queryKey: ["lottery-pool", "user-tickets", roundId, targetAddress ?? "none"],
     queryFn: () => {
       if (!publicClient || !roundId || !targetAddress) {
         return Promise.resolve(null);
@@ -328,11 +318,7 @@ export function useBuyTickets() {
     hash,
   });
 
-  const buyTickets = async (
-    roundId: number,
-    ticketCount: number,
-    ticketPrice: bigint,
-  ) => {
+  const buyTickets = async (roundId: number, ticketCount: number, ticketPrice: bigint) => {
     const totalCost = ticketPrice * BigInt(ticketCount);
 
     writeContract({
@@ -444,8 +430,7 @@ export function useLotteryPoolOwner() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  const isOwner =
-    address && owner ? address.toLowerCase() === owner.toLowerCase() : false;
+  const isOwner = address && owner ? address.toLowerCase() === owner.toLowerCase() : false;
 
   return { owner, isOwner, isLoading };
 }
@@ -495,7 +480,7 @@ export function useCreateRound() {
   const createRound = async (
     ticketPrice: bigint,
     maxTickets: number,
-    durationInSeconds: number,
+    durationInSeconds: number
   ) => {
     writeContract({
       address: LOTTERY_POOL_ADDRESS,

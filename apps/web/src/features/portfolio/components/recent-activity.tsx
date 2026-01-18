@@ -3,19 +3,9 @@
 import { ArrowDown, ArrowUp, Users, Award, ExternalLink } from "lucide-react";
 import * as React from "react";
 
-import {
-  AmountDisplay,
-  TransactionStatus,
-  type TransactionState,
-} from "@/components/common";
+import { AmountDisplay, TransactionStatus, type TransactionState } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface Activity {
@@ -67,25 +57,21 @@ const activityConfig = {
   },
 };
 
-export function RecentActivity({
-  activities = [],
-  isLoading,
-  maxItems = 10,
-}: RecentActivityProps) {
+export function RecentActivity({ activities = [], isLoading, maxItems = 10 }: RecentActivityProps) {
   const displayedActivities = activities.slice(0, maxItems);
 
   if (isLoading) {
     return (
       <Card variant="surface">
         <CardHeader>
-          <div className="h-6 w-32 bg-surface-elevated animate-shimmer rounded" />
+          <div className="h-6 w-32 animate-shimmer rounded bg-surface-elevated" />
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
             {[...Array(5)].map((_, i) => (
               <div
                 key={`skeleton-${i}`}
-                className="h-16 bg-surface-elevated animate-shimmer rounded"
+                className="h-16 animate-shimmer rounded bg-surface-elevated"
               />
             ))}
           </div>
@@ -102,11 +88,9 @@ export function RecentActivity({
       </CardHeader>
       <CardContent>
         {displayedActivities.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+          <div className="py-8 text-center text-muted-foreground">
             <p>No activity yet</p>
-            <p className="text-sm mt-1">
-              Start saving to see your transactions here
-            </p>
+            <p className="mt-1 text-sm">Start saving to see your transactions here</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -118,7 +102,7 @@ export function RecentActivity({
                 <div
                   key={`activity-${activity.id}`}
                   className={cn(
-                    "flex items-center gap-4 p-4 rounded-lg border transition-colors",
+                    "flex items-center gap-4 rounded-lg border p-4 transition-colors",
                     (() => {
                       if (activity.status === "success") {
                         return "border-border bg-surface-elevated";
@@ -127,22 +111,22 @@ export function RecentActivity({
                         return "border-error/30 bg-error/5";
                       }
                       return "border-border bg-surface-elevated";
-                    })(),
+                    })()
                   )}
                 >
                   {/* Icon */}
                   <div
                     className={cn(
-                      "h-10 w-10 rounded-full flex items-center justify-center",
-                      config.bgColor,
+                      "flex h-10 w-10 items-center justify-center rounded-full",
+                      config.bgColor
                     )}
                   >
                     <Icon className={cn("h-5 w-5", config.color)} />
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
+                  <div className="min-w-0 flex-1">
+                    <div className="mb-1 flex items-center gap-2">
                       <p className="font-medium">{config.label}</p>
                       {activity.poolName && (
                         <Badge variant="secondary" className="text-[10px]">
@@ -159,7 +143,7 @@ export function RecentActivity({
                           href={`https://explorer.mezo.org/tx/${activity.txHash}`}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-lavanda hover:underline inline-flex items-center gap-1"
+                          className="inline-flex items-center gap-1 text-lavanda hover:underline"
                         >
                           View
                           <ExternalLink className="h-3 w-3" />
@@ -177,25 +161,19 @@ export function RecentActivity({
                         size="sm"
                         className={cn(
                           (() => {
-                            if (
-                              activity.type === "deposit" ||
-                              activity.type === "claim"
-                            ) {
+                            if (activity.type === "deposit" || activity.type === "claim") {
                               return "text-success";
                             }
                             if (activity.type === "withdraw") {
                               return "text-accent";
                             }
                             return "";
-                          })(),
+                          })()
                         )}
                       />
                     )}
                     <div className="mt-1">
-                      <TransactionStatus
-                        status={activity.status}
-                        variant="badge"
-                      />
+                      <TransactionStatus status={activity.status} variant="badge" />
                     </div>
                   </div>
                 </div>

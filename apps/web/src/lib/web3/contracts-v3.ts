@@ -33,9 +33,7 @@ function extractABI(abiModule: unknown): readonly unknown[] {
   // If it's already an array, return it
   if (Array.isArray(abiModule)) {
     if (abiModule.length === 0) {
-      throw new Error(
-        "ABI module is an empty array - contract ABI may not be generated",
-      );
+      throw new Error("ABI module is an empty array - contract ABI may not be generated");
     }
     return abiModule;
   }
@@ -45,9 +43,7 @@ function extractABI(abiModule: unknown): readonly unknown[] {
     const abi = (abiModule as { abi: unknown }).abi;
     if (Array.isArray(abi)) {
       if (abi.length === 0) {
-        throw new Error(
-          "ABI property is an empty array - contract ABI may not be generated",
-        );
+        throw new Error("ABI property is an empty array - contract ABI may not be generated");
       }
       return abi;
     }
@@ -60,7 +56,7 @@ function extractABI(abiModule: unknown): readonly unknown[] {
   }
 
   throw new Error(
-    `Invalid ABI module: expected array or object with 'abi' property, got ${typeof abiModule}`,
+    `Invalid ABI module: expected array or object with 'abi' property, got ${typeof abiModule}`
   );
 }
 
@@ -83,7 +79,7 @@ const ETH_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
 function validateAddress(address: string, name: string): Address {
   if (!ETH_ADDRESS_REGEX.test(address)) {
     throw new Error(
-      `Invalid ${name} address: ${address}. Must be a valid Ethereum address (0x + 40 hex chars)`,
+      `Invalid ${name} address: ${address}. Must be a valid Ethereum address (0x + 40 hex chars)`
     );
   }
   return address as Address;
@@ -92,11 +88,7 @@ function validateAddress(address: string, name: string): Address {
 /**
  * Gets address from env var with validation, falling back to default
  */
-function getAddress(
-  envKey: string,
-  defaultAddress: string,
-  name: string,
-): Address {
+function getAddress(envKey: string, defaultAddress: string, name: string): Address {
   // eslint-disable-next-line security/detect-object-injection -- safe: envKey is hardcoded string
   const address = process.env[envKey] ?? defaultAddress;
   return validateAddress(address, name);
@@ -107,31 +99,31 @@ export const MEZO_V3_ADDRESSES = {
   individualPoolV3: getAddress(
     "NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS",
     "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
-    "IndividualPoolV3",
+    "IndividualPoolV3"
   ),
   yieldAggregatorV3: getAddress(
     "NEXT_PUBLIC_YIELD_AGGREGATOR_ADDRESS",
     "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6",
-    "YieldAggregatorV3",
+    "YieldAggregatorV3"
   ),
   cooperativePoolV3: getAddress(
     "NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS",
     "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88",
-    "CooperativePoolV3",
+    "CooperativePoolV3"
   ),
 
   // Tokens
   musd: getAddress(
     "NEXT_PUBLIC_MUSD_ADDRESS",
     "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
-    "MUSD",
+    "MUSD"
   ),
 
   // Mezo Integration V3 (Upgradeable Proxy)
   mezoIntegrationV3: getAddress(
     "NEXT_PUBLIC_MEZO_INTEGRATION_ADDRESS",
     "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6",
-    "MezoIntegrationV3",
+    "MezoIntegrationV3"
   ),
 
   // Mezo Protocol (External) - These are hardcoded as they don't change
@@ -200,9 +192,7 @@ export type ReferralStats = {
  * Check if address is V3 contract
  */
 export function isV3Contract(address: string): boolean {
-  return Object.values(MEZO_V3_ADDRESSES).includes(
-    address.toLowerCase() as any,
-  );
+  return Object.values(MEZO_V3_ADDRESSES).includes(address.toLowerCase() as any);
 }
 
 /**
@@ -226,10 +216,7 @@ export function formatReferralBonus(bonus: number): string {
 /**
  * Calculate net yield after fee
  */
-export function calculateNetYield(
-  grossYield: bigint,
-  performanceFee: number,
-): bigint {
+export function calculateNetYield(grossYield: bigint, performanceFee: number): bigint {
   const feeAmount = (grossYield * BigInt(performanceFee)) / BigInt(10000);
   return grossYield - feeAmount;
 }
@@ -237,10 +224,7 @@ export function calculateNetYield(
 /**
  * Check if auto-compound threshold met
  */
-export function shouldAutoCompound(
-  yieldAmount: bigint,
-  threshold: string,
-): boolean {
+export function shouldAutoCompound(yieldAmount: bigint, threshold: string): boolean {
   return yieldAmount >= BigInt(threshold);
 }
 

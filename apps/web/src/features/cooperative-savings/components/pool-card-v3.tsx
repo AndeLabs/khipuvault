@@ -12,24 +12,12 @@
 
 "use client";
 
-import {
-  Users,
-  Bitcoin,
-  Coins,
-  TrendingUp,
-  Calendar,
-  Shield,
-} from "lucide-react";
+import { Users, Bitcoin, Coins, TrendingUp, Calendar, Shield } from "lucide-react";
 import * as React from "react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardFooter,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Separator } from "@/components/ui/separator";
 import { type PoolWithMembership } from "@/hooks/web3/use-all-cooperative-pools";
@@ -65,17 +53,15 @@ export const PoolCardV3 = React.memo(function PoolCardV3({
     !pool.isMember;
 
   return (
-    <Card className="group hover:shadow-lg transition-all duration-300 hover:border-accent/50">
+    <Card className="group transition-all duration-300 hover:border-accent/50 hover:shadow-lg">
       <CardHeader className="space-y-3">
         {/* Pool Name and Status */}
         <div className="flex items-start justify-between gap-2">
-          <div className="flex-1 min-w-0">
-            <h3 className="font-heading font-semibold text-lg truncate group-hover:text-accent transition-colors">
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate font-heading text-lg font-semibold transition-colors group-hover:text-accent">
               {pool.name}
             </h3>
-            <p className="text-xs text-muted-foreground truncate mt-0.5">
-              Pool #{pool.poolId}
-            </p>
+            <p className="mt-0.5 truncate text-xs text-muted-foreground">Pool #{pool.poolId}</p>
           </div>
           <Badge variant={statusBadge.variant} className="shrink-0">
             {statusBadge.label}
@@ -106,7 +92,7 @@ export const PoolCardV3 = React.memo(function PoolCardV3({
               <Bitcoin className="h-3.5 w-3.5" />
               <span>Total BTC</span>
             </div>
-            <p className="font-mono font-semibold text-sm">
+            <p className="font-mono text-sm font-semibold">
               {formatBTCCompact(pool.totalBtcDeposited)}
             </p>
           </div>
@@ -117,9 +103,7 @@ export const PoolCardV3 = React.memo(function PoolCardV3({
               <Coins className="h-3.5 w-3.5" />
               <span>MUSD Minted</span>
             </div>
-            <p className="font-mono font-semibold text-sm">
-              {formatMUSD(pool.totalMusdMinted)}
-            </p>
+            <p className="font-mono text-sm font-semibold">{formatMUSD(pool.totalMusdMinted)}</p>
           </div>
 
           {/* Yields Generated */}
@@ -128,7 +112,7 @@ export const PoolCardV3 = React.memo(function PoolCardV3({
               <TrendingUp className="h-3.5 w-3.5" />
               <span>Yields</span>
             </div>
-            <p className="font-mono font-semibold text-sm text-success">
+            <p className="font-mono text-sm font-semibold text-success">
               {formatMUSD(pool.totalYieldGenerated)}
             </p>
           </div>
@@ -147,13 +131,12 @@ export const PoolCardV3 = React.memo(function PoolCardV3({
 
         {/* Contribution Range */}
         <div className="space-y-1">
-          <p className="text-xs text-muted-foreground flex items-center gap-1.5">
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
             <Shield className="h-3.5 w-3.5" />
             Contribution Range
           </p>
           <p className="font-mono text-sm">
-            {formatBTCCompact(pool.minContribution)} -{" "}
-            {formatBTCCompact(pool.maxContribution)} BTC
+            {formatBTCCompact(pool.minContribution)} - {formatBTCCompact(pool.maxContribution)} BTC
           </p>
         </div>
 
@@ -161,8 +144,8 @@ export const PoolCardV3 = React.memo(function PoolCardV3({
         {pool.isMember && (
           <>
             <Separator />
-            <div className="bg-accent/5 rounded-lg p-3 space-y-2">
-              <p className="text-xs font-medium text-accent flex items-center gap-1.5">
+            <div className="space-y-2 rounded-lg bg-accent/5 p-3">
+              <p className="flex items-center gap-1.5 text-xs font-medium text-accent">
                 <Users className="h-3.5 w-3.5" />
                 Your Position
               </p>

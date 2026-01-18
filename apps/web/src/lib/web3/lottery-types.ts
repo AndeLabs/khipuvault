@@ -56,9 +56,7 @@ export function getRoundStatusName(status: RoundStatus): string {
   }
 }
 
-export function getRoundStatusColor(
-  status: RoundStatus,
-): "success" | "warning" | "default" {
+export function getRoundStatusColor(status: RoundStatus): "success" | "warning" | "default" {
   switch (status) {
     case RoundStatus.OPEN:
       return "success";
@@ -146,7 +144,7 @@ export function formatProbability(basisPoints: bigint): string {
 export function calculateExpectedValue(
   probability: bigint,
   prizeAmount: bigint,
-  ticketCost: bigint,
+  ticketCost: bigint
 ): bigint {
   // EV = (probability * prize) - cost
   // probability is in basis points (10000 = 100% = 1.0)

@@ -21,11 +21,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import React, { ReactNode, useEffect, useState } from "react";
 import { createConfig, http } from "wagmi";
 
-import {
-  PRIVY_APP_ID,
-  privyConfig,
-  isPrivyConfigured,
-} from "@/lib/privy/config";
+import { PRIVY_APP_ID, privyConfig, isPrivyConfigured } from "@/lib/privy/config";
 import { mezoTestnet } from "@/lib/web3/chains";
 
 /**
@@ -97,7 +93,7 @@ export function PrivyWeb3Provider({ children }: PrivyWeb3ProviderProps) {
     if (isPrivyConfigured()) {
       // eslint-disable-next-line no-console
       console.log(
-        "🔐 Privy Web3 Provider Initialized | Network: Mezo Testnet (31611) | Auth: Email, Social, Passkeys, Wallets",
+        "🔐 Privy Web3 Provider Initialized | Network: Mezo Testnet (31611) | Auth: Email, Social, Passkeys, Wallets"
       );
     }
   }, []);
@@ -110,12 +106,10 @@ export function PrivyWeb3Provider({ children }: PrivyWeb3ProviderProps) {
         <div className="min-h-screen">
           {/* Warning banner for development */}
           {process.env.NODE_ENV === "development" && (
-            <div className="bg-yellow-500/10 border-b border-yellow-500/20 px-4 py-2 text-center text-sm text-yellow-500">
+            <div className="border-b border-yellow-500/20 bg-yellow-500/10 px-4 py-2 text-center text-sm text-yellow-500">
               <strong>Privy not configured.</strong> Set{" "}
-              <code className="bg-yellow-500/20 px-1 rounded">
-                NEXT_PUBLIC_PRIVY_APP_ID
-              </code>{" "}
-              in your .env.local file.{" "}
+              <code className="rounded bg-yellow-500/20 px-1">NEXT_PUBLIC_PRIVY_APP_ID</code> in
+              your .env.local file.{" "}
               <a
                 href="https://dashboard.privy.io"
                 target="_blank"

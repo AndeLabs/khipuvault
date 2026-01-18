@@ -18,7 +18,7 @@ import type { Request, Response, NextFunction, RequestHandler } from "express";
 export type AsyncRequestHandler = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => Promise<void | Response>;
 
 /**
@@ -94,7 +94,7 @@ export function sendPaginated<T>(
     page?: number;
     limit: number;
     total: number;
-  },
+  }
 ): void {
   const { page = 1, limit, total } = options;
   const hasMore = page * limit < total;
@@ -114,11 +114,7 @@ export function sendPaginated<T>(
 /**
  * Send an error response
  */
-export function sendError(
-  res: Response,
-  message: string,
-  statusCode = 500,
-): void {
+export function sendError(res: Response, message: string, statusCode = 500): void {
   res.status(statusCode).json({
     success: false,
     error: message,
@@ -142,10 +138,7 @@ export function sendBadRequest(res: Response, message: string): void {
 /**
  * Send a 401 Unauthorized response
  */
-export function sendUnauthorized(
-  res: Response,
-  message = "Unauthorized",
-): void {
+export function sendUnauthorized(res: Response, message = "Unauthorized"): void {
   sendError(res, message, 401);
 }
 
@@ -165,12 +158,9 @@ export function sendForbidden(res: Response, message = "Forbidden"): void {
  */
 export function getPaginationParams(
   req: Request,
-  defaults: { limit: number; offset: number } = { limit: 50, offset: 0 },
+  defaults: { limit: number; offset: number } = { limit: 50, offset: 0 }
 ): { limit: number; offset: number } {
-  const limit = Math.min(
-    Math.max(1, Number(req.query.limit) || defaults.limit),
-    1000,
-  );
+  const limit = Math.min(Math.max(1, Number(req.query.limit) || defaults.limit), 1000);
   const offset = Math.max(0, Number(req.query.offset) || defaults.offset);
 
   return { limit, offset };
@@ -214,8 +204,8 @@ export function validatedHandler<T>(
   handler: (
     req: Request & { validated: T },
     res: Response,
-    next: NextFunction,
-  ) => Promise<void | Response>,
+    next: NextFunction
+  ) => Promise<void | Response>
 ): RequestHandler {
   return asyncHandler(async (req, res, next) => {
     const validated = schema.parse({

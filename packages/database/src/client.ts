@@ -18,10 +18,7 @@ const globalForPrisma = globalThis as unknown as {
  */
 function createPrismaClient(): PrismaClient {
   return new PrismaClient({
-    log:
-      process.env.NODE_ENV === "development"
-        ? ["query", "error", "warn"]
-        : ["error"],
+    log: process.env.NODE_ENV === "development" ? ["query", "error", "warn"] : ["error"],
     // Enable query engine logging in production for debugging
     errorFormat: process.env.NODE_ENV === "production" ? "minimal" : "pretty",
   });

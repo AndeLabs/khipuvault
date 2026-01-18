@@ -18,7 +18,7 @@
  * @returns Normalized value (BigInt -> string, rest unchanged)
  */
 export function normalizeBigInt(
-  value: bigint | number | string | null | undefined,
+  value: bigint | number | string | null | undefined
 ): string | number | null | undefined {
   if (value === null || value === undefined) {
     return value;
@@ -55,7 +55,7 @@ export function normalizeForQueryKey(obj: any): any {
         acc[key] = normalizeForQueryKey(value);
         return acc;
       },
-      {} as Record<string, any>,
+      {} as Record<string, any>
     );
   }
 
@@ -74,9 +74,7 @@ export function stringifyBigInt(value: any): string {
     return value.toString();
   }
   if (typeof value === "object" && value !== null) {
-    return JSON.stringify(value, (_, v) =>
-      typeof v === "bigint" ? v.toString() : v,
-    );
+    return JSON.stringify(value, (_, v) => (typeof v === "bigint" ? v.toString() : v));
   }
   return String(value);
 }

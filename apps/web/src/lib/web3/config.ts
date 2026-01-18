@@ -134,9 +134,7 @@ export function getWagmiConfig(): WagmiConfigInstance {
 
   // Determine dApp URL - use fallback for SSR
   const dappUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : "https://khipuvault.vercel.app";
+    typeof window !== "undefined" ? window.location.origin : "https://khipuvault.vercel.app";
 
   // Create connectors array
   // MetaMask connector is safe to initialize during SSR
@@ -215,10 +213,7 @@ export const publicClient: ReturnType<typeof createPublicClient> | null = null;
 export const appMetadata = {
   name: "KhipuVault",
   description: "Ahorro Bitcoin para Latinoamérica con MUSD de Mezo",
-  url:
-    typeof window !== "undefined"
-      ? window.location.origin
-      : "https://khipuvault.vercel.app",
+  url: typeof window !== "undefined" ? window.location.origin : "https://khipuvault.vercel.app",
   icons: [
     typeof window !== "undefined"
       ? `${window.location.origin}/logos/khipu-logo.png`

@@ -11,12 +11,7 @@
 
 "use client";
 
-import {
-  usePrivy,
-  useWallets,
-  useLogin,
-  useLogout,
-} from "@privy-io/react-auth";
+import { usePrivy, useWallets, useLogin, useLogout } from "@privy-io/react-auth";
 import {
   Wallet,
   ChevronDown,
@@ -125,7 +120,7 @@ export function PrivyConnectButton() {
 
   // Prevent hydration errors
   if (!mounted || !ready) {
-    return <div className="h-10 w-40 animate-pulse bg-muted rounded-lg" />;
+    return <div className="h-10 w-40 animate-pulse rounded-lg bg-muted" />;
   }
 
   // Connected state
@@ -134,9 +129,9 @@ export function PrivyConnectButton() {
       <div className="flex items-center gap-3">
         {/* Balance Display - Hidden on small screens */}
         {btcBalance && (
-          <div className="hidden lg:flex items-center gap-2 text-sm">
+          <div className="hidden items-center gap-2 text-sm lg:flex">
             <span className="text-muted-foreground">Balance:</span>
-            <span className="font-semibold font-code">
+            <span className="font-code font-semibold">
               {Number(btcBalance.formatted).toFixed(6)} BTC
             </span>
           </div>
@@ -147,7 +142,7 @@ export function PrivyConnectButton() {
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="gap-2">
               {getLoginMethodIcon()}
-              <span className="hidden sm:inline max-w-[120px] truncate">
+              <span className="hidden max-w-[120px] truncate sm:inline">
                 {getUserDisplayName()}
               </span>
               <ChevronDown className="h-4 w-4" />
@@ -160,7 +155,7 @@ export function PrivyConnectButton() {
               <div className="flex flex-col space-y-1">
                 <p className="text-sm font-medium">{getUserDisplayName()}</p>
                 {address && (
-                  <p className="text-xs text-muted-foreground font-mono">
+                  <p className="font-mono text-xs text-muted-foreground">
                     {address.slice(0, 10)}...{address.slice(-8)}
                   </p>
                 )}
@@ -195,11 +190,9 @@ export function PrivyConnectButton() {
             {btcBalance && (
               <>
                 <div className="px-2 py-1.5 lg:hidden">
-                  <div className="flex justify-between items-center">
-                    <span className="text-xs text-muted-foreground">
-                      Balance
-                    </span>
-                    <span className="text-sm font-semibold font-code">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-muted-foreground">Balance</span>
+                    <span className="font-code text-sm font-semibold">
                       {Number(btcBalance.formatted).toFixed(6)} BTC
                     </span>
                   </div>
@@ -210,7 +203,7 @@ export function PrivyConnectButton() {
 
             {/* Actions */}
             <DropdownMenuItem onClick={copyAddress}>
-              <Copy className="h-4 w-4 mr-2" />
+              <Copy className="mr-2 h-4 w-4" />
               {copied ? "Copied!" : "Copy Address"}
             </DropdownMenuItem>
 
@@ -220,18 +213,15 @@ export function PrivyConnectButton() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ExternalLink className="mr-2 h-4 w-4" />
                 View in Explorer
               </a>
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />
 
-            <DropdownMenuItem
-              onClick={logout}
-              className="text-destructive focus:text-destructive"
-            >
-              <LogOut className="h-4 w-4 mr-2" />
+            <DropdownMenuItem onClick={logout} className="text-destructive focus:text-destructive">
+              <LogOut className="mr-2 h-4 w-4" />
               Disconnect
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -265,7 +255,7 @@ export function PrivyConnectButtonCompact() {
   }, []);
 
   if (!mounted || !ready) {
-    return <div className="h-8 w-8 animate-pulse bg-muted rounded-full" />;
+    return <div className="h-8 w-8 animate-pulse rounded-full bg-muted" />;
   }
 
   if (authenticated && address) {
@@ -279,7 +269,7 @@ export function PrivyConnectButtonCompact() {
 
   return (
     <Button variant="default" size="sm" onClick={login}>
-      <Wallet className="h-4 w-4 mr-1" />
+      <Wallet className="mr-1 h-4 w-4" />
       Login
     </Button>
   );
@@ -300,7 +290,7 @@ export function PrivyWalletStatus() {
   if (!mounted || !ready) {
     return (
       <div className="flex items-center gap-2">
-        <div className="h-2 w-2 rounded-full bg-muted animate-pulse" />
+        <div className="h-2 w-2 animate-pulse rounded-full bg-muted" />
         <span className="text-sm text-muted-foreground">Loading...</span>
       </div>
     );

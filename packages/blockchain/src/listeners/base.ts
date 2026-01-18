@@ -17,10 +17,7 @@ export abstract class BaseEventListener {
    * @param fromBlock Starting block for historical indexing
    * @param enableReorgChecking Enable periodic reorg checking (default: true)
    */
-  async startListening(
-    fromBlock: number = 0,
-    enableReorgChecking: boolean = true,
-  ): Promise<void> {
+  async startListening(fromBlock: number = 0, enableReorgChecking: boolean = true): Promise<void> {
     console.log(`🎧 Starting ${this.constructor.name} from block ${fromBlock}`);
     console.log(`📊 Confirmation depth: ${CONFIRMATION_DEPTH} blocks`);
 
@@ -36,9 +33,7 @@ export abstract class BaseEventListener {
     if (fromBlock > 0) {
       const safeBlock = await this.reorgHandler.getSafeBlockNumber();
       const safeFromBlock = Math.min(fromBlock, safeBlock);
-      console.log(
-        `📚 Indexing finalized blocks only (up to block ${safeBlock})`,
-      );
+      console.log(`📚 Indexing finalized blocks only (up to block ${safeBlock})`);
       await this.indexHistoricalEvents(safeFromBlock);
     }
   }
@@ -84,6 +79,6 @@ export abstract class BaseEventListener {
    */
   protected abstract processEvent(
     event: ethers.Log,
-    parsedLog: ethers.LogDescription,
+    parsedLog: ethers.LogDescription
   ): Promise<void>;
 }

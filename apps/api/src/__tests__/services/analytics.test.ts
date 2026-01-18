@@ -134,9 +134,7 @@ describe("AnalyticsService", () => {
 
       await analyticsService.getTopPools();
 
-      expect(prisma.pool.findMany).toHaveBeenCalledWith(
-        expect.objectContaining({ take: 10 }),
-      );
+      expect(prisma.pool.findMany).toHaveBeenCalledWith(expect.objectContaining({ take: 10 }));
     });
   });
 

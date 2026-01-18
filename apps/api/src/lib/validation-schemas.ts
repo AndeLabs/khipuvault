@@ -99,20 +99,14 @@ export const paginationQuerySchema = z.object({
       .number()
       .int()
       .min(1, "Limit must be at least 1")
-      .max(
-        PAGINATION_DEFAULTS.maxLimit,
-        `Limit cannot exceed ${PAGINATION_DEFAULTS.maxLimit}`,
-      )
+      .max(PAGINATION_DEFAULTS.maxLimit, `Limit cannot exceed ${PAGINATION_DEFAULTS.maxLimit}`)
       .optional()
       .default(PAGINATION_DEFAULTS.limit),
     offset: z.coerce
       .number()
       .int()
       .min(0, "Offset must be non-negative")
-      .max(
-        PAGINATION_DEFAULTS.maxOffset,
-        `Offset cannot exceed ${PAGINATION_DEFAULTS.maxOffset}`,
-      )
+      .max(PAGINATION_DEFAULTS.maxOffset, `Offset cannot exceed ${PAGINATION_DEFAULTS.maxOffset}`)
       .optional()
       .default(PAGINATION_DEFAULTS.offset),
   }),
@@ -201,9 +195,7 @@ export const dateRangeQuerySchema = z.object({
  */
 export const poolTypeQuerySchema = z.object({
   query: z.object({
-    poolType: z
-      .enum(["INDIVIDUAL", "COOPERATIVE", "LOTTERY", "ROTATING"])
-      .optional(),
+    poolType: z.enum(["INDIVIDUAL", "COOPERATIVE", "LOTTERY", "ROTATING"]).optional(),
   }),
 });
 
@@ -230,11 +222,9 @@ export const flexiblePoolIdParamSchema = z.object({
       .string()
       .min(1)
       .max(66)
-      .refine(
-        (val) =>
-          /^[0-9a-f-]{36}$/i.test(val) || /^0x[a-fA-F0-9]{40}$/.test(val),
-        { message: "poolId must be a valid UUID or Ethereum address" },
-      ),
+      .refine((val) => /^[0-9a-f-]{36}$/i.test(val) || /^0x[a-fA-F0-9]{40}$/.test(val), {
+        message: "poolId must be a valid UUID or Ethereum address",
+      }),
   }),
 });
 
@@ -247,11 +237,9 @@ export const poolAnalyticsSchema = z.object({
       .string()
       .min(1)
       .max(66)
-      .refine(
-        (val) =>
-          /^[0-9a-f-]{36}$/i.test(val) || /^0x[a-fA-F0-9]{40}$/.test(val),
-        { message: "poolId must be a valid UUID or Ethereum address" },
-      ),
+      .refine((val) => /^[0-9a-f-]{36}$/i.test(val) || /^0x[a-fA-F0-9]{40}$/.test(val), {
+        message: "poolId must be a valid UUID or Ethereum address",
+      }),
   }),
   query: z.object({
     days: z.coerce.number().min(1).max(365).optional().default(30),
@@ -269,10 +257,7 @@ export const createNotificationBodySchema = z.object({
   body: z.object({
     title: z.string().min(1).max(200),
     message: z.string().min(1).max(1000),
-    type: z
-      .enum(["INFO", "WARNING", "SUCCESS", "ERROR"])
-      .optional()
-      .default("INFO"),
+    type: z.enum(["INFO", "WARNING", "SUCCESS", "ERROR"]).optional().default("INFO"),
   }),
 });
 

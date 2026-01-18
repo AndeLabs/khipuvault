@@ -10,11 +10,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect, useCallback } from "react";
 import { parseEther } from "viem";
-import {
-  useAccount,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-} from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";
 
@@ -175,12 +171,7 @@ export function useCreatePool() {
   const mutation = usePoolMutation();
 
   const createPool = useCallback(
-    async (
-      name: string,
-      minContribution: string,
-      maxContribution: string,
-      maxMembers: number,
-    ) => {
+    async (name: string, minContribution: string, maxContribution: string, maxMembers: number) => {
       if (!mutation.address) {
         mutation.setError("Please connect your wallet");
         mutation.setState("error");
@@ -208,7 +199,7 @@ export function useCreatePool() {
         mutation.setError(err instanceof Error ? err.message : "Unknown error");
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {
@@ -256,7 +247,7 @@ export function useJoinPool() {
         mutation.setError(err instanceof Error ? err.message : "Unknown error");
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {
@@ -301,7 +292,7 @@ export function useLeavePool() {
         mutation.setError(err instanceof Error ? err.message : "Unknown error");
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {
@@ -346,7 +337,7 @@ export function useClaimYield() {
         mutation.setError(err instanceof Error ? err.message : "Unknown error");
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {
@@ -391,7 +382,7 @@ export function useClosePool() {
         mutation.setError(err instanceof Error ? err.message : "Unknown error");
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {
@@ -456,7 +447,7 @@ export function useWithdrawPartial() {
         mutation.setError(err instanceof Error ? err.message : "Unknown error");
       }
     },
-    [mutation],
+    [mutation]
   );
 
   return {

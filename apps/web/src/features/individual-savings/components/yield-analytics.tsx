@@ -4,13 +4,7 @@ import { TrendingUp, Calculator, BarChart3, Info } from "lucide-react";
 import * as React from "react";
 
 import { AmountDisplay } from "@/components/common";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -21,12 +15,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface YieldAnalyticsProps {
@@ -42,9 +31,9 @@ export function YieldAnalytics({
 }: YieldAnalyticsProps) {
   // Projections calculator state
   const [amount, setAmount] = React.useState(currentDeposit);
-  const [timePeriod, setTimePeriod] = React.useState<
-    "1month" | "3months" | "6months" | "1year"
-  >("1year");
+  const [timePeriod, setTimePeriod] = React.useState<"1month" | "3months" | "6months" | "1year">(
+    "1year"
+  );
   const [autoCompound, setAutoCompound] = React.useState(true);
 
   // Projected yield history based on user deposit and APR
@@ -87,8 +76,7 @@ export function YieldAnalytics({
 
     // Compound interest (monthly compounding with auto-compound)
     const compoundingPeriods = years * 12; // Monthly
-    const compoundFinal =
-      principal * Math.pow(1 + apr / 12, compoundingPeriods);
+    const compoundFinal = principal * Math.pow(1 + apr / 12, compoundingPeriods);
     const compoundInterest = compoundFinal - principal;
 
     const totalYield = autoCompound ? compoundInterest : simpleInterest;
@@ -103,9 +91,7 @@ export function YieldAnalytics({
       performanceFee,
       netYield,
       finalAmount: principal + netYield,
-      effectiveAPR: autoCompound
-        ? (compoundInterest / principal / years) * 100
-        : currentAPR,
+      effectiveAPR: autoCompound ? (compoundInterest / principal / years) * 100 : currentAPR,
     };
   }, [amount, timePeriod, currentAPR, autoCompound]);
 
@@ -116,14 +102,12 @@ export function YieldAnalytics({
     <Card variant="surface" className={className}>
       <CardHeader>
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-full bg-gradient-lavanda flex items-center justify-center">
+          <div className="bg-gradient-lavanda flex h-10 w-10 items-center justify-center rounded-full">
             <TrendingUp className="h-5 w-5 text-white" />
           </div>
           <div>
             <CardTitle>Yield Analytics</CardTitle>
-            <CardDescription>
-              Track your earnings and project future yields
-            </CardDescription>
+            <CardDescription>Track your earnings and project future yields</CardDescription>
           </div>
         </div>
       </CardHeader>
@@ -142,7 +126,7 @@ export function YieldAnalytics({
           </TabsList>
 
           {/* Projections Calculator */}
-          <TabsContent value="projections" className="space-y-6 mt-6">
+          <TabsContent value="projections" className="mt-6 space-y-6">
             {/* Calculator Inputs */}
             <div className="space-y-4">
               <div className="space-y-2">
@@ -159,10 +143,7 @@ export function YieldAnalytics({
 
               <div className="space-y-2">
                 <Label>Time Period</Label>
-                <Select
-                  value={timePeriod}
-                  onValueChange={(value: any) => setTimePeriod(value)}
-                >
+                <Select value={timePeriod} onValueChange={(value: any) => setTimePeriod(value)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -175,7 +156,7 @@ export function YieldAnalytics({
                 </Select>
               </div>
 
-              <div className="flex items-center justify-between p-3 rounded-lg bg-surface-elevated border border-border">
+              <div className="flex items-center justify-between rounded-lg border border-border bg-surface-elevated p-3">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium">Auto-Compound</span>
                   <TooltipProvider>
@@ -189,10 +170,9 @@ export function YieldAnalytics({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent>
-                        <p className="text-sm max-w-xs">
-                          With auto-compound enabled, your yields are
-                          automatically reinvested, earning compound interest
-                          for higher returns.
+                        <p className="max-w-xs text-sm">
+                          With auto-compound enabled, your yields are automatically reinvested,
+                          earning compound interest for higher returns.
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -203,13 +183,13 @@ export function YieldAnalytics({
                   onClick={() => setAutoCompound(!autoCompound)}
                   className={cn(
                     "relative inline-flex h-6 w-11 items-center rounded-full transition-colors",
-                    autoCompound ? "bg-success" : "bg-surface",
+                    autoCompound ? "bg-success" : "bg-surface"
                   )}
                 >
                   <span
                     className={cn(
                       "inline-block h-4 w-4 transform rounded-full bg-white transition-transform",
-                      autoCompound ? "translate-x-6" : "translate-x-1",
+                      autoCompound ? "translate-x-6" : "translate-x-1"
                     )}
                   />
                 </button>
@@ -219,12 +199,10 @@ export function YieldAnalytics({
             {/* Results */}
             {Number(amount) > 0 && (
               <div className="space-y-4">
-                <div className="p-4 rounded-lg bg-gradient-lavanda border border-lavanda/20">
+                <div className="bg-gradient-lavanda rounded-lg border border-lavanda/20 p-4">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Initial Deposit
-                      </span>
+                      <span className="text-sm text-muted-foreground">Initial Deposit</span>
                       <AmountDisplay
                         amount={projections.principal.toFixed(2)}
                         symbol="mUSD"
@@ -232,9 +210,7 @@ export function YieldAnalytics({
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Gross Yield
-                      </span>
+                      <span className="text-sm text-muted-foreground">Gross Yield</span>
                       <AmountDisplay
                         amount={projections.grossYield.toFixed(4)}
                         symbol="mUSD"
@@ -243,9 +219,7 @@ export function YieldAnalytics({
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Performance Fee (1%)
-                      </span>
+                      <span className="text-sm text-muted-foreground">Performance Fee (1%)</span>
                       <AmountDisplay
                         amount={projections.performanceFee.toFixed(4)}
                         symbol="mUSD"
@@ -260,13 +234,11 @@ export function YieldAnalytics({
                         amount={projections.netYield.toFixed(4)}
                         symbol="mUSD"
                         size="md"
-                        className="text-success font-bold"
+                        className="font-bold text-success"
                       />
                     </div>
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-semibold">
-                        Final Amount
-                      </span>
+                      <span className="text-sm font-semibold">Final Amount</span>
                       <AmountDisplay
                         amount={projections.finalAmount.toFixed(2)}
                         symbol="mUSD"
@@ -278,7 +250,7 @@ export function YieldAnalytics({
                 </div>
 
                 {/* APR Info */}
-                <div className="flex items-center justify-between p-3 rounded-lg bg-surface-elevated border border-border text-sm">
+                <div className="flex items-center justify-between rounded-lg border border-border bg-surface-elevated p-3 text-sm">
                   <div className="flex items-center gap-2">
                     <TrendingUp className="h-4 w-4 text-success" />
                     <span className="text-muted-foreground">
@@ -292,22 +264,14 @@ export function YieldAnalytics({
 
                 {/* Comparison */}
                 {autoCompound && (
-                  <div className="p-3 rounded-lg bg-success/10 border border-success/20 text-xs">
-                    <p className="text-success font-semibold mb-1">
-                      Auto-Compound Advantage
-                    </p>
+                  <div className="rounded-lg border border-success/20 bg-success/10 p-3 text-xs">
+                    <p className="mb-1 font-semibold text-success">Auto-Compound Advantage</p>
                     <p className="text-muted-foreground">
                       You'll earn{" "}
                       <span className="font-semibold text-foreground">
-                        {(
-                          ((projections.effectiveAPR - currentAPR) /
-                            currentAPR) *
-                          100
-                        ).toFixed(1)}
-                        %
+                        {(((projections.effectiveAPR - currentAPR) / currentAPR) * 100).toFixed(1)}%
                       </span>{" "}
-                      more compared to simple interest thanks to compound
-                      returns!
+                      more compared to simple interest thanks to compound returns!
                     </p>
                   </div>
                 )}
@@ -316,7 +280,7 @@ export function YieldAnalytics({
           </TabsContent>
 
           {/* Yield History Chart */}
-          <TabsContent value="history" className="space-y-6 mt-6">
+          <TabsContent value="history" className="mt-6 space-y-6">
             {Number(currentDeposit) > 0 ? (
               <>
                 {/* Simple Bar Chart */}
@@ -324,23 +288,18 @@ export function YieldAnalytics({
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-muted-foreground">Last 30 Days</span>
                     <span className="font-semibold">
-                      Total:{" "}
-                      <AmountDisplay
-                        amount={maxYield.toFixed(4)}
-                        symbol="mUSD"
-                        size="sm"
-                      />
+                      Total: <AmountDisplay amount={maxYield.toFixed(4)} symbol="mUSD" size="sm" />
                     </span>
                   </div>
 
-                  <div className="h-64 flex items-end gap-1 p-4 rounded-lg bg-surface-elevated border border-border">
+                  <div className="flex h-64 items-end gap-1 rounded-lg border border-border bg-surface-elevated p-4">
                     {yieldHistory.map((data) => (
                       <TooltipProvider key={data.date}>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <div className="flex-1 flex flex-col justify-end h-full">
+                            <div className="flex h-full flex-1 flex-col justify-end">
                               <div
-                                className="w-full bg-gradient-lavanda rounded-t hover:opacity-80 transition-opacity cursor-pointer"
+                                className="bg-gradient-lavanda w-full cursor-pointer rounded-t transition-opacity hover:opacity-80"
                                 style={{
                                   height: `${(data.cumulative / maxYield) * 100}%`,
                                   minHeight: "2px",
@@ -349,7 +308,7 @@ export function YieldAnalytics({
                             </div>
                           </TooltipTrigger>
                           <TooltipContent>
-                            <div className="text-xs space-y-1">
+                            <div className="space-y-1 text-xs">
                               <p className="font-semibold">{data.date}</p>
                               <p>Yield: {data.cumulative.toFixed(4)} mUSD</p>
                             </div>
@@ -360,7 +319,7 @@ export function YieldAnalytics({
                   </div>
 
                   {/* X-axis labels (showing every 7th day) */}
-                  <div className="flex justify-between text-xs text-muted-foreground px-4">
+                  <div className="flex justify-between px-4 text-xs text-muted-foreground">
                     {yieldHistory
                       .filter((_, i) => i % 7 === 0)
                       .map((data) => (
@@ -371,10 +330,8 @@ export function YieldAnalytics({
 
                 {/* Stats */}
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="p-3 rounded-lg bg-surface-elevated border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">
-                      7-Day Yield
-                    </p>
+                  <div className="rounded-lg border border-border bg-surface-elevated p-3">
+                    <p className="mb-1 text-xs text-muted-foreground">7-Day Yield</p>
                     <AmountDisplay
                       amount={(
                         yieldHistory[yieldHistory.length - 1].cumulative -
@@ -385,10 +342,8 @@ export function YieldAnalytics({
                       className="font-bold"
                     />
                   </div>
-                  <div className="p-3 rounded-lg bg-surface-elevated border border-border">
-                    <p className="text-xs text-muted-foreground mb-1">
-                      30-Day Yield
-                    </p>
+                  <div className="rounded-lg border border-border bg-surface-elevated p-3">
+                    <p className="mb-1 text-xs text-muted-foreground">30-Day Yield</p>
                     <AmountDisplay
                       amount={maxYield.toFixed(4)}
                       symbol="mUSD"
@@ -399,14 +354,13 @@ export function YieldAnalytics({
                 </div>
               </>
             ) : (
-              <div className="text-center py-12">
-                <div className="mx-auto w-16 h-16 rounded-full bg-surface-elevated flex items-center justify-center mb-4">
+              <div className="py-12 text-center">
+                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-elevated">
                   <BarChart3 className="h-8 w-8 text-muted-foreground" />
                 </div>
-                <h3 className="text-lg font-semibold mb-2">No Yield History</h3>
-                <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                  Make your first deposit to start tracking your yield
-                  performance over time.
+                <h3 className="mb-2 text-lg font-semibold">No Yield History</h3>
+                <p className="mx-auto max-w-md text-sm text-muted-foreground">
+                  Make your first deposit to start tracking your yield performance over time.
                 </p>
               </div>
             )}

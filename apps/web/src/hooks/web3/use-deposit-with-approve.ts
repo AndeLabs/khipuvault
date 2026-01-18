@@ -11,18 +11,10 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback, useState, useRef } from "react";
 import { parseEther, maxUint256 } from "viem";
-import {
-  useWriteContract,
-  useWaitForTransactionReceipt,
-  useAccount,
-  useConfig,
-} from "wagmi";
+import { useWriteContract, useWaitForTransactionReceipt, useAccount, useConfig } from "wagmi";
 import { readContract } from "wagmi/actions";
 
-import {
-  MEZO_TESTNET_ADDRESSES,
-  INDIVIDUAL_POOL_ABI,
-} from "@/lib/web3/contracts";
+import { MEZO_TESTNET_ADDRESSES, INDIVIDUAL_POOL_ABI } from "@/lib/web3/contracts";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`;
 const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`;
@@ -98,26 +90,20 @@ export function useDepositWithApprove() {
     reset: resetDeposit,
   } = useWriteContract();
 
-  const { isLoading: isApproving, isSuccess: isApproveSuccess } =
-    useWaitForTransactionReceipt({
-      hash: approveHash,
-      pollingInterval: 3000,
-    });
+  const { isLoading: isApproving, isSuccess: isApproveSuccess } = useWaitForTransactionReceipt({
+    hash: approveHash,
+    pollingInterval: 3000,
+  });
 
-  const { isLoading: isDepositing, isSuccess: isDepositSuccess } =
-    useWaitForTransactionReceipt({
-      hash: depositHash,
-      pollingInterval: 3000,
-    });
+  const { isLoading: isDepositing, isSuccess: isDepositSuccess } = useWaitForTransactionReceipt({
+    hash: depositHash,
+    pollingInterval: 3000,
+  });
 
   // After approve succeeds, verify allowance and do deposit
   // This prevents the race condition by re-checking allowance after approval
   useEffect(() => {
-    if (
-      isApproveSuccess &&
-      pendingAmount &&
-      localState.step === "awaiting-approval"
-    ) {
+    if (isApproveSuccess && pendingAmount && localState.step === "awaiting-approval") {
       const operationId = localState.operationId;
       setLocalState((prev) => ({ ...prev, step: "verifying-allowance" }));
 
@@ -143,7 +129,7 @@ export function useDepositWithApprove() {
 
           if (allowance < pendingAmount) {
             throw new Error(
-              "Allowance verification failed - approval may not have been processed correctly",
+              "Allowance verification failed - approval may not have been processed correctly"
             );
           }
 
@@ -169,11 +155,10 @@ export function useDepositWithApprove() {
                   error: error.message,
                 }));
               },
-            },
+            }
           );
         } catch (error) {
-          const errorMsg =
-            error instanceof Error ? error.message : "Verification failed";
+          const errorMsg = error instanceof Error ? error.message : "Verification failed";
           operationLockRef.current = false;
           setLocalState((prev) => ({
             ...prev,
@@ -215,9 +200,7 @@ export function useDepositWithApprove() {
     async (amount: string | bigint) => {
       // Mutex: prevent concurrent deposit operations
       if (operationLockRef.current) {
-        throw new Error(
-          "A deposit operation is already in progress. Please wait.",
-        );
+        throw new Error("A deposit operation is already in progress. Please wait.");
       }
 
       try {
@@ -233,8 +216,7 @@ export function useDepositWithApprove() {
         resetApprove();
         resetDeposit();
 
-        const amountWei =
-          typeof amount === "string" ? parseEther(amount) : amount;
+        const amountWei = typeof amount === "string" ? parseEther(amount) : amount;
         setPendingAmount(amountWei);
 
         setLocalState({
@@ -277,7 +259,7 @@ export function useDepositWithApprove() {
                   error: error.message,
                 }));
               },
-            },
+            }
           );
         } else {
           // Need to approve first
@@ -308,12 +290,11 @@ export function useDepositWithApprove() {
                   error: error.message,
                 }));
               },
-            },
+            }
           );
         }
       } catch (error) {
-        const errorMsg =
-          error instanceof Error ? error.message : "Unknown error";
+        const errorMsg = error instanceof Error ? error.message : "Unknown error";
         operationLockRef.current = false;
         setLocalState((prev) => ({
           ...prev,
@@ -324,7 +305,7 @@ export function useDepositWithApprove() {
         throw error;
       }
     },
-    [address, config, writeApprove, writeDeposit, resetApprove, resetDeposit],
+    [address, config, writeApprove, writeDeposit, resetApprove, resetDeposit]
   );
 
   // Reset function to clear state and release lock

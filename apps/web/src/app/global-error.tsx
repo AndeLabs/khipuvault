@@ -256,17 +256,13 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
               </div>
               <div>
                 <h1 className="title">Error Critico</h1>
-                <p className="description">
-                  La aplicacion encontro un error grave
-                </p>
+                <p className="description">La aplicacion encontro un error grave</p>
               </div>
             </div>
 
             <div className="content">
               <div className="error-box">
-                <p className="error-message">
-                  {error.message || "Error desconocido"}
-                </p>
+                <p className="error-message">{error.message || "Error desconocido"}</p>
               </div>
 
               {error.digest && (
@@ -283,18 +279,15 @@ export default function GlobalError({ error, reset }: GlobalErrorProps) {
                 <p className="instructions-title">Que puedes hacer:</p>
                 <ul className="instructions-list">
                   <li>Intenta recargar la pagina usando el boton de abajo</li>
-                  <li>
-                    Si el problema persiste, limpia el cache de tu navegador
-                  </li>
+                  <li>Si el problema persiste, limpia el cache de tu navegador</li>
                   <li>Verifica tu conexion a internet</li>
                   <li>Intenta acceder desde otro navegador</li>
                 </ul>
               </div>
 
               <div className="footer-note">
-                Este es un error critico que ha afectado la carga completa de la
-                aplicacion. El equipo de KhipuVault ha sido notificado
-                automaticamente.
+                Este es un error critico que ha afectado la carga completa de la aplicacion. El
+                equipo de KhipuVault ha sido notificado automaticamente.
               </div>
             </div>
 

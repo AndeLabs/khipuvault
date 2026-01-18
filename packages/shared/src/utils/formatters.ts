@@ -19,10 +19,7 @@ const DECIMALS_18 = 1e18;
 /**
  * Format BigInt wei amount to human-readable MUSD string
  */
-export function formatMUSD(
-  weiAmount: string | bigint,
-  decimals: number = 2,
-): string {
+export function formatMUSD(weiAmount: string | bigint, decimals: number = 2): string {
   const amount = typeof weiAmount === "string" ? BigInt(weiAmount) : weiAmount;
   const formatted = Number(amount) / DECIMALS_18;
   return formatted.toLocaleString("en-US", {
@@ -34,10 +31,7 @@ export function formatMUSD(
 /**
  * Format MUSD with currency symbol
  */
-export function formatMUSDWithSymbol(
-  weiAmount: string | bigint,
-  decimals: number = 2,
-): string {
+export function formatMUSDWithSymbol(weiAmount: string | bigint, decimals: number = 2): string {
   return `${formatMUSD(weiAmount, decimals)} MUSD`;
 }
 
@@ -70,23 +64,15 @@ export function formatBTCCompact(weiAmount: string | bigint): string {
 /**
  * Format BTC with symbol
  */
-export function formatBTCWithSymbol(
-  weiAmount: string | bigint,
-  compact: boolean = true,
-): string {
-  const formatted = compact
-    ? formatBTCCompact(weiAmount)
-    : formatBTC(weiAmount);
+export function formatBTCWithSymbol(weiAmount: string | bigint, compact: boolean = true): string {
+  const formatted = compact ? formatBTCCompact(weiAmount) : formatBTC(weiAmount);
   return `${formatted} BTC`;
 }
 
 /**
  * Format BTC for display with localization
  */
-export function formatBTCLocalized(
-  weiAmount: string | bigint,
-  decimals: number = 6,
-): string {
+export function formatBTCLocalized(weiAmount: string | bigint, decimals: number = 6): string {
   const amount = typeof weiAmount === "string" ? BigInt(weiAmount) : weiAmount;
   const formatted = Number(amount) / DECIMALS_18;
   return formatted.toLocaleString("en-US", {
@@ -171,10 +157,7 @@ export function parseBTC(amount: string): bigint {
  * @param grossYield - Gross yield amount in wei
  * @param feePercent - Fee percentage in basis points (100 = 1%)
  */
-export function calculateFeeAmount(
-  grossYield: bigint,
-  feePercent: number,
-): bigint {
+export function calculateFeeAmount(grossYield: bigint, feePercent: number): bigint {
   return (grossYield * BigInt(feePercent)) / BigInt(10000);
 }
 
@@ -183,10 +166,7 @@ export function calculateFeeAmount(
  * @param grossYield - Gross yield amount in wei
  * @param feePercent - Fee percentage in basis points (100 = 1%)
  */
-export function calculateNetYield(
-  grossYield: bigint,
-  feePercent: number,
-): bigint {
+export function calculateNetYield(grossYield: bigint, feePercent: number): bigint {
   const feeAmount = calculateFeeAmount(grossYield, feePercent);
   return grossYield - feeAmount;
 }
@@ -195,10 +175,7 @@ export function calculateNetYield(
  * Format percentage from basis points
  * @param basisPoints - Fee in basis points (100 = 1%)
  */
-export function formatPercentage(
-  basisPoints: number,
-  decimals: number = 2,
-): string {
+export function formatPercentage(basisPoints: number, decimals: number = 2): string {
   return `${(basisPoints / 100).toFixed(decimals)}%`;
 }
 

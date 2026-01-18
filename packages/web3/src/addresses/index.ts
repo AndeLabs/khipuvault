@@ -34,12 +34,8 @@ function getCurrentNetwork(): Network {
 /**
  * Get contract address for specific network
  */
-export function getContractAddress(
-  network: Network,
-  contractName: ContractName,
-): string {
-  const addresses =
-    network === "testnet" ? TESTNET_ADDRESSES : MAINNET_ADDRESSES;
+export function getContractAddress(network: Network, contractName: ContractName): string {
+  const addresses = network === "testnet" ? TESTNET_ADDRESSES : MAINNET_ADDRESSES;
   return addresses[contractName];
 }
 
@@ -70,9 +66,7 @@ export function getActiveAddresses() {
  * Check if address is deployed (not zero address or empty)
  */
 export function isDeployed(address: string): boolean {
-  return (
-    address !== "" && address !== "0x0000000000000000000000000000000000000000"
-  );
+  return address !== "" && address !== "0x0000000000000000000000000000000000000000";
 }
 
 /**

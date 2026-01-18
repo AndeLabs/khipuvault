@@ -41,7 +41,7 @@ export class LotteryPoolListener extends BaseEventListener {
   private async processEventWithRetry(
     eventName: string,
     event: ethers.Log,
-    parsedLog: ethers.LogDescription,
+    parsedLog: ethers.LogDescription
   ): Promise<void> {
     try {
       await retryWithBackoff(
@@ -51,30 +51,22 @@ export class LotteryPoolListener extends BaseEventListener {
         {
           shouldRetry: (err) => {
             // Don't retry if it's a duplicate key error - that's expected for idempotency
-            if (
-              err instanceof Prisma.PrismaClientKnownRequestError &&
-              err.code === "P2002"
-            ) {
+            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
               console.log(
-                `⏭️ Skipping duplicate ${eventName} event: ${event.transactionHash}:${event.index}`,
+                `⏭️ Skipping duplicate ${eventName} event: ${event.transactionHash}:${event.index}`
               );
               return false;
             }
             return isRetryableError(err);
           },
           onRetry: (err, attempt) => {
-            console.warn(
-              `🔄 Retrying ${eventName} event (attempt ${attempt}): ${err.message}`,
-            );
+            console.warn(`🔄 Retrying ${eventName} event (attempt ${attempt}): ${err.message}`);
           },
-        },
+        }
       );
     } catch (error) {
       // After all retries failed, log to dead letter queue
-      console.error(
-        `❌ Failed to process ${eventName} after ${MAX_EVENT_RETRIES} retries:`,
-        error,
-      );
+      console.error(`❌ Failed to process ${eventName} after ${MAX_EVENT_RETRIES} retries:`, error);
       await this.logFailedEvent(eventName, event, error);
     }
   }
@@ -85,7 +77,7 @@ export class LotteryPoolListener extends BaseEventListener {
   private async logFailedEvent(
     eventName: string,
     event: ethers.Log,
-    error: unknown,
+    error: unknown
   ): Promise<void> {
     try {
       await prisma.eventLog.upsert({
@@ -149,11 +141,7 @@ export class LotteryPoolListener extends BaseEventListener {
           data: event.data,
         });
         if (parsedLog) {
-          await this.processEventWithRetry(
-            "TicketsPurchased",
-            event,
-            parsedLog,
-          );
+          await this.processEventWithRetry("TicketsPurchased", event, parsedLog);
         }
       } catch (error) {
         console.error("❌ Error parsing TicketsPurchased event:", error);
@@ -250,21 +238,17 @@ export class LotteryPoolListener extends BaseEventListener {
     let failedEvents = 0;
 
     console.log(
-      `📚 Indexing Lottery Pool historical events from block ${fromBlock} to ${currentBlock}`,
+      `📚 Indexing Lottery Pool historical events from block ${fromBlock} to ${currentBlock}`
     );
 
-    for (
-      let startBlock = fromBlock;
-      startBlock <= currentBlock;
-      startBlock += batchSize
-    ) {
+    for (let startBlock = fromBlock; startBlock <= currentBlock; startBlock += batchSize) {
       const endBlock = Math.min(startBlock + batchSize - 1, currentBlock);
 
       try {
         const events = await retryWithBackoff(
           async () => this.contract.queryFilter("*", startBlock, endBlock),
           MAX_EVENT_RETRIES,
-          INITIAL_RETRY_DELAY,
+          INITIAL_RETRY_DELAY
         );
 
         for (const event of events) {
@@ -275,42 +259,29 @@ export class LotteryPoolListener extends BaseEventListener {
             });
 
             if (parsedLog) {
-              await this.processEventWithRetry(
-                parsedLog.name,
-                event,
-                parsedLog,
-              );
+              await this.processEventWithRetry(parsedLog.name, event, parsedLog);
               processedEvents++;
             }
           } catch (eventError) {
             failedEvents++;
-            console.error(
-              `❌ Failed to process event in block ${event.blockNumber}:`,
-              eventError,
-            );
+            console.error(`❌ Failed to process event in block ${event.blockNumber}:`, eventError);
           }
         }
 
         console.log(
-          `✅ Indexed blocks ${startBlock}-${endBlock} (${events.length} events, ${processedEvents} processed, ${failedEvents} failed)`,
+          `✅ Indexed blocks ${startBlock}-${endBlock} (${events.length} events, ${processedEvents} processed, ${failedEvents} failed)`
         );
       } catch (error) {
-        console.error(
-          `❌ Error fetching events for blocks ${startBlock}-${endBlock}:`,
-          error,
-        );
+        console.error(`❌ Error fetching events for blocks ${startBlock}-${endBlock}:`, error);
       }
     }
 
     console.log(
-      `🎉 Lottery Pool historical indexing complete: ${processedEvents} processed, ${failedEvents} failed`,
+      `🎉 Lottery Pool historical indexing complete: ${processedEvents} processed, ${failedEvents} failed`
     );
   }
 
-  protected async processEvent(
-    event: ethers.Log,
-    parsedLog: ethers.LogDescription,
-  ): Promise<void> {
+  protected async processEvent(event: ethers.Log, parsedLog: ethers.LogDescription): Promise<void> {
     const eventName = parsedLog.name;
     const blockTimestamp = await getBlockTimestampCached(event.blockNumber);
 
@@ -342,7 +313,7 @@ export class LotteryPoolListener extends BaseEventListener {
   private async handleRoundCreated(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const roundId = Number(parsedLog.args.roundId);
     const ticketPrice = parsedLog.args.ticketPrice.toString();
@@ -396,15 +367,13 @@ export class LotteryPoolListener extends BaseEventListener {
       });
     });
 
-    console.log(
-      `🎰 Round Created: #${roundId} - ${maxTickets} tickets @ ${ticketPrice} MUSD`,
-    );
+    console.log(`🎰 Round Created: #${roundId} - ${maxTickets} tickets @ ${ticketPrice} MUSD`);
   }
 
   private async handleTicketsPurchased(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const roundId = Number(parsedLog.args.roundId);
     const participant = parsedLog.args.participant.toLowerCase();
@@ -479,15 +448,13 @@ export class LotteryPoolListener extends BaseEventListener {
       });
     });
 
-    console.log(
-      `🎟️ Tickets Purchased: ${ticketCount} by ${participant} for round #${roundId}`,
-    );
+    console.log(`🎟️ Tickets Purchased: ${ticketCount} by ${participant} for round #${roundId}`);
   }
 
   private async handleWinnerSelected(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const roundId = Number(parsedLog.args.roundId);
     const winner = parsedLog.args.winner.toLowerCase();
@@ -556,15 +523,13 @@ export class LotteryPoolListener extends BaseEventListener {
       }
     });
 
-    console.log(
-      `🏆 Winner Selected: ${winner} won ${prize} MUSD in round #${roundId}`,
-    );
+    console.log(`🏆 Winner Selected: ${winner} won ${prize} MUSD in round #${roundId}`);
   }
 
   private async handlePrizeClaimed(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const roundId = Number(parsedLog.args.roundId);
     const participant = parsedLog.args.participant.toLowerCase();
@@ -607,15 +572,13 @@ export class LotteryPoolListener extends BaseEventListener {
       });
     });
 
-    console.log(
-      `💰 Prize Claimed: ${participant} claimed ${amount} MUSD (winner: ${isWinner})`,
-    );
+    console.log(`💰 Prize Claimed: ${participant} claimed ${amount} MUSD (winner: ${isWinner})`);
   }
 
   private async handleRoundCancelled(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const roundId = Number(parsedLog.args.roundId);
     const reason = parsedLog.args.reason;
@@ -654,7 +617,7 @@ export class LotteryPoolListener extends BaseEventListener {
   private async handleCommitSubmitted(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const roundId = Number(parsedLog.args.roundId);
     const txHash = event.transactionHash;
@@ -695,7 +658,7 @@ export class LotteryPoolListener extends BaseEventListener {
   private async handleSeedRevealed(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const roundId = Number(parsedLog.args.roundId);
     const txHash = event.transactionHash;

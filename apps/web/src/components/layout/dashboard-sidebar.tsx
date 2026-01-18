@@ -1,12 +1,7 @@
 import { Home, Settings, Handshake, Lightbulb, Trophy } from "lucide-react";
 import Link from "next/link";
 
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 export const navItems = [
   { href: "/dashboard", icon: Home, label: "Dashboard" },

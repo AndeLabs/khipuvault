@@ -11,7 +11,7 @@ function Skeleton({ className, variant = "shimmer", ...props }: SkeletonProps) {
         "rounded-md bg-surface-elevated",
         variant === "pulse" && "animate-pulse",
         variant === "shimmer" && "animate-shimmer",
-        className,
+        className
       )}
       {...props}
     />
@@ -19,15 +19,9 @@ function Skeleton({ className, variant = "shimmer", ...props }: SkeletonProps) {
 }
 
 // Specialized skeleton components for common use cases
-function SkeletonCard({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function SkeletonCard({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return (
-    <div
-      className={cn("rounded-lg border border-border p-6 space-y-4", className)}
-      {...props}
-    >
+    <div className={cn("space-y-4 rounded-lg border border-border p-6", className)} {...props}>
       <Skeleton className="h-4 w-2/3" />
       <Skeleton className="h-3 w-1/2" />
       <div className="space-y-2">
@@ -45,31 +39,18 @@ function SkeletonText({
 }: React.HTMLAttributes<HTMLDivElement> & { lines?: number }) {
   return (
     <div className={cn("space-y-2", className)} {...props}>
-      {Array.from({ length: lines }, (_, i) => `text-line-${i}`).map(
-        (lineKey, i) => (
-          <Skeleton
-            key={lineKey}
-            className={cn("h-4", i === lines - 1 ? "w-3/4" : "w-full")}
-          />
-        ),
-      )}
+      {Array.from({ length: lines }, (_, i) => `text-line-${i}`).map((lineKey, i) => (
+        <Skeleton key={lineKey} className={cn("h-4", i === lines - 1 ? "w-3/4" : "w-full")} />
+      ))}
     </div>
   );
 }
 
-function SkeletonAvatar({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
-  return (
-    <Skeleton className={cn("h-12 w-12 rounded-full", className)} {...props} />
-  );
+function SkeletonAvatar({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
+  return <Skeleton className={cn("h-12 w-12 rounded-full", className)} {...props} />;
 }
 
-function SkeletonButton({
-  className,
-  ...props
-}: React.HTMLAttributes<HTMLDivElement>) {
+function SkeletonButton({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) {
   return <Skeleton className={cn("h-10 w-24", className)} {...props} />;
 }
 

@@ -1,26 +1,13 @@
 "use client";
 
-import {
-  ArrowDownCircle,
-  ArrowUpCircle,
-  Award,
-  RefreshCw,
-  FileText,
-  Filter,
-} from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, Award, RefreshCw, FileText, Filter } from "lucide-react";
 import * as React from "react";
 import { formatUnits } from "viem";
 
 import { AmountDisplay } from "@/components/common";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import {
   Select,
   SelectContent,
@@ -207,7 +194,7 @@ export function TransactionHistory({
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-full bg-gradient-lavanda flex items-center justify-center">
+            <div className="bg-gradient-lavanda flex h-10 w-10 items-center justify-center rounded-full">
               <FileText className="h-5 w-5 text-white" />
             </div>
             <div>
@@ -222,15 +209,8 @@ export function TransactionHistory({
 
           <div className="flex items-center gap-2">
             {hasTransactions && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onRefresh}
-                disabled={isLoading}
-              >
-                <RefreshCw
-                  className={cn("h-4 w-4 mr-2", isLoading && "animate-spin")}
-                />
+              <Button variant="outline" size="sm" onClick={onRefresh} disabled={isLoading}>
+                <RefreshCw className={cn("mr-2 h-4 w-4", isLoading && "animate-spin")} />
                 Refresh
               </Button>
             )}
@@ -259,16 +239,14 @@ export function TransactionHistory({
                   <SelectItem value="deposit">Deposits</SelectItem>
                   <SelectItem value="withdraw">Withdrawals</SelectItem>
                   <SelectItem value="claim_yield">Yield Claims</SelectItem>
-                  <SelectItem value="claim_referral">
-                    Referral Claims
-                  </SelectItem>
+                  <SelectItem value="claim_referral">Referral Claims</SelectItem>
                   <SelectItem value="auto_compound">Auto-Compounds</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             {/* Desktop Table */}
-            <div className="hidden md:block rounded-lg border border-border overflow-hidden">
+            <div className="hidden overflow-hidden rounded-lg border border-border md:block">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -289,24 +267,17 @@ export function TransactionHistory({
                             <div className="flex items-center gap-2">
                               <div
                                 className={cn(
-                                  "h-8 w-8 rounded-full bg-surface-elevated flex items-center justify-center",
-                                  txInfo.color,
+                                  "flex h-8 w-8 items-center justify-center rounded-full bg-surface-elevated",
+                                  txInfo.color
                                 )}
                               >
                                 {txInfo.icon}
                               </div>
-                              <span className="font-medium">
-                                {txInfo.label}
-                              </span>
+                              <span className="font-medium">{txInfo.label}</span>
                             </div>
                           </TableCell>
                           <TableCell>
-                            <span
-                              className={cn(
-                                "font-mono font-semibold",
-                                txInfo.color,
-                              )}
-                            >
+                            <span className={cn("font-mono font-semibold", txInfo.color)}>
                               {tx.amount > BigInt(0) ? (
                                 <AmountDisplay
                                   amount={formatAmount(tx.amount, tx.type)}
@@ -314,9 +285,7 @@ export function TransactionHistory({
                                   size="sm"
                                 />
                               ) : (
-                                <span className="text-xs text-muted-foreground">
-                                  —
-                                </span>
+                                <span className="text-xs text-muted-foreground">—</span>
                               )}
                             </span>
                           </TableCell>
@@ -349,10 +318,7 @@ export function TransactionHistory({
                     })
                   ) : (
                     <TableRow>
-                      <TableCell
-                        colSpan={5}
-                        className="text-center text-muted-foreground py-8"
-                      >
+                      <TableCell colSpan={5} className="py-8 text-center text-muted-foreground">
                         No transactions found for this filter
                       </TableCell>
                     </TableRow>
@@ -362,21 +328,21 @@ export function TransactionHistory({
             </div>
 
             {/* Mobile List */}
-            <div className="md:hidden space-y-3">
+            <div className="space-y-3 md:hidden">
               {paginatedTransactions.length > 0 ? (
                 paginatedTransactions.map((tx) => {
                   const txInfo = TRANSACTION_LABELS[tx.type];
                   return (
                     <div
                       key={tx.hash}
-                      className="p-4 rounded-lg border border-border bg-surface-elevated space-y-3"
+                      className="space-y-3 rounded-lg border border-border bg-surface-elevated p-4"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex items-center gap-3">
                           <div
                             className={cn(
-                              "h-10 w-10 rounded-full bg-surface flex items-center justify-center",
-                              txInfo.color,
+                              "flex h-10 w-10 items-center justify-center rounded-full bg-surface",
+                              txInfo.color
                             )}
                           >
                             {txInfo.icon}
@@ -406,15 +372,8 @@ export function TransactionHistory({
 
                       {tx.amount > BigInt(0) && (
                         <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            Amount
-                          </span>
-                          <span
-                            className={cn(
-                              "font-mono font-semibold",
-                              txInfo.color,
-                            )}
-                          >
+                          <span className="text-sm text-muted-foreground">Amount</span>
+                          <span className={cn("font-mono font-semibold", txInfo.color)}>
                             <AmountDisplay
                               amount={formatAmount(tx.amount, tx.type)}
                               symbol="mUSD"
@@ -424,14 +383,14 @@ export function TransactionHistory({
                         </div>
                       )}
 
-                      <div className="pt-2 border-t border-border">
+                      <div className="border-t border-border pt-2">
                         <TransactionLink txHash={tx.hash} />
                       </div>
                     </div>
                   );
                 })
               ) : (
-                <div className="text-center text-muted-foreground py-8">
+                <div className="py-8 text-center text-muted-foreground">
                   No transactions found for this filter
                 </div>
               )}
@@ -439,7 +398,7 @@ export function TransactionHistory({
 
             {/* Pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between pt-4 border-t border-border">
+              <div className="flex items-center justify-between border-t border-border pt-4">
                 <div className="text-sm text-muted-foreground">
                   Page {page} of {totalPages}
                 </div>
@@ -465,14 +424,14 @@ export function TransactionHistory({
             )}
           </>
         ) : (
-          <div className="text-center py-12">
-            <div className="mx-auto w-16 h-16 rounded-full bg-surface-elevated flex items-center justify-center mb-4">
+          <div className="py-12 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-surface-elevated">
               <FileText className="h-8 w-8 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">No Transactions Yet</h3>
-            <p className="text-muted-foreground text-sm max-w-md mx-auto">
-              Your transaction history will appear here after you make your
-              first deposit, withdrawal, or claim.
+            <h3 className="mb-2 text-lg font-semibold">No Transactions Yet</h3>
+            <p className="mx-auto max-w-md text-sm text-muted-foreground">
+              Your transaction history will appear here after you make your first deposit,
+              withdrawal, or claim.
             </p>
           </div>
         )}

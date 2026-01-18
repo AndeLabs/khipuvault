@@ -44,37 +44,26 @@ const settingsSections = [
 
 export default function SettingsPage() {
   return (
-    <div className="space-y-6 animate-slide-up">
-      <PageHeader
-        title="Settings"
-        description="Manage your account settings and preferences"
-      />
+    <div className="animate-slide-up space-y-6">
+      <PageHeader title="Settings" description="Manage your account settings and preferences" />
 
       <div className="grid gap-6 md:grid-cols-2">
         {settingsSections.map((section) => {
           const Icon = section.icon;
           return (
             <Link key={section.href} href={section.href}>
-              <Card
-                variant="surface"
-                hover="glow"
-                className="h-full cursor-pointer group"
-              >
+              <Card variant="surface" hover="glow" className="group h-full cursor-pointer">
                 <CardContent className="pt-6">
                   <div
-                    className={`h-12 w-12 rounded-full ${section.bgColor} flex items-center justify-center mb-4`}
+                    className={`h-12 w-12 rounded-full ${section.bgColor} mb-4 flex items-center justify-center`}
                   >
                     <Icon className={`h-6 w-6 ${section.color}`} />
                   </div>
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="text-xl font-heading font-semibold">
-                      {section.title}
-                    </h3>
-                    <ChevronRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground transition-colors" />
+                  <div className="mb-2 flex items-start justify-between">
+                    <h3 className="font-heading text-xl font-semibold">{section.title}</h3>
+                    <ChevronRight className="h-5 w-5 text-muted-foreground transition-colors group-hover:text-foreground" />
                   </div>
-                  <p className="text-sm text-muted-foreground">
-                    {section.description}
-                  </p>
+                  <p className="text-sm text-muted-foreground">{section.description}</p>
                 </CardContent>
               </Card>
             </Link>

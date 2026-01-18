@@ -9,15 +9,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback, useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
-import {
-  MEZO_V3_ADDRESSES,
-  INDIVIDUAL_POOL_V3_ABI,
-} from "@/lib/web3/contracts-v3";
+import { MEZO_V3_ADDRESSES, INDIVIDUAL_POOL_V3_ABI } from "@/lib/web3/contracts-v3";
 
 import { QUERY_KEYS, INITIAL_TX_STATE, TransactionState } from "./constants";
 
-const INDIVIDUAL_POOL_ADDRESS =
-  MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
+const INDIVIDUAL_POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
 
 // ============================================================================
 // YIELD CLAIM HOOKS
@@ -28,8 +24,7 @@ const INDIVIDUAL_POOL_ADDRESS =
  */
 export function useClaimYield() {
   const queryClient = useQueryClient();
-  const [localState, setLocalState] =
-    useState<TransactionState>(INITIAL_TX_STATE);
+  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE);
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
@@ -85,8 +80,7 @@ export function useClaimYield() {
  */
 export function useClaimReferralRewards() {
   const queryClient = useQueryClient();
-  const [localState, setLocalState] =
-    useState<TransactionState>(INITIAL_TX_STATE);
+  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE);
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
@@ -146,8 +140,7 @@ export function useClaimReferralRewards() {
  */
 export function useToggleAutoCompound() {
   const queryClient = useQueryClient();
-  const [localState, setLocalState] =
-    useState<TransactionState>(INITIAL_TX_STATE);
+  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE);
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
@@ -171,7 +164,7 @@ export function useToggleAutoCompound() {
         throw err;
       }
     },
-    [writeContract],
+    [writeContract]
   );
 
   // Update local state when hash changes

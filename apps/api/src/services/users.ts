@@ -31,9 +31,7 @@ function validateAndNormalizeAddress(address: string): string {
 }
 
 export class UsersService {
-  async getUserByAddress(
-    address: string,
-  ): Promise<User & { deposits: Deposit[] }> {
+  async getUserByAddress(address: string): Promise<User & { deposits: Deposit[] }> {
     const normalizedAddress = validateAndNormalizeAddress(address);
     const user = await prisma.user.findUnique({
       where: { address: normalizedAddress },
@@ -85,29 +83,28 @@ export class UsersService {
         // This scales to millions of transactions without memory issues
         type SumResult = { total: string | null }[];
 
-        const [depositResult, withdrawResult, yieldResult, recentDeposits] =
-          await Promise.all([
-            prisma.$queryRaw<SumResult>`
+        const [depositResult, withdrawResult, yieldResult, recentDeposits] = await Promise.all([
+          prisma.$queryRaw<SumResult>`
             SELECT COALESCE(SUM(CAST(amount AS DECIMAL(78,0))), 0)::text as total
             FROM "Deposit"
             WHERE "userAddress" = ${normalizedAddress} AND type = 'DEPOSIT'
           `,
-            prisma.$queryRaw<SumResult>`
+          prisma.$queryRaw<SumResult>`
             SELECT COALESCE(SUM(CAST(amount AS DECIMAL(78,0))), 0)::text as total
             FROM "Deposit"
             WHERE "userAddress" = ${normalizedAddress} AND type = 'WITHDRAW'
           `,
-            prisma.$queryRaw<SumResult>`
+          prisma.$queryRaw<SumResult>`
             SELECT COALESCE(SUM(CAST(amount AS DECIMAL(78,0))), 0)::text as total
             FROM "Deposit"
             WHERE "userAddress" = ${normalizedAddress} AND type = 'YIELD_CLAIM'
           `,
-            prisma.deposit.findMany({
-              where: { userAddress: normalizedAddress },
-              orderBy: { timestamp: "desc" },
-              take: 5,
-            }),
-          ]);
+          prisma.deposit.findMany({
+            where: { userAddress: normalizedAddress },
+            orderBy: { timestamp: "desc" },
+            take: 5,
+          }),
+        ]);
 
         const totalDeposited = BigInt(depositResult[0]?.total || "0");
         const totalWithdrawn = BigInt(withdrawResult[0]?.total || "0");
@@ -128,7 +125,7 @@ export class UsersService {
           recentActivity: recentDeposits,
         };
       },
-      CACHE_TTL.USER_PORTFOLIO,
+      CACHE_TTL.USER_PORTFOLIO
     );
   }
 
@@ -194,22 +191,20 @@ export class UsersService {
     }
 
     // Build result array
-    const positions = Array.from(positionMap.entries()).map(
-      ([poolAddress, totals]) => {
-        const pool = poolMap.get(poolAddress);
-        const balance = totals.deposited - totals.withdrawn;
+    const positions = Array.from(positionMap.entries()).map(([poolAddress, totals]) => {
+      const pool = poolMap.get(poolAddress);
+      const balance = totals.deposited - totals.withdrawn;
 
-        return {
-          poolAddress,
-          poolName: pool?.name || "Unknown Pool",
-          poolType: pool?.poolType || "unknown",
-          balance: balance.toString(),
-          totalDeposited: totals.deposited.toString(),
-          totalWithdrawn: totals.withdrawn.toString(),
-          totalYieldClaimed: totals.yieldClaimed.toString(),
-        };
-      },
-    );
+      return {
+        poolAddress,
+        poolName: pool?.name || "Unknown Pool",
+        poolType: pool?.poolType || "unknown",
+        balance: balance.toString(),
+        totalDeposited: totals.deposited.toString(),
+        totalWithdrawn: totals.withdrawn.toString(),
+        totalYieldClaimed: totals.yieldClaimed.toString(),
+      };
+    });
 
     return positions.filter((p) => BigInt(p.balance) > 0);
   }
@@ -217,7 +212,7 @@ export class UsersService {
   async getUserTransactions(
     address: string,
     limit = 50,
-    offset = 0,
+    offset = 0
   ): Promise<{
     transactions: Deposit[];
     pagination: {
@@ -255,10 +250,7 @@ export class UsersService {
     };
   }
 
-  async createOrUpdateUser(
-    address: string,
-    data?: { ensName?: string; avatar?: string },
-  ) {
+  async createOrUpdateUser(address: string, data?: { ensName?: string; avatar?: string }) {
     // Validate address before database operation
     const normalizedAddress = validateAndNormalizeAddress(address);
     return prisma.user.upsert({

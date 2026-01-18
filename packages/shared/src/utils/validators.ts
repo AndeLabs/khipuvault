@@ -1,8 +1,4 @@
-import {
-  MIN_DEPOSIT_MUSD,
-  MAX_DEPOSIT_MUSD,
-  MIN_WITHDRAW_MUSD,
-} from "../constants/pools";
+import { MIN_DEPOSIT_MUSD, MAX_DEPOSIT_MUSD, MIN_WITHDRAW_MUSD } from "../constants/pools";
 
 /**
  * Validate Ethereum address
@@ -40,7 +36,7 @@ export function isValidDepositAmount(amount: string): {
  */
 export function isValidWithdrawAmount(
   amount: string,
-  balance: string,
+  balance: string
 ): { valid: boolean; error?: string } {
   try {
     const amountBigInt = BigInt(amount);

@@ -3,13 +3,7 @@
 export const dynamic = "force-dynamic";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Switch } from "@/components/ui/switch";
@@ -18,19 +12,11 @@ export default function NotificationsPage() {
   const notificationCategories = [
     {
       title: "Rendimientos y Ganancias",
-      items: [
-        "Rendimientos generados",
-        "Metas alcanzadas",
-        "Nuevos yields disponibles",
-      ],
+      items: ["Rendimientos generados", "Metas alcanzadas", "Nuevos yields disponibles"],
     },
     {
       title: "Loterías",
-      items: [
-        "Resultados de sorteos",
-        "Nuevas rondas disponibles",
-        "Recordatorio antes de cierre",
-      ],
+      items: ["Resultados de sorteos", "Nuevas rondas disponibles", "Recordatorio antes de cierre"],
     },
     {
       title: "Tandas Rotativas",
@@ -43,22 +29,16 @@ export default function NotificationsPage() {
     },
     {
       title: "Pools Cooperativos",
-      items: [
-        "Nuevos miembros",
-        "Cambios en el pool",
-        "Solicitudes de ingreso (admin)",
-      ],
+      items: ["Nuevos miembros", "Cambios en el pool", "Solicitudes de ingreso (admin)"],
     },
   ];
 
   return (
     <div className="space-y-8">
-      <Card className="bg-card border-primary/20 shadow-custom">
+      <Card className="shadow-custom border-primary/20 bg-card">
         <CardHeader>
           <CardTitle>Notificaciones</CardTitle>
-          <CardDescription>
-            Elige cómo y cuándo quieres recibir notificaciones.
-          </CardDescription>
+          <CardDescription>Elige cómo y cuándo quieres recibir notificaciones.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="flex items-center justify-between rounded-lg border p-4">
@@ -74,23 +54,14 @@ export default function NotificationsPage() {
           </div>
 
           {notificationCategories.map((category) => (
-            <div
-              key={category.title}
-              className="space-y-4 rounded-lg border p-4"
-            >
+            <div key={category.title} className="space-y-4 rounded-lg border p-4">
               <h3 className="font-semibold">{category.title}</h3>
               {category.items.map((item) => (
                 <div key={item} className="flex items-center justify-between">
-                  <Label
-                    htmlFor={item.replace(/\s+/g, "-").toLowerCase()}
-                    className="font-normal"
-                  >
+                  <Label htmlFor={item.replace(/\s+/g, "-").toLowerCase()} className="font-normal">
                     {item}
                   </Label>
-                  <Switch
-                    id={item.replace(/\s+/g, "-").toLowerCase()}
-                    defaultChecked
-                  />
+                  <Switch id={item.replace(/\s+/g, "-").toLowerCase()} defaultChecked />
                 </div>
               ))}
             </div>
@@ -98,10 +69,7 @@ export default function NotificationsPage() {
 
           <div className="space-y-4 rounded-lg border p-4">
             <h3 className="font-semibold">Frecuencia de Resúmenes por Email</h3>
-            <RadioGroup
-              defaultValue="daily"
-              className="flex flex-col md:flex-row gap-4"
-            >
+            <RadioGroup defaultValue="daily" className="flex flex-col gap-4 md:flex-row">
               <div>
                 <RadioGroupItem value="realtime" id="realtime" />
                 <Label htmlFor="realtime" className="ml-2">
@@ -123,7 +91,7 @@ export default function NotificationsPage() {
             </RadioGroup>
           </div>
 
-          <div className="flex justify-between items-center pt-4">
+          <div className="flex items-center justify-between pt-4">
             <Button variant="ghost">🔔 Enviar Notificación de Prueba</Button>
             <div className="flex gap-2">
               <Button variant="outline">Descartar</Button>

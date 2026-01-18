@@ -14,12 +14,7 @@ import {
   securityHeaders,
   validateApiKey,
 } from "../../middleware/security";
-import {
-  createMockRequest,
-  createMockResponse,
-  createMockNext,
-  fixtures,
-} from "../setup";
+import { createMockRequest, createMockResponse, createMockNext, fixtures } from "../setup";
 
 describe("Security Middleware", () => {
   beforeEach(() => {
@@ -55,7 +50,7 @@ describe("Security Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Payload Too Large",
-        }),
+        })
       );
       expect(next).not.toHaveBeenCalled();
     });
@@ -96,7 +91,7 @@ describe("Security Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Missing Content-Type",
-        }),
+        })
       );
     });
 
@@ -129,7 +124,7 @@ describe("Security Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Unsupported Media Type",
-        }),
+        })
       );
     });
   });
@@ -162,7 +157,7 @@ describe("Security Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Invalid Address",
-        }),
+        })
       );
     });
 
@@ -268,10 +263,7 @@ describe("Security Middleware", () => {
       requestId(req, res, next);
 
       expect(req.headers["x-request-id"]).toBeDefined();
-      expect(res.setHeader).toHaveBeenCalledWith(
-        "X-Request-ID",
-        expect.any(String),
-      );
+      expect(res.setHeader).toHaveBeenCalledWith("X-Request-ID", expect.any(String));
       expect(next).toHaveBeenCalled();
     });
 
@@ -298,23 +290,14 @@ describe("Security Middleware", () => {
 
       securityHeaders(req, res, next);
 
-      expect(res.setHeader).toHaveBeenCalledWith(
-        "X-Content-Type-Options",
-        "nosniff",
-      );
+      expect(res.setHeader).toHaveBeenCalledWith("X-Content-Type-Options", "nosniff");
       expect(res.setHeader).toHaveBeenCalledWith("X-Frame-Options", "DENY");
-      expect(res.setHeader).toHaveBeenCalledWith(
-        "X-XSS-Protection",
-        "1; mode=block",
-      );
+      expect(res.setHeader).toHaveBeenCalledWith("X-XSS-Protection", "1; mode=block");
       expect(res.setHeader).toHaveBeenCalledWith(
         "Referrer-Policy",
-        "strict-origin-when-cross-origin",
+        "strict-origin-when-cross-origin"
       );
-      expect(res.setHeader).toHaveBeenCalledWith(
-        "Permissions-Policy",
-        expect.any(String),
-      );
+      expect(res.setHeader).toHaveBeenCalledWith("Permissions-Policy", expect.any(String));
       expect(next).toHaveBeenCalled();
     });
   });
@@ -350,7 +333,7 @@ describe("Security Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Unauthorized",
-        }),
+        })
       );
 
       // Restore

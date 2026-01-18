@@ -63,34 +63,32 @@ export function Products() {
   return (
     <section className="py-20 md:py-28">
       <div className="container mx-auto max-w-7xl px-4">
-        <AnimateOnScroll className="text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-accent/10 border border-accent/20 text-accent text-sm font-medium mb-4">
+        <AnimateOnScroll className="mb-16 text-center">
+          <span className="mb-4 inline-block rounded-full border border-accent/20 bg-accent/10 px-4 py-1.5 text-sm font-medium text-accent">
             Products
           </span>
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
-            Choose Your{" "}
-            <span className="text-gradient-brand">Savings Strategy</span>
+            Choose Your <span className="text-gradient-brand">Savings Strategy</span>
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            Whether you prefer solo saving or community pools, we have the right
-            product for you.
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+            Whether you prefer solo saving or community pools, we have the right product for you.
           </p>
         </AnimateOnScroll>
 
         {/* Product Cards */}
-        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
+        <div className="grid gap-6 md:grid-cols-3 lg:gap-8">
           {products.map((product, index) => (
             <AnimateOnScroll key={product.title} delay={`${index * 100}ms`}>
               <div
                 className={cn(
-                  "relative group h-full rounded-2xl border bg-surface-elevated/50 backdrop-blur-sm p-6 lg:p-8 transition-all duration-300",
-                  "hover:border-opacity-50 hover:shadow-xl hover:-translate-y-1",
+                  "group relative h-full rounded-2xl border bg-surface-elevated/50 p-6 backdrop-blur-sm transition-all duration-300 lg:p-8",
+                  "hover:-translate-y-1 hover:border-opacity-50 hover:shadow-xl",
                   product.color === "primary" &&
                     "border-primary/20 hover:border-primary/50 hover:shadow-primary/10",
                   product.color === "accent" &&
                     "border-accent/20 hover:border-accent/50 hover:shadow-accent/10",
                   product.color === "success" &&
-                    "border-success/20 hover:border-success/50 hover:shadow-success/10",
+                    "border-success/20 hover:border-success/50 hover:shadow-success/10"
                 )}
               >
                 {/* Badge */}
@@ -98,16 +96,14 @@ export function Products() {
                   <Badge
                     className={cn(
                       "absolute -top-3 left-6",
-                      product.badge === "Live" &&
-                        "bg-success/20 text-success border-success/30",
-                      product.badge === "Beta" &&
-                        "bg-accent/20 text-accent border-accent/30",
+                      product.badge === "Live" && "border-success/30 bg-success/20 text-success",
+                      product.badge === "Beta" && "border-accent/30 bg-accent/20 text-accent"
                     )}
                   >
                     {product.badge === "Live" && (
-                      <span className="relative flex h-2 w-2 mr-1.5">
-                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                      <span className="relative mr-1.5 flex h-2 w-2">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75"></span>
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-success"></span>
                       </span>
                     )}
                     {product.badge}
@@ -115,21 +111,21 @@ export function Products() {
                 )}
 
                 {/* Header */}
-                <div className="flex items-start justify-between mb-6">
+                <div className="mb-6 flex items-start justify-between">
                   <div
                     className={cn(
-                      "w-14 h-14 rounded-xl flex items-center justify-center",
+                      "flex h-14 w-14 items-center justify-center rounded-xl",
                       product.color === "primary" && "bg-primary/10",
                       product.color === "accent" && "bg-accent/10",
-                      product.color === "success" && "bg-success/10",
+                      product.color === "success" && "bg-success/10"
                     )}
                   >
                     <product.icon
                       className={cn(
-                        "w-7 h-7",
+                        "h-7 w-7",
                         product.color === "primary" && "text-primary",
                         product.color === "accent" && "text-accent",
-                        product.color === "success" && "text-success",
+                        product.color === "success" && "text-success"
                       )}
                     />
                   </div>
@@ -137,12 +133,10 @@ export function Products() {
                   {/* Highlight Badge */}
                   <div
                     className={cn(
-                      "px-3 py-1 rounded-full text-sm font-semibold",
-                      product.color === "primary" &&
-                        "bg-primary/10 text-primary",
+                      "rounded-full px-3 py-1 text-sm font-semibold",
+                      product.color === "primary" && "bg-primary/10 text-primary",
                       product.color === "accent" && "bg-accent/10 text-accent",
-                      product.color === "success" &&
-                        "bg-success/10 text-success",
+                      product.color === "success" && "bg-success/10 text-success"
                     )}
                   >
                     {product.highlight}
@@ -150,26 +144,19 @@ export function Products() {
                 </div>
 
                 {/* Content */}
-                <h3 className="text-xl font-semibold text-white mb-3">
-                  {product.title}
-                </h3>
-                <p className="text-muted-foreground mb-6 leading-relaxed">
-                  {product.description}
-                </p>
+                <h3 className="mb-3 text-xl font-semibold text-white">{product.title}</h3>
+                <p className="mb-6 leading-relaxed text-muted-foreground">{product.description}</p>
 
                 {/* Features */}
-                <ul className="space-y-3 mb-8">
+                <ul className="mb-8 space-y-3">
                   {product.features.map((feature) => (
-                    <li
-                      key={feature}
-                      className="flex items-center gap-3 text-sm"
-                    >
+                    <li key={feature} className="flex items-center gap-3 text-sm">
                       <svg
                         className={cn(
-                          "w-4 h-4 flex-shrink-0",
+                          "h-4 w-4 flex-shrink-0",
                           product.color === "primary" && "text-primary",
                           product.color === "accent" && "text-accent",
-                          product.color === "success" && "text-success",
+                          product.color === "success" && "text-success"
                         )}
                         fill="currentColor"
                         viewBox="0 0 20 20"
@@ -190,13 +177,13 @@ export function Products() {
                   href={product.href}
                   className={cn(
                     buttonVariants({ variant: "outline", size: "lg" }),
-                    "w-full justify-center group/btn",
+                    "group/btn w-full justify-center",
                     product.color === "primary" &&
-                      "border-primary/30 hover:bg-primary/10 hover:border-primary/50",
+                      "border-primary/30 hover:border-primary/50 hover:bg-primary/10",
                     product.color === "accent" &&
-                      "border-accent/30 hover:bg-accent/10 hover:border-accent/50",
+                      "border-accent/30 hover:border-accent/50 hover:bg-accent/10",
                     product.color === "success" &&
-                      "border-success/30 hover:bg-success/10 hover:border-success/50",
+                      "border-success/30 hover:border-success/50 hover:bg-success/10"
                   )}
                 >
                   {product.badge === "Beta" ? "Try Beta" : "Start Now"}

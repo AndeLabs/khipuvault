@@ -69,11 +69,7 @@ Botones con solo iconos sin descripcion accesible han sido actualizados:
   title={copied ? "¡Copiado!" : "Copiar dirección"}
   aria-label={copied ? "Address copied" : "Copy contract address"}
 >
-  {copied ? (
-    <Check className="h-3 w-3 text-green-500" />
-  ) : (
-    <Copy className="h-3 w-3" />
-  )}
+  {copied ? <Check className="h-3 w-3 text-green-500" /> : <Copy className="h-3 w-3" />}
   <span className="sr-only">{copied ? "Copied" : "Copy"}</span>
 </Button>
 ```
@@ -149,10 +145,7 @@ Botones con solo iconos sin descripcion accesible han sido actualizados:
 ```tsx
 <Button
   variant="ghost"
-  className={cn(
-    "w-full justify-between",
-    isActive && "bg-surface-elevated text-lavanda",
-  )}
+  className={cn("w-full justify-between", isActive && "bg-surface-elevated text-lavanda")}
   aria-label={`${isExpanded || isActive ? "Collapse" : "Expand"} ${item.title} menu`}
 >
   <div className="flex items-center gap-3">
@@ -161,8 +154,8 @@ Botones con solo iconos sin descripcion accesible han sido actualizados:
   </div>
   <ChevronDown
     className={cn(
-      "h-4 w-4 transition-transform duration-fast",
-      (isExpanded || isActive) && "rotate-180",
+      "duration-fast h-4 w-4 transition-transform",
+      (isExpanded || isActive) && "rotate-180"
     )}
     aria-hidden="true"
   />

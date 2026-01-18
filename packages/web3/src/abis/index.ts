@@ -17,13 +17,10 @@ import MezoIntegrationV3ABI from "./MezoIntegrationV3.json";
 
 // Type-safe exports
 export const INDIVIDUAL_POOL_V3_ABI = IndividualPoolV3ABI as readonly unknown[];
-export const COOPERATIVE_POOL_V3_ABI =
-  CooperativePoolV3ABI as readonly unknown[];
+export const COOPERATIVE_POOL_V3_ABI = CooperativePoolV3ABI as readonly unknown[];
 export const LOTTERY_POOL_V3_ABI = LotteryPoolV3ABI as readonly unknown[];
-export const YIELD_AGGREGATOR_V3_ABI =
-  YieldAggregatorV3ABI as readonly unknown[];
-export const MEZO_INTEGRATION_V3_ABI =
-  MezoIntegrationV3ABI as readonly unknown[];
+export const YIELD_AGGREGATOR_V3_ABI = YieldAggregatorV3ABI as readonly unknown[];
+export const MEZO_INTEGRATION_V3_ABI = MezoIntegrationV3ABI as readonly unknown[];
 
 // Re-export for convenience
 export {

@@ -32,11 +32,11 @@ export function AppShell({ children, className }: AppShellProps) {
           id="main-content"
           tabIndex={-1}
           className={cn(
-            "flex-1 w-full md:ml-0",
-            "px-4 md:px-6 py-6",
-            "max-w-[1600px] mx-auto",
+            "w-full flex-1 md:ml-0",
+            "px-4 py-6 md:px-6",
+            "mx-auto max-w-[1600px]",
             "focus:outline-none",
-            className,
+            className
           )}
         >
           {children}
@@ -56,23 +56,14 @@ interface PageHeaderProps {
   className?: string;
 }
 
-export function PageHeader({
-  title,
-  description,
-  actions,
-  className,
-}: PageHeaderProps) {
+export function PageHeader({ title, description, actions, className }: PageHeaderProps) {
   return (
     <div className={cn("mb-6 md:mb-8", className)}>
       <div className="flex items-start justify-between gap-4">
         <div className="space-y-1">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold">
-            {title}
-          </h1>
+          <h1 className="font-heading text-3xl font-bold md:text-4xl">{title}</h1>
           {description && (
-            <p className="text-muted-foreground text-base md:text-lg">
-              {description}
-            </p>
+            <p className="text-base text-muted-foreground md:text-lg">{description}</p>
           )}
         </div>
         {actions && <div className="flex items-center gap-2">{actions}</div>}
@@ -91,24 +82,13 @@ interface PageSectionProps {
   className?: string;
 }
 
-export function PageSection({
-  title,
-  description,
-  children,
-  className,
-}: PageSectionProps) {
+export function PageSection({ title, description, children, className }: PageSectionProps) {
   return (
     <section className={cn("space-y-4", className)}>
       {(title ?? description) && (
         <div className="space-y-1">
-          {title && (
-            <h2 className="text-xl md:text-2xl font-heading font-semibold">
-              {title}
-            </h2>
-          )}
-          {description && (
-            <p className="text-muted-foreground">{description}</p>
-          )}
+          {title && <h2 className="font-heading text-xl font-semibold md:text-2xl">{title}</h2>}
+          {description && <p className="text-muted-foreground">{description}</p>}
         </div>
       )}
       {children}

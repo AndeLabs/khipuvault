@@ -7,16 +7,8 @@ import { describe, it, expect, vi } from "vitest";
 import { Prisma } from "@prisma/client";
 import { ZodError, z } from "zod";
 
-import {
-  errorHandler,
-  AppError,
-  asyncHandler,
-} from "../../middleware/error-handler";
-import {
-  createMockRequest,
-  createMockResponse,
-  createMockNext,
-} from "../setup";
+import { errorHandler, AppError, asyncHandler } from "../../middleware/error-handler";
+import { createMockRequest, createMockResponse, createMockNext } from "../setup";
 
 describe("Error Handler Middleware", () => {
   describe("AppError", () => {
@@ -51,7 +43,7 @@ describe("Error Handler Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Resource not found",
-        }),
+        })
       );
     });
 
@@ -68,7 +60,7 @@ describe("Error Handler Middleware", () => {
         expect.objectContaining({
           error: "Bad Request",
           details: { field: "name" },
-        }),
+        })
       );
     });
 
@@ -96,22 +88,17 @@ describe("Error Handler Middleware", () => {
         expect.objectContaining({
           error: "Validation Error",
           message: "Invalid request data",
-          details: expect.arrayContaining([
-            expect.objectContaining({ field: expect.any(String) }),
-          ]),
-        }),
+          details: expect.arrayContaining([expect.objectContaining({ field: expect.any(String) })]),
+        })
       );
     });
 
     it("should handle Prisma unique constraint violation (P2002)", () => {
-      const err = new Prisma.PrismaClientKnownRequestError(
-        "Unique constraint failed",
-        {
-          code: "P2002",
-          clientVersion: "5.0.0",
-          meta: { target: ["email"] },
-        },
-      );
+      const err = new Prisma.PrismaClientKnownRequestError("Unique constraint failed", {
+        code: "P2002",
+        clientVersion: "5.0.0",
+        meta: { target: ["email"] },
+      });
 
       const req = createMockRequest();
       const res = createMockResponse();
@@ -123,7 +110,7 @@ describe("Error Handler Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Duplicate Entry",
-        }),
+        })
       );
     });
 
@@ -144,19 +131,16 @@ describe("Error Handler Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Not Found",
-        }),
+        })
       );
     });
 
     it("should handle Prisma foreign key violation (P2003)", () => {
-      const err = new Prisma.PrismaClientKnownRequestError(
-        "Foreign key constraint failed",
-        {
-          code: "P2003",
-          clientVersion: "5.0.0",
-          meta: { field_name: "userId" },
-        },
-      );
+      const err = new Prisma.PrismaClientKnownRequestError("Foreign key constraint failed", {
+        code: "P2003",
+        clientVersion: "5.0.0",
+        meta: { field_name: "userId" },
+      });
 
       const req = createMockRequest();
       const res = createMockResponse();
@@ -168,7 +152,7 @@ describe("Error Handler Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Invalid Reference",
-        }),
+        })
       );
     });
 
@@ -184,7 +168,7 @@ describe("Error Handler Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: "Internal Server Error",
-        }),
+        })
       );
     });
   });

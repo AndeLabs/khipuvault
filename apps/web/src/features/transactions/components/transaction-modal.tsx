@@ -59,10 +59,7 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
         if (activeTransaction.status === "idle") {
           return "active";
         }
-        if (
-          activeTransaction.status === "error" ||
-          activeTransaction.status === "rejected"
-        ) {
+        if (activeTransaction.status === "error" || activeTransaction.status === "rejected") {
           return "error";
         }
         return "complete";
@@ -74,16 +71,10 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
         if (activeTransaction.status === "signing") {
           return "active";
         }
-        if (
-          activeTransaction.status === "error" ||
-          activeTransaction.status === "rejected"
-        ) {
+        if (activeTransaction.status === "error" || activeTransaction.status === "rejected") {
           return "error";
         }
-        if (
-          activeTransaction.status === "idle" ||
-          activeTransaction.status === "pending"
-        ) {
+        if (activeTransaction.status === "idle" || activeTransaction.status === "pending") {
           return "pending";
         }
         return "complete";
@@ -127,12 +118,7 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
             {(activeTransaction.status === "success" ||
               activeTransaction.status === "error" ||
               activeTransaction.status === "rejected") && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6"
-                onClick={handleClose}
-              >
+              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleClose}>
                 <X className="h-4 w-4" />
               </Button>
             )}
@@ -140,10 +126,8 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
           <DialogDescription>
             {activeTransaction.status === "signing" &&
               "Please confirm the transaction in your wallet"}
-            {activeTransaction.status === "confirming" &&
-              "Waiting for blockchain confirmation"}
-            {activeTransaction.status === "success" &&
-              "Transaction completed successfully"}
+            {activeTransaction.status === "confirming" && "Waiting for blockchain confirmation"}
+            {activeTransaction.status === "success" && "Transaction completed successfully"}
             {activeTransaction.status === "error" && "Transaction failed"}
             {activeTransaction.status === "rejected" && "Transaction rejected"}
           </DialogDescription>
@@ -169,10 +153,7 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
                   href={`https://explorer.mezo.org/tx/${activeTransaction.txHash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className={cn(
-                    buttonVariants({ variant: "outline" }),
-                    "flex-1",
-                  )}
+                  className={cn(buttonVariants({ variant: "outline" }), "flex-1")}
                 >
                   View on Explorer
                 </a>
@@ -183,8 +164,7 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
             </div>
           )}
 
-          {(activeTransaction.status === "error" ||
-            activeTransaction.status === "rejected") && (
+          {(activeTransaction.status === "error" || activeTransaction.status === "rejected") && (
             <Button onClick={handleClose} variant="outline" className="w-full">
               Close
             </Button>
@@ -210,27 +190,23 @@ export function TransactionHistoryModal() {
       </Button>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogContent className="max-h-[80vh] overflow-y-auto sm:max-w-2xl">
           <DialogHeader>
             <DialogTitle>Transaction History</DialogTitle>
-            <DialogDescription>
-              Your recent blockchain transactions
-            </DialogDescription>
+            <DialogDescription>Your recent blockchain transactions</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-3 py-4">
             {transactions.length === 0 ? (
-              <p className="text-center text-muted-foreground py-8">
-                No transactions yet
-              </p>
+              <p className="py-8 text-center text-muted-foreground">No transactions yet</p>
             ) : (
               transactions.map((tx) => (
                 <div
                   key={tx.id}
-                  className="flex items-center justify-between p-3 rounded-lg border border-border hover:border-primary transition-colors"
+                  className="flex items-center justify-between rounded-lg border border-border p-3 transition-colors hover:border-primary"
                 >
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium truncate">{tx.type}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-medium">{tx.type}</p>
                     <p className="text-xs text-muted-foreground">
                       {new Date(tx.timestamp).toLocaleString()}
                     </p>

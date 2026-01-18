@@ -2,13 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import {
-  ArrowDownCircle,
-  ArrowUpCircle,
-  BarChart3,
-  Gift,
-  Database,
-} from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, BarChart3, Gift, Database } from "lucide-react";
 import * as React from "react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
@@ -59,19 +53,13 @@ export default function IndividualSavingsPage() {
   usePoolEvents();
 
   // Real contract interaction hooks
-  const {
-    deposit,
-    isProcessing: isDepositing,
-    step: depositStep,
-  } = useDepositWithApprove();
+  const { deposit, isProcessing: isDepositing, step: depositStep } = useDepositWithApprove();
   const { withdraw, isProcessing: isWithdrawing } = useSimpleWithdraw();
   const { claimYields, isProcessing: isClaiming } = useClaimYields();
-  const { setAutoCompound, isProcessing: isTogglingAutoCompound } =
-    useAutoCompound();
+  const { setAutoCompound, isProcessing: isTogglingAutoCompound } = useAutoCompound();
 
   // Real transaction history from blockchain events
-  const { data: transactions = [], isLoading: isLoadingTransactions } =
-    useUserTransactionHistory();
+  const { data: transactions = [], isLoading: isLoadingTransactions } = useUserTransactionHistory();
 
   // Real deposit handler - with optional referral code support
   const handleDeposit = async (amount: string, _referralCode?: string) => {
@@ -130,7 +118,7 @@ export default function IndividualSavingsPage() {
           title="Individual Savings"
           description="Connect your wallet to start earning yields on your mUSD deposits"
         />
-        <div className="text-center py-12">
+        <div className="py-12 text-center">
           <p className="text-muted-foreground">
             Please connect your wallet to access Individual Savings
           </p>
@@ -146,13 +134,11 @@ export default function IndividualSavingsPage() {
 
   // Get minimum deposit from V3 features (convert from wei to decimal)
   const minDeposit = Number(
-    formatUnits(BigInt(V3_FEATURES.individualPool.minDeposit), 18),
+    formatUnits(BigInt(V3_FEATURES.individualPool.minDeposit), 18)
   ).toString();
 
   // Calculate if user can claim yields (has yields > 0)
-  const canClaimYields = poolData.userInfo
-    ? poolData.userInfo.netYields > BigInt(0)
-    : false;
+  const canClaimYields = poolData.userInfo ? poolData.userInfo.netYields > BigInt(0) : false;
 
   // Format pending yields for display
   const pendingYields = poolData.userInfo?.netYields
@@ -166,7 +152,7 @@ export default function IndividualSavingsPage() {
         console.error("Individual Savings Error:", error, _errorInfo);
       }}
     >
-      <div className="space-y-8 animate-slide-up">
+      <div className="animate-slide-up space-y-8">
         {/* Page Header */}
         <PageHeader
           title="Individual Savings"
@@ -189,10 +175,10 @@ export default function IndividualSavingsPage() {
         {/* Main Content - 2 Column Layout */}
         <div className="grid gap-8 lg:grid-cols-3">
           {/* Left Column - Deposit/Withdraw */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="space-y-8 lg:col-span-2">
             {/* Deposit & Withdraw Tabs - Real Functions */}
             <Tabs defaultValue="deposit" className="w-full">
-              <TabsList className="grid w-full grid-cols-2 max-w-md">
+              <TabsList className="grid w-full max-w-md grid-cols-2">
                 <TabsTrigger value="deposit" className="gap-2">
                   <ArrowDownCircle className="h-4 w-4" />
                   Deposit
@@ -204,9 +190,7 @@ export default function IndividualSavingsPage() {
               </TabsList>
               <TabsContent value="deposit" className="mt-6">
                 <DepositCard
-                  balance={
-                    poolData.walletBalances.musdBalance?.toString() ?? "0"
-                  }
+                  balance={poolData.walletBalances.musdBalance?.toString() ?? "0"}
                   minDeposit={minDeposit}
                   apy={apy}
                   onDeposit={handleDeposit}
@@ -214,7 +198,7 @@ export default function IndividualSavingsPage() {
                 />
                 {/* Show deposit progress */}
                 {isDepositing && (
-                  <div className="mt-4 p-4 rounded-lg bg-surface-elevated border border-border">
+                  <div className="mt-4 rounded-lg border border-border bg-surface-elevated p-4">
                     <p className="text-sm text-muted-foreground">
                       {depositStep === "checking" && "Checking allowance..."}
                       {depositStep === "approving" && "Approving mUSD..."}
@@ -224,17 +208,13 @@ export default function IndividualSavingsPage() {
                 )}
                 {/* Guide for getting testnet mUSD */}
                 <GetMusdGuide
-                  walletBalance={
-                    poolData.walletBalances.musdBalance?.toString() ?? "0"
-                  }
+                  walletBalance={poolData.walletBalances.musdBalance?.toString() ?? "0"}
                   className="mt-6"
                 />
               </TabsContent>
               <TabsContent value="withdraw" className="mt-6">
                 <WithdrawCard
-                  availableBalance={
-                    poolData.userTotalBalance?.toString() ?? "0"
-                  }
+                  availableBalance={poolData.userTotalBalance?.toString() ?? "0"}
                   onWithdraw={handleWithdraw}
                   isLoading={isWithdrawing}
                 />
@@ -254,9 +234,7 @@ export default function IndividualSavingsPage() {
             <YieldAnalytics
               currentAPR={apy}
               currentDeposit={
-                poolData.userInfo?.deposit
-                  ? formatUnits(poolData.userInfo.deposit, 18)
-                  : "0"
+                poolData.userInfo?.deposit ? formatUnits(poolData.userInfo.deposit, 18) : "0"
               }
             />
 
@@ -297,16 +275,15 @@ export default function IndividualSavingsPage() {
         {/* Bottom Section - Additional Features */}
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {/* Feature Cards */}
-          <div className="p-6 rounded-lg bg-gradient-lavanda border border-lavanda/20">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-lavanda/20 flex items-center justify-center">
+          <div className="bg-gradient-lavanda rounded-lg border border-lavanda/20 p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lavanda/20">
                 <BarChart3 className="h-5 w-5 text-lavanda" />
               </div>
               <h3 className="font-semibold">Auto-Compound</h3>
             </div>
-            <p className="text-sm text-muted-foreground mb-3">
-              Automatically reinvest yields to maximize returns with compound
-              interest
+            <p className="mb-3 text-sm text-muted-foreground">
+              Automatically reinvest yields to maximize returns with compound interest
             </p>
             <ul className="space-y-2 text-xs text-muted-foreground">
               <li className="flex items-center gap-2">
@@ -324,14 +301,14 @@ export default function IndividualSavingsPage() {
             </ul>
           </div>
 
-          <div className="p-6 rounded-lg bg-gradient-accent border border-accent/20">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-accent/20 flex items-center justify-center">
+          <div className="bg-gradient-accent rounded-lg border border-accent/20 p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/20">
                 <Gift className="h-5 w-5 text-accent" />
               </div>
               <h3 className="font-semibold">Referral System</h3>
             </div>
-            <p className="text-sm text-muted-foreground mb-3">
+            <p className="mb-3 text-sm text-muted-foreground">
               Earn 0.5% of every deposit from users you refer to KhipuVault
             </p>
             <ul className="space-y-2 text-xs text-muted-foreground">
@@ -350,14 +327,14 @@ export default function IndividualSavingsPage() {
             </ul>
           </div>
 
-          <div className="p-6 rounded-lg bg-gradient-success border border-success/20">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="h-10 w-10 rounded-full bg-success/20 flex items-center justify-center">
+          <div className="bg-gradient-success rounded-lg border border-success/20 p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/20">
                 <Database className="h-5 w-5 text-success" />
               </div>
               <h3 className="font-semibold">Partial Withdrawals</h3>
             </div>
-            <p className="text-sm text-muted-foreground mb-3">
+            <p className="mb-3 text-sm text-muted-foreground">
               Withdraw any amount without closing your position
             </p>
             <ul className="space-y-2 text-xs text-muted-foreground">

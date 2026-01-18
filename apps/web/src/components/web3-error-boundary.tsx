@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Wallet,
-  WifiOff,
-  XCircle,
-  AlertTriangle,
-  RefreshCw,
-  Home,
-} from "lucide-react";
+import { Wallet, WifiOff, XCircle, AlertTriangle, RefreshCw, Home } from "lucide-react";
 import * as React from "react";
 import { useConnect, useAccount } from "wagmi";
 
@@ -70,17 +63,9 @@ interface ParsedWeb3Error {
  * </Web3ErrorBoundary>
  * ```
  */
-export function Web3ErrorBoundary({
-  children,
-  onError,
-  onReset,
-}: Web3ErrorBoundaryProps) {
+export function Web3ErrorBoundary({ children, onError, onReset }: Web3ErrorBoundaryProps) {
   return (
-    <ErrorBoundary
-      fallback={Web3ErrorFallback}
-      onError={onError}
-      onReset={onReset}
-    >
+    <ErrorBoundary fallback={Web3ErrorFallback} onError={onError} onReset={onReset}>
       {children}
     </ErrorBoundary>
   );
@@ -109,8 +94,7 @@ function parseWeb3Error(error: Error | null): ParsedWeb3Error {
   ) {
     return {
       type: Web3ErrorType.WALLET_DISCONNECTED,
-      message:
-        "Wallet desconectada. Por favor reconecta tu wallet para continuar.",
+      message: "Wallet desconectada. Por favor reconecta tu wallet para continuar.",
       originalError: error,
     };
   }
@@ -125,8 +109,7 @@ function parseWeb3Error(error: Error | null): ParsedWeb3Error {
   ) {
     return {
       type: Web3ErrorType.NETWORK_ERROR,
-      message:
-        "Error de conexion a la red blockchain. Verifica tu conexion a internet.",
+      message: "Error de conexion a la red blockchain. Verifica tu conexion a internet.",
       originalError: error,
     };
   }
@@ -166,8 +149,7 @@ function parseWeb3Error(error: Error | null): ParsedWeb3Error {
   ) {
     return {
       type: Web3ErrorType.CONTRACT_ERROR,
-      message:
-        "Error en el contrato inteligente. La transaccion fue rechazada por el contrato.",
+      message: "Error en el contrato inteligente. La transaccion fue rechazada por el contrato.",
       originalError: error,
     };
   }
@@ -183,11 +165,7 @@ function parseWeb3Error(error: Error | null): ParsedWeb3Error {
 /**
  * Web3-specific Error Fallback UI
  */
-function Web3ErrorFallback({
-  error,
-  errorInfo: _errorInfo,
-  resetError,
-}: ErrorFallbackProps) {
+function Web3ErrorFallback({ error, errorInfo: _errorInfo, resetError }: ErrorFallbackProps) {
   const parsedError = parseWeb3Error(error);
   const { connect, connectors } = useConnect();
   const { isConnected } = useAccount();
@@ -271,12 +249,12 @@ function Web3ErrorFallback({
   };
 
   return (
-    <div className="min-h-[400px] flex items-center justify-center p-4">
-      <Card className="max-w-2xl w-full border-border">
+    <div className="flex min-h-[400px] items-center justify-center p-4">
+      <Card className="w-full max-w-2xl border-border">
         <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
+          <div className="mb-2 flex items-center gap-3">
             <div
-              className={`h-12 w-12 rounded-full flex items-center justify-center ${getErrorColor()}`}
+              className={`flex h-12 w-12 items-center justify-center rounded-full ${getErrorColor()}`}
             >
               {getErrorIcon()}
             </div>
@@ -308,9 +286,7 @@ function Web3ErrorFallback({
           {/* Error Message */}
           <Alert
             variant={
-              parsedError.type === Web3ErrorType.TRANSACTION_REJECTED
-                ? "default"
-                : "destructive"
+              parsedError.type === Web3ErrorType.TRANSACTION_REJECTED ? "default" : "destructive"
             }
           >
             <AlertDescription>{parsedError.message}</AlertDescription>
@@ -319,25 +295,24 @@ function Web3ErrorFallback({
           {/* Development Mode - Show Original Error */}
           {isDevelopment && parsedError.originalError && (
             <details className="mt-4">
-              <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <summary className="cursor-pointer text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 Error original (modo desarrollo)
               </summary>
-              <div className="mt-2 p-4 bg-muted/50 rounded-lg overflow-x-auto">
-                <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
-                  {parsedError.originalError.stack ??
-                    parsedError.originalError.message}
+              <div className="mt-2 overflow-x-auto rounded-lg bg-muted/50 p-4">
+                <pre className="whitespace-pre-wrap font-mono text-xs text-muted-foreground">
+                  {parsedError.originalError.stack ?? parsedError.originalError.message}
                 </pre>
               </div>
             </details>
           )}
 
           {/* User Instructions */}
-          <div className="pt-4 space-y-2">
+          <div className="space-y-2 pt-4">
             <p className="text-sm font-medium">Que puedes hacer:</p>
-            <ul className="text-sm text-muted-foreground space-y-1.5">
+            <ul className="space-y-1.5 text-sm text-muted-foreground">
               {getInstructions().map((instruction) => (
                 <li key={instruction} className="flex items-start gap-2">
-                  <span className="text-primary mt-0.5">•</span>
+                  <span className="mt-0.5 text-primary">•</span>
                   <span>{instruction}</span>
                 </li>
               ))}
@@ -345,26 +320,20 @@ function Web3ErrorFallback({
           </div>
         </CardContent>
 
-        <CardFooter className="flex gap-3 flex-wrap">
+        <CardFooter className="flex flex-wrap gap-3">
           {/* Reconnect Wallet Button (for wallet disconnected errors) */}
-          {parsedError.type === Web3ErrorType.WALLET_DISCONNECTED &&
-            !isConnected && (
-              <Button
-                onClick={handleReconnectWallet}
-                className="gap-2"
-                size="lg"
-              >
-                <Wallet className="h-4 w-4" />
-                Reconectar Wallet
-              </Button>
-            )}
+          {parsedError.type === Web3ErrorType.WALLET_DISCONNECTED && !isConnected && (
+            <Button onClick={handleReconnectWallet} className="gap-2" size="lg">
+              <Wallet className="h-4 w-4" />
+              Reconectar Wallet
+            </Button>
+          )}
 
           {/* Retry Button */}
           <Button
             onClick={resetError}
             variant={
-              parsedError.type === Web3ErrorType.WALLET_DISCONNECTED &&
-              !isConnected
+              parsedError.type === Web3ErrorType.WALLET_DISCONNECTED && !isConnected
                 ? "outline"
                 : "default"
             }

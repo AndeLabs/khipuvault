@@ -38,11 +38,7 @@ interface CreatePoolModalV3Props {
   onSuccess?: () => void;
 }
 
-export function CreatePoolModalV3({
-  open,
-  onClose,
-  onSuccess,
-}: CreatePoolModalV3Props) {
+export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV3Props) {
   const { toast } = useToast();
   const { createPool, state, error, reset } = useCooperativePool();
 
@@ -99,21 +95,14 @@ export function CreatePoolModalV3({
     }
 
     try {
-      await createPool(
-        poolName.trim(),
-        minContribution,
-        maxContribution,
-        maxMembers[0],
-      );
+      await createPool(poolName.trim(), minContribution, maxContribution, maxMembers[0]);
     } catch (err) {
       console.error("Create pool error:", err);
       toast({
         variant: "destructive",
         title: "Error",
         description:
-          err instanceof Error
-            ? err.message
-            : "Failed to create pool. Please try again.",
+          err instanceof Error ? err.message : "Failed to create pool. Please try again.",
       });
     }
   };
@@ -142,16 +131,13 @@ export function CreatePoolModalV3({
   };
 
   const isProcessing = state === "executing" || state === "processing";
-  const canSubmit =
-    !isProcessing && poolName.trim() && minContribution && maxContribution;
+  const canSubmit = !isProcessing && poolName.trim() && minContribution && maxContribution;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-heading">
-            Create Cooperative Pool
-          </DialogTitle>
+          <DialogTitle className="font-heading text-2xl">Create Cooperative Pool</DialogTitle>
           <DialogDescription>
             Set up a new pool where members can save together and earn yields
           </DialogDescription>
@@ -177,11 +163,9 @@ export function CreatePoolModalV3({
           {/* Contribution Range */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="min-contribution">
-                Minimum Contribution (BTC)
-              </Label>
+              <Label htmlFor="min-contribution">Minimum Contribution (BTC)</Label>
               <div className="relative">
-                <Bitcoin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Bitcoin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="min-contribution"
                   type="number"
@@ -197,11 +181,9 @@ export function CreatePoolModalV3({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="max-contribution">
-                Maximum Contribution (BTC)
-              </Label>
+              <Label htmlFor="max-contribution">Maximum Contribution (BTC)</Label>
               <div className="relative">
-                <Bitcoin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Bitcoin className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
                 <Input
                   id="max-contribution"
                   type="number"
@@ -221,9 +203,7 @@ export function CreatePoolModalV3({
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <Label>Maximum Members</Label>
-              <span className="text-sm font-medium">
-                {maxMembers[0]} members
-              </span>
+              <span className="text-sm font-medium">{maxMembers[0]} members</span>
             </div>
             <Slider
               value={maxMembers}
@@ -242,7 +222,7 @@ export function CreatePoolModalV3({
 
           {/* Preview */}
           <Card className="border-accent/20 bg-accent/5">
-            <CardContent className="p-4 space-y-3">
+            <CardContent className="space-y-3 p-4">
               <div className="flex items-center gap-2 text-sm font-medium text-accent">
                 <Shield className="h-4 w-4" />
                 Pool Preview
@@ -288,28 +268,21 @@ export function CreatePoolModalV3({
           <Alert>
             <Users className="h-4 w-4" />
             <AlertDescription className="text-sm">
-              <strong>Note:</strong> Creating a pool is free. Members will
-              contribute BTC when they join, which will be automatically
-              deposited into the Mezo protocol to generate yields.
+              <strong>Note:</strong> Creating a pool is free. Members will contribute BTC when they
+              join, which will be automatically deposited into the Mezo protocol to generate yields.
             </AlertDescription>
           </Alert>
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isProcessing}
-          >
+          <Button variant="outline" onClick={handleClose} disabled={isProcessing}>
             Cancel
           </Button>
           <Button variant="accent" onClick={handleCreate} disabled={!canSubmit}>
             {isProcessing ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {state === "executing"
-                  ? "Confirm in Wallet..."
-                  : "Creating Pool..."}
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {state === "executing" ? "Confirm in Wallet..." : "Creating Pool..."}
               </>
             ) : (
               "Create Pool"

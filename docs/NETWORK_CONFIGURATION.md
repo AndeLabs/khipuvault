@@ -66,11 +66,7 @@ export const MEZO_MAINNET = {
 Runtime configuration based on environment:
 
 ```typescript
-import {
-  getCurrentNetwork,
-  getActiveChain,
-  getChainId,
-} from "@khipu/shared/config/network";
+import { getCurrentNetwork, getActiveChain, getChainId } from "@khipu/shared/config/network";
 
 // Get current network
 const network = getCurrentNetwork(); // "testnet" | "mainnet"
@@ -242,11 +238,7 @@ import { getActiveContractAddress } from "@khipu/web3/addresses";
 import { getProvider } from "./provider";
 
 const poolAddress = getActiveContractAddress("INDIVIDUAL_POOL");
-const contract = new ethers.Contract(
-  poolAddress,
-  INDIVIDUAL_POOL_ABI,
-  getProvider(),
-);
+const contract = new ethers.Contract(poolAddress, INDIVIDUAL_POOL_ABI, getProvider());
 ```
 
 ## Migration Guide

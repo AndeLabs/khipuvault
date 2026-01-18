@@ -269,11 +269,11 @@ export function usePoolMembers(poolId: number) {
             } catch (err) {
               return null;
             }
-          }),
+          })
         );
 
         const validMembers = membersWithInfo.filter(
-          (m): m is MemberWithAddress => m !== null && m.active,
+          (m): m is MemberWithAddress => m !== null && m.active
         );
 
         return validMembers;

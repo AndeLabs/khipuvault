@@ -18,9 +18,7 @@ import LotteryPoolV3ABI from "@/contracts/abis/LotteryPoolV3.json";
 // Ensure ABI is an array (handle bundler wrapping)
 export const LOTTERY_POOL_ABI = Array.isArray(LotteryPoolV3ABI)
   ? LotteryPoolV3ABI
-  : (LotteryPoolV3ABI as any).default ||
-    (LotteryPoolV3ABI as any).abi ||
-    LotteryPoolV3ABI;
+  : (LotteryPoolV3ABI as any).default || (LotteryPoolV3ABI as any).abi || LotteryPoolV3ABI;
 
 // V3 Round Status enum values
 export const LotteryRoundStatus = {
@@ -31,8 +29,7 @@ export const LotteryRoundStatus = {
   CANCELLED: 4,
 } as const;
 
-export type LotteryRoundStatusType =
-  (typeof LotteryRoundStatus)[keyof typeof LotteryRoundStatus];
+export type LotteryRoundStatusType = (typeof LotteryRoundStatus)[keyof typeof LotteryRoundStatus];
 
 // V3 Round structure type
 export interface LotteryRoundV3 {

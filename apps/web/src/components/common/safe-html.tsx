@@ -44,8 +44,7 @@ const PURIFY_CONFIG: Config = {
   // Force all links to open in new tab with security attributes
   ADD_ATTR: ["target", "rel"],
   // Prevent JavaScript URLs
-  ALLOWED_URI_REGEXP:
-    /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
+  ALLOWED_URI_REGEXP: /^(?:(?:https?|mailto|tel):|[^a-z]|[a-z+.-]+(?:[^a-z+.\-:]|$))/i,
 };
 
 /**
@@ -83,18 +82,10 @@ export interface SafeHTMLProps {
  * <SafeHTML html={userContent} className="prose" />
  * ```
  */
-export function SafeHTML({
-  html,
-  className,
-  as: Component = "div",
-  config,
-}: SafeHTMLProps) {
+export function SafeHTML({ html, className, as: Component = "div", config }: SafeHTMLProps) {
   const sanitizedHTML = useMemo(() => {
     // Configure hooks for link security
-    DOMPurify.addHook(
-      "afterSanitizeAttributes",
-      SANITIZE_HOOKS.afterSanitizeAttributes,
-    );
+    DOMPurify.addHook("afterSanitizeAttributes", SANITIZE_HOOKS.afterSanitizeAttributes);
 
     const clean = DOMPurify.sanitize(html, {
       ...PURIFY_CONFIG,
@@ -122,10 +113,7 @@ export function SafeHTML({
  * Useful for preparing content before storing or processing
  */
 export function sanitizeHTML(html: string, config?: Config): string {
-  DOMPurify.addHook(
-    "afterSanitizeAttributes",
-    SANITIZE_HOOKS.afterSanitizeAttributes,
-  );
+  DOMPurify.addHook("afterSanitizeAttributes", SANITIZE_HOOKS.afterSanitizeAttributes);
 
   const clean = DOMPurify.sanitize(html, {
     ...PURIFY_CONFIG,

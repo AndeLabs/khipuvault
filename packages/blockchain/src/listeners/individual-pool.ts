@@ -31,7 +31,7 @@ export class IndividualPoolListener extends BaseEventListener {
   private async processEventWithRetry(
     eventName: string,
     event: ethers.Log,
-    parsedLog: ethers.LogDescription,
+    parsedLog: ethers.LogDescription
   ): Promise<void> {
     try {
       await retryWithBackoff(
@@ -41,30 +41,22 @@ export class IndividualPoolListener extends BaseEventListener {
         {
           shouldRetry: (err) => {
             // Don't retry if it's a duplicate key error - that's expected for idempotency
-            if (
-              err instanceof Prisma.PrismaClientKnownRequestError &&
-              err.code === "P2002"
-            ) {
+            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
               console.log(
-                `⏭️ Skipping duplicate ${eventName} event: ${event.transactionHash}:${event.index}`,
+                `⏭️ Skipping duplicate ${eventName} event: ${event.transactionHash}:${event.index}`
               );
               return false;
             }
             return isRetryableError(err);
           },
           onRetry: (err, attempt) => {
-            console.warn(
-              `🔄 Retrying ${eventName} event (attempt ${attempt}): ${err.message}`,
-            );
+            console.warn(`🔄 Retrying ${eventName} event (attempt ${attempt}): ${err.message}`);
           },
-        },
+        }
       );
     } catch (error) {
       // After all retries failed, log to dead letter queue
-      console.error(
-        `❌ Failed to process ${eventName} after ${MAX_EVENT_RETRIES} retries:`,
-        error,
-      );
+      console.error(`❌ Failed to process ${eventName} after ${MAX_EVENT_RETRIES} retries:`, error);
       await this.logFailedEvent(eventName, event, error);
     }
   }
@@ -75,7 +67,7 @@ export class IndividualPoolListener extends BaseEventListener {
   private async logFailedEvent(
     eventName: string,
     event: ethers.Log,
-    error: unknown,
+    error: unknown
   ): Promise<void> {
     try {
       await prisma.eventLog.upsert({
@@ -139,11 +131,7 @@ export class IndividualPoolListener extends BaseEventListener {
           data: event.data,
         });
         if (parsedLog) {
-          await this.processEventWithRetry(
-            "PartialWithdrawn",
-            event,
-            parsedLog,
-          );
+          await this.processEventWithRetry("PartialWithdrawn", event, parsedLog);
         }
       } catch (error) {
         console.error("❌ Error parsing PartialWithdrawn event:", error);
@@ -207,11 +195,7 @@ export class IndividualPoolListener extends BaseEventListener {
           data: event.data,
         });
         if (parsedLog) {
-          await this.processEventWithRetry(
-            "ReferralRewardsClaimed",
-            event,
-            parsedLog,
-          );
+          await this.processEventWithRetry("ReferralRewardsClaimed", event, parsedLog);
         }
       } catch (error) {
         console.error("❌ Error parsing ReferralRewardsClaimed event:", error);
@@ -227,15 +211,9 @@ export class IndividualPoolListener extends BaseEventListener {
     let processedEvents = 0;
     let failedEvents = 0;
 
-    console.log(
-      `📚 Indexing historical events from block ${fromBlock} to ${currentBlock}`,
-    );
+    console.log(`📚 Indexing historical events from block ${fromBlock} to ${currentBlock}`);
 
-    for (
-      let startBlock = fromBlock;
-      startBlock <= currentBlock;
-      startBlock += batchSize
-    ) {
+    for (let startBlock = fromBlock; startBlock <= currentBlock; startBlock += batchSize) {
       const endBlock = Math.min(startBlock + batchSize - 1, currentBlock);
 
       try {
@@ -243,7 +221,7 @@ export class IndividualPoolListener extends BaseEventListener {
         const events = await retryWithBackoff(
           async () => this.contract.queryFilter("*", startBlock, endBlock),
           MAX_EVENT_RETRIES,
-          INITIAL_RETRY_DELAY,
+          INITIAL_RETRY_DELAY
         );
 
         // Process each event individually with retry
@@ -255,43 +233,30 @@ export class IndividualPoolListener extends BaseEventListener {
             });
 
             if (parsedLog) {
-              await this.processEventWithRetry(
-                parsedLog.name,
-                event,
-                parsedLog,
-              );
+              await this.processEventWithRetry(parsedLog.name, event, parsedLog);
               processedEvents++;
             }
           } catch (eventError) {
             failedEvents++;
-            console.error(
-              `❌ Failed to process event in block ${event.blockNumber}:`,
-              eventError,
-            );
+            console.error(`❌ Failed to process event in block ${event.blockNumber}:`, eventError);
           }
         }
 
         console.log(
-          `✅ Indexed blocks ${startBlock}-${endBlock} (${events.length} events, ${processedEvents} processed, ${failedEvents} failed)`,
+          `✅ Indexed blocks ${startBlock}-${endBlock} (${events.length} events, ${processedEvents} processed, ${failedEvents} failed)`
         );
       } catch (error) {
-        console.error(
-          `❌ Error fetching events for blocks ${startBlock}-${endBlock}:`,
-          error,
-        );
+        console.error(`❌ Error fetching events for blocks ${startBlock}-${endBlock}:`, error);
         // Continue with next batch instead of failing completely
       }
     }
 
     console.log(
-      `🎉 Historical indexing complete: ${processedEvents} processed, ${failedEvents} failed`,
+      `🎉 Historical indexing complete: ${processedEvents} processed, ${failedEvents} failed`
     );
   }
 
-  protected async processEvent(
-    event: ethers.Log,
-    parsedLog: ethers.LogDescription,
-  ): Promise<void> {
+  protected async processEvent(event: ethers.Log, parsedLog: ethers.LogDescription): Promise<void> {
     const eventName = parsedLog.name;
     // Use cached timestamp for batch operations to reduce RPC calls
     const blockTimestamp = await getBlockTimestampCached(event.blockNumber);
@@ -314,11 +279,7 @@ export class IndividualPoolListener extends BaseEventListener {
           await this.handleAutoCompounded(event, parsedLog, blockTimestamp);
           break;
         case "ReferralRewardsClaimed":
-          await this.handleReferralRewardsClaimed(
-            event,
-            parsedLog,
-            blockTimestamp,
-          );
+          await this.handleReferralRewardsClaimed(event, parsedLog, blockTimestamp);
           break;
       }
     } catch (error) {
@@ -329,7 +290,7 @@ export class IndividualPoolListener extends BaseEventListener {
   private async handleDeposited(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const userAddress = parsedLog.args.user.toLowerCase();
     const amount = parsedLog.args.musdAmount.toString(); // V3: musdAmount instead of amount
@@ -401,14 +362,14 @@ export class IndividualPoolListener extends BaseEventListener {
     });
 
     console.log(
-      `💰 Deposited: ${amount} MUSD by ${userAddress}${referrer ? ` (referred by ${referrer})` : ""}`,
+      `💰 Deposited: ${amount} MUSD by ${userAddress}${referrer ? ` (referred by ${referrer})` : ""}`
     );
   }
 
   private async handlePartialWithdrawn(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const userAddress = parsedLog.args.user.toLowerCase();
     const amount = parsedLog.args.musdAmount.toString(); // V3: musdAmount
@@ -477,14 +438,14 @@ export class IndividualPoolListener extends BaseEventListener {
     });
 
     console.log(
-      `💸 Partial Withdraw: ${amount} MUSD by ${userAddress} (remaining: ${remainingDeposit})`,
+      `💸 Partial Withdraw: ${amount} MUSD by ${userAddress} (remaining: ${remainingDeposit})`
     );
   }
 
   private async handleFullWithdrawal(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const userAddress = parsedLog.args.user.toLowerCase();
     const principal = parsedLog.args.principal.toString();
@@ -559,15 +520,13 @@ export class IndividualPoolListener extends BaseEventListener {
       });
     });
 
-    console.log(
-      `🏦 Full Withdrawal: ${principal} MUSD + ${netYield} yield by ${userAddress}`,
-    );
+    console.log(`🏦 Full Withdrawal: ${principal} MUSD + ${netYield} yield by ${userAddress}`);
   }
 
   private async handleYieldClaimed(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const userAddress = parsedLog.args.user.toLowerCase();
     const grossYield = parsedLog.args.grossYield.toString(); // V3: grossYield
@@ -642,14 +601,14 @@ export class IndividualPoolListener extends BaseEventListener {
     });
 
     console.log(
-      `🌾 Yield Claimed: ${netYield} MUSD (gross: ${grossYield}, fee: ${feeAmount}) by ${userAddress}`,
+      `🌾 Yield Claimed: ${netYield} MUSD (gross: ${grossYield}, fee: ${feeAmount}) by ${userAddress}`
     );
   }
 
   private async handleAutoCompounded(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const userAddress = parsedLog.args.user.toLowerCase();
     const amount = parsedLog.args.amount.toString();
@@ -695,15 +654,13 @@ export class IndividualPoolListener extends BaseEventListener {
       });
     });
 
-    console.log(
-      `🔄 Auto Compounded: ${amount} MUSD for ${userAddress} (new total: ${newTotal})`,
-    );
+    console.log(`🔄 Auto Compounded: ${amount} MUSD for ${userAddress} (new total: ${newTotal})`);
   }
 
   private async handleReferralRewardsClaimed(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const referrerAddress = parsedLog.args.referrer.toLowerCase();
     const amount = parsedLog.args.amount.toString();
@@ -773,8 +730,6 @@ export class IndividualPoolListener extends BaseEventListener {
       });
     });
 
-    console.log(
-      `🎁 Referral Rewards Claimed: ${amount} MUSD by ${referrerAddress}`,
-    );
+    console.log(`🎁 Referral Rewards Claimed: ${amount} MUSD by ${referrerAddress}`);
   }
 }

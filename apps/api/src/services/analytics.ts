@@ -21,14 +21,10 @@ export class AnalyticsService {
           where: { status: "ACTIVE" },
         });
 
-        const totalTVL = pools.reduce(
-          (sum, pool) => sum + BigInt(pool.tvl),
-          BigInt(0),
-        );
+        const totalTVL = pools.reduce((sum, pool) => sum + BigInt(pool.tvl), BigInt(0));
 
         // Get average APR
-        const avgAPR =
-          pools.reduce((sum, pool) => sum + pool.apr, 0) / (pools.length || 1);
+        const avgAPR = pools.reduce((sum, pool) => sum + Number(pool.apr), 0) / (pools.length || 1);
 
         return {
           totalUsers,
@@ -38,7 +34,7 @@ export class AnalyticsService {
           avgAPR: avgAPR.toFixed(2),
         };
       },
-      CACHE_TTL.GLOBAL_STATS,
+      CACHE_TTL.GLOBAL_STATS
     );
   }
 
@@ -76,9 +72,7 @@ export class AnalyticsService {
       date: day.date,
       deposits: Number(day.deposits),
       withdrawals: Number(day.withdrawals),
-      volume: (
-        BigInt(day.deposit_volume) + BigInt(day.withdraw_volume)
-      ).toString(),
+      volume: (BigInt(day.deposit_volume) + BigInt(day.withdraw_volume)).toString(),
     }));
   }
 
@@ -94,7 +88,7 @@ export class AnalyticsService {
         });
         return pools;
       },
-      CACHE_TTL.TOP_POOLS,
+      CACHE_TTL.TOP_POOLS
     );
   }
 
@@ -138,15 +132,13 @@ export class AnalyticsService {
       ensName: u.ensName,
       avatar: u.avatar,
       totalDeposited: u.totalDeposited,
-      currentBalance: (
-        BigInt(u.totalDeposited) - BigInt(u.totalWithdrawn)
-      ).toString(),
+      currentBalance: (BigInt(u.totalDeposited) - BigInt(u.totalWithdrawn)).toString(),
     }));
   }
 
   async getEventLogs(
     limit: number = 100,
-    offset: number = 0,
+    offset: number = 0
   ): Promise<{
     logs: EventLog[];
     pagination: {

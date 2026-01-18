@@ -16,39 +16,37 @@ export function Hero() {
       <section className="relative w-full overflow-hidden">
         {/* Background gradient effects */}
         <div className="absolute inset-0 -z-10">
-          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-accent/20 rounded-full blur-3xl animate-pulse delay-1000" />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gradient-radial from-primary/5 to-transparent rounded-full" />
+          <div className="absolute left-1/4 top-0 h-96 w-96 animate-pulse rounded-full bg-primary/20 blur-3xl" />
+          <div className="absolute bottom-0 right-1/4 h-80 w-80 animate-pulse rounded-full bg-accent/20 blur-3xl delay-1000" />
+          <div className="bg-gradient-radial absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full from-primary/5 to-transparent" />
         </div>
 
         <div className="container mx-auto max-w-7xl px-4 py-20 md:py-28 lg:py-36">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid items-center gap-12 lg:grid-cols-2">
             {/* Left: Content */}
             <AnimateOnScroll className="text-center lg:text-left">
               {/* Badge */}
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 mb-6">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75"></span>
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success"></span>
                 </span>
-                <span className="text-sm font-medium text-primary">
-                  Live on Mezo Testnet
-                </span>
+                <span className="text-sm font-medium text-primary">Live on Mezo Testnet</span>
               </div>
 
               {/* Headline */}
               <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl">
                 Bitcoin Savings
                 <br />
-                <span className="bg-gradient-to-r from-primary via-accent to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-gradient">
+                <span className="animate-gradient bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent">
                   That Actually Grow
                 </span>
               </h1>
 
               {/* Subheadline */}
-              <p className="mt-6 text-lg text-muted-foreground md:text-xl max-w-xl mx-auto lg:mx-0">
-                Earn real yields on your Bitcoin through Mezo&apos;s stability
-                pool. No lockups, no complexity, just consistent returns.
+              <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:text-xl lg:mx-0">
+                Earn real yields on your Bitcoin through Mezo&apos;s stability pool. No lockups, no
+                complexity, just consistent returns.
               </p>
 
               {/* CTA Button */}
@@ -57,7 +55,7 @@ export function Hero() {
                   href="/dashboard"
                   className={cn(
                     buttonVariants({ size: "lg" }),
-                    "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white font-semibold px-8 group",
+                    "group bg-gradient-to-r from-primary to-accent px-8 font-semibold text-white hover:opacity-90"
                   )}
                 >
                   Start Earning
@@ -66,13 +64,9 @@ export function Hero() {
               </div>
 
               {/* Trust badges */}
-              <div className="mt-8 flex items-center justify-center lg:justify-start gap-6 text-sm text-muted-foreground">
+              <div className="mt-8 flex items-center justify-center gap-6 text-sm text-muted-foreground lg:justify-start">
                 <div className="flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4 text-success"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
+                  <svg className="h-4 w-4 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -82,11 +76,7 @@ export function Hero() {
                   <span>Non-custodial</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4 text-success"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
+                  <svg className="h-4 w-4 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -96,11 +86,7 @@ export function Hero() {
                   <span>Audited</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <svg
-                    className="h-4 w-4 text-success"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
+                  <svg className="h-4 w-4 text-success" fill="currentColor" viewBox="0 0 20 20">
                     <path
                       fillRule="evenodd"
                       d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
@@ -117,19 +103,19 @@ export function Hero() {
               {/* 3D Visual Element */}
               <div className="relative mx-auto max-w-md lg:max-w-none">
                 {/* Floating cards with stats */}
-                <div className="relative aspect-square max-w-[500px] mx-auto">
+                <div className="relative mx-auto aspect-square max-w-[500px]">
                   {/* Central 3D coin/vault illustration */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="relative w-48 h-48 md:w-64 md:h-64">
+                    <div className="relative h-48 w-48 md:h-64 md:w-64">
                       {/* Outer ring animation */}
-                      <div className="absolute inset-0 rounded-full border-2 border-primary/30 animate-spin-slow" />
-                      <div className="absolute inset-4 rounded-full border-2 border-accent/30 animate-spin-reverse" />
+                      <div className="animate-spin-slow absolute inset-0 rounded-full border-2 border-primary/30" />
+                      <div className="animate-spin-reverse absolute inset-4 rounded-full border-2 border-accent/30" />
 
                       {/* Center vault icon */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="w-32 h-32 md:w-40 md:h-40 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 backdrop-blur-sm border border-primary/30 flex items-center justify-center shadow-2xl shadow-primary/20">
+                        <div className="flex h-32 w-32 items-center justify-center rounded-full border border-primary/30 bg-gradient-to-br from-primary/20 to-accent/20 shadow-2xl shadow-primary/20 backdrop-blur-sm md:h-40 md:w-40">
                           <svg
-                            className="w-16 h-16 md:w-20 md:h-20 text-primary"
+                            className="h-16 w-16 text-primary md:h-20 md:w-20"
                             viewBox="0 0 24 24"
                             fill="none"
                             stroke="currentColor"
@@ -146,16 +132,14 @@ export function Hero() {
 
                   {/* Floating stat cards */}
                   {/* TVL Card - Top Left */}
-                  <div className="absolute top-4 left-0 md:top-8 md:-left-4 animate-float">
-                    <div className="bg-surface-elevated/90 backdrop-blur-md border border-primary/20 rounded-xl p-4 shadow-xl shadow-primary/10">
+                  <div className="animate-float absolute left-0 top-4 md:-left-4 md:top-8">
+                    <div className="rounded-xl border border-primary/20 bg-surface-elevated/90 p-4 shadow-xl shadow-primary/10 backdrop-blur-md">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-primary/20 flex items-center justify-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20">
                           <Wallet className="h-5 w-5 text-primary" />
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">
-                            Total Value Locked
-                          </p>
+                          <p className="text-xs text-muted-foreground">Total Value Locked</p>
                           <p className="text-xl font-bold text-white">
                             {isLoading ? "..." : formattedTVL}
                           </p>
@@ -165,38 +149,30 @@ export function Hero() {
                   </div>
 
                   {/* Yield Card - Top Right */}
-                  <div className="absolute top-4 right-0 md:top-8 md:-right-4 animate-float-delayed">
-                    <div className="bg-surface-elevated/90 backdrop-blur-md border border-success/20 rounded-xl p-4 shadow-xl shadow-success/10">
+                  <div className="animate-float-delayed absolute right-0 top-4 md:-right-4 md:top-8">
+                    <div className="rounded-xl border border-success/20 bg-surface-elevated/90 p-4 shadow-xl shadow-success/10 backdrop-blur-md">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-success/20 flex items-center justify-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-success/20">
                           <TrendingUp className="h-5 w-5 text-success" />
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">
-                            Yield Type
-                          </p>
-                          <p className="text-xl font-bold text-success">
-                            Real Yield
-                          </p>
+                          <p className="text-xs text-muted-foreground">Yield Type</p>
+                          <p className="text-xl font-bold text-success">Real Yield</p>
                         </div>
                       </div>
                     </div>
                   </div>
 
                   {/* Users Card - Bottom Center */}
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 animate-float">
-                    <div className="bg-surface-elevated/90 backdrop-blur-md border border-accent/20 rounded-xl p-4 shadow-xl shadow-accent/10">
+                  <div className="animate-float absolute bottom-4 left-1/2 -translate-x-1/2">
+                    <div className="rounded-xl border border-accent/20 bg-surface-elevated/90 p-4 shadow-xl shadow-accent/10 backdrop-blur-md">
                       <div className="flex items-center gap-3">
-                        <div className="h-10 w-10 rounded-lg bg-accent/20 flex items-center justify-center">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent/20">
                           <Users className="h-5 w-5 text-accent" />
                         </div>
                         <div>
-                          <p className="text-xs text-muted-foreground">
-                            Active Savers
-                          </p>
-                          <p className="text-xl font-bold text-white">
-                            Growing
-                          </p>
+                          <p className="text-xs text-muted-foreground">Active Savers</p>
+                          <p className="text-xl font-bold text-white">Growing</p>
                         </div>
                       </div>
                     </div>

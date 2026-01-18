@@ -29,12 +29,9 @@ router.get(
   validate(paginationQuerySchema),
   asyncHandler(async (req, res) => {
     const { limit = 50, offset = 0 } = req.query;
-    const result = await transactionsService.getRecentTransactions(
-      Number(limit),
-      Number(offset),
-    );
+    const result = await transactionsService.getRecentTransactions(Number(limit), Number(offset));
     sendSuccess(res, result);
-  }),
+  })
 );
 
 // GET /api/transactions/stats
@@ -43,7 +40,7 @@ router.get(
   asyncHandler(async (_req, res) => {
     const stats = await transactionsService.getTransactionStats();
     sendSuccess(res, stats);
-  }),
+  })
 );
 
 // GET /api/transactions/:txHash
@@ -51,11 +48,9 @@ router.get(
   "/:txHash",
   validate(txHashParamSchema),
   asyncHandler(async (req, res) => {
-    const transaction = await transactionsService.getTransactionByHash(
-      req.params.txHash,
-    );
+    const transaction = await transactionsService.getTransactionByHash(req.params.txHash);
     sendSuccess(res, transaction);
-  }),
+  })
 );
 
 // GET /api/transactions/pool/:address
@@ -67,10 +62,10 @@ router.get(
     const result = await transactionsService.getTransactionsByPool(
       req.params.address,
       Number(limit),
-      Number(offset),
+      Number(offset)
     );
     sendSuccess(res, result);
-  }),
+  })
 );
 
 export default router;

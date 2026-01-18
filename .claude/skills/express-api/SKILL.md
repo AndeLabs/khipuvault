@@ -59,7 +59,7 @@ router.post("/deposit", authenticate, async (req, res, next) => {
         userId: req.user.id,
         amount: data.amount,
       },
-      "Deposit recorded",
+      "Deposit recorded"
     );
 
     res.status(201).json(result);
@@ -86,11 +86,7 @@ export interface AuthenticatedRequest extends Request {
   user: { id: string; address: string };
 }
 
-export async function authenticate(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export async function authenticate(req: Request, res: Response, next: NextFunction) {
   try {
     const token = req.headers.authorization?.replace("Bearer ", "");
 
@@ -123,11 +119,7 @@ export async function authenticate(
 }
 
 // SIWE verification endpoint
-export async function verifySiwe(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export async function verifySiwe(req: Request, res: Response, next: NextFunction) {
   try {
     const { message, signature } = req.body;
 
@@ -146,11 +138,9 @@ export async function verifySiwe(
     });
 
     // Generate JWT
-    const token = jwt.sign(
-      { address: user.address, userId: user.id },
-      JWT_SECRET,
-      { expiresIn: "7d" },
-    );
+    const token = jwt.sign({ address: user.address, userId: user.id }, JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     res.json({ token, user });
   } catch (error) {
@@ -168,12 +158,7 @@ import { ZodError } from "zod";
 import { Prisma } from "@khipu/database";
 import { logger } from "../lib/logger";
 
-export function errorHandler(
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
   // Zod validation errors
   if (err instanceof ZodError) {
     return res.status(400).json({
@@ -199,10 +184,7 @@ export function errorHandler(
   logger.error({ err, path: req.path }, "Unhandled error");
 
   // Don't expose internal errors in production
-  const message =
-    process.env.NODE_ENV === "production"
-      ? "Internal server error"
-      : err.message;
+  const message = process.env.NODE_ENV === "production" ? "Internal server error" : err.message;
 
   res.status(500).json({ error: message });
 }
@@ -216,10 +198,7 @@ import pino from "pino";
 
 export const logger = pino({
   level: process.env.LOG_LEVEL || "info",
-  transport:
-    process.env.NODE_ENV === "development"
-      ? { target: "pino-pretty" }
-      : undefined,
+  transport: process.env.NODE_ENV === "development" ? { target: "pino-pretty" } : undefined,
   base: {
     service: "khipuvault-api",
     env: process.env.NODE_ENV,

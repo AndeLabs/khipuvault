@@ -27,10 +27,7 @@ import {
   type MemberInfo,
 } from "@/lib/blockchain/fetch-cooperative-pools";
 import { normalizeBigInt } from "@/lib/query-utils";
-import {
-  MEZO_TESTNET_ADDRESSES,
-  COOPERATIVE_POOL_ABI,
-} from "@/lib/web3/contracts-v3";
+import { MEZO_TESTNET_ADDRESSES, COOPERATIVE_POOL_ABI } from "@/lib/web3/contracts-v3";
 
 const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePoolV3;
 
@@ -61,11 +58,7 @@ export function useCooperativePools() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: [
-      "cooperative-pool",
-      "all-pools",
-      normalizeBigInt(poolCounter as bigint | undefined),
-    ],
+    queryKey: ["cooperative-pool", "all-pools", normalizeBigInt(poolCounter as bigint | undefined)],
     queryFn: () => {
       if (!publicClient) {
         return Promise.resolve([]);
@@ -135,12 +128,7 @@ export function useMemberInfo(poolId: number, memberAddress?: `0x${string}`) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: [
-      "cooperative-pool",
-      "member-info",
-      poolId,
-      memberAddress ?? "none",
-    ],
+    queryKey: ["cooperative-pool", "member-info", poolId, memberAddress ?? "none"],
     queryFn: () => {
       if (!publicClient || !memberAddress) {
         return Promise.resolve(null);
@@ -207,12 +195,7 @@ export function useMemberYield(poolId: number, memberAddress?: `0x${string}`) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: [
-      "cooperative-pool",
-      "member-yield",
-      poolId,
-      memberAddress ?? "none",
-    ],
+    queryKey: ["cooperative-pool", "member-yield", poolId, memberAddress ?? "none"],
     queryFn: () => {
       if (!publicClient || !memberAddress) {
         return Promise.resolve(null);
@@ -246,7 +229,7 @@ export function useCreatePool() {
     name: string,
     minContribution: string,
     maxContribution: string,
-    maxMembers: number,
+    maxMembers: number
   ) => {
     const minBtc = parseEther(minContribution);
     const maxBtc = parseEther(maxContribution);
@@ -401,11 +384,7 @@ export function getPoolStatusColor(status: number): string {
 /**
  * Helper: Calculate APR for a pool (mock for now)
  */
-export function calculatePoolAPR(
-  totalYield: bigint,
-  totalBtc: bigint,
-  daysActive: number,
-): string {
+export function calculatePoolAPR(totalYield: bigint, totalBtc: bigint, daysActive: number): string {
   if (totalBtc === 0n || daysActive === 0) {
     return "0";
   }
@@ -458,16 +437,8 @@ export function useUserCooperativeTotal(userAddress?: `0x${string}`) {
       // Check membership in each pool
       for (let i = 1; i <= count; i++) {
         try {
-          const memberInfo = await fetchMemberInfo(
-            publicClient,
-            i,
-            userAddress,
-          );
-          if (
-            memberInfo &&
-            memberInfo.active &&
-            memberInfo.btcContributed > 0n
-          ) {
+          const memberInfo = await fetchMemberInfo(publicClient, i, userAddress);
+          if (memberInfo && memberInfo.active && memberInfo.btcContributed > 0n) {
             totalContribution += memberInfo.btcContributed;
             poolsParticipated++;
             memberInfos.push({
@@ -483,11 +454,7 @@ export function useUserCooperativeTotal(userAddress?: `0x${string}`) {
 
       return { totalContribution, poolsParticipated, memberInfos };
     },
-    enabled:
-      !!publicClient &&
-      !!userAddress &&
-      !!poolCounter &&
-      Number(poolCounter) > 0,
+    enabled: !!publicClient && !!userAddress && !!poolCounter && Number(poolCounter) > 0,
     staleTime: 30000,
     gcTime: 5 * 60 * 1000,
     retry: 1,

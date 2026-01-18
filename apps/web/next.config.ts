@@ -63,8 +63,7 @@ const nextConfig: NextConfig = {
           // Permissions Policy (disable unused features)
           {
             key: "Permissions-Policy",
-            value:
-              "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
           },
           // Content Security Policy - Allow wallet connections and essential resources
           {
@@ -144,7 +143,7 @@ const nextConfig: NextConfig = {
     // Ignore React Native modules in webpack resolve
     if (!isServer) {
       config.resolve.extensions = config.resolve.extensions.filter(
-        (ext: string) => ext !== ".native.js",
+        (ext: string) => ext !== ".native.js"
       );
     }
 

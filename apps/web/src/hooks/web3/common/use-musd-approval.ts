@@ -128,7 +128,7 @@ export function useMusdApproval() {
 
     // Approve unlimited (max uint256)
     const MAX_UINT256 = BigInt(
-      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
     );
 
     writeContract({
@@ -178,17 +178,13 @@ export function useMusdApproval() {
 
   return {
     // Balance info
-    musdBalance: musdBalance
-      ? BigInt((musdBalance as unknown as bigint) || 0n)
-      : undefined,
+    musdBalance: musdBalance ? BigInt((musdBalance as unknown as bigint) || 0n) : undefined,
     balanceFormatted: musdBalance
       ? formatMUSDFromWei(BigInt((musdBalance as unknown as bigint) || 0n))
       : "0.00",
 
     // Allowance info
-    allowance: allowance
-      ? BigInt((allowance as unknown as bigint) || 0n)
-      : undefined,
+    allowance: allowance ? BigInt((allowance as unknown as bigint) || 0n) : undefined,
     isApprovalNeeded,
 
     // Approval actions

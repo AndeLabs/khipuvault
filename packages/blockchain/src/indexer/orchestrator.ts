@@ -10,10 +10,7 @@ export class IndexerOrchestrator {
   /**
    * Add a listener for a contract
    */
-  addListener(
-    name: string,
-    listener: IndividualPoolListener | CooperativePoolListener,
-  ): void {
+  addListener(name: string, listener: IndividualPoolListener | CooperativePoolListener): void {
     this.listeners.set(name, listener);
   }
 
@@ -42,15 +39,13 @@ export class IndexerOrchestrator {
     console.log(`📚 Starting from block: ${fromBlock}`);
 
     // Start all listeners
-    const listenerPromises = Array.from(this.listeners.entries()).map(
-      async ([name, listener]) => {
-        try {
-          await listener.startListening(fromBlock);
-        } catch (error) {
-          console.error(`❌ Error starting ${name}:`, error);
-        }
-      },
-    );
+    const listenerPromises = Array.from(this.listeners.entries()).map(async ([name, listener]) => {
+      try {
+        await listener.startListening(fromBlock);
+      } catch (error) {
+        console.error(`❌ Error starting ${name}:`, error);
+      }
+    });
 
     await Promise.all(listenerPromises);
 

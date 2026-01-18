@@ -94,13 +94,13 @@ export default function PrizePoolPage() {
 
   // User data for current round
   const { ticketCount, isLoading: isLoadingTickets } = useUserTickets(
-    currentRoundId ? Number(currentRoundId) : undefined,
+    currentRoundId ? Number(currentRoundId) : undefined
   );
   const { investment, isLoading: isLoadingInvestment } = useUserInvestment(
-    currentRoundId ? Number(currentRoundId) : undefined,
+    currentRoundId ? Number(currentRoundId) : undefined
   );
   const { probability, isLoading: isLoadingProbability } = useUserProbability(
-    currentRoundId ? Number(currentRoundId) : undefined,
+    currentRoundId ? Number(currentRoundId) : undefined
   );
 
   // All rounds for history
@@ -114,11 +114,7 @@ export default function PrizePoolPage() {
     useLotteryClaimStatus(currentRoundId ? Number(currentRoundId) : undefined);
 
   // Claim/withdraw hooks
-  const {
-    claimPrize,
-    isPending: isClaiming,
-    isSuccess: isClaimSuccess,
-  } = useClaimPrize();
+  const { claimPrize, isPending: isClaiming, isSuccess: isClaimSuccess } = useClaimPrize();
   const {
     withdrawCapital,
     isPending: isWithdrawing,
@@ -127,16 +123,8 @@ export default function PrizePoolPage() {
 
   // Admin hooks
   const { isOwner: isAdmin } = useLotteryPoolOwner();
-  const {
-    drawWinner,
-    isPending: isDrawing,
-    isSuccess: isDrawSuccess,
-  } = useDrawWinner();
-  const {
-    createRound,
-    isPending: isCreatingRound,
-    isSuccess: isCreateSuccess,
-  } = useCreateRound();
+  const { drawWinner, isPending: isDrawing, isSuccess: isDrawSuccess } = useDrawWinner();
+  const { createRound, isPending: isCreatingRound, isSuccess: isCreateSuccess } = useCreateRound();
 
   // Watch for events and auto-refetch
   useLotteryPoolEvents();
@@ -147,16 +135,11 @@ export default function PrizePoolPage() {
 
   // Check if user is winner
   const isWinner =
-    currentRound && address
-      ? currentRound.winner.toLowerCase() === address.toLowerCase()
-      : false;
+    currentRound && address ? currentRound.winner.toLowerCase() === address.toLowerCase() : false;
 
   // Check if user can claim/withdraw
   const canClaim =
-    currentRound &&
-    currentRound.status === 1 &&
-    ticketCount &&
-    ticketCount > BigInt(0);
+    currentRound && currentRound.status === 1 && ticketCount && ticketCount > BigInt(0);
 
   // Handle claim prize (for winners)
   const handleClaimPrize = async () => {
@@ -176,10 +159,7 @@ export default function PrizePoolPage() {
       console.error("Claim error:", _errorInfo);
       toast({
         title: "Claim Failed",
-        description:
-          _errorInfo instanceof Error
-            ? _errorInfo.message
-            : "Failed to claim prize",
+        description: _errorInfo instanceof Error ? _errorInfo.message : "Failed to claim prize",
         variant: "destructive",
       });
     }
@@ -204,9 +184,7 @@ export default function PrizePoolPage() {
       toast({
         title: "Withdraw Failed",
         description:
-          _errorInfo instanceof Error
-            ? _errorInfo.message
-            : "Failed to withdraw capital",
+          _errorInfo instanceof Error ? _errorInfo.message : "Failed to withdraw capital",
         variant: "destructive",
       });
     }
@@ -238,10 +216,7 @@ export default function PrizePoolPage() {
       console.error("Draw error:", _errorInfo);
       toast({
         title: "Draw Failed",
-        description:
-          _errorInfo instanceof Error
-            ? _errorInfo.message
-            : "Failed to draw winner",
+        description: _errorInfo instanceof Error ? _errorInfo.message : "Failed to draw winner",
         variant: "destructive",
       });
     }
@@ -265,9 +240,7 @@ export default function PrizePoolPage() {
       toast({
         title: "Failed to Create Round",
         description:
-          _errorInfo instanceof Error
-            ? _errorInfo.message
-            : "Failed to create new round",
+          _errorInfo instanceof Error ? _errorInfo.message : "Failed to create new round",
         variant: "destructive",
       });
     }
@@ -275,21 +248,10 @@ export default function PrizePoolPage() {
 
   // Watch for claim/withdraw/admin success
   React.useEffect(() => {
-    if (
-      isClaimSuccess ||
-      isWithdrawSuccess ||
-      isDrawSuccess ||
-      isCreateSuccess
-    ) {
+    if (isClaimSuccess || isWithdrawSuccess || isDrawSuccess || isCreateSuccess) {
       void queryClient.refetchQueries({ type: "active" });
     }
-  }, [
-    isClaimSuccess,
-    isWithdrawSuccess,
-    isDrawSuccess,
-    isCreateSuccess,
-    queryClient,
-  ]);
+  }, [isClaimSuccess, isWithdrawSuccess, isDrawSuccess, isCreateSuccess, queryClient]);
 
   // Not connected state
   if (!isConnected) {
@@ -299,9 +261,9 @@ export default function PrizePoolPage() {
           title="Prize Pool"
           description="No-loss lottery where you never lose your capital"
         />
-        <div className="text-center py-12">
-          <Trophy className="h-16 w-16 text-muted-foreground mx-auto mb-4 opacity-50" />
-          <p className="text-lg font-medium mb-2">Connect Your Wallet</p>
+        <div className="py-12 text-center">
+          <Trophy className="mx-auto mb-4 h-16 w-16 text-muted-foreground opacity-50" />
+          <p className="mb-2 text-lg font-medium">Connect Your Wallet</p>
           <p className="text-sm text-muted-foreground">
             Connect your wallet to participate in the prize pool lottery
           </p>
@@ -320,23 +282,21 @@ export default function PrizePoolPage() {
         />
         <Alert variant="destructive">
           <AlertCircle className="h-4 w-4" />
-          <AlertDescription>
-            Failed to load lottery data. Please try again later.
-          </AlertDescription>
+          <AlertDescription>Failed to load lottery data. Please try again later.</AlertDescription>
         </Alert>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 animate-slide-up">
+    <div className="animate-slide-up space-y-8">
       {/* Page Header */}
       <PageHeader
         title="Prize Pool"
         description="Join the no-loss lottery powered by Mezo's yield generation"
         actions={
           <Button variant="outline" size="sm" onClick={handleRefresh}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="mr-2 h-4 w-4" />
             Refresh
           </Button>
         }
@@ -356,11 +316,7 @@ export default function PrizePoolPage() {
               size="sm"
               className="bg-success hover:bg-success/90"
             >
-              {isClaiming ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Claim Prize"
-              )}
+              {isClaiming ? <Loader2 className="h-4 w-4 animate-spin" /> : "Claim Prize"}
             </Button>
           </AlertDescription>
         </Alert>
@@ -371,8 +327,7 @@ export default function PrizePoolPage() {
           <AlertCircle className="h-4 w-4 text-info" />
           <AlertDescription className="flex items-center justify-between">
             <span className="text-info-foreground">
-              Round ended. Withdraw your capital to participate in the next
-              round.
+              Round ended. Withdraw your capital to participate in the next round.
             </span>
             <Button
               onClick={handleWithdrawCapital}
@@ -380,11 +335,7 @@ export default function PrizePoolPage() {
               size="sm"
               variant="outline"
             >
-              {isWithdrawing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                "Withdraw Capital"
-              )}
+              {isWithdrawing ? <Loader2 className="h-4 w-4 animate-spin" /> : "Withdraw Capital"}
             </Button>
           </AlertDescription>
         </Alert>
@@ -406,43 +357,28 @@ export default function PrizePoolPage() {
 
       {/* Statistics Cards */}
       <PageSection>
-        <LotteryStats
-          roundInfo={currentRound ?? null}
-          isLoading={isLoadingRound}
-        />
+        <LotteryStats roundInfo={currentRound ?? null} isLoading={isLoadingRound} />
       </PageSection>
 
       {/* Main Content - Tabs */}
       <PageSection>
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 md:grid-cols-4 max-w-2xl h-auto gap-1">
-            <TabsTrigger
-              value="overview"
-              className="gap-1 md:gap-2 text-xs md:text-sm py-2"
-            >
+          <TabsList className="grid h-auto w-full max-w-2xl grid-cols-2 gap-1 md:grid-cols-4">
+            <TabsTrigger value="overview" className="gap-1 py-2 text-xs md:gap-2 md:text-sm">
               <BarChart3 className="h-3 w-3 md:h-4 md:w-4" />
               <span className="hidden sm:inline">Overview</span>
               <span className="sm:hidden">Stats</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="tickets"
-              className="gap-1 md:gap-2 text-xs md:text-sm py-2"
-            >
+            <TabsTrigger value="tickets" className="gap-1 py-2 text-xs md:gap-2 md:text-sm">
               <Ticket className="h-3 w-3 md:h-4 md:w-4" />
               <span className="hidden sm:inline">Your Tickets</span>
               <span className="sm:hidden">Tickets</span>
             </TabsTrigger>
-            <TabsTrigger
-              value="history"
-              className="gap-1 md:gap-2 text-xs md:text-sm py-2"
-            >
+            <TabsTrigger value="history" className="gap-1 py-2 text-xs md:gap-2 md:text-sm">
               <History className="h-3 w-3 md:h-4 md:w-4" />
               History
             </TabsTrigger>
-            <TabsTrigger
-              value="how-it-works"
-              className="gap-1 md:gap-2 text-xs md:text-sm py-2"
-            >
+            <TabsTrigger value="how-it-works" className="gap-1 py-2 text-xs md:gap-2 md:text-sm">
               <HelpCircle className="h-3 w-3 md:h-4 md:w-4" />
               <span className="hidden sm:inline">How It Works</span>
               <span className="sm:hidden">Info</span>
@@ -457,11 +393,7 @@ export default function PrizePoolPage() {
                 investment={investment ?? undefined}
                 probability={probability ?? undefined}
                 isWinner={isWinner}
-                isLoading={
-                  isLoadingTickets ||
-                  isLoadingInvestment ||
-                  isLoadingProbability
-                }
+                isLoading={isLoadingTickets || isLoadingInvestment || isLoadingProbability}
               />
 
               <ProbabilityCalculator roundInfo={currentRound ?? null} />
@@ -469,42 +401,30 @@ export default function PrizePoolPage() {
 
             {/* User Stats */}
             {stats && (stats.roundsPlayed > 0 || isLoadingStats) && (
-              <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
-                <div className="p-3 md:p-4 rounded-lg bg-surface-elevated border border-border text-center">
-                  <div className="text-xl md:text-2xl font-bold text-lavanda">
+              <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+                <div className="rounded-lg border border-border bg-surface-elevated p-3 text-center md:p-4">
+                  <div className="text-xl font-bold text-lavanda md:text-2xl">
                     {isLoadingStats ? "-" : stats.roundsPlayed}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Rounds
-                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">Rounds</div>
                 </div>
-                <div className="p-3 md:p-4 rounded-lg bg-surface-elevated border border-border text-center">
-                  <div className="text-xl md:text-2xl font-bold text-accent">
+                <div className="rounded-lg border border-border bg-surface-elevated p-3 text-center md:p-4">
+                  <div className="text-xl font-bold text-accent md:text-2xl">
                     {isLoadingStats ? "-" : stats.totalTickets}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Tickets
-                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">Tickets</div>
                 </div>
-                <div className="p-3 md:p-4 rounded-lg bg-surface-elevated border border-border text-center">
-                  <div className="text-xl md:text-2xl font-bold text-success">
-                    {isLoadingStats
-                      ? "-"
-                      : `${Number(stats.totalInvested) / 1e18}`}
+                <div className="rounded-lg border border-border bg-surface-elevated p-3 text-center md:p-4">
+                  <div className="text-xl font-bold text-success md:text-2xl">
+                    {isLoadingStats ? "-" : `${Number(stats.totalInvested) / 1e18}`}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Invested (BTC)
-                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">Invested (BTC)</div>
                 </div>
-                <div className="p-3 md:p-4 rounded-lg bg-surface-elevated border border-border text-center">
-                  <div className="text-xl md:text-2xl font-bold text-warning">
-                    {isLoadingStats
-                      ? "-"
-                      : `${Number(stats.totalWinnings) / 1e18}`}
+                <div className="rounded-lg border border-border bg-surface-elevated p-3 text-center md:p-4">
+                  <div className="text-xl font-bold text-warning md:text-2xl">
+                    {isLoadingStats ? "-" : `${Number(stats.totalWinnings) / 1e18}`}
                   </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    Won (BTC)
-                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">Won (BTC)</div>
                 </div>
               </div>
             )}
@@ -518,11 +438,7 @@ export default function PrizePoolPage() {
                 investment={investment ?? undefined}
                 probability={probability ?? undefined}
                 isWinner={isWinner}
-                isLoading={
-                  isLoadingTickets ||
-                  isLoadingInvestment ||
-                  isLoadingProbability
-                }
+                isLoading={isLoadingTickets || isLoadingInvestment || isLoadingProbability}
               />
 
               <ProbabilityCalculator roundInfo={currentRound ?? null} />
@@ -531,11 +447,7 @@ export default function PrizePoolPage() {
 
           {/* History Tab */}
           <TabsContent value="history" className="mt-6">
-            <DrawHistory
-              rounds={rounds}
-              isLoading={isLoadingRounds}
-              userAddress={address}
-            />
+            <DrawHistory rounds={rounds} isLoading={isLoadingRounds} userAddress={address} />
           </TabsContent>
 
           {/* How It Works Tab */}

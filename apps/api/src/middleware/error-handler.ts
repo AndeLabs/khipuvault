@@ -9,7 +9,7 @@ export class AppError extends Error {
     public statusCode: number,
     public message: string,
     public isOperational = true,
-    public details?: Record<string, unknown> | string | string[],
+    public details?: Record<string, unknown> | string | string[]
   ) {
     super(message);
     Object.setPrototypeOf(this, AppError.prototype);
@@ -23,12 +23,7 @@ export class AppError extends Error {
  * - Custom application errors
  * - Unknown errors
  */
-export function errorHandler(
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
   // Log error with context using structured logging
   const errorContext = {
     error: {
@@ -127,10 +122,7 @@ export function errorHandler(
   // Unknown errors
   return res.status(500).json({
     error: "Internal Server Error",
-    message:
-      process.env.NODE_ENV === "development"
-        ? err.message
-        : "Something went wrong",
+    message: process.env.NODE_ENV === "development" ? err.message : "Something went wrong",
     stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
   });
 }
@@ -147,10 +139,7 @@ interface PrismaErrorMeta {
   constraint?: string;
 }
 
-function handlePrismaKnownError(
-  err: Prisma.PrismaClientKnownRequestError,
-  res: Response,
-) {
+function handlePrismaKnownError(err: Prisma.PrismaClientKnownRequestError, res: Response) {
   const errorCode = err.code;
   const meta = err.meta as PrismaErrorMeta | undefined;
 
@@ -186,8 +175,7 @@ function handlePrismaKnownError(
     case "P2034": {
       return res.status(409).json({
         error: "Transaction Conflict",
-        message:
-          "The operation conflicted with another transaction. Please retry.",
+        message: "The operation conflicted with another transaction. Please retry.",
       });
     }
 
@@ -232,9 +220,7 @@ function handlePrismaKnownError(
         message: "An unexpected database error occurred",
         code: errorCode,
         details:
-          process.env.NODE_ENV === "development"
-            ? { meta, message: err.message }
-            : undefined,
+          process.env.NODE_ENV === "development" ? { meta, message: err.message } : undefined,
       });
     }
   }
@@ -247,7 +233,7 @@ function handlePrismaKnownError(
 type AsyncRequestHandler = (
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => Promise<void> | void;
 
 export const asyncHandler = (fn: AsyncRequestHandler) => {

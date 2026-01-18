@@ -58,9 +58,8 @@ export function TransactionLink({
         rel="noopener noreferrer"
         className={cn(
           buttonVariants({ variant: "outline", size: "sm" }),
-          "w-full flex items-center gap-2",
-          verification.status !== "verified" &&
-            "pointer-events-none opacity-50",
+          "flex w-full items-center gap-2",
+          verification.status !== "verified" && "pointer-events-none opacity-50"
         )}
       >
         {getStatusIcon()}
@@ -72,7 +71,7 @@ export function TransactionLink({
         <span className="text-muted-foreground">{getStatusMessage()}</span>
 
         <div className="flex items-center gap-2">
-          <code className="bg-muted px-2 py-1 rounded text-xs font-mono">
+          <code className="rounded bg-muted px-2 py-1 font-mono text-xs">
             {txHash.slice(0, 8)}...{txHash.slice(-6)}
           </code>
           <button
@@ -86,26 +85,24 @@ export function TransactionLink({
       </div>
 
       {verification.status === "verified" && (
-        <div className="p-2 rounded-lg bg-green-500/10 border border-green-500/20">
+        <div className="rounded-lg border border-green-500/20 bg-green-500/10 p-2">
           <p className="text-xs text-green-300">
-            ✅ Transacción verificada en blockchain. Si el explorador muestra
-            error, el problema es de indexación del explorador, no de tu
-            transacción.
+            ✅ Transacción verificada en blockchain. Si el explorador muestra error, el problema es
+            de indexación del explorador, no de tu transacción.
           </p>
         </div>
       )}
 
       {verification.status === "not_found" && (
-        <div className="p-2 rounded-lg bg-red-500/10 border border-red-500/20">
+        <div className="rounded-lg border border-red-500/20 bg-red-500/10 p-2">
           <p className="text-xs text-red-300">
-            ❌ Transacción no encontrada. Puede que haya fallado o sido
-            rechazada.
+            ❌ Transacción no encontrada. Puede que haya fallado o sido rechazada.
           </p>
         </div>
       )}
 
       {verification.status === "error" && (
-        <div className="p-2 rounded-lg bg-yellow-500/10 border border-yellow-500/20">
+        <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-2">
           <p className="text-xs text-yellow-300">
             ⚠️ Error verificando transacción: {verification.error}
           </p>

@@ -28,8 +28,7 @@ const devWarn = isDev ? console.warn.bind(console) : () => {};
 const devError = isDev ? console.error.bind(console) : () => {};
 
 // Use centralized contract addresses
-const LOTTERY_POOL_ADDRESS =
-  MEZO_TESTNET_ADDRESSES.lotteryPool as `0x${string}`;
+const LOTTERY_POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.lotteryPool as `0x${string}`;
 
 // Re-export types for consumers
 export type { LotteryRoundV3, LotteryParticipantV3 };
@@ -85,10 +84,7 @@ function getStatusLabel(status: number): string {
 /**
  * Parse raw round data from contract
  */
-function parseRoundData(
-  roundId: number,
-  rawRound: LotteryRoundV3,
-): LotteryRound {
+function parseRoundData(roundId: number, rawRound: LotteryRoundV3): LotteryRound {
   const status = Number(rawRound.status);
   const totalMusd = BigInt(rawRound.totalMusd);
   return {
@@ -120,9 +116,7 @@ function parseRoundData(
  * @param publicClient - Viem PublicClient for blockchain queries
  * @returns Current round ID
  */
-export async function fetchCurrentRoundId(
-  publicClient: PublicClient,
-): Promise<number> {
+export async function fetchCurrentRoundId(publicClient: PublicClient): Promise<number> {
   if (!publicClient) {
     return 0;
   }
@@ -148,9 +142,7 @@ export async function fetchCurrentRoundId(
  * @param publicClient - Viem PublicClient for blockchain queries
  * @returns Active round ID or 0 if no active round
  */
-export async function fetchActiveRoundId(
-  publicClient: PublicClient,
-): Promise<number> {
+export async function fetchActiveRoundId(publicClient: PublicClient): Promise<number> {
   if (!publicClient) {
     return 0;
   }
@@ -177,9 +169,7 @@ export async function fetchActiveRoundId(
  * @param publicClient - Viem PublicClient for blockchain queries
  * @returns Total number of rounds
  */
-export async function fetchRoundCounter(
-  publicClient: PublicClient,
-): Promise<number> {
+export async function fetchRoundCounter(publicClient: PublicClient): Promise<number> {
   return fetchCurrentRoundId(publicClient);
 }
 
@@ -192,7 +182,7 @@ export async function fetchRoundCounter(
  */
 export async function fetchRoundInfo(
   publicClient: PublicClient,
-  roundId: bigint | number,
+  roundId: bigint | number
 ): Promise<LotteryRound | null> {
   if (!publicClient) {
     return null;
@@ -224,7 +214,7 @@ export async function fetchRoundInfo(
  */
 export async function fetchAllRounds(
   publicClient: PublicClient,
-  roundCounter: number,
+  roundCounter: number
 ): Promise<LotteryRound[]> {
   if (!publicClient || roundCounter <= 0) {
     return [];
@@ -242,7 +232,7 @@ export async function fetchAllRounds(
         abi: LOTTERY_POOL_ABI,
         functionName: "getRound",
         args: [BigInt(i + 1)],
-      }),
+      })
     );
 
     const results = await Promise.allSettled(roundPromises);
@@ -280,7 +270,7 @@ export async function fetchAllRounds(
 export async function fetchUserParticipation(
   publicClient: PublicClient,
   roundId: bigint | number,
-  userAddress: `0x${string}`,
+  userAddress: `0x${string}`
 ): Promise<LotteryParticipantV3 | null> {
   if (!publicClient || !userAddress) {
     return null;
@@ -312,13 +302,9 @@ export async function fetchUserParticipation(
 export async function fetchUserTickets(
   publicClient: PublicClient,
   roundId: bigint | number,
-  userAddress: `0x${string}`,
+  userAddress: `0x${string}`
 ): Promise<bigint | null> {
-  const participant = await fetchUserParticipation(
-    publicClient,
-    roundId,
-    userAddress,
-  );
+  const participant = await fetchUserParticipation(publicClient, roundId, userAddress);
   return participant ? BigInt(participant.ticketCount) : null;
 }
 
@@ -333,13 +319,9 @@ export async function fetchUserTickets(
 export async function fetchUserInvestment(
   publicClient: PublicClient,
   roundId: bigint | number,
-  userAddress: `0x${string}`,
+  userAddress: `0x${string}`
 ): Promise<bigint | null> {
-  const participant = await fetchUserParticipation(
-    publicClient,
-    roundId,
-    userAddress,
-  );
+  const participant = await fetchUserParticipation(publicClient, roundId, userAddress);
   return participant ? BigInt(participant.musdContributed) : null;
 }
 
@@ -354,7 +336,7 @@ export async function fetchUserInvestment(
 export async function fetchUserProbability(
   publicClient: PublicClient,
   roundId: bigint | number,
-  userAddress: `0x${string}`,
+  userAddress: `0x${string}`
 ): Promise<bigint | null> {
   if (!publicClient || !userAddress) {
     return null;
@@ -389,7 +371,7 @@ export async function fetchUserProbability(
 export async function fetchUserLotteryStats(
   publicClient: PublicClient,
   roundCounter: number,
-  userAddress: `0x${string}`,
+  userAddress: `0x${string}`
 ): Promise<UserLotteryStats> {
   if (!publicClient || !userAddress || roundCounter <= 0) {
     return {
@@ -400,9 +382,7 @@ export async function fetchUserLotteryStats(
     };
   }
 
-  devLog(
-    `🔄 Fetching lottery stats for ${userAddress} across ${roundCounter} rounds`,
-  );
+  devLog(`🔄 Fetching lottery stats for ${userAddress} across ${roundCounter} rounds`);
 
   try {
     let totalInvested = 0n;
@@ -417,7 +397,7 @@ export async function fetchUserLotteryStats(
         abi: LOTTERY_POOL_ABI,
         functionName: "getParticipant",
         args: [BigInt(i + 1), userAddress],
-      }),
+      })
     );
 
     const roundInfoPromises = Array.from({ length: roundCounter }, (_, i) =>
@@ -426,7 +406,7 @@ export async function fetchUserLotteryStats(
         abi: LOTTERY_POOL_ABI,
         functionName: "getRound",
         args: [BigInt(i + 1)],
-      }),
+      })
     );
 
     const participantResults = await Promise.allSettled(participantPromises);
@@ -452,9 +432,7 @@ export async function fetchUserLotteryStats(
             try {
               const roundInfo = roundResult.value as LotteryRoundV3;
 
-              if (
-                roundInfo.winner.toLowerCase() === userAddress.toLowerCase()
-              ) {
+              if (roundInfo.winner.toLowerCase() === userAddress.toLowerCase()) {
                 totalWinnings += BigInt(roundInfo.winnerPrize);
               }
             } catch (error) {
@@ -465,9 +443,7 @@ export async function fetchUserLotteryStats(
       }
     }
 
-    devLog(
-      `✅ Fetched lottery stats: ${roundsPlayed} rounds, ${totalTickets} tickets`,
-    );
+    devLog(`✅ Fetched lottery stats: ${roundsPlayed} rounds, ${totalTickets} tickets`);
 
     return {
       totalInvested,

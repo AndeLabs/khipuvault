@@ -9,16 +9,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback, useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
-import {
-  MEZO_V3_ADDRESSES,
-  INDIVIDUAL_POOL_V3_ABI,
-  V3_FEATURES,
-} from "@/lib/web3/contracts-v3";
+import { MEZO_V3_ADDRESSES, INDIVIDUAL_POOL_V3_ABI, V3_FEATURES } from "@/lib/web3/contracts-v3";
 
 import { QUERY_KEYS, INITIAL_TX_STATE, TransactionState } from "./constants";
 
-const INDIVIDUAL_POOL_ADDRESS =
-  MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
+const INDIVIDUAL_POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
 
 // ============================================================================
 // DEPOSIT HOOKS
@@ -29,8 +24,7 @@ const INDIVIDUAL_POOL_ADDRESS =
  */
 export function useDeposit() {
   const queryClient = useQueryClient();
-  const [localState, setLocalState] =
-    useState<TransactionState>(INITIAL_TX_STATE);
+  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE);
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
@@ -45,23 +39,16 @@ export function useDeposit() {
 
         // Validate minimum deposit
         if (amount < BigInt(V3_FEATURES.individualPool.minDeposit)) {
-          throw new Error(
-            `Minimum deposit is ${V3_FEATURES.individualPool.minDeposit} MUSD`,
-          );
+          throw new Error(`Minimum deposit is ${V3_FEATURES.individualPool.minDeposit} MUSD`);
         }
 
         // Validate maximum deposit
         if (amount > BigInt(V3_FEATURES.individualPool.maxDeposit)) {
-          throw new Error(
-            `Maximum deposit is ${V3_FEATURES.individualPool.maxDeposit} MUSD`,
-          );
+          throw new Error(`Maximum deposit is ${V3_FEATURES.individualPool.maxDeposit} MUSD`);
         }
 
         // Use depositWithReferral if referrer is provided, otherwise use simple deposit
-        if (
-          referrer &&
-          referrer !== "0x0000000000000000000000000000000000000000"
-        ) {
+        if (referrer && referrer !== "0x0000000000000000000000000000000000000000") {
           writeContract({
             address: INDIVIDUAL_POOL_ADDRESS,
             abi: INDIVIDUAL_POOL_V3_ABI,
@@ -81,7 +68,7 @@ export function useDeposit() {
         throw err;
       }
     },
-    [writeContract],
+    [writeContract]
   );
 
   // Update local state when hash changes
@@ -120,8 +107,7 @@ export function useDeposit() {
  */
 export function usePartialWithdraw() {
   const queryClient = useQueryClient();
-  const [localState, setLocalState] =
-    useState<TransactionState>(INITIAL_TX_STATE);
+  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE);
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
@@ -136,9 +122,7 @@ export function usePartialWithdraw() {
 
         // Validate minimum withdrawal
         if (amount < BigInt(V3_FEATURES.individualPool.minWithdrawal)) {
-          throw new Error(
-            `Minimum withdrawal is ${V3_FEATURES.individualPool.minWithdrawal} MUSD`,
-          );
+          throw new Error(`Minimum withdrawal is ${V3_FEATURES.individualPool.minWithdrawal} MUSD`);
         }
 
         writeContract({
@@ -152,7 +136,7 @@ export function usePartialWithdraw() {
         throw err;
       }
     },
-    [writeContract],
+    [writeContract]
   );
 
   // Update local state when hash changes
@@ -187,8 +171,7 @@ export function usePartialWithdraw() {
  */
 export function useFullWithdraw() {
   const queryClient = useQueryClient();
-  const [localState, setLocalState] =
-    useState<TransactionState>(INITIAL_TX_STATE);
+  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE);
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 

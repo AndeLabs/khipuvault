@@ -25,11 +25,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
 import type { Abi, Address } from "viem";
-import {
-  useAccount,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-} from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 // ============================================================================
 // TYPES
@@ -159,7 +155,7 @@ function defaultErrorParser(error: unknown): string {
  * @returns A hook function that can be used in components
  */
 export function createContractMutation(
-  config: ContractMutationConfig,
+  config: ContractMutationConfig
 ): () => ContractMutationResult {
   const {
     contractAddress,
@@ -258,7 +254,7 @@ export function createContractMutation(
           setError(errorParser(err));
         }
       },
-      [address, resetWrite, writeContract],
+      [address, resetWrite, writeContract]
     );
 
     return {
@@ -267,8 +263,7 @@ export function createContractMutation(
       error,
       reset,
       txHash: receipt?.transactionHash ?? txHash,
-      isProcessing:
-        state !== "idle" && state !== "success" && state !== "error",
+      isProcessing: state !== "idle" && state !== "success" && state !== "error",
       address,
       isConnected,
     };
@@ -289,12 +284,7 @@ export function useBaseMutation() {
   const [state, setState] = useState<MutationState>("idle");
   const [error, setError] = useState<string>("");
 
-  const {
-    writeContract,
-    data: txHash,
-    error: writeError,
-    reset: resetWrite,
-  } = useWriteContract();
+  const { writeContract, data: txHash, error: writeError, reset: resetWrite } = useWriteContract();
 
   const {
     isLoading: isConfirming,

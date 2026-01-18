@@ -5,8 +5,7 @@
 import { chromium } from "playwright";
 import { Wallet, JsonRpcProvider } from "ethers";
 
-const TEST_PRIVATE_KEY =
-  "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
+const TEST_PRIVATE_KEY = "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80";
 const MEZO_RPC = "https://rpc.test.mezo.org";
 const CHAIN_ID = 31611;
 

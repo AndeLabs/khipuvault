@@ -46,12 +46,7 @@ export function EmptyState({
     if (action.href) {
       if (action.external) {
         return (
-          <a
-            href={action.href}
-            target="_blank"
-            rel="noopener noreferrer"
-            key={action.label}
-          >
+          <a href={action.href} target="_blank" rel="noopener noreferrer" key={action.label}>
             {buttonContent}
           </a>
         );
@@ -67,21 +62,19 @@ export function EmptyState({
   };
 
   return (
-    <Card variant="glass" className={cn("text-center py-12", className)}>
+    <Card variant="glass" className={cn("py-12 text-center", className)}>
       <CardContent className="space-y-4">
         <div className="flex justify-center">
-          <div className="h-20 w-20 rounded-full bg-muted flex items-center justify-center">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-muted">
             {icon}
           </div>
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-heading font-semibold">{title}</h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            {description}
-          </p>
+          <h3 className="font-heading text-xl font-semibold">{title}</h3>
+          <p className="mx-auto max-w-md text-muted-foreground">{description}</p>
         </div>
         {(primaryAction ?? secondaryAction) && (
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-4">
+          <div className="flex flex-col items-center justify-center gap-3 pt-4 sm:flex-row">
             {primaryAction && renderAction(primaryAction, true)}
             {secondaryAction && renderAction(secondaryAction, false)}
           </div>

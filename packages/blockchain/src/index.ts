@@ -6,11 +6,9 @@ import { shutdownProvider, getProviderHealth } from "./provider";
 
 // Contract addresses (from env or hardcoded testnet addresses)
 const INDIVIDUAL_POOL_ADDRESS =
-  process.env.INDIVIDUAL_POOL_ADDRESS ||
-  "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393";
+  process.env.INDIVIDUAL_POOL_ADDRESS || "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393";
 const COOPERATIVE_POOL_ADDRESS =
-  process.env.COOPERATIVE_POOL_ADDRESS ||
-  "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88";
+  process.env.COOPERATIVE_POOL_ADDRESS || "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88";
 
 export async function startIndexer() {
   console.log("🌐 KhipuVault Blockchain Indexer");
@@ -19,14 +17,11 @@ export async function startIndexer() {
   const orchestrator = new IndexerOrchestrator();
 
   // Add listeners
-  orchestrator.addListener(
-    "IndividualPool",
-    new IndividualPoolListener(INDIVIDUAL_POOL_ADDRESS),
-  );
+  orchestrator.addListener("IndividualPool", new IndividualPoolListener(INDIVIDUAL_POOL_ADDRESS));
 
   orchestrator.addListener(
     "CooperativePool",
-    new CooperativePoolListener(COOPERATIVE_POOL_ADDRESS),
+    new CooperativePoolListener(COOPERATIVE_POOL_ADDRESS)
   );
 
   // Start indexing

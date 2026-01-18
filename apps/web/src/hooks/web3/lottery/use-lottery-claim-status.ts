@@ -43,8 +43,7 @@ export function useLotteryClaimStatus(roundId?: number) {
 
         // Query PrizeClaimed events for this user and round
         // Look back up to 10,000 blocks (roughly 1-2 weeks on most chains)
-        const fromBlock =
-          latestBlock > BigInt(10000) ? latestBlock - BigInt(10000) : BigInt(0);
+        const fromBlock = latestBlock > BigInt(10000) ? latestBlock - BigInt(10000) : BigInt(0);
 
         const events = await publicClient.getLogs({
           address: MEZO_TESTNET_ADDRESSES.lotteryPool as `0x${string}`,
@@ -102,12 +101,7 @@ export function useBatchLotteryClaimStatus(roundIds: number[]) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: [
-      "lottery-pool",
-      "batch-claim-status",
-      roundIds.join(","),
-      address ?? "none",
-    ],
+    queryKey: ["lottery-pool", "batch-claim-status", roundIds.join(","), address ?? "none"],
     queryFn: async (): Promise<Record<number, boolean>> => {
       if (!publicClient || roundIds.length === 0 || !address) {
         return {};
@@ -115,8 +109,7 @@ export function useBatchLotteryClaimStatus(roundIds: number[]) {
 
       try {
         const latestBlock = await publicClient.getBlockNumber();
-        const fromBlock =
-          latestBlock > BigInt(10000) ? latestBlock - BigInt(10000) : BigInt(0);
+        const fromBlock = latestBlock > BigInt(10000) ? latestBlock - BigInt(10000) : BigInt(0);
 
         // Fetch all PrizeClaimed events for this user
         const events = await publicClient.getLogs({
@@ -141,9 +134,7 @@ export function useBatchLotteryClaimStatus(roundIds: number[]) {
         // Build map of roundId -> hasClaimed
         const statusMap: Record<number, boolean> = {};
         roundIds.forEach((roundId) => {
-          statusMap[roundId] = events.some(
-            (event) => event.args.roundId === BigInt(roundId),
-          );
+          statusMap[roundId] = events.some((event) => event.args.roundId === BigInt(roundId));
         });
 
         return statusMap;

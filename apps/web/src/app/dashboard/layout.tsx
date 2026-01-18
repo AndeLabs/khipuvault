@@ -9,11 +9,7 @@ import { TransactionProvider, TransactionModal } from "@/features/transactions";
  * - Integrated transaction management
  * - Responsive sidebar and header
  */
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
     <TransactionProvider>
       <AppShell>{children}</AppShell>

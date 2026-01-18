@@ -124,11 +124,7 @@ export class LotteryService {
   /**
    * Get all user's lottery participation
    */
-  async getUserLotteryHistory(
-    userAddress: string,
-    limit: number = 20,
-    offset: number = 0,
-  ) {
+  async getUserLotteryHistory(userAddress: string, limit: number = 20, offset: number = 0) {
     const normalizedAddress = userAddress.toLowerCase();
 
     const [tickets, total] = await Promise.all([
@@ -290,9 +286,7 @@ export class LotteryService {
 
     for (const ticket of winningTickets) {
       const existing = winnerMap.get(ticket.userAddress);
-      const prizeAmount = ticket.claimedAmount
-        ? BigInt(ticket.claimedAmount)
-        : BigInt(0);
+      const prizeAmount = ticket.claimedAmount ? BigInt(ticket.claimedAmount) : BigInt(0);
 
       if (existing) {
         existing.wins += 1;
@@ -322,19 +316,18 @@ export class LotteryService {
    * Get lottery pool statistics
    */
   async getPoolStats() {
-    const [totalRounds, completedRounds, totalTickets, completedRoundsList] =
-      await Promise.all([
-        prisma.lotteryRound.count(),
-        prisma.lotteryRound.count({ where: { status: "COMPLETED" } }),
-        prisma.lotteryTicket.aggregate({
-          _sum: { ticketCount: true },
-        }),
-        // Get all completed rounds to sum totalMusd (string field)
-        prisma.lotteryRound.findMany({
-          where: { status: "COMPLETED" },
-          select: { totalMusd: true },
-        }),
-      ]);
+    const [totalRounds, completedRounds, totalTickets, completedRoundsList] = await Promise.all([
+      prisma.lotteryRound.count(),
+      prisma.lotteryRound.count({ where: { status: "COMPLETED" } }),
+      prisma.lotteryTicket.aggregate({
+        _sum: { ticketCount: true },
+      }),
+      // Get all completed rounds to sum totalMusd (string field)
+      prisma.lotteryRound.findMany({
+        where: { status: "COMPLETED" },
+        select: { totalMusd: true },
+      }),
+    ]);
 
     // Calculate total MUSD collected (sum of string values)
     const totalMusdCollected = completedRoundsList.reduce((sum, round) => {

@@ -46,7 +46,7 @@ export function AnimateOnScroll({ children, className, delay = "0ms" }: Props) {
           observer.unobserve(entry.target);
         }
       },
-      { threshold: 0.1 },
+      { threshold: 0.1 }
     );
 
     observer.observe(element);
@@ -71,9 +71,9 @@ export function AnimateOnScroll({ children, className, delay = "0ms" }: Props) {
     <div
       ref={ref}
       className={cn(
-        "transition-all ease-out duration-1000",
-        isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8",
-        className,
+        "transition-all duration-1000 ease-out",
+        isVisible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0",
+        className
       )}
       style={{ transitionDelay: delay }}
     >

@@ -16,10 +16,11 @@
  * - Error handling and recovery
  */
 
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import React, { ReactNode, useEffect, useState } from "react";
+import { QueryClient, QueryClientProvider, QueryErrorResetBoundary } from "@tanstack/react-query";
+import React, { ReactNode, Suspense, useEffect, useState } from "react";
 import { WagmiProvider } from "wagmi";
 
+import { captureError } from "@/lib/error-tracking";
 import { getWagmiConfig } from "@/lib/web3/config";
 
 /**
@@ -119,18 +120,54 @@ export function Web3Provider({
     }
     // eslint-disable-next-line no-console
     console.log(
-      "🔌 Web3Provider Initialized | Network: Mezo Testnet (31611) | Wallets: MetaMask + Unisat",
+      "🔌 Web3Provider Initialized | Network: Mezo Testnet (31611) | Wallets: MetaMask + Unisat"
     );
   }, []);
 
   // Render providers with config and initialState for SSR hydration
+  // QueryErrorResetBoundary enables proper error recovery for React Query errors
   return (
     <WagmiProvider config={config} initialState={initialState}>
       <QueryClientProvider client={finalQueryClient}>
-        {children}
+        <QueryErrorResetBoundary>
+          {({ reset }) => <QueryErrorHandler onReset={reset}>{children}</QueryErrorHandler>}
+        </QueryErrorResetBoundary>
       </QueryClientProvider>
     </WagmiProvider>
   );
+}
+
+/**
+ * Internal component to handle query errors with reset capability
+ */
+function QueryErrorHandler({ children, onReset }: { children: ReactNode; onReset: () => void }) {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-background">
+          <div className="text-center">
+            <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-lavanda" />
+            <p className="text-muted-foreground">Cargando datos...</p>
+          </div>
+        </div>
+      }
+    >
+      <QueryErrorResetContext.Provider value={onReset}>{children}</QueryErrorResetContext.Provider>
+    </Suspense>
+  );
+}
+
+/**
+ * Context to expose query reset function to error boundaries
+ */
+const QueryErrorResetContext = React.createContext<(() => void) | null>(null);
+
+/**
+ * Hook to get the query reset function
+ * Use this in error boundaries to properly reset React Query state
+ */
+export function useQueryErrorReset() {
+  return React.useContext(QueryErrorResetContext);
 }
 
 /**
@@ -150,10 +187,7 @@ interface ErrorBoundaryState {
   errorInfo?: React.ErrorInfo;
 }
 
-export class Web3ErrorBoundary extends React.Component<
-  Web3ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: Web3ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -174,6 +208,12 @@ export class Web3ErrorBoundary extends React.Component<
         timestamp: new Date().toISOString(),
       });
     }
+
+    // Capture error for monitoring (Sentry when enabled)
+    captureError(error, {
+      tags: { boundary: "web3", component: "Web3ErrorBoundary" },
+      extra: { componentStack: errorInfo.componentStack },
+    });
 
     // Store error info for display
     this.setState({
@@ -196,8 +236,7 @@ export class Web3ErrorBoundary extends React.Component<
 
       // Check error types
       const isWagmiError =
-        errorMessage.includes("WagmiProvider") ||
-        errorMessage.includes("useConfig");
+        errorMessage.includes("WagmiProvider") || errorMessage.includes("useConfig");
 
       const isMultiWalletConflict =
         errorMessage.includes("Cannot redefine property: ethereum") ||
@@ -205,31 +244,29 @@ export class Web3ErrorBoundary extends React.Component<
         errorMessage.toLowerCase().includes("allowance is not defined");
 
       return (
-        <div className="min-h-screen flex items-center justify-center bg-background p-4">
-          <div className="max-w-2xl w-full bg-destructive/10 border border-destructive/20 rounded-lg p-6">
+        <div className="flex min-h-screen items-center justify-center bg-background p-4">
+          <div className="w-full max-w-2xl rounded-lg border border-destructive/20 bg-destructive/10 p-6">
             <div className="flex items-start gap-4">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-destructive/20 flex items-center justify-center">
+              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-destructive/20">
                 <span className="text-2xl">⚠️</span>
               </div>
 
               <div className="flex-1">
-                <h2 className="text-xl font-bold text-destructive mb-2">
-                  Error en Web3
-                </h2>
+                <h2 className="mb-2 text-xl font-bold text-destructive">Error en Web3</h2>
 
-                <p className="text-foreground/80 mb-4">
+                <p className="mb-4 text-foreground/80">
                   {getErrorMessage(isMultiWalletConflict, isWagmiError)}
                 </p>
 
                 {isMultiWalletConflict && (
-                  <div className="mb-4 p-4 bg-yellow-500/10 border border-yellow-500/30 rounded-lg">
-                    <p className="text-sm font-semibold text-yellow-500 mb-2">
+                  <div className="mb-4 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4">
+                    <p className="mb-2 text-sm font-semibold text-yellow-500">
                       🔧 Solución Recomendada:
                     </p>
-                    <ol className="text-sm text-foreground/80 space-y-2 list-decimal list-inside">
+                    <ol className="list-inside list-decimal space-y-2 text-sm text-foreground/80">
                       <li>
-                        <strong>Desactiva todas las wallets excepto una</strong>{" "}
-                        en las extensiones de tu navegador
+                        <strong>Desactiva todas las wallets excepto una</strong> en las extensiones
+                        de tu navegador
                       </li>
                       <li>
                         Recomendamos usar <strong>solo MetaMask</strong> o{" "}
@@ -237,22 +274,20 @@ export class Web3ErrorBoundary extends React.Component<
                       </li>
                       <li>
                         Ve a{" "}
-                        <code className="text-xs bg-background/50 px-2 py-1 rounded">
+                        <code className="rounded bg-background/50 px-2 py-1 text-xs">
                           chrome://extensions/
                         </code>
                       </li>
-                      <li>
-                        Desactiva las wallets que no uses (Yoroi, Phantom, etc.)
-                      </li>
+                      <li>Desactiva las wallets que no uses (Yoroi, Phantom, etc.)</li>
                       <li>Recarga esta página</li>
                     </ol>
                   </div>
                 )}
 
-                <div className="flex gap-3 mb-4">
+                <div className="mb-4 flex gap-3">
                   <button
                     onClick={this.handleReload}
-                    className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors"
+                    className="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
                   >
                     Recargar Página
                   </button>
@@ -260,7 +295,7 @@ export class Web3ErrorBoundary extends React.Component<
                   {isDev && (
                     <button
                       onClick={this.handleReset}
-                      className="px-4 py-2 bg-muted text-foreground rounded-md hover:bg-muted/80 transition-colors"
+                      className="rounded-md bg-muted px-4 py-2 text-foreground transition-colors hover:bg-muted/80"
                     >
                       Intentar Recuperar
                     </button>
@@ -269,13 +304,13 @@ export class Web3ErrorBoundary extends React.Component<
 
                 {isDev && (
                   <details className="mt-4 text-sm">
-                    <summary className="cursor-pointer text-muted-foreground hover:text-foreground mb-2">
+                    <summary className="mb-2 cursor-pointer text-muted-foreground hover:text-foreground">
                       Detalles técnicos (solo en desarrollo)
                     </summary>
-                    <div className="bg-background/50 border border-border rounded p-4 overflow-auto">
+                    <div className="overflow-auto rounded border border-border bg-background/50 p-4">
                       <div className="mb-3">
                         <strong className="text-destructive">Error:</strong>
-                        <pre className="mt-1 text-xs overflow-x-auto whitespace-pre-wrap">
+                        <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs">
                           {errorMessage}
                         </pre>
                       </div>
@@ -283,7 +318,7 @@ export class Web3ErrorBoundary extends React.Component<
                       {this.state.error?.stack && (
                         <div className="mb-3">
                           <strong className="text-destructive">Stack:</strong>
-                          <pre className="mt-1 text-xs overflow-x-auto whitespace-pre-wrap">
+                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs">
                             {this.state.error.stack}
                           </pre>
                         </div>
@@ -291,10 +326,8 @@ export class Web3ErrorBoundary extends React.Component<
 
                       {this.state.errorInfo?.componentStack && (
                         <div>
-                          <strong className="text-destructive">
-                            Component Stack:
-                          </strong>
-                          <pre className="mt-1 text-xs overflow-x-auto whitespace-pre-wrap">
+                          <strong className="text-destructive">Component Stack:</strong>
+                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs">
                             {this.state.errorInfo.componentStack}
                           </pre>
                         </div>
@@ -313,34 +346,29 @@ export class Web3ErrorBoundary extends React.Component<
   }
 }
 
-function getErrorMessage(
-  isMultiWalletConflict: boolean,
-  isWagmiError: boolean,
-): React.ReactNode {
+function getErrorMessage(isMultiWalletConflict: boolean, isWagmiError: boolean): React.ReactNode {
   if (isMultiWalletConflict) {
     return (
       <>
-        <strong className="text-destructive">
-          Conflicto de múltiples wallets detectado.
-        </strong>
+        <strong className="text-destructive">Conflicto de múltiples wallets detectado.</strong>
         <br />
-        Tienes varias extensiones de wallet activas (MetaMask, OKX, Yoroi, etc.)
-        que están compitiendo por el control de la conexión Web3.
+        Tienes varias extensiones de wallet activas (MetaMask, OKX, Yoroi, etc.) que están
+        compitiendo por el control de la conexión Web3.
       </>
     );
   }
   if (isWagmiError) {
     return (
       <>
-        Ocurrió un error en la configuración de wallet. El componente está
-        intentando usar hooks de Wagmi fuera del contexto del provider.
+        Ocurrió un error en la configuración de wallet. El componente está intentando usar hooks de
+        Wagmi fuera del contexto del provider.
       </>
     );
   }
   return (
     <>
-      Ocurrió un error en la conexión de wallet. Por favor recarga la página
-      para intentar nuevamente.
+      Ocurrió un error en la conexión de wallet. Por favor recarga la página para intentar
+      nuevamente.
     </>
   );
 }

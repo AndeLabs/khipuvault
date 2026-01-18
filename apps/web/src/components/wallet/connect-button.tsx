@@ -50,7 +50,7 @@ export function ConnectButton() {
 
   // Prevent hydration errors
   if (!mounted) {
-    return <div className="h-10 w-40 animate-pulse bg-muted rounded-lg" />;
+    return <div className="h-10 w-40 animate-pulse rounded-lg bg-muted" />;
   }
 
   if (isConnected && address) {
@@ -58,9 +58,9 @@ export function ConnectButton() {
       <div className="flex items-center gap-3">
         {/* Balance Display */}
         {btcBalance && (
-          <div className="hidden md:flex items-center gap-2 text-sm">
+          <div className="hidden items-center gap-2 text-sm md:flex">
             <span className="text-muted-foreground">Balance:</span>
-            <span className="font-semibold font-code">
+            <span className="font-code font-semibold">
               {Number(btcBalance.formatted).toFixed(6)} BTC
             </span>
           </div>
@@ -81,9 +81,7 @@ export function ConnectButton() {
           <DropdownMenuContent align="end" className="w-56">
             <div className="px-2 py-1.5 text-sm">
               <div className="font-medium">Connected Wallet</div>
-              <div className="text-muted-foreground font-mono text-xs">
-                {address}
-              </div>
+              <div className="font-mono text-xs text-muted-foreground">{address}</div>
             </div>
 
             <DropdownMenuSeparator />
@@ -97,7 +95,7 @@ export function ConnectButton() {
                 }
               }}
             >
-              <Copy className="h-4 w-4 mr-2" aria-hidden="true" />
+              <Copy className="mr-2 h-4 w-4" aria-hidden="true" />
               Copy Address
             </DropdownMenuItem>
 
@@ -107,7 +105,7 @@ export function ConnectButton() {
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <ExternalLink className="h-4 w-4 mr-2" />
+                <ExternalLink className="mr-2 h-4 w-4" />
                 View in Explorer
               </a>
             </DropdownMenuItem>
@@ -138,9 +136,7 @@ export function ConnectButton() {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-56">
-        <div className="px-2 py-1.5 text-sm font-medium">
-          Select your wallet
-        </div>
+        <div className="px-2 py-1.5 text-sm font-medium">Select your wallet</div>
 
         <DropdownMenuSeparator />
 
@@ -204,7 +200,7 @@ export function WalletInfo() {
   if (!mounted) {
     return (
       <div className="flex items-center gap-4">
-        <div className="h-12 w-32 animate-pulse bg-muted rounded" />
+        <div className="h-12 w-32 animate-pulse rounded bg-muted" />
       </div>
     );
   }
@@ -219,7 +215,7 @@ export function WalletInfo() {
       {btcBalance && (
         <div className="flex flex-col items-end">
           <div className="text-sm text-muted-foreground">Balance BTC</div>
-          <div className="text-lg font-semibold font-code">
+          <div className="font-code text-lg font-semibold">
             {Number(btcBalance.formatted).toFixed(6)} BTC
           </div>
         </div>
@@ -229,7 +225,7 @@ export function WalletInfo() {
       {userInfo?.deposit && (
         <div className="flex flex-col items-end border-l border-primary/20 pl-4">
           <div className="text-sm text-muted-foreground">MUSD Generado</div>
-          <div className="text-lg font-semibold font-code text-primary">
+          <div className="font-code text-lg font-semibold text-primary">
             {Number(userInfo.deposit / BigInt(1e18)).toLocaleString()}
           </div>
         </div>
@@ -257,10 +253,8 @@ export function WalletStatus() {
   if (!mounted) {
     return (
       <div className="flex items-center gap-2">
-        <div className="h-2 w-2 rounded-full bg-muted animate-pulse" />
-        <span className="text-sm font-medium text-muted-foreground">
-          Loading...
-        </span>
+        <div className="h-2 w-2 animate-pulse rounded-full bg-muted" />
+        <span className="text-sm font-medium text-muted-foreground">Loading...</span>
       </div>
     );
   }

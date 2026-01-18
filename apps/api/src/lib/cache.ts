@@ -46,7 +46,7 @@ class CacheService {
     }
 
     const entries = Array.from(this.cache.entries()).sort(
-      (a, b) => a[1].lastAccessed - b[1].lastAccessed,
+      (a, b) => a[1].lastAccessed - b[1].lastAccessed
     );
 
     const toEvict = Math.ceil(entries.length * EVICTION_PERCENTAGE);
@@ -54,10 +54,7 @@ class CacheService {
       this.cache.delete(entries[i][0]);
     }
 
-    logger.debug(
-      { evicted: toEvict, remaining: this.cache.size },
-      "LRU cache eviction completed",
-    );
+    logger.debug({ evicted: toEvict, remaining: this.cache.size }, "LRU cache eviction completed");
   }
 
   /**
@@ -131,11 +128,7 @@ class CacheService {
   /**
    * Get or set pattern - fetch from cache or compute and cache
    */
-  async getOrSet<T>(
-    key: string,
-    fetcher: () => Promise<T>,
-    ttlSeconds: number,
-  ): Promise<T> {
+  async getOrSet<T>(key: string, fetcher: () => Promise<T>, ttlSeconds: number): Promise<T> {
     const cached = await this.get<T>(key);
 
     if (cached !== null) {
@@ -182,10 +175,7 @@ class CacheService {
     }
 
     if (cleaned > 0) {
-      logger.debug(
-        { cleaned, remaining: this.cache.size },
-        "Cache cleanup completed",
-      );
+      logger.debug({ cleaned, remaining: this.cache.size }, "Cache cleanup completed");
     }
   }
 
@@ -262,10 +252,7 @@ export const tokenBlacklist = {
    * @param jti JWT ID or token hash
    * @param expiresInSeconds Time until token naturally expires
    */
-  async add(
-    jti: string,
-    expiresInSeconds: number = CACHE_TTL.TOKEN_BLACKLIST,
-  ): Promise<void> {
+  async add(jti: string, expiresInSeconds: number = CACHE_TTL.TOKEN_BLACKLIST): Promise<void> {
     const key = CACHE_KEYS.tokenBlacklist(jti);
     await cache.set(key, true, expiresInSeconds);
     logger.debug({ jti }, "Token added to blacklist");

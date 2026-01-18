@@ -8,18 +8,8 @@ import { formatUnits, isAddress } from "viem";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTransactionExecute } from "@/features/transactions";
@@ -29,10 +19,7 @@ const depositSchema = z.object({
   amount: z
     .string()
     .min(1, "Amount is required")
-    .refine(
-      (val) => !isNaN(Number(val)) && Number(val) > 0,
-      "Amount must be greater than 0",
-    ),
+    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Amount must be greater than 0"),
   referralCode: z.string().optional(),
 });
 
@@ -87,8 +74,7 @@ export function DepositCard({
       if (!balance || balance === "0") {
         return "0.00";
       }
-      const balanceBigInt =
-        typeof balance === "bigint" ? balance : BigInt(balance);
+      const balanceBigInt = typeof balance === "bigint" ? balance : BigInt(balance);
       return Number(formatUnits(balanceBigInt, 18)).toFixed(2);
     } catch (error) {
       console.error("Error formatting balance:", error);
@@ -104,9 +90,7 @@ export function DepositCard({
     <Card variant="surface" className={className}>
       <CardHeader className="pb-4">
         <CardTitle>Deposit</CardTitle>
-        <CardDescription>
-          Earn ~{apy.toFixed(1)}% APY on your mUSD deposits
-        </CardDescription>
+        <CardDescription>Earn ~{apy.toFixed(1)}% APY on your mUSD deposits</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -115,15 +99,13 @@ export function DepositCard({
           <div className="space-y-2">
             {/* Balance Row */}
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">
-                Wallet balance: {formattedBalance} mUSD
-              </span>
+              <span className="text-muted-foreground">Wallet balance: {formattedBalance} mUSD</span>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
                 onClick={setMaxAmount}
-                className="h-6 px-2 text-xs font-semibold text-lavanda hover:text-lavanda hover:bg-lavanda/10"
+                className="h-6 px-2 text-xs font-semibold text-lavanda hover:bg-lavanda/10 hover:text-lavanda"
               >
                 MAX
               </Button>
@@ -132,17 +114,17 @@ export function DepositCard({
             {/* Large Input Container - Aave/Uniswap Style */}
             <div
               className={cn(
-                "relative p-4 rounded-xl border-2 transition-all",
+                "relative rounded-xl border-2 p-4 transition-all",
                 "bg-surface-elevated hover:border-lavanda/50",
                 errors.amount
                   ? "border-error focus-within:border-error"
-                  : "border-border focus-within:border-lavanda",
+                  : "border-border focus-within:border-lavanda"
               )}
             >
               <div className="flex items-center gap-3">
                 {/* Token Badge */}
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-border">
-                  <div className="w-6 h-6 rounded-full bg-gradient-lavanda flex items-center justify-center">
+                <div className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5">
+                  <div className="bg-gradient-lavanda flex h-6 w-6 items-center justify-center rounded-full">
                     <span className="text-xs font-bold">m</span>
                   </div>
                   <span className="font-semibold">mUSD</span>
@@ -156,9 +138,9 @@ export function DepositCard({
                   placeholder="0.00"
                   {...register("amount")}
                   className={cn(
-                    "flex-1 bg-transparent border-0 outline-none",
+                    "flex-1 border-0 bg-transparent outline-none",
                     "text-3xl font-bold tabular-nums placeholder:text-muted-foreground/50",
-                    "focus:outline-none focus:ring-0",
+                    "focus:outline-none focus:ring-0"
                   )}
                 />
               </div>
@@ -172,7 +154,7 @@ export function DepositCard({
             </div>
 
             {errors.amount && (
-              <p className="text-sm text-error flex items-center gap-1">
+              <p className="flex items-center gap-1 text-sm text-error">
                 <span className="text-xs">⚠</span> {errors.amount.message}
               </p>
             )}
@@ -185,20 +167,16 @@ export function DepositCard({
                 type="button"
                 variant="ghost"
                 size="sm"
-                className="w-full justify-start gap-2 text-accent hover:text-accent hover:bg-accent/10"
+                className="w-full justify-start gap-2 text-accent hover:bg-accent/10 hover:text-accent"
               >
                 <Gift className="h-4 w-4" />
                 <span className="text-sm">
-                  {showReferral ? "Hide" : "Have a"} referral code? Get{" "}
-                  {referralBonus}% bonus!
+                  {showReferral ? "Hide" : "Have a"} referral code? Get {referralBonus}% bonus!
                 </span>
               </Button>
             </CollapsibleTrigger>
             <CollapsibleContent className="space-y-2 pt-2">
-              <Label
-                htmlFor="referralCode"
-                className="text-xs text-muted-foreground"
-              >
+              <Label htmlFor="referralCode" className="text-xs text-muted-foreground">
                 Referral Code (Wallet Address)
               </Label>
               <Input
@@ -207,14 +185,14 @@ export function DepositCard({
                 {...register("referralCode")}
                 className={cn(
                   "font-mono text-sm",
-                  referralCode && !isValidReferral && "border-error",
+                  referralCode && !isValidReferral && "border-error"
                 )}
               />
               {referralCode && !isValidReferral && (
                 <p className="text-xs text-error">Invalid wallet address</p>
               )}
               {referralCode && isValidReferral && (
-                <p className="text-xs text-success flex items-center gap-1">
+                <p className="flex items-center gap-1 text-xs text-success">
                   <Gift className="h-3 w-3" />
                   Referrer will earn {referralBonus}% of your deposit!
                 </p>
@@ -223,19 +201,17 @@ export function DepositCard({
           </Collapsible>
 
           {/* Quick Info */}
-          <div className="flex items-center justify-between p-3 rounded-lg bg-gradient-lavanda/10 border border-lavanda/20">
+          <div className="bg-gradient-lavanda/10 flex items-center justify-between rounded-lg border border-lavanda/20 p-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
               <TrendingUp className="h-4 w-4 text-success" />
               <span>Estimated APY</span>
             </div>
-            <span className="text-sm font-bold text-success">
-              ~{apy.toFixed(1)}%
-            </span>
+            <span className="text-sm font-bold text-success">~{apy.toFixed(1)}%</span>
           </div>
 
           {/* Transaction Details - Only show when amount entered */}
           {amount && Number(amount) > 0 && (
-            <div className="space-y-2 p-3 rounded-lg bg-surface-elevated border border-border text-sm">
+            <div className="space-y-2 rounded-lg border border-border bg-surface-elevated p-3 text-sm">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">You will deposit</span>
                 <span className="font-semibold">{amount} mUSD</span>
@@ -244,11 +220,9 @@ export function DepositCard({
                 <span className="text-muted-foreground">Network fee</span>
                 <span className="font-semibold">~$0.50</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-border">
+              <div className="flex justify-between border-t border-border pt-2">
                 <span className="text-muted-foreground">Min. deposit</span>
-                <span className="text-xs text-muted-foreground">
-                  {minDeposit} mUSD
-                </span>
+                <span className="text-xs text-muted-foreground">{minDeposit} mUSD</span>
               </div>
             </div>
           )}
@@ -259,19 +233,13 @@ export function DepositCard({
             className="w-full"
             size="lg"
             loading={isLoading}
-            disabled={
-              !amount ||
-              Number(amount) <= 0 ||
-              Boolean(referralCode && !isValidReferral)
-            }
+            disabled={!amount || Number(amount) <= 0 || Boolean(referralCode && !isValidReferral)}
           >
-            {!amount || Number(amount) <= 0
-              ? "Enter amount"
-              : `Deposit ${amount} mUSD`}
+            {!amount || Number(amount) <= 0 ? "Enter amount" : `Deposit ${amount} mUSD`}
           </Button>
 
           {/* Help Text */}
-          <p className="text-xs text-center text-muted-foreground">
+          <p className="text-center text-xs text-muted-foreground">
             No lock-up period • Withdraw anytime
           </p>
         </form>

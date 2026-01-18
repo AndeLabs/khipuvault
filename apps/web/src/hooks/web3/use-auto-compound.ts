@@ -12,11 +12,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { type Address } from "viem";
-import {
-  useAccount,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-} from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 
@@ -32,12 +28,7 @@ const POOL_ABI = [
   },
 ] as const;
 
-type AutoCompoundState =
-  | "idle"
-  | "confirming"
-  | "processing"
-  | "success"
-  | "error";
+type AutoCompoundState = "idle" | "confirming" | "processing" | "success" | "error";
 
 export function useAutoCompound() {
   const { address } = useAccount();
@@ -46,12 +37,7 @@ export function useAutoCompound() {
   const [state, setState] = useState<AutoCompoundState>("idle");
   const [error, setError] = useState<string>("");
 
-  const {
-    writeContract,
-    data: txHash,
-    error: txError,
-    reset: resetTx,
-  } = useWriteContract();
+  const { writeContract, data: txHash, error: txError, reset: resetTx } = useWriteContract();
 
   const {
     isLoading: isPending,

@@ -7,25 +7,13 @@
 
 "use client";
 
-import {
-  Trophy,
-  ExternalLink,
-  Copy,
-  CheckCircle2,
-  Calendar,
-} from "lucide-react";
+import { Trophy, ExternalLink, Copy, CheckCircle2, Calendar } from "lucide-react";
 import * as React from "react";
 import { formatEther } from "viem";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -45,11 +33,7 @@ interface DrawHistoryProps {
   userAddress?: string;
 }
 
-export function DrawHistory({
-  rounds,
-  isLoading,
-  userAddress,
-}: DrawHistoryProps) {
+export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps) {
   const { toast } = useToast();
   const [copiedAddress, setCopiedAddress] = React.useState<string | null>(null);
 
@@ -94,7 +78,7 @@ export function DrawHistory({
       <Card>
         <CardHeader>
           <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-4 w-48 mt-2" />
+          <Skeleton className="mt-2 h-4 w-48" />
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
@@ -118,7 +102,7 @@ export function DrawHistory({
           <CardDescription>Past lottery draws and winners</CardDescription>
         </CardHeader>
         <CardContent className="py-12 text-center">
-          <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+          <Calendar className="mx-auto mb-4 h-12 w-12 text-muted-foreground opacity-50" />
           <p className="text-sm text-muted-foreground">
             No completed draws yet. Check back after the first lottery ends!
           </p>
@@ -141,7 +125,7 @@ export function DrawHistory({
       </CardHeader>
 
       <CardContent>
-        <div className="rounded-lg border border-border overflow-hidden">
+        <div className="overflow-hidden rounded-lg border border-border">
           <Table>
             <TableHeader>
               <TableRow className="bg-surface-elevated">
@@ -156,8 +140,7 @@ export function DrawHistory({
             <TableBody>
               {completedRounds.map((round) => {
                 const isUserWinner =
-                  userAddress &&
-                  round.winner.toLowerCase() === userAddress.toLowerCase();
+                  userAddress && round.winner.toLowerCase() === userAddress.toLowerCase();
 
                 return (
                   <TableRow
@@ -168,10 +151,7 @@ export function DrawHistory({
                       <div className="flex items-center gap-2">
                         #{round.roundId.toString()}
                         {isUserWinner && (
-                          <Badge
-                            variant="default"
-                            className="bg-success text-success-foreground"
-                          >
+                          <Badge variant="default" className="text-success-foreground bg-success">
                             You Won!
                           </Badge>
                         )}
@@ -184,7 +164,7 @@ export function DrawHistory({
 
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <code className="text-xs bg-surface-elevated px-2 py-1 rounded">
+                        <code className="rounded bg-surface-elevated px-2 py-1 text-xs">
                           {formatAddress(round.winner)}
                         </code>
                         <Button
@@ -213,12 +193,8 @@ export function DrawHistory({
                     </TableCell>
 
                     <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => openExplorer(round.winner)}
-                      >
-                        <ExternalLink className="h-3 w-3 mr-1" />
+                      <Button variant="ghost" size="sm" onClick={() => openExplorer(round.winner)}>
+                        <ExternalLink className="mr-1 h-3 w-3" />
                         View
                       </Button>
                     </TableCell>
@@ -230,33 +206,22 @@ export function DrawHistory({
         </div>
 
         {/* Summary Stats */}
-        <div className="grid grid-cols-3 gap-4 mt-6">
-          <div className="text-center p-3 rounded-lg bg-surface-elevated border border-border">
-            <div className="text-2xl font-bold text-lavanda">
-              {completedRounds.length}
-            </div>
+        <div className="mt-6 grid grid-cols-3 gap-4">
+          <div className="rounded-lg border border-border bg-surface-elevated p-3 text-center">
+            <div className="text-2xl font-bold text-lavanda">{completedRounds.length}</div>
             <div className="text-xs text-muted-foreground">Total Draws</div>
           </div>
 
-          <div className="text-center p-3 rounded-lg bg-surface-elevated border border-border">
+          <div className="rounded-lg border border-border bg-surface-elevated p-3 text-center">
             <div className="text-2xl font-bold text-success">
-              {formatEther(
-                completedRounds.reduce(
-                  (sum, r) => sum + r.totalPrize,
-                  BigInt(0),
-                ),
-              )}{" "}
-              BTC
+              {formatEther(completedRounds.reduce((sum, r) => sum + r.totalPrize, BigInt(0)))} BTC
             </div>
             <div className="text-xs text-muted-foreground">Total Prizes</div>
           </div>
 
-          <div className="text-center p-3 rounded-lg bg-surface-elevated border border-border">
+          <div className="rounded-lg border border-border bg-surface-elevated p-3 text-center">
             <div className="text-2xl font-bold text-accent">
-              {completedRounds.reduce(
-                (sum, r) => sum + Number(r.totalTicketsSold),
-                0,
-              )}
+              {completedRounds.reduce((sum, r) => sum + Number(r.totalTicketsSold), 0)}
             </div>
             <div className="text-xs text-muted-foreground">Total Tickets</div>
           </div>

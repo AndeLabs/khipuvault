@@ -1,9 +1,25 @@
 # KhipuVault Smart Contracts - Security Audit Documentation
 
-**Version:** 3.0.0
-**Date:** 2025-11-27
+**Version:** 3.1.0
+**Date:** 2026-01-12
 **Solidity Version:** 0.8.25
 **Security Contact:** security@khipuvault.com
+
+---
+
+## Recent Security Fixes (January 2026)
+
+### C-01: Referral Rewards Insolvency (FIXED)
+
+**Location:** `IndividualPoolV3.sol`
+**Issue:** Referral rewards were accrued without reserving actual funds.
+**Fix:** Added `referralRewardsReserve` tracking. Bonus is now deducted from deposit and reserved. `claimReferralRewards()` verifies sufficient reserves.
+
+### C-02: Lottery Ticket Index Bug (FIXED)
+
+**Location:** `LotteryPoolV3.sol`
+**Issue:** Non-contiguous ticket purchases caused orphaned tickets.
+**Fix:** Added `ticketOwners` mapping for O(1) ownership lookup. Each ticket is now explicitly assigned to its owner.
 
 ---
 

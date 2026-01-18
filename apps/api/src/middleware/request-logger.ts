@@ -1,7 +1,16 @@
+import { randomBytes } from "node:crypto";
+
 import type { Request, Response } from "express";
 import pinoHttp, { type HttpLogger } from "pino-http";
 
 import { logger } from "../lib/logger";
+
+/**
+ * Generate a cryptographically secure request ID
+ */
+function generateRequestId(): string {
+  return `${Date.now()}-${randomBytes(6).toString("hex")}`;
+}
 
 /**
  * Custom serializer for request logging
@@ -58,8 +67,7 @@ function customResSerializer(res: Response) {
 
     try {
       // Fallback for raw ServerResponse _headers
-      const headers = (res as unknown as { _headers?: Record<string, unknown> })
-        ?._headers;
+      const headers = (res as unknown as { _headers?: Record<string, unknown> })?._headers;
       if (headers) {
         return headers[name.toLowerCase()];
       }
@@ -127,7 +135,7 @@ export const requestLogger: HttpLogger<Request, Response> = pinoHttp({
     res: customResSerializer,
   },
 
-  // Generate request ID if not present
+  // Generate cryptographically secure request ID if not present
   genReqId: (req, res) => {
     try {
       const existingId = req?.id || req?.headers?.["x-request-id"];
@@ -135,14 +143,14 @@ export const requestLogger: HttpLogger<Request, Response> = pinoHttp({
         return existingId as string;
       }
 
-      // Generate new request ID
-      const id = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Generate new cryptographically secure request ID
+      const id = generateRequestId();
       if (res && typeof res.setHeader === "function") {
         res.setHeader("X-Request-ID", id);
       }
       return id;
     } catch {
-      return `${Date.now()}-fallback`;
+      return `${Date.now()}-${randomBytes(4).toString("hex")}`;
     }
   },
 

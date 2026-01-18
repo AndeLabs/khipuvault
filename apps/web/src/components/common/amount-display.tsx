@@ -34,8 +34,7 @@ export function AmountDisplay({
   trend,
   size = "md",
 }: AmountDisplayProps) {
-  const numericAmount =
-    typeof amount === "string" ? parseFloat(amount) : amount;
+  const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
   const isZero = numericAmount === 0;
 
   if (isZero && !showZero) {
@@ -63,12 +62,12 @@ export function AmountDisplay({
   return (
     <span
       className={cn(
-        "tabular-nums font-medium",
+        "font-medium tabular-nums",
         // eslint-disable-next-line security/detect-object-injection -- safe: size is typed enum
         sizeClasses[size],
         // eslint-disable-next-line security/detect-object-injection -- safe: trend is typed enum
         trend && trendColor[trend],
-        className,
+        className
       )}
     >
       {prefix && <span className="mr-1">{prefix}</span>}
@@ -76,12 +75,12 @@ export function AmountDisplay({
       {symbol && (
         <span
           className={cn(
-            "ml-1.5 text-muted-foreground font-normal",
+            "ml-1.5 font-normal text-muted-foreground",
             size === "sm" && "text-xs",
             size === "md" && "text-sm",
             size === "lg" && "text-base",
             size === "xl" && "text-lg",
-            symbolClassName,
+            symbolClassName
           )}
         >
           {symbol}
@@ -115,11 +114,11 @@ export function PercentageDisplay({
   return (
     <span
       className={cn(
-        "tabular-nums font-medium inline-flex items-center gap-1",
+        "inline-flex items-center gap-1 font-medium tabular-nums",
         isPositive && "text-success",
         isNegative && "text-error",
         isZero && "text-muted-foreground",
-        className,
+        className
       )}
     >
       {showSign && !isZero && (
@@ -159,8 +158,8 @@ export function BalanceCard({
   if (loading) {
     return (
       <div className={cn("space-y-2", className)}>
-        <div className="h-4 w-20 bg-surface-elevated animate-shimmer rounded" />
-        <div className="h-8 w-32 bg-surface-elevated animate-shimmer rounded" />
+        <div className="h-4 w-20 animate-shimmer rounded bg-surface-elevated" />
+        <div className="h-8 w-32 animate-shimmer rounded bg-surface-elevated" />
       </div>
     );
   }
@@ -169,12 +168,7 @@ export function BalanceCard({
     <div className={cn("space-y-1", className)}>
       <p className="label">{label}</p>
       <div className="flex items-baseline gap-2">
-        <AmountDisplay
-          amount={amount}
-          symbol={symbol}
-          trend={trend}
-          size="xl"
-        />
+        <AmountDisplay amount={amount} symbol={symbol} trend={trend} size="xl" />
         {change !== undefined && <PercentageDisplay value={change} />}
       </div>
     </div>

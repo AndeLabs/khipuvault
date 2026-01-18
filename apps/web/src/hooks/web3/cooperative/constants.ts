@@ -46,12 +46,7 @@ export interface MemberWithAddress extends MemberInfo {
   address: Address;
 }
 
-export type ActionState =
-  | "idle"
-  | "executing"
-  | "processing"
-  | "success"
-  | "error";
+export type ActionState = "idle" | "executing" | "processing" | "success" | "error";
 
 // ============================================================================
 // CONSTANTS
@@ -62,12 +57,10 @@ export const QUERY_KEYS = {
   POOL_COUNTER: ["cooperative-pool-v3", "pool-counter"] as const,
   PERFORMANCE_FEE: ["cooperative-pool-v3", "performance-fee"] as const,
   EMERGENCY_MODE: ["cooperative-pool-v3", "emergency-mode"] as const,
-  POOL_INFO: (poolId: number) =>
-    ["cooperative-pool-v3", "pool-info", poolId] as const,
+  POOL_INFO: (poolId: number) => ["cooperative-pool-v3", "pool-info", poolId] as const,
   MEMBER_INFO: (poolId: number, address: Address) =>
     ["cooperative-pool-v3", "member-info", poolId, address] as const,
-  POOL_MEMBERS: (poolId: number) =>
-    ["cooperative-pool-v3", "pool-members", poolId] as const,
+  POOL_MEMBERS: (poolId: number) => ["cooperative-pool-v3", "pool-members", poolId] as const,
   MEMBER_YIELD: (poolId: number, address: Address) =>
     ["cooperative-pool-v3", "member-yield", poolId, address] as const,
 } as const;

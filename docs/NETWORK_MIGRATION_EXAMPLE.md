@@ -64,11 +64,7 @@ export const provider = new ethers.JsonRpcProvider(RPC_URL, {
 ```typescript
 // packages/blockchain/src/provider.ts
 import { ethers } from "ethers";
-import {
-  getRpcUrl,
-  getChainId,
-  getNetworkName,
-} from "@khipu/shared/config/network";
+import { getRpcUrl, getChainId, getNetworkName } from "@khipu/shared/config/network";
 
 // Automatically selects RPC and chain ID based on NETWORK env var
 export const provider = new ethers.JsonRpcProvider(getRpcUrl(), {
@@ -200,11 +196,7 @@ export async function getBlockNumber() {
 
 ```typescript
 // __tests__/network-switching.test.ts
-import {
-  getCurrentNetwork,
-  getChainId,
-  getRpcUrl,
-} from "@khipu/shared/config/network";
+import { getCurrentNetwork, getChainId, getRpcUrl } from "@khipu/shared/config/network";
 
 describe("Network Configuration", () => {
   it("should use testnet by default", () => {
@@ -217,10 +209,7 @@ describe("Network Configuration", () => {
 
     // Re-import to get fresh config
     jest.resetModules();
-    const {
-      getCurrentNetwork,
-      getChainId,
-    } = require("@khipu/shared/config/network");
+    const { getCurrentNetwork, getChainId } = require("@khipu/shared/config/network");
 
     expect(getCurrentNetwork()).toBe("mainnet");
     expect(getChainId()).toBe(31612);
@@ -285,7 +274,7 @@ export class KhipuVaultAPI {
 
   async getPoolInfo(poolType: "INDIVIDUAL" | "COOPERATIVE") {
     const address = getActiveContractAddress(
-      poolType === "INDIVIDUAL" ? "INDIVIDUAL_POOL" : "COOPERATIVE_POOL",
+      poolType === "INDIVIDUAL" ? "INDIVIDUAL_POOL" : "COOPERATIVE_POOL"
     );
 
     return {
@@ -339,10 +328,7 @@ const rpc = getRpcUrl();
 ### Get Explorer URL
 
 ```typescript
-import {
-  getExplorerTxUrl,
-  getExplorerAddressUrl,
-} from "@khipu/shared/config/network";
+import { getExplorerTxUrl, getExplorerAddressUrl } from "@khipu/shared/config/network";
 const txUrl = getExplorerTxUrl(txHash);
 const addrUrl = getExplorerAddressUrl(address);
 ```

@@ -10,15 +10,7 @@
 
 "use client";
 
-import {
-  Users,
-  Bitcoin,
-  TrendingUp,
-  Crown,
-  ArrowRight,
-  Coins,
-  Info,
-} from "lucide-react";
+import { Users, Bitcoin, TrendingUp, Crown, ArrowRight, Coins, Info } from "lucide-react";
 import * as React from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -71,31 +63,24 @@ export function MyPoolsDashboard({
   onManagePool,
 }: MyPoolsDashboardProps) {
   const { pools: userPools, isLoading: loadingUserPools } = useUserPools();
-  const { pools: createdPools, isLoading: loadingCreatedPools } =
-    useCreatedPools();
+  const { pools: createdPools, isLoading: loadingCreatedPools } = useCreatedPools();
 
   const isLoading = loadingUserPools || loadingCreatedPools;
 
   // Calculate total statistics
-  const totalContribution = userPools.reduce(
-    (sum, p) => sum + p.userContribution,
-    BigInt(0),
-  );
-  const totalPendingYield = userPools.reduce(
-    (sum, p) => sum + p.userPendingYield,
-    BigInt(0),
-  );
+  const totalContribution = userPools.reduce((sum, p) => sum + p.userContribution, BigInt(0));
+  const totalPendingYield = userPools.reduce((sum, p) => sum + p.userPendingYield, BigInt(0));
   const totalPools = userPools.length;
 
   if (isLoading) {
     return (
-      <div className="space-y-6 animate-fade-in">
+      <div className="animate-fade-in space-y-6">
         {/* Stats Skeleton */}
         <div className="grid gap-4 md:grid-cols-3">
           {[...Array(3)].map((_, i) => (
             <div
               key={`stat-skeleton-${i}`}
-              className="h-24 bg-surface-elevated animate-shimmer rounded-lg"
+              className="h-24 animate-shimmer rounded-lg bg-surface-elevated"
             />
           ))}
         </div>
@@ -112,15 +97,15 @@ export function MyPoolsDashboard({
 
   if (totalPools === 0 && createdPools.length === 0) {
     return (
-      <div className="text-center py-12 space-y-4 animate-fade-in">
-        <div className="h-16 w-16 rounded-full bg-muted mx-auto flex items-center justify-center">
+      <div className="animate-fade-in space-y-4 py-12 text-center">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
           <Users className="h-8 w-8 text-muted-foreground" />
         </div>
         <div className="space-y-2">
-          <h3 className="text-xl font-heading font-semibold">No Pools Yet</h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            You haven't joined or created any cooperative pools yet. Start by
-            browsing available pools or creating your own.
+          <h3 className="font-heading text-xl font-semibold">No Pools Yet</h3>
+          <p className="mx-auto max-w-md text-muted-foreground">
+            You haven't joined or created any cooperative pools yet. Start by browsing available
+            pools or creating your own.
           </p>
         </div>
       </div>
@@ -128,21 +113,19 @@ export function MyPoolsDashboard({
   }
 
   return (
-    <div className="space-y-6 animate-slide-up">
+    <div className="animate-slide-up space-y-6">
       {/* Summary Statistics */}
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="space-y-1">
-                <p className="text-xs text-muted-foreground">
-                  Total Contribution
-                </p>
-                <p className="text-2xl font-heading font-bold font-mono">
+                <p className="text-xs text-muted-foreground">Total Contribution</p>
+                <p className="font-heading font-mono text-2xl font-bold">
                   {formatBTCCompact(totalContribution)} BTC
                 </p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500/10">
                 <Bitcoin className="h-5 w-5 text-orange-500" />
               </div>
             </div>
@@ -154,11 +137,11 @@ export function MyPoolsDashboard({
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Pending Yields</p>
-                <p className="text-2xl font-heading font-bold font-mono text-success">
+                <p className="font-heading font-mono text-2xl font-bold text-success">
                   {formatMUSD(totalPendingYield)}
                 </p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/10">
                 <TrendingUp className="h-5 w-5 text-success" />
               </div>
             </div>
@@ -170,9 +153,9 @@ export function MyPoolsDashboard({
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Active Pools</p>
-                <p className="text-2xl font-heading font-bold">{totalPools}</p>
+                <p className="font-heading text-2xl font-bold">{totalPools}</p>
               </div>
-              <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
                 <Users className="h-5 w-5 text-accent" />
               </div>
             </div>
@@ -185,9 +168,7 @@ export function MyPoolsDashboard({
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Crown className="h-5 w-5 text-accent" />
-            <h3 className="text-lg font-heading font-semibold">
-              Pools You Created
-            </h3>
+            <h3 className="font-heading text-lg font-semibold">Pools You Created</h3>
             <Badge variant="secondary">{createdPools.length}</Badge>
           </div>
 
@@ -209,9 +190,7 @@ export function MyPoolsDashboard({
         <div className="space-y-4">
           <div className="flex items-center gap-2">
             <Users className="h-5 w-5 text-blue-500" />
-            <h3 className="text-lg font-heading font-semibold">
-              Your Memberships
-            </h3>
+            <h3 className="font-heading text-lg font-semibold">Your Memberships</h3>
             <Badge variant="secondary">{userPools.length}</Badge>
           </div>
 
@@ -245,15 +224,13 @@ const CreatedPoolCard = React.memo(function CreatedPoolCard({
   const memberProgress = (pool.currentMembers / pool.maxMembers) * 100;
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-1">
-              <Crown className="h-4 w-4 text-accent shrink-0" />
-              <h4 className="font-heading font-semibold truncate">
-                {pool.name}
-              </h4>
+          <div className="min-w-0 flex-1">
+            <div className="mb-1 flex items-center gap-2">
+              <Crown className="h-4 w-4 shrink-0 text-accent" />
+              <h4 className="truncate font-heading font-semibold">{pool.name}</h4>
               <Badge variant={statusBadge.variant} className="shrink-0">
                 {statusBadge.label}
               </Badge>
@@ -279,15 +256,11 @@ const CreatedPoolCard = React.memo(function CreatedPoolCard({
         <div className="grid grid-cols-3 gap-3 text-sm">
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">BTC Locked</p>
-            <p className="font-mono font-semibold">
-              {formatBTCCompact(pool.totalBtcDeposited)}
-            </p>
+            <p className="font-mono font-semibold">{formatBTCCompact(pool.totalBtcDeposited)}</p>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">MUSD Minted</p>
-            <p className="font-mono font-semibold">
-              {formatMUSD(pool.totalMusdMinted)}
-            </p>
+            <p className="font-mono font-semibold">{formatMUSD(pool.totalMusdMinted)}</p>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Yields</p>
@@ -307,7 +280,7 @@ const CreatedPoolCard = React.memo(function CreatedPoolCard({
             className="flex-1"
             onClick={() => onViewDetails?.(pool.poolId)}
           >
-            <Info className="h-4 w-4 mr-1.5" />
+            <Info className="mr-1.5 h-4 w-4" />
             Details
           </Button>
           <Button
@@ -317,7 +290,7 @@ const CreatedPoolCard = React.memo(function CreatedPoolCard({
             onClick={() => onManagePool?.(pool.poolId)}
           >
             Manage Pool
-            <ArrowRight className="h-4 w-4 ml-1.5" />
+            <ArrowRight className="ml-1.5 h-4 w-4" />
           </Button>
         </div>
       </CardContent>
@@ -337,11 +310,11 @@ const MembershipCard = React.memo(function MembershipCard({
   const hasYield = pool.userPendingYield > BigInt(0);
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card className="transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between gap-4">
-          <div className="flex-1 min-w-0">
-            <h4 className="font-heading font-semibold truncate">{pool.name}</h4>
+          <div className="min-w-0 flex-1">
+            <h4 className="truncate font-heading font-semibold">{pool.name}</h4>
             <p className="text-xs text-muted-foreground">Pool #{pool.poolId}</p>
           </div>
           <Badge variant="outline" className="shrink-0">
@@ -352,11 +325,11 @@ const MembershipCard = React.memo(function MembershipCard({
 
       <CardContent className="space-y-4">
         {/* User Position */}
-        <div className="bg-accent/5 rounded-lg p-3 space-y-3">
+        <div className="space-y-3 rounded-lg bg-accent/5 p-3">
           <p className="text-xs font-medium text-accent">Your Position</p>
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Bitcoin className="h-3 w-3" />
                 Contributed
               </p>
@@ -365,13 +338,11 @@ const MembershipCard = React.memo(function MembershipCard({
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-xs text-muted-foreground flex items-center gap-1">
+              <p className="flex items-center gap-1 text-xs text-muted-foreground">
                 <Coins className="h-3 w-3" />
                 Shares
               </p>
-              <p className="font-mono font-semibold">
-                {pool.userShares.toString()}
-              </p>
+              <p className="font-mono font-semibold">{pool.userShares.toString()}</p>
             </div>
           </div>
         </div>
@@ -399,9 +370,7 @@ const MembershipCard = React.memo(function MembershipCard({
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Total BTC</p>
-            <p className="font-mono font-semibold">
-              {formatBTCCompact(pool.totalBtcDeposited)}
-            </p>
+            <p className="font-mono font-semibold">{formatBTCCompact(pool.totalBtcDeposited)}</p>
           </div>
           <div className="space-y-1">
             <p className="text-xs text-muted-foreground">Joined</p>
@@ -413,28 +382,16 @@ const MembershipCard = React.memo(function MembershipCard({
 
         {/* Actions */}
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onViewDetails?.(pool.poolId)}
-          >
+          <Button variant="outline" size="sm" onClick={() => onViewDetails?.(pool.poolId)}>
             Details
           </Button>
           {hasYield && (
-            <Button
-              variant="success"
-              size="sm"
-              onClick={() => onClaimYield?.(pool.poolId)}
-            >
-              <TrendingUp className="h-4 w-4 mr-1.5" />
+            <Button variant="success" size="sm" onClick={() => onClaimYield?.(pool.poolId)}>
+              <TrendingUp className="mr-1.5 h-4 w-4" />
               Claim Yield
             </Button>
           )}
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => onLeavePool?.(pool.poolId)}
-          >
+          <Button variant="destructive" size="sm" onClick={() => onLeavePool?.(pool.poolId)}>
             Leave Pool
           </Button>
         </div>

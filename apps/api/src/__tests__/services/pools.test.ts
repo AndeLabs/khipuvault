@@ -52,9 +52,7 @@ describe("PoolsService", () => {
         analytics: [{ tvl: "1000000", timestamp: new Date() }],
       };
 
-      vi.mocked(prisma.pool.findUnique).mockResolvedValue(
-        mockPoolWithAnalytics as any,
-      );
+      vi.mocked(prisma.pool.findUnique).mockResolvedValue(mockPoolWithAnalytics as any);
 
       const result = await poolsService.getPoolById("pool-1");
 
@@ -73,9 +71,7 @@ describe("PoolsService", () => {
     it("should throw 404 when pool not found", async () => {
       vi.mocked(prisma.pool.findUnique).mockResolvedValue(null);
 
-      await expect(poolsService.getPoolById("non-existent")).rejects.toThrow(
-        "Pool not found",
-      );
+      await expect(poolsService.getPoolById("non-existent")).rejects.toThrow("Pool not found");
     });
   });
 
@@ -96,9 +92,9 @@ describe("PoolsService", () => {
     it("should throw 404 when pool not found by address", async () => {
       vi.mocked(prisma.pool.findUnique).mockResolvedValue(null);
 
-      await expect(
-        poolsService.getPoolByAddress("0xnonexistent"),
-      ).rejects.toThrow("Pool not found");
+      await expect(poolsService.getPoolByAddress("0xnonexistent")).rejects.toThrow(
+        "Pool not found"
+      );
     });
   });
 
@@ -109,9 +105,7 @@ describe("PoolsService", () => {
         { tvl: "1100000", timestamp: new Date() },
       ];
 
-      vi.mocked(prisma.poolAnalytics.findMany).mockResolvedValue(
-        mockAnalytics as any,
-      );
+      vi.mocked(prisma.poolAnalytics.findMany).mockResolvedValue(mockAnalytics as any);
 
       const result = await poolsService.getPoolAnalytics("pool-1", 30);
 
@@ -136,7 +130,7 @@ describe("PoolsService", () => {
             poolId: "pool-1",
             timestamp: { gte: expect.any(Date) },
           },
-        }),
+        })
       );
     });
   });
@@ -176,7 +170,7 @@ describe("PoolsService", () => {
             poolAddress: "0xpool123",
             status: "CONFIRMED",
           },
-        }),
+        })
       );
       expect(result[0].balance).toBe("800"); // 1000 - 200
     });
@@ -256,9 +250,7 @@ describe("PoolsService", () => {
 
   describe("createAnalyticsSnapshot", () => {
     it("should create analytics snapshot for pool", async () => {
-      vi.mocked(prisma.pool.findUnique).mockResolvedValue(
-        fixtures.mockPool as any,
-      );
+      vi.mocked(prisma.pool.findUnique).mockResolvedValue(fixtures.mockPool as any);
       vi.mocked(prisma.deposit.findMany).mockResolvedValue([]);
       vi.mocked(prisma.poolAnalytics.upsert).mockResolvedValue({} as any);
 
@@ -271,9 +263,9 @@ describe("PoolsService", () => {
     it("should throw 404 when pool not found", async () => {
       vi.mocked(prisma.pool.findUnique).mockResolvedValue(null);
 
-      await expect(
-        poolsService.createAnalyticsSnapshot("non-existent"),
-      ).rejects.toThrow("Pool not found");
+      await expect(poolsService.createAnalyticsSnapshot("non-existent")).rejects.toThrow(
+        "Pool not found"
+      );
     });
   });
 });

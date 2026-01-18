@@ -28,12 +28,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
-import {
-  useClosePool,
-  usePoolInfo,
-  formatBTCCompact,
-  PoolStatus,
-} from "@/hooks/web3/cooperative";
+import { useClosePool, usePoolInfo, formatBTCCompact, PoolStatus } from "@/hooks/web3/cooperative";
 
 // ============================================================================
 // TYPES
@@ -50,12 +45,7 @@ interface ClosePoolDialogProps {
 // COMPONENT
 // ============================================================================
 
-export function ClosePoolDialog({
-  poolId,
-  open,
-  onClose,
-  onSuccess,
-}: ClosePoolDialogProps) {
+export function ClosePoolDialog({ poolId, open, onClose, onSuccess }: ClosePoolDialogProps) {
   const { toast } = useToast();
   const { address } = useAccount();
 
@@ -107,10 +97,7 @@ export function ClosePoolDialog({
       toast({
         variant: "destructive",
         title: "Failed to Close Pool",
-        description:
-          err instanceof Error
-            ? err.message
-            : "Failed to close pool. Please try again.",
+        description: err instanceof Error ? err.message : "Failed to close pool. Please try again.",
       });
     }
   };
@@ -129,8 +116,8 @@ export function ClosePoolDialog({
             Close Pool?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Closing the pool will prevent any new members from joining. Existing
-            members can still withdraw their funds and yields.
+            Closing the pool will prevent any new members from joining. Existing members can still
+            withdraw their funds and yields.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -149,7 +136,7 @@ export function ClosePoolDialog({
 
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
                   <Users className="h-3.5 w-3.5" />
                   Current Members
                 </span>
@@ -159,7 +146,7 @@ export function ClosePoolDialog({
               </div>
 
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
                   <Bitcoin className="h-3.5 w-3.5" />
                   Total Deposited
                 </span>
@@ -184,9 +171,7 @@ export function ClosePoolDialog({
           {isAlreadyClosed && (
             <Alert>
               <Lock className="h-4 w-4" />
-              <AlertDescription className="text-sm">
-                This pool is already closed.
-              </AlertDescription>
+              <AlertDescription className="text-sm">This pool is already closed.</AlertDescription>
             </Alert>
           )}
 
@@ -195,9 +180,9 @@ export function ClosePoolDialog({
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                <strong>Warning:</strong> This action is permanent. The pool
-                will be closed and no new members will be able to join. Existing
-                members will still be able to leave and withdraw their funds.
+                <strong>Warning:</strong> This action is permanent. The pool will be closed and no
+                new members will be able to join. Existing members will still be able to leave and
+                withdraw their funds.
               </AlertDescription>
             </Alert>
           )}
@@ -220,10 +205,8 @@ export function ClosePoolDialog({
           >
             {isProcessing ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {state === "executing"
-                  ? "Confirm in Wallet..."
-                  : "Closing Pool..."}
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {state === "executing" ? "Confirm in Wallet..." : "Closing Pool..."}
               </>
             ) : (
               "Yes, Close Pool"

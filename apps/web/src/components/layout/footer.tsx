@@ -36,13 +36,13 @@ const socialLinks = [
 export function Footer() {
   return (
     <AnimateOnScroll>
-      <footer className="bg-surface border-t border-border">
+      <footer className="border-t border-border bg-surface">
         <div className="container mx-auto max-w-7xl px-4 py-12 lg:py-16">
           {/* Main footer content */}
           <div className="grid grid-cols-2 gap-8 md:grid-cols-4 lg:gap-12">
             {/* Brand column */}
             <div className="col-span-2 md:col-span-1">
-              <Link href="/" className="flex items-center gap-2 mb-4">
+              <Link href="/" className="mb-4 flex items-center gap-2">
                 <Image
                   src="/logos/khipu-logo.png"
                   alt="KhipuVault Logo"
@@ -52,9 +52,8 @@ export function Footer() {
                 />
                 <span className="text-xl font-bold text-white">KhipuVault</span>
               </Link>
-              <p className="text-sm text-muted-foreground leading-relaxed mb-6">
-                Decentralized Bitcoin savings platform. Earn real yields through
-                Mezo Protocol.
+              <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
+                Decentralized Bitcoin savings platform. Earn real yields through Mezo Protocol.
               </p>
 
               {/* Social links */}
@@ -63,7 +62,7 @@ export function Footer() {
                   <a
                     key={link.name}
                     href={link.href}
-                    className="w-9 h-9 rounded-lg bg-surface-elevated flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors"
+                    className="flex h-9 w-9 items-center justify-center rounded-lg bg-surface-elevated text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
                     aria-label={link.name}
                     target="_blank"
                     rel="noopener noreferrer"
@@ -76,13 +75,13 @@ export function Footer() {
 
             {/* Product links */}
             <div>
-              <h3 className="text-sm font-semibold text-white mb-4">Product</h3>
+              <h3 className="mb-4 text-sm font-semibold text-white">Product</h3>
               <ul className="space-y-3">
                 {footerLinks.product.map((link) => (
                   <li key={link.name}>
                     <Link
                       href={link.href}
-                      className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                      className="text-sm text-muted-foreground transition-colors hover:text-primary"
                     >
                       {link.name}
                     </Link>
@@ -93,9 +92,7 @@ export function Footer() {
 
             {/* Resources links */}
             <div>
-              <h3 className="text-sm font-semibold text-white mb-4">
-                Resources
-              </h3>
+              <h3 className="mb-4 text-sm font-semibold text-white">Resources</h3>
               <ul className="space-y-3">
                 {footerLinks.resources.map((link) => (
                   <li key={link.name}>
@@ -104,14 +101,14 @@ export function Footer() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                        className="text-sm text-muted-foreground transition-colors hover:text-primary"
                       >
                         {link.name}
                       </a>
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                        className="text-sm text-muted-foreground transition-colors hover:text-primary"
                       >
                         {link.name}
                       </Link>
@@ -123,7 +120,7 @@ export function Footer() {
 
             {/* Company links */}
             <div>
-              <h3 className="text-sm font-semibold text-white mb-4">Company</h3>
+              <h3 className="mb-4 text-sm font-semibold text-white">Company</h3>
               <ul className="space-y-3">
                 {footerLinks.company.map((link) => (
                   <li key={link.name}>
@@ -132,14 +129,14 @@ export function Footer() {
                         href={link.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                        className="text-sm text-muted-foreground transition-colors hover:text-primary"
                       >
                         {link.name}
                       </a>
                     ) : (
                       <Link
                         href={link.href}
-                        className="text-sm text-muted-foreground hover:text-primary transition-colors"
+                        className="text-sm text-muted-foreground transition-colors hover:text-primary"
                       >
                         {link.name}
                       </Link>
@@ -151,7 +148,7 @@ export function Footer() {
           </div>
 
           {/* Bottom bar */}
-          <div className="mt-12 pt-8 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-border pt-8 sm:flex-row">
             <p className="text-sm text-muted-foreground">
               &copy; {new Date().getFullYear()} KhipuVault. All rights reserved.
             </p>
@@ -161,7 +158,7 @@ export function Footer() {
                 href="https://mezo.org"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="font-semibold text-primary hover:text-accent transition-colors"
+                className="font-semibold text-primary transition-colors hover:text-accent"
               >
                 Mezo Protocol
               </a>

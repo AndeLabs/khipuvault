@@ -9,7 +9,4 @@ export {
   useTransactionExecute,
 } from "./context/transaction-context";
 
-export {
-  TransactionModal,
-  TransactionHistoryModal,
-} from "./components/transaction-modal";
+export { TransactionModal, TransactionHistoryModal } from "./components/transaction-modal";

@@ -24,9 +24,7 @@ describe("UsersService", () => {
         deposits: [fixtures.mockDeposit],
       };
 
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(
-        mockUserWithDeposits as any,
-      );
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(mockUserWithDeposits as any);
 
       const result = await usersService.getUserByAddress(fixtures.validAddress);
 
@@ -46,15 +44,15 @@ describe("UsersService", () => {
     it("should throw 404 error when user not found", async () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
-      await expect(
-        usersService.getUserByAddress(fixtures.validAddress),
-      ).rejects.toThrow("User not found");
+      await expect(usersService.getUserByAddress(fixtures.validAddress)).rejects.toThrow(
+        "User not found"
+      );
     });
 
     it("should throw 400 error for invalid address format", async () => {
-      await expect(
-        usersService.getUserByAddress(fixtures.invalidAddress),
-      ).rejects.toThrow("Invalid Ethereum address format");
+      await expect(usersService.getUserByAddress(fixtures.invalidAddress)).rejects.toThrow(
+        "Invalid Ethereum address format"
+      );
     });
 
     it("should normalize address to lowercase", async () => {
@@ -68,26 +66,20 @@ describe("UsersService", () => {
       expect(prisma.user.findUnique).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { address: fixtures.validAddressLower },
-        }),
+        })
       );
     });
   });
 
   describe("getUserPortfolio", () => {
     it("should return portfolio with aggregated data", async () => {
-      vi.mocked(prisma.user.findUnique).mockResolvedValue(
-        fixtures.mockUser as any,
-      );
+      vi.mocked(prisma.user.findUnique).mockResolvedValue(fixtures.mockUser as any);
       vi.mocked(prisma.$queryRaw)
         .mockResolvedValueOnce([{ total: "1000000000000000000" }]) // deposits
         .mockResolvedValueOnce([{ total: "500000000000000000" }]) // withdrawals
         .mockResolvedValueOnce([{ total: "100000000000000000" }]); // yield claims
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue([
-        fixtures.mockDeposit,
-      ] as any);
-      vi.mocked(prisma.pool.findMany).mockResolvedValue([
-        fixtures.mockPool,
-      ] as any);
+      vi.mocked(prisma.deposit.findMany).mockResolvedValue([fixtures.mockDeposit] as any);
+      vi.mocked(prisma.pool.findMany).mockResolvedValue([fixtures.mockPool] as any);
 
       const result = await usersService.getUserPortfolio(fixtures.validAddress);
 
@@ -101,9 +93,9 @@ describe("UsersService", () => {
     it("should throw 404 when user not found", async () => {
       vi.mocked(prisma.user.findUnique).mockResolvedValue(null);
 
-      await expect(
-        usersService.getUserPortfolio(fixtures.validAddress),
-      ).rejects.toThrow("User not found");
+      await expect(usersService.getUserPortfolio(fixtures.validAddress)).rejects.toThrow(
+        "User not found"
+      );
     });
   });
 
@@ -115,9 +107,7 @@ describe("UsersService", () => {
       ];
 
       vi.mocked(prisma.deposit.findMany).mockResolvedValue(deposits as any);
-      vi.mocked(prisma.pool.findMany).mockResolvedValue([
-        fixtures.mockPool,
-      ] as any);
+      vi.mocked(prisma.pool.findMany).mockResolvedValue([fixtures.mockPool] as any);
 
       const result = await usersService.getUserPositions(fixtures.validAddress);
 
@@ -132,9 +122,7 @@ describe("UsersService", () => {
       ];
 
       vi.mocked(prisma.deposit.findMany).mockResolvedValue(deposits as any);
-      vi.mocked(prisma.pool.findMany).mockResolvedValue([
-        fixtures.mockPool,
-      ] as any);
+      vi.mocked(prisma.pool.findMany).mockResolvedValue([fixtures.mockPool] as any);
 
       const result = await usersService.getUserPositions(fixtures.validAddress);
 
@@ -145,16 +133,10 @@ describe("UsersService", () => {
   describe("getUserTransactions", () => {
     it("should return paginated transactions", async () => {
       const mockTransactions = [fixtures.mockDeposit];
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue(
-        mockTransactions as any,
-      );
+      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockTransactions as any);
       vi.mocked(prisma.deposit.count).mockResolvedValue(100);
 
-      const result = await usersService.getUserTransactions(
-        fixtures.validAddress,
-        50,
-        0,
-      );
+      const result = await usersService.getUserTransactions(fixtures.validAddress, 50, 0);
 
       expect(result.transactions).toHaveLength(1);
       expect(result.pagination.total).toBe(100);
@@ -164,16 +146,10 @@ describe("UsersService", () => {
     });
 
     it("should indicate no more pages when at end", async () => {
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue([
-        fixtures.mockDeposit,
-      ] as any);
+      vi.mocked(prisma.deposit.findMany).mockResolvedValue([fixtures.mockDeposit] as any);
       vi.mocked(prisma.deposit.count).mockResolvedValue(10);
 
-      const result = await usersService.getUserTransactions(
-        fixtures.validAddress,
-        50,
-        0,
-      );
+      const result = await usersService.getUserTransactions(fixtures.validAddress, 50, 0);
 
       expect(result.pagination.hasMore).toBe(false);
     });
@@ -188,7 +164,7 @@ describe("UsersService", () => {
         expect.objectContaining({
           take: 50,
           skip: 0,
-        }),
+        })
       );
     });
   });
@@ -198,9 +174,7 @@ describe("UsersService", () => {
       const newUser = { ...fixtures.mockUser };
       vi.mocked(prisma.user.upsert).mockResolvedValue(newUser as any);
 
-      const result = await usersService.createOrUpdateUser(
-        fixtures.validAddress,
-      );
+      const result = await usersService.createOrUpdateUser(fixtures.validAddress);
 
       expect(prisma.user.upsert).toHaveBeenCalledWith({
         where: { address: fixtures.validAddressLower },
@@ -218,12 +192,9 @@ describe("UsersService", () => {
       const updatedUser = { ...fixtures.mockUser, ensName: "newname.eth" };
       vi.mocked(prisma.user.upsert).mockResolvedValue(updatedUser as any);
 
-      const result = await usersService.createOrUpdateUser(
-        fixtures.validAddress,
-        {
-          ensName: "newname.eth",
-        },
-      );
+      const result = await usersService.createOrUpdateUser(fixtures.validAddress, {
+        ensName: "newname.eth",
+      });
 
       expect(prisma.user.upsert).toHaveBeenCalledWith({
         where: { address: fixtures.validAddressLower },
@@ -240,9 +211,9 @@ describe("UsersService", () => {
     });
 
     it("should validate address format", async () => {
-      await expect(
-        usersService.createOrUpdateUser(fixtures.invalidAddress),
-      ).rejects.toThrow("Invalid Ethereum address format");
+      await expect(usersService.createOrUpdateUser(fixtures.invalidAddress)).rejects.toThrow(
+        "Invalid Ethereum address format"
+      );
     });
   });
 });

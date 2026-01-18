@@ -44,7 +44,7 @@ async function setupWeb3Browser(): Promise<{
     page,
     [TEST_PRIVATE_KEY],
     MEZO_TESTNET.chainId,
-    MEZO_TESTNET.rpcUrl,
+    MEZO_TESTNET.rpcUrl
   );
 
   return { context, page };
@@ -90,9 +90,7 @@ async function testIndividualSavingsDeposit(page: Page): Promise<boolean> {
   await page.screenshot({ path: ".playwright-mcp/e2e-individual-savings.png" });
 
   // Look for deposit input
-  const depositInput = page
-    .locator('input[placeholder*="amount" i], input[type="number"]')
-    .first();
+  const depositInput = page.locator('input[placeholder*="amount" i], input[type="number"]').first();
   if (await depositInput.isVisible()) {
     await depositInput.fill("1"); // Deposit 1 MUSD
     console.log("  Entered deposit amount: 1 MUSD");
@@ -170,12 +168,8 @@ async function runE2ETests() {
   console.log("\n==========================================");
   console.log("📊 Test Results Summary:");
   console.log(`  Wallet Connection: ${results.walletConnection ? "✅" : "❌"}`);
-  console.log(
-    `  Individual Deposit: ${results.individualDeposit ? "✅" : "❌"}`,
-  );
-  console.log(
-    `  Prize Pool Tickets: ${results.prizePoolTickets ? "✅" : "❌"}`,
-  );
+  console.log(`  Individual Deposit: ${results.individualDeposit ? "✅" : "❌"}`);
+  console.log(`  Prize Pool Tickets: ${results.prizePoolTickets ? "✅" : "❌"}`);
   console.log("==========================================\n");
 
   // Keep browser open for inspection

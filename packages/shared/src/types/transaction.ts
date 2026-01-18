@@ -11,11 +11,7 @@ export const TransactionTypeSchema = z.enum([
 ]);
 export type TransactionType = z.infer<typeof TransactionTypeSchema>;
 
-export const TransactionStatusSchema = z.enum([
-  "pending",
-  "confirmed",
-  "failed",
-]);
+export const TransactionStatusSchema = z.enum(["pending", "confirmed", "failed"]);
 export type TransactionStatus = z.infer<typeof TransactionStatusSchema>;
 
 export interface Transaction {

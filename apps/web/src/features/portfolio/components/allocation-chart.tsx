@@ -1,22 +1,9 @@
 "use client";
 
 import * as React from "react";
-import {
-  PieChart,
-  Pie,
-  Cell,
-  ResponsiveContainer,
-  Legend,
-  Tooltip,
-} from "recharts";
+import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from "recharts";
 
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 
 interface AllocationChartProps {
   individualSavings?: number;
@@ -48,10 +35,10 @@ export function AllocationChart({
     return (
       <Card variant="surface">
         <CardHeader>
-          <div className="h-6 w-32 bg-surface-elevated animate-shimmer rounded" />
+          <div className="h-6 w-32 animate-shimmer rounded bg-surface-elevated" />
         </CardHeader>
         <CardContent>
-          <div className="h-64 bg-surface-elevated animate-shimmer rounded" />
+          <div className="h-64 animate-shimmer rounded bg-surface-elevated" />
         </CardContent>
       </Card>
     );
@@ -65,7 +52,7 @@ export function AllocationChart({
           <CardDescription>Your portfolio distribution</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-64 flex items-center justify-center text-muted-foreground">
+          <div className="flex h-64 items-center justify-center text-muted-foreground">
             <p>No assets yet. Start saving to see your allocation.</p>
           </div>
         </CardContent>
@@ -87,9 +74,7 @@ export function AllocationChart({
               cx="50%"
               cy="50%"
               labelLine={false}
-              label={({ name, percent }) =>
-                `${name}: ${(percent * 100).toFixed(0)}%`
-              }
+              label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
               outerRadius={80}
               fill="#8884d8"
               dataKey="value"
@@ -117,13 +102,10 @@ export function AllocationChart({
           {data.map((item) => (
             <div
               key={item.name}
-              className="flex items-center justify-between p-3 rounded-lg bg-surface-elevated"
+              className="flex items-center justify-between rounded-lg bg-surface-elevated p-3"
             >
               <div className="flex items-center gap-2">
-                <div
-                  className="h-3 w-3 rounded-full"
-                  style={{ backgroundColor: item.color }}
-                />
+                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: item.color }} />
                 <span className="text-sm">{item.name}</span>
               </div>
               <div className="text-right">

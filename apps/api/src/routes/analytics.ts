@@ -55,36 +55,26 @@ router.get("/top-pools", expensiveOperationLimiter, async (req, res, next) => {
 
 // GET /api/analytics/top-users
 // Protected: Requires authentication to access user wallet addresses and balances
-router.get(
-  "/top-users",
-  expensiveOperationLimiter,
-  requireAuth,
-  async (req, res, next) => {
-    try {
-      const { limit } = paginationSchema.pick({ limit: true }).parse(req.query);
-      const users = await analyticsService.getTopUsers(limit);
-      res.json(users);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
+router.get("/top-users", expensiveOperationLimiter, requireAuth, async (req, res, next) => {
+  try {
+    const { limit } = paginationSchema.pick({ limit: true }).parse(req.query);
+    const users = await analyticsService.getTopUsers(limit);
+    res.json(users);
+  } catch (error) {
+    next(error);
+  }
+});
 
 // GET /api/analytics/events
 // Protected: Event logs may contain sensitive transaction details
-router.get(
-  "/events",
-  expensiveOperationLimiter,
-  optionalAuth,
-  async (req, res, next) => {
-    try {
-      const { limit, offset } = paginationSchema.parse(req.query);
-      const result = await analyticsService.getEventLogs(limit, offset);
-      res.json(result);
-    } catch (error) {
-      next(error);
-    }
-  },
-);
+router.get("/events", expensiveOperationLimiter, optionalAuth, async (req, res, next) => {
+  try {
+    const { limit, offset } = paginationSchema.parse(req.query);
+    const result = await analyticsService.getEventLogs(limit, offset);
+    res.json(result);
+  } catch (error) {
+    next(error);
+  }
+});
 
 export default router;

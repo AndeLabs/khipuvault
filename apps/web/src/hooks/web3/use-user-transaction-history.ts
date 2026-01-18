@@ -38,8 +38,7 @@ export function useUserTransactionHistory() {
 
         // Mezo RPC has a limit of 10,000 blocks per query
         // Query last 9,000 blocks to be safe (roughly 1-2 weeks of data)
-        const fromBlock =
-          latestBlock > BigInt(9000) ? latestBlock - BigInt(9000) : BigInt(0);
+        const fromBlock = latestBlock > BigInt(9000) ? latestBlock - BigInt(9000) : BigInt(0);
 
         // Get contract events for this user
         const [depositEvents, withdrawEvents, claimEvents] = await Promise.all([

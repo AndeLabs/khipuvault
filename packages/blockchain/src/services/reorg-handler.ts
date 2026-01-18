@@ -63,9 +63,7 @@ export class ReorgHandler {
     }
 
     this.isRunning = true;
-    console.log(
-      `🔍 ReorgHandler started (checking every ${REORG_CHECK_INTERVAL / 1000}s)`,
-    );
+    console.log(`🔍 ReorgHandler started (checking every ${REORG_CHECK_INTERVAL / 1000}s)`);
 
     // Run initial check
     this.checkForReorgs().catch(console.error);
@@ -168,9 +166,7 @@ export class ReorgHandler {
       }
 
       if (orphanedBlocks.length > 0) {
-        console.log(
-          `🔄 Reorg detected: ${orphanedBlocks.length} orphaned blocks`,
-        );
+        console.log(`🔄 Reorg detected: ${orphanedBlocks.length} orphaned blocks`);
         await this.handleReorg(orphanedBlocks, newCanonicalBlocks);
       }
 
@@ -196,7 +192,7 @@ export class ReorgHandler {
    */
   private async handleReorg(
     orphanedBlocks: number[],
-    newCanonicalBlocks: BlockInfo[],
+    newCanonicalBlocks: BlockInfo[]
   ): Promise<void> {
     console.log(`🔄 Handling reorg for blocks: ${orphanedBlocks.join(", ")}`);
 
@@ -239,10 +235,7 @@ export class ReorgHandler {
    * @param toBlock Ending block number
    * @returns Array of inconsistent block numbers
    */
-  async verifyBlockRange(
-    fromBlock: number,
-    toBlock: number,
-  ): Promise<number[]> {
+  async verifyBlockRange(fromBlock: number, toBlock: number): Promise<number[]> {
     const inconsistentBlocks: number[] = [];
 
     // Get stored events in range

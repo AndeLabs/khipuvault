@@ -78,8 +78,7 @@ export function NetworkSwitcher() {
 
               toast({
                 title: "Network Added",
-                description:
-                  "Mezo Testnet added to your wallet. Please try switching again.",
+                description: "Mezo Testnet added to your wallet. Please try switching again.",
               });
             }
           } catch (addError) {
@@ -88,8 +87,7 @@ export function NetworkSwitcher() {
 
             toast({
               title: "Action Required",
-              description:
-                "Please add Mezo Testnet manually to your wallet (Chain ID: 31611)",
+              description: "Please add Mezo Testnet manually to your wallet (Chain ID: 31611)",
               variant: "destructive",
             });
           }
@@ -100,7 +98,7 @@ export function NetworkSwitcher() {
             description: "Connected to Mezo Testnet",
           });
         },
-      },
+      }
     );
   }, [switchChain, walletClient, toast]);
 
@@ -123,26 +121,24 @@ export function NetworkSwitcher() {
   return (
     <div
       className={cn(
-        "fixed top-0 left-0 right-0 z-50",
+        "fixed left-0 right-0 top-0 z-50",
         "bg-warning/95 backdrop-blur-sm",
-        "border-b border-warning-foreground/20",
+        "border-warning-foreground/20 border-b",
         "px-4 py-3",
-        "animate-in slide-in-from-top duration-300",
+        "duration-300 animate-in slide-in-from-top"
       )}
       role="alert"
       aria-live="assertive"
     >
       <div className="container mx-auto flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <AlertTriangle className="h-5 w-5 text-warning-foreground shrink-0" />
-          <div className="text-sm font-medium text-warning-foreground">
+          <AlertTriangle className="text-warning-foreground h-5 w-5 shrink-0" />
+          <div className="text-warning-foreground text-sm font-medium">
             <span className="hidden sm:inline">
-              You&apos;re connected to <strong>{chain.name}</strong>. KhipuVault
-              only works on <strong>Mezo Testnet</strong>.
+              You&apos;re connected to <strong>{chain.name}</strong>. KhipuVault only works on{" "}
+              <strong>Mezo Testnet</strong>.
             </span>
-            <span className="sm:hidden">
-              Wrong network. Switch to Mezo Testnet.
-            </span>
+            <span className="sm:hidden">Wrong network. Switch to Mezo Testnet.</span>
           </div>
         </div>
 
@@ -156,12 +152,12 @@ export function NetworkSwitcher() {
           >
             {isSwitching ? (
               <>
-                <RefreshCw className="h-4 w-4 mr-2 animate-spin" />
+                <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
                 Switching...
               </>
             ) : (
               <>
-                <RefreshCw className="h-4 w-4 mr-2" />
+                <RefreshCw className="mr-2 h-4 w-4" />
                 Switch to Mezo
               </>
             )}

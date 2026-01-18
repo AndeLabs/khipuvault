@@ -85,10 +85,7 @@ const depositsData = await prisma.deposit.findMany({
   select: { amount: true },
 });
 
-const totalVolumeDeposit = depositsData.reduce(
-  (sum, d) => sum + BigInt(d.amount),
-  BigInt(0),
-);
+const totalVolumeDeposit = depositsData.reduce((sum, d) => sum + BigInt(d.amount), BigInt(0));
 ```
 
 **B. UsersService** (`apps/api/src/services/users.ts`):

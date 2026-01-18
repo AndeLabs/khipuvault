@@ -95,8 +95,7 @@ export function getPrivyStatus(): {
     return {
       configured: false,
       appId: "",
-      message:
-        "NEXT_PUBLIC_PRIVY_APP_ID not set. Get one at https://dashboard.privy.io",
+      message: "NEXT_PUBLIC_PRIVY_APP_ID not set. Get one at https://dashboard.privy.io",
     };
   }
 

@@ -13,12 +13,7 @@ import {
   optionalAuth,
   getNonceStats,
 } from "../../middleware/auth";
-import {
-  createMockRequest,
-  createMockResponse,
-  createMockNext,
-  fixtures,
-} from "../setup";
+import { createMockRequest, createMockResponse, createMockNext, fixtures } from "../setup";
 
 describe("Auth Middleware", () => {
   beforeEach(() => {
@@ -26,9 +21,9 @@ describe("Auth Middleware", () => {
   });
 
   describe("generateNonce", () => {
-    it("should generate a unique nonce string", () => {
-      const nonce1 = generateNonce();
-      const nonce2 = generateNonce();
+    it("should generate a unique nonce string", async () => {
+      const nonce1 = await generateNonce();
+      const nonce2 = await generateNonce();
 
       expect(nonce1).toBeDefined();
       expect(typeof nonce1).toBe("string");
@@ -36,8 +31,8 @@ describe("Auth Middleware", () => {
       expect(nonce1).not.toBe(nonce2);
     });
 
-    it("should track nonces in store", () => {
-      const nonce = generateNonce();
+    it("should track nonces in store", async () => {
+      await generateNonce();
       const stats = getNonceStats();
 
       expect(stats.total).toBeGreaterThan(0);
@@ -99,7 +94,7 @@ describe("Auth Middleware", () => {
         expect.objectContaining({
           error: "Unauthorized",
           message: "No authorization token provided",
-        }),
+        })
       );
       expect(next).not.toHaveBeenCalled();
     });
@@ -117,7 +112,7 @@ describe("Auth Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           message: expect.stringContaining("Invalid authorization header"),
-        }),
+        })
       );
     });
 
@@ -134,7 +129,7 @@ describe("Auth Middleware", () => {
       expect(res.json).toHaveBeenCalledWith(
         expect.objectContaining({
           message: "Invalid or expired token",
-        }),
+        })
       );
     });
 
@@ -197,10 +192,10 @@ describe("Auth Middleware", () => {
   });
 
   describe("getNonceStats", () => {
-    it("should return nonce statistics", () => {
+    it("should return nonce statistics", async () => {
       // Generate some nonces
-      generateNonce();
-      generateNonce();
+      await generateNonce();
+      await generateNonce();
 
       const stats = getNonceStats();
 

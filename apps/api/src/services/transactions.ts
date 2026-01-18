@@ -19,7 +19,7 @@ export class TransactionsService {
 
   async getRecentTransactions(
     limit = 50,
-    offset = 0,
+    offset = 0
   ): Promise<{
     transactions: Deposit[];
     pagination: {
@@ -51,7 +51,7 @@ export class TransactionsService {
   async getTransactionsByPool(
     poolAddress: string,
     limit = 50,
-    offset = 0,
+    offset = 0
   ): Promise<{
     transactions: Deposit[];
     pagination: {
@@ -110,7 +110,7 @@ export class TransactionsService {
 
     // Parse results into structured response
     const typeStats = new Map(
-      stats.map((s) => [s.type, { count: Number(s.count), volume: s.volume }]),
+      stats.map((s) => [s.type, { count: Number(s.count), volume: s.volume }])
     );
 
     return {

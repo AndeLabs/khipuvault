@@ -8,10 +8,7 @@
  * - Easy integration with TanStack Query
  */
 
-import {
-  MEZO_TESTNET_ADDRESSES,
-  COOPERATIVE_POOL_ABI,
-} from "@/lib/web3/contracts-v3";
+import { MEZO_TESTNET_ADDRESSES, COOPERATIVE_POOL_ABI } from "@/lib/web3/contracts-v3";
 
 import type { PublicClient } from "viem";
 
@@ -60,7 +57,7 @@ const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePoolV3;
  */
 export async function fetchCooperativePools(
   publicClient: PublicClient,
-  poolCounter: number,
+  poolCounter: number
 ): Promise<PoolInfo[]> {
   if (!publicClient || poolCounter <= 0) {
     return [];
@@ -78,7 +75,7 @@ export async function fetchCooperativePools(
         abi: COOPERATIVE_POOL_ABI,
         functionName: "getPoolInfo",
         args: [BigInt(i + 1)],
-      }),
+      })
     );
 
     const results = await Promise.allSettled(poolPromises);
@@ -110,9 +107,7 @@ export async function fetchCooperativePools(
  * @param publicClient - Viem PublicClient for blockchain queries
  * @returns Total number of pools
  */
-export async function fetchPoolCounter(
-  publicClient: PublicClient,
-): Promise<number> {
+export async function fetchPoolCounter(publicClient: PublicClient): Promise<number> {
   if (!publicClient) {
     return 0;
   }
@@ -140,7 +135,7 @@ export async function fetchPoolCounter(
  */
 export async function fetchPoolInfo(
   publicClient: PublicClient,
-  poolId: number,
+  poolId: number
 ): Promise<PoolInfo | null> {
   if (!publicClient || poolId <= 0) {
     return null;
@@ -172,7 +167,7 @@ export async function fetchPoolInfo(
 export async function fetchMemberInfo(
   publicClient: PublicClient,
   poolId: number,
-  memberAddress: `0x${string}`,
+  memberAddress: `0x${string}`
 ): Promise<MemberInfo | null> {
   if (!publicClient || poolId <= 0 || !memberAddress) {
     return null;
@@ -202,7 +197,7 @@ export async function fetchMemberInfo(
  */
 export async function fetchPoolMembers(
   publicClient: PublicClient,
-  poolId: number,
+  poolId: number
 ): Promise<string[]> {
   if (!publicClient || poolId <= 0) {
     return [];
@@ -234,7 +229,7 @@ export async function fetchPoolMembers(
 export async function fetchMemberYield(
   publicClient: PublicClient,
   poolId: number,
-  memberAddress: `0x${string}`,
+  memberAddress: `0x${string}`
 ): Promise<bigint | null> {
   if (!publicClient || poolId <= 0 || !memberAddress) {
     return null;

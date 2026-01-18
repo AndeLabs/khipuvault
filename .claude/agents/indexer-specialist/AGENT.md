@@ -68,11 +68,7 @@ await prisma.deposit.upsert({
 ### 2. Retry with Exponential Backoff
 
 ```typescript
-async function withRetry<T>(
-  fn: () => Promise<T>,
-  maxRetries = 5,
-  baseDelay = 1000,
-): Promise<T> {
+async function withRetry<T>(fn: () => Promise<T>, maxRetries = 5, baseDelay = 1000): Promise<T> {
   for (let i = 0; i < maxRetries; i++) {
     try {
       return await fn();

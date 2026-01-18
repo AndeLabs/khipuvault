@@ -8,14 +8,7 @@
 "use client";
 
 import { useQueryClient } from "@tanstack/react-query";
-import {
-  Ticket,
-  AlertCircle,
-  Wallet,
-  Calculator,
-  CheckCircle2,
-  Loader2,
-} from "lucide-react";
+import { Ticket, AlertCircle, Wallet, Calculator, CheckCircle2, Loader2 } from "lucide-react";
 import * as React from "react";
 import { formatEther } from "viem";
 import { useAccount, useBalance } from "wagmi";
@@ -34,10 +27,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import {
-  useBuyTickets,
-  formatProbability,
-} from "@/hooks/web3/lottery/use-lottery-pool";
+import { useBuyTickets, formatProbability } from "@/hooks/web3/lottery/use-lottery-pool";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
@@ -63,26 +53,19 @@ export function BuyTicketsModal({
   const { toast } = useToast();
 
   const [ticketCount, setTicketCount] = React.useState("1");
-  const [step, setStep] = React.useState<"input" | "confirming" | "success">(
-    "input",
-  );
+  const [step, setStep] = React.useState<"input" | "confirming" | "success">("input");
 
   // Calculate values
   const ticketCountNum = parseInt(ticketCount) || 0;
-  const totalCost = roundInfo
-    ? roundInfo.ticketPrice * BigInt(ticketCountNum)
-    : BigInt(0);
-  const remainingTickets =
-    Number(maxTicketsPerUser) - Number(currentUserTickets);
+  const totalCost = roundInfo ? roundInfo.ticketPrice * BigInt(ticketCountNum) : BigInt(0);
+  const remainingTickets = Number(maxTicketsPerUser) - Number(currentUserTickets);
 
   // Calculate probability
   const estimatedTotalTickets = roundInfo
     ? Number(roundInfo.totalTicketsSold) + ticketCountNum
     : ticketCountNum;
   const estimatedProbability =
-    estimatedTotalTickets > 0
-      ? (ticketCountNum / estimatedTotalTickets) * 10000
-      : 0;
+    estimatedTotalTickets > 0 ? (ticketCountNum / estimatedTotalTickets) * 10000 : 0;
 
   // Validation
   const hasEnoughBalance = balance ? balance.value >= totalCost : false;
@@ -100,18 +83,13 @@ export function BuyTicketsModal({
 
     try {
       setStep("confirming");
-      await buyTickets(
-        Number(roundInfo.roundId),
-        ticketCountNum,
-        roundInfo.ticketPrice,
-      );
+      await buyTickets(Number(roundInfo.roundId), ticketCountNum, roundInfo.ticketPrice);
     } catch (err) {
       console.error("Purchase error:", err);
       setStep("input");
       toast({
         title: "Purchase Failed",
-        description:
-          err instanceof Error ? err.message : "Failed to purchase tickets",
+        description: err instanceof Error ? err.message : "Failed to purchase tickets",
         variant: "destructive",
       });
     }
@@ -161,22 +139,15 @@ export function BuyTicketsModal({
         {step === "input" && (
           <div className="space-y-6">
             {/* Ticket Price Info */}
-            <div className="p-4 rounded-lg bg-surface-elevated border border-border">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm text-muted-foreground">
-                  Ticket Price
-                </span>
-                <Badge variant="secondary">
-                  {formatEther(roundInfo.ticketPrice)} BTC
-                </Badge>
+            <div className="rounded-lg border border-border bg-surface-elevated p-4">
+              <div className="mb-2 flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Ticket Price</span>
+                <Badge variant="secondary">{formatEther(roundInfo.ticketPrice)} BTC</Badge>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-muted-foreground">
-                  Your Tickets
-                </span>
+              <div className="flex items-center justify-between">
+                <span className="text-sm text-muted-foreground">Your Tickets</span>
                 <span className="text-sm font-medium">
-                  {currentUserTickets.toString()} /{" "}
-                  {maxTicketsPerUser.toString()}
+                  {currentUserTickets.toString()} / {maxTicketsPerUser.toString()}
                 </span>
               </div>
             </div>
@@ -221,8 +192,8 @@ export function BuyTicketsModal({
             </div>
 
             {/* Cost Calculator */}
-            <div className="p-4 rounded-lg bg-lavanda/10 border border-lavanda/20 space-y-2">
-              <div className="flex items-center gap-2 text-sm font-medium mb-3">
+            <div className="space-y-2 rounded-lg border border-lavanda/20 bg-lavanda/10 p-4">
+              <div className="mb-3 flex items-center gap-2 text-sm font-medium">
                 <Calculator className="h-4 w-4 text-lavanda" />
                 Purchase Summary
               </div>
@@ -234,16 +205,12 @@ export function BuyTicketsModal({
 
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Your Wallet</span>
-                <span
-                  className={
-                    hasEnoughBalance ? "text-success" : "text-destructive"
-                  }
-                >
+                <span className={hasEnoughBalance ? "text-success" : "text-destructive"}>
                   {balance ? formatEther(balance.value) : "0"} BTC
                 </span>
               </div>
 
-              <div className="h-px bg-border my-2" />
+              <div className="my-2 h-px bg-border" />
 
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Win Probability</span>
@@ -265,8 +232,7 @@ export function BuyTicketsModal({
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Insufficient BTC balance. You need {formatEther(totalCost)}{" "}
-                  BTC.
+                  Insufficient BTC balance. You need {formatEther(totalCost)} BTC.
                 </AlertDescription>
               </Alert>
             )}
@@ -292,10 +258,10 @@ export function BuyTicketsModal({
         )}
 
         {step === "confirming" && (
-          <div className="py-8 text-center space-y-4">
-            <Loader2 className="h-12 w-12 animate-spin text-lavanda mx-auto" />
+          <div className="space-y-4 py-8 text-center">
+            <Loader2 className="mx-auto h-12 w-12 animate-spin text-lavanda" />
             <div>
-              <p className="font-medium mb-1">Confirming Transaction...</p>
+              <p className="mb-1 font-medium">Confirming Transaction...</p>
               <p className="text-sm text-muted-foreground">
                 Please confirm the transaction in your wallet
               </p>
@@ -304,13 +270,13 @@ export function BuyTicketsModal({
         )}
 
         {step === "success" && (
-          <div className="py-8 text-center space-y-4">
-            <div className="h-16 w-16 rounded-full bg-success/10 flex items-center justify-center mx-auto">
+          <div className="space-y-4 py-8 text-center">
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
               <CheckCircle2 className="h-8 w-8 text-success" />
             </div>
             <div>
-              <p className="font-medium text-lg mb-1">Tickets Purchased!</p>
-              <p className="text-sm text-muted-foreground mb-4">
+              <p className="mb-1 text-lg font-medium">Tickets Purchased!</p>
+              <p className="mb-4 text-sm text-muted-foreground">
                 You successfully purchased {ticketCountNum} ticket(s)
               </p>
               <Badge variant="secondary" className="text-xs">
@@ -331,7 +297,7 @@ export function BuyTicketsModal({
                 disabled={!canPurchase}
                 className="bg-gradient-to-r from-lavanda to-lavanda/80"
               >
-                <Wallet className="h-4 w-4 mr-2" />
+                <Wallet className="mr-2 h-4 w-4" />
                 Purchase Tickets
               </Button>
             </>

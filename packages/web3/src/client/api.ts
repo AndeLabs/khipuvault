@@ -60,8 +60,7 @@ export interface Transaction {
   error?: string;
 }
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001/api";
 
 /**
  * Custom error class for API errors
@@ -71,7 +70,7 @@ export class ApiError extends Error {
     message: string,
     public status: number,
     public code?: string,
-    public details?: unknown,
+    public details?: unknown
   ) {
     super(message);
     this.name = "ApiError";
@@ -87,10 +86,7 @@ export class KhipuApiClient {
   private timeout: number;
   private retries: number;
 
-  constructor(
-    baseUrl: string = API_BASE_URL,
-    options?: { timeout?: number; retries?: number },
-  ) {
+  constructor(baseUrl: string = API_BASE_URL, options?: { timeout?: number; retries?: number }) {
     this.baseUrl = baseUrl;
     this.timeout = options?.timeout ?? 10000; // 10s default
     this.retries = options?.retries ?? 2; // 2 retries default
@@ -121,7 +117,7 @@ export class KhipuApiClient {
             errorBody.message || response.statusText,
             response.status,
             errorBody.code,
-            errorBody.details,
+            errorBody.details
           );
         }
 
@@ -130,11 +126,7 @@ export class KhipuApiClient {
         lastError = error as Error;
 
         // Don't retry on client errors (4xx)
-        if (
-          error instanceof ApiError &&
-          error.status >= 400 &&
-          error.status < 500
-        ) {
+        if (error instanceof ApiError && error.status >= 400 && error.status < 500) {
           throw error;
         }
 
