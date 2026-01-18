@@ -283,8 +283,14 @@ jobs:
           node-version: "20"
           cache: "pnpm"
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
 
       - name: Build all packages
         run: pnpm build
