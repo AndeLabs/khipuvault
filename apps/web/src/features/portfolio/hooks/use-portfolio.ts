@@ -1,11 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAccount } from "wagmi";
 
-import {
-  getUserPortfolio,
-  getUserTransactions,
-  getAllPools,
-} from "../api/client";
+import { getUserPortfolio, getUserTransactions, getAllPools } from "../api/client";
 
 export function usePortfolio() {
   const { address } = useAccount();
@@ -17,14 +13,12 @@ export function usePortfolio() {
     refetchInterval: 10000,
   });
 
-  const { data: transactionsData, isLoading: isLoadingTransactions } = useQuery(
-    {
-      queryKey: ["portfolio", "transactions", address],
-      queryFn: () => getUserTransactions(address!),
-      enabled: !!address,
-      refetchInterval: 15000,
-    },
-  );
+  const { data: transactionsData, isLoading: isLoadingTransactions } = useQuery({
+    queryKey: ["portfolio", "transactions", address],
+    queryFn: () => getUserTransactions(address!),
+    enabled: !!address,
+    refetchInterval: 15000,
+  });
 
   const { data: pools, isLoading: isLoadingPools } = useQuery({
     queryKey: ["pools"],

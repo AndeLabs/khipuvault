@@ -479,35 +479,19 @@ import {
 } from "@/features/individual-savings";
 
 // Cooperative Pools
-import {
-  PoolsList,
-  CreatePoolModal,
-  JoinPoolModal,
-} from "@/features/cooperative-savings";
+import { PoolsList, CreatePoolModal, JoinPoolModal } from "@/features/cooperative-savings";
 
 // Portfolio
-import {
-  PortfolioOverview,
-  AllocationChart,
-  RecentActivity,
-} from "@/features/portfolio";
+import { PortfolioOverview, AllocationChart, RecentActivity } from "@/features/portfolio";
 
 // Transactions
-import {
-  useTransaction,
-  useTransactionExecute,
-  TransactionModal,
-} from "@/features/transactions";
+import { useTransaction, useTransactionExecute, TransactionModal } from "@/features/transactions";
 
 // Layout
 import { AppShell, PageHeader, PageSection } from "@/components/layout";
 
 // Common
-import {
-  TransactionStatus,
-  AmountDisplay,
-  PercentageDisplay,
-} from "@/components/common";
+import { TransactionStatus, AmountDisplay, PercentageDisplay } from "@/components/common";
 ```
 
 ---

@@ -23,9 +23,7 @@
     {
       "type": "function",
       "name": "balanceOf",
-      "inputs": [
-        { "name": "account", "type": "address", "internalType": "address" }
-      ],
+      "inputs": [{ "name": "account", "type": "address", "internalType": "address" }],
       "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
@@ -149,30 +147,22 @@
     {
       "type": "error",
       "name": "ERC20InvalidApprover",
-      "inputs": [
-        { "name": "approver", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "approver", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "ERC20InvalidReceiver",
-      "inputs": [
-        { "name": "receiver", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "receiver", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "ERC20InvalidSender",
-      "inputs": [
-        { "name": "sender", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "sender", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "ERC20InvalidSpender",
-      "inputs": [
-        { "name": "spender", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "spender", "type": "address", "internalType": "address" }]
     }
   ],
   "bytecode": { "object": "0x", "sourceMap": "", "linkReferences": {} },
@@ -217,30 +207,22 @@
           "name": "ERC20InsufficientBalance"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "approver", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "approver", "type": "address" }],
           "type": "error",
           "name": "ERC20InvalidApprover"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "receiver", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "receiver", "type": "address" }],
           "type": "error",
           "name": "ERC20InvalidReceiver"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "sender", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "sender", "type": "address" }],
           "type": "error",
           "name": "ERC20InvalidSender"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "spender", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "spender", "type": "address" }],
           "type": "error",
           "name": "ERC20InvalidSpender"
         },
@@ -302,9 +284,7 @@
           "stateMutability": "view",
           "type": "function",
           "name": "allowance",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [
@@ -317,15 +297,11 @@
           "outputs": [{ "internalType": "bool", "name": "", "type": "bool" }]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "account", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "balanceOf",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
@@ -339,27 +315,21 @@
           "stateMutability": "view",
           "type": "function",
           "name": "name",
-          "outputs": [
-            { "internalType": "string", "name": "", "type": "string" }
-          ]
+          "outputs": [{ "internalType": "string", "name": "", "type": "string" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "symbol",
-          "outputs": [
-            { "internalType": "string", "name": "", "type": "string" }
-          ]
+          "outputs": [{ "internalType": "string", "name": "", "type": "string" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "totalSupply",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [

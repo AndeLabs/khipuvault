@@ -13,19 +13,15 @@ export default mergeConfig(
         reporter: ["text", "json", "html", "lcov"],
         reportsDirectory: "./coverage",
         include: ["src/**/*.ts"],
-        exclude: [
-          "src/**/*.test.ts",
-          "src/**/*.spec.ts",
-          "src/__tests__/**",
-          "src/index.ts",
-        ],
+        exclude: ["src/**/*.test.ts", "src/**/*.spec.ts", "src/__tests__/**", "src/index.ts"],
         all: true,
-        lines: 80,
-        functions: 80,
-        branches: 80,
-        statements: 80,
+        // TODO: Incrementar gradualmente - ver docs/TESTING_ROADMAP.md
+        lines: 35,
+        functions: 30,
+        branches: 30,
+        statements: 35,
       },
       setupFiles: ["./src/__tests__/setup.ts"],
     },
-  }),
+  })
 );

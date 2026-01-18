@@ -1,19 +1,9 @@
 import { z } from "zod";
 
-export const PoolTypeSchema = z.enum([
-  "individual",
-  "cooperative",
-  "lottery",
-  "rotating",
-]);
+export const PoolTypeSchema = z.enum(["individual", "cooperative", "lottery", "rotating"]);
 export type PoolType = z.infer<typeof PoolTypeSchema>;
 
-export const PoolStatusSchema = z.enum([
-  "active",
-  "paused",
-  "emergency",
-  "closed",
-]);
+export const PoolStatusSchema = z.enum(["active", "paused", "emergency", "closed"]);
 export type PoolStatus = z.infer<typeof PoolStatusSchema>;
 
 export interface Pool {

@@ -86,9 +86,7 @@
       "type": "function",
       "name": "MUSD",
       "inputs": [],
-      "outputs": [
-        { "name": "", "type": "address", "internalType": "contract IERC20" }
-      ],
+      "outputs": [{ "name": "", "type": "address", "internalType": "contract IERC20" }],
       "stateMutability": "view"
     },
     {
@@ -136,9 +134,7 @@
       "type": "function",
       "name": "WBTC",
       "inputs": [],
-      "outputs": [
-        { "name": "", "type": "address", "internalType": "contract IERC20" }
-      ],
+      "outputs": [{ "name": "", "type": "address", "internalType": "contract IERC20" }],
       "stateMutability": "view"
     },
     {
@@ -177,9 +173,7 @@
     {
       "type": "function",
       "name": "claimPrize",
-      "inputs": [
-        { "name": "roundId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "roundId", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -204,9 +198,7 @@
           "internalType": "uint256"
         }
       ],
-      "outputs": [
-        { "name": "roundId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "outputs": [{ "name": "roundId", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "nonpayable"
     },
     {
@@ -219,9 +211,7 @@
     {
       "type": "function",
       "name": "getLotteryInfo",
-      "inputs": [
-        { "name": "roundId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "roundId", "type": "uint256", "internalType": "uint256" }],
       "outputs": [
         {
           "name": "",
@@ -348,12 +338,8 @@
     {
       "type": "function",
       "name": "getParticipants",
-      "inputs": [
-        { "name": "roundId", "type": "uint256", "internalType": "uint256" }
-      ],
-      "outputs": [
-        { "name": "", "type": "address[]", "internalType": "address[]" }
-      ],
+      "inputs": [{ "name": "roundId", "type": "uint256", "internalType": "uint256" }],
+      "outputs": [{ "name": "", "type": "address[]", "internalType": "address[]" }],
       "stateMutability": "view"
     },
     {
@@ -363,9 +349,7 @@
         { "name": "roundId", "type": "uint256", "internalType": "uint256" },
         { "name": "participant", "type": "address", "internalType": "address" }
       ],
-      "outputs": [
-        { "name": "probability", "type": "uint256", "internalType": "uint256" }
-      ],
+      "outputs": [{ "name": "probability", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
@@ -465,9 +449,7 @@
     {
       "type": "function",
       "name": "requestDraw",
-      "inputs": [
-        { "name": "roundId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "roundId", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -520,18 +502,14 @@
     {
       "type": "function",
       "name": "setFeeCollector",
-      "inputs": [
-        { "name": "newCollector", "type": "address", "internalType": "address" }
-      ],
+      "inputs": [{ "name": "newCollector", "type": "address", "internalType": "address" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
       "name": "transferOwnership",
-      "inputs": [
-        { "name": "newOwner", "type": "address", "internalType": "address" }
-      ],
+      "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -777,16 +755,12 @@
     {
       "type": "error",
       "name": "AddressEmptyCode",
-      "inputs": [
-        { "name": "target", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "target", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "AddressInsufficientBalance",
-      "inputs": [
-        { "name": "account", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
     },
     { "type": "error", "name": "AlreadyClaimed", "inputs": [] },
     { "type": "error", "name": "DrawAlreadyRequested", "inputs": [] },
@@ -815,24 +789,18 @@
     {
       "type": "error",
       "name": "OwnableInvalidOwner",
-      "inputs": [
-        { "name": "owner", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "owner", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "OwnableUnauthorizedAccount",
-      "inputs": [
-        { "name": "account", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
     },
     { "type": "error", "name": "ReentrancyGuardReentrantCall", "inputs": [] },
     {
       "type": "error",
       "name": "SafeERC20FailedOperation",
-      "inputs": [
-        { "name": "token", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "token", "type": "address", "internalType": "address" }]
     },
     { "type": "error", "name": "TooManyTickets", "inputs": [] },
     { "type": "error", "name": "VRFRequestFailed", "inputs": [] }
@@ -967,16 +935,12 @@
           "type": "constructor"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "target", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "target", "type": "address" }],
           "type": "error",
           "name": "AddressEmptyCode"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "account", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
           "type": "error",
           "name": "AddressInsufficientBalance"
         },
@@ -1005,16 +969,12 @@
           "name": "OnlyCoordinatorCanFulfill"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "owner", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
           "type": "error",
           "name": "OwnableInvalidOwner"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "account", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
           "type": "error",
           "name": "OwnableUnauthorizedAccount"
         },
@@ -1024,9 +984,7 @@
           "name": "ReentrancyGuardReentrantCall"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "token", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
           "type": "error",
           "name": "SafeERC20FailedOperation"
         },
@@ -1262,36 +1220,28 @@
           "stateMutability": "view",
           "type": "function",
           "name": "CALLBACK_GAS_LIMIT",
-          "outputs": [
-            { "internalType": "uint32", "name": "", "type": "uint32" }
-          ]
+          "outputs": [{ "internalType": "uint32", "name": "", "type": "uint32" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "KEY_HASH",
-          "outputs": [
-            { "internalType": "bytes32", "name": "", "type": "bytes32" }
-          ]
+          "outputs": [{ "internalType": "bytes32", "name": "", "type": "bytes32" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "MAX_TICKETS_PER_USER",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "MAX_TICKET_PRICE",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
@@ -1311,54 +1261,42 @@
           "stateMutability": "view",
           "type": "function",
           "name": "MIN_TICKET_PRICE",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "MUSD",
-          "outputs": [
-            { "internalType": "contract IERC20", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "NUM_WORDS",
-          "outputs": [
-            { "internalType": "uint32", "name": "", "type": "uint32" }
-          ]
+          "outputs": [{ "internalType": "uint32", "name": "", "type": "uint32" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "REQUEST_CONFIRMATIONS",
-          "outputs": [
-            { "internalType": "uint16", "name": "", "type": "uint16" }
-          ]
+          "outputs": [{ "internalType": "uint16", "name": "", "type": "uint16" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "SUBSCRIPTION_ID",
-          "outputs": [
-            { "internalType": "uint64", "name": "", "type": "uint64" }
-          ]
+          "outputs": [{ "internalType": "uint64", "name": "", "type": "uint64" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "TREASURY_FEE",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
@@ -1378,9 +1316,7 @@
           "stateMutability": "view",
           "type": "function",
           "name": "WBTC",
-          "outputs": [
-            { "internalType": "contract IERC20", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }]
         },
         {
           "inputs": [],
@@ -1418,9 +1354,7 @@
           "name": "cancelLottery"
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "roundId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "roundId", "type": "uint256" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "claimPrize"
@@ -1451,23 +1385,17 @@
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "createLottery",
-          "outputs": [
-            { "internalType": "uint256", "name": "roundId", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "roundId", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "feeCollector",
-          "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "roundId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "roundId", "type": "uint256" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getLotteryInfo",
@@ -1610,15 +1538,11 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "roundId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "roundId", "type": "uint256" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getParticipants",
-          "outputs": [
-            { "internalType": "address[]", "name": "", "type": "address[]" }
-          ]
+          "outputs": [{ "internalType": "address[]", "name": "", "type": "address[]" }]
         },
         {
           "inputs": [
@@ -1641,9 +1565,7 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
           "stateMutability": "view",
           "type": "function",
           "name": "lotteryRounds",
@@ -1723,9 +1645,7 @@
           "stateMutability": "view",
           "type": "function",
           "name": "owner",
-          "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
         },
         {
           "inputs": [],
@@ -1764,9 +1684,7 @@
           "name": "renounceOwnership"
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "roundId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "roundId", "type": "uint256" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "requestDraw"
@@ -1776,9 +1694,7 @@
           "stateMutability": "view",
           "type": "function",
           "name": "roundCounter",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [
@@ -1825,9 +1741,7 @@
           "stateMutability": "view",
           "type": "function",
           "name": "roundParticipantsList",
-          "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
         },
         {
           "inputs": [
@@ -1842,9 +1756,7 @@
           "name": "setFeeCollector"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "newOwner", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "transferOwnership"
@@ -1856,15 +1768,11 @@
           "name": "unpause"
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
           "stateMutability": "view",
           "type": "function",
           "name": "vrfRequestToRound",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         }
       ],
       "devdoc": {

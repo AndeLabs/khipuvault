@@ -25,7 +25,7 @@ export async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
   initialDelay: number = 1000,
-  optionsOrMaxRetries?: number | RetryOptions,
+  optionsOrMaxRetries?: number | RetryOptions
 ): Promise<T> {
   // Handle backward compatibility
   const options: RetryOptions =
@@ -74,9 +74,7 @@ export async function retryWithBackoff<T>(
         onRetry(lastError, attempt + 1);
       }
 
-      console.log(
-        `⏳ Retry attempt ${attempt + 1}/${retries} after ${Math.round(delay)}ms...`,
-      );
+      console.log(`⏳ Retry attempt ${attempt + 1}/${retries} after ${Math.round(delay)}ms...`);
       console.log(`   Error: ${lastError.message}`);
 
       await sleep(delay);
@@ -131,7 +129,7 @@ function sleep(ms: number): Promise<void> {
 export async function batchProcess<T, R>(
   items: T[],
   processor: (item: T, index: number) => Promise<R>,
-  concurrency: number = 5,
+  concurrency: number = 5
 ): Promise<R[]> {
   const results: R[] = [];
   const errors: Array<{ index: number; error: Error }> = [];
@@ -180,7 +178,7 @@ export async function batchProcess<T, R>(
 export async function rateLimitedProcess<T, R>(
   items: T[],
   processor: (item: T, index: number) => Promise<R>,
-  rateLimit: number = 10,
+  rateLimit: number = 10
 ): Promise<R[]> {
   const results: R[] = [];
   const delayBetweenItems = 1000 / rateLimit;
@@ -213,7 +211,7 @@ export class CircuitBreaker {
   constructor(
     private threshold: number = 5,
     private timeout: number = 60000, // 1 minute
-    private resetTimeout: number = 30000, // 30 seconds
+    private resetTimeout: number = 30000 // 30 seconds
   ) {}
 
   async execute<T>(fn: () => Promise<T>): Promise<T> {
@@ -246,9 +244,7 @@ export class CircuitBreaker {
 
     if (this.failureCount >= this.threshold) {
       this.state = "open";
-      console.error(
-        `🚨 Circuit breaker opened after ${this.failureCount} failures`,
-      );
+      console.error(`🚨 Circuit breaker opened after ${this.failureCount} failures`);
 
       // Auto-reset after timeout
       setTimeout(() => {

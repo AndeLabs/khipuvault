@@ -31,7 +31,7 @@ export class CooperativePoolListener extends BaseEventListener {
   private async processEventWithRetry(
     eventName: string,
     event: ethers.Log,
-    parsedLog: ethers.LogDescription,
+    parsedLog: ethers.LogDescription
   ): Promise<void> {
     try {
       await retryWithBackoff(
@@ -41,30 +41,22 @@ export class CooperativePoolListener extends BaseEventListener {
         {
           shouldRetry: (err) => {
             // Don't retry if it's a duplicate key error - that's expected for idempotency
-            if (
-              err instanceof Prisma.PrismaClientKnownRequestError &&
-              err.code === "P2002"
-            ) {
+            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
               console.log(
-                `⏭️ Skipping duplicate ${eventName} event: ${event.transactionHash}:${event.index}`,
+                `⏭️ Skipping duplicate ${eventName} event: ${event.transactionHash}:${event.index}`
               );
               return false;
             }
             return isRetryableError(err);
           },
           onRetry: (err, attempt) => {
-            console.warn(
-              `🔄 Retrying ${eventName} event (attempt ${attempt}): ${err.message}`,
-            );
+            console.warn(`🔄 Retrying ${eventName} event (attempt ${attempt}): ${err.message}`);
           },
-        },
+        }
       );
     } catch (error) {
       // After all retries failed, log to dead letter queue
-      console.error(
-        `❌ Failed to process ${eventName} after ${MAX_EVENT_RETRIES} retries:`,
-        error,
-      );
+      console.error(`❌ Failed to process ${eventName} after ${MAX_EVENT_RETRIES} retries:`, error);
       await this.logFailedEvent(eventName, event, error);
     }
   }
@@ -75,7 +67,7 @@ export class CooperativePoolListener extends BaseEventListener {
   private async logFailedEvent(
     eventName: string,
     event: ethers.Log,
-    error: unknown,
+    error: unknown
   ): Promise<void> {
     try {
       await prisma.eventLog.upsert({
@@ -171,11 +163,7 @@ export class CooperativePoolListener extends BaseEventListener {
           data: event.data,
         });
         if (parsedLog) {
-          await this.processEventWithRetry(
-            "PartialWithdrawal",
-            event,
-            parsedLog,
-          );
+          await this.processEventWithRetry("PartialWithdrawal", event, parsedLog);
         }
       } catch (error) {
         console.error("❌ Error parsing PartialWithdrawal event:", error);
@@ -207,11 +195,7 @@ export class CooperativePoolListener extends BaseEventListener {
           data: event.data,
         });
         if (parsedLog) {
-          await this.processEventWithRetry(
-            "PoolStatusUpdated",
-            event,
-            parsedLog,
-          );
+          await this.processEventWithRetry("PoolStatusUpdated", event, parsedLog);
         }
       } catch (error) {
         console.error("❌ Error parsing PoolStatusUpdated event:", error);
@@ -243,15 +227,9 @@ export class CooperativePoolListener extends BaseEventListener {
     let processedEvents = 0;
     let failedEvents = 0;
 
-    console.log(
-      `📚 Indexing historical events from block ${fromBlock} to ${currentBlock}`,
-    );
+    console.log(`📚 Indexing historical events from block ${fromBlock} to ${currentBlock}`);
 
-    for (
-      let startBlock = fromBlock;
-      startBlock <= currentBlock;
-      startBlock += batchSize
-    ) {
+    for (let startBlock = fromBlock; startBlock <= currentBlock; startBlock += batchSize) {
       const endBlock = Math.min(startBlock + batchSize - 1, currentBlock);
 
       try {
@@ -259,7 +237,7 @@ export class CooperativePoolListener extends BaseEventListener {
         const events = await retryWithBackoff(
           async () => this.contract.queryFilter("*", startBlock, endBlock),
           MAX_EVENT_RETRIES,
-          INITIAL_RETRY_DELAY,
+          INITIAL_RETRY_DELAY
         );
 
         // Process each event individually with retry
@@ -271,43 +249,30 @@ export class CooperativePoolListener extends BaseEventListener {
             });
 
             if (parsedLog) {
-              await this.processEventWithRetry(
-                parsedLog.name,
-                event,
-                parsedLog,
-              );
+              await this.processEventWithRetry(parsedLog.name, event, parsedLog);
               processedEvents++;
             }
           } catch (eventError) {
             failedEvents++;
-            console.error(
-              `❌ Failed to process event in block ${event.blockNumber}:`,
-              eventError,
-            );
+            console.error(`❌ Failed to process event in block ${event.blockNumber}:`, eventError);
           }
         }
 
         console.log(
-          `✅ Indexed blocks ${startBlock}-${endBlock} (${events.length} events, ${processedEvents} processed, ${failedEvents} failed)`,
+          `✅ Indexed blocks ${startBlock}-${endBlock} (${events.length} events, ${processedEvents} processed, ${failedEvents} failed)`
         );
       } catch (error) {
-        console.error(
-          `❌ Error fetching events for blocks ${startBlock}-${endBlock}:`,
-          error,
-        );
+        console.error(`❌ Error fetching events for blocks ${startBlock}-${endBlock}:`, error);
         // Continue with next batch instead of failing completely
       }
     }
 
     console.log(
-      `🎉 Historical indexing complete: ${processedEvents} processed, ${failedEvents} failed`,
+      `🎉 Historical indexing complete: ${processedEvents} processed, ${failedEvents} failed`
     );
   }
 
-  protected async processEvent(
-    event: ethers.Log,
-    parsedLog: ethers.LogDescription,
-  ): Promise<void> {
+  protected async processEvent(event: ethers.Log, parsedLog: ethers.LogDescription): Promise<void> {
     const eventName = parsedLog.name;
     // Use cached timestamp for batch operations to reduce RPC calls
     const blockTimestamp = await getBlockTimestampCached(event.blockNumber);
@@ -344,7 +309,7 @@ export class CooperativePoolListener extends BaseEventListener {
   private async handlePoolCreated(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const poolId = parsedLog.args.poolId.toString();
     const creator = parsedLog.args.creator.toLowerCase();
@@ -398,7 +363,7 @@ export class CooperativePoolListener extends BaseEventListener {
   private async handleMemberJoined(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const poolId = parsedLog.args.poolId.toString();
     const member = parsedLog.args.member.toLowerCase();
@@ -471,14 +436,14 @@ export class CooperativePoolListener extends BaseEventListener {
     });
 
     console.log(
-      `👥 Member Joined: ${member} contributed ${btcAmount} BTC (${shares} shares) to pool ${poolId}`,
+      `👥 Member Joined: ${member} contributed ${btcAmount} BTC (${shares} shares) to pool ${poolId}`
     );
   }
 
   private async handleMemberLeft(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const poolId = parsedLog.args.poolId.toString();
     const member = parsedLog.args.member.toLowerCase();
@@ -551,20 +516,19 @@ export class CooperativePoolListener extends BaseEventListener {
     });
 
     console.log(
-      `🚪 Member Left: ${member} left pool ${poolId} with ${btcAmount} BTC + ${yieldAmount} yield`,
+      `🚪 Member Left: ${member} left pool ${poolId} with ${btcAmount} BTC + ${yieldAmount} yield`
     );
   }
 
   private async handlePartialWithdrawal(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const poolId = parsedLog.args.poolId.toString();
     const member = parsedLog.args.member.toLowerCase();
     const btcAmount = parsedLog.args.btcAmount.toString();
-    const remainingContribution =
-      parsedLog.args.remainingContribution.toString();
+    const remainingContribution = parsedLog.args.remainingContribution.toString();
     const txHash = event.transactionHash;
     const logIndex = event.index;
 
@@ -635,14 +599,14 @@ export class CooperativePoolListener extends BaseEventListener {
     });
 
     console.log(
-      `📤 Partial Withdrawal: ${member} withdrew ${btcAmount} BTC from pool ${poolId} (remaining: ${remainingContribution})`,
+      `📤 Partial Withdrawal: ${member} withdrew ${btcAmount} BTC from pool ${poolId} (remaining: ${remainingContribution})`
     );
   }
 
   private async handlePoolClosed(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const poolId = parsedLog.args.poolId.toString();
     const finalBalance = parsedLog.args.finalBalance.toString();
@@ -674,15 +638,13 @@ export class CooperativePoolListener extends BaseEventListener {
       },
     });
 
-    console.log(
-      `🔒 Pool Closed: Pool ${poolId} with final balance ${finalBalance}`,
-    );
+    console.log(`🔒 Pool Closed: Pool ${poolId} with final balance ${finalBalance}`);
   }
 
   private async handlePoolStatusUpdated(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const poolId = parsedLog.args.poolId.toString();
     const newStatus = parsedLog.args.newStatus.toString();
@@ -714,15 +676,13 @@ export class CooperativePoolListener extends BaseEventListener {
       },
     });
 
-    console.log(
-      `📊 Pool Status Updated: Pool ${poolId} status changed to ${newStatus}`,
-    );
+    console.log(`📊 Pool Status Updated: Pool ${poolId} status changed to ${newStatus}`);
   }
 
   private async handleYieldClaimed(
     event: ethers.Log,
     parsedLog: ethers.LogDescription,
-    blockTimestamp: number,
+    blockTimestamp: number
   ): Promise<void> {
     const poolId = parsedLog.args.poolId.toString();
     const member = parsedLog.args.member.toLowerCase();
@@ -797,7 +757,7 @@ export class CooperativePoolListener extends BaseEventListener {
     });
 
     console.log(
-      `🌾 Yield Claimed: ${member} claimed ${netYield} (gross: ${grossYield}, fee: ${feeAmount}) from pool ${poolId}`,
+      `🌾 Yield Claimed: ${member} claimed ${netYield} (gross: ${grossYield}, fee: ${feeAmount}) from pool ${poolId}`
     );
   }
 }

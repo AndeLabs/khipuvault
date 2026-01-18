@@ -30,8 +30,7 @@ export function useTransactionVerification(txHash?: string) {
       try {
         setVerification({ status: "loading" });
 
-        const RPC_URL =
-          process.env.NEXT_PUBLIC_RPC_URL ?? "https://rpc.test.mezo.org";
+        const RPC_URL = process.env.NEXT_PUBLIC_RPC_URL ?? "https://rpc.test.mezo.org";
 
         // First check transaction details
         const txResponse = await fetch(RPC_URL, {
@@ -104,11 +103,7 @@ export function useTransactionVerification(txHash?: string) {
     intervalId = setInterval(() => {
       // Check current state - stop polling if already verified or errored
       setVerification((prev) => {
-        if (
-          prev.status === "verified" ||
-          prev.status === "error" ||
-          prev.status === "not_found"
-        ) {
+        if (prev.status === "verified" || prev.status === "error" || prev.status === "not_found") {
           if (intervalId) {
             clearInterval(intervalId);
           }

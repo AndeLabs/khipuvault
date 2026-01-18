@@ -62,9 +62,7 @@
       "type": "function",
       "name": "MUSD_TOKEN",
       "inputs": [],
-      "outputs": [
-        { "name": "", "type": "address", "internalType": "contract IERC20" }
-      ],
+      "outputs": [{ "name": "", "type": "address", "internalType": "contract IERC20" }],
       "stateMutability": "view"
     },
     {
@@ -104,40 +102,28 @@
       "type": "function",
       "name": "WBTC_TOKEN",
       "inputs": [],
-      "outputs": [
-        { "name": "", "type": "address", "internalType": "contract IERC20" }
-      ],
+      "outputs": [{ "name": "", "type": "address", "internalType": "contract IERC20" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "addCollateral",
-      "inputs": [
-        { "name": "btcAmount", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "btcAmount", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
       "name": "burnAndWithdraw",
-      "inputs": [
-        { "name": "musdAmount", "type": "uint256", "internalType": "uint256" }
-      ],
-      "outputs": [
-        { "name": "btcAmount", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "musdAmount", "type": "uint256", "internalType": "uint256" }],
+      "outputs": [{ "name": "btcAmount", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
       "name": "depositAndMint",
-      "inputs": [
-        { "name": "btcAmount", "type": "uint256", "internalType": "uint256" }
-      ],
-      "outputs": [
-        { "name": "musdAmount", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "btcAmount", "type": "uint256", "internalType": "uint256" }],
+      "outputs": [{ "name": "musdAmount", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "nonpayable"
     },
     {
@@ -154,69 +140,49 @@
       "type": "function",
       "name": "getBorrowRate",
       "inputs": [],
-      "outputs": [
-        { "name": "rate", "type": "uint256", "internalType": "uint256" }
-      ],
+      "outputs": [{ "name": "rate", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "getBtcBalance",
-      "inputs": [
-        { "name": "user", "type": "address", "internalType": "address" }
-      ],
-      "outputs": [
-        { "name": "btcBalance", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "user", "type": "address", "internalType": "address" }],
+      "outputs": [{ "name": "btcBalance", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "getBtcPrice",
       "inputs": [],
-      "outputs": [
-        { "name": "price", "type": "uint256", "internalType": "uint256" }
-      ],
+      "outputs": [{ "name": "price", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "getCollateralRatio",
-      "inputs": [
-        { "name": "user", "type": "address", "internalType": "address" }
-      ],
-      "outputs": [
-        { "name": "ratio", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "user", "type": "address", "internalType": "address" }],
+      "outputs": [{ "name": "ratio", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "getLiquidationThreshold",
       "inputs": [],
-      "outputs": [
-        { "name": "threshold", "type": "uint256", "internalType": "uint256" }
-      ],
+      "outputs": [{ "name": "threshold", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "getMinCollateralRatio",
       "inputs": [],
-      "outputs": [
-        { "name": "minRatio", "type": "uint256", "internalType": "uint256" }
-      ],
+      "outputs": [{ "name": "minRatio", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "getMusdDebt",
-      "inputs": [
-        { "name": "user", "type": "address", "internalType": "address" }
-      ],
-      "outputs": [
-        { "name": "musdDebt", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "user", "type": "address", "internalType": "address" }],
+      "outputs": [{ "name": "musdDebt", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
@@ -229,12 +195,8 @@
     {
       "type": "function",
       "name": "isPositionHealthy",
-      "inputs": [
-        { "name": "user", "type": "address", "internalType": "address" }
-      ],
-      "outputs": [
-        { "name": "isHealthy", "type": "bool", "internalType": "bool" }
-      ],
+      "inputs": [{ "name": "user", "type": "address", "internalType": "address" }],
+      "outputs": [{ "name": "isHealthy", "type": "bool", "internalType": "bool" }],
       "stateMutability": "view"
     },
     {
@@ -247,12 +209,8 @@
     {
       "type": "function",
       "name": "mintMore",
-      "inputs": [
-        { "name": "musdAmount", "type": "uint256", "internalType": "uint256" }
-      ],
-      "outputs": [
-        { "name": "success", "type": "bool", "internalType": "bool" }
-      ],
+      "inputs": [{ "name": "musdAmount", "type": "uint256", "internalType": "uint256" }],
+      "outputs": [{ "name": "success", "type": "bool", "internalType": "bool" }],
       "stateMutability": "nonpayable"
     },
     {
@@ -293,27 +251,21 @@
     {
       "type": "function",
       "name": "repayDebt",
-      "inputs": [
-        { "name": "musdAmount", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "musdAmount", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
       "name": "setMaxFeePercentage",
-      "inputs": [
-        { "name": "newMaxFee", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "newMaxFee", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
       "name": "setTargetLtv",
-      "inputs": [
-        { "name": "newLtv", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "newLtv", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -341,9 +293,7 @@
     {
       "type": "function",
       "name": "transferOwnership",
-      "inputs": [
-        { "name": "newOwner", "type": "address", "internalType": "address" }
-      ],
+      "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -586,16 +536,12 @@
     {
       "type": "error",
       "name": "AddressEmptyCode",
-      "inputs": [
-        { "name": "target", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "target", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "AddressInsufficientBalance",
-      "inputs": [
-        { "name": "account", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
     },
     { "type": "error", "name": "CollateralRatioTooLow", "inputs": [] },
     { "type": "error", "name": "EnforcedPause", "inputs": [] },
@@ -610,25 +556,19 @@
     {
       "type": "error",
       "name": "OwnableInvalidOwner",
-      "inputs": [
-        { "name": "owner", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "owner", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "OwnableUnauthorizedAccount",
-      "inputs": [
-        { "name": "account", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
     },
     { "type": "error", "name": "PriceFeedFailure", "inputs": [] },
     { "type": "error", "name": "ReentrancyGuardReentrantCall", "inputs": [] },
     {
       "type": "error",
       "name": "SafeERC20FailedOperation",
-      "inputs": [
-        { "name": "token", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "token", "type": "address", "internalType": "address" }]
     },
     { "type": "error", "name": "StalePriceData", "inputs": [] },
     { "type": "error", "name": "TroveNotExists", "inputs": [] },
@@ -783,16 +723,12 @@
           "type": "constructor"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "target", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "target", "type": "address" }],
           "type": "error",
           "name": "AddressEmptyCode"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "account", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
           "type": "error",
           "name": "AddressInsufficientBalance"
         },
@@ -807,16 +743,12 @@
         { "inputs": [], "type": "error", "name": "InvalidAmount" },
         { "inputs": [], "type": "error", "name": "InvalidLtv" },
         {
-          "inputs": [
-            { "internalType": "address", "name": "owner", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
           "type": "error",
           "name": "OwnableInvalidOwner"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "account", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
           "type": "error",
           "name": "OwnableUnauthorizedAccount"
         },
@@ -827,9 +759,7 @@
           "name": "ReentrancyGuardReentrantCall"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "token", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
           "type": "error",
           "name": "SafeERC20FailedOperation"
         },
@@ -1082,18 +1012,14 @@
           "stateMutability": "view",
           "type": "function",
           "name": "HINT_TRIALS",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "MUSD_TOKEN",
-          "outputs": [
-            { "internalType": "contract IERC20", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }]
         },
         {
           "inputs": [],
@@ -1113,9 +1039,7 @@
           "stateMutability": "view",
           "type": "function",
           "name": "PRICE_STALENESS_THRESHOLD",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
@@ -1135,9 +1059,7 @@
           "stateMutability": "view",
           "type": "function",
           "name": "WBTC_TOKEN",
-          "outputs": [
-            { "internalType": "contract IERC20", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }]
         },
         {
           "inputs": [
@@ -1203,14 +1125,10 @@
           "stateMutability": "view",
           "type": "function",
           "name": "getBorrowRate",
-          "outputs": [
-            { "internalType": "uint256", "name": "rate", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "rate", "type": "uint256" }]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "user", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getBtcBalance",
@@ -1227,20 +1145,14 @@
           "stateMutability": "view",
           "type": "function",
           "name": "getBtcPrice",
-          "outputs": [
-            { "internalType": "uint256", "name": "price", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "price", "type": "uint256" }]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "user", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getCollateralRatio",
-          "outputs": [
-            { "internalType": "uint256", "name": "ratio", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "ratio", "type": "uint256" }]
         },
         {
           "inputs": [],
@@ -1260,49 +1172,35 @@
           "stateMutability": "view",
           "type": "function",
           "name": "getMinCollateralRatio",
-          "outputs": [
-            { "internalType": "uint256", "name": "minRatio", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "minRatio", "type": "uint256" }]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "user", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getMusdDebt",
-          "outputs": [
-            { "internalType": "uint256", "name": "musdDebt", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "musdDebt", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "hintRandomSeed",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "user", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "isPositionHealthy",
-          "outputs": [
-            { "internalType": "bool", "name": "isHealthy", "type": "bool" }
-          ]
+          "outputs": [{ "internalType": "bool", "name": "isHealthy", "type": "bool" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "maxFeePercentage",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [
@@ -1315,18 +1213,14 @@
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "mintMore",
-          "outputs": [
-            { "internalType": "bool", "name": "success", "type": "bool" }
-          ]
+          "outputs": [{ "internalType": "bool", "name": "success", "type": "bool" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "owner",
-          "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
         },
         {
           "inputs": [],
@@ -1378,9 +1272,7 @@
           "name": "setMaxFeePercentage"
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "newLtv", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "newLtv", "type": "uint256" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "setTargetLtv"
@@ -1390,32 +1282,24 @@
           "stateMutability": "view",
           "type": "function",
           "name": "targetLtv",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "totalBtcDeposited",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "totalMusdMinted",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "newOwner", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "transferOwnership"
@@ -1427,26 +1311,18 @@
           "name": "unpause"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "userBtcCollateral",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "userMusdDebt",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         { "inputs": [], "stateMutability": "payable", "type": "receive" }
       ],

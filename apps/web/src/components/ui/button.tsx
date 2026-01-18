@@ -10,20 +10,14 @@ const buttonVariants = cva(
     variants: {
       variant: {
         // Brand variants
-        default:
-          "bg-lavanda text-btn-primary-fg hover:opacity-90 focus-visible:ring-lavanda",
-        primary:
-          "bg-lavanda text-btn-primary-fg hover:opacity-90 focus-visible:ring-lavanda",
-        accent:
-          "bg-accent text-btn-accent-fg hover:opacity-90 focus-visible:ring-accent",
+        default: "bg-lavanda text-btn-primary-fg hover:opacity-90 focus-visible:ring-lavanda",
+        primary: "bg-lavanda text-btn-primary-fg hover:opacity-90 focus-visible:ring-lavanda",
+        accent: "bg-accent text-btn-accent-fg hover:opacity-90 focus-visible:ring-accent",
 
         // Semantic variants
-        success:
-          "bg-success text-white hover:opacity-90 focus-visible:ring-success",
-        destructive:
-          "bg-error text-white hover:opacity-90 focus-visible:ring-error",
-        warning:
-          "bg-warning text-white hover:opacity-90 focus-visible:ring-warning",
+        success: "bg-success text-white hover:opacity-90 focus-visible:ring-success",
+        destructive: "bg-error text-white hover:opacity-90 focus-visible:ring-error",
+        warning: "bg-warning text-white hover:opacity-90 focus-visible:ring-warning",
 
         // Utility variants
         outline:
@@ -48,7 +42,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 export interface ButtonProps
@@ -59,19 +53,7 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      className,
-      variant,
-      size,
-      asChild = false,
-      loading,
-      children,
-      disabled,
-      ...props
-    },
-    ref,
-  ) => {
+  ({ className, variant, size, asChild = false, loading, children, disabled, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
@@ -82,7 +64,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {loading && (
           <svg
-            className="animate-spin -ml-1 mr-2 h-4 w-4"
+            className="-ml-1 mr-2 h-4 w-4 animate-spin"
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 24 24"
@@ -107,7 +89,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {children}
       </Comp>
     );
-  },
+  }
 );
 Button.displayName = "Button";
 

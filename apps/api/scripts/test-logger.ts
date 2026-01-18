@@ -36,7 +36,7 @@ async function testLogger() {
       ip: "192.168.1.1",
       timestamp: new Date().toISOString(),
     },
-    "User login event",
+    "User login event"
   );
 
   await wait(100);
@@ -56,7 +56,7 @@ async function testLogger() {
       },
       publicData: "This will be visible",
     },
-    "Sensitive data test (password, apiKey, tokens should be [REDACTED])",
+    "Sensitive data test (password, apiKey, tokens should be [REDACTED])"
   );
 
   await wait(100);
@@ -89,7 +89,7 @@ async function testLogger() {
           retries: 3,
         },
       },
-      "Error processing payment",
+      "Error processing payment"
     );
   }
 
@@ -109,7 +109,7 @@ async function testLogger() {
       query: "SELECT * FROM users WHERE id = ?",
       recordsReturned: 1,
     },
-    "Database query completed",
+    "Database query completed"
   );
 
   await wait(100);
@@ -134,7 +134,7 @@ async function testLogger() {
         blockNumber: 12345678,
       },
     },
-    "New pool created",
+    "New pool created"
   );
 
   await wait(100);
@@ -164,15 +164,13 @@ async function testLogger() {
         remaining: 5,
       },
     },
-    "Approaching rate limit threshold",
+    "Approaching rate limit threshold"
   );
 
   await wait(100);
 
   console.log("\n=== Logger Test Complete ===\n");
-  console.log(
-    "Note: password, apiKey, token, and refreshToken should appear as [REDACTED]",
-  );
+  console.log("Note: password, apiKey, token, and refreshToken should appear as [REDACTED]");
   console.log("Run with LOG_LEVEL=trace to see trace messages");
   console.log("Run with LOG_LEVEL=error to see only errors and fatals");
 }

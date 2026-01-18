@@ -7,12 +7,7 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Sheet,
-  SheetContent,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import { SmartConnectButton } from "@/components/wallet/smart-connect-button";
 
 export function Header() {
@@ -34,9 +29,7 @@ export function Header() {
             className="h-10 w-10"
             priority
           />
-          <span className="text-2xl font-bold hidden sm:inline">
-            KhipuVault
-          </span>
+          <span className="hidden text-2xl font-bold sm:inline">KhipuVault</span>
         </Link>
 
         <div className="flex items-center gap-3">
@@ -53,19 +46,12 @@ export function Header() {
 
           <Sheet>
             <SheetTrigger asChild className="md:hidden">
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="Open navigation menu"
-              >
+              <Button variant="ghost" size="icon" aria-label="Open navigation menu">
                 <Menu className="h-6 w-6" />
                 <span className="sr-only">Open menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent
-              side="right"
-              className="bg-background border-l-primary/20"
-            >
+            <SheetContent side="right" className="border-l-primary/20 bg-background">
               <VisuallyHidden.Root>
                 <SheetTitle>Navigation Menu</SheetTitle>
               </VisuallyHidden.Root>

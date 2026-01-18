@@ -689,9 +689,7 @@ Multi-chain: wagmi's multi-chain support built-in
 </div>
 
 <!-- Error alerts -->
-<div role="alert" aria-live="assertive">
-  Transaction failed: Insufficient gas
-</div>
+<div role="alert" aria-live="assertive">Transaction failed: Insufficient gas</div>
 ```
 
 **Accessible Verification:**
@@ -1170,7 +1168,7 @@ Desktop:  Full sidebar (always visible)
 **Dashboard Grid Example:**
 
 ```jsx
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
   <PositionCard />
   <PositionCard />
   <PositionCard />
@@ -1180,7 +1178,7 @@ Desktop:  Full sidebar (always visible)
 **Hero Section Grid:**
 
 ```jsx
-<div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
+<div className="grid grid-cols-1 gap-12 lg:grid-cols-2">
   <div className="space-y-6">{/* Left: Content */}</div>
   <div>{/* Right: Visual/Form */}</div>
 </div>
@@ -1189,7 +1187,7 @@ Desktop:  Full sidebar (always visible)
 **Stats Grid (Common Pattern):**
 
 ```jsx
-<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
   <StatCard label="TVL" value="$123M" />
   <StatCard label="APY" value="5.67%" />
   <StatCard label="Users" value="45.2K" />
@@ -1273,7 +1271,7 @@ function DepositButton() {
           Transaction submitted
           <a href={`https://explorer.com/tx/${hash}`}>View on Explorer</a>
         </div>,
-        { id: toastId },
+        { id: toastId }
       );
 
       // Step 4-5: Handled by useWaitForTransactionReceipt
@@ -1314,7 +1312,7 @@ function DepositButton() {
 <div className="space-y-2">
   {/* Primary Balance */}
   <div className="flex items-center justify-between">
-    <span className="text-sm text-muted-foreground">Total Balance</span>
+    <span className="text-muted-foreground text-sm">Total Balance</span>
     <Button variant="ghost" size="sm" onClick={refetch}>
       <RefreshIcon className={cn(isRefetching && "animate-spin")} />
     </Button>
@@ -1324,12 +1322,8 @@ function DepositButton() {
     <Skeleton className="h-10 w-48" />
   ) : (
     <div className="space-y-1">
-      <p className="text-4xl font-bold tabular-nums">
-        {formatNumber(balance)} USDC
-      </p>
-      <p className="text-sm text-muted-foreground">
-        ≈ ${formatCurrency(balance * usdcPrice)}
-      </p>
+      <p className="text-4xl font-bold tabular-nums">{formatNumber(balance)} USDC</p>
+      <p className="text-muted-foreground text-sm">≈ ${formatCurrency(balance * usdcPrice)}</p>
     </div>
   )}
 
@@ -1354,9 +1348,7 @@ function DepositButton() {
       APY
     </Badge>
   </div>
-  <p className="text-xs text-muted-foreground">
-    Variable rate · Updated 5m ago
-  </p>
+  <p className="text-muted-foreground text-xs">Variable rate · Updated 5m ago</p>
 </div>
 ```
 
@@ -1388,10 +1380,7 @@ function DepositButton() {
   </DropdownMenuTrigger>
   <DropdownMenuContent>
     {supportedNetworks.map((network) => (
-      <DropdownMenuItem
-        key={network.id}
-        onClick={() => switchNetwork(network.id)}
-      >
+      <DropdownMenuItem key={network.id} onClick={() => switchNetwork(network.id)}>
         <NetworkIcon />
         {network.name}
         {network.id === currentNetwork.id && <CheckIcon />}
@@ -1408,9 +1397,7 @@ function DepositButton() {
     <Alert variant="destructive">
       <AlertTriangle />
       <AlertTitle>Wrong Network</AlertTitle>
-      <AlertDescription>
-        Please switch to {SUPPORTED_NETWORK.name} to continue.
-      </AlertDescription>
+      <AlertDescription>Please switch to {SUPPORTED_NETWORK.name} to continue.</AlertDescription>
     </Alert>
   );
 }
@@ -1462,7 +1449,7 @@ function DepositButton() {
   {transactions.map((tx) => (
     <Card key={tx.hash}>
       <CardHeader>
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <Badge>{tx.type}</Badge>
           <StatusBadge status={tx.status} />
         </div>
@@ -1478,7 +1465,7 @@ function DepositButton() {
           <span className="text-muted-foreground">Date</span>
           <span>{formatDate(tx.timestamp)}</span>
         </div>
-        <div className="flex justify-between items-center">
+        <div className="flex items-center justify-between">
           <span className="text-muted-foreground">Tx Hash</span>
           <a href={getExplorerUrl(tx.hash)} className="text-blue-500">
             {shortenHash(tx.hash)}
@@ -1623,27 +1610,27 @@ import { motion } from 'framer-motion'
 **Example:**
 
 ```jsx
-<div className="space-y-4 p-6 border rounded-lg">
+<div className="space-y-4 rounded-lg border p-6">
   <h3 className="font-semibold">Security & Trust</h3>
 
   <div className="space-y-2">
     <div className="flex items-center justify-between">
-      <span className="text-sm text-muted-foreground">Contract</span>
-      <a href={etherscanUrl} className="text-blue-500 text-sm">
+      <span className="text-muted-foreground text-sm">Contract</span>
+      <a href={etherscanUrl} className="text-sm text-blue-500">
         {shortenAddress(CONTRACT_ADDRESS)}
       </a>
     </div>
 
     <div className="flex items-center justify-between">
-      <span className="text-sm text-muted-foreground">Audit</span>
-      <a href={auditUrl} className="text-blue-500 text-sm">
+      <span className="text-muted-foreground text-sm">Audit</span>
+      <a href={auditUrl} className="text-sm text-blue-500">
         CertiK (Dec 2024) ↗
       </a>
     </div>
 
     <div className="flex items-center justify-between">
-      <span className="text-sm text-muted-foreground">Code</span>
-      <a href={githubUrl} className="text-blue-500 text-sm">
+      <span className="text-muted-foreground text-sm">Code</span>
+      <a href={githubUrl} className="text-sm text-blue-500">
         GitHub ↗
       </a>
     </div>
@@ -1670,8 +1657,7 @@ import { motion } from 'framer-motion'
       <AlertTriangle />
       <AlertTitle>High Risk</AlertTitle>
       <AlertDescription>
-        This pool offers unusually high returns. Please understand the risks
-        before depositing.
+        This pool offers unusually high returns. Please understand the risks before depositing.
         <a href="/risks" className="text-blue-500">
           Learn more
         </a>
@@ -1694,7 +1680,7 @@ import { motion } from 'framer-motion'
 **Example:**
 
 ```jsx
-<div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+<div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
   <StatCard label="Total Value Locked" value="$123.4M" icon={<Lock />} />
   <StatCard label="Active Users" value="45,234" icon={<Users />} />
   <StatCard label="24h Volume" value="$12.3M" icon={<Activity />} />
@@ -1764,9 +1750,7 @@ import { motion } from 'framer-motion'
 
     <AlertDialogFooter>
       <AlertDialogCancel>Cancel</AlertDialogCancel>
-      <AlertDialogAction onClick={handleWithdraw}>
-        Confirm Withdrawal
-      </AlertDialogAction>
+      <AlertDialogAction onClick={handleWithdraw}>Confirm Withdrawal</AlertDialogAction>
     </AlertDialogFooter>
   </AlertDialogContent>
 </AlertDialog>
@@ -1780,8 +1764,8 @@ import { motion } from 'framer-motion'
 
 ```jsx
 <div className="flex flex-col items-center justify-center py-12 text-center">
-  <EmptyIcon className="h-24 w-24 text-muted-foreground mb-4" />
-  <h3 className="text-lg font-semibold mb-2">No Deposits Yet</h3>
+  <EmptyIcon className="text-muted-foreground mb-4 h-24 w-24" />
+  <h3 className="mb-2 text-lg font-semibold">No Deposits Yet</h3>
   <p className="text-muted-foreground mb-6 max-w-md">
     Start earning yield on your crypto by making your first deposit.
   </p>
@@ -1797,7 +1781,7 @@ import { motion } from 'framer-motion'
 <div className="space-y-4">
   {/* Search */}
   <div className="relative">
-    <SearchIcon className="absolute left-3 top-1/2 transform -translate-y-1/2" />
+    <SearchIcon className="absolute top-1/2 left-3 -translate-y-1/2 transform" />
     <Input
       placeholder="Search pools..."
       value={search}
@@ -1807,11 +1791,8 @@ import { motion } from 'framer-motion'
   </div>
 
   {/* Filters */}
-  <div className="flex gap-2 flex-wrap">
-    <Button
-      variant={filter === "all" ? "default" : "outline"}
-      onClick={() => setFilter("all")}
-    >
+  <div className="flex flex-wrap gap-2">
+    <Button variant={filter === "all" ? "default" : "outline"} onClick={() => setFilter("all")}>
       All Pools
     </Button>
     <Button

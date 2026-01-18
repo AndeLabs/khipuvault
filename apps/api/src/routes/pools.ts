@@ -31,7 +31,7 @@ router.get(
   asyncHandler(async (_req, res) => {
     const pools = await poolsService.getAllPools();
     sendSuccess(res, pools);
-  }),
+  })
 );
 
 // IMPORTANT: /address routes must come BEFORE /:poolId to prevent routing conflicts
@@ -44,7 +44,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const pool = await poolsService.getPoolByAddress(req.params.address);
     sendSuccess(res, pool);
-  }),
+  })
 );
 
 // GET /api/pools/address/:address/users
@@ -54,7 +54,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const users = await poolsService.getPoolUsers(req.params.address);
     sendSuccess(res, users);
-  }),
+  })
 );
 
 // GET /api/pools/:poolId
@@ -64,7 +64,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const pool = await poolsService.getPoolById(req.params.poolId);
     sendSuccess(res, pool);
-  }),
+  })
 );
 
 // GET /api/pools/:poolId/analytics
@@ -73,12 +73,9 @@ router.get(
   validate(poolAnalyticsSchema),
   asyncHandler(async (req, res) => {
     const { days = 30 } = req.query;
-    const analytics = await poolsService.getPoolAnalytics(
-      req.params.poolId,
-      Number(days),
-    );
+    const analytics = await poolsService.getPoolAnalytics(req.params.poolId, Number(days));
     sendSuccess(res, analytics);
-  }),
+  })
 );
 
 // POST /api/pools/address/:address/refresh
@@ -92,7 +89,7 @@ router.post(
   asyncHandler(async (req, res) => {
     const pool = await poolsService.updatePoolStats(req.params.address);
     sendSuccess(res, pool);
-  }),
+  })
 );
 
 export default router;

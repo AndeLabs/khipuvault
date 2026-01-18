@@ -66,7 +66,7 @@ interface ValidationResult {
 function validateWithdrawal(
   amountStr: string,
   poolInfo: PoolInfo | null | undefined,
-  memberInfo: MemberInfo | null | undefined,
+  memberInfo: MemberInfo | null | undefined
 ): ValidationResult {
   const defaultResult: ValidationResult = {
     isValid: false,
@@ -129,7 +129,7 @@ function validateWithdrawal(
  */
 function calculateMaxWithdrawable(
   poolInfo: PoolInfo | null | undefined,
-  memberInfo: MemberInfo | null | undefined,
+  memberInfo: MemberInfo | null | undefined
 ): bigint {
   if (!poolInfo || !memberInfo) return BigInt(0);
 
@@ -155,24 +155,19 @@ export function WithdrawPartialModal({
   const [amount, setAmount] = React.useState("");
 
   // Hooks
-  const {
-    withdrawPartial,
-    state,
-    error: txError,
-    reset,
-  } = useWithdrawPartial();
+  const { withdrawPartial, state, error: txError, reset } = useWithdrawPartial();
   const { poolInfo } = usePoolInfo(poolId ?? 0);
   const { memberInfo } = useMemberInfo(poolId ?? 0);
 
   // Validation
   const validation = React.useMemo(
     () => validateWithdrawal(amount, poolInfo, memberInfo),
-    [amount, poolInfo, memberInfo],
+    [amount, poolInfo, memberInfo]
   );
 
   const maxWithdrawable = React.useMemo(
     () => calculateMaxWithdrawable(poolInfo, memberInfo),
-    [poolInfo, memberInfo],
+    [poolInfo, memberInfo]
   );
 
   // Reset form when modal opens/closes
@@ -218,17 +213,13 @@ export function WithdrawPartialModal({
       toast({
         variant: "destructive",
         title: "Withdrawal Failed",
-        description:
-          err instanceof Error
-            ? err.message
-            : "Failed to withdraw. Please try again.",
+        description: err instanceof Error ? err.message : "Failed to withdraw. Please try again.",
       });
     }
   };
 
   const isProcessing = state === "executing" || state === "processing";
-  const canWithdraw =
-    validation.isValid && !isProcessing && maxWithdrawable > BigInt(0);
+  const canWithdraw = validation.isValid && !isProcessing && maxWithdrawable > BigInt(0);
 
   if (!poolId || !memberInfo || !poolInfo) return null;
 
@@ -255,7 +246,7 @@ export function WithdrawPartialModal({
           {/* Current Balance */}
           <div className="space-y-2">
             <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground flex items-center gap-1.5">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
                 <Bitcoin className="h-3.5 w-3.5" />
                 Your Current Balance
               </span>
@@ -304,17 +295,13 @@ export function WithdrawPartialModal({
                 Max
               </Button>
             </div>
-            {validation.error && (
-              <p className="text-xs text-destructive">{validation.error}</p>
-            )}
+            {validation.error && <p className="text-xs text-destructive">{validation.error}</p>}
           </div>
 
           {/* Preview */}
           {validation.isValid && (
-            <div className="rounded-lg border border-primary/20 bg-primary/5 p-3 space-y-2">
-              <p className="text-xs font-medium text-primary">
-                After Withdrawal
-              </p>
+            <div className="space-y-2 rounded-lg border border-primary/20 bg-primary/5 p-3">
+              <p className="text-xs font-medium text-primary">After Withdrawal</p>
               <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Remaining Balance</span>
                 <span className="font-mono font-semibold">
@@ -329,9 +316,8 @@ export function WithdrawPartialModal({
             <Alert>
               <AlertTriangle className="h-4 w-4" />
               <AlertDescription className="text-sm">
-                Your current balance equals the pool minimum. You cannot make a
-                partial withdrawal. Use &quot;Leave Pool&quot; to withdraw all
-                funds.
+                Your current balance equals the pool minimum. You cannot make a partial withdrawal.
+                Use &quot;Leave Pool&quot; to withdraw all funds.
               </AlertDescription>
             </Alert>
           )}
@@ -346,20 +332,14 @@ export function WithdrawPartialModal({
         </div>
 
         <DialogFooter>
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isProcessing}
-          >
+          <Button variant="outline" onClick={handleClose} disabled={isProcessing}>
             Cancel
           </Button>
           <Button onClick={handleWithdraw} disabled={!canWithdraw}>
             {isProcessing ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {state === "executing"
-                  ? "Confirm in Wallet..."
-                  : "Withdrawing..."}
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {state === "executing" ? "Confirm in Wallet..." : "Withdrawing..."}
               </>
             ) : (
               "Withdraw"

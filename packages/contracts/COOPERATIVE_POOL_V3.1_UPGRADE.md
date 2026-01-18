@@ -155,13 +155,7 @@ const withdrawPartial = async (poolId: number, btcAmount: string) => {
 
     const amount = parseEther(btcAmount);
 
-    console.log(
-      "💸 Partial withdrawal from pool:",
-      poolId,
-      "amount:",
-      btcAmount,
-      "BTC",
-    );
+    console.log("💸 Partial withdrawal from pool:", poolId, "amount:", btcAmount, "BTC");
     setState("executing");
 
     write({

@@ -1,15 +1,19 @@
 import "dotenv/config";
+import compression from "compression";
 import cors from "cors";
 import express, { type Application } from "express";
 import helmet from "helmet";
 
 import { logger } from "./lib/logger";
+import { httpRequestDuration, httpRequestsTotal, activeConnections } from "./lib/metrics";
+import { initRedis, closeRedis } from "./lib/redis";
 import { errorHandler } from "./middleware/error-handler";
 import { notFoundHandler } from "./middleware/not-found";
 import {
   globalRateLimiter,
   speedLimiter,
   writeRateLimiter,
+  initRateLimitStore,
 } from "./middleware/rate-limit";
 import { requestLogger } from "./middleware/request-logger";
 import {
@@ -26,6 +30,7 @@ import analyticsRouter from "./routes/analytics";
 import authRouter from "./routes/auth";
 import healthRouter from "./routes/health";
 import lotteryRouter from "./routes/lottery";
+import metricsRouter from "./routes/metrics";
 import poolsRouter from "./routes/pools";
 import transactionsRouter from "./routes/transactions";
 import usersRouter from "./routes/users";
@@ -33,6 +38,32 @@ import usersRouter from "./routes/users";
 const app: Application = express();
 const PORT = process.env.PORT || 3001;
 const NODE_ENV = process.env.NODE_ENV || "development";
+
+// ===== STARTUP VALIDATION =====
+
+// Validate CORS_ORIGIN in production
+const corsOrigins =
+  process.env.CORS_ORIGIN?.split(",")
+    .map((o) => o.trim())
+    .filter(Boolean) || [];
+const isProduction = NODE_ENV === "production";
+
+if (isProduction && corsOrigins.length === 0) {
+  logger.warn("CORS_ORIGIN not set in production. All cross-origin requests will be blocked.");
+}
+
+if (isProduction) {
+  // Validate each origin is a valid URL
+  for (const origin of corsOrigins) {
+    try {
+      new URL(origin);
+    } catch {
+      logger.error({ origin }, "Invalid CORS origin URL. Must be a valid URL.");
+      throw new Error(`Invalid CORS_ORIGIN: ${origin}`);
+    }
+  }
+  logger.info({ corsOrigins }, "CORS origins validated");
+}
 
 // Trust proxy (required for rate limiting behind reverse proxy)
 app.set("trust proxy", 1);
@@ -58,17 +89,11 @@ app.use(
       includeSubDomains: true,
       preload: true,
     },
-  }),
+  })
 );
 app.use(securityHeaders);
 
 // 3. CORS configuration - Secure setup following best practices
-const corsOrigins =
-  process.env.CORS_ORIGIN?.split(",")
-    .map((o) => o.trim())
-    .filter(Boolean) || [];
-const isProduction = NODE_ENV === "production";
-
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -102,16 +127,11 @@ app.use(
     },
     credentials: true,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    allowedHeaders: [
-      "Content-Type",
-      "Authorization",
-      "X-Request-ID",
-      "X-API-Key",
-    ],
+    allowedHeaders: ["Content-Type", "Authorization", "X-Request-ID", "X-API-Key"],
     exposedHeaders: ["X-Request-ID", "RateLimit-Limit", "RateLimit-Remaining"],
     maxAge: 86400, // 24 hours
     optionsSuccessStatus: 200, // Legacy browser support
-  }),
+  })
 );
 
 // 4. Request logging with Pino
@@ -120,6 +140,44 @@ app.use(requestLogger);
 // 5. Body parsing with size limits
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
+
+// 5.5. Response compression (gzip/deflate)
+app.use(
+  compression({
+    level: 6, // Balanced compression level
+    threshold: 1024, // Only compress responses > 1KB
+    filter: (req, res) => {
+      // Don't compress if client doesn't accept it
+      if (req.headers["x-no-compression"]) {
+        return false;
+      }
+      // Fall back to standard filter function
+      return compression.filter(req, res);
+    },
+  })
+);
+
+// 5.6. Metrics middleware - track request duration
+app.use((req, res, next) => {
+  activeConnections.inc();
+  const start = Date.now();
+
+  res.on("finish", () => {
+    activeConnections.dec();
+    const duration = (Date.now() - start) / 1000;
+    const route = req.route?.path || req.path;
+    const labels = {
+      method: req.method,
+      route,
+      status_code: res.statusCode.toString(),
+    };
+
+    httpRequestDuration.observe(labels, duration);
+    httpRequestsTotal.inc(labels);
+  });
+
+  next();
+});
 
 // 6. Request size validation
 app.use(requestSizeLimiter("10mb"));
@@ -146,6 +204,9 @@ app.use(writeRateLimiter); // Extra limit for write operations
 // Health check (no rate limiting)
 app.use("/health", healthRouter);
 
+// Metrics endpoint (Prometheus format)
+app.use("/metrics", metricsRouter);
+
 // API routes
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
@@ -164,54 +225,82 @@ app.use(errorHandler);
 
 // ===== SERVER STARTUP =====
 
-const server = app.listen(PORT, () => {
-  logger.info(
-    {
-      port: PORT,
-      environment: NODE_ENV,
-      corsOrigins: corsOrigins.length > 0 ? corsOrigins : ["localhost (dev)"],
-      features: {
-        rateLimiting: true,
-        security: true,
-        logging: true,
-      },
-    },
-    "KhipuVault API Server started",
-  );
+// Initialize services before starting the server
+async function startServer() {
+  try {
+    // Initialize Redis for rate limiting and nonce storage
+    await initRedis();
+    await initRateLimitStore();
+    logger.info("Redis and rate limiting initialized");
+  } catch (error) {
+    logger.warn({ error }, "Redis initialization failed, using in-memory fallback");
+  }
 
-  logger.info(`Server listening on http://localhost:${PORT}`);
-});
+  const server = app.listen(PORT, () => {
+    logger.info(
+      {
+        port: PORT,
+        environment: NODE_ENV,
+        corsOrigins: corsOrigins.length > 0 ? corsOrigins : ["localhost (dev)"],
+        features: {
+          rateLimiting: true,
+          security: true,
+          logging: true,
+          redis: process.env.REDIS_URL ? "enabled" : "disabled",
+        },
+      },
+      "KhipuVault API Server started"
+    );
+
+    logger.info(`Server listening on http://localhost:${PORT}`);
+  });
+
+  return server;
+}
+
+// Start the server
+const serverPromise = startServer();
+let server: ReturnType<typeof app.listen>;
 
 // ===== REQUEST TIMEOUT PROTECTION =====
-// Protects against slowloris attacks and hung connections
+// Configure server timeouts after startup
 
-// Request timeout: 30 seconds for normal requests
-server.setTimeout(30000);
+serverPromise.then((s) => {
+  server = s;
 
-// Keep-alive timeout: Must be greater than load balancer's idle timeout
-// AWS ALB default is 60s, so we use 65s
-server.keepAliveTimeout = 65000;
+  // Protects against slowloris attacks and hung connections
+  // Request timeout: 30 seconds for normal requests
+  server.setTimeout(30000);
 
-// Headers timeout: Must be greater than keepAliveTimeout
-// Prevents attacks that send headers very slowly
-server.headersTimeout = 66000;
+  // Keep-alive timeout: Must be greater than load balancer's idle timeout
+  // AWS ALB default is 60s, so we use 65s
+  server.keepAliveTimeout = 65000;
+
+  // Headers timeout: Must be greater than keepAliveTimeout
+  // Prevents attacks that send headers very slowly
+  server.headersTimeout = 66000;
+});
 
 // Graceful shutdown handling
 const gracefulShutdown = async (signal: string) => {
-  logger.info(
-    { signal },
-    "Shutdown signal received, starting graceful shutdown",
-  );
+  logger.info({ signal }, "Shutdown signal received, starting graceful shutdown");
+
+  // Wait for server to be initialized
+  const srv = await serverPromise;
 
   // 1. Stop accepting new connections
-  server.close(async () => {
+  srv.close(async () => {
     try {
-      // 2. Shutdown cache service
+      // 2. Close Redis connection
+      await closeRedis();
+      logger.info("Redis connection closed");
+
+      // 3. Shutdown cache service
       const { cache } = await import("./lib/cache");
       cache.shutdown();
       logger.info("Cache service shutdown complete");
 
-      // 3. Disconnect Prisma
+      // 4. Disconnect Prisma
       const { prisma } = await import("@khipu/database");
       await prisma.$disconnect();
       logger.info("Database connection closed");
@@ -239,7 +328,7 @@ process.on("uncaughtException", (error) => {
   // Use 'err' key so pino serializer properly extracts error properties
   logger.fatal(
     { err: error, errorMessage: error.message, errorStack: error.stack },
-    "Uncaught Exception detected",
+    "Uncaught Exception detected"
   );
   void gracefulShutdown("UNCAUGHT_EXCEPTION");
 });
@@ -252,7 +341,7 @@ process.on("unhandledRejection", (reason, promise) => {
       : { reason };
   logger.fatal(
     { ...errorInfo, promise: String(promise) },
-    "Unhandled Promise Rejection detected - initiating shutdown",
+    "Unhandled Promise Rejection detected - initiating shutdown"
   );
   void gracefulShutdown("UNHANDLED_REJECTION");
 });

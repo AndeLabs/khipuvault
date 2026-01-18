@@ -67,7 +67,7 @@ model Deposit {
   // Pool info - denormalized for performance
   poolType    PoolType
   poolId      String? // For cooperative/lottery/rotating pools
-  pool        Pool?   @relation(fields: [poolId], references: [id])
+  pool        Pool?   @relation(fields: [poolId], references: [id], onDelete: SetNull)
   poolAddress String // Denormalized for fast queries
 
   // Transaction details
@@ -92,6 +92,7 @@ model Deposit {
   @@unique([txHash, logIndex])
   @@index([userId])
   @@index([userAddress])
+  @@index([poolId])
   @@index([poolAddress])
   @@index([poolType])
   @@index([type])
@@ -116,19 +117,19 @@ model Pool {
   name            String
   description     String?
 
-  // Financial metrics
-  tvl              String @default("0") // Total Value Locked (BigInt as string)
-  apr              Float  @default(0) // Annual Percentage Rate
-  apy              Float? // Annual Percentage Yield (compounded)
-  totalUsers       Int    @default(0)
-  totalDeposits    Int    @default(0)
-  totalWithdrawals Int    @default(0)
+  // Financial metrics - Using Decimal for precision
+  tvl              String  @default("0") // Total Value Locked (BigInt as string)
+  apr              Decimal @default(0) @db.Decimal(18, 8) // Annual Percentage Rate
+  apy              Decimal? @db.Decimal(18, 8) // Annual Percentage Yield (compounded)
+  totalUsers       Int     @default(0)
+  totalDeposits    Int     @default(0)
+  totalWithdrawals Int     @default(0)
 
-  // Pool configuration
+  // Pool configuration - Using Decimal for fee precision
   minDeposit  String? // Minimum deposit amount
   maxDeposit  String? // Maximum deposit amount
-  depositFee  Float   @default(0)
-  withdrawFee Float   @default(0)
+  depositFee  Decimal @default(0) @db.Decimal(8, 6) // Fee percentage (e.g., 0.001 = 0.1%)
+  withdrawFee Decimal @default(0) @db.Decimal(8, 6) // Fee percentage
 
   // Status and health
   status      PoolStatus @default(ACTIVE)
@@ -158,12 +159,12 @@ model PoolAnalytics {
   poolId String
   pool   Pool   @relation(fields: [poolId], references: [id], onDelete: Cascade)
 
-  // Snapshot data
+  // Snapshot data - Using Decimal for financial precision
   timestamp        DateTime @default(now())
   date             DateTime // Day aggregation
   tvl              String // BigInt as string
-  apr              Float
-  apy              Float?
+  apr              Decimal  @db.Decimal(18, 8)
+  apy              Decimal? @db.Decimal(18, 8)
   totalDeposits    Int
   totalWithdrawals Int
   totalUsers       Int
@@ -200,6 +201,7 @@ model Notification {
 
   read      Boolean  @default(false)
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([read])

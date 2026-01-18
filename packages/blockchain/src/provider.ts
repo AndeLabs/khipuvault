@@ -1,11 +1,6 @@
 import { ethers } from "ethers";
 import { retryWithBackoff } from "./utils/retry";
-import {
-  getRpcUrl,
-  getAllRpcUrls,
-  getChainId,
-  getNetworkName,
-} from "@khipu/shared";
+import { getRpcUrl, getAllRpcUrls, getChainId, getNetworkName } from "@khipu/shared";
 
 // For backward compatibility - these will be set from environment
 export const MEZO_TESTNET_RPC = getRpcUrl();
@@ -37,7 +32,7 @@ class ResilientProvider {
 
   constructor(
     private rpcUrl: string = process.env.RPC_URL || getRpcUrl(),
-    private chainId: number = getChainId(),
+    private chainId: number = getChainId()
   ) {
     this.initializeProvider();
     this.startHealthCheck();
@@ -73,8 +68,7 @@ class ResilientProvider {
     } catch (error) {
       console.error("❌ Failed to initialize provider:", error);
       this.health.isHealthy = false;
-      this.health.lastError =
-        error instanceof Error ? error.message : "Unknown error";
+      this.health.lastError = error instanceof Error ? error.message : "Unknown error";
       throw error;
     }
   }
@@ -128,7 +122,7 @@ class ResilientProvider {
       // Exponential backoff for next retry
       const delay = Math.min(
         INITIAL_RETRY_DELAY * Math.pow(2, this.health.consecutiveFailures),
-        60000, // Max 1 minute
+        60000 // Max 1 minute
       );
 
       setTimeout(() => this.reconnect(), delay);
@@ -158,8 +152,7 @@ class ResilientProvider {
       console.error("❌ Health check failed:", error);
       this.health.consecutiveFailures++;
       this.health.isHealthy = false;
-      this.health.lastError =
-        error instanceof Error ? error.message : "Health check failed";
+      this.health.lastError = error instanceof Error ? error.message : "Health check failed";
 
       // Trigger reconnection if health check fails multiple times
       if (this.health.consecutiveFailures >= 3) {
@@ -253,10 +246,7 @@ export async function getCurrentBlock(): Promise<number> {
 
 // Block timestamp cache to reduce RPC calls
 // Key: blockNumber, Value: { timestamp, cachedAt }
-const blockTimestampCache = new Map<
-  number,
-  { timestamp: number; cachedAt: number }
->();
+const blockTimestampCache = new Map<number, { timestamp: number; cachedAt: number }>();
 const CACHE_MAX_SIZE = 10000;
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
@@ -279,7 +269,7 @@ function cleanTimestampCache(): void {
   // If still at capacity after TTL cleanup, remove oldest 10%
   if (blockTimestampCache.size >= CACHE_MAX_SIZE) {
     const entries = Array.from(blockTimestampCache.entries()).sort(
-      (a, b) => a[1].cachedAt - b[1].cachedAt,
+      (a, b) => a[1].cachedAt - b[1].cachedAt
     );
     const toDelete = Math.floor(entries.length * 0.1);
     for (let i = 0; i < toDelete; i++) {
@@ -308,9 +298,7 @@ export async function getBlockTimestamp(blockNumber: number): Promise<number> {
  * Get block timestamp with caching to reduce RPC calls
  * Use this for batch operations where same block is queried multiple times
  */
-export async function getBlockTimestampCached(
-  blockNumber: number,
-): Promise<number> {
+export async function getBlockTimestampCached(blockNumber: number): Promise<number> {
   // Check cache first
   const cached = blockTimestampCache.get(blockNumber);
   if (cached && Date.now() - cached.cachedAt < CACHE_TTL_MS) {
@@ -333,9 +321,7 @@ export async function getBlockTimestampCached(
 /**
  * Get block with full details and retry logic
  */
-export async function getBlock(
-  blockNumber: number,
-): Promise<ethers.Block | null> {
+export async function getBlock(blockNumber: number): Promise<ethers.Block | null> {
   return retryWithBackoff(async () => {
     const provider = getProvider();
     return await provider.getBlock(blockNumber);

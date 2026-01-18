@@ -41,9 +41,7 @@ export const MEZO_HINT_HELPERS_ABI = Array.isArray(HintHelpersABI)
 export const MEZO_SORTED_TROVES_ABI = Array.isArray(SortedTrovesABI)
   ? SortedTrovesABI
   : (SortedTrovesABI as any).default || SortedTrovesABI;
-export const MEZO_MUSD_ABI = Array.isArray(MUSDABI)
-  ? MUSDABI
-  : (MUSDABI as any).default || MUSDABI;
+export const MEZO_MUSD_ABI = Array.isArray(MUSDABI) ? MUSDABI : (MUSDABI as any).default || MUSDABI;
 export const MEZO_STABILITY_POOL_ABI = Array.isArray(StabilityPoolABI)
   ? StabilityPoolABI
   : (StabilityPoolABI as any).default || StabilityPoolABI;
@@ -75,9 +73,7 @@ export const MEZO_TESTNET_ADDRESSES = {
 /**
  * Get contract address for a given key
  */
-export function getContractAddress(
-  key: keyof typeof MEZO_TESTNET_ADDRESSES,
-): string {
+export function getContractAddress(key: keyof typeof MEZO_TESTNET_ADDRESSES): string {
   const address = MEZO_TESTNET_ADDRESSES[key];
   if (address === "0x0000000000000000000000000000000000000000") {
     if (process.env.NODE_ENV === "development") {

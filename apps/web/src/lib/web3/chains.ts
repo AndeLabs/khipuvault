@@ -144,10 +144,7 @@ export function isSupportedChain(chainId: number): chainId is SupportedChainId {
  * @param address - Address to view
  * @returns Explorer URL or null
  */
-export function getExplorerAddressUrl(
-  chainId: number,
-  address: string,
-): string | null {
+export function getExplorerAddressUrl(chainId: number, address: string): string | null {
   const chain = getChainConfig(chainId);
   if (!chain?.blockExplorers?.default) {
     return null;
@@ -161,10 +158,7 @@ export function getExplorerAddressUrl(
  * @param txHash - Transaction hash
  * @returns Explorer URL or null
  */
-export function getExplorerTxUrl(
-  chainId: number,
-  txHash: string,
-): string | null {
+export function getExplorerTxUrl(chainId: number, txHash: string): string | null {
   const chain = getChainConfig(chainId);
   if (!chain?.blockExplorers?.default) {
     return null;

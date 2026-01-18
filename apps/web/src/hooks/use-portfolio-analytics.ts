@@ -13,10 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
-import {
-  useUserTransactionHistory,
-  type Transaction,
-} from "./web3/use-user-transaction-history";
+import { useUserTransactionHistory, type Transaction } from "./web3/use-user-transaction-history";
 
 export interface PortfolioChange {
   change24h: number;
@@ -76,15 +73,13 @@ export function usePortfolioChanges(currentValue: number): PortfolioChange {
         const netDeposits24h = calculateNetDepositsAfter(oneDayAgo);
         const value24hAgo = currentValue - netDeposits24h;
         const change24h = currentValue - value24hAgo;
-        const percentChange24h =
-          value24hAgo > 0 ? (change24h / value24hAgo) * 100 : 0;
+        const percentChange24h = value24hAgo > 0 ? (change24h / value24hAgo) * 100 : 0;
 
         // Value 7d ago = current value - net deposits in last 7 days
         const netDeposits7d = calculateNetDepositsAfter(sevenDaysAgo);
         const value7dAgo = currentValue - netDeposits7d;
         const change7d = currentValue - value7dAgo;
-        const percentChange7d =
-          value7dAgo > 0 ? (change7d / value7dAgo) * 100 : 0;
+        const percentChange7d = value7dAgo > 0 ? (change7d / value7dAgo) * 100 : 0;
 
         return {
           change24h,
@@ -119,15 +114,11 @@ export function useRecentActivities(limit: number = 5): ActivityItem[] {
       queryFn: (): ActivityItem[] => {
         return transactions.slice(0, limit).map((tx: Transaction) => ({
           id: tx.hash,
-          type: (tx.type === "compound"
-            ? "claim"
-            : tx.type) as ActivityItem["type"], // Map compound to claim for UI
+          type: (tx.type === "compound" ? "claim" : tx.type) as ActivityItem["type"], // Map compound to claim for UI
           amount: formatUnits(tx.amount, 18),
           timestamp: tx.timestamp * 1000, // Convert to milliseconds for JS Date
           txHash: tx.hash,
-          status: (tx.status === "failed"
-            ? "error"
-            : tx.status) as ActivityItem["status"],
+          status: (tx.status === "failed" ? "error" : tx.status) as ActivityItem["status"],
         }));
       },
       enabled: transactions.length > 0,

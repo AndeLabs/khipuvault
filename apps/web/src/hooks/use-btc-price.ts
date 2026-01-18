@@ -21,7 +21,7 @@ async function fetchBTCPrice(): Promise<number> {
         Accept: "application/json",
       },
       next: { revalidate: 60 }, // Cache for 60 seconds
-    },
+    }
   );
 
   if (!response.ok) {

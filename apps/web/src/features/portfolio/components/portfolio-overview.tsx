@@ -39,7 +39,7 @@ export function PortfolioOverview({
         {[...Array(4)].map((_, _i) => (
           <div
             key={`skeleton-${_i}`}
-            className="h-32 bg-surface-elevated animate-shimmer rounded-lg"
+            className="h-32 animate-shimmer rounded-lg bg-surface-elevated"
           />
         ))}
       </div>
@@ -51,7 +51,7 @@ export function PortfolioOverview({
       {/* Total Portfolio Value */}
       <Card variant="surface" hover="glow-lavanda" className="md:col-span-2">
         <CardHeader>
-          <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
             <TrendingUp className="h-4 w-4" />
             Total Portfolio Value
           </CardTitle>
@@ -75,8 +75,8 @@ export function PortfolioOverview({
 
       {/* Total Yields */}
       <StatCard>
-        <div className="flex items-center gap-3 mb-3">
-          <div className="h-10 w-10 rounded-full bg-success/20 flex items-center justify-center">
+        <div className="mb-3 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/20">
             <Award className="h-5 w-5 text-success" />
           </div>
         </div>
@@ -88,8 +88,8 @@ export function PortfolioOverview({
 
       {/* Active Positions */}
       <StatCard>
-        <div className="flex items-center gap-3 mb-3">
-          <div className="h-10 w-10 rounded-full bg-lavanda/20 flex items-center justify-center">
+        <div className="mb-3 flex items-center gap-3">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lavanda/20">
             <DollarSign className="h-5 w-5 text-lavanda" />
           </div>
         </div>
@@ -108,7 +108,7 @@ export function PortfolioOverview({
       {/* Individual Savings */}
       <Card variant="surface" className="border-l-4 border-l-lavanda">
         <CardContent className="pt-6">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="mb-3 flex items-center gap-2">
             <Wallet className="h-4 w-4 text-lavanda" />
             <StatLabel>Individual Savings</StatLabel>
           </div>
@@ -119,7 +119,7 @@ export function PortfolioOverview({
       {/* Cooperative Savings */}
       <Card variant="surface" className="border-l-4 border-l-accent">
         <CardContent className="pt-6">
-          <div className="flex items-center gap-2 mb-3">
+          <div className="mb-3 flex items-center gap-2">
             <Users className="h-4 w-4 text-accent" />
             <StatLabel>Cooperative Pools</StatLabel>
           </div>

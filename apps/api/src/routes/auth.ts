@@ -50,7 +50,7 @@ router.get(
     res.json({
       nonce,
     });
-  }),
+  })
 );
 
 /**
@@ -87,11 +87,7 @@ router.post(
     }
 
     if (!verification.address) {
-      throw new AppError(
-        500,
-        "Verification succeeded but no address returned",
-        true,
-      );
+      throw new AppError(500, "Verification succeeded but no address returned", true);
     }
 
     // Generate JWT token
@@ -105,7 +101,7 @@ router.post(
       address: verification.address.toLowerCase(),
       expiresIn,
     });
-  }),
+  })
 );
 
 /**
@@ -137,7 +133,7 @@ router.post(
       success: true,
       message: "Logged out successfully. Token has been invalidated.",
     });
-  }),
+  })
 );
 
 /**
@@ -169,14 +165,15 @@ router.get(
       iat: req.user.iat,
       exp: req.user.exp,
     });
-  }),
+  })
 );
 
 /**
  * GET /api/auth/stats
- * Get authentication statistics (development/monitoring only)
+ * Get authentication statistics (requires authentication)
  *
- * Note: This endpoint should be protected or removed in production
+ * Headers:
+ * Authorization: Bearer <token>
  *
  * Response:
  * {
@@ -185,27 +182,22 @@ router.get(
  *     used: number
  *     unused: number
  *     expired: number
+ *     storeType: string
  *   }
  * }
  */
 router.get(
   "/stats",
+  requireAuth,
   asyncHandler(async (req: Request, res: Response) => {
-    // Only allow in development or with admin auth
-    if (process.env.NODE_ENV === "production") {
-      throw new AppError(
-        403,
-        "Stats endpoint not available in production",
-        true,
-      );
-    }
-
     const stats = getNonceStats();
 
     res.json({
       nonces: stats,
+      requestedBy: req.user?.address,
+      timestamp: new Date().toISOString(),
     });
-  }),
+  })
 );
 
 export default router;

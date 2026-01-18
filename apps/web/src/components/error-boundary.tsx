@@ -4,6 +4,7 @@ import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import * as React from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { captureError } from "@/lib/error-tracking";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -53,10 +54,7 @@ export interface ErrorFallbackProps {
  * </ErrorBoundary>
  * ```
  */
-export class ErrorBoundary extends React.Component<
-  ErrorBoundaryProps,
-  ErrorBoundaryState
-> {
+export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
   constructor(props: ErrorBoundaryProps) {
     super(props);
     this.state = {
@@ -84,11 +82,14 @@ export class ErrorBoundary extends React.Component<
       errorInfo,
     });
 
+    // Capture error for monitoring (Sentry when enabled)
+    captureError(error, {
+      tags: { boundary: "generic", component: "ErrorBoundary" },
+      extra: { componentStack: errorInfo.componentStack },
+    });
+
     // Call custom error handler if provided
     this.props.onError?.(error, errorInfo);
-
-    // You can also log the error to an error reporting service here
-    // Example: logErrorToService(error, errorInfo)
   }
 
   resetError = () => {
@@ -117,9 +118,7 @@ export class ErrorBoundary extends React.Component<
       }
 
       // Default fallback UI
-      return (
-        <DefaultErrorFallback {...this.state} resetError={this.resetError} />
-      );
+      return <DefaultErrorFallback {...this.state} resetError={this.resetError} />;
     }
 
     return this.props.children;
@@ -131,26 +130,20 @@ export class ErrorBoundary extends React.Component<
  *
  * A user-friendly error page with retry functionality
  */
-function DefaultErrorFallback({
-  error,
-  errorInfo,
-  resetError,
-}: ErrorFallbackProps) {
+function DefaultErrorFallback({ error, errorInfo, resetError }: ErrorFallbackProps) {
   const isDevelopment = process.env.NODE_ENV === "development";
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <Card className="max-w-2xl w-full border-destructive/50">
+    <div className="flex min-h-screen items-center justify-center bg-background p-4">
+      <Card className="w-full max-w-2xl border-destructive/50">
         <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
               <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
             <div>
               <CardTitle className="text-2xl">Algo salio mal</CardTitle>
-              <CardDescription>
-                Lo sentimos, ocurrio un error inesperado
-              </CardDescription>
+              <CardDescription>Lo sentimos, ocurrio un error inesperado</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -166,11 +159,11 @@ function DefaultErrorFallback({
           {/* Development Mode - Show Stack Trace */}
           {isDevelopment && error?.stack && (
             <details className="mt-4">
-              <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <summary className="cursor-pointer text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 Detalles tecnicos (modo desarrollo)
               </summary>
-              <div className="mt-2 p-4 bg-muted/50 rounded-lg overflow-x-auto">
-                <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
+              <div className="mt-2 overflow-x-auto rounded-lg bg-muted/50 p-4">
+                <pre className="whitespace-pre-wrap font-mono text-xs text-muted-foreground">
                   {error.stack}
                 </pre>
               </div>
@@ -180,11 +173,11 @@ function DefaultErrorFallback({
           {/* Development Mode - Component Stack */}
           {isDevelopment && errorInfo?.componentStack && (
             <details className="mt-2">
-              <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <summary className="cursor-pointer text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 Component Stack
               </summary>
-              <div className="mt-2 p-4 bg-muted/50 rounded-lg overflow-x-auto">
-                <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
+              <div className="mt-2 overflow-x-auto rounded-lg bg-muted/50 p-4">
+                <pre className="whitespace-pre-wrap font-mono text-xs text-muted-foreground">
                   {errorInfo.componentStack}
                 </pre>
               </div>
@@ -192,11 +185,11 @@ function DefaultErrorFallback({
           )}
 
           {/* User Instructions */}
-          <div className="pt-4 space-y-2">
+          <div className="space-y-2 pt-4">
             <p className="text-sm text-muted-foreground">
               Puedes intentar las siguientes acciones:
             </p>
-            <ul className="text-sm text-muted-foreground space-y-1 list-disc list-inside">
+            <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
               <li>Reintentar la operacion</li>
               <li>Recargar la pagina</li>
               <li>Volver a la pagina principal</li>

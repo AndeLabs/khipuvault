@@ -47,8 +47,7 @@ function getEnvAddress(key: string, fallback?: string): ContractAddress {
       return fallback as ContractAddress;
     }
     throw new Error(
-      `Contract address not configured: ${key}. ` +
-        `Please set it in your .env.local file.`,
+      `Contract address not configured: ${key}. ` + `Please set it in your .env.local file.`
     );
   }
   return value as ContractAddress;
@@ -59,9 +58,7 @@ function getEnvAddress(key: string, fallback?: string): ContractAddress {
  * @param address - Address to validate
  * @returns True if valid Ethereum address
  */
-export function isValidAddress(
-  address: string | undefined,
-): address is Address {
+export function isValidAddress(address: string | undefined): address is Address {
   if (!address) {
     return false;
   }
@@ -88,19 +85,13 @@ export const CONTRACT_ADDRESSES = {
    * ERC20 token used as collateral
    * NOTE: On Mezo testnet, BTC is native, not WBTC
    */
-  WBTC: getEnvAddress(
-    ENV_KEYS.WBTC,
-    "0x0000000000000000000000000000000000000000",
-  ),
+  WBTC: getEnvAddress(ENV_KEYS.WBTC, "0x0000000000000000000000000000000000000000"),
 
   /**
    * MUSD Token (Mezo USD Stablecoin)
    * Bitcoin-backed stablecoin from Mezo
    */
-  MUSD: getEnvAddress(
-    ENV_KEYS.MUSD,
-    "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
-  ),
+  MUSD: getEnvAddress(ENV_KEYS.MUSD, "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"),
 
   /**
    * Mezo Integration Contract (V3)
@@ -109,7 +100,7 @@ export const CONTRACT_ADDRESSES = {
    */
   MEZO_INTEGRATION: getEnvAddress(
     ENV_KEYS.MEZO_INTEGRATION,
-    "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6",
+    "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6"
   ),
 
   /**
@@ -119,7 +110,7 @@ export const CONTRACT_ADDRESSES = {
    */
   YIELD_AGGREGATOR: getEnvAddress(
     ENV_KEYS.YIELD_AGGREGATOR,
-    "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6",
+    "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6"
   ),
 
   /**
@@ -130,7 +121,7 @@ export const CONTRACT_ADDRESSES = {
    */
   STABILITY_POOL_STRATEGY: getEnvAddress(
     ENV_KEYS.STABILITY_POOL_STRATEGY,
-    "0xe6e0608abEf8f31847C1c9367465DbF68A040Edc",
+    "0xe6e0608abEf8f31847C1c9367465DbF68A040Edc"
   ),
 
   /**
@@ -141,7 +132,7 @@ export const CONTRACT_ADDRESSES = {
    */
   INDIVIDUAL_POOL: getEnvAddress(
     ENV_KEYS.INDIVIDUAL_POOL,
-    "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
+    "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393"
   ),
 
   /**
@@ -151,7 +142,7 @@ export const CONTRACT_ADDRESSES = {
    */
   COOPERATIVE_POOL: getEnvAddress(
     ENV_KEYS.COOPERATIVE_POOL,
-    "0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65",
+    "0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65"
   ),
 
   /**
@@ -159,10 +150,7 @@ export const CONTRACT_ADDRESSES = {
    * No-loss lottery with Chainlink VRF
    * ⚠️ Not deployed yet
    */
-  LOTTERY_POOL: getEnvAddress(
-    ENV_KEYS.LOTTERY_POOL,
-    "0x0000000000000000000000000000000000000000",
-  ),
+  LOTTERY_POOL: getEnvAddress(ENV_KEYS.LOTTERY_POOL, "0x0000000000000000000000000000000000000000"),
 
   /**
    * Rotating Pool (ROSCA/Pasanaku)
@@ -171,7 +159,7 @@ export const CONTRACT_ADDRESSES = {
    */
   ROTATING_POOL: getEnvAddress(
     ENV_KEYS.ROTATING_POOL,
-    "0x0000000000000000000000000000000000000000",
+    "0x0000000000000000000000000000000000000000"
   ),
 } as const;
 
@@ -188,8 +176,7 @@ export type ContractAddresses = typeof CONTRACT_ADDRESSES;
 /**
  * Zero address constant
  */
-export const ZERO_ADDRESS: Address =
-  "0x0000000000000000000000000000000000000000";
+export const ZERO_ADDRESS: Address = "0x0000000000000000000000000000000000000000";
 
 /**
  * Check if address is zero address
@@ -205,14 +192,12 @@ export function isZeroAddress(address: string): boolean {
  * @param contractName - Name of the contract
  * @returns Contract address
  */
-export function getContractAddress(
-  contractName: ContractName,
-): ContractAddress {
+export function getContractAddress(contractName: ContractName): ContractAddress {
   const address = CONTRACT_ADDRESSES[contractName];
   if (!address || isZeroAddress(address)) {
     throw new Error(
       `Contract address not configured for: ${contractName}. ` +
-        `Please deploy contracts and update environment variables.`,
+        `Please deploy contracts and update environment variables.`
     );
   }
   return address;
@@ -299,7 +284,7 @@ export function formatAddress(address: string, chars: number = 4): string {
  */
 export function addressesEqual(
   address1: string | undefined,
-  address2: string | undefined,
+  address2: string | undefined
 ): boolean {
   if (!address1 || !address2) {
     return false;

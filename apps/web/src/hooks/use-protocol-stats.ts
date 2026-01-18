@@ -18,10 +18,8 @@ import {
   MEZO_V3_ADDRESSES,
 } from "@/lib/web3/contracts-v3";
 
-const INDIVIDUAL_POOL_ADDRESS =
-  MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
-const COOPERATIVE_POOL_ADDRESS =
-  MEZO_V3_ADDRESSES.cooperativePoolV3 as `0x${string}`;
+const INDIVIDUAL_POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
+const COOPERATIVE_POOL_ADDRESS = MEZO_V3_ADDRESSES.cooperativePoolV3 as `0x${string}`;
 
 export interface ProtocolStats {
   /** Total Value Locked across all pools in mUSD */

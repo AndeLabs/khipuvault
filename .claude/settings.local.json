@@ -52,9 +52,27 @@
       "Bash(git fetch:*)",
       "Bash(git ls-tree:*)",
       "Bash(scripts/configure-vercel.sh:*)",
-      "Bash(bash:*)"
+      "Bash(bash:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_resize",
+      "mcp__playwright__browser_tabs",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_press_key",
+      "mcp__playwright__browser_snapshot",
+      "mcp__playwright__browser_close",
+      "mcp__playwright__browser_evaluate",
+      "Skill(quick-scan)"
     ],
     "deny": [],
     "ask": []
-  }
+  },
+  "enabledMcpjsonServers": [
+    "context7",
+    "slither",
+    "semgrep",
+    "codacy"
+  ],
+  "enableAllProjectMcpServers": true
 }

@@ -50,12 +50,7 @@ The MezoIntegration contract interfaces with Mezo's native staking system for yi
 ### Viem Client Configuration
 
 ```typescript
-import {
-  createPublicClient,
-  createWalletClient,
-  http,
-  defineChain,
-} from "viem";
+import { createPublicClient, createWalletClient, http, defineChain } from "viem";
 
 export const mezoTestnet = defineChain({
   id: 31611,
@@ -140,11 +135,7 @@ const provider = new JsonRpcProvider("https://rpc.test.mezo.org", {
   name: "mezo-testnet",
 });
 
-const contract = new Contract(
-  INDIVIDUAL_POOL_ADDRESS,
-  INDIVIDUAL_POOL_ABI,
-  provider,
-);
+const contract = new Contract(INDIVIDUAL_POOL_ADDRESS, INDIVIDUAL_POOL_ABI, provider);
 
 // Listen for events
 contract.on("Deposit", (user, amount, event) => {

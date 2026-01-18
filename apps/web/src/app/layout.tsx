@@ -24,8 +24,7 @@ export const revalidate = 0;
 
 export const metadata: Metadata = {
   title: "KhipuVault | Ahorro Bitcoin con Rendimientos Reales",
-  description:
-    "Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.",
+  description: "Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.",
   icons: {
     icon: [
       { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
@@ -50,8 +49,7 @@ export const metadata: Metadata = {
   manifest: "/manifest.json",
   openGraph: {
     title: "KhipuVault | Ahorro Bitcoin con Rendimientos Reales",
-    description:
-      "Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.",
+    description: "Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.",
     url: "https://khipuvault.vercel.app",
     siteName: "KhipuVault",
     images: [
@@ -68,8 +66,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "KhipuVault | Ahorro Bitcoin con Rendimientos Reales",
-    description:
-      "Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.",
+    description: "Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.",
     images: ["/icon-512.png"],
   },
 };
@@ -89,7 +86,7 @@ export default function RootLayout({
         {/* Skip navigation link for accessibility */}
         <a
           href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-primary focus:text-primary-foreground focus:rounded-md focus:outline-none focus:ring-2 focus:ring-ring"
+          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-primary focus:px-4 focus:py-2 focus:text-primary-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         >
           Ir al contenido principal
         </a>

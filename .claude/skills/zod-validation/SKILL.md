@@ -19,9 +19,7 @@ const AddressSchema = z
   .transform((addr) => addr.toLowerCase() as `0x${string}`);
 
 // Transaction hash validation
-const TxHashSchema = z
-  .string()
-  .regex(/^0x[a-fA-F0-9]{64}$/, "Invalid transaction hash");
+const TxHashSchema = z.string().regex(/^0x[a-fA-F0-9]{64}$/, "Invalid transaction hash");
 
 // BigInt as string (for API transport)
 const BigIntStringSchema = z
@@ -37,10 +35,8 @@ const WeiAmountSchema = z
   .refine(
     (val) =>
       BigInt(val) <=
-      BigInt(
-        "115792089237316195423570985008687907853269984665640564039457584007913129639935",
-      ),
-    "Exceeds max uint256",
+      BigInt("115792089237316195423570985008687907853269984665640564039457584007913129639935"),
+    "Exceeds max uint256"
   );
 ```
 
@@ -119,9 +115,7 @@ const PaginatedResponseSchema = <T extends z.ZodTypeAny>(itemSchema: T) =>
   });
 
 // Usage
-const TransactionsResponseSchema = PaginatedResponseSchema(
-  TransactionResponseSchema,
-);
+const TransactionsResponseSchema = PaginatedResponseSchema(TransactionResponseSchema);
 ```
 
 ## Middleware Integration
@@ -170,18 +164,13 @@ export function validateQuery<T extends ZodSchema>(schema: T) {
 }
 
 // Usage in routes
-router.post(
-  "/deposit",
-  authenticate,
-  validate(DepositRequestSchema),
-  depositController,
-);
+router.post("/deposit", authenticate, validate(DepositRequestSchema), depositController);
 
 router.get(
   "/transactions",
   authenticate,
   validateQuery(TransactionFilterSchema),
-  transactionsController,
+  transactionsController
 );
 ```
 
@@ -237,10 +226,9 @@ const PoolConfigSchema = z
     // Required only for COOPERATIVE
     votingThreshold: z.number().min(1).max(100).optional(),
   })
-  .refine(
-    (data) => data.type !== "COOPERATIVE" || data.votingThreshold !== undefined,
-    { message: "Voting threshold required for cooperative pools" },
-  );
+  .refine((data) => data.type !== "COOPERATIVE" || data.votingThreshold !== undefined, {
+    message: "Voting threshold required for cooperative pools",
+  });
 ```
 
 ## Best Practices

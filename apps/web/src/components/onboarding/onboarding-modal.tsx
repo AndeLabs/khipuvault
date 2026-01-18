@@ -102,33 +102,32 @@ export function OnboardingModal() {
     {
       id: 3,
       title: "Choose Your Savings Type",
-      description:
-        "KhipuVault offers three ways to save and earn yields on your Bitcoin:",
+      description: "KhipuVault offers three ways to save and earn yields on your Bitcoin:",
       icon: <PiggyBank className="h-12 w-12 text-success" />,
       action: (
-        <div className="grid gap-3 mt-4">
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-surface-elevated border border-border">
-            <PiggyBank className="h-5 w-5 text-lavanda shrink-0 mt-0.5" />
+        <div className="mt-4 grid gap-3">
+          <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-elevated p-3">
+            <PiggyBank className="mt-0.5 h-5 w-5 shrink-0 text-lavanda" />
             <div>
-              <div className="font-medium text-sm">Individual Savings</div>
+              <div className="text-sm font-medium">Individual Savings</div>
               <div className="text-xs text-muted-foreground">
                 Save alone and earn automatic yields on your mUSD deposits
               </div>
             </div>
           </div>
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-surface-elevated border border-border">
-            <Users className="h-5 w-5 text-accent shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-elevated p-3">
+            <Users className="mt-0.5 h-5 w-5 shrink-0 text-accent" />
             <div>
-              <div className="font-medium text-sm">Cooperative Pools</div>
+              <div className="text-sm font-medium">Cooperative Pools</div>
               <div className="text-xs text-muted-foreground">
                 Join or create savings groups with friends (like Pasanaku)
               </div>
             </div>
           </div>
-          <div className="flex items-start gap-3 p-3 rounded-lg bg-surface-elevated border border-border">
-            <Trophy className="h-5 w-5 text-success shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 rounded-lg border border-border bg-surface-elevated p-3">
+            <Trophy className="mt-0.5 h-5 w-5 shrink-0 text-success" />
             <div>
-              <div className="font-medium text-sm">Prize Pool</div>
+              <div className="text-sm font-medium">Prize Pool</div>
               <div className="text-xs text-muted-foreground">
                 No-loss lottery where you never lose your capital
               </div>
@@ -144,20 +143,14 @@ export function OnboardingModal() {
         "You're ready to start saving. Make your first deposit and watch your yields grow!",
       icon: <CheckCircle2 className="h-12 w-12 text-success" />,
       action: (
-        <div className="flex flex-col gap-3 mt-4">
-          <Link
-            href="/dashboard/individual-savings"
-            onClick={completeOnboarding}
-          >
+        <div className="mt-4 flex flex-col gap-3">
+          <Link href="/dashboard/individual-savings" onClick={completeOnboarding}>
             <Button className="w-full gap-2">
               Start with Individual Savings
               <ArrowRight className="h-4 w-4" />
             </Button>
           </Link>
-          <Link
-            href="/dashboard/cooperative-savings"
-            onClick={completeOnboarding}
-          >
+          <Link href="/dashboard/cooperative-savings" onClick={completeOnboarding}>
             <Button variant="outline" className="w-full gap-2">
               Explore Cooperative Pools
               <ArrowRight className="h-4 w-4" />
@@ -179,7 +172,7 @@ export function OnboardingModal() {
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <div className="flex items-center justify-between mb-2">
+          <div className="mb-2 flex items-center justify-between">
             <span className="text-xs text-muted-foreground">
               Step {currentStep + 1} of {steps.length}
             </span>
@@ -192,25 +185,21 @@ export function OnboardingModal() {
               Skip tour
             </Button>
           </div>
-          <Progress value={progress} className="h-1 mb-4" />
-          <div className="flex justify-center mb-4">
-            <div className="h-20 w-20 rounded-full bg-surface-elevated flex items-center justify-center">
+          <Progress value={progress} className="mb-4 h-1" />
+          <div className="mb-4 flex justify-center">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-surface-elevated">
               {currentStepData.icon}
             </div>
           </div>
-          <DialogTitle className="text-center text-xl">
-            {currentStepData.title}
-          </DialogTitle>
+          <DialogTitle className="text-center text-xl">{currentStepData.title}</DialogTitle>
           <DialogDescription className="text-center">
             {currentStepData.description}
           </DialogDescription>
         </DialogHeader>
 
-        {currentStepData.action && (
-          <div className="mt-2">{currentStepData.action}</div>
-        )}
+        {currentStepData.action && <div className="mt-2">{currentStepData.action}</div>}
 
-        <div className="flex justify-between mt-6">
+        <div className="mt-6 flex justify-between">
           <Button
             variant="ghost"
             onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
@@ -219,9 +208,7 @@ export function OnboardingModal() {
             Back
           </Button>
           {currentStep < steps.length - 1 ? (
-            <Button onClick={() => setCurrentStep(currentStep + 1)}>
-              Next
-            </Button>
+            <Button onClick={() => setCurrentStep(currentStep + 1)}>Next</Button>
           ) : (
             <Button onClick={completeOnboarding}>Get Started</Button>
           )}

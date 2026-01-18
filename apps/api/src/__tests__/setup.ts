@@ -64,19 +64,36 @@ vi.mock("@khipu/database", () => ({
 }));
 
 // Mock logger to avoid console noise during tests
+const mockChildLogger = {
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+  debug: vi.fn(),
+  fatal: vi.fn(),
+  trace: vi.fn(),
+  child: vi.fn(() => mockChildLogger),
+};
+
 vi.mock("../lib/logger", () => ({
   logger: {
     info: vi.fn(),
     warn: vi.fn(),
     error: vi.fn(),
     debug: vi.fn(),
-    child: vi.fn(() => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
-      debug: vi.fn(),
-    })),
+    fatal: vi.fn(),
+    trace: vi.fn(),
+    child: vi.fn(() => mockChildLogger),
   },
+  createChildLogger: vi.fn(() => mockChildLogger),
+}));
+
+// Mock Redis module
+vi.mock("../lib/redis", () => ({
+  initRedis: vi.fn().mockResolvedValue(undefined),
+  closeRedis: vi.fn().mockResolvedValue(undefined),
+  getRedisClient: vi.fn().mockReturnValue(null),
+  getStore: vi.fn().mockReturnValue(new Map()),
+  isRedisEnabled: false,
 }));
 
 // Mock cache

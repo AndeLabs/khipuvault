@@ -19,13 +19,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  CardContent,
-} from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { useTransactionExecute } from "@/features/transactions";
 import { cn } from "@/lib/utils";
 
@@ -33,10 +27,7 @@ const withdrawSchema = z.object({
   amount: z
     .string()
     .min(1, "Amount is required")
-    .refine(
-      (val) => !isNaN(Number(val)) && Number(val) > 0,
-      "Amount must be greater than 0",
-    ),
+    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Amount must be greater than 0"),
 });
 
 type WithdrawFormData = z.infer<typeof withdrawSchema>;
@@ -55,11 +46,8 @@ export function WithdrawCard({
   className,
 }: WithdrawCardProps) {
   const { execute } = useTransactionExecute({ type: "Withdraw mUSD" });
-  const [showFullWithdrawConfirm, setShowFullWithdrawConfirm] =
-    React.useState(false);
-  const [pendingWithdrawAmount, setPendingWithdrawAmount] = React.useState<
-    string | null
-  >(null);
+  const [showFullWithdrawConfirm, setShowFullWithdrawConfirm] = React.useState(false);
+  const [pendingWithdrawAmount, setPendingWithdrawAmount] = React.useState<string | null>(null);
 
   const {
     register,
@@ -80,9 +68,7 @@ export function WithdrawCard({
         return "0.00";
       }
       const balanceBigInt =
-        typeof availableBalance === "bigint"
-          ? availableBalance
-          : BigInt(availableBalance);
+        typeof availableBalance === "bigint" ? availableBalance : BigInt(availableBalance);
       return Number(formatUnits(balanceBigInt, 18)).toFixed(2);
     } catch (error) {
       console.error("Error formatting balance:", error);
@@ -131,9 +117,7 @@ export function WithdrawCard({
     <Card variant="surface" className={className}>
       <CardHeader className="pb-4">
         <CardTitle>Withdraw</CardTitle>
-        <CardDescription>
-          Withdraw your deposits and yields anytime
-        </CardDescription>
+        <CardDescription>Withdraw your deposits and yields anytime</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -141,8 +125,7 @@ export function WithdrawCard({
           <Alert className="border-amber-500/20 bg-amber-500/5">
             <AlertCircle className="h-4 w-4 text-amber-500" />
             <AlertDescription className="text-sm">
-              No balance available to withdraw. Deposit mUSD first to start
-              earning.
+              No balance available to withdraw. Deposit mUSD first to start earning.
             </AlertDescription>
           </Alert>
         ) : (
@@ -151,15 +134,13 @@ export function WithdrawCard({
             <div className="space-y-2">
               {/* Available Balance Row */}
               <div className="flex items-center justify-between text-sm">
-                <span className="text-muted-foreground">
-                  Deposited: {formattedBalance} mUSD
-                </span>
+                <span className="text-muted-foreground">Deposited: {formattedBalance} mUSD</span>
                 <Button
                   type="button"
                   variant="ghost"
                   size="sm"
                   onClick={setMaxAmount}
-                  className="h-6 px-2 text-xs font-semibold text-accent hover:text-accent hover:bg-accent/10"
+                  className="h-6 px-2 text-xs font-semibold text-accent hover:bg-accent/10 hover:text-accent"
                 >
                   MAX
                 </Button>
@@ -168,18 +149,17 @@ export function WithdrawCard({
               {/* Large Input Container - Aave/Uniswap Style */}
               <div
                 className={cn(
-                  "relative p-4 rounded-xl border-2 transition-all",
+                  "relative rounded-xl border-2 p-4 transition-all",
                   "bg-surface-elevated hover:border-accent/50",
-                  (errors.amount ??
-                    (amount && Number(amount) > Number(formattedBalance)))
+                  (errors.amount ?? (amount && Number(amount) > Number(formattedBalance)))
                     ? "border-error focus-within:border-error"
-                    : "border-border focus-within:border-accent",
+                    : "border-border focus-within:border-accent"
                 )}
               >
                 <div className="flex items-center gap-3">
                   {/* Token Badge */}
-                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-surface border border-border">
-                    <div className="w-6 h-6 rounded-full bg-gradient-to-br from-amber-500 to-orange-600 flex items-center justify-center">
+                  <div className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5">
+                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-amber-500 to-orange-600">
                       <span className="text-xs font-bold">m</span>
                     </div>
                     <span className="font-semibold">mUSD</span>
@@ -193,9 +173,9 @@ export function WithdrawCard({
                     placeholder="0.00"
                     {...register("amount")}
                     className={cn(
-                      "flex-1 bg-transparent border-0 outline-none",
+                      "flex-1 border-0 bg-transparent outline-none",
                       "text-3xl font-bold tabular-nums placeholder:text-muted-foreground/50",
-                      "focus:outline-none focus:ring-0",
+                      "focus:outline-none focus:ring-0"
                     )}
                   />
                 </div>
@@ -210,43 +190,36 @@ export function WithdrawCard({
 
               {/* Error Messages */}
               {errors.amount && (
-                <p className="text-sm text-error flex items-center gap-1">
+                <p className="flex items-center gap-1 text-sm text-error">
                   <span className="text-xs">⚠</span> {errors.amount.message}
                 </p>
               )}
               {amount && Number(amount) > Number(formattedBalance) && (
-                <p className="text-sm text-error flex items-center gap-1">
+                <p className="flex items-center gap-1 text-sm text-error">
                   <span className="text-xs">⚠</span> Insufficient balance
                 </p>
               )}
             </div>
 
             {/* Transaction Details - Only show when amount entered */}
-            {amount &&
-              Number(amount) > 0 &&
-              Number(amount) <= Number(formattedBalance) && (
-                <div className="space-y-2 p-3 rounded-lg bg-surface-elevated border border-border text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">
-                      You will receive
-                    </span>
-                    <span className="font-semibold">{amount} mUSD</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-muted-foreground">Network fee</span>
-                    <span className="font-semibold">~$0.30</span>
-                  </div>
-                  <div className="flex justify-between pt-2 border-t border-border">
-                    <span className="text-muted-foreground">
-                      Remaining balance
-                    </span>
-                    <span className="font-semibold text-accent">
-                      {(Number(formattedBalance) - Number(amount)).toFixed(2)}{" "}
-                      mUSD
-                    </span>
-                  </div>
+            {amount && Number(amount) > 0 && Number(amount) <= Number(formattedBalance) && (
+              <div className="space-y-2 rounded-lg border border-border bg-surface-elevated p-3 text-sm">
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">You will receive</span>
+                  <span className="font-semibold">{amount} mUSD</span>
                 </div>
-              )}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Network fee</span>
+                  <span className="font-semibold">~$0.30</span>
+                </div>
+                <div className="flex justify-between border-t border-border pt-2">
+                  <span className="text-muted-foreground">Remaining balance</span>
+                  <span className="font-semibold text-accent">
+                    {(Number(formattedBalance) - Number(amount)).toFixed(2)} mUSD
+                  </span>
+                </div>
+              </div>
+            )}
 
             {/* Submit Button */}
             <Button
@@ -255,11 +228,7 @@ export function WithdrawCard({
               className="w-full"
               size="lg"
               loading={isLoading}
-              disabled={
-                !amount ||
-                Number(amount) <= 0 ||
-                Number(amount) > Number(formattedBalance)
-              }
+              disabled={!amount || Number(amount) <= 0 || Number(amount) > Number(formattedBalance)}
             >
               {(() => {
                 if (!amount || Number(amount) <= 0) {
@@ -273,7 +242,7 @@ export function WithdrawCard({
             </Button>
 
             {/* Help Text */}
-            <p className="text-xs text-center text-muted-foreground">
+            <p className="text-center text-xs text-muted-foreground">
               No penalties • Instant withdrawal
             </p>
           </form>
@@ -281,10 +250,7 @@ export function WithdrawCard({
       </CardContent>
 
       {/* Full Withdrawal Confirmation Dialog */}
-      <AlertDialog
-        open={showFullWithdrawConfirm}
-        onOpenChange={setShowFullWithdrawConfirm}
-      >
+      <AlertDialog open={showFullWithdrawConfirm} onOpenChange={setShowFullWithdrawConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center gap-2">
@@ -293,13 +259,12 @@ export function WithdrawCard({
             </AlertDialogTitle>
             <AlertDialogDescription className="space-y-3">
               <p>
-                You are about to withdraw{" "}
-                <strong>{pendingWithdrawAmount} mUSD</strong>, which is your
-                entire balance.
+                You are about to withdraw <strong>{pendingWithdrawAmount} mUSD</strong>, which is
+                your entire balance.
               </p>
-              <div className="p-3 rounded-lg bg-warning/10 border border-warning/20 text-sm">
-                <p className="font-medium text-foreground mb-1">This will:</p>
-                <ul className="list-disc list-inside text-muted-foreground space-y-1">
+              <div className="rounded-lg border border-warning/20 bg-warning/10 p-3 text-sm">
+                <p className="mb-1 font-medium text-foreground">This will:</p>
+                <ul className="list-inside list-disc space-y-1 text-muted-foreground">
                   <li>Close your position in this pool</li>
                   <li>Stop all yield accumulation</li>
                   <li>Require a new deposit to rejoin</li>
@@ -314,7 +279,7 @@ export function WithdrawCard({
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleConfirmFullWithdraw}
-              className="bg-warning text-warning-foreground hover:bg-warning/90"
+              className="text-warning-foreground bg-warning hover:bg-warning/90"
             >
               Yes, Withdraw All
             </AlertDialogAction>

@@ -6,13 +6,7 @@ import { RefreshCw, Unplug, Eye } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -25,19 +19,17 @@ import {
 export default function WalletsPage() {
   return (
     <div className="space-y-8">
-      <Card className="bg-card border-primary/20 shadow-custom">
+      <Card className="shadow-custom border-primary/20 bg-card">
         <CardHeader>
           <CardTitle>Wallets Conectadas</CardTitle>
-          <CardDescription>
-            Gestiona las wallets que usas con KhipuVault.
-          </CardDescription>
+          <CardDescription>Gestiona las wallets que usas con KhipuVault.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Primary Wallet */}
-          <Card className="bg-background border-primary/50">
+          <Card className="border-primary/50 bg-background">
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg flex items-center gap-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-3 text-lg">
                   <img
                     src="https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
                     alt="MetaMask"
@@ -51,12 +43,12 @@ export default function WalletsPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="text-sm text-muted-foreground font-code p-2 bg-card rounded">
+              <div className="rounded bg-card p-2 font-code text-sm text-muted-foreground">
                 0x1234567890abcdef1234567890abcdef12345678
               </div>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Balance:</span>
-                <span className="font-bold font-code">0.005 BTC</span>
+                <span className="font-code font-bold">0.005 BTC</span>
               </div>
               <div className="flex gap-2 pt-2">
                 <Button variant="outline" size="sm">
@@ -73,10 +65,10 @@ export default function WalletsPage() {
           </Card>
 
           {/* Bitcoin Wallet */}
-          <Card className="bg-background border-primary/20">
+          <Card className="border-primary/20 bg-background">
             <CardHeader>
-              <div className="flex justify-between items-center">
-                <CardTitle className="text-lg flex items-center gap-3">
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-3 text-lg">
                   <svg
                     className="h-6 w-6"
                     viewBox="0 0 24 24"
@@ -96,12 +88,12 @@ export default function WalletsPage() {
               </div>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="text-sm text-muted-foreground font-code p-2 bg-card rounded">
+              <div className="rounded bg-card p-2 font-code text-sm text-muted-foreground">
                 bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh
               </div>
-              <div className="flex justify-between items-center text-sm">
+              <div className="flex items-center justify-between text-sm">
                 <span className="text-muted-foreground">Balance:</span>
-                <span className="font-bold font-code">0.003 BTC</span>
+                <span className="font-code font-bold">0.003 BTC</span>
               </div>
               <div className="flex gap-2 pt-2">
                 <Button variant="outline" size="sm">
@@ -123,7 +115,7 @@ export default function WalletsPage() {
         </CardContent>
       </Card>
 
-      <Card className="bg-card border-primary/20 shadow-custom">
+      <Card className="shadow-custom border-primary/20 bg-card">
         <CardHeader>
           <CardTitle>Historial de Conexiones</CardTitle>
         </CardHeader>

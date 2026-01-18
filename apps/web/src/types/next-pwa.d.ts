@@ -6,12 +6,7 @@ declare module "next-pwa" {
 
   interface RuntimeCachingEntry {
     urlPattern: RegExp | string;
-    handler:
-      | "CacheFirst"
-      | "CacheOnly"
-      | "NetworkFirst"
-      | "NetworkOnly"
-      | "StaleWhileRevalidate";
+    handler: "CacheFirst" | "CacheOnly" | "NetworkFirst" | "NetworkOnly" | "StaleWhileRevalidate";
     options?: {
       cacheName?: string;
       expiration?: {

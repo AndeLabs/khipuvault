@@ -30,10 +30,7 @@ interface ClientProvidersProps {
  * - MetaMask connection only
  * - Development fallback
  */
-export function ClientProviders({
-  children,
-  initialState,
-}: ClientProvidersProps) {
+export function ClientProviders({ children, initialState }: ClientProvidersProps) {
   // Use Privy when configured, otherwise fall back to basic Web3Provider
   const usePrivy = isPrivyConfigured();
 

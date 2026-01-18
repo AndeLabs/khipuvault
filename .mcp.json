@@ -7,11 +7,7 @@
     },
     "slither": {
       "command": "uvx",
-      "args": [
-        "--from",
-        "git+https://github.com/trailofbits/slither-mcp",
-        "slither-mcp"
-      ],
+      "args": ["--from", "git+https://github.com/trailofbits/slither-mcp", "slither-mcp"],
       "description": "Slither static analysis for Solidity smart contracts (Trail of Bits)"
     },
     "semgrep": {
@@ -21,9 +17,7 @@
     },
     "codacy": {
       "command": "node",
-      "args": [
-        "/opt/homebrew/lib/node_modules/@codacy/codacy-mcp/dist/index.js"
-      ],
+      "args": ["/opt/homebrew/lib/node_modules/@codacy/codacy-mcp/dist/index.js"],
       "description": "Codacy Guardrails - real-time security and code quality scanning"
     }
   }

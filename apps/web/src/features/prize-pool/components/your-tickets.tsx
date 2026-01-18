@@ -12,13 +12,7 @@ import * as React from "react";
 import { formatEther } from "viem";
 
 import { Badge } from "@/components/ui/badge";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatProbability } from "@/hooks/web3/lottery/use-lottery-pool";
 
@@ -44,7 +38,7 @@ export function YourTickets({
       <Card>
         <CardHeader>
           <Skeleton className="h-6 w-32" />
-          <Skeleton className="h-4 w-48 mt-2" />
+          <Skeleton className="mt-2 h-4 w-48" />
         </CardHeader>
         <CardContent className="space-y-4">
           <Skeleton className="h-16 w-full" />
@@ -67,11 +61,8 @@ export function YourTickets({
           </div>
 
           {isWinner && (
-            <Badge
-              variant="default"
-              className="bg-success text-success-foreground"
-            >
-              <Trophy className="h-3 w-3 mr-1" />
+            <Badge variant="default" className="text-success-foreground bg-success">
+              <Trophy className="mr-1 h-3 w-3" />
               Winner!
             </Badge>
           )}
@@ -80,79 +71,67 @@ export function YourTickets({
 
       <CardContent className="space-y-4">
         {!hasTickets ? (
-          <div className="text-center py-8">
-            <Ticket className="h-12 w-12 text-muted-foreground mx-auto mb-3 opacity-50" />
-            <p className="text-sm text-muted-foreground">
-              You haven't purchased any tickets yet.
-            </p>
-            <p className="text-xs text-muted-foreground mt-1">
+          <div className="py-8 text-center">
+            <Ticket className="mx-auto mb-3 h-12 w-12 text-muted-foreground opacity-50" />
+            <p className="text-sm text-muted-foreground">You haven't purchased any tickets yet.</p>
+            <p className="mt-1 text-xs text-muted-foreground">
               Buy tickets to participate in the lottery!
             </p>
           </div>
         ) : (
           <div className="space-y-3">
             {/* Tickets Count */}
-            <div className="p-4 rounded-lg bg-gradient-to-br from-lavanda/10 to-lavanda/5 border border-lavanda/20">
+            <div className="rounded-lg border border-lavanda/20 bg-gradient-to-br from-lavanda/10 to-lavanda/5 p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-lavanda/20 flex items-center justify-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-lavanda/20">
                     <Ticket className="h-5 w-5 text-lavanda" />
                   </div>
                   <div>
-                    <div className="text-2xl font-bold">
-                      {ticketCount.toString()}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Tickets Purchased
-                    </div>
+                    <div className="text-2xl font-bold">{ticketCount.toString()}</div>
+                    <div className="text-xs text-muted-foreground">Tickets Purchased</div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Investment */}
-            <div className="p-4 rounded-lg bg-surface-elevated border border-border">
+            <div className="rounded-lg border border-border bg-surface-elevated p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-accent/20 flex items-center justify-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/20">
                     <Wallet className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <div className="text-xl font-bold">
-                      {formatEther(investment)} BTC
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      Total Invested
-                    </div>
+                    <div className="text-xl font-bold">{formatEther(investment)} BTC</div>
+                    <div className="text-xs text-muted-foreground">Total Invested</div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Win Probability */}
-            <div className="p-4 rounded-lg bg-surface-elevated border border-border">
+            <div className="rounded-lg border border-border bg-surface-elevated p-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="h-10 w-10 rounded-full bg-success/20 flex items-center justify-center">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/20">
                     <TrendingUp className="h-5 w-5 text-success" />
                   </div>
                   <div>
                     <div className="text-xl font-bold text-success">
                       {formatProbability(probability)}
                     </div>
-                    <div className="text-xs text-muted-foreground">
-                      Win Probability
-                    </div>
+                    <div className="text-xs text-muted-foreground">Win Probability</div>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* Info */}
-            <div className="p-3 rounded-lg bg-info/10 border border-info/20">
-              <p className="text-xs text-info-foreground">
-                <strong>Remember:</strong> You never lose your capital! If you
-                don't win, you get your BTC back.
+            <div className="rounded-lg border border-info/20 bg-info/10 p-3">
+              <p className="text-info-foreground text-xs">
+                <strong>Remember:</strong> You never lose your capital! If you don't win, you get
+                your BTC back.
               </p>
             </div>
           </div>

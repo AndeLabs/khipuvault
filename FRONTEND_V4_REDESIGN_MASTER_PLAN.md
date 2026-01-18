@@ -729,10 +729,7 @@ export function useTransaction() {
   const [txHash, setTxHash] = useState<Hash>();
   const [error, setError] = useState<Error>();
 
-  const execute = async (
-    contractWrite: () => Promise<Hash>,
-    options?: TransactionOptions,
-  ) => {
+  const execute = async (contractWrite: () => Promise<Hash>, options?: TransactionOptions) => {
     try {
       setStatus("preparing");
 
@@ -780,9 +777,7 @@ export function useTransaction() {
     error,
     execute,
     reset,
-    isLoading: ["preparing", "signing", "submitted", "confirming"].includes(
-      status,
-    ),
+    isLoading: ["preparing", "signing", "submitted", "confirming"].includes(status),
     isSuccess: status === "success",
     isError: status === "error",
   };

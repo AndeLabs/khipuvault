@@ -1,10 +1,4 @@
-import {
-  CheckCircle2,
-  XCircle,
-  Clock,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Loader2, AlertCircle } from "lucide-react";
 import * as React from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -96,10 +90,7 @@ export function TransactionStatus({
         <Icon
           className={cn(
             "h-3 w-3",
-            "animate" in config &&
-              "animate" in config &&
-              config.animate &&
-              "animate-spin",
+            "animate" in config && "animate" in config && config.animate && "animate-spin"
           )}
         />
         {config.label}
@@ -114,12 +105,10 @@ export function TransactionStatus({
           className={cn(
             "h-4 w-4",
             config.color,
-            "animate" in config && config.animate && "animate-spin",
+            "animate" in config && config.animate && "animate-spin"
           )}
         />
-        <span className={cn("text-sm font-medium", config.color)}>
-          {message ?? config.label}
-        </span>
+        <span className={cn("text-sm font-medium", config.color)}>{message ?? config.label}</span>
       </div>
     );
   }
@@ -132,30 +121,21 @@ export function TransactionStatus({
           className={cn(
             "h-5 w-5",
             config.color,
-            "animate" in config && config.animate && "animate-spin",
+            "animate" in config && config.animate && "animate-spin"
           )}
         />
-        <span className={cn("text-base font-semibold", config.color)}>
-          {config.label}
-        </span>
+        <span className={cn("text-base font-semibold", config.color)}>{config.label}</span>
       </div>
-      {message && (
-        <p className="text-sm text-muted-foreground pl-7">{message}</p>
-      )}
+      {message && <p className="pl-7 text-sm text-muted-foreground">{message}</p>}
       {txHash && (
         <a
           href={`https://explorer.mezo.org/tx/${txHash}`}
           target="_blank"
           rel="noopener noreferrer"
-          className="text-sm text-lavanda hover:underline pl-7 inline-flex items-center gap-1"
+          className="inline-flex items-center gap-1 pl-7 text-sm text-lavanda hover:underline"
         >
           View on Explorer
-          <svg
-            className="h-3 w-3"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-          >
+          <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -188,19 +168,16 @@ export function TransactionSteps({ steps, className }: TransactionStepsProps) {
       {steps.map((step, index) => {
         const isLast = index === steps.length - 1;
         return (
-          <div
-            key={`step-${step.label}-${index}`}
-            className="flex items-start gap-3"
-          >
+          <div key={`step-${step.label}-${index}`} className="flex items-start gap-3">
             <div className="flex flex-col items-center">
               <div
                 className={cn(
-                  "h-6 w-6 rounded-full flex items-center justify-center text-xs font-semibold",
+                  "flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold",
                   step.status === "complete" && "bg-success text-white",
                   step.status === "active" && "bg-lavanda text-white",
                   step.status === "error" && "bg-error text-white",
                   step.status === "pending" &&
-                    "bg-surface border-2 border-border text-muted-foreground",
+                    "border-2 border-border bg-surface text-muted-foreground"
                 )}
               >
                 {(() => {
@@ -216,8 +193,8 @@ export function TransactionSteps({ steps, className }: TransactionStepsProps) {
               {!isLast && (
                 <div
                   className={cn(
-                    "w-0.5 h-8 mt-1",
-                    step.status === "complete" ? "bg-success" : "bg-border",
+                    "mt-1 h-8 w-0.5",
+                    step.status === "complete" ? "bg-success" : "bg-border"
                   )}
                 />
               )}
@@ -229,7 +206,7 @@ export function TransactionSteps({ steps, className }: TransactionStepsProps) {
                   step.status === "active" && "text-foreground",
                   step.status === "complete" && "text-success",
                   step.status === "error" && "text-error",
-                  step.status === "pending" && "text-muted-foreground",
+                  step.status === "pending" && "text-muted-foreground"
                 )}
               >
                 {step.label}

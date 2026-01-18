@@ -36,64 +36,55 @@ const steps = [
 
 export function HowItWorks() {
   return (
-    <section className="py-20 md:py-28 bg-surface/50">
+    <section className="bg-surface/50 py-20 md:py-28">
       <div className="container mx-auto max-w-7xl px-4">
-        <AnimateOnScroll className="text-center mb-16">
-          <span className="inline-block px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-sm font-medium mb-4">
+        <AnimateOnScroll className="mb-16 text-center">
+          <span className="mb-4 inline-block rounded-full border border-primary/20 bg-primary/10 px-4 py-1.5 text-sm font-medium text-primary">
             Simple Process
           </span>
           <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl md:text-5xl">
-            Start Saving in{" "}
-            <span className="text-gradient-brand">3 Easy Steps</span>
+            Start Saving in <span className="text-gradient-brand">3 Easy Steps</span>
           </h2>
-          <p className="mt-4 text-lg text-muted-foreground max-w-2xl mx-auto">
-            No complicated DeFi knowledge required. Just connect, deposit, and
-            earn.
+          <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
+            No complicated DeFi knowledge required. Just connect, deposit, and earn.
           </p>
         </AnimateOnScroll>
 
         {/* Steps */}
-        <div className="grid md:grid-cols-3 gap-8 md:gap-12 relative">
+        <div className="relative grid gap-8 md:grid-cols-3 md:gap-12">
           {/* Connecting line (desktop only) */}
-          <div className="hidden md:block absolute top-24 left-1/6 right-1/6 h-0.5 bg-gradient-to-r from-primary via-accent to-success opacity-30" />
+          <div className="left-1/6 right-1/6 absolute top-24 hidden h-0.5 bg-gradient-to-r from-primary via-accent to-success opacity-30 md:block" />
 
           {steps.map((step, index) => (
-            <AnimateOnScroll
-              key={step.number}
-              delay={`${index * 150}ms`}
-              className="relative"
-            >
+            <AnimateOnScroll key={step.number} delay={`${index * 150}ms`} className="relative">
               <div className="flex flex-col items-center text-center">
                 {/* Step number & icon */}
                 <div className="relative mb-6">
                   {/* Background glow */}
                   <div
                     className={cn(
-                      "absolute inset-0 rounded-full blur-xl opacity-30",
+                      "absolute inset-0 rounded-full opacity-30 blur-xl",
                       step.color === "primary" && "bg-primary",
                       step.color === "accent" && "bg-accent",
-                      step.color === "success" && "bg-success",
+                      step.color === "success" && "bg-success"
                     )}
                   />
 
                   {/* Icon container */}
                   <div
                     className={cn(
-                      "relative w-20 h-20 rounded-full flex items-center justify-center border-2",
-                      step.color === "primary" &&
-                        "bg-primary/10 border-primary/30",
-                      step.color === "accent" &&
-                        "bg-accent/10 border-accent/30",
-                      step.color === "success" &&
-                        "bg-success/10 border-success/30",
+                      "relative flex h-20 w-20 items-center justify-center rounded-full border-2",
+                      step.color === "primary" && "border-primary/30 bg-primary/10",
+                      step.color === "accent" && "border-accent/30 bg-accent/10",
+                      step.color === "success" && "border-success/30 bg-success/10"
                     )}
                   >
                     <step.icon
                       className={cn(
-                        "w-8 h-8",
+                        "h-8 w-8",
                         step.color === "primary" && "text-primary",
                         step.color === "accent" && "text-accent",
-                        step.color === "success" && "text-success",
+                        step.color === "success" && "text-success"
                       )}
                     />
                   </div>
@@ -101,10 +92,10 @@ export function HowItWorks() {
                   {/* Step number badge */}
                   <div
                     className={cn(
-                      "absolute -top-2 -right-2 w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold",
+                      "absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full text-xs font-bold",
                       step.color === "primary" && "bg-primary text-background",
                       step.color === "accent" && "bg-accent text-background",
-                      step.color === "success" && "bg-success text-background",
+                      step.color === "success" && "bg-success text-background"
                     )}
                   >
                     {step.number}
@@ -112,24 +103,20 @@ export function HowItWorks() {
                 </div>
 
                 {/* Content */}
-                <h3 className="text-xl font-semibold text-white mb-3">
-                  {step.title}
-                </h3>
-                <p className="text-muted-foreground leading-relaxed">
-                  {step.description}
-                </p>
+                <h3 className="mb-3 text-xl font-semibold text-white">{step.title}</h3>
+                <p className="leading-relaxed text-muted-foreground">{step.description}</p>
               </div>
             </AnimateOnScroll>
           ))}
         </div>
 
         {/* CTA */}
-        <AnimateOnScroll delay="300ms" className="text-center mt-16">
+        <AnimateOnScroll delay="300ms" className="mt-16 text-center">
           <Link
             href="/dashboard"
             className={cn(
               buttonVariants({ size: "lg" }),
-              "bg-gradient-to-r from-primary to-accent hover:opacity-90 text-white font-semibold px-8 group",
+              "group bg-gradient-to-r from-primary to-accent px-8 font-semibold text-white hover:opacity-90"
             )}
           >
             Get Started Now

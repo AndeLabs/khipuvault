@@ -9,16 +9,11 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback, useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
-import {
-  MEZO_V3_ADDRESSES,
-  YIELD_AGGREGATOR_V3_ABI,
-  V3_FEATURES,
-} from "@/lib/web3/contracts-v3";
+import { MEZO_V3_ADDRESSES, YIELD_AGGREGATOR_V3_ABI, V3_FEATURES } from "@/lib/web3/contracts-v3";
 
 import { QUERY_KEYS, INITIAL_TX_STATE, TransactionState } from "./constants";
 
-const YIELD_AGGREGATOR_ADDRESS =
-  MEZO_V3_ADDRESSES.yieldAggregatorV3 as `0x${string}`;
+const YIELD_AGGREGATOR_ADDRESS = MEZO_V3_ADDRESSES.yieldAggregatorV3 as `0x${string}`;
 
 // ============================================================================
 // DEPOSIT/WITHDRAW HOOKS
@@ -29,8 +24,7 @@ const YIELD_AGGREGATOR_ADDRESS =
  */
 export function useYieldAggregatorDeposit() {
   const queryClient = useQueryClient();
-  const [localState, setLocalState] =
-    useState<TransactionState>(INITIAL_TX_STATE);
+  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE);
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
@@ -45,9 +39,7 @@ export function useYieldAggregatorDeposit() {
 
         // Validate minimum deposit
         if (amount < BigInt(V3_FEATURES.yieldAggregator.minDeposit)) {
-          throw new Error(
-            `Minimum deposit is ${V3_FEATURES.yieldAggregator.minDeposit} MUSD`,
-          );
+          throw new Error(`Minimum deposit is ${V3_FEATURES.yieldAggregator.minDeposit} MUSD`);
         }
 
         writeContract({
@@ -61,7 +53,7 @@ export function useYieldAggregatorDeposit() {
         throw err;
       }
     },
-    [writeContract],
+    [writeContract]
   );
 
   // Update local state when hash changes
@@ -96,8 +88,7 @@ export function useYieldAggregatorDeposit() {
  */
 export function useYieldAggregatorWithdraw() {
   const queryClient = useQueryClient();
-  const [localState, setLocalState] =
-    useState<TransactionState>(INITIAL_TX_STATE);
+  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE);
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 
@@ -121,7 +112,7 @@ export function useYieldAggregatorWithdraw() {
         throw err;
       }
     },
-    [writeContract],
+    [writeContract]
   );
 
   // Update local state when hash changes
@@ -160,8 +151,7 @@ export function useYieldAggregatorWithdraw() {
  */
 export function useCompoundYields() {
   const queryClient = useQueryClient();
-  const [localState, setLocalState] =
-    useState<TransactionState>(INITIAL_TX_STATE);
+  const [localState, setLocalState] = useState<TransactionState>(INITIAL_TX_STATE);
 
   const { writeContract, data: hash, isPending, error } = useWriteContract();
 

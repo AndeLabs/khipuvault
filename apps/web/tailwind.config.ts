@@ -44,8 +44,7 @@ export default {
         "surface-elevated": "rgb(var(--surface-elevated) / <alpha-value>)",
 
         "muted-foreground": "rgb(var(--muted-foreground) / <alpha-value>)",
-        "disabled-foreground":
-          "rgb(var(--disabled-foreground) / <alpha-value>)",
+        "disabled-foreground": "rgb(var(--disabled-foreground) / <alpha-value>)",
 
         border: "rgb(var(--border) / <alpha-value>)",
         "border-strong": "rgb(var(--border-strong) / <alpha-value>)",

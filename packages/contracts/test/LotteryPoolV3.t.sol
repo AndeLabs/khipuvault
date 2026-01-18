@@ -588,4 +588,122 @@ contract LotteryPoolV3Test is Test {
         assertEq(round2, 2);
         assertEq(lottery.currentRoundId(), 2);
     }
+
+    /*//////////////////////////////////////////////////////////////
+                        C-02 FIX VERIFICATION
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Test C-02 Fix: Non-contiguous ticket purchases are handled correctly
+     * @dev This test verifies that when users buy tickets in multiple batches
+     *      (with other users buying in between), all tickets are correctly
+     *      assigned to their owners and can win the lottery.
+     *
+     * Scenario:
+     * 1. User1 buys 5 tickets (tickets 0-4)
+     * 2. User2 buys 5 tickets (tickets 5-9)
+     * 3. User1 buys 3 more tickets (tickets 10-12) <- NON-CONTIGUOUS!
+     *
+     * Before fix: Tickets 10-12 would have no owner (orphaned)
+     * After fix: Tickets 10-12 correctly belong to User1
+     */
+    function test_C02Fix_NonContiguousTicketPurchases() public {
+        // Create round
+        vm.prank(owner);
+        uint256 roundId = lottery.createRound(TICKET_PRICE, MAX_TICKETS, ROUND_DURATION);
+
+        // User1 buys 5 tickets (tickets 0-4)
+        vm.prank(user1);
+        lottery.buyTickets(roundId, 5);
+
+        // User2 buys 5 tickets (tickets 5-9)
+        vm.prank(user2);
+        lottery.buyTickets(roundId, 5);
+
+        // User1 buys 3 more tickets (tickets 10-12) - NON-CONTIGUOUS
+        vm.prank(user1);
+        lottery.buyTickets(roundId, 3);
+
+        // Verify total tickets and user counts
+        LotteryPoolV3.Round memory round = lottery.getRound(roundId);
+        assertEq(round.totalTicketsSold, 13, "Total tickets should be 13");
+
+        LotteryPoolV3.Participant memory p1 = lottery.getParticipant(roundId, user1);
+        assertEq(p1.ticketCount, 8, "User1 should have 8 tickets total");
+
+        LotteryPoolV3.Participant memory p2 = lottery.getParticipant(roundId, user2);
+        assertEq(p2.ticketCount, 5, "User2 should have 5 tickets");
+
+        // Verify ticket ownership via the ticketOwners mapping
+        // Tickets 0-4 belong to user1
+        for (uint256 i = 0; i < 5; i++) {
+            assertEq(lottery.ticketOwners(roundId, i), user1, "Tickets 0-4 should belong to user1");
+        }
+
+        // Tickets 5-9 belong to user2
+        for (uint256 i = 5; i < 10; i++) {
+            assertEq(lottery.ticketOwners(roundId, i), user2, "Tickets 5-9 should belong to user2");
+        }
+
+        // Tickets 10-12 belong to user1 (NON-CONTIGUOUS - this is the C-02 fix)
+        for (uint256 i = 10; i < 13; i++) {
+            assertEq(lottery.ticketOwners(roundId, i), user1, "Tickets 10-12 should belong to user1 (C-02 fix)");
+        }
+
+        // Verify win probability is correct
+        // User1: 8/13 tickets ≈ 61.5% = 6153 basis points
+        uint256 user1Prob = lottery.getWinProbability(roundId, user1);
+        assertEq(user1Prob, 6153, "User1 probability should be 6153 basis points (8/13)");
+
+        // User2: 5/13 tickets ≈ 38.5% = 3846 basis points
+        uint256 user2Prob = lottery.getWinProbability(roundId, user2);
+        assertEq(user2Prob, 3846, "User2 probability should be 3846 basis points (5/13)");
+    }
+
+    /**
+     * @notice Test that non-contiguous ticket winner selection works correctly
+     * @dev Completes a full round to ensure the winner is correctly identified
+     *      even when their tickets are non-contiguous
+     */
+    function test_C02Fix_NonContiguousTicketWinnerSelection() public {
+        // Create round
+        vm.prank(owner);
+        uint256 roundId = lottery.createRound(TICKET_PRICE, MAX_TICKETS, ROUND_DURATION);
+
+        // User1 buys tickets 0-4
+        vm.prank(user1);
+        lottery.buyTickets(roundId, 5);
+
+        // User2 buys tickets 5-9
+        vm.prank(user2);
+        lottery.buyTickets(roundId, 5);
+
+        // User1 buys tickets 10-12 (non-contiguous)
+        vm.prank(user1);
+        lottery.buyTickets(roundId, 3);
+
+        // End open phase
+        vm.warp(block.timestamp + ROUND_DURATION + 1);
+
+        // Commit phase - use a seed that will select ticket 11 (belongs to user1)
+        // The winning ticket = seed % totalTicketsSold = seed % 13
+        // We need seed % 13 = 11, so seed could be 11, 24, 37, etc.
+        uint256 seed = 11; // This will select ticket 11
+        bytes32 salt = keccak256("test_salt");
+        bytes32 commitment = keccak256(abi.encodePacked(seed, salt));
+
+        vm.prank(operator);
+        lottery.submitCommitment(roundId, commitment);
+
+        // Reveal phase
+        vm.warp(block.timestamp + 1 hours + 1);
+
+        vm.prank(operator);
+        lottery.revealSeed(roundId, seed, salt);
+
+        // Verify user1 is the winner (ticket 11 belongs to user1's non-contiguous batch)
+        LotteryPoolV3.Round memory round = lottery.getRound(roundId);
+        assertEq(round.winner, user1, "User1 should win with ticket 11 (C-02 fix)");
+        assertEq(uint256(round.status), uint256(LotteryPoolV3.RoundStatus.COMPLETED), "Round should be completed");
+    }
 }

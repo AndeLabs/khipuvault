@@ -46,17 +46,13 @@ const roundIdParamSchema = z.object({
 
 const addressParamSchema = z.object({
   params: z.object({
-    address: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
+    address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
   }),
 });
 
 const userRoundSchema = z.object({
   params: z.object({
-    address: z
-      .string()
-      .regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
+    address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
     roundId: z
       .string()
       .transform((val) => parseInt(val, 10))
@@ -75,7 +71,7 @@ router.get(
   asyncHandler(async (_req, res) => {
     const stats = await lotteryService.getPoolStats();
     sendSuccess(res, stats);
-  }),
+  })
 );
 
 // GET /api/lottery/rounds
@@ -90,7 +86,7 @@ router.get(
     };
     const rounds = await lotteryService.getAllRounds(limit, offset);
     sendSuccess(res, rounds);
-  }),
+  })
 );
 
 // GET /api/lottery/rounds/active
@@ -100,7 +96,7 @@ router.get(
   asyncHandler(async (_req, res) => {
     const rounds = await lotteryService.getActiveRounds();
     sendSuccess(res, rounds);
-  }),
+  })
 );
 
 // GET /api/lottery/rounds/:roundId
@@ -112,7 +108,7 @@ router.get(
     const roundId = parseInt(req.params.roundId, 10);
     const round = await lotteryService.getRoundById(roundId);
     sendSuccess(res, round);
-  }),
+  })
 );
 
 // GET /api/lottery/draws
@@ -127,7 +123,7 @@ router.get(
     };
     const draws = await lotteryService.getDrawHistory(limit, offset);
     sendSuccess(res, draws);
-  }),
+  })
 );
 
 // GET /api/lottery/winners
@@ -135,13 +131,10 @@ router.get(
 router.get(
   "/winners",
   asyncHandler(async (req, res) => {
-    const limit = Math.min(
-      parseInt((req.query.limit as string) || "10", 10),
-      50,
-    );
+    const limit = Math.min(parseInt((req.query.limit as string) || "10", 10), 50);
     const winners = await lotteryService.getTopWinners(limit);
     sendSuccess(res, winners);
-  }),
+  })
 );
 
 // ============================================================================
@@ -156,7 +149,7 @@ router.get(
   asyncHandler(async (req, res) => {
     const stats = await lotteryService.getUserStats(req.params.address);
     sendSuccess(res, stats);
-  }),
+  })
 );
 
 // GET /api/lottery/user/:address/history
@@ -170,13 +163,9 @@ router.get(
       limit?: number;
       offset?: number;
     };
-    const history = await lotteryService.getUserLotteryHistory(
-      req.params.address,
-      limit,
-      offset,
-    );
+    const history = await lotteryService.getUserLotteryHistory(req.params.address, limit, offset);
     sendSuccess(res, history);
-  }),
+  })
 );
 
 // GET /api/lottery/user/:address/rounds/:roundId
@@ -186,12 +175,9 @@ router.get(
   validate(userRoundSchema),
   asyncHandler(async (req, res) => {
     const roundId = parseInt(req.params.roundId, 10);
-    const ticket = await lotteryService.getUserTickets(
-      req.params.address,
-      roundId,
-    );
+    const ticket = await lotteryService.getUserTickets(req.params.address, roundId);
     sendSuccess(res, ticket);
-  }),
+  })
 );
 
 export default router;

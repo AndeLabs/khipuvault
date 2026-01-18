@@ -102,14 +102,7 @@ export function useIndividualPoolV3() {
         if (!result || !Array.isArray(result)) {
           return null;
         }
-        return result as unknown as [
-          bigint,
-          bigint,
-          bigint,
-          bigint,
-          bigint,
-          boolean,
-        ];
+        return result as unknown as [bigint, bigint, bigint, bigint, bigint, boolean];
       } catch (error) {
         return null;
       }
@@ -239,9 +232,7 @@ export function useIndividualPoolV3() {
   const poolStats = {
     totalMusdDeposited: BigInt((totalMusdDeposited as unknown as bigint) || 0n),
     totalYields: BigInt((totalYieldsGenerated as unknown as bigint) || 0n),
-    totalReferralRewards: BigInt(
-      (totalReferralRewards as unknown as bigint) || 0n,
-    ),
+    totalReferralRewards: BigInt((totalReferralRewards as unknown as bigint) || 0n),
     poolAPR: userInfo?.estimatedAPR ? Number(userInfo.estimatedAPR) / 100 : 0,
     emergencyMode: Boolean(emergencyMode),
   };
@@ -257,8 +248,7 @@ export function useIndividualPoolV3() {
       : false;
   const shouldShowAutoCompound =
     hasActiveDeposit && userInfo
-      ? userInfo.yields >=
-        BigInt(V3_FEATURES.individualPool.autoCompoundThreshold)
+      ? userInfo.yields >= BigInt(V3_FEATURES.individualPool.autoCompoundThreshold)
       : false;
 
   // ========================================================================
@@ -285,9 +275,7 @@ export function useIndividualPoolV3() {
 
     // Referral System
     referralStats,
-    hasReferralRewards: referralStats
-      ? referralStats.rewards > BigInt(0)
-      : false,
+    hasReferralRewards: referralStats ? referralStats.rewards > BigInt(0) : false,
     referralCount: referralStats?.count ?? BigInt(0),
 
     // Wallet

@@ -53,10 +53,8 @@ export default function Error({ error, reset }: ErrorProps) {
         digest: error.digest ?? "unknown",
       },
       extra: {
-        pathname:
-          typeof window !== "undefined" ? window.location.pathname : "unknown",
-        userAgent:
-          typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+        pathname: typeof window !== "undefined" ? window.location.pathname : "unknown",
+        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
       },
       level: "error",
     });
@@ -71,20 +69,16 @@ export default function Error({ error, reset }: ErrorProps) {
   }, [error]);
 
   return (
-    <div className="min-h-[calc(100vh-4rem)] flex items-center justify-center p-4">
-      <Card className="max-w-2xl w-full border-destructive/50 shadow-xl">
+    <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center p-4">
+      <Card className="w-full max-w-2xl border-destructive/50 shadow-xl">
         <CardHeader>
-          <div className="flex items-center gap-3 mb-2">
-            <div className="h-12 w-12 rounded-full bg-destructive/10 flex items-center justify-center">
+          <div className="mb-2 flex items-center gap-3">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
               <AlertTriangle className="h-6 w-6 text-destructive" />
             </div>
             <div>
-              <CardTitle className="text-2xl font-heading">
-                Algo salio mal
-              </CardTitle>
-              <CardDescription>
-                Ocurrio un error inesperado en esta pagina
-              </CardDescription>
+              <CardTitle className="font-heading text-2xl">Algo salio mal</CardTitle>
+              <CardDescription>Ocurrio un error inesperado en esta pagina</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -99,11 +93,11 @@ export default function Error({ error, reset }: ErrorProps) {
 
           {/* Error Digest (Production) */}
           {error.digest && (
-            <div className="p-3 rounded-lg bg-muted">
+            <div className="rounded-lg bg-muted p-3">
               <p className="text-xs text-muted-foreground">
                 ID de Error: <span className="font-mono">{error.digest}</span>
               </p>
-              <p className="text-xs text-muted-foreground mt-1">
+              <p className="mt-1 text-xs text-muted-foreground">
                 Por favor incluye este ID si contactas a soporte
               </p>
             </div>
@@ -112,11 +106,11 @@ export default function Error({ error, reset }: ErrorProps) {
           {/* Development Mode - Show Stack Trace */}
           {isDevelopment && error.stack && (
             <details className="mt-4">
-              <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground transition-colors">
+              <summary className="cursor-pointer text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 Stack Trace (modo desarrollo)
               </summary>
-              <div className="mt-2 p-4 bg-muted/50 rounded-lg overflow-x-auto">
-                <pre className="text-xs font-mono text-muted-foreground whitespace-pre-wrap">
+              <div className="mt-2 overflow-x-auto rounded-lg bg-muted/50 p-4">
+                <pre className="whitespace-pre-wrap font-mono text-xs text-muted-foreground">
                   {error.stack}
                 </pre>
               </div>
@@ -124,11 +118,11 @@ export default function Error({ error, reset }: ErrorProps) {
           )}
 
           {/* User Instructions */}
-          <div className="pt-4 space-y-3">
+          <div className="space-y-3 pt-4">
             <p className="text-sm font-medium">Que puedes hacer:</p>
             <div className="grid gap-2">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-surface-elevated">
-                <RefreshCw className="h-5 w-5 text-primary mt-0.5" />
+              <div className="flex items-start gap-3 rounded-lg bg-surface-elevated p-3">
+                <RefreshCw className="mt-0.5 h-5 w-5 text-primary" />
                 <div>
                   <p className="text-sm font-medium">Reintentar</p>
                   <p className="text-xs text-muted-foreground">
@@ -136,8 +130,8 @@ export default function Error({ error, reset }: ErrorProps) {
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-surface-elevated">
-                <Home className="h-5 w-5 text-primary mt-0.5" />
+              <div className="flex items-start gap-3 rounded-lg bg-surface-elevated p-3">
+                <Home className="mt-0.5 h-5 w-5 text-primary" />
                 <div>
                   <p className="text-sm font-medium">Volver al inicio</p>
                   <p className="text-xs text-muted-foreground">
@@ -145,8 +139,8 @@ export default function Error({ error, reset }: ErrorProps) {
                   </p>
                 </div>
               </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-surface-elevated">
-                <Mail className="h-5 w-5 text-primary mt-0.5" />
+              <div className="flex items-start gap-3 rounded-lg bg-surface-elevated p-3">
+                <Mail className="mt-0.5 h-5 w-5 text-primary" />
                 <div>
                   <p className="text-sm font-medium">Contactar soporte</p>
                   <p className="text-xs text-muted-foreground">
@@ -158,23 +152,23 @@ export default function Error({ error, reset }: ErrorProps) {
           </div>
 
           {/* Additional Help */}
-          <div className="pt-4 border-t border-border">
+          <div className="border-t border-border pt-4">
             <p className="text-xs text-muted-foreground">
-              Este error ha sido registrado automaticamente. Estamos trabajando
-              para mejorar la estabilidad de la aplicacion.
+              Este error ha sido registrado automaticamente. Estamos trabajando para mejorar la
+              estabilidad de la aplicacion.
             </p>
           </div>
         </CardContent>
 
         <CardFooter className="flex gap-3">
-          <Button onClick={reset} className="gap-2 flex-1" size="lg">
+          <Button onClick={reset} className="flex-1 gap-2" size="lg">
             <RefreshCw className="h-4 w-4" />
             Reintentar
           </Button>
           <Button
             variant="outline"
             onClick={() => (window.location.href = "/")}
-            className="gap-2 flex-1"
+            className="flex-1 gap-2"
             size="lg"
           >
             <Home className="h-4 w-4" />

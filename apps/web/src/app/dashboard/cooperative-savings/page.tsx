@@ -49,9 +49,7 @@ export default function CooperativeSavingsPage() {
   const [detailsModalOpen, setDetailsModalOpen] = React.useState(false);
 
   // Selected pool for modals
-  const [selectedPoolId, setSelectedPoolId] = React.useState<number | null>(
-    null,
-  );
+  const [selectedPoolId, setSelectedPoolId] = React.useState<number | null>(null);
 
   // Active tab
   const [activeTab, setActiveTab] = React.useState("browse");
@@ -118,8 +116,7 @@ export default function CooperativeSavingsPage() {
   const handleLeaveSuccess = () => {
     toast({
       title: "Left Pool",
-      description:
-        "You have successfully left the pool and withdrawn your funds.",
+      description: "You have successfully left the pool and withdrawn your funds.",
     });
     void refetch();
   };
@@ -142,16 +139,13 @@ export default function CooperativeSavingsPage() {
           title="Cooperative Pools"
           description="Connect your wallet to explore and join cooperative savings pools"
         />
-        <div className="text-center py-12">
-          <div className="h-16 w-16 rounded-full bg-muted mx-auto flex items-center justify-center mb-4">
+        <div className="py-12 text-center">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-muted">
             <Wallet className="h-8 w-8 text-muted-foreground" />
           </div>
-          <h3 className="text-xl font-heading font-semibold mb-2">
-            Wallet Not Connected
-          </h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            Please connect your wallet to access Cooperative Pools and start
-            saving together.
+          <h3 className="mb-2 font-heading text-xl font-semibold">Wallet Not Connected</h3>
+          <p className="mx-auto max-w-md text-muted-foreground">
+            Please connect your wallet to access Cooperative Pools and start saving together.
           </p>
         </div>
       </div>
@@ -165,7 +159,7 @@ export default function CooperativeSavingsPage() {
         console.error("Cooperative Savings Error:", error, errorInfo);
       }}
     >
-      <div className="space-y-6 animate-slide-up">
+      <div className="animate-slide-up space-y-6">
         {/* Page Header */}
         <PageHeader
           title="Cooperative Pools"
@@ -176,16 +170,15 @@ export default function CooperativeSavingsPage() {
         <Alert>
           <Info className="h-4 w-4" />
           <AlertDescription>
-            <strong>How it works:</strong> Create or join a pool with friends.
-            Each member contributes BTC which is deposited into Mezo to generate
-            yields. Yields are distributed proportionally based on each
-            member&apos;s contribution.
+            <strong>How it works:</strong> Create or join a pool with friends. Each member
+            contributes BTC which is deposited into Mezo to generate yields. Yields are distributed
+            proportionally based on each member&apos;s contribution.
           </AlertDescription>
         </Alert>
 
         {/* Tabbed Interface */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 lg:w-auto lg:inline-grid">
+          <TabsList className="grid w-full grid-cols-2 lg:inline-grid lg:w-auto">
             <TabsTrigger value="browse" className="gap-2">
               Browse Pools
               {statistics.totalPools > 0 && (

@@ -48,7 +48,7 @@ export const sanitizeMongoQueries = mongoSanitize({
           requestId: req.headers["x-request-id"],
         },
       },
-      "Sanitized potentially malicious NoSQL query input",
+      "Sanitized potentially malicious NoSQL query input"
     );
   },
 });
@@ -79,7 +79,7 @@ export function requestSizeLimiter(maxSize: string = "10mb") {
               ip: req.ip,
             },
           },
-          "Request payload exceeds size limit",
+          "Request payload exceeds size limit"
         );
         return res.status(413).json({
           error: "Payload Too Large",
@@ -96,9 +96,7 @@ export function requestSizeLimiter(maxSize: string = "10mb") {
  * Content-Type validation middleware
  * Ensures requests have correct Content-Type headers
  */
-export function validateContentType(
-  allowedTypes: string[] = ["application/json"],
-) {
+export function validateContentType(allowedTypes: string[] = ["application/json"]) {
   return (req: Request, res: Response, next: NextFunction) => {
     // Skip for GET requests
     if (req.method === "GET") {
@@ -115,7 +113,7 @@ export function validateContentType(
     }
 
     const isAllowed = allowedTypes.some((type) =>
-      contentType.toLowerCase().includes(type.toLowerCase()),
+      contentType.toLowerCase().includes(type.toLowerCase())
     );
 
     if (!isAllowed) {
@@ -209,8 +207,7 @@ export function xssProtection(req: Request, res: Response, next: NextFunction) {
  */
 export function requestId(req: Request, res: Response, next: NextFunction) {
   const id =
-    req.headers["x-request-id"] ||
-    `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    req.headers["x-request-id"] || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   req.headers["x-request-id"] = id as string;
   res.setHeader("X-Request-ID", id);
@@ -222,11 +219,7 @@ export function requestId(req: Request, res: Response, next: NextFunction) {
  * Security headers middleware
  * Adds additional security headers beyond helmet
  */
-export function securityHeaders(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export function securityHeaders(req: Request, res: Response, next: NextFunction) {
   // Prevent MIME type sniffing
   res.setHeader("X-Content-Type-Options", "nosniff");
 
@@ -240,10 +233,7 @@ export function securityHeaders(
   res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
 
   // Permissions policy
-  res.setHeader(
-    "Permissions-Policy",
-    "geolocation=(), microphone=(), camera=()",
-  );
+  res.setHeader("Permissions-Policy", "geolocation=(), microphone=(), camera=()");
 
   next();
 }
@@ -252,11 +242,7 @@ export function securityHeaders(
  * API key validation middleware (for internal services)
  * Uses timing-safe comparison to prevent timing attacks
  */
-export function validateApiKey(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) {
+export function validateApiKey(req: Request, res: Response, next: NextFunction) {
   const apiKey = req.headers["x-api-key"] as string;
   const expectedApiKey = process.env.API_KEY;
 
@@ -281,7 +267,7 @@ export function validateApiKey(
           ip: req.ip,
         },
       },
-      "Invalid or missing API key",
+      "Invalid or missing API key"
     );
     return res.status(401).json({
       error: "Unauthorized",

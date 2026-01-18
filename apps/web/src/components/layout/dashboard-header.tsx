@@ -35,7 +35,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps = {}) {
   if (!mounted) {
     return (
       <header className="sticky top-0 z-30 flex h-14 items-center gap-4 border-b bg-background px-4 sm:static sm:h-auto sm:border-0 sm:bg-transparent sm:px-6">
-        <div className="animate-pulse flex items-center gap-2 ml-auto h-10 w-32 bg-muted rounded" />
+        <div className="ml-auto flex h-10 w-32 animate-pulse items-center gap-2 rounded bg-muted" />
       </header>
     );
   }
@@ -56,12 +56,12 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps = {}) {
         </Button>
       )}
 
-      <div className="flex items-center gap-3 ml-auto">
+      <div className="ml-auto flex items-center gap-3">
         {/* BTC Balance Display (when connected) - Hidden on mobile as SmartConnectButton shows it */}
         {isConnected && balanceData && (
-          <div className="hidden lg:flex items-center gap-2 px-3 py-2 rounded-lg bg-background/50 border border-primary/10">
+          <div className="hidden items-center gap-2 rounded-lg border border-primary/10 bg-background/50 px-3 py-2 lg:flex">
             <Icons.bitcoin className="h-5 w-5" style={{ color: "#F7931A" }} />
-            <span className="font-code font-semibold text-sm">
+            <span className="font-code text-sm font-semibold">
               {Number(balanceData.formatted).toFixed(6)} BTC
             </span>
           </div>

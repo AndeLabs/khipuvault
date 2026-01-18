@@ -19,11 +19,7 @@ import {
   useClaimYield,
   useClosePool,
 } from "./use-pool-mutations";
-import {
-  usePoolCounter,
-  usePerformanceFee,
-  useEmergencyMode,
-} from "./use-pool-queries";
+import { usePoolCounter, usePerformanceFee, useEmergencyMode } from "./use-pool-queries";
 
 /**
  * Main hook combining all cooperative pool functionality

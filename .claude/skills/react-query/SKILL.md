@@ -17,8 +17,7 @@ export const queryKeys = {
   all: ["khipuvault"] as const,
   pools: () => [...queryKeys.all, "pools"] as const,
   pool: (address: string) => [...queryKeys.pools(), address] as const,
-  userDeposits: (address: string) =>
-    [...queryKeys.all, "deposits", address] as const,
+  userDeposits: (address: string) => [...queryKeys.all, "deposits", address] as const,
   transactions: (filters: TransactionFilters) =>
     [...queryKeys.all, "transactions", filters] as const,
 };
@@ -46,11 +45,7 @@ export function useTransactions(filters: TransactionFilters) {
 ## Wagmi Integration
 
 ```typescript
-import {
-  useReadContract,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-} from "wagmi";
+import { useReadContract, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { useQueryClient } from "@tanstack/react-query";
 import { INDIVIDUAL_POOL_ABI, INDIVIDUAL_POOL_ADDRESS } from "@khipu/web3";
 
@@ -132,23 +127,17 @@ export function useRecordTransaction() {
       const previousTxs = queryClient.getQueryData(queryKeys.transactions({}));
 
       // Optimistically add new transaction
-      queryClient.setQueryData(
-        queryKeys.transactions({}),
-        (old: Transaction[] | undefined) => [
-          { ...newTx, status: "PENDING" },
-          ...(old || []),
-        ],
-      );
+      queryClient.setQueryData(queryKeys.transactions({}), (old: Transaction[] | undefined) => [
+        { ...newTx, status: "PENDING" },
+        ...(old || []),
+      ]);
 
       return { previousTxs };
     },
 
     // Rollback on error
     onError: (err, newTx, context) => {
-      queryClient.setQueryData(
-        queryKeys.transactions({}),
-        context?.previousTxs,
-      );
+      queryClient.setQueryData(queryKeys.transactions({}), context?.previousTxs);
     },
 
     // Refetch after success or error

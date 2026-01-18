@@ -42,15 +42,9 @@ interface LeavePoolDialogProps {
   onSuccess?: () => void;
 }
 
-export function LeavePoolDialog({
-  poolId,
-  open,
-  onClose,
-  onSuccess,
-}: LeavePoolDialogProps) {
+export function LeavePoolDialog({ poolId, open, onClose, onSuccess }: LeavePoolDialogProps) {
   const { toast } = useToast();
-  const { leavePool, state, error, reset, performanceFee } =
-    useCooperativePool();
+  const { leavePool, state, error, reset, performanceFee } = useCooperativePool();
   const { poolInfo } = usePoolInfo(poolId ?? 0);
   const { memberInfo } = useMemberInfo(poolId ?? 0);
   const { pendingYield } = useMemberYield(poolId ?? 0);
@@ -68,10 +62,7 @@ export function LeavePoolDialog({
       toast({
         variant: "destructive",
         title: "Error",
-        description:
-          err instanceof Error
-            ? err.message
-            : "Failed to leave pool. Please try again.",
+        description: err instanceof Error ? err.message : "Failed to leave pool. Please try again.",
       });
     }
   };
@@ -81,8 +72,7 @@ export function LeavePoolDialog({
     if (state === "success") {
       toast({
         title: "Left Pool",
-        description:
-          "You have successfully left the pool and withdrawn your funds.",
+        description: "You have successfully left the pool and withdrawn your funds.",
       });
       onSuccess?.();
       handleClose();
@@ -114,8 +104,8 @@ export function LeavePoolDialog({
             Leave Pool?
           </AlertDialogTitle>
           <AlertDialogDescription>
-            This action will remove you from the pool and withdraw your
-            contribution plus any earned yields. This action cannot be undone.
+            This action will remove you from the pool and withdraw your contribution plus any earned
+            yields. This action cannot be undone.
           </AlertDialogDescription>
         </AlertDialogHeader>
 
@@ -123,7 +113,7 @@ export function LeavePoolDialog({
           {/* Pool Info */}
           {poolInfo && (
             <div>
-              <p className="text-sm font-medium mb-1">{poolInfo.name}</p>
+              <p className="mb-1 text-sm font-medium">{poolInfo.name}</p>
               <p className="text-xs text-muted-foreground">Pool #{poolId}</p>
             </div>
           )}
@@ -136,7 +126,7 @@ export function LeavePoolDialog({
 
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between">
-                <span className="text-muted-foreground flex items-center gap-1.5">
+                <span className="flex items-center gap-1.5 text-muted-foreground">
                   <Bitcoin className="h-3.5 w-3.5" />
                   Your Contribution
                 </span>
@@ -148,7 +138,7 @@ export function LeavePoolDialog({
               {grossYield > BigInt(0) && (
                 <>
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground flex items-center gap-1.5">
+                    <span className="flex items-center gap-1.5 text-muted-foreground">
                       <TrendingUp className="h-3.5 w-3.5" />
                       Gross Yield
                     </span>
@@ -158,7 +148,7 @@ export function LeavePoolDialog({
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <span className="text-muted-foreground text-xs">
+                    <span className="text-xs text-muted-foreground">
                       Performance Fee ({(performanceFee / 100).toFixed(2)}%)
                     </span>
                     <span className="font-mono text-xs text-muted-foreground">
@@ -170,9 +160,7 @@ export function LeavePoolDialog({
 
                   <div className="flex items-center justify-between font-semibold">
                     <span>Net Yield</span>
-                    <span className="font-mono text-success">
-                      {formatMUSD(netYield)} MUSD
-                    </span>
+                    <span className="font-mono text-success">{formatMUSD(netYield)} MUSD</span>
                   </div>
                 </>
               )}
@@ -183,9 +171,8 @@ export function LeavePoolDialog({
           <Alert variant="destructive">
             <AlertTriangle className="h-4 w-4" />
             <AlertDescription className="text-sm">
-              <strong>Warning:</strong> Leaving the pool will permanently remove
-              you from this cooperative. You will need to rejoin to participate
-              again.
+              <strong>Warning:</strong> Leaving the pool will permanently remove you from this
+              cooperative. You will need to rejoin to participate again.
             </AlertDescription>
           </Alert>
 
@@ -207,10 +194,8 @@ export function LeavePoolDialog({
           >
             {isProcessing ? (
               <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                {state === "executing"
-                  ? "Confirm in Wallet..."
-                  : "Leaving Pool..."}
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                {state === "executing" ? "Confirm in Wallet..." : "Leaving Pool..."}
               </>
             ) : (
               "Yes, Leave Pool"

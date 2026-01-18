@@ -52,7 +52,7 @@ logger.info(
     action: "login",
     ip: "192.168.1.1",
   },
-  "User logged in",
+  "User logged in"
 );
 
 // ❌ BAD - String concatenation
@@ -93,7 +93,7 @@ try {
         retries: 3,
       },
     },
-    "Operation failed",
+    "Operation failed"
   );
 }
 ```
@@ -175,7 +175,7 @@ logger.info(
       apiKey: "key_xyz", // Will be [REDACTED]
     },
   },
-  "User data",
+  "User data"
 );
 
 // Output:
@@ -300,7 +300,7 @@ Logs are always JSON in production for log aggregation systems:
        endpoint: "/api/users",
        rateLimit: { current: 95, max: 100 },
      },
-     "Approaching rate limit",
+     "Approaching rate limit"
    );
    ```
 

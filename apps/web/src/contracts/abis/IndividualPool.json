@@ -36,9 +36,7 @@
       "type": "function",
       "name": "MUSD",
       "inputs": [],
-      "outputs": [
-        { "name": "", "type": "address", "internalType": "contract IERC20" }
-      ],
+      "outputs": [{ "name": "", "type": "address", "internalType": "contract IERC20" }],
       "stateMutability": "view"
     },
     {
@@ -57,29 +55,21 @@
     {
       "type": "function",
       "name": "calculateYield",
-      "inputs": [
-        { "name": "user", "type": "address", "internalType": "address" }
-      ],
-      "outputs": [
-        { "name": "totalYield", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "user", "type": "address", "internalType": "address" }],
+      "outputs": [{ "name": "totalYield", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "claimYield",
       "inputs": [],
-      "outputs": [
-        { "name": "yieldAmount", "type": "uint256", "internalType": "uint256" }
-      ],
+      "outputs": [{ "name": "yieldAmount", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
       "name": "deposit",
-      "inputs": [
-        { "name": "musdAmount", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "musdAmount", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -105,9 +95,7 @@
     {
       "type": "function",
       "name": "getUserInfo",
-      "inputs": [
-        { "name": "user", "type": "address", "internalType": "address" }
-      ],
+      "inputs": [{ "name": "user", "type": "address", "internalType": "address" }],
       "outputs": [
         {
           "name": "userDeposit",
@@ -149,12 +137,8 @@
     {
       "type": "function",
       "name": "getUserRoi",
-      "inputs": [
-        { "name": "user", "type": "address", "internalType": "address" }
-      ],
-      "outputs": [
-        { "name": "roi", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "user", "type": "address", "internalType": "address" }],
+      "outputs": [{ "name": "roi", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
@@ -195,18 +179,14 @@
     {
       "type": "function",
       "name": "setFeeCollector",
-      "inputs": [
-        { "name": "newCollector", "type": "address", "internalType": "address" }
-      ],
+      "inputs": [{ "name": "newCollector", "type": "address", "internalType": "address" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
       "name": "setPerformanceFee",
-      "inputs": [
-        { "name": "newFee", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "newFee", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -227,9 +207,7 @@
     {
       "type": "function",
       "name": "transferOwnership",
-      "inputs": [
-        { "name": "newOwner", "type": "address", "internalType": "address" }
-      ],
+      "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -462,16 +440,12 @@
     {
       "type": "error",
       "name": "AddressEmptyCode",
-      "inputs": [
-        { "name": "target", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "target", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "AddressInsufficientBalance",
-      "inputs": [
-        { "name": "account", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
     },
     { "type": "error", "name": "DepositAlreadyExists", "inputs": [] },
     { "type": "error", "name": "EnforcedPause", "inputs": [] },
@@ -487,24 +461,18 @@
     {
       "type": "error",
       "name": "OwnableInvalidOwner",
-      "inputs": [
-        { "name": "owner", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "owner", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "OwnableUnauthorizedAccount",
-      "inputs": [
-        { "name": "account", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
     },
     { "type": "error", "name": "ReentrancyGuardReentrantCall", "inputs": [] },
     {
       "type": "error",
       "name": "SafeERC20FailedOperation",
-      "inputs": [
-        { "name": "token", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "token", "type": "address", "internalType": "address" }]
     }
   ],
   "bytecode": {
@@ -592,16 +560,12 @@
           "type": "constructor"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "target", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "target", "type": "address" }],
           "type": "error",
           "name": "AddressEmptyCode"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "account", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
           "type": "error",
           "name": "AddressInsufficientBalance"
         },
@@ -617,16 +581,12 @@
         { "inputs": [], "type": "error", "name": "MinimumDepositNotMet" },
         { "inputs": [], "type": "error", "name": "NoActiveDeposit" },
         {
-          "inputs": [
-            { "internalType": "address", "name": "owner", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
           "type": "error",
           "name": "OwnableInvalidOwner"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "account", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
           "type": "error",
           "name": "OwnableUnauthorizedAccount"
         },
@@ -636,9 +596,7 @@
           "name": "ReentrancyGuardReentrantCall"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "token", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
           "type": "error",
           "name": "SafeERC20FailedOperation"
         },
@@ -824,27 +782,21 @@
           "stateMutability": "view",
           "type": "function",
           "name": "MAX_DEPOSIT",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "MIN_DEPOSIT",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "MUSD",
-          "outputs": [
-            { "internalType": "contract IERC20", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }]
         },
         {
           "inputs": [],
@@ -860,9 +812,7 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "user", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "calculateYield",
@@ -904,9 +854,7 @@
           "stateMutability": "view",
           "type": "function",
           "name": "feeCollector",
-          "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
         },
         {
           "inputs": [],
@@ -933,9 +881,7 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "user", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getUserInfo",
@@ -977,24 +923,18 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "user", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "user", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getUserRoi",
-          "outputs": [
-            { "internalType": "uint256", "name": "roi", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "roi", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "owner",
-          "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
         },
         {
           "inputs": [],
@@ -1014,9 +954,7 @@
           "stateMutability": "view",
           "type": "function",
           "name": "performanceFee",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
@@ -1037,9 +975,7 @@
           "name": "setFeeCollector"
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "newFee", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "newFee", "type": "uint256" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "setPerformanceFee"
@@ -1049,23 +985,17 @@
           "stateMutability": "view",
           "type": "function",
           "name": "totalMusdDeposited",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "totalYieldsGenerated",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "newOwner", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "transferOwnership"
@@ -1083,9 +1013,7 @@
           "name": "updateYield"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "", "type": "address" }],
           "stateMutability": "view",
           "type": "function",
           "name": "userDeposits",

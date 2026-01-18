@@ -19,9 +19,7 @@ describe("TransactionsService", () => {
 
   describe("getTransactionByHash", () => {
     it("should return transaction for valid hash", async () => {
-      vi.mocked(prisma.deposit.findUnique).mockResolvedValue(
-        fixtures.mockDeposit as any,
-      );
+      vi.mocked(prisma.deposit.findUnique).mockResolvedValue(fixtures.mockDeposit as any);
 
       const result = await transactionsService.getTransactionByHash("0xTx123");
 
@@ -34,15 +32,13 @@ describe("TransactionsService", () => {
     it("should throw 404 when transaction not found", async () => {
       vi.mocked(prisma.deposit.findUnique).mockResolvedValue(null);
 
-      await expect(
-        transactionsService.getTransactionByHash("0xnonexistent"),
-      ).rejects.toThrow("Transaction not found");
+      await expect(transactionsService.getTransactionByHash("0xnonexistent")).rejects.toThrow(
+        "Transaction not found"
+      );
     });
 
     it("should normalize hash to lowercase", async () => {
-      vi.mocked(prisma.deposit.findUnique).mockResolvedValue(
-        fixtures.mockDeposit as any,
-      );
+      vi.mocked(prisma.deposit.findUnique).mockResolvedValue(fixtures.mockDeposit as any);
 
       await transactionsService.getTransactionByHash("0xABCDEF123456");
 
@@ -55,9 +51,7 @@ describe("TransactionsService", () => {
   describe("getRecentTransactions", () => {
     it("should return paginated transactions", async () => {
       const mockTransactions = [fixtures.mockDeposit];
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue(
-        mockTransactions as any,
-      );
+      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockTransactions as any);
       vi.mocked(prisma.deposit.count).mockResolvedValue(100);
 
       const result = await transactionsService.getRecentTransactions(50, 0);
@@ -86,9 +80,7 @@ describe("TransactionsService", () => {
     });
 
     it("should indicate no more pages when at end", async () => {
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue([
-        fixtures.mockDeposit,
-      ] as any);
+      vi.mocked(prisma.deposit.findMany).mockResolvedValue([fixtures.mockDeposit] as any);
       vi.mocked(prisma.deposit.count).mockResolvedValue(10);
 
       const result = await transactionsService.getRecentTransactions(50, 0);
@@ -100,16 +92,10 @@ describe("TransactionsService", () => {
   describe("getTransactionsByPool", () => {
     it("should return transactions for specific pool", async () => {
       const mockTransactions = [fixtures.mockDeposit];
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue(
-        mockTransactions as any,
-      );
+      vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockTransactions as any);
       vi.mocked(prisma.deposit.count).mockResolvedValue(50);
 
-      const result = await transactionsService.getTransactionsByPool(
-        "0xPool123",
-        20,
-        0,
-      );
+      const result = await transactionsService.getTransactionsByPool("0xPool123", 20, 0);
 
       expect(prisma.deposit.findMany).toHaveBeenCalledWith({
         where: { poolAddress: "0xpool123" },
@@ -130,21 +116,15 @@ describe("TransactionsService", () => {
       expect(prisma.deposit.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { poolAddress: "0xabcdef" },
-        }),
+        })
       );
     });
 
     it("should calculate hasMore correctly", async () => {
-      vi.mocked(prisma.deposit.findMany).mockResolvedValue([
-        fixtures.mockDeposit,
-      ] as any);
+      vi.mocked(prisma.deposit.findMany).mockResolvedValue([fixtures.mockDeposit] as any);
       vi.mocked(prisma.deposit.count).mockResolvedValue(100);
 
-      const result = await transactionsService.getTransactionsByPool(
-        "0xPool123",
-        50,
-        40,
-      );
+      const result = await transactionsService.getTransactionsByPool("0xPool123", 50, 40);
 
       expect(result.pagination.hasMore).toBe(true); // 40 + 50 < 100
     });

@@ -97,6 +97,10 @@ contract LotteryPoolV3 is BasePoolV3 {
     /// @notice List of participants per round (for iteration)
     mapping(uint256 => address[]) public participantList;
 
+    /// @notice C-02 FIX: Direct ticket ownership mapping for non-contiguous ticket support
+    /// @dev Maps roundId => ticketIndex => owner address
+    mapping(uint256 => mapping(uint256 => address)) public ticketOwners;
+
     /// @notice Operator address (can commit/reveal)
     address public operator;
 
@@ -121,9 +125,10 @@ contract LotteryPoolV3 is BasePoolV3 {
 
     /**
      * @dev Storage gap for future upgrades
-     * Size: 50 slots - base pool (5) - lottery pool (7) = 38 slots
+     * Size: 50 slots - base pool (5) - lottery pool (8) = 37 slots
+     * Note: Reduced by 1 for ticketOwners mapping added in C-02 FIX
      */
-    uint256[38] private __gap;
+    uint256[37] private __gap;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
@@ -315,17 +320,22 @@ contract LotteryPoolV3 is BasePoolV3 {
 
         uint256 musdAmount = uint256(round.ticketPrice) * ticketCount;
 
-        // Record first ticket index for new participants
-        uint64 firstTicket;
+        // C-02 FIX: Calculate ticket indices based on global totalTicketsSold
+        // This ensures each ticket has a unique global index regardless of purchase order
+        uint64 firstTicket = round.totalTicketsSold;
+        uint64 lastTicket = firstTicket + uint64(ticketCount) - 1;
+
+        // Record first ticket index only for new participants
         if (participant.ticketCount == 0) {
-            firstTicket = round.totalTicketsSold;
             participant.firstTicketIndex = firstTicket;
             participantList[roundId].push(msg.sender);
-        } else {
-            firstTicket = uint64(participant.firstTicketIndex) + uint64(participant.ticketCount);
         }
 
-        uint64 lastTicket = firstTicket + uint64(ticketCount) - 1;
+        // C-02 FIX: Register ownership for each ticket in this batch
+        // This handles non-contiguous ticket purchases correctly
+        for (uint64 i = firstTicket; i <= lastTicket; i++) {
+            ticketOwners[roundId][i] = msg.sender;
+        }
 
         // Update state (CEI pattern)
         participant.ticketCount += uint128(ticketCount);
@@ -585,24 +595,15 @@ contract LotteryPoolV3 is BasePoolV3 {
 
     /**
      * @notice Find owner of a specific ticket
+     * @dev C-02 FIX: Now uses direct mapping lookup (O(1)) instead of iteration
+     *      This correctly handles non-contiguous ticket purchases
      */
     function _findTicketOwner(uint256 roundId, uint256 ticketIndex)
         internal
         view
         returns (address)
     {
-        address[] memory participantAddresses = participantList[roundId];
-
-        for (uint256 i = 0; i < participantAddresses.length; i++) {
-            Participant memory p = participants[roundId][participantAddresses[i]];
-            uint256 lastTicket = p.firstTicketIndex + p.ticketCount - 1;
-
-            if (ticketIndex >= p.firstTicketIndex && ticketIndex <= lastTicket) {
-                return participantAddresses[i];
-            }
-        }
-
-        return address(0);
+        return ticketOwners[roundId][ticketIndex];
     }
 
     /**

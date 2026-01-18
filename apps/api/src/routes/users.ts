@@ -8,12 +8,7 @@
 import { Router, type Router as ExpressRouter } from "express";
 import { z } from "zod";
 
-import {
-  asyncHandler,
-  sendSuccess,
-  sendUnauthorized,
-  sendForbidden,
-} from "../lib/route-handler";
+import { asyncHandler, sendSuccess, sendUnauthorized, sendForbidden } from "../lib/route-handler";
 import {
   addressParamSchema,
   addressWithPaginationSchema,
@@ -37,7 +32,7 @@ const usersService = new UsersService();
 function verifyAddressOwnership(
   req: import("express").Request,
   res: import("express").Response,
-  requestedAddress: string,
+  requestedAddress: string
 ): boolean {
   if (!req.user) {
     sendUnauthorized(res, "Authentication required");
@@ -67,7 +62,7 @@ router.get(
     }
     const user = await usersService.getUserByAddress(req.params.address);
     sendSuccess(res, user);
-  }),
+  })
 );
 
 // GET /api/users/:address/portfolio
@@ -81,7 +76,7 @@ router.get(
     }
     const portfolio = await usersService.getUserPortfolio(req.params.address);
     sendSuccess(res, portfolio);
-  }),
+  })
 );
 
 // GET /api/users/:address/transactions
@@ -97,10 +92,10 @@ router.get(
     const transactions = await usersService.getUserTransactions(
       req.params.address,
       Number(limit),
-      Number(offset),
+      Number(offset)
     );
     sendSuccess(res, transactions);
-  }),
+  })
 );
 
 // GET /api/users/:address/positions
@@ -114,7 +109,7 @@ router.get(
     }
     const positions = await usersService.getUserPositions(req.params.address);
     sendSuccess(res, positions);
-  }),
+  })
 );
 
 // POST /api/users - Create or update user profile
@@ -149,7 +144,7 @@ router.post(
     });
 
     sendSuccess(res, user, 201);
-  }),
+  })
 );
 
 export default router;

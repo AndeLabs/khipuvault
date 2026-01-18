@@ -4,18 +4,8 @@ import { Coins, ExternalLink, ChevronDown } from "lucide-react";
 import * as React from "react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 
 const MEZO_FAUCET_URL = "https://faucet.mezo.org";
@@ -25,10 +15,7 @@ interface GetMusdGuideProps {
   className?: string;
 }
 
-export function GetMusdGuide({
-  walletBalance = "0",
-  className,
-}: GetMusdGuideProps) {
+export function GetMusdGuide({ walletBalance = "0", className }: GetMusdGuideProps) {
   const [isOpen, setIsOpen] = React.useState(true);
   const hasBalance = Number(walletBalance) > 0;
 
@@ -38,31 +25,24 @@ export function GetMusdGuide({
   }
 
   return (
-    <Card
-      variant="surface"
-      className={cn("border-accent/30 bg-accent/5", className)}
-    >
+    <Card variant="surface" className={cn("border-accent/30 bg-accent/5", className)}>
       <Collapsible open={isOpen} onOpenChange={setIsOpen}>
         <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-accent/10 transition-colors rounded-t-lg">
+          <CardHeader className="cursor-pointer rounded-t-lg transition-colors hover:bg-accent/10">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-accent/20 flex items-center justify-center">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/20">
                   <Coins className="h-5 w-5 text-accent" />
                 </div>
                 <div>
-                  <CardTitle className="text-base">
-                    Need testnet mUSD tokens?
-                  </CardTitle>
-                  <CardDescription>
-                    Follow these steps to get started
-                  </CardDescription>
+                  <CardTitle className="text-base">Need testnet mUSD tokens?</CardTitle>
+                  <CardDescription>Follow these steps to get started</CardDescription>
                 </div>
               </div>
               <ChevronDown
                 className={cn(
                   "h-5 w-5 text-muted-foreground transition-transform",
-                  isOpen && "rotate-180",
+                  isOpen && "rotate-180"
                 )}
               />
             </div>
@@ -74,21 +54,15 @@ export function GetMusdGuide({
             <div className="space-y-4">
               {/* Step 1 */}
               <div className="flex gap-4">
-                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-lavanda/20 flex items-center justify-center text-sm font-semibold text-lavanda">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-lavanda/20 text-sm font-semibold text-lavanda">
                   1
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium mb-1">
-                    Visit the Mezo Testnet Faucet
-                  </div>
-                  <p className="text-sm text-muted-foreground mb-2">
+                  <div className="mb-1 font-medium">Visit the Mezo Testnet Faucet</div>
+                  <p className="mb-2 text-sm text-muted-foreground">
                     Get free testnet BTC and mUSD tokens to start testing.
                   </p>
-                  <a
-                    href={MEZO_FAUCET_URL}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  >
+                  <a href={MEZO_FAUCET_URL} target="_blank" rel="noopener noreferrer">
                     <Button variant="secondary" size="sm" className="gap-2">
                       <Coins className="h-4 w-4" />
                       Open Mezo Faucet
@@ -100,38 +74,36 @@ export function GetMusdGuide({
 
               {/* Step 2 */}
               <div className="flex gap-4">
-                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-lavanda/20 flex items-center justify-center text-sm font-semibold text-lavanda">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-lavanda/20 text-sm font-semibold text-lavanda">
                   2
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium mb-1">Connect your wallet</div>
+                  <div className="mb-1 font-medium">Connect your wallet</div>
                   <p className="text-sm text-muted-foreground">
-                    Make sure you're on Mezo Testnet (Chain ID: 31611) and
-                    request tokens.
+                    Make sure you're on Mezo Testnet (Chain ID: 31611) and request tokens.
                   </p>
                 </div>
               </div>
 
               {/* Step 3 */}
               <div className="flex gap-4">
-                <div className="flex-shrink-0 h-8 w-8 rounded-full bg-lavanda/20 flex items-center justify-center text-sm font-semibold text-lavanda">
+                <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-lavanda/20 text-sm font-semibold text-lavanda">
                   3
                 </div>
                 <div className="flex-1">
-                  <div className="font-medium mb-1">Come back and deposit</div>
+                  <div className="mb-1 font-medium">Come back and deposit</div>
                   <p className="text-sm text-muted-foreground">
-                    Once you have mUSD, enter an amount above and start earning
-                    yields!
+                    Once you have mUSD, enter an amount above and start earning yields!
                   </p>
                 </div>
               </div>
 
               {/* Info box */}
-              <div className="p-3 rounded-lg bg-muted/50 border border-border mt-4">
+              <div className="mt-4 rounded-lg border border-border bg-muted/50 p-3">
                 <p className="text-xs text-muted-foreground">
-                  <strong>Note:</strong> This is a testnet application. The mUSD
-                  tokens have no real value and are for testing purposes only.
-                  Never send real funds to testnet addresses.
+                  <strong>Note:</strong> This is a testnet application. The mUSD tokens have no real
+                  value and are for testing purposes only. Never send real funds to testnet
+                  addresses.
                 </p>
               </div>
             </div>

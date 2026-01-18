@@ -14,12 +14,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { parseEther, type Address } from "viem";
-import {
-  useAccount,
-  useWriteContract,
-  useWaitForTransactionReceipt,
-  useReadContract,
-} from "wagmi";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 
@@ -136,10 +131,11 @@ export function useReferralSystem() {
     reset: resetApprove,
   } = useWriteContract();
 
-  const { isLoading: isApprovePending, isSuccess: isApproveSuccess } =
-    useWaitForTransactionReceipt({
+  const { isLoading: isApprovePending, isSuccess: isApproveSuccess } = useWaitForTransactionReceipt(
+    {
       hash: approveTxHash,
-    });
+    }
+  );
 
   // Claim/Deposit transaction
   const {
@@ -171,14 +167,7 @@ export function useReferralSystem() {
         });
       });
     }
-  }, [
-    isApproveSuccess,
-    state,
-    depositAmount,
-    referrerAddress,
-    claimWrite,
-    refetchAllowance,
-  ]);
+  }, [isApproveSuccess, state, depositAmount, referrerAddress, claimWrite, refetchAllowance]);
 
   // Handle success
   useEffect(() => {
@@ -250,10 +239,7 @@ export function useReferralSystem() {
   };
 
   // Deposit with referral
-  const depositWithReferral = async (
-    amountString: string,
-    referrer: Address,
-  ) => {
+  const depositWithReferral = async (amountString: string, referrer: Address) => {
     if (!address) {
       setError("Conecta tu wallet primero");
       setState("error");
@@ -288,7 +274,7 @@ export function useReferralSystem() {
         setState("approving");
 
         const MAX_UINT256 = BigInt(
-          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
         );
 
         approveWrite({

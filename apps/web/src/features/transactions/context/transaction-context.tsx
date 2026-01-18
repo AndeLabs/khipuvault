@@ -31,10 +31,7 @@ interface TransactionContextValue {
   transactions: Transaction[];
   activeTransaction: Transaction | null;
   startTransaction: (type: string, data?: any) => string;
-  updateTransaction: (
-    id: string,
-    update: Partial<Omit<Transaction, "id" | "timestamp">>,
-  ) => void;
+  updateTransaction: (id: string, update: Partial<Omit<Transaction, "id" | "timestamp">>) => void;
   completeTransaction: (id: string, txHash?: string) => void;
   failTransaction: (id: string, error: string) => void;
   rejectTransaction: (id: string) => void;
@@ -42,31 +39,23 @@ interface TransactionContextValue {
   clearAllTransactions: () => void;
 }
 
-const TransactionContext = React.createContext<
-  TransactionContextValue | undefined
->(undefined);
+const TransactionContext = React.createContext<TransactionContextValue | undefined>(undefined);
 
 interface TransactionProviderProps {
   children: React.ReactNode;
   maxHistory?: number;
 }
 
-export function TransactionProvider({
-  children,
-  maxHistory = 50,
-}: TransactionProviderProps) {
+export function TransactionProvider({ children, maxHistory = 50 }: TransactionProviderProps) {
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
   const { toast } = useToast();
 
   const activeTransaction = React.useMemo(
     () =>
       transactions.find(
-        (tx) =>
-          tx.status === "pending" ||
-          tx.status === "signing" ||
-          tx.status === "confirming",
+        (tx) => tx.status === "pending" || tx.status === "signing" || tx.status === "confirming"
       ) ?? null,
-    [transactions],
+    [transactions]
   );
 
   const startTransaction = React.useCallback(
@@ -87,16 +76,14 @@ export function TransactionProvider({
 
       return id;
     },
-    [maxHistory],
+    [maxHistory]
   );
 
   const updateTransaction = React.useCallback(
     (id: string, update: Partial<Omit<Transaction, "id" | "timestamp">>) => {
-      setTransactions((prev) =>
-        prev.map((tx) => (tx.id === id ? { ...tx, ...update } : tx)),
-      );
+      setTransactions((prev) => prev.map((tx) => (tx.id === id ? { ...tx, ...update } : tx)));
     },
-    [],
+    []
   );
 
   const completeTransaction = React.useCallback(
@@ -113,23 +100,19 @@ export function TransactionProvider({
           });
         }
         return prev.map((tx) =>
-          tx.id === id
-            ? { ...tx, status: "success" as TransactionState, txHash }
-            : tx,
+          tx.id === id ? { ...tx, status: "success" as TransactionState, txHash } : tx
         );
       });
     },
-    [toast],
+    [toast]
   );
 
   const failTransaction = React.useCallback(
     (id: string, error: string) => {
       setTransactions((prev) =>
         prev.map((tx) =>
-          tx.id === id
-            ? { ...tx, status: "error" as TransactionState, message: error }
-            : tx,
-        ),
+          tx.id === id ? { ...tx, status: "error" as TransactionState, message: error } : tx
+        )
       );
 
       toast({
@@ -138,7 +121,7 @@ export function TransactionProvider({
         variant: "destructive",
       });
     },
-    [toast],
+    [toast]
   );
 
   const rejectTransaction = React.useCallback((id: string) => {
@@ -150,8 +133,8 @@ export function TransactionProvider({
               status: "rejected" as TransactionState,
               message: "Transaction rejected by user",
             }
-          : tx,
-      ),
+          : tx
+      )
     );
   }, []);
 
@@ -175,11 +158,7 @@ export function TransactionProvider({
     clearAllTransactions,
   };
 
-  return (
-    <TransactionContext.Provider value={value}>
-      {children}
-    </TransactionContext.Provider>
-  );
+  return <TransactionContext.Provider value={value}>{children}</TransactionContext.Provider>;
 }
 
 export function useTransaction() {
@@ -201,9 +180,7 @@ interface UseTransactionExecuteOptions<T = any> {
   onError?: (error: Error) => void;
 }
 
-export function useTransactionExecute<T = any>(
-  options: UseTransactionExecuteOptions<T>,
-) {
+export function useTransactionExecute<T = any>(options: UseTransactionExecuteOptions<T>) {
   const {
     startTransaction,
     updateTransaction,
@@ -259,10 +236,7 @@ export function useTransactionExecute<T = any>(
           rejectTransaction(txId);
         } else {
           // Transaction failed
-          failTransaction(
-            txId,
-            error?.message || "Transaction failed. Please try again.",
-          );
+          failTransaction(txId, error?.message || "Transaction failed. Please try again.");
 
           if (options.onError) {
             options.onError(error);
@@ -279,7 +253,7 @@ export function useTransactionExecute<T = any>(
       failTransaction,
       rejectTransaction,
       options,
-    ],
+    ]
   );
 
   return { execute };

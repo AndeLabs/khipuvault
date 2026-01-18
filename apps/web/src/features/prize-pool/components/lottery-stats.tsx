@@ -26,7 +26,7 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
   const [timeRemaining, setTimeRemaining] = React.useState(
     roundInfo
       ? getTimeRemaining(roundInfo.endTime)
-      : { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 },
+      : { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 }
   );
 
   // Update countdown
@@ -53,7 +53,7 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
             </CardHeader>
             <CardContent>
               <Skeleton className="h-8 w-20" />
-              <Skeleton className="h-3 w-32 mt-2" />
+              <Skeleton className="mt-2 h-3 w-32" />
             </CardContent>
           </Card>
         ))}
@@ -130,9 +130,7 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{stat.value}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {stat.subtitle}
-              </p>
+              <p className="mt-1 text-xs text-muted-foreground">{stat.subtitle}</p>
             </CardContent>
           </Card>
         );

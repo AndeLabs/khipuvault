@@ -7,6 +7,7 @@ import { verifyMessage } from "viem";
 
 import { tokenBlacklist } from "../lib/cache";
 import { logger } from "../lib/logger";
+import { getStore, isRedisEnabled } from "../lib/redis";
 
 // Extend Express Request type to include auth data
 declare global {
@@ -23,16 +24,19 @@ declare global {
   }
 }
 
-// In-memory nonce storage (in production, use Redis or similar)
+// In-memory nonce storage (fallback when Redis not available)
 // Map<nonce, { timestamp: number, used: boolean }>
-const nonceStore = new Map<string, { timestamp: number; used: boolean }>();
+const memoryNonceStore = new Map<string, { timestamp: number; used: boolean }>();
 
 // Nonce expiration time: 10 minutes
 const NONCE_EXPIRATION_MS = 10 * 60 * 1000;
-// Maximum nonces to prevent memory leak
+const NONCE_EXPIRATION_SECONDS = 10 * 60; // 10 minutes in seconds
+// Maximum nonces to prevent memory leak (only for in-memory store)
 const MAX_NONCES = 10000;
+// Redis key prefix for nonces
+const NONCE_PREFIX = "nonce:";
 
-// Automatic cleanup interval (every 5 minutes)
+// Automatic cleanup interval (every 5 minutes) - only for memory store
 let cleanupInterval: NodeJS.Timeout | null = null;
 function startPeriodicCleanup(): void {
   if (cleanupInterval) {
@@ -41,12 +45,9 @@ function startPeriodicCleanup(): void {
   cleanupInterval = setInterval(
     () => {
       cleanupExpiredNonces();
-      logger.debug(
-        { nonceCount: nonceStore.size },
-        "Periodic nonce cleanup completed",
-      );
+      logger.debug({ nonceCount: memoryNonceStore.size }, "Periodic nonce cleanup completed");
     },
-    5 * 60 * 1000,
+    5 * 60 * 1000
   );
   // Prevent interval from keeping process alive
   cleanupInterval.unref();
@@ -60,40 +61,53 @@ if (!JWT_SECRET && process.env.NODE_ENV === "production") {
 }
 // Use crypto-generated secret for development only
 const DEV_SECRET =
-  process.env.NODE_ENV !== "production"
-    ? crypto.randomBytes(32).toString("hex")
-    : undefined;
+  process.env.NODE_ENV !== "production" ? crypto.randomBytes(32).toString("hex") : undefined;
 const EFFECTIVE_JWT_SECRET = JWT_SECRET || DEV_SECRET!;
 const JWT_EXPIRATION = process.env.JWT_EXPIRATION || "2h"; // Reduced from 7d to 2h for security
 
 /**
  * Generate a cryptographically secure random nonce
- * @returns {string} A unique nonce string
+ * Uses Redis when available, falls back to in-memory store
+ * @returns {Promise<string>} A unique nonce string
  */
-export function generateNonce(): string {
+export async function generateNonce(): Promise<string> {
   const nonce = crypto.randomBytes(32).toString("base64url");
 
+  // Use Redis when available
+  if (isRedisEnabled) {
+    const store = getStore();
+    // Store nonce with TTL (Redis handles expiration automatically)
+    await store.set(
+      `${NONCE_PREFIX}${nonce}`,
+      Date.now().toString(),
+      "EX",
+      NONCE_EXPIRATION_SECONDS
+    );
+    return nonce;
+  }
+
+  // Fallback to in-memory store
   // Enforce max nonces to prevent memory leak
-  if (nonceStore.size >= MAX_NONCES) {
+  if (memoryNonceStore.size >= MAX_NONCES) {
     cleanupExpiredNonces();
     // If still at limit after cleanup, remove oldest 10%
-    if (nonceStore.size >= MAX_NONCES) {
-      const entries = Array.from(nonceStore.entries()).sort(
-        (a, b) => a[1].timestamp - b[1].timestamp,
+    if (memoryNonceStore.size >= MAX_NONCES) {
+      const entries = Array.from(memoryNonceStore.entries()).sort(
+        (a, b) => a[1].timestamp - b[1].timestamp
       );
       const toDelete = Math.floor(entries.length * 0.1);
       for (let i = 0; i < toDelete; i++) {
-        nonceStore.delete(entries[i][0]);
+        memoryNonceStore.delete(entries[i][0]);
       }
       logger.warn(
-        { deleted: toDelete, remaining: nonceStore.size },
-        "Forced nonce cleanup due to limit",
+        { deleted: toDelete, remaining: memoryNonceStore.size },
+        "Forced nonce cleanup due to limit"
       );
     }
   }
 
   // Store nonce with timestamp
-  nonceStore.set(nonce, {
+  memoryNonceStore.set(nonce, {
     timestamp: Date.now(),
     used: false,
   });
@@ -102,15 +116,16 @@ export function generateNonce(): string {
 }
 
 /**
- * Clean up expired nonces from storage
+ * Clean up expired nonces from in-memory storage
+ * Redis handles expiration automatically via TTL
  */
 function cleanupExpiredNonces(): void {
   const now = Date.now();
-  const entries = Array.from(nonceStore.entries());
+  const entries = Array.from(memoryNonceStore.entries());
   for (let i = 0; i < entries.length; i++) {
     const [nonce, data] = entries[i];
     if (now - data.timestamp > NONCE_EXPIRATION_MS) {
-      nonceStore.delete(nonce);
+      memoryNonceStore.delete(nonce);
     }
   }
 }
@@ -123,7 +138,7 @@ function cleanupExpiredNonces(): void {
  */
 export async function verifySiweMessage(
   message: string,
-  signature: string,
+  signature: string
 ): Promise<{ valid: boolean; address?: string; error?: string }> {
   try {
     // Parse the SIWE message
@@ -141,31 +156,58 @@ export async function verifySiweMessage(
     }
 
     // Atomically check and consume nonce (prevents TOCTOU race condition)
-    // We delete the nonce immediately to prevent concurrent requests from using it
-    const nonceData = nonceStore.get(siweMessage.nonce);
-    nonceStore.delete(siweMessage.nonce); // Delete immediately for atomicity
-
-    if (!nonceData) {
-      return {
-        valid: false,
-        error: "Invalid nonce: nonce not found",
-      };
-    }
-
-    if (nonceData.used) {
-      return {
-        valid: false,
-        error: "Invalid nonce: nonce already used",
-      };
-    }
-
-    // Check nonce expiration
+    const nonceKey = `${NONCE_PREFIX}${siweMessage.nonce}`;
     const now = Date.now();
-    if (now - nonceData.timestamp > NONCE_EXPIRATION_MS) {
-      return {
-        valid: false,
-        error: "Invalid nonce: nonce expired",
-      };
+
+    if (isRedisEnabled) {
+      // Use Redis for distributed nonce storage
+      const store = getStore();
+      const nonceTimestamp = await store.get(nonceKey);
+
+      // Delete immediately for atomicity (if exists)
+      await store.del(nonceKey);
+
+      if (!nonceTimestamp) {
+        return {
+          valid: false,
+          error: "Invalid nonce: nonce not found or expired",
+        };
+      }
+
+      // Nonce expiration is handled by Redis TTL, but double-check
+      const timestamp = parseInt(nonceTimestamp, 10);
+      if (now - timestamp > NONCE_EXPIRATION_MS) {
+        return {
+          valid: false,
+          error: "Invalid nonce: nonce expired",
+        };
+      }
+    } else {
+      // Fallback to in-memory store
+      const nonceData = memoryNonceStore.get(siweMessage.nonce);
+      memoryNonceStore.delete(siweMessage.nonce); // Delete immediately for atomicity
+
+      if (!nonceData) {
+        return {
+          valid: false,
+          error: "Invalid nonce: nonce not found",
+        };
+      }
+
+      if (nonceData.used) {
+        return {
+          valid: false,
+          error: "Invalid nonce: nonce already used",
+        };
+      }
+
+      // Check nonce expiration
+      if (now - nonceData.timestamp > NONCE_EXPIRATION_MS) {
+        return {
+          valid: false,
+          error: "Invalid nonce: nonce expired",
+        };
+      }
     }
 
     // Verify signature using viem
@@ -212,14 +254,10 @@ export async function verifySiweMessage(
       address: siweMessage.address,
     };
   } catch (error) {
-    logger.error(
-      { error, messagePreview: message.substring(0, 100) },
-      "SIWE verification error",
-    );
+    logger.error({ error, messagePreview: message.substring(0, 100) }, "SIWE verification error");
     return {
       valid: false,
-      error:
-        error instanceof Error ? error.message : "Unknown verification error",
+      error: error instanceof Error ? error.message : "Unknown verification error",
     };
   }
 }
@@ -281,11 +319,7 @@ export function verifyJWT(token: string): {
  * Validates JWT token from Authorization header
  * Checks token blacklist for revoked tokens
  */
-export async function requireAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export async function requireAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     // Get token from Authorization header
     const authHeader = req.headers.authorization;
@@ -340,10 +374,7 @@ export async function requireAuth(
 
     next();
   } catch (error) {
-    logger.error(
-      { error, path: req.path, method: req.method },
-      "Auth middleware error",
-    );
+    logger.error({ error, path: req.path, method: req.method }, "Auth middleware error");
     res.status(500).json({
       error: "Internal Server Error",
       message: "Authentication failed",
@@ -356,11 +387,7 @@ export async function requireAuth(
  * Useful for routes that have different behavior for authenticated users
  * Logs unexpected errors but continues without blocking the request
  */
-export async function optionalAuth(
-  req: Request,
-  res: Response,
-  next: NextFunction,
-): Promise<void> {
+export async function optionalAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
     const authHeader = req.headers.authorization;
 
@@ -395,7 +422,7 @@ export async function optionalAuth(
     // Log unexpected errors but continue without auth
     logger.warn(
       { error, path: req.path },
-      "Optional auth failed - continuing without authentication",
+      "Optional auth failed - continuing without authentication"
     );
     next();
   }
@@ -403,13 +430,27 @@ export async function optionalAuth(
 
 /**
  * Get nonce store statistics (for monitoring/debugging)
+ * Note: For Redis, we only report store type since keys are distributed
  */
 export function getNonceStats(): {
   total: number;
   used: number;
   unused: number;
   expired: number;
+  storeType: "redis" | "memory";
 } {
+  // When using Redis, we can't efficiently count all nonces
+  if (isRedisEnabled) {
+    return {
+      total: -1, // Unknown for Redis
+      used: -1,
+      unused: -1,
+      expired: -1,
+      storeType: "redis",
+    };
+  }
+
+  // In-memory stats
   cleanupExpiredNonces();
 
   let used = 0;
@@ -417,7 +458,7 @@ export function getNonceStats(): {
   let expired = 0;
   const now = Date.now();
 
-  const entries = Array.from(nonceStore.entries());
+  const entries = Array.from(memoryNonceStore.entries());
   for (let i = 0; i < entries.length; i++) {
     const [_, data] = entries[i];
     if (now - data.timestamp > NONCE_EXPIRATION_MS) {
@@ -430,10 +471,11 @@ export function getNonceStats(): {
   }
 
   return {
-    total: nonceStore.size,
+    total: memoryNonceStore.size,
     used,
     unused,
     expired,
+    storeType: "memory",
   };
 }
 
@@ -442,10 +484,7 @@ export function getNonceStats(): {
  * @param jti JWT ID from the token
  * @param expiresAt Token expiration timestamp
  */
-export async function invalidateToken(
-  jti: string,
-  expiresAt: number,
-): Promise<void> {
+export async function invalidateToken(jti: string, expiresAt: number): Promise<void> {
   // Calculate remaining time until token expires
   const now = Math.floor(Date.now() / 1000);
   const remainingSeconds = Math.max(0, expiresAt - now);

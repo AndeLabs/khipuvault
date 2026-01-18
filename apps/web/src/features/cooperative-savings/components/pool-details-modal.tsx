@@ -11,16 +11,7 @@
 
 "use client";
 
-import {
-  Users,
-  Bitcoin,
-  Coins,
-  TrendingUp,
-  Calendar,
-  Crown,
-  Copy,
-  Shield,
-} from "lucide-react";
+import { Users, Bitcoin, Coins, TrendingUp, Calendar, Crown, Copy, Shield } from "lucide-react";
 import * as React from "react";
 
 import { Badge } from "@/components/ui/badge";
@@ -99,14 +90,10 @@ export function PoolDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={onClose}>
-      <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+      <DialogContent className="max-h-[90vh] max-w-4xl p-0">
         <DialogHeader className="px-6 pt-6">
-          <DialogTitle className="text-2xl font-heading">
-            Pool Details
-          </DialogTitle>
-          <DialogDescription>
-            Complete information about this cooperative pool
-          </DialogDescription>
+          <DialogTitle className="font-heading text-2xl">Pool Details</DialogTitle>
+          <DialogDescription>Complete information about this cooperative pool</DialogDescription>
         </DialogHeader>
 
         {(() => {
@@ -119,28 +106,22 @@ export function PoolDetailsModal({
           }
           if (!poolInfo) {
             return (
-              <div className="px-6 pb-6 text-center py-12">
+              <div className="px-6 py-12 pb-6 text-center">
                 <p className="text-muted-foreground">Pool not found</p>
               </div>
             );
           }
           return (
             <ScrollArea className="max-h-[calc(90vh-120px)]">
-              <div className="px-6 pb-6 space-y-6">
+              <div className="space-y-6 px-6 pb-6">
                 {/* Pool Header */}
                 <div className="space-y-3">
                   <div className="flex items-start justify-between gap-4">
                     <div className="flex-1">
-                      <h3 className="text-xl font-heading font-semibold mb-1">
-                        {poolInfo.name}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        Pool #{poolId}
-                      </p>
+                      <h3 className="mb-1 font-heading text-xl font-semibold">{poolInfo.name}</h3>
+                      <p className="text-sm text-muted-foreground">Pool #{poolId}</p>
                     </div>
-                    <Badge
-                      variant={getPoolStatusBadge(poolInfo.status).variant}
-                    >
+                    <Badge variant={getPoolStatusBadge(poolInfo.status).variant}>
                       {getPoolStatusBadge(poolInfo.status).label}
                     </Badge>
                   </div>
@@ -149,7 +130,7 @@ export function PoolDetailsModal({
                   <div className="flex items-center gap-2 text-sm">
                     <Crown className="h-4 w-4 text-accent" />
                     <span className="text-muted-foreground">Created by:</span>
-                    <code className="bg-muted px-2 py-0.5 rounded text-xs">
+                    <code className="rounded bg-muted px-2 py-0.5 text-xs">
                       {poolInfo.creator.slice(0, 6)}...
                       {poolInfo.creator.slice(-4)}
                     </code>
@@ -174,35 +155,25 @@ export function PoolDetailsModal({
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3">
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
                         <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground">
-                            Contributed
-                          </p>
+                          <p className="text-xs text-muted-foreground">Contributed</p>
                           <p className="font-mono font-semibold">
                             {formatBTCCompact(memberInfo.btcContributed)} BTC
                           </p>
                         </div>
                         <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground">
-                            Shares
-                          </p>
-                          <p className="font-mono font-semibold">
-                            {memberInfo.shares.toString()}
-                          </p>
+                          <p className="text-xs text-muted-foreground">Shares</p>
+                          <p className="font-mono font-semibold">{memberInfo.shares.toString()}</p>
                         </div>
                         <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground">
-                            Share %
-                          </p>
+                          <p className="text-xs text-muted-foreground">Share %</p>
                           <p className="font-semibold">
                             {formatPercentage(memberInfo.shares, totalShares)}
                           </p>
                         </div>
                         <div className="space-y-1">
-                          <p className="text-xs text-muted-foreground">
-                            Pending Yield
-                          </p>
+                          <p className="text-xs text-muted-foreground">Pending Yield</p>
                           <p className="font-mono font-semibold text-success">
                             {formatMUSD(pendingYield)}
                           </p>
@@ -212,20 +183,12 @@ export function PoolDetailsModal({
                       {/* Actions */}
                       <div className="flex gap-2">
                         {pendingYield > BigInt(0) && (
-                          <Button
-                            variant="success"
-                            size="sm"
-                            onClick={() => onClaim?.(poolId)}
-                          >
-                            <TrendingUp className="h-4 w-4 mr-1.5" />
+                          <Button variant="success" size="sm" onClick={() => onClaim?.(poolId)}>
+                            <TrendingUp className="mr-1.5 h-4 w-4" />
                             Claim Yield
                           </Button>
                         )}
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => onLeave?.(poolId)}
-                        >
+                        <Button variant="destructive" size="sm" onClick={() => onLeave?.(poolId)}>
                           Leave Pool
                         </Button>
                       </div>
@@ -237,20 +200,16 @@ export function PoolDetailsModal({
                 <Tabs defaultValue="overview" className="w-full">
                   <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="overview">Overview</TabsTrigger>
-                    <TabsTrigger value="members">
-                      Members ({poolInfo.currentMembers})
-                    </TabsTrigger>
+                    <TabsTrigger value="members">Members ({poolInfo.currentMembers})</TabsTrigger>
                     <TabsTrigger value="stats">Statistics</TabsTrigger>
                   </TabsList>
 
                   {/* Overview Tab */}
-                  <TabsContent value="overview" className="space-y-4 mt-4">
+                  <TabsContent value="overview" className="mt-4 space-y-4">
                     {/* Pool Capacity */}
                     <Card>
                       <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium">
-                          Pool Capacity
-                        </CardTitle>
+                        <CardTitle className="text-sm font-medium">Pool Capacity</CardTitle>
                       </CardHeader>
                       <CardContent className="space-y-2">
                         <div className="flex items-center justify-between text-sm">
@@ -260,10 +219,7 @@ export function PoolDetailsModal({
                           </span>
                         </div>
                         <Progress
-                          value={
-                            (poolInfo.currentMembers / poolInfo.maxMembers) *
-                            100
-                          }
+                          value={(poolInfo.currentMembers / poolInfo.maxMembers) * 100}
                           className="h-2"
                         />
                       </CardContent>
@@ -274,13 +230,11 @@ export function PoolDetailsModal({
                       <Card>
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-orange-500/10 flex items-center justify-center">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500/10">
                               <Bitcoin className="h-5 w-5 text-orange-500" />
                             </div>
                             <div className="space-y-0.5">
-                              <p className="text-xs text-muted-foreground">
-                                Total BTC
-                              </p>
+                              <p className="text-xs text-muted-foreground">Total BTC</p>
                               <p className="font-mono font-semibold">
                                 {formatBTCCompact(poolInfo.totalBtcDeposited)}
                               </p>
@@ -292,13 +246,11 @@ export function PoolDetailsModal({
                       <Card>
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-blue-500/10 flex items-center justify-center">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-500/10">
                               <Coins className="h-5 w-5 text-blue-500" />
                             </div>
                             <div className="space-y-0.5">
-                              <p className="text-xs text-muted-foreground">
-                                MUSD Minted
-                              </p>
+                              <p className="text-xs text-muted-foreground">MUSD Minted</p>
                               <p className="font-mono font-semibold">
                                 {formatMUSD(poolInfo.totalMusdMinted)}
                               </p>
@@ -310,13 +262,11 @@ export function PoolDetailsModal({
                       <Card>
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-success/10 flex items-center justify-center">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/10">
                               <TrendingUp className="h-5 w-5 text-success" />
                             </div>
                             <div className="space-y-0.5">
-                              <p className="text-xs text-muted-foreground">
-                                Total Yields
-                              </p>
+                              <p className="text-xs text-muted-foreground">Total Yields</p>
                               <p className="font-mono font-semibold text-success">
                                 {formatMUSD(poolInfo.totalYieldGenerated)}
                               </p>
@@ -328,13 +278,11 @@ export function PoolDetailsModal({
                       <Card>
                         <CardContent className="p-4">
                           <div className="flex items-center gap-3">
-                            <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
                               <Calendar className="h-5 w-5 text-accent" />
                             </div>
                             <div className="space-y-0.5">
-                              <p className="text-xs text-muted-foreground">
-                                Created
-                              </p>
+                              <p className="text-xs text-muted-foreground">Created</p>
                               <p className="text-sm font-medium">
                                 {formatDate(poolInfo.createdAt)}
                               </p>
@@ -347,7 +295,7 @@ export function PoolDetailsModal({
                     {/* Contribution Range */}
                     <Card>
                       <CardHeader className="pb-3">
-                        <CardTitle className="text-sm font-medium flex items-center gap-2">
+                        <CardTitle className="flex items-center gap-2 text-sm font-medium">
                           <Shield className="h-4 w-4" />
                           Contribution Requirements
                         </CardTitle>
@@ -366,14 +314,8 @@ export function PoolDetailsModal({
                           </span>
                         </div>
                         <div className="flex items-center justify-between text-sm">
-                          <span className="text-muted-foreground">
-                            Accepting New Members
-                          </span>
-                          <Badge
-                            variant={
-                              poolInfo.allowNewMembers ? "success" : "error"
-                            }
-                          >
+                          <span className="text-muted-foreground">Accepting New Members</span>
+                          <Badge variant={poolInfo.allowNewMembers ? "success" : "error"}>
                             {poolInfo.allowNewMembers ? "Yes" : "No"}
                           </Badge>
                         </div>
@@ -389,7 +331,7 @@ export function PoolDetailsModal({
                           className="w-full"
                           onClick={() => onJoin?.(poolId)}
                         >
-                          <Users className="h-4 w-4 mr-2" />
+                          <Users className="mr-2 h-4 w-4" />
                           Join This Pool
                         </Button>
                       )}
@@ -424,7 +366,7 @@ export function PoolDetailsModal({
                                 <TableRow key={member.address}>
                                   <TableCell>
                                     <div className="flex items-center gap-2">
-                                      <code className="text-xs bg-muted px-2 py-0.5 rounded">
+                                      <code className="rounded bg-muted px-2 py-0.5 text-xs">
                                         {member.address.slice(0, 6)}...
                                         {member.address.slice(-4)}
                                       </code>
@@ -432,9 +374,7 @@ export function PoolDetailsModal({
                                         variant="ghost"
                                         size="sm"
                                         className="h-6 w-6 p-0"
-                                        onClick={() =>
-                                          copyAddress(member.address)
-                                        }
+                                        onClick={() => copyAddress(member.address)}
                                         aria-label="Copy member address"
                                       >
                                         <Copy className="h-3 w-3" />
@@ -445,17 +385,13 @@ export function PoolDetailsModal({
                                     </div>
                                   </TableCell>
                                   <TableCell className="font-mono">
-                                    {formatBTCCompact(member.btcContributed)}{" "}
-                                    BTC
+                                    {formatBTCCompact(member.btcContributed)} BTC
                                   </TableCell>
                                   <TableCell className="font-mono">
                                     {member.shares.toString()}
                                   </TableCell>
                                   <TableCell className="font-semibold">
-                                    {formatPercentage(
-                                      member.shares,
-                                      totalShares,
-                                    )}
+                                    {formatPercentage(member.shares, totalShares)}
                                   </TableCell>
                                   <TableCell className="text-sm text-muted-foreground">
                                     {formatDate(member.joinedAt)}
@@ -470,7 +406,7 @@ export function PoolDetailsModal({
                   </TabsContent>
 
                   {/* Statistics Tab */}
-                  <TabsContent value="stats" className="space-y-4 mt-4">
+                  <TabsContent value="stats" className="mt-4 space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <Card>
                         <CardHeader className="pb-3">
@@ -479,11 +415,10 @@ export function PoolDetailsModal({
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-2xl font-mono font-bold">
+                          <p className="font-mono text-2xl font-bold">
                             {poolInfo.currentMembers > 0
                               ? formatBTCCompact(
-                                  poolInfo.totalBtcDeposited /
-                                    BigInt(poolInfo.currentMembers),
+                                  poolInfo.totalBtcDeposited / BigInt(poolInfo.currentMembers)
                                 )
                               : "0"}{" "}
                             BTC
@@ -498,16 +433,15 @@ export function PoolDetailsModal({
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-2xl font-mono font-bold text-success">
+                          <p className="font-mono text-2xl font-bold text-success">
                             {(() => {
                               if (
                                 poolInfo.totalBtcDeposited > BigInt(0) &&
                                 poolInfo.totalYieldGenerated > BigInt(0)
                               ) {
                                 return formatMUSD(
-                                  (poolInfo.totalYieldGenerated *
-                                    BigInt(1e18)) /
-                                    poolInfo.totalBtcDeposited,
+                                  (poolInfo.totalYieldGenerated * BigInt(1e18)) /
+                                    poolInfo.totalBtcDeposited
                                 );
                               }
                               return "0";
@@ -524,11 +458,7 @@ export function PoolDetailsModal({
                         </CardHeader>
                         <CardContent>
                           <p className="text-2xl font-bold">
-                            {(
-                              (poolInfo.currentMembers / poolInfo.maxMembers) *
-                              100
-                            ).toFixed(1)}
-                            %
+                            {((poolInfo.currentMembers / poolInfo.maxMembers) * 100).toFixed(1)}%
                           </p>
                         </CardContent>
                       </Card>
@@ -540,9 +470,7 @@ export function PoolDetailsModal({
                           </CardTitle>
                         </CardHeader>
                         <CardContent>
-                          <p className="text-2xl font-mono font-bold">
-                            {totalShares.toString()}
-                          </p>
+                          <p className="font-mono text-2xl font-bold">{totalShares.toString()}</p>
                         </CardContent>
                       </Card>
                     </div>

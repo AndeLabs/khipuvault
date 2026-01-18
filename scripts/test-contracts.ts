@@ -2,13 +2,7 @@
  * Smart Contract Integration Test Script
  * Tests deposit/withdraw on IndividualPool with real wallet
  */
-import {
-  createPublicClient,
-  createWalletClient,
-  http,
-  parseEther,
-  formatEther,
-} from "viem";
+import { createPublicClient, createWalletClient, http, parseEther, formatEther } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 
 // Mezo Testnet Configuration
@@ -96,8 +90,7 @@ const INDIVIDUAL_POOL_ABI = [
 ] as const;
 
 // Wallet configuration
-const PRIVATE_KEY =
-  "b176fc68626eb21176876a975a91f89ef69c069925185a52655deb31ebda8c9e";
+const PRIVATE_KEY = "b176fc68626eb21176876a975a91f89ef69c069925185a52655deb31ebda8c9e";
 
 async function main() {
   console.log("🔧 KhipuVault Smart Contract Test Suite");
@@ -188,9 +181,7 @@ async function main() {
       // Check if we need approval
       if (allowance < depositAmount) {
         console.log("   Need to approve mUSD first...");
-        console.log(
-          `   Would approve ${formatEther(depositAmount)} mUSD to pool`,
-        );
+        console.log(`   Would approve ${formatEther(depositAmount)} mUSD to pool`);
       }
 
       // Simulate deposit
@@ -204,9 +195,7 @@ async function main() {
       console.log(`   ✅ Deposit simulation SUCCESS`);
       console.log(`   Would deposit: ${formatEther(depositAmount)} mUSD`);
     } catch (err) {
-      console.log(
-        `   ❌ Deposit simulation FAILED: ${(err as Error).message.slice(0, 100)}`,
-      );
+      console.log(`   ❌ Deposit simulation FAILED: ${(err as Error).message.slice(0, 100)}`);
     }
   } else {
     console.log(`   ⚠️ Insufficient mUSD balance for deposit test`);

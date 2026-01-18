@@ -68,9 +68,7 @@
       "type": "function",
       "name": "MUSD",
       "inputs": [],
-      "outputs": [
-        { "name": "", "type": "address", "internalType": "contract IERC20" }
-      ],
+      "outputs": [{ "name": "", "type": "address", "internalType": "contract IERC20" }],
       "stateMutability": "view"
     },
     {
@@ -93,26 +91,20 @@
         { "name": "poolId", "type": "uint256", "internalType": "uint256" },
         { "name": "member", "type": "address", "internalType": "address" }
       ],
-      "outputs": [
-        { "name": "pendingYield", "type": "uint256", "internalType": "uint256" }
-      ],
+      "outputs": [{ "name": "pendingYield", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "claimYield",
-      "inputs": [
-        { "name": "poolId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "poolId", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
       "name": "closePool",
-      "inputs": [
-        { "name": "poolId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "poolId", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -133,9 +125,7 @@
         },
         { "name": "maxMembers", "type": "uint256", "internalType": "uint256" }
       ],
-      "outputs": [
-        { "name": "poolId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "outputs": [{ "name": "poolId", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "nonpayable"
     },
     {
@@ -183,9 +173,7 @@
     {
       "type": "function",
       "name": "getPoolInfo",
-      "inputs": [
-        { "name": "poolId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "poolId", "type": "uint256", "internalType": "uint256" }],
       "outputs": [
         {
           "name": "info",
@@ -253,20 +241,14 @@
     {
       "type": "function",
       "name": "getPoolMembers",
-      "inputs": [
-        { "name": "poolId", "type": "uint256", "internalType": "uint256" }
-      ],
-      "outputs": [
-        { "name": "members", "type": "address[]", "internalType": "address[]" }
-      ],
+      "inputs": [{ "name": "poolId", "type": "uint256", "internalType": "uint256" }],
+      "outputs": [{ "name": "members", "type": "address[]", "internalType": "address[]" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "getPoolStats",
-      "inputs": [
-        { "name": "poolId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "poolId", "type": "uint256", "internalType": "uint256" }],
       "outputs": [
         { "name": "totalBtc", "type": "uint256", "internalType": "uint256" },
         { "name": "totalMusd", "type": "uint256", "internalType": "uint256" },
@@ -278,29 +260,21 @@
     {
       "type": "function",
       "name": "getTotalShares",
-      "inputs": [
-        { "name": "poolId", "type": "uint256", "internalType": "uint256" }
-      ],
-      "outputs": [
-        { "name": "totalShares", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "poolId", "type": "uint256", "internalType": "uint256" }],
+      "outputs": [{ "name": "totalShares", "type": "uint256", "internalType": "uint256" }],
       "stateMutability": "view"
     },
     {
       "type": "function",
       "name": "joinPool",
-      "inputs": [
-        { "name": "poolId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "poolId", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "payable"
     },
     {
       "type": "function",
       "name": "leavePool",
-      "inputs": [
-        { "name": "poolId", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "poolId", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -432,27 +406,21 @@
     {
       "type": "function",
       "name": "setFeeCollector",
-      "inputs": [
-        { "name": "newCollector", "type": "address", "internalType": "address" }
-      ],
+      "inputs": [{ "name": "newCollector", "type": "address", "internalType": "address" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
       "name": "setPerformanceFee",
-      "inputs": [
-        { "name": "newFee", "type": "uint256", "internalType": "uint256" }
-      ],
+      "inputs": [{ "name": "newFee", "type": "uint256", "internalType": "uint256" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
     {
       "type": "function",
       "name": "transferOwnership",
-      "inputs": [
-        { "name": "newOwner", "type": "address", "internalType": "address" }
-      ],
+      "inputs": [{ "name": "newOwner", "type": "address", "internalType": "address" }],
       "outputs": [],
       "stateMutability": "nonpayable"
     },
@@ -698,16 +666,12 @@
     {
       "type": "error",
       "name": "AddressEmptyCode",
-      "inputs": [
-        { "name": "target", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "target", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "AddressInsufficientBalance",
-      "inputs": [
-        { "name": "account", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
     },
     { "type": "error", "name": "AlreadyMember", "inputs": [] },
     { "type": "error", "name": "ContributionTooHigh", "inputs": [] },
@@ -726,16 +690,12 @@
     {
       "type": "error",
       "name": "OwnableInvalidOwner",
-      "inputs": [
-        { "name": "owner", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "owner", "type": "address", "internalType": "address" }]
     },
     {
       "type": "error",
       "name": "OwnableUnauthorizedAccount",
-      "inputs": [
-        { "name": "account", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "account", "type": "address", "internalType": "address" }]
     },
     { "type": "error", "name": "PoolFull", "inputs": [] },
     { "type": "error", "name": "PoolNotAcceptingMembers", "inputs": [] },
@@ -744,9 +704,7 @@
     {
       "type": "error",
       "name": "SafeERC20FailedOperation",
-      "inputs": [
-        { "name": "token", "type": "address", "internalType": "address" }
-      ]
+      "inputs": [{ "name": "token", "type": "address", "internalType": "address" }]
     }
   ],
   "bytecode": {
@@ -847,16 +805,12 @@
           "type": "constructor"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "target", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "target", "type": "address" }],
           "type": "error",
           "name": "AddressEmptyCode"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "account", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
           "type": "error",
           "name": "AddressInsufficientBalance"
         },
@@ -875,16 +829,12 @@
         { "inputs": [], "type": "error", "name": "NoYieldToClaim" },
         { "inputs": [], "type": "error", "name": "NotMember" },
         {
-          "inputs": [
-            { "internalType": "address", "name": "owner", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "owner", "type": "address" }],
           "type": "error",
           "name": "OwnableInvalidOwner"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "account", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "account", "type": "address" }],
           "type": "error",
           "name": "OwnableUnauthorizedAccount"
         },
@@ -897,9 +847,7 @@
           "name": "ReentrancyGuardReentrantCall"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "token", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "token", "type": "address" }],
           "type": "error",
           "name": "SafeERC20FailedOperation"
         },
@@ -1140,18 +1088,14 @@
           "stateMutability": "view",
           "type": "function",
           "name": "MAX_MEMBERS_LIMIT",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "MAX_POOL_SIZE",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
@@ -1171,27 +1115,21 @@
           "stateMutability": "view",
           "type": "function",
           "name": "MIN_CONTRIBUTION",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "MIN_POOL_SIZE",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "MUSD",
-          "outputs": [
-            { "internalType": "contract IERC20", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "contract IERC20", "name": "", "type": "address" }]
         },
         {
           "inputs": [],
@@ -1223,17 +1161,13 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "poolId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "poolId", "type": "uint256" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "claimYield"
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "poolId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "poolId", "type": "uint256" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "closePool"
@@ -1260,18 +1194,14 @@
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "createPool",
-          "outputs": [
-            { "internalType": "uint256", "name": "poolId", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "poolId", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "feeCollector",
-          "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
         },
         {
           "inputs": [
@@ -1313,9 +1243,7 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "poolId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "poolId", "type": "uint256" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getPoolInfo",
@@ -1391,9 +1319,7 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "poolId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "poolId", "type": "uint256" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getPoolMembers",
@@ -1406,9 +1332,7 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "poolId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "poolId", "type": "uint256" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getPoolStats",
@@ -1432,9 +1356,7 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "poolId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "poolId", "type": "uint256" }],
           "stateMutability": "view",
           "type": "function",
           "name": "getTotalShares",
@@ -1447,17 +1369,13 @@
           ]
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "poolId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "poolId", "type": "uint256" }],
           "stateMutability": "payable",
           "type": "function",
           "name": "joinPool"
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "poolId", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "poolId", "type": "uint256" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "leavePool"
@@ -1467,9 +1385,7 @@
           "stateMutability": "view",
           "type": "function",
           "name": "owner",
-          "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
         },
         {
           "inputs": [],
@@ -1489,18 +1405,14 @@
           "stateMutability": "view",
           "type": "function",
           "name": "performanceFee",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [],
           "stateMutability": "view",
           "type": "function",
           "name": "poolCounter",
-          "outputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ]
+          "outputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }]
         },
         {
           "inputs": [
@@ -1538,14 +1450,10 @@
           "stateMutability": "view",
           "type": "function",
           "name": "poolMembersList",
-          "outputs": [
-            { "internalType": "address", "name": "", "type": "address" }
-          ]
+          "outputs": [{ "internalType": "address", "name": "", "type": "address" }]
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "", "type": "uint256" }],
           "stateMutability": "view",
           "type": "function",
           "name": "pools",
@@ -1624,17 +1532,13 @@
           "name": "setFeeCollector"
         },
         {
-          "inputs": [
-            { "internalType": "uint256", "name": "newFee", "type": "uint256" }
-          ],
+          "inputs": [{ "internalType": "uint256", "name": "newFee", "type": "uint256" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "setPerformanceFee"
         },
         {
-          "inputs": [
-            { "internalType": "address", "name": "newOwner", "type": "address" }
-          ],
+          "inputs": [{ "internalType": "address", "name": "newOwner", "type": "address" }],
           "stateMutability": "nonpayable",
           "type": "function",
           "name": "transferOwnership"
