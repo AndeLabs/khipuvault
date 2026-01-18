@@ -17,11 +17,11 @@
       "outputs": ["coverage/**"]
     },
     "lint": {
-      "dependsOn": ["^lint"],
+      "dependsOn": ["^build", "^lint"],
       "outputs": []
     },
     "typecheck": {
-      "dependsOn": ["^typecheck"],
+      "dependsOn": ["^build", "^typecheck"],
       "outputs": []
     },
     "clean": {
