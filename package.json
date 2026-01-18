@@ -36,19 +36,19 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.0",
-    "@vitest/coverage-v8": "^4.0.14",
+    "@vitest/coverage-v8": "^4.0.17",
     "autoprefixer": "^10.4.21",
     "headless-web3-provider": "^0.3.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
     "playwright": "^1.57.0",
-    "prettier": "^3.1.0",
+    "prettier": "^3.8.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
     "tsup": "^8.0.0",
     "tsx": "^4.21.0",
-    "turbo": "^2.3.0",
+    "turbo": "^2.7.5",
     "typescript": "^5.3.3",
-    "vitest": "^4.0.14"
+    "vitest": "^4.0.17"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
