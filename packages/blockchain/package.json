@@ -13,7 +13,7 @@
   "dependencies": {
     "@khipu/database": "workspace:*",
     "@khipu/shared": "workspace:*",
-    "ethers": "^6.13.0",
+    "ethers": "^6.16.0",
     "dotenv": "^16.4.5"
   },
   "devDependencies": {

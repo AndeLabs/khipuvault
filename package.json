@@ -37,7 +37,7 @@
   "devDependencies": {
     "@types/node": "^20.10.0",
     "@vitest/coverage-v8": "^4.0.14",
-    "autoprefixer": "^10.4.21",
+    "autoprefixer": "^10.4.23",
     "headless-web3-provider": "^0.3.2",
     "husky": "^9.1.7",
     "lint-staged": "^16.2.7",
