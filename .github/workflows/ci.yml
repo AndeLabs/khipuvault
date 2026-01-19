@@ -256,7 +256,7 @@ jobs:
           fi
 
       - name: Upload gas snapshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: gas-snapshots
           path: packages/contracts/.gas-snapshot-*
