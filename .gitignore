@@ -185,4 +185,21 @@ secrets/
 
 # Local settings and test outputs
 .claude/settings.local.json
+.claude/commands/*.md
 .playwright-mcp/
+
+# AI-generated documentation (keep local only)
+/*_REPORT.md
+/*_AUDIT.md
+/*_COMPLETE.md
+/*_PROGRESS.md
+/*_SOLUTIONS.md
+/*_FIXES.md
+/TODO.md
+/WEEK_*.md
+/SECURITY_*.md
+/MATHEMATICAL_*.md
+/FREE_*.md
+packages/contracts/*_REPORT.md
+packages/contracts/slither-report.json
+security/shannon/
