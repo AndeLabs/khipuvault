@@ -21,7 +21,7 @@ import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
  *      ✅ Emergency mode
  *      ✅ Auto-compounding
  *      ✅ Multi-vault support
- * 
+ *
  * @custom:security-contact security@khipuvault.com
  * @author KhipuVault Team
  */
@@ -65,7 +65,7 @@ contract YieldAggregatorV3 is
 
     mapping(address => VaultInfoPacked) public vaults;
     address[] public activeVaultsList;
-    
+
     mapping(address => mapping(address => UserPositionPacked)) public userVaultPositions;
     mapping(address => uint256) public userTotalDeposited;
 
@@ -73,7 +73,7 @@ contract YieldAggregatorV3 is
     uint256 public totalYieldGenerated;
     bool public depositsPaused;
     bool public emergencyMode;
-    
+
     mapping(address => bool) public authorizedCallers;
 
     // H-01 FIX: Block-based flash loan protection
@@ -81,6 +81,13 @@ contract YieldAggregatorV3 is
 
     uint256 public constant MIN_DEPOSIT = 1e18;
     uint256 public constant MAX_VAULTS = 10;
+
+    // ✅ SECURITY FIX: Minimum thresholds to prevent dust attacks
+    // Instead of checking `== 0`, we use `<= MIN_THRESHOLD`
+    // This prevents attackers from bypassing checks with 1 wei deposits
+    uint256 public constant MIN_YIELD_THRESHOLD = 1e12; // 0.000001 MUSD minimum yield
+    uint256 public constant MIN_TVL_THRESHOLD = 1e15; // 0.001 MUSD minimum TVL
+    uint256 public constant MIN_PRINCIPAL_THRESHOLD = 1e15; // 0.001 MUSD minimum principal
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
@@ -162,7 +169,7 @@ contract YieldAggregatorV3 is
         // H-01 FIX: Record deposit block for flash loan protection
         depositBlock[msg.sender] = block.number;
 
-        (vaultAddress, ) = getBestVault();
+        (vaultAddress,) = getBestVault();
         if (vaultAddress == address(0)) revert VaultNotFound();
 
         shares = _depositToVault(msg.sender, vaultAddress, amount);
@@ -195,13 +202,7 @@ contract YieldAggregatorV3 is
                          WITHDRAW FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function withdraw(uint256 amount)
-        external
-        override
-        nonReentrant
-        noFlashLoan
-        returns (uint256 totalWithdrawn)
-    {
+    function withdraw(uint256 amount) external override nonReentrant noFlashLoan returns (uint256 totalWithdrawn) {
         uint256 userTotal = userTotalDeposited[msg.sender];
         if (userTotal == 0) revert NoDeposit();
 
@@ -211,7 +212,8 @@ contract YieldAggregatorV3 is
         // CEI Pattern: Update state BEFORE external calls
         userTotalDeposited[msg.sender] -= toWithdraw;
 
-        for (uint256 i = 0; i < activeVaultsList.length; i++) {
+        uint256 vaultsLength = activeVaultsList.length;
+        for (uint256 i = 0; i < vaultsLength; i++) {
             address vaultAddr = activeVaultsList[i];
             UserPositionPacked storage position = userVaultPositions[msg.sender][vaultAddr];
 
@@ -260,19 +262,14 @@ contract YieldAggregatorV3 is
                          YIELD FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function claimYield()
-        external
-        override
-        nonReentrant
-        noFlashLoan
-        returns (uint256 yieldAmount)
-    {
+    function claimYield() external override nonReentrant noFlashLoan returns (uint256 yieldAmount) {
         if (userTotalDeposited[msg.sender] == 0) revert NoDeposit();
 
-        for (uint256 i = 0; i < activeVaultsList.length; i++) {
+        uint256 vaultsLength = activeVaultsList.length;
+        for (uint256 i = 0; i < vaultsLength; i++) {
             address vaultAddr = activeVaultsList[i];
             UserPositionPacked storage position = userVaultPositions[msg.sender][vaultAddr];
-            
+
             if (position.principal > 0) {
                 uint256 pendingYield = _calculatePendingYield(msg.sender, vaultAddr);
                 if (pendingYield > 0) {
@@ -290,20 +287,15 @@ contract YieldAggregatorV3 is
         emit YieldClaimed(msg.sender, yieldAmount);
     }
 
-    function compoundYields()
-        external
-        override
-        nonReentrant
-        noFlashLoan
-        returns (uint256 compoundedAmount)
-    {
+    function compoundYields() external override nonReentrant noFlashLoan returns (uint256 compoundedAmount) {
         if (userTotalDeposited[msg.sender] == 0) revert NoDeposit();
 
-        (address bestVault, ) = getBestVault();
+        (address bestVault,) = getBestVault();
         if (bestVault == address(0)) revert VaultNotFound();
 
         uint256 totalYield = getPendingYield(msg.sender);
-        if (totalYield == 0) revert InvalidAmount();
+        // ✅ SECURITY FIX: Use threshold instead of strict equality
+        if (totalYield <= MIN_YIELD_THRESHOLD) revert InvalidAmount();
 
         compoundedAmount = totalYield;
 
@@ -324,13 +316,9 @@ contract YieldAggregatorV3 is
                          VIEW FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function getPendingYield(address user)
-        public
-        view
-        override
-        returns (uint256 pendingYield)
-    {
-        for (uint256 i = 0; i < activeVaultsList.length; i++) {
+    function getPendingYield(address user) public view override returns (uint256 pendingYield) {
+        uint256 vaultsLength = activeVaultsList.length;
+        for (uint256 i = 0; i < vaultsLength; i++) {
             pendingYield += _calculatePendingYield(user, activeVaultsList[i]);
         }
     }
@@ -344,12 +332,7 @@ contract YieldAggregatorV3 is
         return _calculatePendingYield(user, vaultAddress);
     }
 
-    function getUserPosition(address user)
-        external
-        view
-        override
-        returns (uint256 principal, uint256 yields)
-    {
+    function getUserPosition(address user) external view override returns (uint256 principal, uint256 yields) {
         principal = userTotalDeposited[user];
         yields = getPendingYield(user);
     }
@@ -369,12 +352,7 @@ contract YieldAggregatorV3 is
         });
     }
 
-    function getVaultInfo(address vaultAddress)
-        external
-        view
-        override
-        returns (VaultInfo memory info)
-    {
+    function getVaultInfo(address vaultAddress) external view override returns (VaultInfo memory info) {
         VaultInfoPacked memory packed = vaults[vaultAddress];
         info = VaultInfo({
             vaultAddress: packed.vaultAddress,
@@ -388,22 +366,13 @@ contract YieldAggregatorV3 is
         });
     }
 
-    function getActiveVaults()
-        external
-        view
-        override
-        returns (address[] memory)
-    {
+    function getActiveVaults() external view override returns (address[] memory) {
         return activeVaultsList;
     }
 
-    function getBestVault()
-        public
-        view
-        override
-        returns (address vaultAddress, uint256 apr)
-    {
-        for (uint256 i = 0; i < activeVaultsList.length; i++) {
+    function getBestVault() public view override returns (address vaultAddress, uint256 apr) {
+        uint256 vaultsLength = activeVaultsList.length;
+        for (uint256 i = 0; i < vaultsLength; i++) {
             VaultInfoPacked memory vault = vaults[activeVaultsList[i]];
             if (vault.active && vault.apr > apr) {
                 apr = vault.apr;
@@ -412,11 +381,7 @@ contract YieldAggregatorV3 is
         }
     }
 
-    function calculateExpectedYield(
-        uint256 amount,
-        address vaultAddress,
-        uint256 timeInSeconds
-    )
+    function calculateExpectedYield(uint256 amount, address vaultAddress, uint256 timeInSeconds)
         external
         view
         override
@@ -428,25 +393,17 @@ contract YieldAggregatorV3 is
         expectedYield = (amount * uint256(vault.apr) * timeInSeconds) / (10000 * 365 days);
     }
 
-    function getTotalValueLocked()
-        external
-        view
-        override
-        returns (uint256 tvl)
-    {
+    function getTotalValueLocked() external view override returns (uint256 tvl) {
         return totalValueLocked;
     }
 
-    function getAverageApr()
-        external
-        view
-        override
-        returns (uint256 avgApr)
-    {
-        if (totalValueLocked == 0) return 0;
+    function getAverageApr() external view override returns (uint256 avgApr) {
+        // ✅ SECURITY FIX: Use threshold to prevent dust attacks
+        if (totalValueLocked <= MIN_TVL_THRESHOLD) return 0;
 
         uint256 weightedSum = 0;
-        for (uint256 i = 0; i < activeVaultsList.length; i++) {
+        uint256 vaultsLength = activeVaultsList.length;
+        for (uint256 i = 0; i < vaultsLength; i++) {
             VaultInfoPacked memory vault = vaults[activeVaultsList[i]];
             if (vault.active && vault.totalDeposited > 0) {
                 weightedSum += (uint256(vault.apr) * uint256(vault.totalDeposited));
@@ -460,11 +417,7 @@ contract YieldAggregatorV3 is
                        INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function _depositToVault(
-        address user,
-        address vaultAddress,
-        uint256 amount
-    ) internal returns (uint256 shares) {
+    function _depositToVault(address user, address vaultAddress, uint256 amount) internal returns (uint256 shares) {
         MUSD_TOKEN.safeTransferFrom(user, address(this), amount);
 
         shares = amount;
@@ -489,11 +442,10 @@ contract YieldAggregatorV3 is
         totalValueLocked += amount;
     }
 
-    function _withdrawFromVault(
-        address user,
-        address vaultAddress,
-        uint256 amount
-    ) internal returns (uint256 withdrawn) {
+    function _withdrawFromVault(address user, address vaultAddress, uint256 amount)
+        internal
+        returns (uint256 withdrawn)
+    {
         UserPositionPacked storage position = userVaultPositions[user][vaultAddress];
         VaultInfoPacked storage vault = vaults[vaultAddress];
 
@@ -513,21 +465,18 @@ contract YieldAggregatorV3 is
         totalValueLocked -= amount;
     }
 
-    function _calculatePendingYield(address user, address vaultAddress)
-        internal
-        view
-        returns (uint256 pendingYield)
-    {
+    function _calculatePendingYield(address user, address vaultAddress) internal view returns (uint256 pendingYield) {
         UserPositionPacked memory position = userVaultPositions[user][vaultAddress];
-        if (position.principal == 0) return 0;
+        // ✅ SECURITY FIX: Use threshold to prevent calculation errors with dust amounts
+        if (position.principal <= MIN_PRINCIPAL_THRESHOLD) return 0;
 
         VaultInfoPacked memory vault = vaults[vaultAddress];
         if (!vault.active) return 0;
 
         uint256 timeElapsed = block.timestamp - uint256(position.lastUpdateTime);
-        
+
         pendingYield = (uint256(position.principal) * uint256(vault.apr) * timeElapsed) / (10000 * 365 days);
-        
+
         pendingYield += uint256(position.yieldAccrued);
     }
 
@@ -539,11 +488,7 @@ contract YieldAggregatorV3 is
         authorizedCallers[caller] = authorized;
     }
 
-    function addVault(
-        address vaultAddress,
-        YieldStrategy strategy,
-        uint256 apr
-    ) external onlyOwner {
+    function addVault(address vaultAddress, YieldStrategy strategy, uint256 apr) external onlyOwner {
         if (vaultAddress == address(0)) revert InvalidAddress();
         if (vaults[vaultAddress].vaultAddress != address(0)) revert VaultAlreadyExists();
         if (activeVaultsList.length >= MAX_VAULTS) revert TooManyVaults();
