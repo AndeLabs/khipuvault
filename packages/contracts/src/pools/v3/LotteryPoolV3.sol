@@ -5,6 +5,7 @@ import {BasePoolV3} from "./BasePoolV3.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
+import {SecureRandomness} from "../../libraries/SecureRandomness.sol";
 
 /**
  * @title LotteryPoolV3 - Production Grade No-Loss Lottery
@@ -36,11 +37,12 @@ contract LotteryPoolV3 is BasePoolV3 {
     //////////////////////////////////////////////////////////////*/
 
     enum RoundStatus {
-        OPEN,           // Accepting participants
-        COMMIT,         // Commit phase for randomness
-        REVEAL,         // Reveal phase for randomness
-        COMPLETED,      // Draw completed, claims open
-        CANCELLED       // Round cancelled, refunds available
+        OPEN, // Accepting participants
+        COMMIT, // Commit phase for randomness
+        REVEAL, // Reveal phase for randomness
+        COMPLETED, // Draw completed, claims open
+        CANCELLED // Round cancelled, refunds available
+
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -52,30 +54,30 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @dev Optimized storage packing
      */
     struct Round {
-        uint128 ticketPrice;        // Price per ticket in MUSD (18 decimals)
-        uint128 totalMusd;          // Total MUSD collected
-        uint64 maxTickets;          // Maximum tickets allowed
-        uint64 totalTicketsSold;    // Current tickets sold
-        uint64 startTime;           // Round start timestamp
-        uint64 endTime;             // Round end timestamp
-        uint64 commitDeadline;      // Commit phase deadline
-        uint64 revealDeadline;      // Reveal phase deadline
-        address winner;             // Winner address (after draw)
-        uint256 winnerPrize;        // Total prize for winner
-        uint256 totalYield;         // Total yield generated
-        RoundStatus status;         // Current round status
-        bytes32 operatorCommit;     // Operator's commitment hash
-        uint256 revealedSeed;       // Revealed random seed
+        uint128 ticketPrice; // Price per ticket in MUSD (18 decimals)
+        uint128 totalMusd; // Total MUSD collected
+        uint64 maxTickets; // Maximum tickets allowed
+        uint64 totalTicketsSold; // Current tickets sold
+        uint64 startTime; // Round start timestamp
+        uint64 endTime; // Round end timestamp
+        uint64 commitDeadline; // Commit phase deadline
+        uint64 revealDeadline; // Reveal phase deadline
+        address winner; // Winner address (after draw)
+        uint256 winnerPrize; // Total prize for winner
+        uint256 totalYield; // Total yield generated
+        RoundStatus status; // Current round status
+        bytes32 operatorCommit; // Operator's commitment hash
+        uint256 revealedSeed; // Revealed random seed
     }
 
     /**
      * @notice Participant info per round
      */
     struct Participant {
-        uint128 ticketCount;        // Number of tickets owned
-        uint128 musdContributed;    // Total MUSD contributed
-        uint64 firstTicketIndex;    // First ticket index (for winner selection)
-        bool claimed;               // Has claimed prize/refund
+        uint128 ticketCount; // Number of tickets owned
+        uint128 musdContributed; // Total MUSD contributed
+        uint64 firstTicketIndex; // First ticket index (for winner selection)
+        bool claimed; // Has claimed prize/refund
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -108,16 +110,16 @@ contract LotteryPoolV3 is BasePoolV3 {
                               CONSTANTS
     //////////////////////////////////////////////////////////////*/
 
-    uint256 public constant MIN_TICKET_PRICE = 1 ether;         // 1 MUSD minimum
-    uint256 public constant MAX_TICKET_PRICE = 10_000 ether;    // 10,000 MUSD maximum
-    uint256 public constant MAX_TICKETS_PER_USER = 100;         // Per user per round
-    uint256 public constant MIN_ROUND_DURATION = 1 hours;       // Minimum round length
-    uint256 public constant COMMIT_PHASE_DURATION = 1 hours;    // Commit phase length
-    uint256 public constant REVEAL_PHASE_DURATION = 1 hours;    // Reveal phase length
-    uint256 public constant WINNER_YIELD_SHARE = 9000;          // 90% of yields to winner
+    uint256 public constant MIN_TICKET_PRICE = 1 ether; // 1 MUSD minimum
+    uint256 public constant MAX_TICKET_PRICE = 10_000 ether; // 10,000 MUSD maximum
+    uint256 public constant MAX_TICKETS_PER_USER = 100; // Per user per round
+    uint256 public constant MIN_ROUND_DURATION = 1 hours; // Minimum round length
+    uint256 public constant COMMIT_PHASE_DURATION = 1 hours; // Commit phase length
+    uint256 public constant REVEAL_PHASE_DURATION = 1 hours; // Reveal phase length
+    uint256 public constant WINNER_YIELD_SHARE = 9000; // 90% of yields to winner
     uint256 public constant BASIS_POINTS = 10000;
-    uint256 public constant FORCE_COMPLETE_DELAY = 1 hours;     // C-01 FIX: Delay after reveal deadline
-    uint256 public constant MULTI_BLOCK_ENTROPY_RANGE = 5;      // C-01 FIX: Use multiple block hashes
+    uint256 public constant FORCE_COMPLETE_DELAY = 1 hours; // C-01 FIX: Delay after reveal deadline
+    uint256 public constant MULTI_BLOCK_ENTROPY_RANGE = 5; // C-01 FIX: Use multiple block hashes
 
     /*//////////////////////////////////////////////////////////////
                             STORAGE GAP
@@ -134,12 +136,7 @@ contract LotteryPoolV3 is BasePoolV3 {
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
 
-    event RoundCreated(
-        uint256 indexed roundId,
-        uint256 ticketPrice,
-        uint256 maxTickets,
-        uint256 endTime
-    );
+    event RoundCreated(uint256 indexed roundId, uint256 ticketPrice, uint256 maxTickets, uint256 endTime);
 
     event TicketsPurchased(
         uint256 indexed roundId,
@@ -153,19 +150,9 @@ contract LotteryPoolV3 is BasePoolV3 {
     event CommitSubmitted(uint256 indexed roundId, bytes32 commitment);
     event SeedRevealed(uint256 indexed roundId, uint256 seed);
 
-    event WinnerSelected(
-        uint256 indexed roundId,
-        address indexed winner,
-        uint256 prize,
-        uint256 winningTicket
-    );
+    event WinnerSelected(uint256 indexed roundId, address indexed winner, uint256 prize, uint256 winningTicket);
 
-    event PrizeClaimed(
-        uint256 indexed roundId,
-        address indexed participant,
-        uint256 amount,
-        bool isWinner
-    );
+    event PrizeClaimed(uint256 indexed roundId, address indexed participant, uint256 amount, bool isWinner);
 
     event RoundCancelled(uint256 indexed roundId, string reason);
     event OperatorUpdated(address indexed oldOperator, address indexed newOperator);
@@ -222,12 +209,10 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @param _feeCollector Fee collector address
      * @param _operator Operator address for commit-reveal
      */
-    function initialize(
-        address _musd,
-        address _yieldAggregator,
-        address _feeCollector,
-        address _operator
-    ) external initializer {
+    function initialize(address _musd, address _yieldAggregator, address _feeCollector, address _operator)
+        external
+        initializer
+    {
         if (_yieldAggregator == address(0)) revert ZeroAddress();
         if (_operator == address(0)) revert ZeroAddress();
 
@@ -248,11 +233,12 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @param durationSeconds Duration of the open phase in seconds
      * @return roundId The ID of the created round
      */
-    function createRound(
-        uint256 ticketPrice,
-        uint256 maxTickets,
-        uint256 durationSeconds
-    ) external onlyOwner whenNotPaused returns (uint256 roundId) {
+    function createRound(uint256 ticketPrice, uint256 maxTickets, uint256 durationSeconds)
+        external
+        onlyOwner
+        whenNotPaused
+        returns (uint256 roundId)
+    {
         if (ticketPrice < MIN_TICKET_PRICE || ticketPrice > MAX_TICKET_PRICE) {
             revert InvalidTicketPrice();
         }
@@ -298,12 +284,7 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @param roundId The round to participate in
      * @param ticketCount Number of tickets to buy
      */
-    function buyTickets(uint256 roundId, uint256 ticketCount)
-        external
-        nonReentrant
-        whenNotPaused
-        notInEmergency
-    {
+    function buyTickets(uint256 roundId, uint256 ticketCount) external nonReentrant whenNotPaused notInEmergency {
         Round storage round = rounds[roundId];
 
         if (round.startTime == 0) revert InvalidRoundId();
@@ -346,14 +327,7 @@ contract LotteryPoolV3 is BasePoolV3 {
         // Record deposit for flash loan protection
         _recordDeposit();
 
-        emit TicketsPurchased(
-            roundId,
-            msg.sender,
-            ticketCount,
-            musdAmount,
-            firstTicket,
-            lastTicket
-        );
+        emit TicketsPurchased(roundId, msg.sender, ticketCount, musdAmount, firstTicket, lastTicket);
 
         // Transfer MUSD from user
         MUSD.safeTransferFrom(msg.sender, address(this), musdAmount);
@@ -371,10 +345,7 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @param roundId The round ID
      * @param commitment Hash of (seed + salt)
      */
-    function submitCommitment(uint256 roundId, bytes32 commitment)
-        external
-        onlyOperator
-    {
+    function submitCommitment(uint256 roundId, bytes32 commitment) external onlyOperator {
         Round storage round = rounds[roundId];
 
         if (round.startTime == 0) revert InvalidRoundId();
@@ -396,11 +367,7 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @param seed The random seed
      * @param salt The salt used in commitment
      */
-    function revealSeed(uint256 roundId, uint256 seed, bytes32 salt)
-        external
-        onlyOperator
-        nonReentrant
-    {
+    function revealSeed(uint256 roundId, uint256 seed, bytes32 salt) external onlyOperator nonReentrant {
         Round storage round = rounds[roundId];
 
         if (round.startTime == 0) revert InvalidRoundId();
@@ -428,11 +395,7 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @notice Claim prize or principal after round completion
      * @param roundId The round ID
      */
-    function claimPrize(uint256 roundId)
-        external
-        nonReentrant
-        noFlashLoan
-    {
+    function claimPrize(uint256 roundId) external nonReentrant noFlashLoan {
         Round storage round = rounds[roundId];
         Participant storage participant = participants[roundId][msg.sender];
 
@@ -464,10 +427,7 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @notice Claim refund for cancelled round
      * @param roundId The round ID
      */
-    function claimRefund(uint256 roundId)
-        external
-        nonReentrant
-    {
+    function claimRefund(uint256 roundId) external nonReentrant {
         Round storage round = rounds[roundId];
         Participant storage participant = participants[roundId][msg.sender];
 
@@ -500,33 +460,21 @@ contract LotteryPoolV3 is BasePoolV3 {
     /**
      * @notice Get participant information
      */
-    function getParticipant(uint256 roundId, address user)
-        external
-        view
-        returns (Participant memory)
-    {
+    function getParticipant(uint256 roundId, address user) external view returns (Participant memory) {
         return participants[roundId][user];
     }
 
     /**
      * @notice Get all participants in a round
      */
-    function getParticipants(uint256 roundId)
-        external
-        view
-        returns (address[] memory)
-    {
+    function getParticipants(uint256 roundId) external view returns (address[] memory) {
         return participantList[roundId];
     }
 
     /**
      * @notice Calculate win probability for a user (in basis points)
      */
-    function getWinProbability(uint256 roundId, address user)
-        external
-        view
-        returns (uint256)
-    {
+    function getWinProbability(uint256 roundId, address user) external view returns (uint256) {
         Round memory round = rounds[roundId];
         if (round.totalTicketsSold == 0) return 0;
 
@@ -565,8 +513,21 @@ contract LotteryPoolV3 is BasePoolV3 {
     function _selectWinnerAndComplete(uint256 roundId, uint256 seed) internal {
         Round storage round = rounds[roundId];
 
-        // Calculate winning ticket
-        uint256 winningTicket = seed % round.totalTicketsSold;
+        // ✅ SECURITY FIX: Use SecureRandomness library instead of simple modulo
+        // Combines multiple entropy sources for better randomness:
+        // 1. Revealed seed from operator commit-reveal
+        // 2. RANDAO (Ethereum's native randomness)
+        // 3. Block hash from previous blocks
+        // 4. Current block number and timestamp
+
+        // Wait at least 1 block after reveal for block hash entropy
+        uint256 entropyBlock = block.number - 1;
+
+        // Generate secure random number using hybrid approach
+        uint256 secureRandom = SecureRandomness.generateSecureRandom(entropyBlock, bytes32(seed));
+
+        // Select winning ticket using secure random number
+        uint256 winningTicket = SecureRandomness.randomInRange(secureRandom, round.totalTicketsSold);
 
         // Find winner by iterating through participants
         address winner = _findTicketOwner(roundId, winningTicket);
@@ -598,21 +559,14 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @dev C-02 FIX: Now uses direct mapping lookup (O(1)) instead of iteration
      *      This correctly handles non-contiguous ticket purchases
      */
-    function _findTicketOwner(uint256 roundId, uint256 ticketIndex)
-        internal
-        view
-        returns (address)
-    {
+    function _findTicketOwner(uint256 roundId, uint256 ticketIndex) internal view returns (address) {
         return ticketOwners[roundId][ticketIndex];
     }
 
     /**
      * @notice Withdraw from yield aggregator and calculate total yield
      */
-    function _withdrawAndCalculateYield(uint256 roundId)
-        internal
-        returns (uint256 totalYield)
-    {
+    function _withdrawAndCalculateYield(uint256 roundId) internal returns (uint256 totalYield) {
         Round memory round = rounds[roundId];
 
         // Get pending yield
@@ -645,10 +599,7 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @param roundId The round ID
      * @param reason Cancellation reason
      */
-    function cancelRound(uint256 roundId, string calldata reason)
-        external
-        onlyOwner
-    {
+    function cancelRound(uint256 roundId, string calldata reason) external onlyOwner {
         Round storage round = rounds[roundId];
 
         if (round.startTime == 0) revert InvalidRoundId();
@@ -712,15 +663,19 @@ contract LotteryPoolV3 is BasePoolV3 {
         }
 
         // C-01 FIX: Add additional entropy sources
-        fallbackSeed = uint256(keccak256(abi.encodePacked(
-            fallbackSeed,
-            msg.sender,
-            block.timestamp,
-            block.prevrandao,  // EIP-4399: Use prevrandao for additional entropy
-            round.totalTicketsSold,
-            round.totalMusd,
-            roundId
-        )));
+        fallbackSeed = uint256(
+            keccak256(
+                abi.encodePacked(
+                    fallbackSeed,
+                    msg.sender,
+                    block.timestamp,
+                    block.prevrandao, // EIP-4399: Use prevrandao for additional entropy
+                    round.totalTicketsSold,
+                    round.totalMusd,
+                    roundId
+                )
+            )
+        );
 
         round.revealedSeed = fallbackSeed;
         round.status = RoundStatus.REVEAL;
