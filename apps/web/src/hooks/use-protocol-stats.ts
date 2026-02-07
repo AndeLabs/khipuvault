@@ -8,13 +8,12 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { usePublicClient } from "wagmi";
 import { formatUnits } from "viem";
+import { usePublicClient } from "wagmi";
 
 import {
   COOPERATIVE_POOL_ABI,
   INDIVIDUAL_POOL_V3_ABI,
-  MEZO_TESTNET_ADDRESSES,
   MEZO_V3_ADDRESSES,
 } from "@/lib/web3/contracts-v3";
 
@@ -64,7 +63,9 @@ export function useProtocolStats(): ProtocolStats {
   const { data: individualTVL, isLoading: isLoadingIndividual } = useQuery({
     queryKey: ["protocol-stats", "individual-tvl"],
     queryFn: async () => {
-      if (!publicClient) return 0n;
+      if (!publicClient) {
+        return 0n;
+      }
       try {
         const result = await publicClient.readContract({
           address: INDIVIDUAL_POOL_ADDRESS,
@@ -86,7 +87,9 @@ export function useProtocolStats(): ProtocolStats {
   const { data: cooperativeTVL, isLoading: isLoadingCooperative } = useQuery({
     queryKey: ["protocol-stats", "cooperative-tvl"],
     queryFn: async () => {
-      if (!publicClient) return 0n;
+      if (!publicClient) {
+        return 0n;
+      }
       try {
         // Get pool counter
         const poolCounter = await publicClient.readContract({
@@ -97,7 +100,9 @@ export function useProtocolStats(): ProtocolStats {
         });
 
         const count = Number(poolCounter);
-        if (count === 0) return 0n;
+        if (count === 0) {
+          return 0n;
+        }
 
         // Sum TVL from all pools
         let total = 0n;

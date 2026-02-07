@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import { renderHook, act } from "@testing-library/react";
-import { useDepositWithApprove } from "../use-deposit-with-approve";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import { createWrapper } from "@/test/test-providers";
+
+import { useDepositWithApprove } from "../use-deposit-with-approve";
 
 // Mock wagmi hooks
 const mockWriteContract = vi.fn();

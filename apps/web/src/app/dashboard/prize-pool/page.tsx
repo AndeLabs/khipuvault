@@ -27,22 +27,32 @@ import {
   Loader2,
   RefreshCw,
 } from "lucide-react";
+import nextDynamic from "next/dynamic";
 import * as React from "react";
 import { useAccount } from "wagmi";
 
 import { PageHeader, PageSection } from "@/components/layout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   ActiveLotteryHero,
-  BuyTicketsModal,
   YourTickets,
   ProbabilityCalculator,
   DrawHistory,
   HowItWorks,
   LotteryStats,
 } from "@/features/prize-pool";
+
+// Lazy load modal to reduce initial bundle size
+const BuyTicketsModal = nextDynamic(
+  () => import("@/features/prize-pool").then((mod) => ({ default: mod.BuyTicketsModal })),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[500px] w-full" />,
+  }
+);
 import { useToast } from "@/hooks/use-toast";
 // Hooks
 import { useLotteryClaimStatus } from "@/hooks/web3/lottery/use-lottery-claim-status";
@@ -110,7 +120,7 @@ export default function PrizePoolPage() {
   const { stats, isLoading: isLoadingStats } = useUserLotteryStats();
 
   // Check if user has already claimed/withdrawn for current round
-  const { hasClaimed: hasClaimedOrWithdrawn, isLoading: isLoadingClaimStatus } =
+  const { hasClaimed: hasClaimedOrWithdrawn, isLoading: _isLoadingClaimStatus } =
     useLotteryClaimStatus(currentRoundId ? Number(currentRoundId) : undefined);
 
   // Claim/withdraw hooks

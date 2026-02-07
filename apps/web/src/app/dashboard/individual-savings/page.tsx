@@ -3,11 +3,13 @@
 export const dynamic = "force-dynamic";
 
 import { ArrowDownCircle, ArrowUpCircle, BarChart3, Gift, Database } from "lucide-react";
+import nextDynamic from "next/dynamic";
 import * as React from "react";
 import { formatUnits } from "viem";
 import { useAccount } from "wagmi";
 
 import { PageHeader, PageSection } from "@/components/layout";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Web3ErrorBoundary } from "@/components/web3-error-boundary";
 import {
@@ -15,10 +17,6 @@ import {
   WithdrawCard,
   PositionCard,
   ActionsCard,
-  ReferralDashboard,
-  PoolStatistics,
-  TransactionHistory,
-  YieldAnalytics,
   GetMusdGuide,
 } from "@/features/individual-savings";
 import { usePoolEvents } from "@/hooks/web3/common/use-pool-events";
@@ -29,6 +27,40 @@ import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import { useSimpleWithdraw } from "@/hooks/web3/use-simple-withdraw";
 import { useUserTransactionHistory } from "@/hooks/web3/use-user-transaction-history";
 import { V3_FEATURES } from "@/lib/web3/contracts-v3";
+
+// Dynamic imports for tab content components to reduce initial bundle size
+const PoolStatistics = nextDynamic(
+  () => import("@/features/individual-savings").then((mod) => ({ default: mod.PoolStatistics })),
+  {
+    loading: () => <Skeleton className="h-[400px] w-full rounded-lg" />,
+    ssr: false,
+  }
+);
+
+const TransactionHistory = nextDynamic(
+  () =>
+    import("@/features/individual-savings").then((mod) => ({ default: mod.TransactionHistory })),
+  {
+    loading: () => <Skeleton className="h-[400px] w-full rounded-lg" />,
+    ssr: false,
+  }
+);
+
+const YieldAnalytics = nextDynamic(
+  () => import("@/features/individual-savings").then((mod) => ({ default: mod.YieldAnalytics })),
+  {
+    loading: () => <Skeleton className="h-[400px] w-full rounded-lg" />,
+    ssr: false,
+  }
+);
+
+const ReferralDashboard = nextDynamic(
+  () => import("@/features/individual-savings").then((mod) => ({ default: mod.ReferralDashboard })),
+  {
+    loading: () => <Skeleton className="h-[400px] w-full rounded-lg" />,
+    ssr: false,
+  }
+);
 
 /**
  * Individual Savings Page - V4 Production Ready with ALL V3 Features

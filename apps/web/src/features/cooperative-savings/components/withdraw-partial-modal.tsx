@@ -131,12 +131,16 @@ function calculateMaxWithdrawable(
   poolInfo: PoolInfo | null | undefined,
   memberInfo: MemberInfo | null | undefined
 ): bigint {
-  if (!poolInfo || !memberInfo) return BigInt(0);
+  if (!poolInfo || !memberInfo) {
+    return BigInt(0);
+  }
 
   const currentBalance = memberInfo.btcContributed;
   const minContribution = poolInfo.minContribution;
 
-  if (currentBalance <= minContribution) return BigInt(0);
+  if (currentBalance <= minContribution) {
+    return BigInt(0);
+  }
 
   return currentBalance - minContribution;
 }
@@ -204,7 +208,9 @@ export function WithdrawPartialModal({
   };
 
   const handleWithdraw = async () => {
-    if (!poolId || !validation.isValid) return;
+    if (!poolId || !validation.isValid) {
+      return;
+    }
 
     try {
       await withdrawPartial(poolId, amount);
@@ -221,7 +227,9 @@ export function WithdrawPartialModal({
   const isProcessing = state === "executing" || state === "processing";
   const canWithdraw = validation.isValid && !isProcessing && maxWithdrawable > BigInt(0);
 
-  if (!poolId || !memberInfo || !poolInfo) return null;
+  if (!poolId || !memberInfo || !poolInfo) {
+    return null;
+  }
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>

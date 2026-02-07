@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronRight, User, Wallet, Shield, Activity } from "lucide-react";
+import { ChevronRight, Wallet, Activity } from "lucide-react";
 import Link from "next/link";
 import * as React from "react";
 
@@ -8,14 +8,6 @@ import { PageHeader } from "@/components/layout";
 import { Card, CardContent } from "@/components/ui/card";
 
 const settingsSections = [
-  {
-    href: "/dashboard/settings/preferences",
-    icon: User,
-    title: "Preferences",
-    description: "Customize your KhipuVault experience",
-    color: "text-lavanda",
-    bgColor: "bg-lavanda/20",
-  },
   {
     href: "/dashboard/settings/wallets",
     icon: Wallet,
@@ -25,18 +17,10 @@ const settingsSections = [
     bgColor: "bg-accent/20",
   },
   {
-    href: "/dashboard/settings/security",
-    icon: Shield,
-    title: "Security",
-    description: "Security settings and best practices",
-    color: "text-success",
-    bgColor: "bg-success/20",
-  },
-  {
     href: "/dashboard/settings/activity",
     icon: Activity,
     title: "Activity",
-    description: "View your account activity history",
+    description: "View your transaction history",
     color: "text-info",
     bgColor: "bg-info/20",
   },
@@ -45,7 +29,7 @@ const settingsSections = [
 export default function SettingsPage() {
   return (
     <div className="animate-slide-up space-y-6">
-      <PageHeader title="Settings" description="Manage your account settings and preferences" />
+      <PageHeader title="Settings" description="Manage your wallets and view activity" />
 
       <div className="grid gap-6 md:grid-cols-2">
         {settingsSections.map((section) => {

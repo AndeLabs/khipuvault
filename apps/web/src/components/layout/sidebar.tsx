@@ -1,6 +1,14 @@
 "use client";
 
-import { LayoutDashboard, Wallet, Users, Trophy, Settings, ChevronDown } from "lucide-react";
+import {
+  LayoutDashboard,
+  Wallet,
+  Users,
+  Trophy,
+  Settings,
+  ChevronDown,
+  RefreshCw,
+} from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import * as React from "react";
@@ -39,10 +47,15 @@ const navItems: NavItem[] = [
     icon: Users,
   },
   {
+    title: "ROSCA Pools",
+    href: "/dashboard/rotating-pool",
+    icon: RefreshCw,
+    badge: "New",
+  },
+  {
     title: "Prize Pool",
     href: "/dashboard/prize-pool",
     icon: Trophy,
-    badge: "New",
   },
   {
     title: "Settings",
@@ -50,16 +63,8 @@ const navItems: NavItem[] = [
     icon: Settings,
     children: [
       {
-        title: "Preferences",
-        href: "/dashboard/settings/preferences",
-      },
-      {
         title: "Wallets",
         href: "/dashboard/settings/wallets",
-      },
-      {
-        title: "Security",
-        href: "/dashboard/settings/security",
       },
       {
         title: "Activity",

@@ -24,8 +24,9 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback, useEffect, useState } from "react";
-import type { Abi, Address } from "viem";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
+
+import type { Abi, Address } from "viem";
 
 // ============================================================================
 // TYPES
@@ -97,7 +98,9 @@ export interface ContractMutationResult {
  * Parse contract errors into user-friendly messages
  */
 function defaultErrorParser(error: unknown): string {
-  if (!error) return "Unknown error";
+  if (!error) {
+    return "Unknown error";
+  }
 
   const errorString = String(error);
 
@@ -284,7 +287,7 @@ export function useBaseMutation() {
   const [state, setState] = useState<MutationState>("idle");
   const [error, setError] = useState<string>("");
 
-  const { writeContract, data: txHash, error: writeError, reset: resetWrite } = useWriteContract();
+  const { writeContract, data: txHash, error: _writeError, reset: resetWrite } = useWriteContract();
 
   const {
     isLoading: isConfirming,

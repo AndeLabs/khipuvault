@@ -13,9 +13,14 @@
  * ✅ View pool details with members list
  * ✅ Real-time data from blockchain
  * ✅ Responsive tabbed layout
+ *
+ * Optimizations:
+ * ✅ Dynamic imports for modals (loaded on demand)
+ * ✅ Reduced initial bundle size
  */
 
 import { Info, Wallet } from "lucide-react";
+import nextDynamic from "next/dynamic";
 import * as React from "react";
 import { useAccount } from "wagmi";
 
@@ -24,17 +29,32 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Web3ErrorBoundary } from "@/components/web3-error-boundary";
-import {
-  PoolsBrowseV3,
-  MyPoolsDashboard,
-  PoolDetailsModal,
-  CreatePoolModalV3,
-  JoinPoolModalV3,
-  LeavePoolDialog,
-} from "@/features/cooperative-savings";
+import { PoolsBrowseV3, MyPoolsDashboard } from "@/features/cooperative-savings";
 import { useToast } from "@/hooks/use-toast";
 import { useAllCooperativePools } from "@/hooks/web3/use-all-cooperative-pools";
 import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
+
+// Dynamic imports for modals - only loaded when needed
+const PoolDetailsModal = nextDynamic(
+  () => import("@/features/cooperative-savings").then((mod) => ({ default: mod.PoolDetailsModal })),
+  { ssr: false }
+);
+
+const CreatePoolModalV3 = nextDynamic(
+  () =>
+    import("@/features/cooperative-savings").then((mod) => ({ default: mod.CreatePoolModalV3 })),
+  { ssr: false }
+);
+
+const JoinPoolModalV3 = nextDynamic(
+  () => import("@/features/cooperative-savings").then((mod) => ({ default: mod.JoinPoolModalV3 })),
+  { ssr: false }
+);
+
+const LeavePoolDialog = nextDynamic(
+  () => import("@/features/cooperative-savings").then((mod) => ({ default: mod.LeavePoolDialog })),
+  { ssr: false }
+);
 
 export default function CooperativeSavingsPage() {
   const { isConnected } = useAccount();

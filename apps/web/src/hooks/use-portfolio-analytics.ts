@@ -11,7 +11,6 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { formatUnits } from "viem";
-import { useAccount } from "wagmi";
 
 import { useUserTransactionHistory, type Transaction } from "./web3/use-user-transaction-history";
 
