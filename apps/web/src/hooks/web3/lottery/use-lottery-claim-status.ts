@@ -11,7 +11,6 @@ import { useQuery } from "@tanstack/react-query";
 import { useAccount, usePublicClient } from "wagmi";
 
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
-import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
 
 /**
  * Hook to check if user has claimed their prize/capital for a specific round

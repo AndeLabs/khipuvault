@@ -102,8 +102,8 @@ export function Products() {
                   >
                     {product.badge === "Live" && (
                       <span className="relative mr-1.5 flex h-2 w-2">
-                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75"></span>
-                        <span className="relative inline-flex h-2 w-2 rounded-full bg-success"></span>
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+                        <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
                       </span>
                     )}
                     {product.badge}

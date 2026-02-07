@@ -1,7 +1,9 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { renderHook, waitFor } from "@testing-library/react";
-import { useBTCPrice, formatUSD, btcToUSD, formatBTCtoUSD } from "../use-btc-price";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
+
 import { createWrapper } from "@/test/test-providers";
+
+import { useBTCPrice, formatUSD, btcToUSD, formatBTCtoUSD } from "../use-btc-price";
 
 describe("useBTCPrice", () => {
   const mockFetch = vi.fn();

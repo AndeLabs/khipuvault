@@ -4,7 +4,6 @@ import { AlertTriangle, RefreshCw, Home } from "lucide-react";
 import * as React from "react";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { captureError } from "@/lib/error-tracking";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { captureError } from "@/lib/error-tracking";
 
 interface ErrorBoundaryProps {
   children: React.ReactNode;
@@ -83,7 +83,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
     });
 
     // Capture error for monitoring (Sentry when enabled)
-    captureError(error, {
+    void captureError(error, {
       tags: { boundary: "generic", component: "ErrorBoundary" },
       extra: { componentStack: errorInfo.componentStack },
     });

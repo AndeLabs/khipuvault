@@ -55,7 +55,9 @@ export function ClosePoolDialog({ poolId, open, onClose, onSuccess }: ClosePoolD
 
   // Check if user is the pool creator
   const isCreator = React.useMemo(() => {
-    if (!poolInfo || !address) return false;
+    if (!poolInfo || !address) {
+      return false;
+    }
     return poolInfo.creator.toLowerCase() === address.toLowerCase();
   }, [poolInfo, address]);
 
@@ -88,7 +90,9 @@ export function ClosePoolDialog({ poolId, open, onClose, onSuccess }: ClosePoolD
   };
 
   const handleClosePool = async () => {
-    if (!poolId || !isCreator) return;
+    if (!poolId || !isCreator) {
+      return;
+    }
 
     try {
       await closePool(poolId);
@@ -105,7 +109,9 @@ export function ClosePoolDialog({ poolId, open, onClose, onSuccess }: ClosePoolD
   const isProcessing = state === "executing" || state === "processing";
   const canClose = isCreator && !isProcessing && !isAlreadyClosed;
 
-  if (!poolId || !poolInfo) return null;
+  if (!poolId || !poolInfo) {
+    return null;
+  }
 
   return (
     <AlertDialog open={open} onOpenChange={handleClose}>

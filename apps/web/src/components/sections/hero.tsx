@@ -28,8 +28,8 @@ export function Hero() {
               {/* Badge */}
               <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2">
                 <span className="relative flex h-2 w-2">
-                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75"></span>
-                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success"></span>
+                  <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
+                  <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
                 </span>
                 <span className="text-sm font-medium text-primary">Live on Mezo Testnet</span>
               </div>
