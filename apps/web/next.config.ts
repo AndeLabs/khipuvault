@@ -104,11 +104,15 @@ const nextConfig: NextConfig = {
     ];
   },
   // Transpile Mezo Passport and dependencies for Next.js 15
+  // CRITICAL: Also transpile internal monorepo packages for Vercel deployment
   transpilePackages: [
     "@mezo-org/passport",
     "@mezo-org/orangekit",
     "@mezo-org/orangekit-smart-account",
     "@mezo-org/orangekit-contracts",
+    "@khipu/shared",
+    "@khipu/web3",
+    "@khipu/ui",
   ],
   webpack: (config, { isServer }) => {
     config.resolve.alias = {
