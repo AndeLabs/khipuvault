@@ -57,6 +57,16 @@ router.get(
   })
 );
 
+// GET /api/pools/address/:address/stats
+router.get(
+  "/address/:address/stats",
+  validate(addressParamSchema),
+  asyncHandler(async (req, res) => {
+    const stats = await poolsService.getPoolStats(req.params.address);
+    sendSuccess(res, stats);
+  })
+);
+
 // GET /api/pools/:poolId
 router.get(
   "/:poolId",

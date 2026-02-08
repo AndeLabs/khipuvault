@@ -19,6 +19,7 @@ import {
   ActionsCard,
   GetMusdGuide,
 } from "@/features/individual-savings";
+import { usePoolStats } from "@/hooks/use-pool-stats";
 import { usePoolEvents } from "@/hooks/web3/common/use-pool-events";
 import { useAutoCompound } from "@/hooks/web3/use-auto-compound";
 import { useClaimYields } from "@/hooks/web3/use-claim-yields";
@@ -26,7 +27,7 @@ import { useDepositWithApprove } from "@/hooks/web3/use-deposit-with-approve";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import { useSimpleWithdraw } from "@/hooks/web3/use-simple-withdraw";
 import { useUserTransactionHistory } from "@/hooks/web3/use-user-transaction-history";
-import { V3_FEATURES } from "@/lib/web3/contracts-v3";
+import { V3_FEATURES, MEZO_V3_ADDRESSES } from "@/lib/web3/contracts-v3";
 
 // Dynamic imports for tab content components to reduce initial bundle size
 const PoolStatistics = nextDynamic(
@@ -83,6 +84,9 @@ export default function IndividualSavingsPage() {
 
   // Subscribe to pool events for automatic data refresh on blockchain changes
   usePoolEvents();
+
+  // Fetch real-time pool statistics from backend API
+  const poolStats = usePoolStats(MEZO_V3_ADDRESSES.individualPoolV3);
 
   // Real contract interaction hooks
   const { deposit, isProcessing: isDepositing, step: depositStep } = useDepositWithApprove();
@@ -199,8 +203,8 @@ export default function IndividualSavingsPage() {
             totalYields={poolData.userInfo?.netYields?.toString() ?? "0"}
             referralRewards={poolData.referralStats?.rewards?.toString() ?? "0"}
             apy={apy}
-            change24h={0} // Not available from contract - would need historical data API
-            isLoading={poolData.isLoading}
+            change24h={poolStats.change24h}
+            isLoading={poolData.isLoading || poolStats.isLoading}
           />
         </PageSection>
 
@@ -297,9 +301,9 @@ export default function IndividualSavingsPage() {
               totalReferralRewards={poolData.poolStats.totalReferralRewards}
               poolAPR={poolData.poolStats.poolAPR}
               performanceFee={poolData.performanceFee}
-              activeDepositors={0} // Would need to track this in contract
+              activeDepositors={poolStats.activeDepositors}
               emergencyMode={poolData.emergencyMode}
-              isLoading={poolData.isLoading}
+              isLoading={poolData.isLoading || poolStats.isLoading}
             />
           </div>
         </div>

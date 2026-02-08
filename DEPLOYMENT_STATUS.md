@@ -17,12 +17,14 @@
 ## ✅ Lo que YA está configurado
 
 ### 1. Proyectos Vercel Renombrados
+
 ```
 ✅ khipuvault-web  → khipuvault.com + www.khipuvault.com
 ✅ khipuvault-docs → docs.khipuvault.com
 ```
 
 ### 2. DNS Configurado en Cloudflare
+
 ```
 ✅ Zone ID: 190a5c7eb417184f1ae3249d7348c351
 ✅ Nameservers asignados:
@@ -36,6 +38,7 @@
 ```
 
 ### 3. Dominios agregados a Vercel
+
 ```
 ✅ khipuvault.com        → khipuvault-web (verified ✓)
 ✅ www.khipuvault.com    → redirect a khipuvault.com (verified ✓)
@@ -43,6 +46,7 @@
 ```
 
 ### 4. Código Actualizado
+
 ```
 ✅ apps/web/src/components/layout/header.tsx
    - Desktop link: https://docs.khipuvault.com
@@ -68,6 +72,7 @@
 2. **Buscar "Nameservers" o "DNS"**
 
 3. **Cambiar:**
+
    ```
    DE:  launch1.spaceship.net  ❌
         launch2.spaceship.net  ❌
@@ -122,6 +127,7 @@ dig khipuvault.com NS
 Una vez que cambies los nameservers, espera ~30 minutos y verifica:
 
 ### DNS Propagación
+
 ```bash
 # Verificar nameservers
 dig khipuvault.com NS +short
@@ -137,17 +143,20 @@ dig docs.khipuvault.com CNAME +short
 ```
 
 ### Sitios Web
+
 - [ ] https://khipuvault.com carga correctamente
 - [ ] https://www.khipuvault.com redirige a khipuvault.com
 - [ ] https://docs.khipuvault.com carga la documentación
 - [ ] SSL activo (candado verde) en todos los dominios
 
 ### Navegación
+
 - [ ] Click "Docs" en header de web → abre docs.khipuvault.com
 - [ ] Click "Main App" en docs → abre khipuvault.com
 - [ ] Links funcionan en mobile
 
 ### Cloudflare Dashboard
+
 - [ ] Status muestra "Active" (no "Pending")
 - [ ] SSL/TLS mode: "Full" o "Full (strict)"
 
@@ -198,6 +207,7 @@ Vercel auto-deployará con las nuevas URLs.
 ### 2. Eliminar Proyecto Duplicado
 
 Hay un proyecto antiguo "khipuvault" que parece no usarse:
+
 ```bash
 # Opcional: eliminar después de verificar que todo funciona
 # Ir a Vercel dashboard → khipuvault project → Settings → Delete
@@ -206,6 +216,7 @@ Hay un proyecto antiguo "khipuvault" que parece no usarse:
 ### 3. Configurar Monitoreo (Opcional)
 
 **UptimeRobot** (gratis):
+
 - https://uptimerobot.com
 - Monitor: khipuvault.com (HTTP)
 - Monitor: docs.khipuvault.com (HTTP)
@@ -251,18 +262,22 @@ Desarrollo:
 ## 🚨 Troubleshooting
 
 ### "This site can't be reached"
+
 - **Causa:** Nameservers no actualizados o propagación pendiente
 - **Solución:** Esperar propagación (hasta 48h, usualmente 30min)
 
 ### "NET::ERR_CERT_AUTHORITY_INVALID"
+
 - **Causa:** SSL aún no generado por Vercel
 - **Solución:** Esperar 5-10 minutos después de que DNS propague
 
 ### Cloudflare muestra "Pending"
+
 - **Causa:** Nameservers aún no cambiados en Spaceship
 - **Solución:** Cambiar nameservers en Spaceship
 
 ### Vercel muestra "Invalid Configuration"
+
 - **Causa:** DNS no apunta correctamente
 - **Solución:** Verificar DNS records en Cloudflare
 
@@ -271,16 +286,19 @@ Desarrollo:
 ## 📞 Soporte
 
 ### Cloudflare
+
 - Dashboard: https://dash.cloudflare.com
 - Docs: https://developers.cloudflare.com
 - Community: https://community.cloudflare.com
 
 ### Vercel
+
 - Dashboard: https://vercel.com/dashboard
 - Docs: https://vercel.com/docs
 - Support: https://vercel.com/support
 
 ### Spaceship
+
 - Dashboard: https://www.spaceship.com
 - Support: Email support@spaceship.com
 
@@ -289,6 +307,7 @@ Desarrollo:
 ## ✅ Checklist Final
 
 **Antes de cambiar nameservers:**
+
 - [x] Dominio comprado en Spaceship
 - [x] Proyectos renombrados en Vercel
 - [x] DNS configurado en Cloudflare
@@ -297,9 +316,11 @@ Desarrollo:
 - [x] Environment variables configuradas
 
 **Acción requerida:**
+
 - [ ] **CAMBIAR NAMESERVERS EN SPACESHIP** ← HACER AHORA
 
 **Después de propagación:**
+
 - [ ] Verificar DNS con dig
 - [ ] Verificar sitios cargan con HTTPS
 - [ ] Verificar navegación funciona

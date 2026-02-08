@@ -1,6 +1,6 @@
 "use client";
 
-import { Wallet, Users, Trophy, ArrowRight } from "lucide-react";
+import { Wallet, Users, Trophy, ArrowRight, Repeat } from "lucide-react";
 import Link from "next/link";
 
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
@@ -42,19 +42,35 @@ const products = [
     highlight: "Yield",
   },
   {
+    icon: Repeat,
+    title: "Rotating Pool (ROSCA)",
+    description:
+      "Turn-based savings circles where members contribute periodically and take turns receiving the full pot. Built with Native BTC support.",
+    features: [
+      "Native BTC & WBTC support",
+      "Flash loan protected",
+      "Transparent turn system",
+      "Gas optimized (~1M saved)",
+    ],
+    href: "/dashboard/rotating-pool",
+    color: "accent",
+    badge: "Live",
+    highlight: "Turns",
+  },
+  {
     icon: Trophy,
     title: "Prize Pool",
     description:
-      "No-loss lottery where your capital is always safe. Only the yields are distributed as prizes to lucky winners.",
+      "No-loss lottery with 99% gas optimization. Capital always safe, yields distributed as prizes via secure commit-reveal randomness.",
     features: [
-      "Never lose your capital",
-      "Weekly prize draws",
-      "Fair probability system",
-      "Withdraw anytime",
+      "99% gas optimized",
+      "Secure randomness",
+      "Fair minimum 2 players",
+      "Never lose capital",
     ],
     href: "/dashboard/prize-pool",
     color: "success",
-    badge: "Beta",
+    badge: "Live",
     highlight: "Prizes",
   },
 ];
@@ -71,12 +87,12 @@ export function Products() {
             Choose Your <span className="text-gradient-brand">Savings Strategy</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            Whether you prefer solo saving or community pools, we have the right product for you.
+            From solo savings to rotating pools, find the perfect way to grow your Bitcoin.
           </p>
         </AnimateOnScroll>
 
         {/* Product Cards */}
-        <div className="grid gap-6 md:grid-cols-3 lg:gap-8">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 lg:gap-8">
           {products.map((product, index) => (
             <AnimateOnScroll key={product.title} delay={`${index * 100}ms`}>
               <div

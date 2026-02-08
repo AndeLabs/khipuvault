@@ -21,6 +21,18 @@ const contracts = [
     icon: Code2,
   },
   {
+    name: "Rotating Pool (ROSCA)",
+    description: "Turn-based savings circles with Native BTC & WBTC support",
+    address: "0x0Bac59e87Af0D2e95711846BaDb124164382aafC",
+    icon: Code2,
+  },
+  {
+    name: "Prize Pool (Lottery)",
+    description: "No-loss lottery with 99% gas optimization and secure randomness",
+    address: "0x04D0172067e490C5845F8925A50282C7a1348377",
+    icon: Code2,
+  },
+  {
     name: "Mezo Integration",
     description: "Bridge contract for Mezo Protocol staking",
     address: "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6",
