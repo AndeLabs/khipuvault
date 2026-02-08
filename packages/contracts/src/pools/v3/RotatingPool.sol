@@ -548,6 +548,15 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         uint256 feeAmount = (yieldAmount * performanceFee) / 10000;
         uint256 netYield = yieldAmount - feeAmount;
 
+        // CEI FIX: Update ALL state BEFORE any external calls
+        member.hasReceivedPayout = true;
+        member.payoutReceived = payoutAmount;
+        member.yieldReceived = netYield;
+        period.paid = true;
+
+        // M-04 FIX: Increment payout counter
+        membersWithPayoutCount[poolId]++;
+
         // Try to claim yields from aggregator if needed (read operation + claim)
         if (yieldAmount > 0) {
             uint256 poolMusdBalance = MUSD.balanceOf(address(this));
@@ -570,15 +579,6 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
                 }
             }
         }
-
-        // CEI FIX: Update ALL state BEFORE external transfers
-        member.hasReceivedPayout = true;
-        member.payoutReceived = payoutAmount;
-        member.yieldReceived = netYield;
-        period.paid = true;
-
-        // M-04 FIX: Increment payout counter
-        membersWithPayoutCount[poolId]++;
 
         // Cache member index for event
         uint256 memberIndex = member.memberIndex;

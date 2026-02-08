@@ -377,13 +377,14 @@ contract IndividualPoolV3 is BasePoolV3 {
         (uint256 feeAmount, uint256 netYieldCalc) = _calculateFee(totalYield);
         netYield = netYieldCalc;
 
+        // CEI FIX: Reset yield BEFORE external calls
+        userDeposit.yieldAccrued = 0;
+
         // Claim from aggregator if needed
         uint256 poolYield = YIELD_AGGREGATOR.getPendingYield(address(this));
         if (poolYield > 0) {
             YIELD_AGGREGATOR.claimYield();
         }
-        
-        userDeposit.yieldAccrued = 0;
 
         // Transfer yield to user
         MUSD.safeTransfer(msg.sender, netYield);
