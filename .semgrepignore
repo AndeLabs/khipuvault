@@ -1,0 +1,122 @@
+# Semgrep Ignore Configuration
+# Exclude directories that don't need security scanning
+
+# Dependencies
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+build/
+out/
+.next/
+.turbo/
+.vercel/
+.netlify/
+
+# Coverage reports
+coverage/
+.nyc_output/
+
+# Cache directories
+.cache/
+.parcel-cache/
+.npm/
+.yarn/
+
+# Foundry/Hardhat artifacts
+cache/
+artifacts/
+typechain/
+typechain-types/
+**/contracts/lib/
+**/contracts/out/
+**/contracts/cache/
+broadcast/
+deployments/
+
+# Prisma migrations (generated code)
+**/prisma/migrations/
+
+# Test fixtures and mocks
+**/__mocks__/
+**/__fixtures__/
+**/test/fixtures/
+**/tests/fixtures/
+
+# Generated files
+**/*.generated.ts
+**/*.generated.js
+**/.generated/
+
+# Documentation builds
+docs/build/
+.docusaurus/
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Lock files (too large)
+pnpm-lock.yaml
+package-lock.json
+yarn.lock
+
+# Environment files (should never be scanned)
+.env
+.env.*
+!.env.example
+
+# Private keys
+*.key
+*.pem
+private-key.txt
+*.keystore
+keystore/
+secrets/
+
+# AI-generated reports
+*_REPORT.md
+*_AUDIT.md
+*_COMPLETE.md
+*_PROGRESS.md
+*_SOLUTIONS.md
+*_FIXES.md
+TODO.md
+WEEK_*.md
+SECURITY_*.md
+MATHEMATICAL_*.md
+FREE_*.md
+
+# Security scanning outputs
+security/shannon/
+slither-report.json
+
+# Storybook
+.storybook-out/
+storybook-static/
+
+# Playwright
+.playwright-mcp/
+playwright-report/
+
+# PWA generated files
+**/public/sw.js
+**/public/workbox-*.js
+**/public/worker-*.js
+**/public/fallback-*.js

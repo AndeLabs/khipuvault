@@ -9,7 +9,6 @@ import { Router, type Router as ExpressRouter } from "express";
 import { z } from "zod";
 
 import { asyncHandler, sendSuccess } from "../lib/route-handler";
-import { requireAuth } from "../middleware/auth";
 import { validate } from "../middleware/validate";
 import { LotteryService } from "../services/lottery";
 

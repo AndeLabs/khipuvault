@@ -1,4 +1,5 @@
 import "dotenv/config";
+
 import compression from "compression";
 import cors from "cors";
 import express, { type Application } from "express";
@@ -114,11 +115,15 @@ app.use(
         return callback(null, true);
       }
 
+      // HTTP URLs are acceptable for localhost development environments
+      // These URLs are only used in local development, never in production
+      /* eslint-disable @microsoft/sdl/no-insecure-url */
       const devOrigins = [
         "http://localhost:3000",
         "http://localhost:9002",
         "http://127.0.0.1:3000",
       ];
+      /* eslint-enable @microsoft/sdl/no-insecure-url */
       if (corsOrigins.includes(origin) || devOrigins.includes(origin)) {
         return callback(null, true);
       }
@@ -265,21 +270,26 @@ let server: ReturnType<typeof app.listen>;
 // ===== REQUEST TIMEOUT PROTECTION =====
 // Configure server timeouts after startup
 
-serverPromise.then((s) => {
-  server = s;
+void serverPromise
+  .then((s) => {
+    server = s;
 
-  // Protects against slowloris attacks and hung connections
-  // Request timeout: 30 seconds for normal requests
-  server.setTimeout(30000);
+    // Protects against slowloris attacks and hung connections
+    // Request timeout: 30 seconds for normal requests
+    server.setTimeout(30000);
 
-  // Keep-alive timeout: Must be greater than load balancer's idle timeout
-  // AWS ALB default is 60s, so we use 65s
-  server.keepAliveTimeout = 65000;
+    // Keep-alive timeout: Must be greater than load balancer's idle timeout
+    // AWS ALB default is 60s, so we use 65s
+    server.keepAliveTimeout = 65000;
 
-  // Headers timeout: Must be greater than keepAliveTimeout
-  // Prevents attacks that send headers very slowly
-  server.headersTimeout = 66000;
-});
+    // Headers timeout: Must be greater than keepAliveTimeout
+    // Prevents attacks that send headers very slowly
+    server.headersTimeout = 66000;
+  })
+  .catch((error) => {
+    logger.error({ error }, "Failed to configure server timeouts");
+    // Error is already handled in startServer, this is just for timeout configuration
+  });
 
 // Graceful shutdown handling
 const gracefulShutdown = async (signal: string) => {
@@ -306,9 +316,11 @@ const gracefulShutdown = async (signal: string) => {
       logger.info("Database connection closed");
 
       logger.info("Graceful shutdown completed successfully");
+      // eslint-disable-next-line no-process-exit -- Intentional exit after graceful shutdown
       process.exit(0);
     } catch (error) {
       logger.error({ error }, "Error during graceful shutdown");
+      // eslint-disable-next-line no-process-exit -- Intentional exit on shutdown error
       process.exit(1);
     }
   });
@@ -316,6 +328,7 @@ const gracefulShutdown = async (signal: string) => {
   // Force close after 30 seconds (give more time for cleanup)
   setTimeout(() => {
     logger.error("Forcing shutdown after timeout");
+    // eslint-disable-next-line no-process-exit -- Intentional forced exit on timeout
     process.exit(1);
   }, 30000);
 };

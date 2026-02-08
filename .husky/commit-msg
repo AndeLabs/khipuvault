@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Commitlint hook - validates commit message format
 # Enforces conventional commits: <type>(<scope>): <subject>
 

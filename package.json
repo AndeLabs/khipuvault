@@ -76,13 +76,20 @@
     "overrides": {
       "valibot": ">=1.2.0",
       "node-forge": ">=1.3.2",
-      "@modelcontextprotocol/sdk": ">=1.24.0",
+      "@modelcontextprotocol/sdk": ">=1.26.0",
       "@trpc/server": ">=10.45.3",
       "h3": ">=1.15.5",
-      "hono": ">=4.11.4",
+      "hono": ">=4.11.7",
       "jws": ">=4.0.1",
       "preact": ">=10.27.3",
-      "qs": ">=6.14.1"
+      "qs": ">=6.14.1",
+      "fast-xml-parser": ">=5.3.4",
+      "body-parser": ">=2.2.2",
+      "lodash": ">=4.17.23",
+      "@sentry/webpack-plugin": ">=4.9.0",
+      "@types/react": "18.3.27",
+      "@types/react-dom": "18.3.7",
+      "next": "15.5.12"
     }
   }
 }

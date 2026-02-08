@@ -132,6 +132,11 @@ pnpm db:seed          # Seed test data
 pnpm contracts:build  # Compile contracts (forge build)
 pnpm contracts:test   # Run tests (forge test)
 
+# Security
+pnpm security:semgrep         # Semgrep SAST scan
+pnpm security:snyk:test       # Snyk dependency scan
+pnpm security:audit           # npm audit
+
 # Quality
 pnpm lint             # Lint all packages
 pnpm typecheck        # TypeScript check
@@ -231,6 +236,8 @@ forge test --gas-report
 **Security Tools:**
 
 - ✅ Slither (static analysis complete)
+- ✅ Semgrep (SAST for TypeScript/Solidity)
+- ✅ Snyk (dependency scanning)
 - ✅ Foundry (150+ tests, fuzz testing)
 - ⏳ Formal verification (planned)
 

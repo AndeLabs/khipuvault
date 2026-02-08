@@ -66,24 +66,67 @@ ChartContainer.displayName = "Chart";
 /**
  * Validates CSS color values to prevent XSS injection
  * Allows: hex colors, rgb/rgba, hsl/hsla, named colors, CSS variables
+ * Fixed: ReDoS vulnerabilities - added length limits and simplified patterns
  */
 function isValidCssColor(color: string): boolean {
+  // Safety check: reject excessively long strings
+  if (color.length > 150) {
+    return false;
+  }
+
   // Hex colors: #rgb, #rrggbb, #rrggbbaa
   if (/^#[0-9A-Fa-f]{3,8}$/.test(color)) {
     return true;
   }
+
   // RGB/RGBA: rgb(r,g,b) or rgba(r,g,b,a)
-  if (/^rgba?\([^)]+\)$/.test(color)) {
+  // Fixed: ReDoS vulnerability - limited content length
+  if (/^rgba?\([^)]{0,50}\)$/.test(color)) {
     return true;
   }
+
   // HSL/HSLA: hsl(h,s,l) or hsla(h,s,l,a)
-  if (/^hsla?\([^)]+\)$/.test(color)) {
+  // Fixed: ReDoS vulnerability - limited content length
+  if (/^hsla?\([^)]{0,50}\)$/.test(color)) {
     return true;
   }
+
   // CSS variables: var(--name) or var(--name, fallback)
-  if (/^var\(--[a-zA-Z0-9-]+(?:,\s*[^)]+)?\)$/.test(color)) {
+  // Fixed: ReDoS vulnerability - use string methods instead of complex regex
+  if (color.startsWith("var(--") && color.endsWith(")")) {
+    const inner = color.slice(6, -1); // Extract content between 'var(--' and ')'
+    if (inner.length === 0 || inner.length > 100) {
+      return false;
+    }
+    // Check for comma to detect fallback value
+    const parts = inner.split(",");
+    if (parts.length > 2) {
+      return false; // Only allow one comma (for fallback)
+    }
+    // Validate variable name (first part): alphanumeric and hyphens only, max 50 chars
+    const varName = parts[0].trim();
+    if (varName.length === 0 || varName.length > 50) {
+      return false;
+    }
+    // Use simple character validation without quantifiers
+    for (let i = 0; i < varName.length; i++) {
+      const char = varName[i];
+      const isValid =
+        (char >= "a" && char <= "z") ||
+        (char >= "A" && char <= "Z") ||
+        (char >= "0" && char <= "9") ||
+        char === "-";
+      if (!isValid) {
+        return false;
+      }
+    }
+    // If there's a fallback, just check length
+    if (parts.length === 2 && parts[1].trim().length > 50) {
+      return false;
+    }
     return true;
   }
+
   // Named colors (common ones) - whitelist approach
   const namedColors = [
     "transparent",
@@ -106,6 +149,7 @@ function isValidCssColor(color: string): boolean {
   if (namedColors.includes(color.toLowerCase())) {
     return true;
   }
+
   return false;
 }
 

@@ -1,0 +1,368 @@
+name: Security Scanning
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: "0 2 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NODE_VERSION: "20"
+  PNPM_VERSION: "9.0.0"
+
+jobs:
+  dependency-audit:
+    name: Dependency Audit
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run npm audit
+        id: npm-audit
+        continue-on-error: true
+        run: |
+          pnpm audit --audit-level=high --json > audit-report.json
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Parse audit results
+        if: always()
+        run: |
+          if [ -f audit-report.json ]; then
+            echo "## Dependency Audit Results" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Count vulnerabilities by severity
+            HIGH=$(jq '.metadata.vulnerabilities.high // 0' audit-report.json)
+            MODERATE=$(jq '.metadata.vulnerabilities.moderate // 0' audit-report.json)
+            LOW=$(jq '.metadata.vulnerabilities.low // 0' audit-report.json)
+
+            echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+            echo "| Moderate | $MODERATE |" >> $GITHUB_STEP_SUMMARY
+            echo "| Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+
+            if [ "$HIGH" -gt 0 ]; then
+              echo "::error::Found $HIGH high severity vulnerabilities"
+            fi
+          fi
+
+      - name: Upload audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npm-audit-report
+          path: audit-report.json
+          retention-days: 30
+
+      - name: Fail on high vulnerabilities
+        if: steps.npm-audit.outputs.exit_code != '0'
+        run: |
+          echo "::error::npm audit found vulnerabilities. Review the report above."
+          exit 1
+
+  snyk-scan:
+    name: Snyk Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Snyk test
+        id: snyk-test
+        continue-on-error: true
+        run: pnpm security:snyk:test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Run Snyk code test
+        id: snyk-code
+        continue-on-error: true
+        run: pnpm security:snyk:code
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Upload Snyk results
+        if: always()
+        run: |
+          echo "## Snyk Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Dependencies: ${{ steps.snyk-test.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Code: ${{ steps.snyk-code.outcome }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Monitor on main branch
+        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: pnpm security:snyk:monitor
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  semgrep-scan:
+    name: Semgrep SAST Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    container:
+      image: returntocorp/semgrep
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Run Semgrep with auto-detection
+        id: semgrep-auto
+        continue-on-error: true
+        run: |
+          semgrep scan --config=auto \
+            --sarif \
+            --output=semgrep-auto-results.sarif \
+            --verbose \
+            --exclude='node_modules' \
+            --exclude='dist' \
+            --exclude='.next' \
+            --exclude='coverage' \
+            --metrics=off
+
+      - name: Run Semgrep with custom rules
+        id: semgrep-custom
+        continue-on-error: true
+        run: |
+          semgrep scan --config=.semgrep.yml \
+            --json \
+            --output=semgrep-custom-results.json \
+            --verbose \
+            --metrics=off
+
+      - name: Parse Semgrep results
+        if: always()
+        run: |
+          echo "## Semgrep SAST Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f semgrep-custom-results.json ]; then
+            ERROR_COUNT=$(jq '[.results[] | select(.extra.severity == "ERROR")] | length' semgrep-custom-results.json)
+            WARNING_COUNT=$(jq '[.results[] | select(.extra.severity == "WARNING")] | length' semgrep-custom-results.json)
+            INFO_COUNT=$(jq '[.results[] | select(.extra.severity == "INFO")] | length' semgrep-custom-results.json)
+
+            echo "### Custom Rules" >> $GITHUB_STEP_SUMMARY
+            echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+            echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+            echo "| ERROR | $ERROR_COUNT |" >> $GITHUB_STEP_SUMMARY
+            echo "| WARNING | $WARNING_COUNT |" >> $GITHUB_STEP_SUMMARY
+            echo "| INFO | $INFO_COUNT |" >> $GITHUB_STEP_SUMMARY
+
+            if [ "$ERROR_COUNT" -gt 0 ]; then
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "::warning::Found $ERROR_COUNT ERROR-level findings in custom rules"
+            fi
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Auto-detection: ${{ steps.semgrep-auto.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Custom rules: ${{ steps.semgrep-custom.outcome }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload Semgrep results to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep-auto-results.sarif
+          category: semgrep
+
+      - name: Upload Semgrep results as artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-results
+          path: |
+            semgrep-auto-results.sarif
+            semgrep-custom-results.json
+          retention-days: 30
+
+  codeql-analysis:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ["javascript", "typescript"]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          queries: +security-and-quality
+
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v3
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  secret-scanning:
+    name: Secret Scanning
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_ENABLE_SUMMARY: true
+
+      - name: Create summary
+        if: always()
+        run: |
+          echo "## Secret Scanning Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Gitleaks scan completed. Check the logs for any detected secrets." >> $GITHUB_STEP_SUMMARY
+
+  dependency-review:
+    name: Dependency Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Dependency Review
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+          deny-licenses: GPL-3.0, AGPL-3.0
+          comment-summary-in-pr: always
+
+  security-scorecard:
+    name: OpenSSF Scorecard
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    permissions:
+      security-events: write
+      id-token: write
+      contents: read
+      actions: read
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          persist-credentials: false
+
+      - name: Run analysis
+        uses: ossf/scorecard-action@v2.4.0
+        with:
+          results_file: results.sarif
+          results_format: sarif
+          publish_results: true
+
+      - name: Upload results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: results.sarif
+
+      - name: Upload results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: scorecard-results
+          path: results.sarif
+          retention-days: 30
+
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs:
+      - dependency-audit
+      - snyk-scan
+      - semgrep-scan
+      - codeql-analysis
+      - secret-scanning
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan Type | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Audit | ${{ needs.dependency-audit.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Snyk Scan | ${{ needs.snyk-scan.result == 'success' && '✅ Passed' || (needs.snyk-scan.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Semgrep SAST | ${{ needs.semgrep-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| CodeQL | ${{ needs.codeql-analysis.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret Scanning | ${{ needs.secret-scanning.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Review individual job outputs for detailed findings." >> $GITHUB_STEP_SUMMARY
+
+      - name: Check critical failures
+        if: |
+          needs.dependency-audit.result == 'failure' ||
+          needs.secret-scanning.result == 'failure'
+        run: |
+          echo "::error::Critical security checks failed. Please review the scan results."
+          exit 1

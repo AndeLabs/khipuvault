@@ -1,0 +1,442 @@
+name: Smart Contract Checks
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "packages/contracts/**"
+      - ".github/workflows/contracts.yml"
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "packages/contracts/**"
+      - ".github/workflows/contracts.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  compile:
+    name: Compile Contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Show Foundry version
+        run: |
+          forge --version
+          cast --version
+          anvil --version
+
+      - name: Run forge build
+        working-directory: packages/contracts
+        run: |
+          forge build --sizes
+          echo "## Build Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          forge build --sizes >> $GITHUB_STEP_SUMMARY 2>&1 || true
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Check contract sizes
+        working-directory: packages/contracts
+        run: |
+          forge build --sizes | tee sizes.txt
+          # Fail if any contract is over 24KB (Ethereum limit)
+          if grep -q "24[0-9][0-9][0-9]\|2[5-9][0-9][0-9][0-9]\|[3-9][0-9][0-9][0-9][0-9]" sizes.txt; then
+            echo "::error::One or more contracts exceed the 24KB size limit"
+            exit 1
+          fi
+
+      - name: Cache build artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/contracts/out
+            packages/contracts/cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('packages/contracts/src/**/*.sol') }}
+          restore-keys: |
+            ${{ runner.os }}-foundry-
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: compile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/contracts/out
+            packages/contracts/cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('packages/contracts/src/**/*.sol') }}
+          restore-keys: |
+            ${{ runner.os }}-foundry-
+
+      - name: Run forge tests
+        working-directory: packages/contracts
+        run: |
+          forge test -vvv
+          echo "exit_code=$?" >> test_result.txt
+
+      - name: Generate test report
+        if: always()
+        working-directory: packages/contracts
+        run: |
+          echo "## Test Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          forge test --summary >> $GITHUB_STEP_SUMMARY 2>&1 || true
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+  gas-report:
+    name: Gas Report
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: compile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/contracts/out
+            packages/contracts/cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('packages/contracts/src/**/*.sol') }}
+          restore-keys: |
+            ${{ runner.os }}-foundry-
+
+      - name: Run gas report
+        working-directory: packages/contracts
+        run: |
+          forge test --gas-report > gas-report.txt 2>&1 || true
+          cat gas-report.txt
+
+      - name: Parse gas report
+        working-directory: packages/contracts
+        run: |
+          echo "## Gas Usage Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          cat gas-report.txt >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload gas report
+        uses: actions/upload-artifact@v4
+        with:
+          name: gas-report
+          path: packages/contracts/gas-report.txt
+          retention-days: 30
+
+  gas-snapshot:
+    name: Gas Snapshot
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: compile
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run gas snapshot (PR)
+        working-directory: packages/contracts
+        run: |
+          forge snapshot --snap .gas-snapshot-pr
+          cat .gas-snapshot-pr
+
+      - name: Checkout base branch
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.base_ref }}
+          submodules: recursive
+          clean: false
+
+      - name: Run gas snapshot (base)
+        working-directory: packages/contracts
+        continue-on-error: true
+        run: |
+          forge snapshot --snap .gas-snapshot-base || echo "No base snapshot (new tests ok)"
+          if [ -f .gas-snapshot-base ]; then
+            cat .gas-snapshot-base
+          fi
+
+      - name: Checkout PR branch again
+        uses: actions/checkout@v6
+        with:
+          clean: false
+
+      - name: Compare gas snapshots
+        working-directory: packages/contracts
+        run: |
+          echo "## Gas Comparison Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ -f .gas-snapshot-base ]; then
+            echo "\`\`\`diff" >> $GITHUB_STEP_SUMMARY
+            forge snapshot --diff .gas-snapshot-base --check --tolerance 5 >> $GITHUB_STEP_SUMMARY 2>&1 || {
+              echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+              echo "" >> $GITHUB_STEP_SUMMARY
+              echo "⚠️ Gas usage increased by more than 5% in some tests" >> $GITHUB_STEP_SUMMARY
+            }
+            echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "No base snapshot found - this is the first run or new tests added" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Upload gas snapshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: gas-snapshots
+          path: packages/contracts/.gas-snapshot-*
+          retention-days: 7
+
+  coverage:
+    name: Test Coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: compile
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Restore build cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            packages/contracts/out
+            packages/contracts/cache
+          key: ${{ runner.os }}-foundry-${{ hashFiles('packages/contracts/src/**/*.sol') }}
+          restore-keys: |
+            ${{ runner.os }}-foundry-
+
+      - name: Generate coverage report
+        working-directory: packages/contracts
+        run: |
+          forge coverage --report lcov --via-ir || {
+            echo "::warning::Coverage generation failed, but continuing..."
+            exit 0
+          }
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v5
+        if: always()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./packages/contracts/lcov.info
+          flags: contracts
+          fail_ci_if_error: false
+
+      - name: Generate coverage summary
+        if: always()
+        working-directory: packages/contracts
+        run: |
+          if [ -f lcov.info ]; then
+            echo "## Coverage Report" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            forge coverage --report summary >> $GITHUB_STEP_SUMMARY 2>&1 || echo "Coverage report unavailable" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  slither:
+    name: Slither Static Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: compile
+    # Allow this to fail without blocking the workflow
+    continue-on-error: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: false
+
+      - name: Clean submodule references
+        run: |
+          git config --unset-all submodule.security/shannon/shannon-repo.url || true
+          rm -rf .gitmodules security/shannon/shannon-repo || true
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Build contracts
+        working-directory: packages/contracts
+        run: forge build --build-info
+
+      - name: Run Slither
+        uses: crytic/slither-action@v0.4.0
+        id: slither
+        continue-on-error: true
+        with:
+          target: packages/contracts/
+          slither-args: >-
+            --filter-paths "test/|script/|lib/"
+            --exclude-dependencies
+            --exclude naming-convention,unused-state,unindexed-event
+            --json slither-report.json
+          fail-on: high
+          sarif: slither-results.sarif
+
+      - name: Upload Slither SARIF to GitHub Security
+        if: always()
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: slither-results.sarif
+          category: slither
+
+      - name: Upload Slither report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: slither-report
+          path: |
+            slither-report.json
+            slither-results.sarif
+          retention-days: 30
+
+      - name: Generate Slither summary
+        if: always()
+        run: |
+          echo "## Slither Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ steps.slither.outcome }}" == "failure" ]; then
+            echo "⚠️ Slither found potential issues. Review the Security tab for details." >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ No critical issues found" >> $GITHUB_STEP_SUMMARY
+          fi
+
+  mythril:
+    name: Mythril Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs: compile
+    # Optional security scan - don't block on failures
+    continue-on-error: true
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Mythril
+        run: |
+          pip install mythril
+          myth version
+
+      - name: Find main contracts
+        id: find-contracts
+        working-directory: packages/contracts/src
+        run: |
+          # Find main contract files (excluding test/mock files)
+          CONTRACTS=$(find . -name "*.sol" -not -path "*/test/*" -not -path "*/mock/*" | head -5)
+          echo "contracts=$CONTRACTS" >> $GITHUB_OUTPUT
+
+      - name: Run Mythril analysis
+        working-directory: packages/contracts/src
+        continue-on-error: true
+        run: |
+          echo "## Mythril Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          for contract in ${{ steps.find-contracts.outputs.contracts }}; do
+            echo "Analyzing $contract..."
+            myth analyze "$contract" --solc-json foundry-config.json || true
+          done
+
+  contract-summary:
+    name: Contract Checks Summary
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: [compile, test, gas-report, coverage, slither]
+    if: always()
+
+    steps:
+      - name: Generate summary
+        run: |
+          echo "## Smart Contract Checks Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Check | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Compile | ${{ needs.compile.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Tests | ${{ needs.test.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Gas Report | ${{ needs.gas-report.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Coverage | ${{ needs.coverage.result == 'success' && '✅ Passed' || '⚠️ Issues' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Slither | ${{ needs.slither.result == 'success' && '✅ Passed' || '⚠️ Issues' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Note: Some security checks are non-blocking and shown as warnings." >> $GITHUB_STEP_SUMMARY
+
+      - name: Check critical failures
+        if: |
+          needs.compile.result == 'failure' ||
+          needs.test.result == 'failure'
+        run: |
+          echo "::error::Critical contract checks failed. Review the logs above."
+          exit 1

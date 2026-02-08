@@ -60,7 +60,13 @@ export function TransactionProvider({ children, maxHistory = 50 }: TransactionPr
 
   const startTransaction = React.useCallback(
     (type: string, data?: any) => {
-      const id = `tx-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+      // Use crypto.randomUUID() for secure ID generation
+      // Falls back to timestamp-based ID if crypto is unavailable
+      const randomPart =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID().split("-")[0]
+          : Date.now().toString(36);
+      const id = `tx-${Date.now()}-${randomPart}`;
       const newTransaction: Transaction = {
         id,
         type,
