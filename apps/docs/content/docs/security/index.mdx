@@ -1,0 +1,207 @@
+---
+title: Security
+description: How we protect your Bitcoin and ensure platform security. Audits, best practices, and emergency procedures.
+---
+
+# Security
+
+Security is our top priority at KhipuVault. Your Bitcoin deserves the highest level of protection, and we've built multiple layers of security to ensure your funds are safe.
+
+## Security Overview
+
+KhipuVault employs a comprehensive security approach:
+
+<Cards>
+  <Card
+    title="Smart Contract Audits"
+    href="/docs/security/audits"
+    description="Independent security reviews and audit reports"
+  />
+  <Card
+    title="Bug Bounty Program"
+    href="/docs/security/bug-bounty"
+    description="Report vulnerabilities responsibly and earn rewards"
+  />
+  <Card
+    title="Best Practices"
+    href="/docs/security/best-practices"
+    description="User security guide for wallet safety and phishing prevention"
+  />
+  <Card
+    title="Contract Security"
+    href="/docs/security/contract-security"
+    description="How our smart contracts are secured and protected"
+  />
+  <Card
+    title="Emergency Procedures"
+    href="/docs/security/emergency-procedures"
+    description="What to do if something goes wrong"
+  />
+</Cards>
+
+## Our Security Principles
+
+### 1. Non-Custodial Design
+
+You always maintain full control of your Bitcoin. We never hold your private keys or have custody of your funds.
+
+<Callout type="success" title="Your Keys, Your Bitcoin">
+KhipuVault smart contracts are designed to ensure you can always withdraw your funds, even if our website goes offline.
+</Callout>
+
+### 2. Smart Contract Security
+
+Our smart contracts follow industry best practices:
+
+- ✅ **OpenZeppelin libraries** - Battle-tested security standards
+- ✅ **Reentrancy guards** - Protection against reentrancy attacks
+- ✅ **Access controls** - Role-based permissions with multi-sig
+- ✅ **Pausable contracts** - Emergency stop mechanism
+- ✅ **Event logging** - Complete audit trail on-chain
+- ✅ **Time-locks** - Delayed execution for sensitive operations
+
+### 3. Multi-Layered Defense
+
+We implement defense in depth:
+
+**Smart Contract Layer**
+- Formal verification patterns
+- Automated security scanning (Slither, Aderyn)
+- Manual code reviews
+- Independent audits
+
+**Application Layer**
+- SIWE (Sign-In With Ethereum) authentication
+- JWT token security with short expiration
+- Rate limiting and DDoS protection
+- Input validation with Zod schemas
+
+**Infrastructure Layer**
+- Secure RPC endpoints
+- Database encryption at rest
+- TLS/SSL for all connections
+- Regular security updates
+
+### 4. Continuous Monitoring
+
+We actively monitor the platform 24/7:
+
+- Real-time event indexing for unusual activity
+- Automated alerts for contract interactions
+- Community reporting channels
+- Regular security assessments
+
+## Security Guarantees
+
+### What We Guarantee
+
+✅ **Your funds are always yours** - Non-custodial design ensures you maintain control
+
+✅ **Transparent operations** - All contract code is open-source and verified
+
+✅ **Emergency procedures** - Clear protocols for handling security incidents
+
+✅ **Responsible disclosure** - Bug bounty program for responsible vulnerability reporting
+
+### What We Don't Guarantee
+
+⚠️ **Smart contract risks** - While audited, smart contracts can have undiscovered vulnerabilities
+
+⚠️ **Blockchain risks** - Mezo blockchain infrastructure is beyond our control
+
+⚠️ **User error protection** - We cannot recover funds lost due to compromised private keys
+
+⚠️ **Third-party risks** - Wallet providers, RPC nodes, and integrations have their own risks
+
+## Audits & Reports
+
+KhipuVault has undergone multiple security reviews:
+
+| Audit Type | Date | Status | Report |
+|------------|------|--------|--------|
+| Automated (Slither) | January 2025 | Completed | [View Report](/docs/security/audits#slither) |
+| Automated (Aderyn) | January 2025 | Completed | [View Report](/docs/security/audits#aderyn) |
+| Manual Review | February 2025 | In Progress | Coming Soon |
+
+<Callout type="info">
+Full audit reports and detailed findings are available on our [Audits](/docs/security/audits) page.
+</Callout>
+
+## Bug Bounty Program
+
+We offer rewards for responsible disclosure of security vulnerabilities.
+
+**Reward Tiers:**
+- 🔴 **Critical** - Up to $10,000
+- 🟠 **High** - Up to $5,000
+- 🟡 **Medium** - Up to $2,000
+- 🟢 **Low** - Up to $500
+
+[Learn more about our Bug Bounty Program](/docs/security/bug-bounty)
+
+## Emergency Contacts
+
+If you discover a security vulnerability:
+
+**DO NOT** post it publicly on Discord, Twitter, or GitHub issues.
+
+**DO** report it through one of these secure channels:
+
+- 📧 **Email**: security@khipuvault.com (encrypted with PGP)
+- 🔒 **Immunefi**: [khipuvault.immunefi.com](https://immunefi.com) (Coming Soon)
+- 🐛 **Private GitHub**: security@khipuvault.com for access
+
+We commit to responding within 24 hours.
+
+## Security Best Practices
+
+Protect yourself while using KhipuVault:
+
+### Wallet Security
+
+✅ **Use a hardware wallet** for large amounts (Ledger, Trezor)
+
+✅ **Backup your seed phrase** securely offline
+
+✅ **Never share your private keys** with anyone
+
+✅ **Use a dedicated browser profile** for crypto transactions
+
+### Phishing Prevention
+
+⚠️ **Always verify the URL**: Official domain is `khipuvault.com`
+
+⚠️ **Bookmark the official site** to avoid typosquatting
+
+⚠️ **Check contract addresses** before approving transactions
+
+⚠️ **Be wary of DMs** offering support or asking for keys
+
+[Complete security guide](/docs/security/best-practices)
+
+## Open Source & Transparency
+
+Our commitment to transparency:
+
+- 📂 **Full source code**: [github.com/khipuvault](https://github.com/khipuvault)
+- 🔍 **Verified contracts**: All contracts verified on Mezo block explorer
+- 📊 **Public metrics**: Transaction data visible on-chain
+- 📢 **Regular updates**: Security announcements via Discord and Twitter
+
+## Stay Informed
+
+Subscribe to security updates:
+
+- 🔔 **Discord #security-alerts**: [discord.gg/khipuvault](https://discord.gg/khipuvault)
+- 🐦 **Twitter @KhipuVault**: Security announcements
+- 📧 **Newsletter**: security-alerts@khipuvault.com
+
+## Questions?
+
+If you have security questions or concerns:
+
+- 📖 Read our [FAQ](/docs/resources/faq#security)
+- 💬 Ask in [Discord #security](https://discord.gg/khipuvault)
+- 📧 Email: security@khipuvault.com
+
+Your security is our priority. Thank you for helping us keep KhipuVault safe.

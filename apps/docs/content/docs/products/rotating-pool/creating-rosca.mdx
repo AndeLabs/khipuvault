@@ -1,0 +1,635 @@
+---
+title: Creating a Rotating Pool
+description: Step-by-step guide to starting your own blockchain ROSCA, tanda, or pasanaku on KhipuVault.
+---
+
+# Creating a Rotating Pool
+
+Start your own rotating savings pool and invite trusted members to participate. This guide walks through the complete creation process.
+
+## Before You Start
+
+### Prerequisites
+
+**1. MUSD Balance**
+You'll need MUSD for:
+- Gas fees (~$0.50 for contract deployment)
+- Optional collateral deposit
+- Your own first contribution
+
+**2. Member List**
+Identify your participants:
+- Minimum: 3 members (including you)
+- Maximum: 50 members
+- Recommended: 5-20 members
+
+**3. Pool Parameters**
+Decide on:
+- Contribution amount per member
+- Payment schedule (weekly/biweekly/monthly)
+- Start date
+- Collateral requirements (if any)
+
+### Planning Worksheet
+
+Before creating the pool, answer these questions:
+
+```
+1. How much can each member commit per round?
+   Amount: $_______ MUSD
+
+2. How often will contributions occur?
+   [ ] Weekly  [ ] Biweekly  [ ] Monthly  [ ] Custom
+
+3. How many members? (including yourself)
+   Count: _______
+
+4. Total pot per round?
+   Members × Amount = $_______ MUSD
+
+5. How long will a complete cycle take?
+   Members × Interval = _______ weeks/months
+
+6. Require collateral to prevent defaults?
+   [ ] Yes, _____% upfront  [ ] No
+
+7. Allow emergency exits?
+   [ ] Yes, with _____% penalty  [ ] No
+```
+
+## Step 1: Navigate to Pool Creation
+
+<Steps>
+
+### Open KhipuVault Dashboard
+
+Go to [app.khipuvault.com](https://app.khipuvault.com) and connect your wallet.
+
+### Access Rotating Pools
+
+Click **"Rotating Pool"** in the main navigation.
+
+### Start Creation
+
+Click **"Create New Pool"** button.
+
+</Steps>
+
+## Step 2: Configure Basic Settings
+
+### Pool Name & Description
+
+```
+Pool Name: "Neighborhood Tanda - January 2026"
+Description: "Monthly savings pool for home improvements"
+```
+
+**Tips:**
+- Use descriptive names
+- Include time period
+- Mention purpose if relevant
+
+### Member Count
+
+```
+Number of Members: 10
+```
+
+**Considerations:**
+- Smaller groups (5-8): Easier to coordinate, faster cycles
+- Medium groups (10-15): Balanced, traditional size
+- Larger groups (20+): Higher pots, longer cycles
+
+### Contribution Amount
+
+```
+Contribution per Member: 100 MUSD
+```
+
+**Considerations:**
+- Must be affordable for all members
+- Consider members' income levels
+- Remember: Amount × Members = Total pot each round
+
+<Callout type="info">
+**Example Calculations:**
+
+- 5 members × $200 = $1,000 pot every round
+- 10 members × $100 = $1,000 pot every round
+- 20 members × $50 = $1,000 pot every round
+
+Same pot size, different trade-offs on member count vs. contribution amount.
+</Callout>
+
+### Payment Schedule
+
+```
+Rotation Interval: Monthly (every 30 days)
+```
+
+**Common schedules:**
+- **Weekly:** Fast cycles, requires discipline
+- **Biweekly:** Matches payday for many workers
+- **Monthly:** Traditional, easier to budget
+
+**Start Date:**
+```
+First Contribution Due: February 1, 2026, 12:00 PM UTC
+```
+
+Pick a date that gives members time to join and prepare funds.
+
+## Step 3: Set Rotation Order
+
+### Fixed Order (Recommended)
+
+**Option A: First-Come, First-Served**
+```
+Order determined by join sequence
+Member who joins 1st → Receives Round 1
+Member who joins 2nd → Receives Round 2
+...
+```
+
+Pros: Simple, fair, transparent
+Cons: May favor faster joiners
+
+**Option B: Random Lottery**
+```
+Order randomly assigned on-chain when pool starts
+All members have equal chance for any position
+```
+
+Pros: Completely fair
+Cons: Unpredictable, may not suit planned expenses
+
+**Option C: Manual Assignment**
+```
+Organizer sets specific order:
+Round 1 → 0xAbcd...1234
+Round 2 → 0xEfgh...5678
+...
+```
+
+Pros: Accommodate specific needs (e.g., wedding dates)
+Cons: Requires trust in organizer's fairness
+
+**Option D: Member Voting**
+```
+Members propose order
+Requires majority approval to finalize
+```
+
+Pros: Democratic
+Cons: Time-consuming, potential conflicts
+
+### Bidding Order (Advanced)
+
+Enable bidding for dynamic order:
+
+```
+Allow Bidding: Yes
+Minimum Discount: 1% (1 MUSD on $100 pot)
+Maximum Discount: 15% (15 MUSD on $100 pot)
+```
+
+**How it works:**
+Each round, members bid a discount to receive early.
+
+Example:
+```
+Round 1 Bids:
+- Member A: 10% discount (receive $900 now)
+- Member B: 5% discount (receive $950 now)
+- Member C: No bid
+
+Winner: Member A (highest discount)
+Member A receives $900, cycle continues
+```
+
+<Callout type="warning">
+**Bidding complexity warning:**
+
+Bidding ROSCAs work well for sophisticated groups but can confuse traditional ROSCA participants. Stick with fixed-order for cultural authenticity.
+</Callout>
+
+## Step 4: Configure Security Settings
+
+### Collateral Requirements
+
+**No Collateral:**
+```
+Collateral Required: No
+```
+Relies purely on trust and penalties.
+
+**Partial Collateral:**
+```
+Collateral Required: Yes
+Collateral Percentage: 50%
+```
+Each member deposits 50% of total pot upfront.
+
+**Full Collateral:**
+```
+Collateral Required: Yes
+Collateral Percentage: 100%
+```
+Each member deposits full pot value upfront.
+
+**Recommended approach:**
+
+| Trust Level | Collateral |
+|-------------|------------|
+| Family/close friends | 0-25% |
+| Coworkers/neighbors | 25-50% |
+| Online community | 50-100% |
+
+### Late Payment Rules
+
+**Grace Period:**
+```
+Grace Period: 3 days
+```
+Extra time after due date before penalties apply.
+
+**Penalty Rate:**
+```
+Late Penalty: 5% per week overdue
+```
+
+**Example:**
+```
+Contribution due: Feb 1
+Grace period ends: Feb 4
+Member pays on Feb 8: 4 days late = 5% penalty = $5 extra
+Member pays on Feb 15: 11 days late = 10% penalty = $10 extra
+```
+
+### Default Handling
+
+**Default Threshold:**
+```
+Missed Payments Before Default: 2
+```
+
+**Default Consequences:**
+```
+1. Collateral slashed to cover missing contributions
+2. Member expelled from pool
+3. Address blacklisted from future pools
+```
+
+### Emergency Exit Policy
+
+**Allow Exits:**
+```
+Emergency Withdrawal: Enabled
+Exit Penalty: 10% of remaining equity
+```
+
+**Example:**
+```
+Member C paid 3 rounds ($300)
+Member C hasn't received payout yet
+Emergency exit request approved
+Refund: $300 - 10% penalty = $270
+```
+
+## Step 5: Review & Deploy
+
+### Configuration Summary
+
+Review all settings before deploying:
+
+```
+Pool Configuration:
+├─ Name: Neighborhood Tanda - January 2026
+├─ Members: 10
+├─ Contribution: 100 MUSD per member
+├─ Schedule: Monthly (every 30 days)
+├─ Start Date: February 1, 2026
+├─ Total Pot per Round: 1,000 MUSD
+├─ Complete Cycle Duration: 10 months
+├─ Rotation Order: First-come, first-served
+├─ Collateral: 50% (500 MUSD per member)
+├─ Grace Period: 3 days
+├─ Late Penalty: 5% per week
+├─ Emergency Exit: Allowed (10% penalty)
+└─ Estimated Gas: 0.0012 ETH (~$0.50)
+```
+
+### Deploy Contract
+
+<Steps>
+
+### Click "Deploy Pool"
+
+This creates the smart contract on-chain.
+
+### Sign Transaction
+
+Approve the transaction in your wallet.
+
+**Gas fees:** ~$0.50 (varies by network congestion)
+
+### Wait for Confirmation
+
+Usually takes 5-15 seconds on Mezo testnet.
+
+### Get Pool Address
+
+```
+Pool deployed at: 0x7a8E9F...3B4C
+Pool ID: #42
+```
+
+</Steps>
+
+## Step 6: Join as First Member
+
+As the organizer, you must join your own pool:
+
+<Steps>
+
+### Approve MUSD Spending
+
+Allow the pool contract to pull contributions.
+
+```
+Approve Amount: Unlimited (recommended)
+OR
+Approve Amount: 1,000 MUSD (10 rounds × 100)
+```
+
+### Deposit Collateral (if required)
+
+```
+Collateral Amount: 500 MUSD (50% × 1,000)
+```
+
+### Confirm Membership
+
+Sign the transaction to officially join.
+
+</Steps>
+
+You're now Member #1 in the rotation order.
+
+## Step 7: Invite Members
+
+### Share Pool Link
+
+```
+https://app.khipuvault.com/pools/rotating/42
+```
+
+**Or share QR code:**
+
+Generate QR code from pool dashboard for easy mobile sharing.
+
+### Provide Pool Details
+
+Send members this information:
+
+```
+🎯 Join Our Tanda!
+
+Pool Name: Neighborhood Tanda - January 2026
+Contribution: 100 MUSD per month
+Total Pot: 1,000 MUSD per round
+Members: 10 total (2/10 joined)
+Start Date: February 1, 2026
+Duration: 10 months
+
+Security:
+✓ 50% collateral required (500 MUSD)
+✓ 3-day grace period
+✓ 5% late penalty
+
+Join here: [link]
+Pool Address: 0x7a8E9F...3B4C
+```
+
+### Monitor Joiners
+
+Track membership in real-time on the pool dashboard:
+
+```
+Member Status:
+1. You (Organizer) ✓ Joined
+2. [Pending]
+3. [Pending]
+...
+10. [Pending]
+```
+
+### Set Member Deadline
+
+```
+Membership Closes: January 25, 2026
+OR
+Membership Closes: When 10 members join
+```
+
+## Step 8: Start the Pool
+
+### Prerequisites Check
+
+Before starting, verify:
+
+```
+✓ Minimum members met (3+)
+✓ All members deposited collateral
+✓ All members approved MUSD spending
+✓ Rotation order finalized
+✓ Start date configured
+```
+
+### Manual Start (Optional)
+
+If you don't want to wait until start date:
+
+```
+Click "Start Pool Early"
+Requires: Organizer + majority member approval
+```
+
+### Automatic Start
+
+Pool automatically activates on the start date:
+
+```
+Start Date: February 1, 2026, 12:00 PM UTC
+Status: ACTIVE
+```
+
+## Step 9: Manage Pool
+
+### Organizer Dashboard
+
+Monitor pool health:
+
+**Payment Tracking:**
+```
+Round 1 (Feb 1 - Feb 28):
+- Payments: 9/10 ✓
+- Late: 1 (3 days overdue)
+- Defaulted: 0
+- On-time rate: 90%
+```
+
+**Actions Available:**
+- Send payment reminders
+- Approve emergency exits
+- Escalate defaults
+- Update metadata (name, description)
+- Pause in emergency
+
+### Communication Tools
+
+**Built-in messaging:**
+```
+Send Announcement: "Reminder: Round 2 payments due Feb 28"
+Tag members: @Everyone
+```
+
+**Payment reminders:**
+```
+Auto-remind: 3 days before due date
+Manual remind: Click member → Send reminder
+```
+
+### Dispute Resolution
+
+**If conflicts arise:**
+
+1. **Review on-chain data**
+   - All contributions are timestamped
+   - All payments are verifiable
+
+2. **Use built-in evidence**
+   ```
+   Member B claims they paid:
+   → Check transaction hash
+   → Verify timestamp
+   → Confirm amount
+   ```
+
+3. **Escalate if needed**
+   - Multi-sig organizers vote
+   - Emergency pause
+   - Refund and dissolve
+
+## Best Practices
+
+### For Organizers
+
+**1. Know Your Members**
+- Only invite people you trust or who come recommended
+- Verify they understand commitment
+- Check they have stable income
+
+**2. Set Realistic Parameters**
+- Don't over-estimate member capacity
+- Choose affordable contribution amounts
+- Allow grace periods for life events
+
+**3. Communicate Clearly**
+- Send regular updates
+- Remind before due dates
+- Celebrate successful rounds
+
+**4. Start Small**
+- First pool: 5-8 members, lower amounts
+- Build trust and reputation
+- Scale up after successful completion
+
+**5. Document Everything**
+- Save pool address and ID
+- Keep member contact info
+- Note any special agreements
+
+### Common Mistakes to Avoid
+
+❌ **Setting contributions too high**
+Members can't sustain payments, defaults increase.
+
+❌ **No collateral with strangers**
+High default risk without skin in the game.
+
+❌ **Unclear rotation order**
+Leads to disputes and confusion.
+
+❌ **Ignoring late payments**
+Small delays compound into major defaults.
+
+❌ **Starting before members ready**
+Some members may not have funds prepared.
+
+## Example Pool Configurations
+
+### Conservative Pool (Low Risk)
+
+```yaml
+Members: 6 close family members
+Contribution: $50 MUSD monthly
+Pot: $300 per round
+Collateral: 25%
+Grace Period: 7 days
+Duration: 6 months
+```
+
+**Good for:** First-time ROSCA organizers, tight-knit groups.
+
+### Standard Pool (Balanced)
+
+```yaml
+Members: 10 coworkers
+Contribution: $100 MUSD biweekly
+Pot: $1,000 per round
+Collateral: 50%
+Grace Period: 3 days
+Duration: 20 weeks (5 months)
+```
+
+**Good for:** Traditional tanda participants, workplace pools.
+
+### High-Value Pool (Structured)
+
+```yaml
+Members: 15 community members
+Contribution: $500 MUSD monthly
+Pot: $7,500 per round
+Collateral: 75%
+Grace Period: 1 day
+Multi-sig: 3 of 5 organizers
+Duration: 15 months
+```
+
+**Good for:** Home down payments, business capital, serious savers.
+
+### Rapid Pool (Fast Cycles)
+
+```yaml
+Members: 5 friends
+Contribution: $200 MUSD weekly
+Pot: $1,000 per round
+Collateral: 0% (trust-based)
+Grace Period: 1 day
+Duration: 5 weeks
+```
+
+**Good for:** Short-term goals, high-trust groups, urgent needs.
+
+## Next Steps
+
+Now that your pool is created:
+
+- [Participating](/docs/products/rotating-pool/participating) - Guide for members
+- [Receiving Payout](/docs/products/rotating-pool/receiving-payout) - Claiming process
+- [FAQ](/docs/products/rotating-pool/faq) - Troubleshooting
+
+---
+
+**Ready to start your tanda?** [Create a rotating pool →](https://app.khipuvault.com/pools/rotating/create)

@@ -1,0 +1,217 @@
+---
+title: API Rate Limits
+description: Rate limiting policies, best practices, and how to handle rate limit errors in KhipuVault API.
+---
+
+# API Rate Limits
+
+KhipuVault implements rate limiting to ensure fair usage and protect against abuse. This guide explains limits, headers, and best practices.
+
+## Rate Limit Tiers
+
+### Free Tier (Current)
+
+| Endpoint Category | Limit | Window |
+|------------------|-------|--------|
+| General API | 100 requests | 15 minutes |
+| Authentication | 5 requests | 15 minutes |
+| Analytics | 20 requests | 15 minutes |
+| Health/Status | 300 requests | 15 minutes |
+
+### Pro Tier (Coming Soon)
+
+| Endpoint Category | Limit | Window |
+|------------------|-------|--------|
+| General API | 1000 requests | 15 minutes |
+| Authentication | 20 requests | 15 minutes |
+| Analytics | 200 requests | 15 minutes |
+
+## Rate Limit Headers
+
+Every API response includes rate limit information:
+
+```http
+HTTP/1.1 200 OK
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 87
+X-RateLimit-Reset: 1644336000
+```
+
+**Headers:**
+- `X-RateLimit-Limit`: Maximum requests allowed in window
+- `X-RateLimit-Remaining`: Requests remaining in current window
+- `X-RateLimit-Reset`: Unix timestamp when limit resets
+
+## Rate Limit Exceeded Response
+
+When you exceed the limit:
+
+```http
+HTTP/1.1 429 Too Many Requests
+X-RateLimit-Limit: 100
+X-RateLimit-Remaining: 0
+X-RateLimit-Reset: 1644336000
+Retry-After: 300
+
+{
+  "success": false,
+  "error": "Too many requests. Please try again in 5 minutes."
+}
+```
+
+## Handling Rate Limits
+
+### TypeScript Example
+
+```typescript
+async function makeApiRequest(url: string, options?: RequestInit) {
+  const response = await fetch(url, options)
+
+  // Check rate limit
+  if (response.status === 429) {
+    const retryAfter = parseInt(response.headers.get('Retry-After') || '60')
+
+    console.warn(`Rate limited. Retrying after ${retryAfter}s`)
+
+    await new Promise(resolve => setTimeout(resolve, retryAfter * 1000))
+
+    return makeApiRequest(url, options) // Retry
+  }
+
+  return response
+}
+```
+
+### With Exponential Backoff
+
+```typescript
+async function fetchWithRetry(
+  url: string,
+  options?: RequestInit,
+  maxRetries = 3
+) {
+  for (let i = 0; i < maxRetries; i++) {
+    const response = await fetch(url, options)
+
+    if (response.status !== 429) {
+      return response
+    }
+
+    const retryAfter = parseInt(response.headers.get('Retry-After') || '60')
+    const backoff = Math.min(retryAfter * Math.pow(2, i), 300) // Max 5 min
+
+    await new Promise(resolve => setTimeout(resolve, backoff * 1000))
+  }
+
+  throw new Error('Max retries exceeded')
+}
+```
+
+### React Query Integration
+
+```typescript
+import { useQuery } from '@tanstack/react-query'
+
+function usePools() {
+  return useQuery({
+    queryKey: ['pools'],
+    queryFn: async () => {
+      const response = await fetchWithRetry('/api/pools')
+      return response.json()
+    },
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+  })
+}
+```
+
+## Best Practices
+
+### 1. Cache Responses
+
+```typescript
+// Use React Query's built-in caching
+const { data } = useQuery({
+  queryKey: ['pool', poolId],
+  queryFn: () => fetchPool(poolId),
+  staleTime: 5 * 60 * 1000, // 5 minutes
+  cacheTime: 10 * 60 * 1000 // 10 minutes
+})
+```
+
+### 2. Batch Requests
+
+```typescript
+// Bad: Multiple requests
+const pools = await Promise.all(
+  poolIds.map(id => fetchPool(id))
+)
+
+// Good: Single request with multiple IDs
+const pools = await fetchPools({ ids: poolIds })
+```
+
+### 3. Monitor Rate Limit Headers
+
+```typescript
+function logRateLimitStatus(response: Response) {
+  const limit = response.headers.get('X-RateLimit-Limit')
+  const remaining = response.headers.get('X-RateLimit-Remaining')
+  const reset = response.headers.get('X-RateLimit-Reset')
+
+  console.log(`Rate Limit: ${remaining}/${limit} (resets at ${reset})`)
+
+  // Warn when approaching limit
+  if (parseInt(remaining!) < 10) {
+    console.warn('Approaching rate limit!')
+  }
+}
+```
+
+### 4. Use WebSockets for Real-time Data
+
+For real-time updates, use WebSockets instead of polling:
+
+```typescript
+// Bad: Polling (wastes rate limit)
+setInterval(() => fetchPoolData(), 5000)
+
+// Good: WebSocket (no rate limit)
+const ws = new WebSocket('wss://api.khipuvault.com/ws')
+ws.on('pool_update', (data) => updateUI(data))
+```
+
+## Rate Limit by IP vs Token
+
+- **Unauthenticated**: Limited by IP address
+- **Authenticated**: Limited by JWT token (user account)
+
+## Exempt Endpoints
+
+These endpoints have no rate limits:
+
+- `/health` - Health checks
+- `/metrics` - Prometheus metrics (internal)
+
+## Increasing Limits
+
+Contact dev@khipuvault.com to discuss:
+
+- Enterprise plans
+- Custom rate limits
+- Dedicated infrastructure
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="REST API"
+    href="/docs/developers/api-reference/rest-api"
+    description="Complete API documentation"
+  />
+  <Card
+    title="Examples"
+    href="/docs/developers/examples"
+    description="Working code examples"
+  />
+</Cards>

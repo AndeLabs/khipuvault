@@ -1,0 +1,1087 @@
+---
+title: Code Examples
+description: Working TypeScript examples for deposits, withdrawals, pool creation, and more.
+---
+
+# Code Examples
+
+Production-ready TypeScript examples for integrating with KhipuVault smart contracts and APIs.
+
+## Setup
+
+### Installation
+
+```bash
+npm install wagmi viem @tanstack/react-query
+```
+
+### Configuration
+
+```typescript
+// config/wagmi.ts
+import { createConfig, http } from 'wagmi'
+import { mezoTestnet } from './chains'
+
+export const mezoTestnet = {
+  id: 31611,
+  name: 'Mezo Testnet',
+  network: 'mezo-testnet',
+  nativeCurrency: {
+    name: 'Bitcoin',
+    symbol: 'BTC',
+    decimals: 18,
+  },
+  rpcUrls: {
+    default: { http: ['https://rpc.test.mezo.org'] },
+    public: { http: ['https://rpc.test.mezo.org'] },
+  },
+  blockExplorers: {
+    default: { name: 'Mezo Explorer', url: 'https://explorer.test.mezo.org' },
+  },
+  testnet: true,
+}
+
+export const config = createConfig({
+  chains: [mezoTestnet],
+  transports: {
+    [mezoTestnet.id]: http('https://rpc.test.mezo.org'),
+  },
+})
+```
+
+### Contract Addresses
+
+```typescript
+// config/contracts.ts
+export const CONTRACTS = {
+  INDIVIDUAL_POOL: '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393',
+  COOPERATIVE_POOL: '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88',
+  LOTTERY_POOL: '0x04D0172067e490C5845F8925A50282C7a1348377',
+  YIELD_AGGREGATOR: '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6',
+  MEZO_INTEGRATION: '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6',
+  MUSD: '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503',
+} as const
+```
+
+## Individual Pool Examples
+
+### Read User Balance
+
+```typescript
+import { useReadContract } from 'wagmi'
+import { CONTRACTS } from './config/contracts'
+import { INDIVIDUAL_POOL_ABI } from './abis'
+
+function UserBalance({ address }: { address: `0x${string}` }) {
+  const { data: userInfo } = useReadContract({
+    address: CONTRACTS.INDIVIDUAL_POOL,
+    abi: INDIVIDUAL_POOL_ABI,
+    functionName: 'getUserInfo',
+    args: [address],
+  })
+
+  if (!userInfo) return <div>Loading...</div>
+
+  const [deposit, yields, netYields, daysActive, estimatedAPR, autoCompoundEnabled] = userInfo
+
+  return (
+    <div>
+      <p>Deposit: {(Number(deposit) / 1e18).toFixed(2)} MUSD</p>
+      <p>Yields: {(Number(yields) / 1e18).toFixed(2)} MUSD</p>
+      <p>Net Yields: {(Number(netYields) / 1e18).toFixed(2)} MUSD</p>
+      <p>Days Active: {Number(daysActive)}</p>
+      <p>APR: {(Number(estimatedAPR) / 100).toFixed(2)}%</p>
+      <p>Auto-compound: {autoCompoundEnabled ? 'Enabled' : 'Disabled'}</p>
+    </div>
+  )
+}
+```
+
+### Make a Deposit
+
+```typescript
+import { useState } from 'react'
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { parseUnits } from 'viem'
+import { CONTRACTS } from './config/contracts'
+import { INDIVIDUAL_POOL_ABI, ERC20_ABI } from './abis'
+
+function DepositForm() {
+  const [amount, setAmount] = useState('')
+  const { writeContract, data: hash } = useWriteContract()
+
+  // Wait for approval transaction
+  const { isLoading: isApproving, isSuccess: isApproved } = useWaitForTransactionReceipt({
+    hash: approvalHash,
+  })
+
+  // Wait for deposit transaction
+  const { isLoading: isDepositing, isSuccess: isDeposited } = useWaitForTransactionReceipt({
+    hash,
+  })
+
+  const handleApprove = async () => {
+    const amountWei = parseUnits(amount, 18)
+
+    writeContract({
+      address: CONTRACTS.MUSD,
+      abi: ERC20_ABI,
+      functionName: 'approve',
+      args: [CONTRACTS.INDIVIDUAL_POOL, amountWei],
+    })
+  }
+
+  const handleDeposit = async () => {
+    const amountWei = parseUnits(amount, 18)
+
+    writeContract({
+      address: CONTRACTS.INDIVIDUAL_POOL,
+      abi: INDIVIDUAL_POOL_ABI,
+      functionName: 'deposit',
+      args: [amountWei],
+    })
+  }
+
+  return (
+    <div>
+      <input
+        type="number"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        placeholder="Amount in MUSD"
+        min="10"
+      />
+
+      {!isApproved ? (
+        <button onClick={handleApprove} disabled={isApproving}>
+          {isApproving ? 'Approving...' : 'Approve MUSD'}
+        </button>
+      ) : (
+        <button onClick={handleDeposit} disabled={isDepositing}>
+          {isDepositing ? 'Depositing...' : 'Deposit'}
+        </button>
+      )}
+
+      {isDeposited && <p>Deposit successful! 🎉</p>}
+    </div>
+  )
+}
+```
+
+### Deposit with Referral
+
+```typescript
+function DepositWithReferral({ referrer }: { referrer?: `0x${string}` }) {
+  const [amount, setAmount] = useState('')
+  const { writeContract, data: hash } = useWriteContract()
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  const handleDeposit = async () => {
+    const amountWei = parseUnits(amount, 18)
+
+    writeContract({
+      address: CONTRACTS.INDIVIDUAL_POOL,
+      abi: INDIVIDUAL_POOL_ABI,
+      functionName: 'depositWithReferral',
+      args: [amountWei, referrer || '0x0000000000000000000000000000000000000000'],
+    })
+  }
+
+  return (
+    <div>
+      <input
+        type="number"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        placeholder="Amount in MUSD"
+      />
+
+      <button onClick={handleDeposit} disabled={isLoading}>
+        {isLoading ? 'Depositing...' : 'Deposit with Referral'}
+      </button>
+
+      {isSuccess && <p>Deposit successful! Referrer will receive 0.5% bonus 🎁</p>}
+    </div>
+  )
+}
+```
+
+### Withdraw Yields Only
+
+```typescript
+function ClaimYields() {
+  const { writeContract, data: hash } = useWriteContract()
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  const handleClaim = async () => {
+    writeContract({
+      address: CONTRACTS.INDIVIDUAL_POOL,
+      abi: INDIVIDUAL_POOL_ABI,
+      functionName: 'claimYield',
+    })
+  }
+
+  return (
+    <button onClick={handleClaim} disabled={isLoading}>
+      {isLoading ? 'Claiming...' : 'Claim Yields'}
+    </button>
+  )
+}
+```
+
+### Partial Withdrawal
+
+```typescript
+function PartialWithdraw() {
+  const [amount, setAmount] = useState('')
+  const { writeContract, data: hash } = useWriteContract()
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  const handleWithdraw = async () => {
+    const amountWei = parseUnits(amount, 18)
+
+    writeContract({
+      address: CONTRACTS.INDIVIDUAL_POOL,
+      abi: INDIVIDUAL_POOL_ABI,
+      functionName: 'withdrawPartial',
+      args: [amountWei],
+    })
+  }
+
+  return (
+    <div>
+      <input
+        type="number"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        placeholder="Amount to withdraw"
+        min="1"
+      />
+
+      <button onClick={handleWithdraw} disabled={isLoading}>
+        {isLoading ? 'Withdrawing...' : 'Withdraw Partial'}
+      </button>
+    </div>
+  )
+}
+```
+
+### Full Withdrawal (Principal + Yields)
+
+```typescript
+function FullWithdraw() {
+  const { writeContract, data: hash } = useWriteContract()
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  const handleWithdraw = async () => {
+    writeContract({
+      address: CONTRACTS.INDIVIDUAL_POOL,
+      abi: INDIVIDUAL_POOL_ABI,
+      functionName: 'withdraw',
+    })
+  }
+
+  return (
+    <button onClick={handleWithdraw} disabled={isLoading}>
+      {isLoading ? 'Withdrawing...' : 'Withdraw All'}
+    </button>
+  )
+}
+```
+
+### Toggle Auto-Compound
+
+```typescript
+function AutoCompoundToggle() {
+  const [enabled, setEnabled] = useState(false)
+  const { writeContract, data: hash } = useWriteContract()
+  const { isLoading } = useWaitForTransactionReceipt({ hash })
+
+  const handleToggle = async () => {
+    writeContract({
+      address: CONTRACTS.INDIVIDUAL_POOL,
+      abi: INDIVIDUAL_POOL_ABI,
+      functionName: 'setAutoCompound',
+      args: [!enabled],
+    })
+    setEnabled(!enabled)
+  }
+
+  return (
+    <label>
+      <input
+        type="checkbox"
+        checked={enabled}
+        onChange={handleToggle}
+        disabled={isLoading}
+      />
+      Enable Auto-Compound
+    </label>
+  )
+}
+```
+
+### Claim Referral Rewards
+
+```typescript
+function ClaimReferralRewards() {
+  const { address } = useAccount()
+  const { writeContract, data: hash } = useWriteContract()
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  // Get referral stats
+  const { data: referralStats } = useReadContract({
+    address: CONTRACTS.INDIVIDUAL_POOL,
+    abi: INDIVIDUAL_POOL_ABI,
+    functionName: 'getReferralStats',
+    args: [address!],
+  })
+
+  const handleClaim = async () => {
+    writeContract({
+      address: CONTRACTS.INDIVIDUAL_POOL,
+      abi: INDIVIDUAL_POOL_ABI,
+      functionName: 'claimReferralRewards',
+    })
+  }
+
+  if (!referralStats) return null
+
+  const [count, rewards, referrer] = referralStats
+  const hasRewards = Number(rewards) > 0
+
+  return (
+    <div>
+      <p>Referrals: {Number(count)}</p>
+      <p>Rewards: {(Number(rewards) / 1e18).toFixed(4)} MUSD</p>
+
+      {hasRewards && (
+        <button onClick={handleClaim} disabled={isLoading}>
+          {isLoading ? 'Claiming...' : 'Claim Rewards'}
+        </button>
+      )}
+    </div>
+  )
+}
+```
+
+## Cooperative Pool Examples
+
+### Get All Pools
+
+```typescript
+function PoolList() {
+  const { data: poolCounter } = useReadContract({
+    address: CONTRACTS.COOPERATIVE_POOL,
+    abi: COOPERATIVE_POOL_ABI,
+    functionName: 'poolCounter',
+  })
+
+  const pools = Array.from({ length: Number(poolCounter) || 0 }, (_, i) => i)
+
+  return (
+    <div>
+      {pools.map((poolId) => (
+        <PoolCard key={poolId} poolId={poolId} />
+      ))}
+    </div>
+  )
+}
+```
+
+### Get Pool Information
+
+```typescript
+function PoolCard({ poolId }: { poolId: number }) {
+  const { data: poolInfo } = useReadContract({
+    address: CONTRACTS.COOPERATIVE_POOL,
+    abi: COOPERATIVE_POOL_ABI,
+    functionName: 'pools',
+    args: [BigInt(poolId)],
+  })
+
+  if (!poolInfo) return null
+
+  const [
+    minContribution,
+    maxContribution,
+    maxMembers,
+    currentMembers,
+    createdAt,
+    status,
+    allowNewMembers,
+    creator,
+    name,
+    totalBtcDeposited,
+    totalMusdMinted,
+    totalYieldGenerated,
+  ] = poolInfo
+
+  return (
+    <div>
+      <h3>{name}</h3>
+      <p>Members: {Number(currentMembers)} / {Number(maxMembers)}</p>
+      <p>Total Deposited: {(Number(totalMusdMinted) / 1e18).toFixed(2)} MUSD</p>
+      <p>Total Yields: {(Number(totalYieldGenerated) / 1e18).toFixed(2)} MUSD</p>
+      <p>Status: {['ACCEPTING', 'ACTIVE', 'CLOSED'][status]}</p>
+      <p>Creator: {creator}</p>
+    </div>
+  )
+}
+```
+
+### Create a Pool
+
+```typescript
+function CreatePool() {
+  const [name, setName] = useState('')
+  const [minContribution, setMinContribution] = useState('0.001')
+  const [maxContribution, setMaxContribution] = useState('10')
+  const [maxMembers, setMaxMembers] = useState('10')
+
+  const { writeContract, data: hash } = useWriteContract()
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  const handleCreate = async () => {
+    writeContract({
+      address: CONTRACTS.COOPERATIVE_POOL,
+      abi: COOPERATIVE_POOL_ABI,
+      functionName: 'createPool',
+      args: [
+        name,
+        parseUnits(minContribution, 18),
+        parseUnits(maxContribution, 18),
+        BigInt(maxMembers),
+      ],
+    })
+  }
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        placeholder="Pool Name"
+      />
+      <input
+        type="number"
+        value={minContribution}
+        onChange={(e) => setMinContribution(e.target.value)}
+        placeholder="Min Contribution (BTC)"
+      />
+      <input
+        type="number"
+        value={maxContribution}
+        onChange={(e) => setMaxContribution(e.target.value)}
+        placeholder="Max Contribution (BTC)"
+      />
+      <input
+        type="number"
+        value={maxMembers}
+        onChange={(e) => setMaxMembers(e.target.value)}
+        placeholder="Max Members"
+      />
+
+      <button onClick={handleCreate} disabled={isLoading}>
+        {isLoading ? 'Creating...' : 'Create Pool'}
+      </button>
+
+      {isSuccess && <p>Pool created successfully! 🎉</p>}
+    </div>
+  )
+}
+```
+
+### Join a Pool
+
+```typescript
+function JoinPool({ poolId }: { poolId: number }) {
+  const [btcAmount, setBtcAmount] = useState('')
+  const { writeContract, data: hash } = useWriteContract()
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  const handleJoin = async () => {
+    const amountWei = parseUnits(btcAmount, 18)
+
+    writeContract({
+      address: CONTRACTS.COOPERATIVE_POOL,
+      abi: COOPERATIVE_POOL_ABI,
+      functionName: 'joinPool',
+      args: [BigInt(poolId)],
+      value: amountWei, // Send BTC
+    })
+  }
+
+  return (
+    <div>
+      <input
+        type="number"
+        value={btcAmount}
+        onChange={(e) => setBtcAmount(e.target.value)}
+        placeholder="BTC Amount"
+      />
+
+      <button onClick={handleJoin} disabled={isLoading}>
+        {isLoading ? 'Joining...' : 'Join Pool'}
+      </button>
+    </div>
+  )
+}
+```
+
+### Get Member Information
+
+```typescript
+function MemberInfo({ poolId, address }: { poolId: number; address: `0x${string}` }) {
+  const { data: memberInfo } = useReadContract({
+    address: CONTRACTS.COOPERATIVE_POOL,
+    abi: COOPERATIVE_POOL_ABI,
+    functionName: 'poolMembers',
+    args: [BigInt(poolId), address],
+  })
+
+  if (!memberInfo) return null
+
+  const [btcContributed, shares, joinedAt, active, yieldClaimed] = memberInfo
+
+  return (
+    <div>
+      <p>Contributed: {(Number(btcContributed) / 1e18).toFixed(4)} BTC</p>
+      <p>Shares: {Number(shares)}</p>
+      <p>Yield Claimed: {(Number(yieldClaimed) / 1e18).toFixed(2)} MUSD</p>
+      <p>Status: {active ? 'Active' : 'Inactive'}</p>
+      <p>Joined: {new Date(Number(joinedAt) * 1000).toLocaleDateString()}</p>
+    </div>
+  )
+}
+```
+
+## Lottery Pool Examples
+
+### Get Current Round
+
+```typescript
+function CurrentRound() {
+  const { data: currentRoundId } = useReadContract({
+    address: CONTRACTS.LOTTERY_POOL,
+    abi: LOTTERY_POOL_ABI,
+    functionName: 'currentRoundId',
+  })
+
+  const { data: round } = useReadContract({
+    address: CONTRACTS.LOTTERY_POOL,
+    abi: LOTTERY_POOL_ABI,
+    functionName: 'rounds',
+    args: [currentRoundId!],
+    enabled: !!currentRoundId,
+  })
+
+  if (!round) return null
+
+  const [
+    ticketPrice,
+    totalMusd,
+    maxTickets,
+    totalTicketsSold,
+    startTime,
+    endTime,
+    commitDeadline,
+    revealDeadline,
+    winner,
+    winnerPrize,
+    totalYield,
+    status,
+  ] = round
+
+  return (
+    <div>
+      <h3>Round {Number(currentRoundId)}</h3>
+      <p>Ticket Price: {(Number(ticketPrice) / 1e18).toFixed(2)} MUSD</p>
+      <p>Tickets Sold: {Number(totalTicketsSold)} / {Number(maxTickets)}</p>
+      <p>Prize Pool: {(Number(totalYield) / 1e18).toFixed(2)} MUSD</p>
+      <p>Status: {['OPEN', 'COMMIT', 'REVEAL', 'COMPLETED', 'CANCELLED'][status]}</p>
+      {winner !== '0x0000000000000000000000000000000000000000' && (
+        <p>Winner: {winner} - Prize: {(Number(winnerPrize) / 1e18).toFixed(2)} MUSD</p>
+      )}
+    </div>
+  )
+}
+```
+
+### Buy Lottery Tickets
+
+```typescript
+function BuyTickets({ roundId }: { roundId: number }) {
+  const [ticketCount, setTicketCount] = useState(1)
+  const { writeContract, data: hash } = useWriteContract()
+  const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  const { data: ticketPrice } = useReadContract({
+    address: CONTRACTS.LOTTERY_POOL,
+    abi: LOTTERY_POOL_ABI,
+    functionName: 'rounds',
+    args: [BigInt(roundId)],
+    select: (data) => data[0], // Get ticketPrice from tuple
+  })
+
+  const handleBuy = async () => {
+    if (!ticketPrice) return
+
+    const totalCost = BigInt(ticketPrice) * BigInt(ticketCount)
+
+    writeContract({
+      address: CONTRACTS.LOTTERY_POOL,
+      abi: LOTTERY_POOL_ABI,
+      functionName: 'buyTickets',
+      args: [BigInt(roundId), BigInt(ticketCount)],
+    })
+  }
+
+  return (
+    <div>
+      <input
+        type="number"
+        value={ticketCount}
+        onChange={(e) => setTicketCount(Number(e.target.value))}
+        min="1"
+        max="100"
+      />
+      <p>
+        Total Cost: {ticketPrice ? (Number(ticketPrice) * ticketCount / 1e18).toFixed(2) : '0'} MUSD
+      </p>
+
+      <button onClick={handleBuy} disabled={isLoading}>
+        {isLoading ? 'Buying...' : `Buy ${ticketCount} Ticket${ticketCount > 1 ? 's' : ''}`}
+      </button>
+    </div>
+  )
+}
+```
+
+## REST API Examples
+
+### Authentication (SIWE)
+
+```typescript
+import { SiweMessage } from 'siwe'
+import { useAccount, useSignMessage } from 'wagmi'
+
+function SignIn() {
+  const { address } = useAccount()
+  const { signMessageAsync } = useSignMessage()
+  const [token, setToken] = useState<string | null>(null)
+
+  const handleSignIn = async () => {
+    if (!address) return
+
+    // 1. Get nonce from API
+    const nonceRes = await fetch('https://api.khipuvault.com/auth/nonce')
+    const { nonce } = await nonceRes.json()
+
+    // 2. Create SIWE message
+    const message = new SiweMessage({
+      domain: window.location.host,
+      address,
+      statement: 'Sign in to KhipuVault',
+      uri: window.location.origin,
+      version: '1',
+      chainId: 31611,
+      nonce,
+    })
+
+    // 3. Sign message
+    const signature = await signMessageAsync({
+      message: message.prepareMessage(),
+    })
+
+    // 4. Verify and get JWT token
+    const verifyRes = await fetch('https://api.khipuvault.com/auth/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: message.prepareMessage(),
+        signature,
+      }),
+    })
+
+    const { token: jwtToken } = await verifyRes.json()
+    setToken(jwtToken)
+
+    // Store token
+    localStorage.setItem('auth_token', jwtToken)
+  }
+
+  return (
+    <button onClick={handleSignIn}>
+      Sign In with Ethereum
+    </button>
+  )
+}
+```
+
+### Query Pool Analytics
+
+```typescript
+async function getPoolAnalytics() {
+  const response = await fetch('https://api.khipuvault.com/pools/individual', {
+    headers: {
+      'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+    },
+  })
+
+  const data = await response.json()
+
+  return {
+    totalDeposits: data.totalDeposits,
+    totalYields: data.totalYields,
+    activeUsers: data.activeUsers,
+    averageAPR: data.averageAPR,
+  }
+}
+```
+
+### Get User Transactions
+
+```typescript
+async function getUserTransactions(address: string) {
+  const response = await fetch(
+    `https://api.khipuvault.com/transactions/${address}?limit=50&offset=0`,
+    {
+      headers: {
+        'Authorization': `Bearer ${localStorage.getItem('auth_token')}`,
+      },
+    }
+  )
+
+  const data = await response.json()
+
+  return data.transactions.map((tx: any) => ({
+    hash: tx.hash,
+    type: tx.type, // 'deposit', 'withdraw', 'claim', etc.
+    amount: tx.amount,
+    timestamp: new Date(tx.timestamp),
+    status: tx.status,
+  }))
+}
+```
+
+## Event Indexing Examples
+
+### Listen to Deposit Events
+
+```typescript
+import { ethers } from 'ethers'
+import { CONTRACTS } from './config/contracts'
+import { INDIVIDUAL_POOL_ABI } from './abis'
+
+const provider = new ethers.JsonRpcProvider('https://rpc.test.mezo.org')
+const poolContract = new ethers.Contract(
+  CONTRACTS.INDIVIDUAL_POOL,
+  INDIVIDUAL_POOL_ABI,
+  provider
+)
+
+// Listen to Deposited events
+poolContract.on('Deposited', (user, musdAmount, totalDeposit, referrer, timestamp, event) => {
+  console.log('New deposit:', {
+    user,
+    amount: ethers.formatUnits(musdAmount, 18),
+    total: ethers.formatUnits(totalDeposit, 18),
+    referrer,
+    timestamp: new Date(Number(timestamp) * 1000),
+    txHash: event.log.transactionHash,
+  })
+})
+
+// Listen to YieldClaimed events
+poolContract.on('YieldClaimed', (user, grossYield, feeAmount, netYield, timestamp) => {
+  console.log('Yield claimed:', {
+    user,
+    grossYield: ethers.formatUnits(grossYield, 18),
+    fee: ethers.formatUnits(feeAmount, 18),
+    netYield: ethers.formatUnits(netYield, 18),
+    timestamp: new Date(Number(timestamp) * 1000),
+  })
+})
+
+// Query past events
+async function getPastDeposits(fromBlock: number, toBlock: number) {
+  const filter = poolContract.filters.Deposited()
+  const events = await poolContract.queryFilter(filter, fromBlock, toBlock)
+
+  return events.map((event) => ({
+    user: event.args.user,
+    amount: ethers.formatUnits(event.args.musdAmount, 18),
+    total: ethers.formatUnits(event.args.totalDeposit, 18),
+    referrer: event.args.referrer,
+    blockNumber: event.blockNumber,
+    txHash: event.transactionHash,
+  }))
+}
+```
+
+### Index Events to Database
+
+```typescript
+import { PrismaClient } from '@prisma/client'
+import { ethers } from 'ethers'
+
+const prisma = new PrismaClient()
+const provider = new ethers.JsonRpcProvider('https://rpc.test.mezo.org')
+const poolContract = new ethers.Contract(CONTRACTS.INDIVIDUAL_POOL, INDIVIDUAL_POOL_ABI, provider)
+
+async function indexDeposits() {
+  poolContract.on('Deposited', async (user, musdAmount, totalDeposit, referrer, timestamp, event) => {
+    try {
+      await prisma.deposit.create({
+        data: {
+          userAddress: user.toLowerCase(),
+          amount: musdAmount.toString(),
+          totalDeposit: totalDeposit.toString(),
+          referrer: referrer !== ethers.ZeroAddress ? referrer.toLowerCase() : null,
+          timestamp: new Date(Number(timestamp) * 1000),
+          txHash: event.log.transactionHash,
+          blockNumber: event.log.blockNumber,
+          poolType: 'INDIVIDUAL',
+        },
+      })
+
+      console.log(`Indexed deposit: ${event.log.transactionHash}`)
+    } catch (error) {
+      console.error('Failed to index deposit:', error)
+    }
+  })
+}
+
+// Start indexing
+indexDeposits()
+```
+
+## React Query Patterns
+
+### Complete Hook with Caching
+
+```typescript
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useAccount, useConfig } from 'wagmi'
+import { readContract } from 'wagmi/actions'
+
+export function useIndividualPool() {
+  const { address } = useAccount()
+  const config = useConfig()
+  const queryClient = useQueryClient()
+
+  // User info with auto-refetch
+  const { data: userInfo, refetch } = useQuery({
+    queryKey: ['individual-pool', 'user-info', address],
+    queryFn: async () => {
+      if (!address) return null
+
+      return await readContract(config, {
+        address: CONTRACTS.INDIVIDUAL_POOL,
+        abi: INDIVIDUAL_POOL_ABI,
+        functionName: 'getUserInfo',
+        args: [address],
+      })
+    },
+    enabled: !!address,
+    staleTime: 5_000, // Consider data fresh for 5 seconds
+    refetchInterval: 10_000, // Auto-refetch every 10 seconds
+  })
+
+  // Invalidate all queries after write operations
+  const invalidateAll = () => {
+    queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+  }
+
+  return {
+    userInfo,
+    refetch,
+    invalidateAll,
+  }
+}
+```
+
+## Error Handling
+
+### Contract Error Handling
+
+```typescript
+import { BaseError, ContractFunctionRevertedError } from 'viem'
+
+function DepositWithErrorHandling() {
+  const { writeContract } = useWriteContract()
+  const [error, setError] = useState<string | null>(null)
+
+  const handleDeposit = async (amount: bigint) => {
+    try {
+      setError(null)
+
+      await writeContract({
+        address: CONTRACTS.INDIVIDUAL_POOL,
+        abi: INDIVIDUAL_POOL_ABI,
+        functionName: 'deposit',
+        args: [amount],
+      })
+    } catch (err) {
+      if (err instanceof BaseError) {
+        const revertError = err.walk(err => err instanceof ContractFunctionRevertedError)
+
+        if (revertError instanceof ContractFunctionRevertedError) {
+          const errorName = revertError.data?.errorName ?? ''
+
+          switch (errorName) {
+            case 'MinimumDepositNotMet':
+              setError('Deposit must be at least 10 MUSD')
+              break
+            case 'MaximumDepositExceeded':
+              setError('Maximum deposit is 100,000 MUSD')
+              break
+            case 'InsufficientBalance':
+              setError('Insufficient MUSD balance')
+              break
+            default:
+              setError('Transaction failed. Please try again.')
+          }
+        }
+      } else {
+        setError('An unexpected error occurred')
+      }
+    }
+  }
+
+  return error ? <div className="error">{error}</div> : null
+}
+```
+
+## Type Definitions
+
+```typescript
+// User Info from IndividualPoolV3
+export interface UserInfoV3 {
+  deposit: bigint
+  yields: bigint
+  netYields: bigint
+  daysActive: bigint
+  estimatedAPR: bigint
+  autoCompoundEnabled: boolean
+}
+
+// Referral Stats
+export interface ReferralStats {
+  count: bigint
+  rewards: bigint
+  referrer: string
+}
+
+// Pool Info from CooperativePoolV3
+export interface PoolInfo {
+  minContribution: bigint
+  maxContribution: bigint
+  maxMembers: bigint
+  currentMembers: bigint
+  createdAt: bigint
+  status: 0 | 1 | 2 // ACCEPTING, ACTIVE, CLOSED
+  allowNewMembers: boolean
+  creator: string
+  name: string
+  totalBtcDeposited: bigint
+  totalMusdMinted: bigint
+  totalYieldGenerated: bigint
+}
+
+// Member Info
+export interface MemberInfo {
+  btcContributed: bigint
+  shares: bigint
+  joinedAt: bigint
+  active: boolean
+  yieldClaimed: bigint
+}
+```
+
+## Best Practices
+
+### 1. Always Wait for Transaction Receipt
+
+```typescript
+const { writeContract, data: hash } = useWriteContract()
+const { isLoading, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+// ✅ Wait for confirmation
+if (isSuccess) {
+  console.log('Transaction confirmed!')
+  refetchUserInfo()
+}
+```
+
+### 2. Approve Before Deposit
+
+```typescript
+// ✅ Step 1: Approve token
+await writeContract({
+  address: CONTRACTS.MUSD,
+  abi: ERC20_ABI,
+  functionName: 'approve',
+  args: [CONTRACTS.INDIVIDUAL_POOL, amount],
+})
+
+// ✅ Step 2: Wait for approval
+await waitForApproval()
+
+// ✅ Step 3: Deposit
+await writeContract({
+  address: CONTRACTS.INDIVIDUAL_POOL,
+  abi: INDIVIDUAL_POOL_ABI,
+  functionName: 'deposit',
+  args: [amount],
+})
+```
+
+### 3. Handle BigInt Properly
+
+```typescript
+// ✅ Use parseUnits for input
+const amount = parseUnits('100', 18) // 100 MUSD
+
+// ✅ Use formatUnits for display
+const display = formatUnits(balance, 18) // "100.00"
+
+// ❌ Never convert BigInt to Number for wei values
+const wrong = Number(balance) / 1e18 // Precision loss!
+```
+
+### 4. Invalidate Cache After Writes
+
+```typescript
+const { writeContract } = useWriteContract()
+const queryClient = useQueryClient()
+
+const handleDeposit = async () => {
+  await writeContract({ ... })
+
+  // ✅ Invalidate all pool queries
+  queryClient.invalidateQueries({ queryKey: ['individual-pool'] })
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Smart Contracts Reference"
+    href="/docs/developers/smart-contracts/individual-pool"
+    description="Complete contract documentation"
+  />
+  <Card
+    title="API Reference"
+    href="/docs/developers/api-reference/rest-api"
+    description="Backend API endpoints"
+  />
+  <Card
+    title="Web3 Integration Guide"
+    href="/docs/developers/integration/web3-integration"
+    description="Wagmi and Viem setup"
+  />
+</Cards>

@@ -1,0 +1,621 @@
+---
+title: API Design & Architecture
+description: Backend API structure, design patterns, authentication, and best practices for KhipuVault REST API.
+---
+
+# API Design & Architecture
+
+KhipuVault's backend API is built with Express.js, following REST principles and modern Node.js best practices. This guide explains the architecture, design patterns, and conventions.
+
+## API Structure
+
+```
+apps/api/src/
+├── index.ts              # Server entry point
+├── middleware/           # Express middleware
+│   ├── auth.ts          # JWT verification
+│   ├── logger.ts        # Pino request logging
+│   ├── rateLimiter.ts   # Rate limiting
+│   └── errorHandler.ts  # Global error handling
+├── routes/              # API endpoints
+│   ├── auth.ts          # Authentication (SIWE)
+│   ├── pools.ts         # Pool operations
+│   ├── users.ts         # User profiles
+│   ├── transactions.ts  # Transaction history
+│   ├── analytics.ts     # Pool analytics
+│   ├── lottery.ts       # Lottery/prize pool
+│   ├── health.ts        # Health checks
+│   └── metrics.ts       # Metrics (Prometheus)
+├── services/            # Business logic layer
+│   ├── auth.service.ts
+│   ├── pool.service.ts
+│   ├── user.service.ts
+│   ├── transaction.service.ts
+│   └── analytics.service.ts
+├── types/               # TypeScript types
+│   └── express.d.ts     # Extended Express types
+└── utils/               # Helper functions
+    ├── validation.ts    # Zod schemas
+    └── logger.ts        # Pino logger instance
+```
+
+## Three-Layer Architecture
+
+```
+┌─────────────────────────────────────┐
+│         Routes Layer                │
+│  ├─ HTTP request/response           │
+│  ├─ Input validation (Zod)          │
+│  ├─ Authentication checks            │
+│  └─ Error handling                  │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│       Services Layer                │
+│  ├─ Business logic                  │
+│  ├─ Data transformation             │
+│  ├─ Cross-cutting concerns          │
+│  └─ Transaction coordination        │
+└──────────────┬──────────────────────┘
+               │
+┌──────────────▼──────────────────────┐
+│      Database Layer (Prisma)        │
+│  ├─ Data access                     │
+│  ├─ Query optimization              │
+│  └─ Relationship handling           │
+└─────────────────────────────────────┘
+```
+
+### Routes Layer
+
+Handles HTTP concerns:
+
+```typescript
+// routes/pools.ts
+import express from 'express'
+import { z } from 'zod'
+import { authMiddleware } from '../middleware/auth'
+import { poolService } from '../services/pool.service'
+
+const router = express.Router()
+
+// Validation schema
+const createPoolSchema = z.object({
+  type: z.enum(['individual', 'cooperative', 'lottery']),
+  initialDeposit: z.string().regex(/^\d+$/), // BigInt string
+  autoCompound: z.boolean().optional()
+})
+
+// GET /pools - List user's pools
+router.get('/', authMiddleware, async (req, res, next) => {
+  try {
+    const { userId } = req.user // From auth middleware
+
+    const pools = await poolService.getUserPools(userId)
+
+    res.json({
+      success: true,
+      data: pools
+    })
+  } catch (error) {
+    next(error) // Pass to error handler
+  }
+})
+
+// POST /pools - Create new pool
+router.post('/', authMiddleware, async (req, res, next) => {
+  try {
+    // Validate input
+    const data = createPoolSchema.parse(req.body)
+
+    // Call service
+    const pool = await poolService.createPool({
+      userId: req.user.userId,
+      ...data
+    })
+
+    res.status(201).json({
+      success: true,
+      data: pool
+    })
+  } catch (error) {
+    next(error)
+  }
+})
+
+export default router
+```
+
+### Services Layer
+
+Business logic and data transformation:
+
+```typescript
+// services/pool.service.ts
+import { prisma } from '@khipu/database'
+import { logger } from '../utils/logger'
+
+class PoolService {
+  async getUserPools(userId: string) {
+    logger.info({ userId }, 'Fetching user pools')
+
+    const pools = await prisma.pool.findMany({
+      where: {
+        OR: [
+          { ownerId: userId },
+          { members: { some: { userId } } }
+        ]
+      },
+      include: {
+        transactions: {
+          orderBy: { createdAt: 'desc' },
+          take: 10
+        },
+        members: true
+      }
+    })
+
+    // Transform data
+    return pools.map(pool => ({
+      id: pool.id,
+      type: pool.type,
+      balance: pool.balance.toString(), // BigInt to string
+      totalYield: pool.totalYield.toString(),
+      createdAt: pool.createdAt.toISOString(),
+      members: pool.members.length,
+      recentTransactions: pool.transactions
+    }))
+  }
+
+  async createPool(params: CreatePoolParams) {
+    const { userId, type, initialDeposit, autoCompound } = params
+
+    logger.info({ userId, type }, 'Creating new pool')
+
+    // Business logic
+    const minimumDeposit = BigInt(10e18) // 10 MUSD
+    if (BigInt(initialDeposit) < minimumDeposit) {
+      throw new ValidationError('Initial deposit below minimum')
+    }
+
+    // Database transaction
+    const pool = await prisma.$transaction(async (tx) => {
+      // Create pool
+      const newPool = await tx.pool.create({
+        data: {
+          ownerId: userId,
+          type,
+          balance: initialDeposit,
+          autoCompound: autoCompound ?? false
+        }
+      })
+
+      // Create initial deposit transaction
+      await tx.transaction.create({
+        data: {
+          poolId: newPool.id,
+          userId,
+          type: 'DEPOSIT',
+          amount: initialDeposit,
+          txHash: null // Will be updated by indexer
+        }
+      })
+
+      return newPool
+    })
+
+    logger.info({ poolId: pool.id }, 'Pool created successfully')
+
+    return pool
+  }
+}
+
+export const poolService = new PoolService()
+```
+
+### Database Layer
+
+Prisma ORM handles all database operations:
+
+```typescript
+// Prisma auto-generates type-safe client
+import { prisma } from '@khipu/database'
+
+// Type-safe queries
+const user = await prisma.user.findUnique({
+  where: { address: '0x123...' },
+  include: { pools: true }
+})
+
+// Transactions
+await prisma.$transaction([
+  prisma.user.update({ where: { id }, data: { balance } }),
+  prisma.transaction.create({ data: { userId: id, amount } })
+])
+```
+
+## Authentication Flow
+
+KhipuVault uses **SIWE** (Sign-In With Ethereum) for authentication:
+
+```
+┌─────────┐                          ┌─────────┐
+│ Frontend│                          │   API   │
+└────┬────┘                          └────┬────┘
+     │                                    │
+     │ 1. Request nonce                   │
+     ├───────────────────────────────────>│
+     │                                    │
+     │ 2. Return nonce                    │
+     │<───────────────────────────────────┤
+     │                                    │
+     │ 3. Sign message with wallet        │
+     │    (includes nonce)                │
+     │                                    │
+     │ 4. Send signature + message        │
+     ├───────────────────────────────────>│
+     │                                    │
+     │                                    │ 5. Verify signature
+     │                                    │ 6. Check nonce
+     │                                    │ 7. Generate JWT
+     │                                    │
+     │ 8. Return JWT token                │
+     │<───────────────────────────────────┤
+     │                                    │
+     │ 9. Subsequent requests with JWT    │
+     ├───────────────────────────────────>│
+     │    Authorization: Bearer <token>   │
+     │                                    │
+```
+
+### Implementation
+
+```typescript
+// routes/auth.ts
+import { SiweMessage } from 'siwe'
+import jwt from 'jsonwebtoken'
+
+// 1. Generate nonce
+router.get('/nonce', async (req, res) => {
+  const nonce = crypto.randomBytes(16).toString('hex')
+
+  // Store nonce in session or Redis (10 min expiry)
+  await redis.setex(`nonce:${nonce}`, 600, '1')
+
+  res.json({ nonce })
+})
+
+// 2. Verify signature and issue JWT
+router.post('/verify', async (req, res) => {
+  const { message, signature } = req.body
+
+  try {
+    // Parse SIWE message
+    const siweMessage = new SiweMessage(message)
+
+    // Verify signature
+    await siweMessage.verify({ signature })
+
+    // Check nonce hasn't been used
+    const nonceExists = await redis.get(`nonce:${siweMessage.nonce}`)
+    if (!nonceExists) {
+      throw new Error('Invalid or expired nonce')
+    }
+
+    // Delete nonce (prevent replay)
+    await redis.del(`nonce:${siweMessage.nonce}`)
+
+    // Get or create user
+    let user = await prisma.user.findUnique({
+      where: { address: siweMessage.address.toLowerCase() }
+    })
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: { address: siweMessage.address.toLowerCase() }
+      })
+    }
+
+    // Generate JWT
+    const token = jwt.sign(
+      { userId: user.id, address: user.address },
+      process.env.JWT_SECRET!,
+      { expiresIn: '7d' }
+    )
+
+    res.json({ token, user })
+  } catch (error) {
+    res.status(401).json({ error: 'Authentication failed' })
+  }
+})
+
+// 3. Middleware to verify JWT
+export const authMiddleware = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '')
+
+    if (!token) {
+      throw new Error('No token provided')
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!)
+    req.user = decoded
+
+    next()
+  } catch (error) {
+    res.status(401).json({ error: 'Invalid token' })
+  }
+}
+```
+
+## Input Validation (Zod)
+
+All endpoints validate input with Zod schemas:
+
+```typescript
+// utils/validation.ts
+import { z } from 'zod'
+
+// Ethereum address
+export const addressSchema = z
+  .string()
+  .regex(/^0x[a-fA-F0-9]{40}$/, 'Invalid address')
+
+// BigInt string (for amounts)
+export const bigIntSchema = z
+  .string()
+  .regex(/^\d+$/, 'Must be numeric string')
+
+// Pool creation
+export const createPoolSchema = z.object({
+  type: z.enum(['individual', 'cooperative', 'lottery', 'rotating']),
+  initialDeposit: bigIntSchema,
+  autoCompound: z.boolean().default(false),
+  members: z.array(addressSchema).optional()
+})
+
+// Usage in routes
+router.post('/pools', authMiddleware, async (req, res, next) => {
+  try {
+    const data = createPoolSchema.parse(req.body) // Throws if invalid
+    // ... rest of logic
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return res.status(400).json({
+        error: 'Validation failed',
+        details: error.errors
+      })
+    }
+    next(error)
+  }
+})
+```
+
+## Error Handling
+
+Centralized error handling with custom error classes:
+
+```typescript
+// utils/errors.ts
+export class AppError extends Error {
+  constructor(
+    public statusCode: number,
+    public message: string,
+    public isOperational = true
+  ) {
+    super(message)
+    Object.setPrototypeOf(this, AppError.prototype)
+  }
+}
+
+export class ValidationError extends AppError {
+  constructor(message: string) {
+    super(400, message)
+  }
+}
+
+export class UnauthorizedError extends AppError {
+  constructor(message = 'Unauthorized') {
+    super(401, message)
+  }
+}
+
+export class NotFoundError extends AppError {
+  constructor(message = 'Not found') {
+    super(404, message)
+  }
+}
+
+// middleware/errorHandler.ts
+export const errorHandler = (err, req, res, next) => {
+  logger.error({
+    err,
+    req: {
+      method: req.method,
+      url: req.url,
+      body: req.body
+    }
+  }, 'Request error')
+
+  if (err instanceof AppError) {
+    return res.status(err.statusCode).json({
+      error: err.message
+    })
+  }
+
+  // Unknown error
+  res.status(500).json({
+    error: 'Internal server error'
+  })
+}
+```
+
+## Logging (Pino)
+
+Structured JSON logging for production:
+
+```typescript
+// utils/logger.ts
+import pino from 'pino'
+
+export const logger = pino({
+  level: process.env.LOG_LEVEL || 'info',
+  formatters: {
+    level: (label) => ({ level: label })
+  },
+  timestamp: pino.stdTimeFunctions.isoTime
+})
+
+// Usage
+logger.info({ userId, poolId }, 'User created pool')
+logger.error({ err, userId }, 'Failed to process transaction')
+
+// Request logging middleware
+export const loggerMiddleware = pinoHttp({
+  logger,
+  customLogLevel: (req, res, err) => {
+    if (res.statusCode >= 500) return 'error'
+    if (res.statusCode >= 400) return 'warn'
+    return 'info'
+  }
+})
+```
+
+## Rate Limiting
+
+Protect API from abuse:
+
+```typescript
+// middleware/rateLimiter.ts
+import rateLimit from 'express-rate-limit'
+
+export const generalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // 100 requests per window
+  message: 'Too many requests from this IP'
+})
+
+export const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 5, // Only 5 auth attempts
+  message: 'Too many login attempts'
+})
+
+// Apply to routes
+app.use('/api/', generalLimiter)
+app.use('/api/auth/', authLimiter)
+```
+
+## Response Format
+
+Consistent JSON response structure:
+
+```typescript
+// Success response
+{
+  "success": true,
+  "data": {
+    "id": "123",
+    "balance": "1000000000000000000",
+    "createdAt": "2026-02-08T10:00:00Z"
+  }
+}
+
+// Error response
+{
+  "success": false,
+  "error": "Validation failed",
+  "details": [
+    {
+      "field": "amount",
+      "message": "Must be greater than 0"
+    }
+  ]
+}
+
+// Paginated response
+{
+  "success": true,
+  "data": [...],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 150,
+    "pages": 8
+  }
+}
+```
+
+## Database Best Practices
+
+### Connection Pooling
+
+```typescript
+// packages/database/src/client.ts
+import { PrismaClient } from '@prisma/client'
+
+const prisma = new PrismaClient({
+  log: ['error', 'warn'],
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL
+    }
+  }
+})
+
+// Connection pool settings in DATABASE_URL:
+// postgresql://user:password@localhost:5432/khipu?connection_limit=10&pool_timeout=20
+```
+
+### Transactions
+
+```typescript
+// Always use transactions for multi-step operations
+await prisma.$transaction(async (tx) => {
+  const pool = await tx.pool.create({ data: poolData })
+  await tx.transaction.create({ data: txData })
+  await tx.user.update({ where: { id }, data: { poolCount: { increment: 1 } } })
+})
+```
+
+### Indexes
+
+```prisma
+// schema.prisma
+model Transaction {
+  id        String   @id @default(cuid())
+  userId    String
+  poolId    String
+  amount    BigInt
+  createdAt DateTime @default(now())
+
+  @@index([userId])       // For user queries
+  @@index([poolId])       // For pool queries
+  @@index([createdAt])    // For time-based queries
+  @@index([userId, poolId]) // Composite index
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="REST API Reference"
+    href="/docs/developers/api-reference/rest-api"
+    description="Complete endpoint documentation"
+  />
+  <Card
+    title="Authentication Guide"
+    href="/docs/developers/api-reference/authentication"
+    description="SIWE implementation details"
+  />
+  <Card
+    title="Smart Contracts"
+    href="/docs/developers/architecture/smart-contracts"
+    description="Contract architecture"
+  />
+</Cards>
+
+---
+
+**Questions?** Join [Discord](https://discord.gg/khipuvault) #api channel or email dev@khipuvault.com

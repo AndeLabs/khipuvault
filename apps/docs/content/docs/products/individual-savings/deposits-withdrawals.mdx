@@ -1,0 +1,703 @@
+---
+title: Deposits & Withdrawals
+description: Complete guide to adding and removing funds from your Individual Savings pool, including gas fees and best practices.
+---
+
+# Deposits & Withdrawals
+
+Learn how to add funds to your pool, withdraw earnings, and manage your savings efficiently.
+
+## Depositing Funds
+
+Add MUSD to your pool and start earning yields immediately.
+
+### First-Time Deposit
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Navigate to Your Pool
+
+1. Go to [khipuvault.com](https://khipuvault.com)
+2. Connect your wallet (if not connected)
+3. Click **"My Pools"** in navigation
+4. Select the pool you want to deposit to
+
+You'll see your pool dashboard:
+```
+House Down Payment
+Balance: 0 MUSD
+Goal: 50,000 MUSD (0% complete)
+Yields Earned: 0 MUSD
+[Deposit] [Withdraw] [Settings]
+```
+
+### Click "Deposit" Button
+
+A modal appears with the deposit form:
+- **Amount field** - How much MUSD to deposit
+- **Balance display** - Your current MUSD wallet balance
+- **Minimum:** 10 MUSD
+- **Maximum:** Your wallet balance
+
+### Enter Deposit Amount
+
+**Examples:**
+```
+Conservative: 100 MUSD ($100)
+Moderate: 1,000 MUSD ($1,000)
+Aggressive: 10,000 MUSD ($10,000)
+```
+
+<Callout type="info">
+**Recommended first deposit:** 100-500 MUSD to test the platform before committing larger amounts.
+</Callout>
+
+**Quick amount buttons:**
+- Click **"25%"** to deposit quarter of your balance
+- Click **"50%"** to deposit half
+- Click **"75%"** to deposit three-quarters
+- Click **"Max"** to deposit everything
+
+### Review Deposit Summary
+
+Before confirming, you'll see:
+
+```
+Deposit Amount: 1,000 MUSD
+Current Balance: 0 MUSD
+New Balance: 1,000 MUSD
+Estimated Annual Yield: ~150 MUSD (15% APY)
+Gas Fee: ~0.0001 BTC (~$0.01)
+
+Yield Starts: Immediately
+Next Compound: In 5 seconds
+```
+
+### Approve MUSD (First Time Only)
+
+Click **"Approve & Deposit"**. MetaMask pops up:
+
+**Transaction 1: Approve MUSD Spending**
+```
+Approve MUSD
+Spender: IndividualPool (0xdfBE...0393)
+Amount: Unlimited (standard for ERC-20)
+Gas: ~0.0001 BTC
+```
+
+**Why unlimited?**
+- Standard practice in DeFi
+- Saves gas on future deposits (no re-approval needed)
+- You can revoke anytime
+
+<Callout type="warning">
+**Security:** We request "unlimited" approval but this only applies to this specific pool contract. It's safe and standard. You can revoke in MetaMask settings if needed.
+</Callout>
+
+Click **"Confirm"** in MetaMask.
+
+### Confirm Deposit Transaction
+
+After approval, second transaction appears:
+
+**Transaction 2: Deposit MUSD**
+```
+Contract Interaction
+Function: deposit(1000000000000000000000)
+To: Your Pool Contract
+Gas: ~0.0001 BTC
+```
+
+Click **"Confirm"** in MetaMask.
+
+### Wait for Confirmation
+
+```
+Processing deposit...
+Transaction: 0xabc123...
+⏳ Waiting for confirmation (5-10 seconds)
+```
+
+**What's happening:**
+1. MUSD transfers from your wallet to pool
+2. Pool updates your balance
+3. YieldAggregator receives funds
+4. Funds are invested in yield strategies
+5. Yields start accumulating
+
+### Success!
+
+```
+✅ Deposit Successful!
+
+Deposited: 1,000 MUSD
+New Balance: 1,000 MUSD
+Yields Accruing: ~0.41 MUSD/day (~15% APY)
+
+[View Transaction] [Close]
+```
+
+</div>
+
+<Callout type="success" title="Yields Start Immediately">
+Your deposit begins earning yields within seconds. No waiting period, no lock-up. Returns start accruing immediately after confirmation.
+</Callout>
+
+## Subsequent Deposits
+
+Adding more funds to an existing pool is simpler (no approval needed):
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Click "Deposit"
+
+Navigate to your pool and click **"Deposit"** button.
+
+### Enter Amount
+
+Type amount or use quick buttons. For example, adding your weekly savings:
+```
+Weekly deposit: 50 MUSD
+Monthly deposit: 200 MUSD
+Yearly deposit: 2,400 MUSD
+```
+
+### Confirm Transaction
+
+Only ONE transaction this time (approval already done):
+```
+Deposit 50 MUSD
+Gas: ~0.0001 BTC
+```
+
+Click **"Confirm"** in MetaMask.
+
+### Done!
+
+Funds added in ~10 seconds. Balance updates automatically.
+
+</div>
+
+## Dollar-Cost Averaging (DCA)
+
+Regular deposits smooth out market volatility and build discipline.
+
+### Manual DCA Strategy
+
+**Weekly deposits:**
+```
+Week 1: Deposit 50 MUSD
+Week 2: Deposit 50 MUSD
+Week 3: Deposit 50 MUSD
+...
+Total after 1 year: 2,600 MUSD (52 weeks × 50)
+```
+
+**Benefits:**
+- Builds savings habit
+- Reduces timing risk
+- Easier on budget (small chunks)
+
+### Setting Reminders
+
+Since auto-deposits aren't available yet, use:
+- 📅 Google Calendar reminder (every Monday)
+- 📱 Phone alarm (payday)
+- 💌 Email reminder service
+
+<Callout type="info">
+**Coming Soon:** Automated recurring deposits via smart contracts. You'll be able to set up weekly/monthly auto-deposits without manual transactions.
+</Callout>
+
+## Withdrawing Funds
+
+Access your savings anytime - no penalties, no lock-ups.
+
+### Full Withdrawal
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Navigate to Pool
+
+Go to **"My Pools"** and select the pool you want to withdraw from.
+
+### Click "Withdraw" Button
+
+Withdrawal modal appears showing:
+```
+Available Balance: 1,150 MUSD
+  Principal: 1,000 MUSD
+  Yields: 150 MUSD
+
+Withdraw Amount: [Enter amount]
+[25%] [50%] [75%] [Max]
+```
+
+### Select "Max" for Full Withdrawal
+
+Click **"Max"** button to withdraw everything (principal + yields).
+
+Withdrawal summary:
+```
+Withdraw Amount: 1,150 MUSD
+  Your Deposits: 1,000 MUSD (100%)
+  Earned Yields: 150 MUSD (15% return)
+Remaining Balance: 0 MUSD
+Gas Fee: ~0.0001 BTC
+```
+
+### Confirm Transaction
+
+MetaMask pops up:
+```
+Withdraw 1,150 MUSD
+To: YOUR_WALLET_ADDRESS
+Gas: ~0.0001 BTC
+```
+
+Click **"Confirm"**.
+
+### Receive Funds
+
+```
+✅ Withdrawal Complete!
+
+Amount Received: 1,150 MUSD
+  Principal Returned: 1,000 MUSD
+  Yields Claimed: 150 MUSD
+Time Held: 45 days
+Effective APY: 15.2%
+
+[View Transaction] [Close]
+```
+
+Funds appear in your MetaMask wallet immediately.
+
+</div>
+
+### Partial Withdrawal
+
+Withdraw only what you need, keep the rest earning:
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Click "Withdraw"
+
+Same as full withdrawal - navigate to pool and click **"Withdraw"**.
+
+### Enter Specific Amount
+
+Instead of "Max", type the amount you need:
+```
+Available: 1,150 MUSD
+Withdraw: 200 MUSD (emergency expense)
+Remaining: 950 MUSD (continues earning)
+```
+
+### Choose Withdrawal Source
+
+You can specify where to withdraw from:
+
+**Option A: Yields First (Recommended)**
+- Withdraw from earned yields
+- Preserve principal for maximum compounding
+- Example: Withdraw 150 MUSD from yields, keep 1,000 MUSD principal
+
+**Option B: Proportional**
+- Withdraw proportionally from principal and yields
+- Default option
+- Example: Withdraw 200 MUSD (174 principal + 26 yields)
+
+**Option C: Principal First**
+- Withdraw from deposits first
+- Keep yields compounding
+- Example: Withdraw 200 MUSD from principal, keep 150 MUSD yields
+
+<Callout type="success">
+**Recommendation:** Always withdraw yields first to maximize compound growth of your principal.
+</Callout>
+
+### Confirm & Receive
+
+Same confirmation process - funds arrive in ~10 seconds.
+
+</div>
+
+## Withdrawal Strategies
+
+Different approaches for different goals:
+
+### Strategy 1: Never Withdraw (Maximum Compounding)
+
+**Best for:** Long-term wealth building
+
+**How it works:**
+- Deposit regularly
+- Never touch the balance
+- Let yields compound indefinitely
+
+**Example (10 years):**
+```
+Initial: 1,000 MUSD
+Monthly deposits: 100 MUSD
+APY: 15% (compounded)
+After 10 years: ~31,500 MUSD
+  Deposits: 13,000 MUSD
+  Yields: 18,500 MUSD
+```
+
+### Strategy 2: Withdraw Yields, Keep Principal
+
+**Best for:** Passive income seekers
+
+**How it works:**
+- Build up principal (e.g., 10,000 MUSD)
+- Withdraw yields monthly/quarterly
+- Never touch principal
+
+**Example:**
+```
+Principal: 10,000 MUSD
+Monthly yield: ~125 MUSD (15% APY)
+Annual income: ~1,500 MUSD
+Principal after 5 years: Still 10,000 MUSD
+```
+
+### Strategy 3: Hybrid (Withdraw Some, Keep Some)
+
+**Best for:** Balanced approach
+
+**How it works:**
+- Withdraw 50% of yields
+- Reinvest 50% of yields
+- Grow principal while enjoying returns
+
+**Example:**
+```
+Principal: 5,000 MUSD
+Quarterly yield: ~187 MUSD
+Withdraw: 93 MUSD
+Reinvest: 94 MUSD
+After 1 year: Principal grows to ~5,375 MUSD
+```
+
+### Strategy 4: Goal-Based Withdrawal
+
+**Best for:** Specific savings goals
+
+**How it works:**
+- Set a goal (e.g., $10k for car down payment)
+- Deposit until goal is reached
+- Withdraw full amount when needed
+
+**Example:**
+```
+Goal: 10,000 MUSD for car down payment
+Monthly deposit: 400 MUSD
+With 15% APY: Reach goal in 23 months (vs 25 months at 0%)
+Withdraw: Full 10,000 MUSD when ready to buy
+```
+
+<Callout type="info">
+Choose the strategy that fits your financial goals. You can always change strategies - there's no commitment!
+</Callout>
+
+## Gas Fees Explained
+
+Every blockchain transaction costs gas. Here's what you'll pay:
+
+### Fee Breakdown
+
+| Action | Gas Cost (BTC) | Gas Cost (USD) | Frequency |
+|--------|---------------|---------------|-----------|
+| First Deposit (Approve) | ~0.0001 | ~$0.01 | One-time per pool |
+| First Deposit (Transfer) | ~0.0001 | ~$0.01 | One-time per pool |
+| Subsequent Deposits | ~0.0001 | ~$0.01 | Each deposit |
+| Withdrawals | ~0.0001 | ~$0.01 | Each withdrawal |
+
+**Example Cost (First Year):**
+```
+Initial deposit: $0.02 (approve + deposit)
+Weekly deposits (52): $0.52 (52 × $0.01)
+Yearly withdrawal: $0.01
+Total gas: $0.55
+
+On $2,600 deposited: 0.02% fee
+Compare to bank wire fees: $20-30 per transfer!
+```
+
+### Gas Optimization Tips
+
+<Callout type="success" title="Save on Gas Fees">
+✅ **DO:**
+- Batch deposits (one larger deposit vs many small ones)
+- Deposit during off-peak hours (lower network congestion)
+- Withdraw less frequently (quarterly vs weekly)
+- Use "Max" button to avoid dust (tiny amounts left behind)
+
+❌ **DON'T:**
+- Make tiny deposits (gas fee % too high)
+- Withdraw and re-deposit frequently (wasteful)
+- Rush transactions during high congestion
+</Callout>
+
+### When Gas Fees Spike
+
+During network congestion, gas can increase 2-5x:
+
+**Normal:** ~0.0001 BTC
+**Congested:** ~0.0003-0.0005 BTC
+
+**What to do:**
+1. Check [Mezo Gas Tracker](https://explorer.test.mezo.org/gas)
+2. If fees are high, wait 30-60 minutes
+3. Transactions aren't urgent - yields keep accruing
+4. Set a gas limit in MetaMask (advanced)
+
+## Transaction Limits
+
+Understanding minimums and maximums:
+
+### Minimum Deposit
+
+**10 MUSD** per deposit
+
+**Why?**
+- Gas fees become too expensive on smaller amounts
+- Example: $0.01 gas on $5 deposit = 0.2% fee (too high)
+- On $10 deposit = 0.1% fee (acceptable)
+
+### Maximum Deposit
+
+**No hard maximum**, but consider:
+
+| Amount | Recommendation |
+|--------|---------------|
+| < 10,000 MUSD | Deposit freely |
+| 10,000 - 50,000 MUSD | Consider splitting across pools |
+| 50,000 - 100,000 MUSD | Contact support for optimal strategy |
+| > 100,000 MUSD | Institutional account recommended |
+
+**Why limits matter:**
+- Larger deposits may require custom yield strategies
+- Risk management (don't put all eggs in one basket)
+- Smart contract capacity planning
+
+### Minimum Withdrawal
+
+**No minimum** - withdraw any amount (even 1 MUSD if you want)
+
+**But consider:**
+- Gas fee is ~$0.01 regardless of amount
+- Withdrawing $1 means 1% goes to gas
+- Withdrawing $100 means 0.01% goes to gas
+
+**Recommendation:** Withdraw at least 100 MUSD to keep gas fees < 0.01% of transaction.
+
+## Viewing Transaction History
+
+Track all your deposits and withdrawals:
+
+### In KhipuVault Dashboard
+
+Navigate to **"My Pools"** → **"Transaction History"**:
+
+```
+Date          Action      Amount        Balance    Tx Hash
+2026-01-15    Deposit     1,000 MUSD    1,000      0xabc...
+2026-01-22    Deposit     100 MUSD      1,100      0xdef...
+2026-02-01    Yield       18 MUSD       1,118      Auto
+2026-02-05    Withdraw    200 MUSD      918        0x123...
+```
+
+**Export options:**
+- CSV download (for accounting)
+- PDF report (for taxes)
+- JSON (for developers)
+
+### On Blockchain Explorer
+
+For full transparency, view on-chain:
+
+1. Go to [Mezo Block Explorer](https://explorer.test.mezo.org)
+2. Paste your pool address: `0x7890...def1`
+3. Click **"Transactions"** tab
+
+You'll see every interaction:
+- Token transfers (deposits/withdrawals)
+- Contract calls (createPool, deposit, withdraw)
+- Event emissions (Deposited, Withdrawn, YieldClaimed)
+- Gas paid for each transaction
+
+**Example transaction:**
+```
+Tx Hash: 0xabc123...
+Block: 1234567
+From: YOUR_WALLET
+To: POOL_CONTRACT
+Value: 1,000 MUSD
+Function: deposit(uint256)
+Gas: 0.0001 BTC
+Status: ✅ Success
+```
+
+## Emergency Withdrawals
+
+If something goes wrong or you need urgent access:
+
+### Standard Emergency Withdrawal
+
+If the platform is down but blockchain is running:
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Go to Block Explorer
+
+Visit [Mezo Block Explorer](https://explorer.test.mezo.org)
+
+### Find Your Pool Contract
+
+Paste your pool address in search.
+
+### Navigate to "Write Contract"
+
+Click **"Contract"** tab → **"Write Contract"** → **"Connect Wallet"**
+
+### Call withdraw() Function
+
+```
+Function: withdraw(uint256 amount)
+Parameters: 1150000000000000000000 (1,150 MUSD in wei)
+```
+
+Click **"Write"** and confirm in MetaMask.
+
+</div>
+
+<Callout type="warning">
+**Use this only if:**
+- KhipuVault website is inaccessible
+- You need urgent withdrawal during downtime
+- Standard withdrawal isn't working
+
+This is a backup method. The UI is much easier!
+</Callout>
+
+### Smart Contract Paused
+
+If contracts are paused (emergency only):
+
+```
+function emergencyWithdraw() external onlyOwner
+```
+
+This bypasses normal withdrawal logic and returns all your funds. Only callable by you (the pool owner).
+
+**When would this happen?**
+- Critical bug discovered
+- Network attack detected
+- Upgrade in progress
+
+You'll be notified via email/Discord if this ever occurs.
+
+## Common Issues
+
+### "Insufficient MUSD Balance"
+
+**Error:** Can't deposit because you don't have enough MUSD
+
+**Solution:**
+1. Check your MetaMask MUSD balance
+2. Get more MUSD from [faucet](https://faucet.test.mezo.org)
+3. Or deposit a smaller amount
+
+### "Insufficient BTC for Gas"
+
+**Error:** Not enough BTC to pay gas fees
+
+**Solution:**
+1. Get BTC from [Mezo Faucet](https://faucet.test.mezo.org)
+2. You need at least 0.0005 BTC for multiple transactions
+3. 0.001 BTC is recommended for comfort
+
+### "Allowance Exceeded"
+
+**Error:** Trying to deposit more than approved amount
+
+**Solution:**
+1. This shouldn't happen with "unlimited" approval
+2. If it does, revoke approval in MetaMask
+3. Re-approve when depositing
+
+**How to revoke:**
+- MetaMask → Assets → MUSD → "Revoke all"
+- Next deposit will request approval again
+
+### Transaction Pending Forever
+
+**Issue:** Transaction stuck for greater than 5 minutes
+
+**Solution:**
+1. Check [Mezo Explorer](https://explorer.test.mezo.org) with your tx hash
+2. If "pending", it's stuck in mempool
+3. Try speeding up (MetaMask → Activity → Speed Up)
+4. Or wait - it will eventually confirm or fail
+
+### Withdrawal Not Received
+
+**Issue:** Withdrawal confirmed but MUSD not in wallet
+
+**Solution:**
+1. Check MUSD is added to MetaMask (custom token)
+2. Verify transaction on block explorer
+3. Refresh MetaMask (close and reopen)
+4. Check correct network (Mezo Testnet)
+5. If still missing after 10 minutes, contact support with tx hash
+
+## Best Practices
+
+<Callout type="success" title="Deposit & Withdrawal Tips">
+**Deposits:**
+- ✅ Start with small amount (100-500 MUSD) to test
+- ✅ Set up regular deposits (DCA strategy)
+- ✅ Deposit during off-peak hours (lower gas)
+- ✅ Keep some MUSD in wallet for emergencies
+
+**Withdrawals:**
+- ✅ Withdraw yields first (keep principal compounding)
+- ✅ Plan withdrawals ahead (avoid panic selling)
+- ✅ Minimize withdrawal frequency (save on gas)
+- ✅ Always verify recipient address (your wallet)
+
+**General:**
+- ✅ Keep transaction receipts for taxes
+- ✅ Monitor your balance regularly
+- ✅ Set price alerts (if MUSD depegs)
+- ✅ Diversify across multiple pools if balance > $10k
+</Callout>
+
+## Next Steps
+
+Now that you know how to manage funds:
+
+<Cards>
+  <Card
+    title="Understanding Yields"
+    href="/docs/products/individual-savings/yields-rewards"
+    description="Learn how your earnings are calculated"
+  />
+  <Card
+    title="Savings Strategies"
+    href="/docs/products/individual-savings/strategies"
+    description="Optimize your approach for maximum returns"
+  />
+  <Card
+    title="FAQ"
+    href="/docs/products/individual-savings/faq"
+    description="Common questions answered"
+  />
+</Cards>
+
+---
+
+**Questions about deposits or withdrawals?** Ask in [Discord](https://discord.gg/khipuvault)!

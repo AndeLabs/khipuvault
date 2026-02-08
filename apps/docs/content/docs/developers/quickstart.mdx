@@ -1,0 +1,453 @@
+---
+title: Quickstart Guide
+description: Integrate KhipuVault into your app in 5 minutes. Make your first deposit using Wagmi and Viem.
+---
+
+# Quickstart Guide
+
+Get your first KhipuVault integration running in under 5 minutes. This guide shows you how to read pool data and make a deposit using React, Wagmi, and Viem.
+
+## Prerequisites
+
+Before you start:
+
+- Node.js 18+ installed
+- Basic understanding of React and TypeScript
+- MetaMask or another Web3 wallet
+- MUSD tokens on Mezo testnet ([Get MUSD →](/docs/getting-started/get-musd))
+
+## Step 1: Install Dependencies
+
+```bash
+npm install wagmi viem @tanstack/react-query
+```
+
+Or with pnpm:
+
+```bash
+pnpm add wagmi viem @tanstack/react-query
+```
+
+## Step 2: Configure Mezo Testnet
+
+Create a `chains.ts` file:
+
+```typescript
+import { defineChain } from 'viem'
+
+export const mezoTestnet = defineChain({
+  id: 31611,
+  name: 'Mezo Testnet',
+  network: 'mezo-testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Bitcoin',
+    symbol: 'BTC',
+  },
+  rpcUrls: {
+    default: {
+      http: ['https://rpc.test.mezo.org'],
+    },
+    public: {
+      http: ['https://rpc.test.mezo.org'],
+    },
+  },
+  blockExplorers: {
+    default: {
+      name: 'Mezo Explorer',
+      url: 'https://explorer.test.mezo.org'
+    },
+  },
+  testnet: true,
+})
+```
+
+## Step 3: Set Up Wagmi Config
+
+Create a `wagmi.config.ts` file:
+
+```typescript
+import { http, createConfig } from 'wagmi'
+import { mezoTestnet } from './chains'
+import { injected, metaMask } from 'wagmi/connectors'
+
+export const config = createConfig({
+  chains: [mezoTestnet],
+  connectors: [
+    injected(),
+    metaMask(),
+  ],
+  transports: {
+    [mezoTestnet.id]: http(),
+  },
+})
+```
+
+## Step 4: Wrap Your App with Providers
+
+Update your `App.tsx` or `layout.tsx`:
+
+```typescript
+import { WagmiProvider } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { config } from './wagmi.config'
+
+const queryClient = new QueryClient()
+
+function App() {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        {/* Your app components */}
+        <YourApp />
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+## Step 5: Add Contract Constants
+
+Create a `contracts.ts` file:
+
+```typescript
+export const INDIVIDUAL_POOL_ADDRESS = '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as const
+export const MUSD_ADDRESS = '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503' as const
+
+// Minimal ABI - just the functions we need
+export const INDIVIDUAL_POOL_ABI = [
+  {
+    name: 'deposit',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [{ name: 'amount', type: 'uint256' }],
+    outputs: [],
+  },
+  {
+    name: 'balanceOf',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'account', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+  {
+    name: 'totalDeposits',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+] as const
+
+export const MUSD_ABI = [
+  {
+    name: 'approve',
+    type: 'function',
+    stateMutability: 'nonpayable',
+    inputs: [
+      { name: 'spender', type: 'address' },
+      { name: 'amount', type: 'uint256' }
+    ],
+    outputs: [{ name: '', type: 'bool' }],
+  },
+  {
+    name: 'balanceOf',
+    type: 'function',
+    stateMutability: 'view',
+    inputs: [{ name: 'account', type: 'address' }],
+    outputs: [{ name: '', type: 'uint256' }],
+  },
+] as const
+```
+
+## Step 6: Read Pool Data
+
+Create a component to display pool information:
+
+```typescript
+import { useReadContract, useAccount } from 'wagmi'
+import { formatUnits } from 'viem'
+import { INDIVIDUAL_POOL_ADDRESS, INDIVIDUAL_POOL_ABI } from './contracts'
+
+export function PoolStats() {
+  const { address } = useAccount()
+
+  // Read total deposits
+  const { data: totalDeposits } = useReadContract({
+    address: INDIVIDUAL_POOL_ADDRESS,
+    abi: INDIVIDUAL_POOL_ABI,
+    functionName: 'totalDeposits',
+  })
+
+  // Read user balance
+  const { data: userBalance } = useReadContract({
+    address: INDIVIDUAL_POOL_ADDRESS,
+    abi: INDIVIDUAL_POOL_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+  })
+
+  return (
+    <div>
+      <h2>Pool Statistics</h2>
+      <p>Total Deposits: {totalDeposits ? formatUnits(totalDeposits, 18) : '0'} MUSD</p>
+      <p>Your Balance: {userBalance ? formatUnits(userBalance, 18) : '0'} MUSD</p>
+    </div>
+  )
+}
+```
+
+## Step 7: Make Your First Deposit
+
+Create a deposit component:
+
+```typescript
+import { useState } from 'react'
+import { useAccount, useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { parseUnits } from 'viem'
+import {
+  INDIVIDUAL_POOL_ADDRESS,
+  INDIVIDUAL_POOL_ABI,
+  MUSD_ADDRESS,
+  MUSD_ABI
+} from './contracts'
+
+export function DepositForm() {
+  const [amount, setAmount] = useState('')
+  const { address } = useAccount()
+  const { writeContract, data: hash, isPending } = useWriteContract()
+
+  // Wait for transaction confirmation
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({
+    hash,
+  })
+
+  const handleApprove = async () => {
+    if (!amount) return
+
+    // First, approve MUSD spending
+    writeContract({
+      address: MUSD_ADDRESS,
+      abi: MUSD_ABI,
+      functionName: 'approve',
+      args: [INDIVIDUAL_POOL_ADDRESS, parseUnits(amount, 18)],
+    })
+  }
+
+  const handleDeposit = async () => {
+    if (!amount) return
+
+    // Then deposit
+    writeContract({
+      address: INDIVIDUAL_POOL_ADDRESS,
+      abi: INDIVIDUAL_POOL_ABI,
+      functionName: 'deposit',
+      args: [parseUnits(amount, 18)],
+    })
+  }
+
+  return (
+    <div>
+      <h2>Deposit MUSD</h2>
+
+      <input
+        type="number"
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+        placeholder="Amount (MUSD)"
+      />
+
+      <button
+        onClick={handleApprove}
+        disabled={!address || isPending || !amount}
+      >
+        1. Approve
+      </button>
+
+      <button
+        onClick={handleDeposit}
+        disabled={!address || isPending || !amount}
+      >
+        2. Deposit
+      </button>
+
+      {isPending && <p>Check your wallet...</p>}
+      {isConfirming && <p>Waiting for confirmation...</p>}
+      {isSuccess && <p>Deposit successful! 🎉</p>}
+    </div>
+  )
+}
+```
+
+## Step 8: Put It All Together
+
+Final `App.tsx`:
+
+```typescript
+import { WagmiProvider } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useConnect, useAccount, useDisconnect } from 'wagmi'
+import { config } from './wagmi.config'
+import { PoolStats } from './PoolStats'
+import { DepositForm } from './DepositForm'
+
+const queryClient = new QueryClient()
+
+function ConnectWallet() {
+  const { connectors, connect } = useConnect()
+  const { address, isConnected } = useAccount()
+  const { disconnect } = useDisconnect()
+
+  if (isConnected) {
+    return (
+      <div>
+        <p>Connected: {address}</p>
+        <button onClick={() => disconnect()}>Disconnect</button>
+      </div>
+    )
+  }
+
+  return (
+    <div>
+      {connectors.map((connector) => (
+        <button key={connector.id} onClick={() => connect({ connector })}>
+          Connect {connector.name}
+        </button>
+      ))}
+    </div>
+  )
+}
+
+function KhipuVaultApp() {
+  const { isConnected } = useAccount()
+
+  return (
+    <div>
+      <h1>KhipuVault Quickstart</h1>
+      <ConnectWallet />
+
+      {isConnected && (
+        <>
+          <PoolStats />
+          <DepositForm />
+        </>
+      )}
+    </div>
+  )
+}
+
+export default function App() {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <KhipuVaultApp />
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+## Run Your App
+
+```bash
+npm run dev
+# or
+pnpm dev
+```
+
+Visit `http://localhost:3000`, connect your wallet, and make your first deposit!
+
+## What's Next?
+
+<Cards>
+  <Card
+    title="Complete ABIs"
+    href="/docs/developers/smart-contracts/individual-pool"
+    description="Full contract interfaces and methods"
+  />
+  <Card
+    title="More Examples"
+    href="/docs/developers/examples"
+    description="Withdrawals, pool creation, yield tracking"
+  />
+  <Card
+    title="API Integration"
+    href="/docs/developers/api-reference/rest-api"
+    description="Backend API for analytics and user data"
+  />
+  <Card
+    title="Event Indexing"
+    href="/docs/developers/integration/indexing-events"
+    description="Listen to blockchain events in real-time"
+  />
+</Cards>
+
+## Common Issues
+
+### Transaction Fails: "Insufficient Allowance"
+
+You need to approve MUSD spending before depositing. Always call `approve()` on the MUSD contract first.
+
+```typescript
+// Step 1: Approve
+await writeContract({
+  address: MUSD_ADDRESS,
+  abi: MUSD_ABI,
+  functionName: 'approve',
+  args: [INDIVIDUAL_POOL_ADDRESS, parseUnits('100', 18)]
+})
+
+// Step 2: Deposit (after approval confirms)
+await writeContract({
+  address: INDIVIDUAL_POOL_ADDRESS,
+  abi: INDIVIDUAL_POOL_ABI,
+  functionName: 'deposit',
+  args: [parseUnits('100', 18)]
+})
+```
+
+### Network Mismatch
+
+Make sure MetaMask is connected to Mezo Testnet (Chain ID 31611). Add it manually:
+
+[Add Mezo Network →](/docs/getting-started/add-mezo-network)
+
+### No MUSD Balance
+
+Get free test tokens from the faucet:
+
+[Get MUSD →](/docs/getting-started/get-musd)
+
+## Full Source Code
+
+Complete working example on GitHub:
+
+[github.com/khipuvault/examples/quickstart](https://github.com/khipuvault/examples)
+
+## Next Steps
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Explore Other Contracts
+
+Learn about CooperativePool, LotteryPool, and more.
+
+[Smart Contracts →](/docs/developers/smart-contracts/cooperative-pool)
+
+### Integrate Backend API
+
+Use our REST API for user profiles, analytics, and notifications.
+
+[API Reference →](/docs/developers/api-reference/rest-api)
+
+### Set Up Event Indexing
+
+Index blockchain events to your database.
+
+[Indexing Guide →](/docs/developers/integration/indexing-events)
+
+</div>
+
+---
+
+**Questions?** Join our [Discord](https://discord.gg/khipuvault) #developers channel or email dev@khipuvault.com

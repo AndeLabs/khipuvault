@@ -1,0 +1,496 @@
+---
+title: Creating Your First Pool
+description: Step-by-step guide to create an Individual Savings pool with screenshots, MetaMask transactions, and troubleshooting tips.
+---
+
+# Creating Your First Pool
+
+Create your personal savings pool in under 5 minutes. This guide walks you through every step with detailed explanations.
+
+## Before You Start
+
+Make sure you have:
+
+- ✅ MetaMask installed and connected
+- ✅ Mezo Testnet added to your wallet
+- ✅ At least 10 MUSD in your wallet
+- ✅ Small amount of BTC for gas (~0.0005 BTC)
+
+Not ready? Complete these guides first:
+- [Connect Your Wallet](/docs/getting-started/connect-wallet)
+- [Add Mezo Network](/docs/getting-started/add-mezo-network)
+- [Get MUSD](/docs/getting-started/get-musd)
+
+## Pool Creation Process
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Navigate to Individual Savings
+
+1. Go to [khipuvault.com](https://khipuvault.com)
+2. Click **"Connect Wallet"** (top right)
+3. Select **MetaMask** from the modal
+4. Approve the connection request
+5. Click **"Products"** in navigation
+6. Select **"Individual Savings"**
+
+<Callout type="info">
+First-time visitors will see a welcome modal explaining Individual Savings. Click "Get Started" to proceed.
+</Callout>
+
+### Open Pool Creation Form
+
+On the Individual Savings page:
+
+1. Click the **"Create New Pool"** button (center of screen)
+2. A modal will appear with the pool creation form
+
+You should see:
+- Pool Name field
+- Goal Amount field (optional)
+- Pool Description field (optional)
+- Estimated gas fee display
+- "Create Pool" button
+
+### Fill in Pool Details
+
+**Pool Name** (required)
+- What to enter: A memorable name for your pool
+- Examples: "Emergency Fund", "House Down Payment", "Europe Trip 2026"
+- Max length: 50 characters
+- Can't be changed later (choose wisely!)
+
+```
+Good names: "Bitcoin Savings 2026", "My First Pool", "Retirement Fund"
+Bad names: "Pool", "123", "asdfsadf"
+```
+
+**Goal Amount** (optional)
+- What to enter: Your savings target in MUSD
+- Examples: 1000, 5000, 10000
+- Purpose: Visual progress tracking in dashboard
+- Can be updated later
+
+<Callout type="success">
+**Tip:** Set a specific goal! Users with goals save 34% more on average. Make it SMART (Specific, Measurable, Achievable, Relevant, Time-bound).
+</Callout>
+
+**Pool Description** (optional)
+- What to enter: Why you're saving, motivation, notes
+- Max length: 200 characters
+- Examples: "Saving for a new car by December 2026"
+- Only visible to you (private)
+
+**Example Configuration:**
+```
+Pool Name: "House Down Payment"
+Goal Amount: 50000 MUSD
+Description: "Saving $50k for a house in Miami by June 2027"
+```
+
+### Review Gas Estimate
+
+Before creating, check the estimated gas fee:
+
+```
+Estimated Gas: ~0.0002 BTC (~$0.02 USD)
+```
+
+This covers:
+- Smart contract deployment (your pool instance)
+- Storage on blockchain (name, goal, metadata)
+- Event emission (PoolCreated)
+
+<Callout type="warning">
+Gas fees vary by network congestion. During peak times, fees may be 2-3x higher. If the fee seems too high, wait 10-15 minutes and try again.
+</Callout>
+
+### Click "Create Pool"
+
+Hit the **"Create Pool"** button. MetaMask will pop up with a transaction confirmation.
+
+### Approve in MetaMask (Transaction 1)
+
+MetaMask shows:
+
+```
+Contract Interaction
+To: IndividualPool Contract (0xdfBE...0393)
+Data: createPool(...)
+Estimated Gas: 0.0002 BTC
+```
+
+**What to check:**
+- ✅ Network is "Mezo Testnet"
+- ✅ Gas fee is reasonable (~0.0002 BTC)
+- ✅ Contract address matches: `0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393`
+
+**Click "Confirm"** to proceed.
+
+<Callout type="danger" title="Security Check">
+Never approve transactions to unknown contracts! Always verify the contract address matches the official KhipuVault contracts listed in our [documentation](/docs/developers/smart-contracts).
+</Callout>
+
+### Wait for Confirmation
+
+You'll see a loading state:
+
+```
+Creating your pool...
+Transaction submitted: 0x1234...abcd
+Waiting for confirmation (usually 5-10 seconds)
+```
+
+**What's happening:**
+1. Transaction is broadcast to Mezo network
+2. Validators pick it up and include it in a block
+3. Your pool contract is deployed
+4. PoolCreated event is emitted
+5. Your pool address is registered
+
+**Typical timeline:** 5-15 seconds
+
+<Callout type="info">
+You can check transaction status on [Mezo Block Explorer](https://explorer.test.mezo.org) by pasting your transaction hash.
+</Callout>
+
+### Success Confirmation
+
+When complete, you'll see:
+
+```
+🎉 Pool Created Successfully!
+
+Your Pool Address: 0x7890...def1
+Pool Name: House Down Payment
+Goal: 50,000 MUSD
+Status: Active
+
+[View on Explorer] [Go to Dashboard]
+```
+
+**Save your pool address!** While it's saved automatically in the app, it's good practice to record it.
+
+</div>
+
+<Callout type="success" title="Congratulations!">
+You now own a personal savings pool on the blockchain! Your pool is a smart contract that only you control.
+</Callout>
+
+## What Just Happened?
+
+Let's break down what occurred on-chain:
+
+### Smart Contract Deployment
+
+```solidity
+// A new contract was deployed just for you:
+IndividualPoolInstance deployed at: 0x7890...def1
+
+Constructor called with:
+- owner: YOUR_WALLET_ADDRESS
+- name: "House Down Payment"
+- goalAmount: 50000000000000000000000 (50k MUSD in wei)
+```
+
+### Blockchain Event
+
+```solidity
+event PoolCreated(
+    address indexed owner,
+    address indexed poolAddress,
+    string name,
+    uint256 goalAmount,
+    uint256 timestamp
+);
+```
+
+This event is permanent and can be queried anytime to prove you created this pool.
+
+### Storage Allocated
+
+Your pool contract now stores:
+- Owner address (you)
+- Pool name ("House Down Payment")
+- Goal amount (50,000 MUSD)
+- Creation timestamp
+- Initial balance (0 MUSD)
+
+## Next Steps After Creation
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### View Your Dashboard
+
+Click **"Go to Dashboard"** to see your new pool:
+
+```
+📊 My Pools
+
+House Down Payment
+Created: 2 minutes ago
+Balance: 0 MUSD
+Progress: 0% of 50,000 MUSD goal
+Status: Active (ready for deposits)
+
+[Deposit] [Settings]
+```
+
+### Make Your First Deposit
+
+Ready to fund your pool? You have two options:
+
+**Option A: Immediate Deposit**
+1. Click **"Deposit"** button on your pool
+2. Enter amount (minimum 10 MUSD)
+3. Approve MUSD spending (one-time)
+4. Confirm deposit transaction
+
+[Full deposit guide →](/docs/products/individual-savings/deposits-withdrawals)
+
+**Option B: Wait and Plan**
+1. Set up recurring deposits (optional)
+2. Calculate your DCA strategy
+3. Fund when ready
+
+### Configure Pool Settings (Optional)
+
+Click the gear icon to access settings:
+
+- **Update Goal:** Change your target amount
+- **Edit Description:** Update your motivation
+- **Enable Notifications:** Get alerts for milestones
+- **Privacy Settings:** Show/hide pool on leaderboard
+
+</div>
+
+## Understanding Your Pool Contract
+
+Your pool is now a live smart contract on Mezo blockchain. Here's what you can do with it:
+
+### Owner Privileges
+
+As the owner, you can:
+- ✅ Deposit MUSD anytime
+- ✅ Withdraw funds anytime (principal + yields)
+- ✅ Update pool metadata (name, goal, description)
+- ✅ Emergency withdraw (if paused)
+- ✅ View detailed analytics
+
+**No one else can:**
+- ❌ Deposit to your pool
+- ❌ Withdraw your funds
+- ❌ Modify your settings
+- ❌ Access your balance
+
+### Verifying Your Pool
+
+To verify your pool on-chain:
+
+1. Go to [Mezo Block Explorer](https://explorer.test.mezo.org)
+2. Paste your pool address: `0x7890...def1`
+3. You should see:
+   - Contract creation transaction
+   - Your wallet as deployer
+   - Contract code (verified)
+   - Zero transactions (until first deposit)
+
+### Reading Pool Data
+
+You can query your pool directly:
+
+```typescript
+// Using ethers.js
+const pool = new ethers.Contract(poolAddress, poolABI, provider);
+
+// Get pool info
+const name = await pool.name(); // "House Down Payment"
+const goal = await pool.goalAmount(); // 50000000000000000000000
+const balance = await pool.balanceOf(yourAddress); // 0 (no deposits yet)
+const owner = await pool.owner(); // YOUR_WALLET_ADDRESS
+```
+
+[Developer docs →](/docs/developers/smart-contracts/individual-pool)
+
+## Pool Creation Costs
+
+Here's the full cost breakdown:
+
+| Item | Cost (BTC) | Cost (USD) | When Charged |
+|------|-----------|-----------|--------------|
+| Pool Creation | ~0.0002 | ~$0.02 | One-time (now) |
+| MUSD Approval | ~0.0001 | ~$0.01 | Before first deposit |
+| First Deposit | ~0.0001 | ~$0.01 | When depositing |
+| **Total** | ~0.0004 | ~$0.04 | To get started |
+
+<Callout type="success">
+**Future savings:** After initial setup, deposits cost only ~0.0001 BTC (~$0.01). Much cheaper than bank wire fees ($20-30)!
+</Callout>
+
+## Multiple Pools
+
+Can you create more pools? **Absolutely!**
+
+### Why Have Multiple Pools?
+
+Users often create separate pools for:
+- 🎯 Different goals (emergency fund, vacation, house)
+- 📊 Different strategies (aggressive, conservative)
+- 📅 Different timeframes (short-term, long-term)
+- 🔒 Different risk profiles
+
+**Example Multi-Pool Strategy:**
+```
+Pool 1: "Emergency Fund" (Goal: $10k, conservative)
+Pool 2: "House Down Payment" (Goal: $50k, moderate)
+Pool 3: "Retirement" (Goal: $100k, aggressive)
+```
+
+### Creating Additional Pools
+
+Same process:
+1. Go to Individual Savings page
+2. Click "Create New Pool" again
+3. Fill in details for new pool
+4. Each pool costs ~0.0002 BTC to create
+
+<Callout type="info">
+**Best Practice:** Start with one pool to learn the platform. Add more pools as your strategy evolves. Most users have 2-3 pools.
+</Callout>
+
+## Troubleshooting
+
+### Transaction Failed
+
+**Error:** "Transaction failed"
+
+**Possible causes:**
+1. Insufficient BTC for gas → Get more from [faucet](https://faucet.test.mezo.org)
+2. Wrong network → Switch to Mezo Testnet
+3. Network congestion → Wait 5 minutes and retry
+4. MetaMask nonce issue → Reset account (Settings → Advanced → Reset)
+
+### Pool Name Already Taken
+
+**Error:** "Pool name already exists"
+
+**Solution:** Pool names must be unique per user. Try:
+- Adding a date: "My Pool 2026"
+- Adding a number: "My Pool v2"
+- Being more specific: "Emergency Fund - Q1"
+
+### MetaMask Not Popping Up
+
+**Issue:** Clicked "Create Pool" but no MetaMask window
+
+**Solutions:**
+1. Check for MetaMask icon in browser extensions (click it manually)
+2. Disable pop-up blockers for khipuvault.com
+3. Refresh page and try again
+4. Restart browser
+
+### Gas Estimate Shows "Error"
+
+**Issue:** Can't estimate gas fee
+
+**Solutions:**
+1. Verify you're on Mezo Testnet (not Ethereum)
+2. Check you have some BTC for gas
+3. Try disconnecting and reconnecting wallet
+4. Clear browser cache and reload
+
+### Pool Created But Not Showing
+
+**Issue:** Transaction succeeded but pool not in dashboard
+
+**Solutions:**
+1. Refresh the page (may take 10-20 seconds to index)
+2. Check transaction on [Explorer](https://explorer.test.mezo.org)
+3. Verify you're connected with the same wallet that created it
+4. Clear browser cache
+
+<Callout type="warning">
+If your pool still doesn't show after 5 minutes but the transaction succeeded, contact support with your transaction hash.
+</Callout>
+
+## Advanced Options
+
+### Setting a Custom Goal Strategy
+
+Instead of a single goal, some users track multiple metrics:
+
+**Option A: Percentage-Based**
+- Goal: Grow balance by 20% each quarter
+- Requires manual tracking (calculate externally)
+
+**Option B: Time-Based**
+- Goal: Save $500/month for 24 months = $12k total
+- Set goal to 12,000 MUSD
+
+**Option C: Yield-Based**
+- Goal: Earn $1,000 in yields (not principal)
+- Track yields separately in dashboard
+
+### Naming Conventions for Organization
+
+If you plan to have many pools:
+
+```
+Format: [Category] - [Purpose] - [Timeline]
+
+Examples:
+- "Emergency - Medical - 2026"
+- "Savings - House - 5yr"
+- "Investment - Crypto - Longterm"
+```
+
+Benefits:
+- Easy sorting
+- Clear purpose
+- Better tracking
+
+## Best Practices
+
+<Callout type="success" title="Pool Creation Tips">
+✅ **DO:**
+- Choose a meaningful, memorable name
+- Set a realistic goal (achievable in 6-24 months)
+- Write a description to stay motivated
+- Verify gas fees before confirming
+- Save your pool address
+
+❌ **DON'T:**
+- Use generic names ("Pool 1", "Test")
+- Set impossibly high goals (demoralizing)
+- Skip the description (helps with discipline)
+- Create pools you won't use (costs gas)
+- Share pool address publicly (privacy)
+</Callout>
+
+## What's Next?
+
+You've successfully created your pool! Now it's time to fund it and start earning:
+
+<Cards>
+  <Card
+    title="Make Your First Deposit"
+    href="/docs/products/individual-savings/deposits-withdrawals"
+    description="Fund your pool and start earning yields"
+  />
+  <Card
+    title="Understanding Yields"
+    href="/docs/products/individual-savings/yields-rewards"
+    description="Learn how your earnings are calculated"
+  />
+  <Card
+    title="Best Strategies"
+    href="/docs/products/individual-savings/strategies"
+    description="Optimize your savings approach"
+  />
+</Cards>
+
+---
+
+**Pool created successfully?** Share your success in [Discord](https://discord.gg/khipuvault) and help others!
+
+**Questions?** Check the [FAQ](/docs/products/individual-savings/faq) or ask the community.

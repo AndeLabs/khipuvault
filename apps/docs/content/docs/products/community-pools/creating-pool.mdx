@@ -1,0 +1,618 @@
+---
+title: Creating a Community Pool
+description: Step-by-step guide to create and configure your own community savings pool on KhipuVault.
+---
+
+# Creating a Community Pool
+
+Learn how to create a community pool, configure governance parameters, invite members, and launch your collective savings journey.
+
+## Before You Start
+
+### Prerequisites
+
+Make sure you have:
+
+- ✅ MetaMask installed and connected
+- ✅ Mezo Testnet added to your wallet
+- ✅ Minimum 50 MUSD for initial deposit
+- ✅ Small amount of BTC for gas fees (~0.0003 BTC)
+- ✅ A community ready to join (at least 3-5 members)
+
+Not ready? Go back to:
+- [Connect Wallet](/docs/getting-started/connect-wallet)
+- [Add Mezo Network](/docs/getting-started/add-mezo-network)
+- [Get MUSD](/docs/getting-started/get-musd)
+
+### Planning Your Pool
+
+Before creating, consider:
+
+1. **Who are your members?**
+   - Family, church, neighborhood, sports team, etc.
+   - Do they know each other?
+   - What's the trust level?
+
+2. **What's the purpose?**
+   - Emergency fund
+   - Shared project (building, equipment)
+   - Collective investment
+   - Community development
+
+3. **How will it be governed?**
+   - Democratic (everyone equal)
+   - Weighted (by contribution)
+   - Who makes decisions?
+
+4. **What are the rules?**
+   - Minimum deposit
+   - Withdrawal limits
+   - Member requirements
+   - Voting thresholds
+
+## Step-by-Step Pool Creation
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### Navigate to Community Pools
+
+1. Visit [https://khipuvault.com](https://khipuvault.com)
+2. Connect your wallet (top right)
+3. Go to **Products** → **Community Pools**
+4. Click **"Create New Pool"**
+
+### Choose Pool Type
+
+Select the pool visibility:
+
+**Open Pool**
+- Anyone can join
+- Listed publicly on platform
+- Good for growing communities
+- Example: Neighborhood association
+
+**Closed Pool**
+- Invite-only membership
+- Not listed publicly
+- Ideal for families/small groups
+- Example: Extended family fund
+
+**Hybrid Pool**
+- Public but requires approval
+- Join requests reviewed by admin
+- Balance between growth and control
+- Example: Church congregation
+
+<Callout type="info">
+**Recommendation**: Start with **Closed** or **Hybrid** for better control. You can switch to Open later via governance vote.
+</Callout>
+
+### Configure Basic Settings
+
+Fill in the pool details:
+
+**Pool Name** (required)
+```
+Example: "Villa Esperanza Neighborhood Fund"
+```
+- Keep it descriptive
+- Include location or group name
+- Max 50 characters
+
+**Description** (required)
+```
+Example: "Emergency savings fund for Villa Esperanza neighborhood families.
+We pool resources to help members during emergencies and fund community projects."
+```
+- Explain the purpose
+- Mention member requirements
+- 200-500 characters
+
+**Pool Image** (optional)
+- Upload logo or image
+- Helps with discovery
+- Max 2MB, JPG/PNG
+
+**Category** (required)
+- Neighborhood Association
+- Religious Organization
+- Sports Team
+- Family Fund
+- Professional Network
+- Study Group
+- Other
+
+### Set Membership Rules
+
+Configure who can join and how:
+
+**Minimum Deposit**
+```
+Recommended: 50-100 MUSD
+```
+- Lower = easier to join
+- Higher = more commitment
+- Must be ≥ 50 MUSD
+
+**Maximum Members** (optional)
+```
+Recommended: 10-50 for small groups, 50-200 for larger
+```
+- Leave blank for unlimited
+- Helps manage governance
+- Can be changed later
+
+**Geographic Restriction** (optional)
+- Limit to specific country/region
+- Useful for local communities
+- Uses IP verification (not foolproof)
+
+**Verification Requirements** (Hybrid/Closed only)
+- Email verification
+- Social media account
+- ID verification (manual)
+- Referral from existing member
+
+### Configure Governance
+
+Set how decisions are made:
+
+**Voting Type**
+
+<Cards>
+  <Card
+    title="Democratic"
+    description="One person, one vote - all members equal"
+  />
+  <Card
+    title="Weighted"
+    description="Vote power based on deposit amount"
+  />
+</Cards>
+
+**Recommended**: Democratic for communities, Weighted for investment clubs
+
+**Voting Period**
+```
+Recommended: 3-7 days
+```
+- Time members have to vote
+- Too short = low participation
+- Too long = slow decisions
+
+**Quorum Percentage**
+```
+Recommended: 51% for democratic, 30% for weighted
+```
+- Minimum participation required
+- Higher = more consensus needed
+- Lower = faster decisions
+
+**Approval Threshold**
+```
+Recommended: 60% for major decisions, 51% for minor
+```
+- Percentage of "Yes" votes to pass
+- 51% = simple majority
+- 60%+ = supermajority
+
+**Proposal Types Enabled**
+
+Select which proposals members can create:
+- ✅ Add/remove members
+- ✅ Withdraw pool funds
+- ✅ Change pool parameters
+- ✅ Change yield strategy
+- ✅ Distribute accumulated yields
+
+### Set Withdrawal Rules
+
+Configure how members can withdraw:
+
+**Individual Withdrawal Limit** (without vote)
+```
+Recommended: 10% of member's balance
+```
+- Instant withdrawals up to this limit
+- Larger withdrawals require proposal
+- Prevents sudden liquidity drain
+
+**Pool Withdrawal Limit** (total per day)
+```
+Recommended: 20% of total pool
+```
+- Max total withdrawals per 24 hours
+- Protects pool stability
+- Resets daily
+
+**Withdrawal Cooldown** (optional)
+```
+Recommended: 0-7 days
+```
+- Waiting period after deposit before withdrawal
+- Prevents pump-and-dump behavior
+- 0 = instant access
+
+**Emergency Withdrawal**
+- Allow members to force-exit
+- Requires 7-day notice period
+- Withdraws proportional share + yields
+
+### Set Fee Parameters
+
+Configure how fees are handled:
+
+**Platform Fee** (fixed)
+```
+10% of yields
+```
+- Standard KhipuVault fee
+- Deducted from gross yields
+- You keep 90%
+
+**Pool Admin Fee** (optional)
+```
+Recommended: 0-2% of yields
+```
+- Additional fee for pool management
+- Goes to pool treasury
+- Requires governance vote to use
+
+**Gas Fee Coverage** (optional)
+- Pool pays member gas fees
+- Useful for communities with less crypto experience
+- Covered from pool yields
+
+### Review & Create
+
+Review all settings:
+
+```
+Pool Name: Villa Esperanza Neighborhood Fund
+Type: Hybrid (Public with Approval)
+Minimum Deposit: 50 MUSD
+Voting: Democratic, 3-day period, 51% quorum
+Withdrawal Limit: 10% instant, 20% daily cap
+```
+
+Click **"Create Pool"** to proceed.
+
+### Approve Transactions
+
+MetaMask will prompt you for transactions:
+
+**Transaction 1: Approve MUSD**
+- Allows contract to access your MUSD
+- One-time approval
+- Gas: ~0.00005 BTC
+
+**Transaction 2: Deploy Pool Contract**
+- Creates your pool smart contract
+- Highest gas cost
+- Gas: ~0.0003 BTC
+
+**Transaction 3: Initial Deposit**
+- Your first deposit to the pool
+- Activates yield generation
+- Gas: ~0.0001 BTC
+
+<Callout type="warning">
+**Wait for all transactions** to complete before navigating away. This usually takes 15-30 seconds total.
+</Callout>
+
+### Confirmation
+
+Success! Your pool is created. You'll see:
+
+```
+✅ Pool Created Successfully!
+
+Pool Address: 0x1234...5678
+Pool ID: #42
+Initial Deposit: 100 MUSD
+You are now: Admin & Member
+```
+
+</div>
+
+## Post-Creation Setup
+
+### Customize Your Pool
+
+After creation, enhance your pool:
+
+**1. Add Detailed Information**
+- Upload better images
+- Write comprehensive guidelines
+- Add FAQs for potential members
+- List specific use cases
+
+**2. Set Up Communication**
+- Link Discord/Telegram channel
+- Share email for inquiries
+- Set up notification preferences
+
+**3. Configure Advanced Settings**
+- Set up multi-sig admin (optional)
+- Enable specific proposal types
+- Adjust withdrawal limits
+- Fine-tune voting parameters
+
+### Invite Your Members
+
+**For Closed Pools:**
+
+1. Go to **Pool Management** → **Members**
+2. Click **"Invite Members"**
+3. Enter email addresses or wallet addresses
+4. Send invitations
+
+Members will receive:
+- Email with pool link
+- Pool details and requirements
+- Steps to join
+
+**For Hybrid Pools:**
+
+1. Share your pool link:
+```
+https://khipuvault.com/pools/42
+```
+
+2. Members can:
+- View pool details
+- Request to join
+- You review and approve
+
+**For Open Pools:**
+
+1. Pool is automatically listed in:
+- Community Pools directory
+- Search results
+- Category pages
+
+2. Members join directly by depositing minimum
+
+### Pool Dashboard
+
+Your admin dashboard shows:
+
+```
+📊 Pool Overview
+├─ Total Members: 1 (you)
+├─ Total Deposited: 100 MUSD
+├─ Total Yields: 0 MUSD (just started)
+├─ Pool Status: Active
+└─ Days Active: 0
+
+👥 Member Management
+├─ Active Members: 1
+├─ Pending Requests: 0
+├─ Invite Members: [Button]
+└─ View All: [Link]
+
+🗳️ Governance
+├─ Active Proposals: 0
+├─ Create Proposal: [Button]
+└─ Voting History: [Link]
+
+💰 Financial
+├─ Available to Withdraw: 100 MUSD
+├─ Pending Withdrawals: 0 MUSD
+├─ Pool Treasury: 0 MUSD
+└─ Today's Yield: +0.02 MUSD
+```
+
+## Pool Configuration Examples
+
+### Example 1: Church Building Fund
+
+```yaml
+Name: "Nueva Vida Church Building Fund"
+Type: Hybrid
+Category: Religious Organization
+
+Membership:
+  Minimum Deposit: 50 MUSD
+  Max Members: 200
+  Verification: Email + Manual approval
+
+Governance:
+  Voting Type: Democratic
+  Voting Period: 5 days
+  Quorum: 40%
+  Approval: 60%
+
+Withdrawals:
+  Individual Limit: 5% (strict)
+  Pool Daily Limit: 10%
+  Cooldown: 7 days
+
+Purpose: Save for new chapel construction over 18 months
+```
+
+### Example 2: Neighborhood Emergency Fund
+
+```yaml
+Name: "Villa Esperanza Emergency Fund"
+Type: Open
+Category: Neighborhood Association
+
+Membership:
+  Minimum Deposit: 100 MUSD
+  Max Members: 50
+  Verification: Address verification
+
+Governance:
+  Voting Type: Democratic
+  Voting Period: 3 days
+  Quorum: 51%
+  Approval: 60%
+
+Withdrawals:
+  Individual Limit: 10%
+  Pool Daily Limit: 25%
+  Cooldown: 0 days (emergency access)
+
+Purpose: Quick-access fund for member emergencies
+```
+
+### Example 3: Investment Club
+
+```yaml
+Name: "Crypto Investors Club - Peru"
+Type: Closed
+Category: Professional Network
+
+Membership:
+  Minimum Deposit: 1000 MUSD
+  Max Members: 20
+  Verification: Invite-only + KYC
+
+Governance:
+  Voting Type: Weighted by contribution
+  Voting Period: 7 days
+  Quorum: 30%
+  Approval: 51%
+
+Withdrawals:
+  Individual Limit: 15%
+  Pool Daily Limit: 30%
+  Cooldown: 14 days
+
+Purpose: Collective crypto investment with strategy voting
+```
+
+### Example 4: Extended Family Savings
+
+```yaml
+Name: "Rodriguez Family Fund"
+Type: Closed
+Category: Family Fund
+
+Membership:
+  Minimum Deposit: 50 MUSD
+  Max Members: 25 (family only)
+  Verification: Family relation proof
+
+Governance:
+  Voting Type: Democratic
+  Voting Period: 3 days
+  Quorum: 60% (high for family consensus)
+  Approval: 70%
+
+Withdrawals:
+  Individual Limit: 20% (flexible)
+  Pool Daily Limit: 40%
+  Cooldown: 0 days
+
+Purpose: Multi-generational savings for emergencies and celebrations
+```
+
+## Best Practices
+
+### Do's ✅
+
+- **Start small**: Begin with close, trusted members
+- **Clear purpose**: Define specific goals
+- **Written rules**: Document expectations clearly
+- **Regular communication**: Keep members informed
+- **Test governance**: Create practice proposals
+- **Monitor yields**: Check performance weekly
+- **Member onboarding**: Help new members understand
+
+### Don'ts ❌
+
+- **Don't over-complicate**: Keep rules simple at first
+- **Don't skip verification**: Verify members for closed pools
+- **Don't ignore proposals**: Vote and encourage participation
+- **Don't set unrealistic minimums**: Make it accessible
+- **Don't forget communication**: Silent pools fail
+- **Don't misuse admin rights**: Govern democratically
+
+## Common Issues & Solutions
+
+### Issue: No One Joining
+
+**Solutions:**
+- Lower minimum deposit
+- Improve pool description
+- Share in relevant communities
+- Offer initial matching contribution
+- Switch from Closed to Hybrid
+
+### Issue: Low Voting Participation
+
+**Solutions:**
+- Shorten voting period (7d → 3d)
+- Lower quorum requirement
+- Send voting reminders
+- Explain importance of proposals
+- Reward voters (from pool treasury)
+
+### Issue: Withdrawal Conflicts
+
+**Solutions:**
+- Clarify withdrawal rules upfront
+- Set up emergency withdrawal policy
+- Create separate categories (emergency vs planned)
+- Increase individual limits
+- Educate on pool stability
+
+### Issue: Member Disputes
+
+**Solutions:**
+- Establish clear dispute resolution process
+- Designate neutral mediators
+- Use governance votes for decisions
+- Document everything on-chain
+- Set up member code of conduct
+
+## Cost Breakdown
+
+Creating a pool costs:
+
+| Item | Cost | When |
+|------|------|------|
+| MUSD Approval | ~0.00005 BTC | One-time |
+| Pool Deployment | ~0.0003 BTC | One-time |
+| Initial Deposit | 50+ MUSD | One-time |
+| First Deposit Gas | ~0.0001 BTC | One-time |
+| **Total** | **~0.00045 BTC + 50 MUSD** | **~$0.045 + deposit** |
+
+<Callout type="info">
+**Ongoing costs**: None! Members pay their own gas for deposits/withdrawals. Platform fee (10% of yields) is automatic.
+</Callout>
+
+## Next Steps
+
+After creating your pool:
+
+<Cards>
+  <Card
+    title="Invite Members"
+    href="/docs/products/community-pools/pool-management#inviting-members"
+    description="Grow your community"
+  />
+  <Card
+    title="Set Up Governance"
+    href="/docs/products/community-pools/governance"
+    description="Create your first proposal"
+  />
+  <Card
+    title="Monitor Performance"
+    href="/docs/products/community-pools/pool-management#monitoring"
+    description="Track yields and growth"
+  />
+  <Card
+    title="Member Guide"
+    href="/docs/products/community-pools/joining-pool"
+    description="Share with new members"
+  />
+</Cards>
+
+---
+
+**Pool created?** Share it with your community and start saving together! 🚀
+
+**Need help?** Join our [Discord](https://discord.gg/khipuvault) or check the [FAQ](/docs/products/community-pools/faq)

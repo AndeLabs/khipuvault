@@ -1,0 +1,585 @@
+---
+title: Smart Contracts
+description: Learn what smart contracts are, how they work, why they're safe, and how KhipuVault uses them to manage your Bitcoin savings without intermediaries.
+---
+
+# Smart Contracts
+
+Smart contracts are the foundation of KhipuVault. They automatically manage your funds without banks, paperwork, or human intermediaries.
+
+## What is a Smart Contract?
+
+**Simple definition**: A smart contract is a computer program that automatically executes agreements when conditions are met - like a digital vending machine.
+
+**Technical definition**: A smart contract is self-executing code deployed on a blockchain that enforces the terms of an agreement through cryptographic verification and decentralized consensus.
+
+## The Vending Machine Analogy
+
+Smart contracts work like vending machines:
+
+### Vending Machine
+
+```
+1. You insert $2
+2. You press button B3
+3. Machine verifies payment
+4. Machine dispenses chips
+5. Transaction complete
+```
+
+**No human needed** - the machine enforces the rules.
+
+### Smart Contract
+
+```
+1. You deposit 100 MUSD
+2. You call "deposit()" function
+3. Contract verifies balance
+4. Contract issues pool shares
+5. Transaction complete
+```
+
+**No bank needed** - the code enforces the rules.
+
+<Callout type="success" title="Key Insight">
+Smart contracts are **trustless** - you don't need to trust a person or company. You only need to trust the code (which anyone can verify).
+</Callout>
+
+## How Smart Contracts Work
+
+### The Basics
+
+Smart contracts run on **blockchain networks** (like Mezo):
+
+```
+Traditional Agreement:
+User → Signs contract → Bank → Manually processes → Outcome
+       (lawyers, delays, fees)
+
+Smart Contract:
+User → Calls function → Blockchain → Auto-executes → Outcome
+       (instant, transparent, cheap)
+```
+
+### Example: KhipuVault Deposit
+
+When you deposit to KhipuVault:
+
+```solidity
+// Simplified smart contract code
+function deposit(uint256 amount) public {
+    // 1. Verify user has enough MUSD
+    require(musd.balanceOf(msg.sender) >= amount, "Insufficient balance");
+
+    // 2. Transfer MUSD from user to contract
+    musd.transferFrom(msg.sender, address(this), amount);
+
+    // 3. Calculate pool shares
+    uint256 shares = amount * exchangeRate;
+
+    // 4. Mint shares to user
+    poolShares[msg.sender] += shares;
+
+    // 5. Emit event (transparent record)
+    emit Deposit(msg.sender, amount, shares);
+}
+```
+
+**What happens**:
+1. You call `deposit(100 MUSD)`
+2. Contract verifies you have 100 MUSD
+3. Contract transfers MUSD to itself
+4. Contract gives you pool shares (like stock certificates)
+5. Transaction recorded on blockchain forever
+
+**No human involved** - all automatic, instant, transparent.
+
+## Why Smart Contracts Are Safe
+
+### 1. Immutable (Can't Be Changed)
+
+Once deployed, smart contract code **cannot be altered**:
+
+**Traditional Bank**:
+- Bank can change terms
+- Bank can freeze accounts
+- Bank can go bankrupt
+- No recourse
+
+**Smart Contract**:
+- Code is permanent
+- Rules can't change mid-agreement
+- Transparent and verifiable
+- Decentralized (no single point of failure)
+
+<Callout type="info">
+**Upgradeable Contracts**: Some contracts use "proxy patterns" for upgrades. KhipuVault uses time-locked, multi-sig upgrades for safety.
+
+[Learn more →](#upgradeable-contracts)
+</Callout>
+
+### 2. Transparent
+
+All smart contract code is **public and auditable**:
+
+```
+Traditional Bank:
+You: "How do you calculate my interest?"
+Bank: "That's proprietary. Trust us."
+
+Smart Contract:
+You: "How do you calculate my yields?"
+Contract: "Here's the exact code. Verify yourself."
+```
+
+**KhipuVault contracts**:
+- Source code on GitHub
+- Verified on block explorer
+- Anyone can audit
+- Security firms have audited
+
+[View source code →](https://github.com/khipuvault/contracts)
+
+### 3. Audited by Experts
+
+KhipuVault contracts are audited by:
+
+- **Aderyn** (automated security analysis)
+- **Slither** (static analysis tool)
+- **Third-party auditors** (human experts)
+- **Community reviews** (open-source)
+
+**What auditors check**:
+- ✅ No backdoors or malicious code
+- ✅ Funds can't be stolen
+- ✅ Math is correct (no overflow/underflow)
+- ✅ Access controls work
+- ✅ Reentrancy protection
+- ✅ Gas optimization
+
+[See audit reports →](/docs/security/audits)
+
+### 4. Battle-Tested Patterns
+
+KhipuVault uses proven smart contract patterns:
+
+- **OpenZeppelin** contracts (industry standard)
+- **ReentrancyGuard** (prevents attacks)
+- **AccessControl** (permissions management)
+- **Pausable** (emergency stop if issues found)
+
+These patterns have secured **billions of dollars** in DeFi.
+
+## Types of Smart Contracts in KhipuVault
+
+KhipuVault uses several types of contracts:
+
+### 1. Pool Contracts
+
+Manage savings pools:
+
+```
+IndividualPool.sol
+├── deposit()        → Add funds
+├── withdraw()       → Remove funds
+├── claimYields()    → Collect earnings
+└── getBalance()     → Check balance
+```
+
+### 2. Token Contracts
+
+Manage MUSD and pool shares:
+
+```
+MUSD.sol (ERC-20 stablecoin)
+├── transfer()       → Send MUSD
+├── approve()        → Allow contract to spend
+└── balanceOf()      → Check balance
+```
+
+### 3. Governance Contracts
+
+For community decision-making:
+
+```
+CommunityPoolGovernance.sol
+├── propose()        → Create proposal
+├── vote()           → Vote on proposal
+├── execute()        → Execute if passed
+└── getVotingPower() → Check your votes
+```
+
+### 4. Yield Aggregator
+
+Manages yield strategies:
+
+```
+YieldAggregator.sol
+├── allocate()       → Move funds to protocols
+├── rebalance()      → Optimize allocations
+├── harvest()        → Collect yields
+└── compound()       → Reinvest earnings
+```
+
+## How to Trust Smart Contracts
+
+You should **always verify** before depositing. Here's how:
+
+### 1. Check the Code
+
+Visit the block explorer and verify:
+
+```
+Mezo Testnet Explorer:
+https://explorer.test.mezo.org/address/0x...
+
+Look for:
+✅ "Contract Source Code Verified" badge
+✅ Green checkmark
+✅ Code matches GitHub
+```
+
+### 2. Read the Audit
+
+Review security audit reports:
+
+```
+Questions to ask:
+- Who audited? (reputable firm?)
+- When? (recent?)
+- What issues found? (high/medium/low)
+- Were issues fixed?
+```
+
+[See KhipuVault audits →](/docs/security/audits)
+
+### 3. Check the Community
+
+Legitimate projects have:
+- ✅ Active GitHub repository
+- ✅ Public team (not anonymous)
+- ✅ Community discussions (Discord, Twitter)
+- ✅ Documentation (like this!)
+- ✅ Bug bounty program
+
+### 4. Start Small
+
+**Best practice**: Test with small amounts first.
+
+```
+1. Deposit 10 MUSD (testnet)
+2. Verify deposit shows in UI
+3. Try withdrawal
+4. Confirm funds returned
+5. Scale up if comfortable
+```
+
+<Callout type="warn" title="Red Flags">
+**Avoid smart contracts that**:
+- Have no audit
+- Use closed-source code
+- Were created by anonymous teams
+- Promise unrealistic yields (greater than 100% APY)
+- Have no test period
+
+If it seems too good to be true, it probably is.
+</Callout>
+
+## Smart Contract Risks
+
+Even audited contracts have risks:
+
+### 1. Code Bugs
+
+**Risk**: Bugs can be exploited (e.g., reentrancy attacks, overflow errors).
+
+**Real examples**:
+- The DAO hack (2016): $60M stolen due to reentrancy bug
+- Parity wallet bug (2017): $300M locked forever
+
+**KhipuVault mitigations**:
+- Multiple audits (Aderyn, Slither, human reviewers)
+- Battle-tested libraries (OpenZeppelin)
+- Extensive testing (unit, integration, fuzzing)
+- Bug bounty program ($10k+ rewards)
+
+### 2. Admin Keys
+
+**Risk**: If admin keys are compromised, attacker could upgrade contracts maliciously.
+
+**KhipuVault mitigations**:
+- Multi-signature wallets (3-of-5 required)
+- Time-locked upgrades (48-hour delay)
+- Transparent governance (proposals on-chain)
+- Community oversight
+
+### 3. Oracle Failures
+
+**Risk**: If price oracles fail or are manipulated, contract logic can break.
+
+**KhipuVault mitigations**:
+- Multiple oracle sources (Chainlink, Band, Pyth)
+- Sanity checks (reject outlier prices)
+- Time-weighted averages (prevent flash loan attacks)
+
+### 4. Economic Exploits
+
+**Risk**: Game theory exploits even if code is perfect.
+
+**Example**: Flash loan attacks to manipulate prices.
+
+**KhipuVault mitigations**:
+- Reentrancy guards
+- Transaction limits (max deposit per transaction)
+- Time delays on large withdrawals
+- Monitoring and alerting
+
+[Full risk disclosure →](/docs/security/risks)
+
+## Upgradeable Contracts
+
+Some KhipuVault contracts are upgradeable for fixing bugs and adding features:
+
+### How It Works
+
+```
+User → Proxy Contract (unchangeable) → Implementation (upgradeable)
+```
+
+**Proxy contract**: Permanent address, just forwards calls
+**Implementation**: Contains logic, can be replaced
+
+### Why Upgradeable?
+
+**Benefits**:
+- Fix critical bugs quickly
+- Add new features
+- Improve gas efficiency
+
+**Risks**:
+- Admins could upgrade maliciously
+
+### KhipuVault's Safety Measures
+
+1. **Time-lock**: 48-hour delay before upgrades execute
+2. **Multi-sig**: Requires 3 of 5 signers to approve
+3. **Transparency**: Upgrade proposals public on-chain
+4. **Community veto**: Users can exit if they disagree
+
+<Callout type="info">
+**You have control**: If you don't like an upgrade proposal, you have 48 hours to withdraw before it takes effect.
+</Callout>
+
+## Interacting with Smart Contracts
+
+### For Users (Non-Technical)
+
+You interact through our web interface:
+
+```
+Your Browser → MetaMask → KhipuVault UI → Smart Contracts
+```
+
+**Steps**:
+1. Click "Deposit" button
+2. MetaMask pops up with transaction details
+3. Review gas fee and amount
+4. Click "Confirm"
+5. Transaction sent to blockchain
+6. Wait ~10 seconds for confirmation
+
+[Try it now →](https://app.khipuvault.com)
+
+### For Developers
+
+Direct contract interaction:
+
+```javascript
+// Using ethers.js
+const contract = new ethers.Contract(
+  INDIVIDUAL_POOL_ADDRESS,
+  IndividualPoolABI,
+  signer
+);
+
+// Deposit 100 MUSD
+await contract.deposit(ethers.parseUnits("100", 18));
+
+// Check balance
+const balance = await contract.balanceOf(address);
+```
+
+[Developer docs →](https://docs.khipuvault.com/developers)
+
+## Gas Fees Explained
+
+**Gas** is the fee to execute smart contract functions:
+
+### What is Gas?
+
+**Simple explanation**: Gas is like postage for blockchain transactions. More complex transactions cost more.
+
+**Technical explanation**: Gas measures computational work. Miners/validators charge gas fees to process transactions.
+
+### Typical Gas Costs (Mezo)
+
+| Action | Gas Cost | USD Equivalent |
+|--------|----------|----------------|
+| Deposit | ~50,000 gas | ~$0.05 |
+| Withdraw | ~70,000 gas | ~$0.07 |
+| Claim yields | ~40,000 gas | ~$0.04 |
+| Approve | ~45,000 gas | ~$0.045 |
+
+**Why so cheap?** Mezo is a Layer-2, so gas is ~100x cheaper than Ethereum.
+
+### Gas Optimization
+
+KhipuVault contracts are optimized for low gas:
+
+- **Batch operations** (claim multiple yields at once)
+- **Efficient storage** (use `uint256` instead of smaller types)
+- **Minimal writes** (reads are free, writes are expensive)
+- **Avoid loops** (loops can be very expensive)
+
+## Real-World Examples
+
+### Example 1: Individual Savings Deposit
+
+```
+User: "I want to deposit 1,000 MUSD"
+
+Smart Contract:
+1. Checks user has 1,000 MUSD ✅
+2. Checks user approved contract to spend ✅
+3. Transfers 1,000 MUSD from user to pool
+4. Calculates shares: 1,000 / 1.05 = 952.38 shares
+5. Mints 952.38 pool shares to user
+6. Emits Deposit event (on-chain log)
+7. Returns success ✅
+
+Blockchain:
+- Transaction hash: 0xabc123...
+- Gas used: 52,341 gas
+- Fee: $0.05
+- Status: Success ✅
+```
+
+### Example 2: Community Pool Voting
+
+```
+User: "I vote YES on proposal #5"
+
+Smart Contract:
+1. Checks user is pool member ✅
+2. Checks user hasn't voted yet ✅
+3. Checks proposal is active ✅
+4. Records vote: YES
+5. Adds user's voting power: 1,000 shares
+6. Updates tally: YES: 5,200 | NO: 3,100
+7. Emits Vote event
+8. Checks if quorum reached (50%)
+9. If yes, queue proposal for execution
+
+Result: Vote recorded transparently ✅
+```
+
+### Example 3: Emergency Pause
+
+```
+Security team: "We found a potential exploit!"
+
+Multi-sig holders:
+1. Propose pause transaction
+2. 3 of 5 signers approve
+3. Contract pauses all deposits/withdrawals
+4. No funds can be moved (safety)
+5. Team fixes bug
+6. Deploy new implementation
+7. Wait 48-hour time-lock
+8. Unpause contract
+
+Result: User funds protected ✅
+```
+
+<Callout type="success">
+**Real example**: In 2021, Compound Finance paused their contracts when a bug was found, preventing $100M+ in losses.
+</Callout>
+
+## FAQ
+
+### Can smart contracts steal my funds?
+
+**Malicious contracts**: Yes
+**Audited contracts (like KhipuVault)**: Extremely unlikely
+
+**Protection**:
+- Only interact with audited contracts
+- Verify code on block explorer
+- Start with small amounts
+
+### What if the smart contract has a bug?
+
+Possible, but mitigated through:
+- Multiple audits
+- Bug bounty program
+- Insurance protocols (coming soon)
+- Gradual rollout (testnet → mainnet)
+
+### Can the government shut down smart contracts?
+
+**No.** Smart contracts run on decentralized blockchains. No single entity can shut them down.
+
+Governments could:
+- Block websites (use IPFS frontends)
+- Arrest developers (code still runs)
+- Regulate fiat on-ramps (crypto-to-crypto unaffected)
+
+But they **cannot** stop the contracts themselves.
+
+### Are smart contracts legal?
+
+**Generally yes**, but regulations vary by jurisdiction. Smart contracts are just code. Using them for legal purposes (savings, DeFi) is allowed in most countries.
+
+**Illegal uses** (money laundering, sanctions evasion) are still illegal.
+
+### How long do smart contracts last?
+
+**Forever** (as long as the blockchain exists). Ethereum contracts from 2015 still run today. Bitcoin contracts could run for decades.
+
+### Can I reverse a smart contract transaction?
+
+**No.** Blockchain transactions are irreversible. Always double-check:
+- Recipient address
+- Amount
+- Function called
+
+Before clicking "Confirm".
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Security"
+    href="/docs/concepts/security"
+    description="How KhipuVault secures your funds"
+  />
+  <Card
+    title="Try It Yourself"
+    href="/docs/getting-started/your-first-deposit"
+    description="Interact with smart contracts hands-on"
+  />
+  <Card
+    title="Yield Generation"
+    href="/docs/concepts/yield-generation"
+    description="How smart contracts generate yields"
+  />
+  <Card
+    title="View Source Code"
+    href="https://github.com/khipuvault/contracts"
+    description="Audit the code yourself"
+  />
+</Cards>
+
+---
+
+**Questions?** Join our [Discord](https://discord.gg/khipuvault) or check the [FAQ](/docs/resources/faq)

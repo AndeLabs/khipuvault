@@ -1,0 +1,540 @@
+---
+title: REST API Reference
+description: Complete REST API documentation for KhipuVault backend - endpoints, request/response formats, and examples.
+---
+
+# REST API Reference
+
+Complete reference for KhipuVault's REST API. Base URL: `https://api.khipuvault.com` (or `http://localhost:3001` for development).
+
+## Base URL
+
+```
+Production: https://api.khipuvault.com
+Testnet:    https://api-testnet.khipuvault.com
+Development: http://localhost:3001
+```
+
+## Authentication
+
+All endpoints except `/auth/*` and `/health` require JWT authentication.
+
+```http
+Authorization: Bearer <your-jwt-token>
+```
+
+[Authentication Guide →](/docs/developers/api-reference/authentication)
+
+## Common Response Format
+
+### Success Response
+
+```json
+{
+  "success": true,
+  "data": {
+    // Response data here
+  }
+}
+```
+
+### Error Response
+
+```json
+{
+  "success": false,
+  "error": "Error message",
+  "details": [
+    {
+      "field": "amount",
+      "message": "Must be a valid number"
+    }
+  ]
+}
+```
+
+## Authentication Endpoints
+
+### POST /auth/nonce
+
+Generate a nonce for SIWE authentication.
+
+**Request:**
+```http
+POST /auth/nonce
+Content-Type: application/json
+
+{
+  "address": "0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb"
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "nonce": "3f8a9c7b2d1e4f6a"
+  }
+}
+```
+
+### POST /auth/verify
+
+Verify SIWE signature and get JWT token.
+
+**Request:**
+```http
+POST /auth/verify
+Content-Type: application/json
+
+{
+  "message": "localhost:3000 wants you to sign in with your Ethereum account:\n0x742d35Cc...",
+  "signature": "0x1234567890abcdef..."
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+    "user": {
+      "id": "cm4xf2k9l0000vu8x3y7z1a2b",
+      "address": "0x742d35cc6634c0532925a3b844bc9e7595f0beb",
+      "createdAt": "2026-02-08T10:00:00Z"
+    }
+  }
+}
+```
+
+### GET /auth/me
+
+Get current authenticated user.
+
+**Headers:**
+```http
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "cm4xf2k9l0000vu8x3y7z1a2b",
+    "address": "0x742d35cc6634c0532925a3b844bc9e7595f0beb",
+    "poolCount": 3,
+    "totalDeposits": "5000000000000000000000",
+    "createdAt": "2026-01-15T08:30:00Z"
+  }
+}
+```
+
+## Pool Endpoints
+
+### GET /pools
+
+List all pools for authenticated user.
+
+**Query Parameters:**
+- `type` (optional): Filter by pool type (`individual`, `cooperative`, `lottery`, `rotating`)
+- `page` (optional): Page number (default: 1)
+- `limit` (optional): Results per page (default: 20, max: 100)
+
+**Request:**
+```http
+GET /pools?type=individual&page=1&limit=10
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "pool_123",
+      "type": "individual",
+      "contractAddress": "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
+      "balance": "1000000000000000000000",
+      "totalYield": "50000000000000000000",
+      "apr": 18.5,
+      "autoCompound": true,
+      "createdAt": "2026-01-20T12:00:00Z",
+      "lastUpdate": "2026-02-08T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 10,
+    "total": 3,
+    "pages": 1
+  }
+}
+```
+
+### POST /pools
+
+Create a new pool.
+
+**Request:**
+```http
+POST /pools
+Authorization: Bearer <token>
+Content-Type: application/json
+
+{
+  "type": "individual",
+  "initialDeposit": "1000000000000000000000",
+  "autoCompound": true
+}
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "pool_456",
+    "type": "individual",
+    "contractAddress": "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
+    "balance": "1000000000000000000000",
+    "createdAt": "2026-02-08T10:00:00Z"
+  }
+}
+```
+
+### GET /pools/:id
+
+Get pool details by ID.
+
+**Request:**
+```http
+GET /pools/pool_123
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "pool_123",
+    "type": "individual",
+    "owner": {
+      "id": "user_789",
+      "address": "0x742d35cc6634c0532925a3b844bc9e7595f0beb"
+    },
+    "balance": "1000000000000000000000",
+    "totalYield": "50000000000000000000",
+    "apr": 18.5,
+    "autoCompound": true,
+    "transactions": [
+      {
+        "id": "tx_001",
+        "type": "DEPOSIT",
+        "amount": "1000000000000000000000",
+        "txHash": "0xabcdef...",
+        "createdAt": "2026-01-20T12:00:00Z"
+      }
+    ],
+    "createdAt": "2026-01-20T12:00:00Z"
+  }
+}
+```
+
+### GET /pools/:id/yield
+
+Calculate current yield for a pool.
+
+**Request:**
+```http
+GET /pools/pool_123/yield
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "totalYield": "50000000000000000000",
+    "claimableYield": "25000000000000000000",
+    "apr": 18.5,
+    "apy": 20.2,
+    "lastClaimed": "2026-01-25T10:00:00Z"
+  }
+}
+```
+
+## Transaction Endpoints
+
+### GET /transactions
+
+List transactions for authenticated user.
+
+**Query Parameters:**
+- `poolId` (optional): Filter by pool ID
+- `type` (optional): Filter by type (`DEPOSIT`, `WITHDRAWAL`, `YIELD_CLAIM`)
+- `page` (optional): Page number
+- `limit` (optional): Results per page
+
+**Request:**
+```http
+GET /transactions?poolId=pool_123&page=1&limit=20
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "id": "tx_001",
+      "poolId": "pool_123",
+      "type": "DEPOSIT",
+      "amount": "1000000000000000000000",
+      "txHash": "0xabcdef1234567890...",
+      "blockNumber": 12345678,
+      "status": "CONFIRMED",
+      "createdAt": "2026-02-08T10:00:00Z"
+    }
+  ],
+  "pagination": {
+    "page": 1,
+    "limit": 20,
+    "total": 15,
+    "pages": 1
+  }
+}
+```
+
+### GET /transactions/:hash
+
+Get transaction details by hash.
+
+**Request:**
+```http
+GET /transactions/0xabcdef1234567890...
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "id": "tx_001",
+    "txHash": "0xabcdef1234567890...",
+    "type": "DEPOSIT",
+    "amount": "1000000000000000000000",
+    "from": "0x742d35cc6634c0532925a3b844bc9e7595f0beb",
+    "to": "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
+    "blockNumber": 12345678,
+    "gasUsed": "65432",
+    "gasPrice": "1000000000",
+    "status": "CONFIRMED",
+    "createdAt": "2026-02-08T10:00:00Z",
+    "confirmedAt": "2026-02-08T10:01:00Z"
+  }
+}
+```
+
+## Analytics Endpoints
+
+### GET /analytics/pools
+
+Get aggregated pool statistics.
+
+**Request:**
+```http
+GET /analytics/pools
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "totalPools": 1234,
+    "totalDeposits": "50000000000000000000000000",
+    "totalYield": "2500000000000000000000000",
+    "averageAPR": 17.8,
+    "byType": {
+      "individual": 856,
+      "cooperative": 234,
+      "lottery": 89,
+      "rotating": 55
+    }
+  }
+}
+```
+
+### GET /analytics/user
+
+Get user-specific analytics.
+
+**Request:**
+```http
+GET /analytics/user
+Authorization: Bearer <token>
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "totalDeposited": "5000000000000000000000",
+    "totalYield": "250000000000000000000",
+    "yieldEarned": "250000000000000000000",
+    "activePoolsCount": 3,
+    "averageAPR": 18.5,
+    "joinedAt": "2026-01-15T08:30:00Z",
+    "chartData": {
+      "deposits": [
+        { "date": "2026-01-20", "amount": "1000000000000000000000" },
+        { "date": "2026-01-25", "amount": "2000000000000000000000" }
+      ],
+      "yields": [
+        { "date": "2026-01-20", "amount": "0" },
+        { "date": "2026-02-08", "amount": "250000000000000000000" }
+      ]
+    }
+  }
+}
+```
+
+## Lottery Endpoints
+
+### GET /lottery/current
+
+Get current lottery draw information.
+
+**Request:**
+```http
+GET /lottery/current
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": {
+    "drawId": 42,
+    "prizePool": "100000000000000000000000",
+    "participants": 345,
+    "totalTickets": 12450,
+    "drawTime": "2026-02-10T18:00:00Z",
+    "status": "ACTIVE"
+  }
+}
+```
+
+### GET /lottery/winners
+
+List recent lottery winners.
+
+**Request:**
+```http
+GET /lottery/winners?limit=10
+```
+
+**Response:**
+```json
+{
+  "success": true,
+  "data": [
+    {
+      "drawId": 41,
+      "winner": "0x742d35cc6634c0532925a3b844bc9e7595f0beb",
+      "prize": "50000000000000000000000",
+      "tickets": 25,
+      "totalTickets": 10000,
+      "drawnAt": "2026-02-03T18:00:00Z"
+    }
+  ]
+}
+```
+
+## Health Check
+
+### GET /health
+
+Check API health status (no auth required).
+
+**Request:**
+```http
+GET /health
+```
+
+**Response:**
+```json
+{
+  "status": "healthy",
+  "timestamp": "2026-02-08T10:00:00Z",
+  "uptime": 86400,
+  "services": {
+    "database": "connected",
+    "blockchain": "synced",
+    "redis": "connected"
+  }
+}
+```
+
+## Error Codes
+
+| Status Code | Error | Description |
+|------------|-------|-------------|
+| 400 | Bad Request | Invalid request parameters |
+| 401 | Unauthorized | Missing or invalid token |
+| 403 | Forbidden | Insufficient permissions |
+| 404 | Not Found | Resource doesn't exist |
+| 429 | Too Many Requests | Rate limit exceeded |
+| 500 | Internal Server Error | Server error |
+
+## Rate Limits
+
+[See Rate Limits Guide →](/docs/developers/api-reference/rate-limits)
+
+## TypeScript SDK (Coming Soon)
+
+```typescript
+import { KhipuVault } from '@khipu/sdk'
+
+const client = new KhipuVault({
+  apiKey: 'your-api-key',
+  network: 'testnet'
+})
+
+const pools = await client.pools.list()
+const pool = await client.pools.get('pool_123')
+```
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Authentication"
+    href="/docs/developers/api-reference/authentication"
+    description="SIWE implementation guide"
+  />
+  <Card
+    title="Rate Limits"
+    href="/docs/developers/api-reference/rate-limits"
+    description="API rate limiting details"
+  />
+  <Card
+    title="Code Examples"
+    href="/docs/developers/examples"
+    description="Working TypeScript examples"
+  />
+</Cards>
+
+---
+
+**API Support:** dev@khipuvault.com | [Discord](https://discord.gg/khipuvault) #api

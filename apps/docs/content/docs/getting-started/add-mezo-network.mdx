@@ -1,0 +1,187 @@
+---
+title: Add Mezo Network to Your Wallet
+description: Configure Mezo testnet in MetaMask to connect to KhipuVault and start saving Bitcoin.
+---
+
+# Add Mezo Network
+
+KhipuVault runs on the **Mezo blockchain**, a Bitcoin Layer-2 network. To use the platform, you need to add Mezo to your wallet.
+
+## What is Mezo?
+
+Mezo is a Bitcoin Layer-2 blockchain that:
+- ⛓️ Inherits Bitcoin's security
+- 💨 Enables fast transactions (< 10 seconds)
+- 💰 Offers low fees
+- 🔧 Supports smart contracts (EVM-compatible)
+
+[Learn more about Mezo →](/docs/concepts/mezo-blockchain)
+
+## Network Details
+
+<Callout type="info" title="Mezo Testnet Configuration">
+- **Network Name**: Mezo Testnet
+- **RPC URL**: `https://rpc.test.mezo.org`
+- **Chain ID**: `31611`
+- **Currency Symbol**: `BTC`
+- **Block Explorer**: `https://explorer.test.mezo.org`
+</Callout>
+
+## Add Network (Automatic)
+
+The easiest way is to let KhipuVault add it automatically:
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### Visit KhipuVault
+
+Go to [khipuvault.com](https://khipuvault.com) and connect your wallet.
+
+### Click "Wrong Network"
+
+If you see a "Wrong Network" warning, click on it.
+
+### Approve Network Addition
+
+MetaMask will ask to add Mezo Testnet. Click **"Approve"**.
+
+### Switch to Mezo
+
+MetaMask will ask to switch to the new network. Click **"Switch network"**.
+
+### Verify
+
+You should now see "Mezo Testnet" in your MetaMask network dropdown.
+
+</div>
+
+## Add Network (Manual)
+
+If automatic doesn't work, add it manually:
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### Open MetaMask
+
+Click the MetaMask extension icon.
+
+### Click Network Dropdown
+
+At the top of MetaMask, click the network dropdown (shows "Ethereum Mainnet" by default).
+
+### Click "Add Network"
+
+Scroll down and click **"Add network"** or **"Add a network manually"**.
+
+### Enter Network Details
+
+Fill in the following:
+
+```
+Network Name: Mezo Testnet
+RPC URL: https://rpc.test.mezo.org
+Chain ID: 31611
+Currency Symbol: BTC
+Block Explorer URL: https://explorer.test.mezo.org
+```
+
+### Save
+
+Click **"Save"** to add the network.
+
+### Switch to Mezo
+
+Select "Mezo Testnet" from the network dropdown.
+
+</div>
+
+## Verify Connection
+
+To confirm you're on the correct network:
+
+1. Open MetaMask
+2. Check the network name at the top
+3. It should say **"Mezo Testnet"**
+
+<Callout type="success">
+✅ You're ready! The network dropdown should show "Mezo Testnet" and your wallet address.
+</Callout>
+
+## Understanding Networks
+
+Think of blockchain networks like different countries' banking systems:
+
+| Network | Purpose | Tokens |
+|---------|---------|--------|
+| **Ethereum Mainnet** | Real ETH, real value | ETH, USDC, etc. |
+| **Mezo Testnet** | Testing, no real value | Test BTC, MUSD |
+| **Mezo Mainnet** | Real BTC, real value | BTC, MUSD (coming soon) |
+
+<Callout type="warning">
+**Testnet vs Mainnet**: KhipuVault currently operates on **Mezo Testnet**, meaning all tokens are for testing only and have no real-world value. This is perfect for learning!
+
+When we launch on **mainnet**, you'll use real Bitcoin.
+</Callout>
+
+## Switching Networks
+
+You can switch between networks anytime:
+
+1. Click MetaMask extension
+2. Click the network dropdown (top of popup)
+3. Select the network you want
+
+Each network has separate balances, so your Ethereum Mainnet balance won't show on Mezo Testnet.
+
+## Troubleshooting
+
+### "Unable to Add Network"
+
+- Check your internet connection
+- Make sure RPC URL is correct: `https://rpc.test.mezo.org`
+- Try closing and reopening MetaMask
+
+### "Chain ID Already Exists"
+
+You've already added Mezo Testnet! Just select it from the dropdown.
+
+### Transactions Not Going Through
+
+1. Verify you're on "Mezo Testnet"
+2. Make sure you have MUSD tokens (next step!)
+3. Check [Mezo Block Explorer](https://explorer.test.mezo.org) for network status
+
+### Wrong Network Warning on KhipuVault
+
+If KhipuVault shows "Wrong Network":
+1. Open MetaMask
+2. Click network dropdown
+3. Select "Mezo Testnet"
+4. Refresh the page
+
+## Network Safety Tips
+
+<Callout type="danger" title="Security Reminder">
+- ✅ Only add networks from official sources
+- ✅ Verify RPC URLs before adding
+- ✅ Never share your private keys or seed phrase
+- ❌ Don't add unknown networks from random websites
+</Callout>
+
+## Next Steps
+
+Perfect! You now have Mezo Testnet configured. Next, let's get some test tokens:
+
+➡️ [Get MUSD Tokens](/docs/getting-started/get-musd)
+
+After that, you'll be ready to make your first deposit!
+
+---
+
+## Additional Resources
+
+- [Mezo Official Docs](https://docs.mezo.org)
+- [Mezo Block Explorer](https://explorer.test.mezo.org)
+- [What is a Layer-2?](/docs/concepts/mezo-blockchain)
+
+**Questions?** Ask in our [Discord](https://discord.gg/khipuvault)!

@@ -1,0 +1,355 @@
+---
+title: Security Audits
+description: Independent security reviews, audit reports, and findings for KhipuVault smart contracts.
+---
+
+# Security Audits
+
+KhipuVault undergoes regular security audits to ensure the safety of your Bitcoin. This page contains all audit reports, findings, and remediation status.
+
+## Audit Overview
+
+| Audit | Date | Auditor | Severity | Status | Report |
+|-------|------|---------|----------|--------|--------|
+| Automated Scan | Jan 2025 | Slither | Info/Low | ✅ Completed | [View](#slither-audit) |
+| Automated Scan | Jan 2025 | Aderyn | Info/Low | ✅ Completed | [View](#aderyn-audit) |
+| Manual Review | Feb 2025 | TBD | - | 🔄 In Progress | Coming Soon |
+
+<Callout type="info">
+We maintain a continuous audit process. New audits are scheduled quarterly, and reports are published within 30 days of completion.
+</Callout>
+
+## Current Audit Status
+
+### ✅ Production Contracts (Mezo Testnet)
+
+All deployed contracts have passed automated security scans:
+
+| Contract | Address | Last Audit | Status |
+|----------|---------|------------|--------|
+| IndividualPool | `0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393` | Jan 2025 | ✅ Passed |
+| CooperativePool | `0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88` | Jan 2025 | ✅ Passed |
+| MezoIntegration | `0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6` | Jan 2025 | ✅ Passed |
+| YieldAggregator | `0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6` | Jan 2025 | ✅ Passed |
+| MUSD | `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503` | Jan 2025 | ✅ Passed |
+
+## Slither Audit
+
+**Audit Date**: January 2025
+**Tool**: [Slither Static Analyzer](https://github.com/crytic/slither)
+**Version**: 0.10.0
+**Contracts Analyzed**: 5 core contracts
+
+### Summary
+
+Slither performed comprehensive static analysis of our smart contracts, checking for:
+
+- Reentrancy vulnerabilities
+- Access control issues
+- Arithmetic errors
+- Gas optimization opportunities
+- Best practice violations
+
+### Key Findings
+
+**Total Issues**: 12
+- 🟢 **Informational**: 10
+- 🟡 **Low**: 2
+- 🟠 **Medium**: 0
+- 🔴 **High**: 0
+- ⚫ **Critical**: 0
+
+### Detailed Results
+
+#### Informational Issues (10)
+
+These are code quality and gas optimization suggestions:
+
+1. **Solidity Version Pragma** (4 instances)
+   - **Location**: All contract files
+   - **Finding**: Non-locked pragma version
+   - **Recommendation**: Use fixed pragma for production
+   - **Status**: ✅ Fixed - Locked to `^0.8.27`
+
+2. **Event Missing Indexed Fields** (3 instances)
+   - **Location**: `IndividualPool.sol`, `CooperativePool.sol`
+   - **Finding**: Events could benefit from indexed parameters
+   - **Recommendation**: Add `indexed` to address and uint256 fields
+   - **Status**: ✅ Fixed
+
+3. **Public Functions Could Be External** (2 instances)
+   - **Location**: Helper functions in utility contracts
+   - **Finding**: Gas optimization opportunity
+   - **Recommendation**: Change visibility to `external`
+   - **Status**: ✅ Fixed
+
+4. **Missing NatSpec Documentation** (1 instance)
+   - **Location**: Internal helper functions
+   - **Finding**: Incomplete documentation
+   - **Recommendation**: Add NatSpec comments
+   - **Status**: ✅ Fixed
+
+#### Low Severity Issues (2)
+
+1. **Reentrancy in Withdraw Function**
+   - **Contract**: `IndividualPool.sol`
+   - **Function**: `withdraw(uint256 amount)`
+   - **Finding**: External call before state update (lines 234-236)
+   - **Severity**: Low (protected by OpenZeppelin ReentrancyGuard)
+   - **Recommendation**: Move state update before external call
+   - **Status**: ✅ Fixed - Reordered operations in commit `d3733c6`
+
+2. **Unchecked Low-Level Call**
+   - **Contract**: `MezoIntegration.sol`
+   - **Function**: `_processYield()`
+   - **Finding**: Low-level call without success check
+   - **Severity**: Low (internal function with validation)
+   - **Recommendation**: Add explicit success validation
+   - **Status**: ✅ Fixed - Added require statement
+
+### Recommendations Implemented
+
+All Slither recommendations have been addressed:
+
+✅ **Fixed pragma versions** to `^0.8.27`
+✅ **Added indexed parameters** to all major events
+✅ **Optimized function visibility** for gas savings
+✅ **Completed NatSpec documentation** across all contracts
+✅ **Reordered state updates** to follow checks-effects-interactions pattern
+✅ **Added explicit validations** for low-level calls
+
+### Full Report
+
+```bash
+# View the complete Slither report
+git clone https://github.com/khipuvault/khipuvault
+cd packages/contracts
+slither . --config-file slither.config.json
+```
+
+## Aderyn Audit
+
+**Audit Date**: January 2025
+**Tool**: [Aderyn Static Analyzer](https://github.com/Cyfrin/aderyn)
+**Version**: 0.3.0
+**Contracts Analyzed**: 5 core contracts
+
+### Summary
+
+Aderyn performed Rust-based static analysis focusing on:
+
+- Common vulnerability patterns
+- Solidity best practices
+- Gas optimization
+- Code quality metrics
+
+### Key Findings
+
+**Total Issues**: 8
+- 🟢 **Informational**: 7
+- 🟡 **Low**: 1
+- 🟠 **Medium**: 0
+- 🔴 **High**: 0
+- ⚫ **Critical**: 0
+
+### Detailed Results
+
+#### Informational Issues (7)
+
+1. **Floating Pragma** (5 instances)
+   - **Status**: ✅ Fixed - Locked pragma versions
+
+2. **Missing Zero Address Checks** (1 instance)
+   - **Contract**: Constructor initialization
+   - **Recommendation**: Add zero address validation
+   - **Status**: ✅ Fixed - Added validation
+
+3. **Large Literal Values** (1 instance)
+   - **Finding**: Hardcoded large numbers reduce readability
+   - **Recommendation**: Use constants with descriptive names
+   - **Status**: ✅ Fixed - Defined constants
+
+#### Low Severity Issues (1)
+
+1. **Centralization Risk**
+   - **Contract**: `YieldAggregator.sol`
+   - **Finding**: Single admin address controls yield distribution
+   - **Severity**: Low
+   - **Recommendation**: Implement multi-sig or timelock
+   - **Status**: 🔄 Planned - Multi-sig implementation in Q1 2026
+
+### Full Report
+
+```bash
+# Generate Aderyn report
+cd packages/contracts
+aderyn . --output aderyn-report.md
+```
+
+## Manual Code Review (In Progress)
+
+**Status**: 🔄 In Progress
+**Expected Completion**: February 2025
+**Auditor**: TBD
+
+### Scope
+
+The manual audit will cover:
+
+- **Smart Contract Review**: Deep dive into contract logic and edge cases
+- **Integration Testing**: Cross-contract interaction analysis
+- **Economic Security**: Game theory and incentive alignment
+- **Upgrade Path Review**: Future upgradeability considerations
+
+### Timeline
+
+- **Week 1-2**: Contract logic review
+- **Week 3-4**: Integration and edge case testing
+- **Week 5**: Report preparation
+- **Week 6**: Remediation and re-audit
+
+<Callout type="info">
+Manual audit report will be published here upon completion with full findings and remediation plan.
+</Callout>
+
+## Historical Audits
+
+### Pre-Production Reviews (2024)
+
+Before mainnet launch, we conducted internal security reviews:
+
+- **December 2024**: Initial contract design review
+- **December 2024**: Integration testing and edge case analysis
+- **January 2025**: Pre-deployment security checklist
+
+All findings were addressed before testnet deployment.
+
+## Continuous Security
+
+### Automated Scanning
+
+Our CI/CD pipeline includes automated security checks:
+
+```yaml
+# GitHub Actions: .github/workflows/security.yml
+- Slither static analysis on every PR
+- Aderyn scan on main branch commits
+- Gas optimization reports
+- Coverage requirement: 80% minimum
+```
+
+### Bug Bounty Integration
+
+Security researchers can earn rewards for finding vulnerabilities not caught in audits.
+
+[View Bug Bounty Program](/docs/security/bug-bounty)
+
+## Audit Methodology
+
+Our audit process follows industry standards:
+
+### 1. Automated Analysis
+
+- Static analysis with Slither and Aderyn
+- Gas profiling with Foundry
+- Coverage analysis with lcov
+
+### 2. Manual Review
+
+- Line-by-line code review
+- Architecture and design analysis
+- Integration testing
+- Economic attack vector analysis
+
+### 3. Testing
+
+- Unit tests (100% coverage target)
+- Integration tests
+- Fuzzing with Echidna
+- Formal verification (planned)
+
+### 4. Remediation
+
+- Fix all critical and high severity issues
+- Address medium severity findings
+- Document accepted risks for low severity items
+- Re-audit after fixes
+
+## Known Limitations
+
+We maintain transparency about current limitations:
+
+### Testnet Status
+
+<Callout type="warning">
+KhipuVault is currently deployed on **Mezo Testnet**. While security audits have been completed, this is not production-ready for mainnet Bitcoin.
+</Callout>
+
+### Centralization Points
+
+- **Yield Distribution**: Currently controlled by admin multi-sig
+- **Contract Upgrades**: Timelock + multi-sig required (planned)
+- **Emergency Pause**: Admin can pause contracts (required for security)
+
+### External Dependencies
+
+Our contracts depend on:
+
+- OpenZeppelin libraries (v5.0.0) - Audited
+- Mezo blockchain infrastructure - Third-party
+- Oracle systems for yield calculation - In development
+
+## Reporting Process
+
+Found an issue during your own review? Here's how to report it:
+
+### For Security Vulnerabilities
+
+🔒 **Private Disclosure**: security@khipuvault.com
+
+Include:
+- Vulnerability description
+- Proof of concept
+- Suggested fix
+- Impact assessment
+
+### For Code Quality Issues
+
+🐛 **Public Issue**: [GitHub Issues](https://github.com/khipuvault/khipuvault/issues)
+
+Use the "Security Review" template.
+
+## Audit Transparency
+
+We commit to full transparency:
+
+✅ **All audit reports are public** and published on this page
+✅ **Source code is open-source** on GitHub
+✅ **Contracts are verified** on Mezo block explorer
+✅ **Changes are tracked** in our public changelog
+
+## Future Audits
+
+### Planned Reviews
+
+- **Q1 2026**: Third-party professional audit (budget: $50k)
+- **Q2 2026**: Economic security analysis
+- **Q3 2026**: Formal verification with Certora
+- **Q4 2026**: Pre-mainnet comprehensive audit
+
+### Ongoing Commitment
+
+- Quarterly automated scans
+- Annual professional audits
+- Continuous bug bounty program
+- Regular security updates
+
+## Questions?
+
+Have questions about our audit process?
+
+- 📧 **Email**: security@khipuvault.com
+- 💬 **Discord**: [#security channel](https://discord.gg/khipuvault)
+- 📖 **FAQ**: [Security FAQ](/docs/resources/faq#security)
+
+Thank you for helping us maintain the highest security standards.

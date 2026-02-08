@@ -1,0 +1,441 @@
+---
+title: System Architecture
+description: Complete architecture overview of KhipuVault - monorepo structure, tech stack, and design patterns.
+---
+
+# System Architecture
+
+KhipuVault is a full-stack decentralized application built as a TypeScript monorepo. This guide explains the system architecture, tech stack, and how all components work together.
+
+## High-Level Architecture
+
+```
+┌──────────────────────────────────────────────────────────────┐
+│                         Frontend (Port 9002)                  │
+│                                                               │
+│  Next.js 15 App Router + React 18                            │
+│  ├─ Wagmi 2.x (React hooks for Ethereum)                     │
+│  ├─ Viem 2.x (TypeScript Ethereum library)                   │
+│  ├─ React Query 5 (Server state management)                  │
+│  ├─ Zustand (Client state management)                        │
+│  └─ Tailwind CSS + shadcn/ui (Styling)                       │
+│                                                               │
+└───────────────────┬──────────────────────┬───────────────────┘
+                    │                      │
+                    │ HTTP/REST            │ JSON-RPC (web3)
+                    │                      │
+        ┌───────────▼──────────┐  ┌────────▼──────────┐
+        │   Backend API        │  │  Smart Contracts   │
+        │   (Port 3001)        │  │  Mezo Testnet      │
+        │                      │  │  Chain ID: 31611   │
+        │  Express.js          │  │                    │
+        │  ├─ SIWE Auth        │  │  Solidity 0.8.26   │
+        │  ├─ JWT Tokens       │  │  ├─ IndividualPool │
+        │  ├─ Zod Validation   │  │  ├─ CooperativePool│
+        │  └─ Pino Logging     │  │  ├─ LotteryPoolV3  │
+        │                      │  │  ├─ MezoIntegration│
+        └───────────┬──────────┘  │  └─ YieldAggregator│
+                    │              │                    │
+                    │              └──────────┬─────────┘
+                    │                         │
+                    │                         │ Events
+                    │                         │
+        ┌───────────▼─────────────────────────▼─────────┐
+        │         PostgreSQL Database                    │
+        │                                                │
+        │  ├─ User profiles & authentication             │
+        │  ├─ Pool metadata & analytics                  │
+        │  ├─ Indexed blockchain events                  │
+        │  └─ Transaction history                        │
+        │                                                │
+        └────────────────────▲───────────────────────────┘
+                             │
+                    ┌────────┴─────────┐
+                    │  Event Indexer   │
+                    │   (Background)   │
+                    │                  │
+                    │  ethers.js 6.x   │
+                    │  ├─ WebSocket    │
+                    │  ├─ Event logs   │
+                    │  └─ Retry logic  │
+                    │                  │
+                    └──────────────────┘
+```
+
+## Monorepo Structure
+
+KhipuVault uses pnpm workspaces for monorepo management:
+
+```
+KhipuVault/
+├── apps/
+│   ├── web/              # Next.js frontend (Port 9002)
+│   │   ├── src/
+│   │   │   ├── app/           # Next.js App Router
+│   │   │   ├── features/      # Feature-based modules
+│   │   │   │   ├── individual-savings/
+│   │   │   │   ├── cooperative-savings/
+│   │   │   │   ├── rotating-pool/
+│   │   │   │   └── portfolio/
+│   │   │   ├── hooks/         # Custom React hooks
+│   │   │   │   └── web3/      # Web3-specific hooks
+│   │   │   ├── components/    # Shared components
+│   │   │   └── lib/           # Utilities
+│   │   └── package.json
+│   │
+│   └── api/              # Express.js backend (Port 3001)
+│       ├── src/
+│       │   ├── routes/        # REST API endpoints
+│       │   ├── services/      # Business logic
+│       │   ├── middleware/    # Express middleware
+│       │   └── index.ts       # Server entry
+│       └── package.json
+│
+├── packages/
+│   ├── contracts/        # Solidity smart contracts
+│   │   ├── src/               # Contract source
+│   │   │   ├── pools/v3/
+│   │   │   ├── integrations/v3/
+│   │   │   ├── strategies/
+│   │   │   └── interfaces/
+│   │   ├── test/              # Foundry tests
+│   │   ├── script/            # Deploy scripts
+│   │   └── Makefile           # Build/deploy commands
+│   │
+│   ├── database/         # Prisma ORM + PostgreSQL
+│   │   ├── prisma/
+│   │   │   ├── schema.prisma  # Database schema
+│   │   │   └── migrations/    # SQL migrations
+│   │   └── src/
+│   │       └── client.ts      # Prisma client export
+│   │
+│   ├── blockchain/       # Event indexer service
+│   │   ├── src/
+│   │   │   ├── listeners/     # Event listeners
+│   │   │   ├── services/      # Processing logic
+│   │   │   └── index.ts       # Indexer entry
+│   │   └── package.json
+│   │
+│   ├── web3/             # Web3 utilities & ABIs
+│   │   ├── src/
+│   │   │   ├── abis/          # Contract ABIs
+│   │   │   ├── addresses/     # Contract addresses
+│   │   │   └── client/        # Wagmi/Viem config
+│   │   └── package.json
+│   │
+│   ├── ui/               # Shared UI components
+│   │   ├── src/
+│   │   │   └── components/    # Radix/shadcn components
+│   │   └── package.json
+│   │
+│   └── shared/           # Shared utilities
+│       ├── src/
+│       │   ├── types/         # TypeScript types
+│       │   ├── constants/     # App constants
+│       │   └── utils/         # Helper functions
+│       └── package.json
+│
+├── pnpm-workspace.yaml   # Workspace config
+├── package.json          # Root package
+└── turbo.json            # Turborepo config
+```
+
+## Package Dependencies
+
+```
+┌─────────────┐
+│     web     │───────┐
+└─────────────┘       │
+                      │
+┌─────────────┐       │
+│     api     │───────┤
+└─────────────┘       │
+                      │         ┌──────────┐
+┌─────────────┐       ├────────▶│   web3   │
+│ blockchain  │───────┤         └──────────┘
+└─────────────┘       │         ┌──────────┐
+                      ├────────▶│ database │
+                      │         └──────────┘
+                      │         ┌──────────┐
+                      └────────▶│  shared  │
+                                └──────────┘
+```
+
+### Import Map
+
+```typescript
+// All packages can import from:
+import { ... } from '@khipu/shared'      // Types, constants, utils
+
+// web, api, blockchain can import from:
+import { ... } from '@khipu/web3'        // ABIs, addresses
+import { ... } from '@khipu/database'    // Prisma client
+
+// Only web can import from:
+import { ... } from '@khipu/ui'          // React components
+```
+
+## Technology Stack
+
+### Frontend (`apps/web`)
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Framework | Next.js 15 | React framework with App Router |
+| Web3 | Wagmi 2.x + Viem 2.x | Ethereum interactions |
+| State | React Query 5 + Zustand | Server/client state |
+| Styling | Tailwind CSS | Utility-first CSS |
+| Components | Radix UI + shadcn/ui | Accessible components |
+| Forms | React Hook Form + Zod | Form validation |
+| Charts | Recharts | Data visualization |
+
+**Key Patterns:**
+- Feature-based architecture (`src/features/`)
+- Custom hooks for Web3 (`src/hooks/web3/`)
+- Server components by default (App Router)
+- Client components for interactivity
+
+### Backend (`apps/api`)
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Server | Express.js | REST API framework |
+| Database | Prisma + PostgreSQL | ORM and database |
+| Auth | SIWE + JWT | Ethereum-based auth |
+| Validation | Zod | Request validation |
+| Logging | Pino | Structured logging |
+| CORS | cors middleware | Cross-origin requests |
+
+**Key Patterns:**
+- Routes → Services → Database (3-layer)
+- Middleware for auth, logging, validation
+- Error handling with custom error classes
+- Structured JSON logging (Pino)
+
+### Smart Contracts (`packages/contracts`)
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Language | Solidity 0.8.26 | Smart contract code |
+| Framework | Foundry | Build, test, deploy |
+| Security | OpenZeppelin | Audited libraries |
+| Testing | Forge | Unit/integration tests |
+| Deployment | Forge scripts | Automated deployment |
+
+**Key Patterns:**
+- Upgradeable contracts (UUPS proxy)
+- Reentrancy guards (OpenZeppelin)
+- Custom errors (gas optimization)
+- Comprehensive events for indexing
+
+### Event Indexer (`packages/blockchain`)
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Library | ethers.js 6.x | Blockchain interactions |
+| Database | Prisma | Store indexed data |
+| Retry | Exponential backoff | Handle RPC failures |
+| Logging | Pino | Structured logs |
+
+**Key Patterns:**
+- WebSocket for real-time events
+- Idempotency checks (no duplicate indexing)
+- Error recovery with retry logic
+- Block reorganization handling
+
+## Data Flow Examples
+
+### User Makes a Deposit
+
+```
+1. User clicks "Deposit" in web app
+   ↓
+2. Frontend (Wagmi hook):
+   - Calls approve() on MUSD contract
+   - Waits for confirmation
+   - Calls deposit() on IndividualPool
+   ↓
+3. Smart Contract (IndividualPool):
+   - Validates amount > 0
+   - Transfers MUSD from user
+   - Updates user balance
+   - Emits Deposit event
+   ↓
+4. Event Indexer (blockchain package):
+   - Listens for Deposit event
+   - Parses event data
+   - Stores in PostgreSQL via Prisma
+   ↓
+5. Backend API:
+   - Queries indexed data
+   - Returns to frontend
+   ↓
+6. Frontend updates UI with React Query cache
+```
+
+### User Views Portfolio
+
+```
+1. User navigates to /portfolio
+   ↓
+2. Frontend (Next.js):
+   - Server-side: Fetch user data from API
+   - Client-side: Read balances from contracts (Wagmi)
+   ↓
+3. Backend API:
+   - Queries PostgreSQL for:
+     - User profile
+     - Transaction history
+     - Pool memberships
+   - Returns aggregated data
+   ↓
+4. Smart Contracts (via Wagmi):
+   - Read current balances (balanceOf)
+   - Read pool stats (totalDeposits)
+   - Read yield data (calculateYield)
+   ↓
+5. Frontend:
+   - Combines API data + on-chain data
+   - React Query caches results
+   - Displays in UI components
+```
+
+## Deployment Architecture
+
+### Development
+
+```
+Local Machine:
+├─ PostgreSQL (Docker)    → Port 5432
+├─ Backend API            → Port 3001
+├─ Frontend (Next.js)     → Port 9002
+└─ Event Indexer          → Background process
+
+Mezo Testnet:
+└─ Smart Contracts        → Chain ID 31611
+```
+
+### Production (Future)
+
+```
+Cloud Infrastructure:
+├─ Frontend (Vercel)           → Edge network
+├─ Backend API (Railway/Fly)   → Global regions
+├─ PostgreSQL (Supabase)       → Managed DB
+└─ Event Indexer (Railway)     → Long-running service
+
+Mezo Mainnet:
+└─ Smart Contracts             → Chain ID TBD
+```
+
+## Security Architecture
+
+### Smart Contracts
+
+- OpenZeppelin security libraries
+- Reentrancy guards on all state-changing functions
+- Access control (Ownable, role-based)
+- Upgrade safety (UUPS proxy pattern)
+- Slither static analysis in CI/CD
+
+### Backend
+
+- SIWE authentication (Sign-In With Ethereum)
+- JWT tokens (short-lived)
+- Rate limiting (express-rate-limit)
+- Input validation (Zod schemas)
+- SQL injection protection (Prisma ORM)
+
+### Frontend
+
+- No private keys in browser
+- User wallet controls all funds
+- HTTPS only (production)
+- Content Security Policy headers
+- XSS protection (React escaping)
+
+## Performance Optimizations
+
+### Frontend
+
+- Server components (reduce JavaScript)
+- React Query caching (reduce RPC calls)
+- Code splitting (Next.js automatic)
+- Image optimization (Next.js Image)
+- Static generation where possible
+
+### Backend
+
+- Database indexing (Prisma)
+- Connection pooling (PostgreSQL)
+- Response caching (in-memory)
+- Batch database queries
+- Async/await patterns
+
+### Smart Contracts
+
+- Custom errors (cheaper than require strings)
+- Tight variable packing (save storage slots)
+- `unchecked` blocks (skip overflow checks)
+- Minimal storage reads/writes
+- Events instead of storage (when possible)
+
+## Development Workflow
+
+```bash
+# Start all services
+pnpm dev              # Web + API + Indexer
+
+# Individual services
+pnpm dev:web          # Frontend only (9002)
+pnpm dev:api          # Backend only (3001)
+
+# Database
+pnpm docker:up        # Start PostgreSQL
+pnpm db:push          # Sync schema
+pnpm db:seed          # Seed data
+
+# Smart contracts
+pnpm contracts:build  # Compile
+pnpm contracts:test   # Test
+```
+
+## Monitoring & Observability
+
+### Logging
+
+- Pino structured JSON logs
+- Log levels: trace, debug, info, warn, error
+- Request IDs for tracing
+- Automatic error stack traces
+
+### Metrics (Planned)
+
+- API endpoint latency
+- Smart contract gas usage
+- Database query performance
+- Event indexer sync status
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Smart Contract Architecture"
+    href="/docs/developers/architecture/smart-contracts"
+    description="Deep dive into contract design"
+  />
+  <Card
+    title="API Design Patterns"
+    href="/docs/developers/architecture/api-design"
+    description="Backend architecture details"
+  />
+  <Card
+    title="REST API Reference"
+    href="/docs/developers/api-reference/rest-api"
+    description="Complete API documentation"
+  />
+</Cards>
+
+---
+
+**Questions about architecture?** Email dev@khipuvault.com or join [Discord](https://discord.gg/khipuvault) #developers

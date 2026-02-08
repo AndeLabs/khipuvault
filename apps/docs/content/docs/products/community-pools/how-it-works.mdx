@@ -1,0 +1,627 @@
+---
+title: How Community Pools Work
+description: Technical explanation of community pool mechanics, governance, yield distribution, and member management on KhipuVault.
+---
+
+# How Community Pools Work
+
+Learn the technical details of how community pools operate, from member deposits to governance and yield distribution.
+
+## Architecture Overview
+
+Community Pools are smart contracts that enable collective savings with democratic governance.
+
+```
+┌─────────────────────────────────────────┐
+│         Community Pool Contract         │
+├─────────────────────────────────────────┤
+│                                         │
+│  👥 Members                             │
+│  ├─ Member addresses & balances        │
+│  ├─ Voting weights                     │
+│  └─ Join/leave timestamps              │
+│                                         │
+│  💰 Treasury                            │
+│  ├─ Total pooled MUSD                  │
+│  ├─ Individual member balances         │
+│  └─ Accumulated yields                 │
+│                                         │
+│  🗳️ Governance                          │
+│  ├─ Active proposals                   │
+│  ├─ Voting records                     │
+│  └─ Execution queue                    │
+│                                         │
+│  ⚙️ Configuration                       │
+│  ├─ Membership rules                   │
+│  ├─ Voting parameters                  │
+│  └─ Withdrawal limits                  │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+## Core Mechanics
+
+### Pool Creation
+
+When you create a community pool:
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### Smart Contract Deployment
+
+A new `CooperativePool` contract is deployed with your specified parameters:
+
+```solidity
+struct PoolConfig {
+    string name;
+    string description;
+    uint256 minimumDeposit;      // e.g., 50 MUSD
+    uint256 votingPeriod;        // e.g., 3 days
+    uint256 quorumPercentage;    // e.g., 51%
+    bool isPublic;               // Open vs closed
+    VotingType votingType;       // Democratic or weighted
+}
+```
+
+### Founder Initialization
+
+You become the first member and admin:
+- Your address is recorded as founder
+- Initial admin privileges granted
+- First deposit can be made
+
+### Pool Registration
+
+Pool is registered in the `YieldAggregator`:
+- Receives unique pool ID
+- Begins earning yields
+- Listed on platform (if public)
+
+</div>
+
+### Member Lifecycle
+
+#### Joining Process
+
+For **open pools**:
+```
+User clicks "Join" → Deposits minimum → Automatically added → Starts earning
+```
+
+For **closed pools**:
+```
+User requests join → Admin/members vote → If approved, deposit → Added
+```
+
+For **hybrid pools**:
+```
+User requests join → Provides verification → Admin approves → Deposit → Added
+```
+
+#### Member States
+
+```typescript
+enum MemberStatus {
+  ACTIVE,        // Contributing and earning
+  INACTIVE,      // Temporarily not contributing
+  PENDING,       // Awaiting approval
+  REMOVED,       // Voted out or left
+  SUSPENDED      // Temporarily restricted
+}
+```
+
+### Deposits & Balances
+
+#### Individual Tracking
+
+Each member has their own balance:
+
+```solidity
+struct Member {
+    address wallet;
+    uint256 totalDeposited;      // All-time deposits
+    uint256 currentBalance;      // Current principal
+    uint256 accruedYields;       // Earned yields
+    uint256 joinedAt;            // Timestamp
+    MemberStatus status;         // Current state
+    uint256 votingWeight;        // For weighted voting
+}
+```
+
+#### Deposit Flow
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### Member Initiates Deposit
+
+```typescript
+deposit(amount: bigint)
+```
+
+### MUSD Transfer
+
+Smart contract receives MUSD from member's wallet:
+- Requires prior MUSD approval
+- Verifies minimum deposit requirement
+- Updates member's balance
+
+### Pool Balance Update
+
+```solidity
+poolTotalDeposits += amount;
+member.totalDeposited += amount;
+member.currentBalance += amount;
+```
+
+### Yield Aggregator Notification
+
+Pool notifies aggregator of new funds:
+- Funds deployed to yield strategies
+- Begins earning immediately
+
+</div>
+
+## Yield Generation & Distribution
+
+### How Yields are Earned
+
+Your pooled MUSD is deployed across multiple strategies:
+
+1. **Mezo Staking** (40-50% allocation)
+   - Bitcoin staking on Mezo L2
+   - ~8-12% APY
+   - Lowest risk
+
+2. **DeFi Lending** (30-40% allocation)
+   - Lending protocols (Aave-style)
+   - ~15-20% APY
+   - Medium risk
+
+3. **Liquidity Provision** (10-20% allocation)
+   - DEX liquidity pools
+   - ~20-30% APY
+   - Higher risk, higher return
+
+<Callout type="info">
+**Diversification** across strategies reduces risk while maintaining competitive yields.
+
+The `YieldAggregator` automatically rebalances based on market conditions.
+</Callout>
+
+### Yield Calculation
+
+Yields are calculated per block and attributed to each member proportionally:
+
+```solidity
+// Simplified yield calculation
+function calculateMemberYield(address member) returns (uint256) {
+    uint256 memberShare = memberBalance[member] / totalPoolBalance;
+    uint256 totalYield = getCurrentYields();
+    uint256 platformFee = totalYield * 10 / 100; // 10% fee
+    uint256 netYield = totalYield - platformFee;
+
+    return netYield * memberShare;
+}
+```
+
+**Every block (~5 seconds):**
+```
+Total Pool Yields Generated
+    ↓
+Subtract 10% Platform Fee
+    ↓
+Distribute 90% Proportionally
+    ↓
+Update Each Member's Balance
+```
+
+### Yield Distribution Options
+
+Pools can choose how to handle yields:
+
+1. **Auto-compound** (default)
+   - Yields added to principal automatically
+   - Maximizes compound growth
+   - No action needed
+
+2. **Distribute to members**
+   - Yields sent to member wallets periodically
+   - Members receive actual MUSD
+   - Requires gas for distributions
+
+3. **Pool treasury**
+   - Yields accumulate in pool
+   - Used for pool expenses
+   - Requires governance vote to distribute
+
+## Governance System
+
+### Proposal Types
+
+Members can propose various actions:
+
+```typescript
+enum ProposalType {
+  ADD_MEMBER,           // Invite new member
+  REMOVE_MEMBER,        // Remove a member
+  WITHDRAW_FUNDS,       // Pool-level withdrawal
+  CHANGE_PARAMETERS,    // Modify pool settings
+  CHANGE_STRATEGY,      // Adjust yield strategy
+  DISTRIBUTE_YIELDS,    // Payout accumulated yields
+  UPGRADE_CONTRACT      // Technical upgrades
+}
+```
+
+### Voting Mechanisms
+
+#### Democratic (One Person, One Vote)
+
+```solidity
+// Each member gets 1 vote
+function vote(uint256 proposalId, bool support) {
+    require(isMember(msg.sender), "Not a member");
+    votes[proposalId][msg.sender] = support ? 1 : 0;
+}
+```
+
+**Best for:**
+- Tight-knit communities
+- Equal participation
+- Fairness emphasis
+
+#### Weighted by Contribution
+
+```solidity
+// Vote weight based on deposited amount
+function vote(uint256 proposalId, bool support) {
+    uint256 weight = memberBalance[msg.sender];
+    votes[proposalId][msg.sender] = support ? weight : 0;
+}
+```
+
+**Best for:**
+- Large diverse pools
+- Proportional risk/reward
+- Investment clubs
+
+### Proposal Lifecycle
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### Creation
+
+Any member can create a proposal:
+
+```typescript
+createProposal({
+  type: ProposalType,
+  description: string,
+  data: bytes,      // Encoded parameters
+  votingPeriod: uint256
+})
+```
+
+### Voting Period
+
+Members vote during the configured period (typically 3-7 days):
+
+```
+Proposal Created (Day 0)
+    ↓
+Voting Period (3-7 days)
+    ↓
+Voting Ends
+```
+
+### Quorum Check
+
+For proposal to pass:
+- ✅ Minimum participation met (quorum)
+- ✅ Majority voted in favor
+
+```solidity
+uint256 totalVotes = yesVotes + noVotes;
+uint256 participation = totalVotes / totalMembers;
+bool quorumMet = participation >= quorumPercentage;
+bool majorityApproved = yesVotes > noVotes;
+```
+
+### Execution
+
+If passed, proposal is executed automatically:
+
+```solidity
+if (quorumMet && majorityApproved) {
+    executeProposal(proposalId);
+    emit ProposalExecuted(proposalId);
+}
+```
+
+### Completion
+
+Proposal is marked as executed or rejected:
+- State updated on-chain
+- Event emitted
+- Results visible to all members
+
+</div>
+
+## Withdrawal Mechanisms
+
+### Individual Withdrawals
+
+Members can withdraw their own balance:
+
+```typescript
+// Small withdrawals (< 10% of balance)
+withdraw(amount) {
+    require(amount <= balance * 0.1, "Exceeds limit");
+    // Instant, no approval needed
+}
+
+// Large withdrawals (≥ 10% of balance)
+requestWithdrawal(amount) {
+    // Creates proposal
+    // Requires member vote
+    // Protects pool stability
+}
+```
+
+<Callout type="warning">
+**Large Withdrawal Protection**: Withdrawals exceeding 10% of pool balance may require governance approval to prevent sudden liquidity issues.
+</Callout>
+
+### Emergency Withdrawals
+
+In case of emergencies, members can force withdraw:
+
+```solidity
+emergencyWithdraw() {
+    // Available after 7-day waiting period
+    // Withdraws proportional share
+    // Removes from pool
+}
+```
+
+## Member Management
+
+### Adding Members
+
+**Open Pools**: Automatic
+```solidity
+joinPool() payable {
+    require(msg.value >= minimumDeposit);
+    members.push(msg.sender);
+}
+```
+
+**Closed Pools**: Requires vote
+```solidity
+proposeNewMember(address newMember) {
+    createProposal(ADD_MEMBER, newMember);
+    // Voting begins
+}
+```
+
+### Removing Members
+
+Members can be removed by vote for:
+- Violating pool rules
+- Inactivity (not contributing)
+- Malicious behavior
+- Voluntary exit
+
+```solidity
+proposalRemoveMember(address member, string reason) {
+    // Creates removal proposal
+    // Requires 60% approval
+    // Member can withdraw during vote
+}
+```
+
+<Callout type="error">
+**Member Protection**: A member under removal proposal can still withdraw their balance during the voting period.
+</Callout>
+
+## Fee Structure
+
+### Platform Fees
+
+```
+Gross Yields: 100 MUSD
+    ↓
+Platform Fee (10%): -10 MUSD
+    ↓
+Net to Pool: 90 MUSD
+    ↓
+Distributed to Members Proportionally
+```
+
+### Gas Fees
+
+Approximate gas costs on Mezo testnet:
+
+| Action | Gas Cost | USD Equivalent |
+|--------|----------|----------------|
+| Create pool | ~0.0003 BTC | ~$0.03 |
+| Join pool | ~0.0001 BTC | ~$0.01 |
+| Deposit | ~0.0001 BTC | ~$0.01 |
+| Vote | ~0.00005 BTC | ~$0.005 |
+| Withdraw | ~0.00015 BTC | ~$0.015 |
+
+<Callout type="info">
+**Mainnet Costs**: Gas fees on mainnet will be higher (~$0.10-$0.50 per transaction) but still significantly cheaper than Ethereum.
+</Callout>
+
+## Smart Contract Architecture
+
+### Core Contracts
+
+```
+CooperativePool.sol
+├─ Inherits from ERC20 (pool shares)
+├─ Implements governance (proposals, voting)
+├─ Manages members (add, remove, balances)
+└─ Integrates with YieldAggregator
+
+YieldAggregator.sol
+├─ Routes funds to strategies
+├─ Calculates yields
+├─ Distributes returns
+└─ Manages platform fees
+
+GovernanceModule.sol
+├─ Proposal creation
+├─ Voting logic
+├─ Execution queue
+└─ Event emissions
+```
+
+### Key Functions
+
+```solidity
+// Member actions
+function deposit(uint256 amount) external;
+function withdraw(uint256 amount) external;
+function requestJoin() external;
+function leavePool() external;
+
+// Governance
+function createProposal(...) external returns (uint256);
+function vote(uint256 proposalId, bool support) external;
+function executeProposal(uint256 proposalId) external;
+
+// Admin (multi-sig or voted role)
+function approveJoinRequest(address member) external;
+function updatePoolParameters(...) external;
+function emergencyPause() external;
+
+// Views
+function getMemberBalance(address member) external view returns (uint256);
+function getPoolStats() external view returns (PoolStats);
+function getActiveProposals() external view returns (Proposal[]);
+```
+
+## Security Measures
+
+### Access Control
+
+```solidity
+// Role-based permissions
+modifier onlyMember() {
+    require(isMember(msg.sender), "Not a member");
+    _;
+}
+
+modifier onlyAdmin() {
+    require(isAdmin(msg.sender), "Not an admin");
+    _;
+}
+
+modifier whenNotPaused() {
+    require(!paused, "Pool is paused");
+    _;
+}
+```
+
+### Reentrancy Protection
+
+All external calls use OpenZeppelin's `ReentrancyGuard`:
+
+```solidity
+function withdraw(uint256 amount)
+    external
+    nonReentrant
+    whenNotPaused
+{
+    // Safe withdrawal logic
+}
+```
+
+### Emergency Controls
+
+- **Pause mechanism**: Stops deposits/withdrawals during emergencies
+- **Timelock**: Major changes require 48-hour delay
+- **Multi-sig admin**: Critical functions require multiple approvals
+
+## Data Transparency
+
+### On-Chain Events
+
+All important actions emit events:
+
+```solidity
+event Deposited(address indexed member, uint256 amount);
+event Withdrawn(address indexed member, uint256 amount);
+event MemberAdded(address indexed member);
+event MemberRemoved(address indexed member, string reason);
+event ProposalCreated(uint256 indexed proposalId);
+event Voted(uint256 indexed proposalId, address indexed voter, bool support);
+event YieldsDistributed(uint256 amount, uint256 timestamp);
+```
+
+### Real-Time Queries
+
+Members can query pool state anytime:
+
+```typescript
+// Get pool overview
+const stats = await pool.getPoolStats();
+// {
+//   totalMembers: 45,
+//   totalDeposits: 125000000000, // 125k MUSD
+//   totalYields: 15000000000,    // 15k MUSD
+//   avgMemberBalance: 2777777778
+// }
+
+// Get your balance
+const myBalance = await pool.getMemberBalance(address);
+
+// Get active proposals
+const proposals = await pool.getActiveProposals();
+```
+
+## Performance Optimization
+
+### Gas Optimization
+
+- **Batch operations**: Vote on multiple proposals at once
+- **Lazy yield calculation**: Yields calculated on-demand, not every block
+- **Efficient storage**: Packed struct variables
+
+### Scalability
+
+- **Member limits**: Pools capped at 1,000 members for governance efficiency
+- **Proposal limits**: Max 10 active proposals at once
+- **Vote indexing**: Off-chain indexing for fast UI queries
+
+## Next Steps
+
+Now that you understand how community pools work technically:
+
+<Cards>
+  <Card
+    title="Create Your Pool"
+    href="/docs/products/community-pools/creating-pool"
+    description="Step-by-step pool creation guide"
+  />
+  <Card
+    title="Join Existing Pool"
+    href="/docs/products/community-pools/joining-pool"
+    description="Find and join community pools"
+  />
+  <Card
+    title="Governance Details"
+    href="/docs/products/community-pools/governance"
+    description="Deep dive into voting and proposals"
+  />
+  <Card
+    title="Pool Management"
+    href="/docs/products/community-pools/pool-management"
+    description="Admin features and best practices"
+  />
+</Cards>
+
+---
+
+**Questions?** See our [FAQ](/docs/products/community-pools/faq) or ask in [Discord](https://discord.gg/khipuvault)

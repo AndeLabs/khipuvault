@@ -1,0 +1,408 @@
+---
+title: Entering the Lottery
+description: Step-by-step guide to participating in Prize Pool, depositing MUSD, earning tickets, and staying eligible for weekly draws.
+---
+
+# Entering the Lottery
+
+Learn how to participate in Prize Pool and maximize your lottery entries while keeping your principal safe.
+
+## Prerequisites
+
+Before entering Prize Pool, ensure you have:
+
+1. **Mezo-compatible wallet** (MetaMask, Rabby, Coinbase Wallet)
+2. **MUSD balance** (Mezo's stablecoin)
+3. **Small amount of MBTC** (for gas fees)
+
+<Callout type="info">
+**Don't have MUSD?**
+
+You can mint MUSD from BTC on Mezo or swap on [MezoSwap](https://swap.mezo.org). See [Getting MUSD](/docs/getting-started/getting-musd) for details.
+</Callout>
+
+## Step-by-Step: Entering Prize Pool
+
+### 1. Connect Your Wallet
+
+Navigate to the Prize Pool page:
+
+```
+https://app.khipuvault.com/prize-pool
+```
+
+Click **"Connect Wallet"** and approve the connection.
+
+**Supported wallets:**
+- MetaMask
+- Rabby
+- Coinbase Wallet
+- WalletConnect-compatible wallets
+
+### 2. Review Current Prize
+
+Before depositing, check the current week's prize:
+
+```
+Current Week Prize Pool: 5,750 MUSD
+- Grand Prize: 4,600 MUSD
+- Runner-Up: 862 MUSD (5 winners)
+- Consolation: 287 MUSD (10 winners)
+
+Next Draw: Friday, 12:00 PM UTC (in 3 days)
+Total Participants: 1,247
+Your Odds (if you deposit 1,000 MUSD): ~0.05%
+```
+
+### 3. Deposit MUSD
+
+Click **"Deposit"** and enter your amount:
+
+```
+Deposit Amount: [1000] MUSD
+
+You will receive:
+- ~1,000 lottery tickets
+- Participation in all future draws
+- Right to withdraw anytime
+
+Estimated odds:
+- Grand Prize: 1 in 2,000
+- Any Prize: 1 in 125
+```
+
+**Deposit Options:**
+- **Minimum**: 10 MUSD (to prevent spam)
+- **Maximum**: No limit
+- **Incremental**: Deposit multiple times to increase tickets
+
+### 4. Approve Transaction
+
+Two transactions required:
+
+**Transaction 1: Approve MUSD**
+```
+Approve KhipuVault Prize Pool to spend MUSD
+Gas: ~0.0001 MBTC
+```
+
+**Transaction 2: Deposit**
+```
+Deposit 1,000 MUSD into Prize Pool
+Gas: ~0.0002 MBTC
+```
+
+<Callout type="warning">
+**Gas Optimization Tip**
+
+Approve unlimited MUSD spending to avoid repeated approval transactions. This is safe because you control withdrawals.
+</Callout>
+
+### 5. Confirm Your Entry
+
+After deposit confirms (~5 seconds on Mezo), you'll see:
+
+```
+✅ Deposit Successful!
+
+Your Stats:
+- Balance: 1,000 MUSD
+- Lottery Tickets: 1,000
+- Eligible Draws: All future draws starting Friday
+- Next Draw: In 3 days, 4 hours
+
+Your Odds:
+- Grand Prize: 0.05% (1 in 2,000)
+- Runner-Up: 0.25% (1 in 400)
+- Any Prize: 0.8% (1 in 125)
+```
+
+## Understanding Your Tickets
+
+### Ticket Allocation
+
+Tickets are calculated based on:
+
+1. **Deposit amount** (1 MUSD ≈ 1 ticket)
+2. **Time-weighted average** (longer deposits = more tickets)
+
+**Example:**
+
+```
+Scenario A: Deposit 1,000 MUSD on Monday
+By Friday draw: 1,000 tickets (full week)
+
+Scenario B: Deposit 1,000 MUSD on Thursday
+By Friday draw: ~285 tickets (2 days out of 7)
+```
+
+<Callout type="info">
+**Time-Weighting Explained**
+
+Your tickets are calculated using a time-weighted average to prevent "sniping" (depositing right before draws). Longer deposits earn proportionally more tickets.
+
+Formula: `Tickets = Balance × (Days Deposited ÷ 7)`
+</Callout>
+
+### Increasing Your Tickets
+
+**Option 1: Deposit More**
+```
+Initial: 1,000 MUSD = 1,000 tickets
+Add 500 MUSD = 1,500 total tickets
+```
+
+**Option 2: Deposit Earlier**
+```
+Deposit Monday: Full week time-weight
+Deposit Thursday: Partial week time-weight
+```
+
+**Option 3: Keep Deposited**
+```
+Week 1: 1,000 tickets
+Week 2: 1,000 tickets (cumulative)
+Week 52: 1,000 tickets (still eligible)
+```
+
+### Ticket Tracking
+
+View your tickets in real-time:
+
+```
+My Prize Pool Dashboard
+
+Balance: 2,500 MUSD
+Current Tickets: 2,500
+Time in Pool: 14 days
+
+Ticket History:
+- Week 1: 714 tickets (deposited Thursday)
+- Week 2: 2,500 tickets (full week)
+- Week 3: 2,500 tickets (projected)
+```
+
+## Draw Eligibility
+
+### When Are You Eligible?
+
+You're eligible for a draw if:
+- ✅ You have MUSD deposited at draw time
+- ✅ Your deposit has been in the pool for at least 1 block
+- ✅ You have at least 10 MUSD (minimum threshold)
+
+You're NOT eligible if:
+- ❌ You withdrew before the draw
+- ❌ Your balance is below 10 MUSD
+- ❌ Your deposit occurred after the draw snapshot
+
+### Draw Schedule
+
+Draws occur **every Friday at 12:00 PM UTC**.
+
+**Timeline:**
+```
+Monday 12:00 PM UTC: Week begins
+Tuesday-Thursday: Deposits accrue time-weight
+Friday 11:59 AM UTC: Snapshot taken
+Friday 12:00 PM UTC: Draw executes
+Friday 12:01 PM UTC: Winners announced
+```
+
+**Important:**
+- Deposits after snapshot don't count for current draw
+- Early week deposits have higher time-weight
+
+## Depositing Strategies
+
+### Conservative Approach
+
+Deposit a comfortable amount and leave it:
+
+```
+Deposit: 1,000 MUSD
+Strategy: Set and forget
+Duration: 52 weeks (1 year)
+Draws entered: 52
+Cost: 0 MUSD (no-loss)
+Potential upside: 52 chances to win
+```
+
+### Aggressive Approach
+
+Maximize tickets through larger deposits:
+
+```
+Deposit: 10,000 MUSD
+Strategy: Large position for better odds
+Duration: 12 weeks (3 months)
+Draws entered: 12
+Your odds: 10x higher than 1,000 MUSD deposit
+```
+
+### Dollar-Cost Averaging
+
+Gradually build position:
+
+```
+Week 1: Deposit 500 MUSD
+Week 2: Deposit 500 MUSD (1,000 total)
+Week 3: Deposit 500 MUSD (1,500 total)
+Week 4: Deposit 500 MUSD (2,000 total)
+
+Benefits:
+- Spread out gas costs
+- Average entry price (if MUSD fluctuates)
+- Build tickets over time
+```
+
+## Managing Your Entry
+
+### Adding to Your Position
+
+Click **"Deposit"** again to add funds:
+
+```
+Current Balance: 1,000 MUSD
+Additional Deposit: 500 MUSD
+New Balance: 1,500 MUSD
+New Tickets: ~1,500 (depends on time-weight)
+```
+
+### Withdrawing (Partially)
+
+You can withdraw part of your balance:
+
+```
+Current Balance: 2,000 MUSD
+Withdraw: 500 MUSD
+Remaining Balance: 1,500 MUSD
+Remaining Tickets: ~1,500
+
+Effect: Reduces your odds but keeps you in draws
+```
+
+### Withdrawing (Fully)
+
+Exit Prize Pool completely:
+
+```
+Current Balance: 2,000 MUSD
+Withdraw: 2,000 MUSD
+Remaining Balance: 0 MUSD
+Tickets: 0
+
+Effect: No longer eligible for draws
+Note: Can claim any unclaimed prizes separately
+```
+
+## Entry Limits and Rules
+
+### Minimum Deposit
+```
+Minimum: 10 MUSD
+Reason: Prevent spam and dust accounts
+```
+
+### Maximum Deposit
+```
+Maximum: No limit
+Note: Large deposits improve odds but don't guarantee wins
+```
+
+### Multiple Entries
+
+You can deposit from multiple wallets:
+
+```
+Wallet A: 1,000 MUSD
+Wallet B: 1,000 MUSD
+Total tickets: 2,000 (tracked separately)
+
+Note: Each wallet is an independent entry
+```
+
+### Time Limits
+
+No time limits on:
+- How long you can stay deposited
+- How many draws you can enter
+- When you can withdraw
+
+<Callout type="success">
+**Unlimited Participation**
+
+Unlike traditional lotteries where you buy tickets per draw, Prize Pool lets you participate in unlimited draws with a single deposit. Deposit once, enter every week!
+</Callout>
+
+## Entry Checklist
+
+Before entering Prize Pool:
+
+- [ ] I have a Mezo-compatible wallet connected
+- [ ] I have at least 10 MUSD to deposit
+- [ ] I have MBTC for gas fees (~0.0003 MBTC)
+- [ ] I understand my deposit is always withdrawable
+- [ ] I know my tickets are based on deposit amount and time
+- [ ] I'm comfortable with opportunity cost (foregoing direct yields)
+
+## Common Entry Mistakes
+
+### ❌ Depositing Right Before Draw
+
+```
+Thursday 11:00 PM UTC: Deposit 1,000 MUSD
+Friday 12:00 PM UTC: Draw occurs
+Your tickets: ~83 (1 day out of 7)
+
+Better: Deposit Monday for full time-weight
+```
+
+### ❌ Withdrawing Before Draw
+
+```
+Thursday: Withdraw all funds
+Friday: Draw occurs
+Your tickets: 0 (not eligible)
+
+Better: Wait until after draw to withdraw
+```
+
+### ❌ Depositing Below Minimum
+
+```
+Deposit: 5 MUSD
+Result: Transaction reverts (minimum 10 MUSD)
+
+Better: Deposit at least 10 MUSD
+```
+
+### ❌ Not Checking Odds
+
+```
+Your deposit: 10 MUSD
+Total pool: 2,000,000 MUSD
+Your odds: 0.0005% (extremely low)
+
+Better: Deposit more or understand your odds
+```
+
+## After Depositing
+
+Once deposited:
+
+1. **Wait for draw** - Every Friday at 12:00 PM UTC
+2. **Check results** - Winners announced immediately
+3. **Claim prizes** - If you win (see [Claiming Prizes](/docs/products/prize-pool/claiming-prizes))
+4. **Stay deposited** - Automatically enter next draw
+5. **Withdraw anytime** - If you want your MUSD back
+
+## Next Steps
+
+- [Prize Calculation](/docs/products/prize-pool/prize-calculation) - How prizes are determined
+- [Claiming Prizes](/docs/products/prize-pool/claiming-prizes) - What to do if you win
+- [Odds & Strategies](/docs/products/prize-pool/odds-strategies) - Improve your chances
+
+---
+
+**Ready to enter?** [Deposit now →](https://app.khipuvault.com/prize-pool)

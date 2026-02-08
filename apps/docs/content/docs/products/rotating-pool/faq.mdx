@@ -1,0 +1,1006 @@
+---
+title: Rotating Pool FAQ
+description: Frequently asked questions about blockchain ROSCAs, tandas, and pasanakus on KhipuVault.
+---
+
+# Rotating Pool FAQ
+
+Common questions about participating in and organizing rotating savings pools on KhipuVault.
+
+## General Questions
+
+### What's the difference between a tanda, pasanaku, and ROSCA?
+
+They're all the same concept - rotating savings circles - just with different cultural names:
+
+- **ROSCA** - Global term (Rotating Savings and Credit Association)
+- **Tanda** - Mexico, Central America
+- **Pasanaku** - Bolivia, Peru (Quechua/Aymara origin)
+- **Cundina** - Peru, Ecuador
+- **San** - Colombia
+
+KhipuVault supports all these traditions on blockchain with the same smart contract system.
+
+### How is a rotating pool different from other KhipuVault products?
+
+| Feature | Rotating Pool | Individual Savings | Community Pool |
+|---------|--------------|-------------------|----------------|
+| Participants | 3-50 members | Just you | 2+ members |
+| Withdrawals | Only on your turn | Anytime | Anytime (with rules) |
+| Goal | Lump sum distribution | Flexible savings | Shared savings |
+| Commitment | Fixed duration | None | Varies |
+| Best for | Planned expenses | Emergency fund | Group goals |
+
+### Is this legal?
+
+Yes. Rotating savings circles are legal worldwide and have existed for centuries. KhipuVault simply brings them on-chain with smart contracts.
+
+However, crypto regulations vary by country. Ensure you comply with your local laws regarding:
+- Cryptocurrency ownership
+- Tax reporting on yields
+- Cross-border transfers (if international pool)
+
+**Always consult a local tax professional.**
+
+### Why use blockchain instead of traditional ROSCAs?
+
+**Blockchain advantages:**
+- ✅ Transparent records (no disputes)
+- ✅ Automatic payments (no manual collection)
+- ✅ Smart contract enforcement (reduced defaults)
+- ✅ Global participation (connect diaspora communities)
+- ✅ Verifiable history (build reputation)
+
+**Traditional advantages:**
+- ✅ No technology barriers
+- ✅ Cash-based (no crypto needed)
+- ✅ Personal relationships
+- ✅ Cultural familiarity
+
+KhipuVault combines the best of both: blockchain infrastructure with cultural tradition.
+
+### What if I don't trust blockchain technology?
+
+Valid concern! Here's what protects you:
+
+1. **Audited contracts** - Security experts verify our code
+2. **Open source** - Anyone can inspect the contracts
+3. **On-chain verification** - Every transaction is public
+4. **No custody** - You control your wallet, not KhipuVault
+5. **Tested extensively** - Months of testing on Mezo testnet
+
+Start small: Join a low-value pool first to build confidence.
+
+## Joining & Membership
+
+### How do I find pools to join?
+
+**Three ways:**
+
+1. **Direct invitation** - Organizer shares pool link
+2. **Browse public pools** - KhipuVault marketplace
+3. **Create your own** - Start a pool and invite members
+
+We recommend joining pools with people you know or who have high reputation scores.
+
+### What do I need to join?
+
+**Required:**
+- MUSD balance (for contributions + collateral)
+- Compatible wallet (MetaMask, Coinbase Wallet, etc.)
+- Mezo testnet access
+
+**Recommended:**
+- Email for notifications
+- Stable income to support contributions
+- Understanding of commitment duration
+
+### Can I join multiple pools at once?
+
+Yes! Many users participate in several pools simultaneously:
+
+**Example:**
+```
+Pool A: $50/week, 8 members, your turn Round 3
+Pool B: $100/month, 10 members, your turn Round 7
+Pool C: $200/biweekly, 6 members, your turn Round 2
+```
+
+**Just ensure you can afford all commitments:**
+```
+Monthly total:
+Pool A: ~$200/month
+Pool B: $100/month
+Pool C: ~$400/month
+───────────────
+Total: $700/month commitment
+```
+
+### Can I leave a pool after joining?
+
+**Before pool starts:** Yes, easy exit with collateral refund.
+
+**After pool starts:** Only via emergency exit:
+- Requires organizer/member approval
+- 10% penalty on your equity
+- Damages your reputation score
+- Should only be done for true emergencies
+
+**After receiving payout:** You MUST complete all remaining contributions. No exit allowed.
+
+### What happens if the pool doesn't fill up?
+
+Organizers set a minimum member threshold (usually 3-5). If not met by start date:
+
+**Option 1: Extended recruitment**
+```
+Original start: Feb 1
+Extended deadline: Feb 15
+Minimum members: 5
+```
+
+**Option 2: Start with fewer members**
+```
+Planned: 10 members × $100 = $1,000 pot
+Actual: 7 members × $100 = $700 pot
+Rotation: 7 rounds instead of 10
+```
+
+**Option 3: Cancel and refund**
+```
+Status: DISSOLVED
+All collateral: Refunded
+Pool: Cancelled, try again
+```
+
+## Contributions & Payments
+
+### How do automatic payments work?
+
+**Setup (one-time):**
+1. Approve MUSD spending by pool contract
+2. Keep sufficient MUSD balance in wallet
+3. Contract pulls exact amount on schedule
+
+**Each round:**
+```
+Due date arrives → Smart contract executes → Pulls from all members → Distributes to recipient
+```
+
+**No manual action needed** unless you run out of MUSD.
+
+### What if I forget to pay?
+
+The smart contract attempts automatic pull. If it fails (insufficient balance):
+
+**Grace period** (typically 3 days):
+- No penalty yet
+- Reminders sent
+- Time to add funds
+
+**After grace period:**
+- Late penalties apply (e.g., 5% per week)
+- Your reputation score drops
+- Risk of default if too late
+
+**Avoid this:**
+- Set calendar reminders
+- Keep buffer MUSD balance
+- Enable email/SMS notifications
+
+### Can I pay early or skip a round?
+
+**Pay early:** No. Smart contract pulls on fixed schedule.
+
+**Pay extra:** Yes, but doesn't skip future rounds.
+
+**Skip a round:** No. Every round requires full participation.
+
+**The design is intentional:** Ensures fairness and predictability for all members.
+
+### What happens if someone else doesn't pay?
+
+**During grace period:**
+- Pool waits for late member
+- Payout delayed until payment received
+- Other members notified
+
+**After default:**
+- Member's collateral slashed to cover contribution
+- Slashed funds distributed to current round recipient
+- Defaulting member expelled
+- Pool continues with remaining members
+
+**If no collateral:**
+- Pool enters emergency state
+- Members vote on resolution:
+  - Continue without defaulter (smaller pots)
+  - Dissolve and refund remaining equity
+  - Organizer covers shortage
+
+### Can I change my contribution amount mid-cycle?
+
+No. All parameters are locked when the pool starts:
+- Contribution amount
+- Schedule
+- Member count
+- Rotation order
+
+**Why?** Changing mid-cycle would be unfair to members who already received or planned based on original terms.
+
+**Alternative:** Complete current cycle, then create new pool with different parameters.
+
+## Rotation & Payouts
+
+### How is rotation order decided?
+
+**Four common methods:**
+
+**1. First-come, first-served (default)**
+```
+Join order 1 → Receive Round 1
+Join order 2 → Receive Round 2
+...
+```
+
+**2. Random lottery**
+```
+All members assigned randomly on-chain at start
+Fair for everyone
+```
+
+**3. Manual assignment**
+```
+Organizer sets order based on:
+- Member needs (wedding dates, etc.)
+- Consensus discussion
+- Community decision
+```
+
+**4. Bidding (advanced)**
+```
+Each round, members bid discount to receive early
+Highest bidder wins that round
+```
+
+### Can I swap my position with another member?
+
+Yes, if both parties agree and organizer approves:
+
+<Steps>
+
+### Propose Swap
+
+```
+You: Round 9 → Want Round 4
+Other member: Round 4 → Willing to move to Round 9
+```
+
+### Both Sign Agreement
+
+On-chain swap transaction.
+
+### Organizer Approves
+
+Verifies swap is legitimate and fair.
+
+### Order Updated
+
+```
+NEW rotation order:
+Round 4: YOU (swapped)
+Round 9: Other member (swapped)
+```
+
+</Steps>
+
+**Why swap?**
+- Urgent need for earlier payout
+- Preference for later position (higher yields)
+- Accommodate life events
+
+### When exactly do I receive my payout?
+
+**Scheduled time:**
+```
+Round 9: November 1, 2026, 12:00 PM UTC
+```
+
+**Actual distribution:**
+- Automatic pools: Within minutes of scheduled time
+- Manual claim pools: After all contributions verified
+
+**Delays possible if:**
+- Members late on payments (during grace period)
+- Technical issues (rare)
+- Organizer manually reviewing (high-value pools)
+
+**Check dashboard** for real-time status.
+
+### What if I don't receive my payout?
+
+**First, check:**
+
+1. **Pool status** - Is round complete?
+2. **Payment status** - Did all members pay?
+3. **Wallet** - Is it connected and accessible?
+4. **Transaction history** - Was it sent?
+
+**Then:**
+
+```
+If sent but not showing:
+→ Check Mezo blockchain explorer
+→ Verify wallet address
+→ Contact wallet support
+
+If not sent:
+→ Review payment status of all members
+→ Contact pool organizer
+→ Check for manual claim button
+→ Escalate to KhipuVault support if needed
+```
+
+### How are yields calculated on payouts?
+
+**Yield source:** Contributions deposited in pool earn yields on Mezo before distribution.
+
+**Calculation:**
+```
+Base pot: 1,000 MUSD (10 members × 100)
+Holding period: ~7 days average
+Current APY: 12%
+Weekly rate: 12% / 52 = 0.23%
+
+Gross yields: 1,000 × 0.23% = 2.30 MUSD
+Platform fee: 2.30 × 10% = 0.23 MUSD
+Net yields: 2.07 MUSD
+
+Total payout: 1,000 + 2.07 = 1,002.07 MUSD
+```
+
+**Factors:**
+- Position (later = more yield time)
+- Market APY (varies 10-18%)
+- Pool size (larger = more absolute yield)
+- Holding period (weekly vs monthly pools)
+
+## Security & Risk
+
+### What prevents people from defaulting after receiving?
+
+**Multi-layer protection:**
+
+**1. Collateral system**
+```
+Member deposits: 50% of total pot upfront
+Returned when: They receive their payout
+Slashed if: They default on future contributions
+```
+
+**2. Reputation system**
+```
+On-chain history of:
+- Payment reliability
+- Completed pools
+- Defaults and late payments
+
+Low reputation = Can't join new pools
+```
+
+**3. Social pressure**
+```
+Pool members know each other
+Community accountability
+Cultural tradition of trust
+```
+
+**4. Legal recourse** (optional)
+```
+Some pools require identity verification
+Can pursue legal action for large defaults
+```
+
+**5. Smart contract enforcement**
+```
+Automatic penalties
+Immediate consequences
+No escape via disappearing
+```
+
+### Is my money safe in the smart contract?
+
+**Security measures:**
+
+✅ **Audited contracts** - Third-party security firms review code
+✅ **Open source** - Public verification by community
+✅ **Battle-tested** - Months of testnet usage
+✅ **Mezo security** - Built on secure Bitcoin-backed blockchain
+✅ **No admin keys** - No one can drain funds
+✅ **Time-locks** - Protection against exploit attempts
+
+**Risks remain:**
+- Smart contract bugs (mitigated by audits)
+- Blockchain vulnerabilities (very rare on Mezo)
+- Your wallet security (protect seed phrase!)
+
+**Best practices:**
+- Start with small amounts
+- Verify contract addresses
+- Use hardware wallet for large sums
+- Never share seed phrase
+
+### What if the organizer is malicious?
+
+**Organizer powers are LIMITED:**
+
+**Can do:**
+- Set pool parameters at creation
+- Approve emergency exits
+- Send announcements
+- Pause in extreme emergency
+
+**Cannot do:**
+- ❌ Withdraw funds
+- ❌ Change rotation order mid-cycle
+- ❌ Steal collateral
+- ❌ Skip distributions
+- ❌ Modify contributions
+
+**Smart contract enforces all critical operations.** Organizer is more like a coordinator than a controller.
+
+**For high-value pools:**
+- Use multi-signature organizers (3 of 5 approval)
+- Check organizer reputation score
+- Require transparent communication
+- Verify contract source code
+
+### What happens if KhipuVault shuts down?
+
+**Your funds are safe because:**
+
+1. **Smart contracts are autonomous** - They run on blockchain regardless of KhipuVault website
+2. **You control your wallet** - Not custodial
+3. **Open source** - Anyone can build alternative frontend
+4. **On-chain data** - All records permanent
+
+**How to access:**
+```
+If app.khipuvault.com goes offline:
+→ Use blockchain explorer (Mezo block explorer)
+→ Interact directly with contract
+→ Community can fork frontend
+→ Your wallet still works
+```
+
+**Recommendation:** Save your pool contract address.
+
+### Can the government seize my pool funds?
+
+**Technical answer:** Funds are in a smart contract, not a bank account. Harder to seize.
+
+**Legal answer:** Depends on your jurisdiction. Governments can:
+- Require reporting of crypto holdings
+- Tax yields as income
+- Seize crypto in some cases (varies widely)
+
+**Compliance is your responsibility:**
+- Report yields on taxes if required
+- Follow local crypto regulations
+- Consult legal expert if concerned
+
+**KhipuVault is not a bank** and doesn't hold your funds. We provide software tools.
+
+## Fees & Costs
+
+### What fees does KhipuVault charge?
+
+**Platform fee:** 10% of yields only
+
+**Examples:**
+
+```
+Example 1: Individual Savings
+Deposit: 1,000 MUSD
+Yields earned: 120 MUSD (12% APY)
+Platform fee: 12 MUSD (10% of 120)
+You keep: 1,108 MUSD
+```
+
+```
+Example 2: Rotating Pool Payout
+Base pot: 1,000 MUSD
+Yields earned: 2.30 MUSD
+Platform fee: 0.23 MUSD (10% of 2.30)
+You receive: 1,002.07 MUSD
+```
+
+**No fees on:**
+- ❌ Deposits
+- ❌ Withdrawals
+- ❌ Pool creation
+- ❌ Contributions
+- ❌ Base payouts
+
+**Only on yields**, which are bonus earnings anyway.
+
+### What are the blockchain gas fees?
+
+**Typical costs on Mezo testnet:**
+
+```
+Pool creation: ~$0.50
+Joining pool: ~$0.10
+Contribution: $0 (automatic pull)
+Claim payout: $0 (automatic) or ~$0.10 (manual)
+```
+
+**Gas fees go to Mezo validators**, not KhipuVault.
+
+**Testnet note:** Currently using test funds. Mainnet fees may vary.
+
+### Are there any hidden costs?
+
+No hidden fees. All costs transparent:
+
+**Upfront costs:**
+- Collateral (refundable, not a fee)
+- Initial gas for joining
+
+**Ongoing costs:**
+- Contributions (go into pot, not a fee)
+- Platform fee (10% of yields only)
+
+**No monthly fees, no withdrawal fees, no surprise charges.**
+
+## Technical Questions
+
+### What blockchain is this on?
+
+**Mezo Blockchain:**
+- Chain ID: 31611 (testnet)
+- Bitcoin-backed security
+- EVM-compatible (like Ethereum)
+- Fast, low-cost transactions
+
+**Why Mezo?**
+- Bitcoin security without Bitcoin fees
+- DeFi yields on BTC
+- Built for savings applications
+- Latin America friendly
+
+### What is MUSD?
+
+**MUSD** = Mezo USD, the stablecoin on Mezo blockchain.
+
+- Pegged to US Dollar (1 MUSD ≈ $1 USD)
+- Used for all KhipuVault transactions
+- Backed by Bitcoin collateral on Mezo
+- Can be swapped for other stablecoins
+
+**Get MUSD:**
+1. Bridge from Ethereum/other chains
+2. Swap from other Mezo tokens
+3. Buy from supported exchanges
+
+### Do I need to keep my wallet connected all the time?
+
+**No.** Your wallet only needs to be connected when:
+
+**For automatic payments:**
+- Doesn't need to be online
+- Smart contract pulls from your address
+- Works even if computer is off
+
+**For manual actions:**
+- Creating a pool
+- Joining a pool
+- Manual claiming payout
+- Emergency exits
+
+**Between these actions**, you can disconnect safely.
+
+### Can I use a hardware wallet?
+
+**Yes! Highly recommended for large amounts:**
+
+**Compatible wallets:**
+- Ledger (via MetaMask)
+- Trezor (via MetaMask)
+- GridPlus Lattice
+
+**Benefits:**
+- Offline private key storage
+- Extra security layer
+- Protection from malware
+
+**Considerations:**
+- Must connect to approve each transaction
+- Slight UX friction (worth it for security)
+
+### What if I lose access to my wallet?
+
+**Prevention (CRITICAL):**
+- **Write down seed phrase** on paper
+- Store in safe, secure location
+- NEVER digital copy (no photos, no cloud)
+- Consider metal backup for fire protection
+- Test recovery process
+
+**If lost without backup:**
+- ❌ Funds are unrecoverable
+- ❌ Cannot access pool payouts
+- ❌ No customer service can help
+
+**This is blockchain:** You are your own bank. Backup is YOUR responsibility.
+
+**Pool implications:**
+If you lose wallet access during pool:
+- Can't receive payout (unless you recover)
+- Organizer CANNOT reroute to new address (security feature)
+- You'll miss your turn
+
+### Can I participate from outside the US?
+
+**Yes!** KhipuVault is global.
+
+**Requirements:**
+- Internet access
+- Compatible wallet
+- MUSD tokens
+- Compliance with your local laws
+
+**Popular regions:**
+- Latin America (Mexico, Peru, Bolivia, Colombia)
+- United States
+- Europe
+- Asia
+
+**Remittance use case:**
+Many users create pools with family across borders. Example: Workers in US + family in Mexico in same tanda.
+
+## Cultural & Social
+
+### How do I organize a pool with my family?
+
+**Step-by-step:**
+
+1. **Gauge interest** - Ask family members if interested
+2. **Determine parameters**
+   ```
+   8 family members
+   $50/month each
+   $400 pot per round
+   8 months duration
+   ```
+3. **Help with wallets** - Assist less tech-savvy members
+4. **Create pool** - Set 0-25% collateral (trust-based)
+5. **Onboard members** - Walk through joining process
+6. **Stay connected** - Family chat for updates
+
+**Cultural tip:** Use traditional names (tanda/pasanaku) to honor heritage.
+
+### Can non-technical people participate?
+
+**Yes, but requires learning:**
+
+**Skills needed:**
+- Install wallet app (15 min tutorial)
+- Buy/receive MUSD (one-time setup)
+- Connect wallet to KhipuVault (simple)
+- Monitor notifications (email/SMS)
+
+**KhipuVault makes it easier:**
+- Step-by-step wizards
+- Video tutorials (in Spanish & English)
+- Customer support
+- Simple interface
+
+**Organizer role:**
+- Help members set up wallets
+- Provide ongoing support
+- Explain blockchain basics
+- Troubleshoot issues
+
+**Reality:** First pool has learning curve. Second pool is easy.
+
+### How do traditional ROSCA participants react to blockchain?
+
+**Common concerns:**
+
+**"Why change what works?"**
+→ We enhance, not replace. Keep the community spirit, add transparency.
+
+**"I don't understand technology."**
+→ You don't need to understand blockchain internals. Just use the app like online banking.
+
+**"I prefer cash."**
+→ MUSD is digital cash. Stable value, works globally.
+
+**"What about people without internet?"**
+→ Blockchain ROSCAs are for connected communities. Traditional ROSCAs still valuable for offline groups.
+
+**Success stories:**
+- Immigrants staying connected with home communities
+- Young generation introducing elders to crypto savings
+- Remote workers organizing global tandas
+
+### Can I run a pool for my workplace?
+
+**Yes! Common use case:**
+
+**Workplace tanda example:**
+```
+15 coworkers
+$100 biweekly (payday aligned)
+$1,500 pot
+Rotation matches annual timing
+  - January → Tax season expenses
+  - July → Summer vacation
+  - December → Holiday shopping
+```
+
+**Advantages:**
+- See members daily (trust)
+- Aligned payday schedule
+- Shared culture/community
+- Easy communication
+
+**Considerations:**
+- Company policy on workplace pools
+- Avoid pressure on coworkers
+- Handle departures (emergency exit)
+
+### Is this culturally appropriate?
+
+**KhipuVault respects tradition:**
+
+✅ Honors centuries-old practices
+✅ Uses cultural names (tanda, pasanaku)
+✅ Preserves community spirit
+✅ Serves underbanked populations
+✅ Enables diaspora connections
+
+**We add value without appropriation:**
+- Built by people from ROSCA cultures
+- Designed for financial inclusion
+- Open to all, not extractive
+- Community-focused, not profit-maximizing
+
+**Feedback welcome:** We improve based on community input.
+
+## Troubleshooting
+
+### "Insufficient balance" error when joining
+
+**Cause:** Not enough MUSD for collateral + first contribution.
+
+**Solution:**
+```
+Required: Collateral (500) + Contribution (100) = 600 MUSD
+Your balance: Check wallet
+Need to: Buy/bridge more MUSD
+```
+
+### "Approval required" error
+
+**Cause:** Haven't approved pool contract to spend your MUSD.
+
+**Solution:**
+1. Click "Approve MUSD"
+2. Sign transaction (small gas fee)
+3. Wait for confirmation
+4. Then join pool
+
+### Can't see my pool on the dashboard
+
+**Possible causes:**
+
+1. **Wrong network** - Switch to Mezo testnet
+2. **Wrong wallet** - Connect the wallet you joined with
+3. **Pool not yet created** - Check transaction status
+4. **Browser cache** - Hard refresh (Ctrl+Shift+R)
+
+**Solution:**
+```
+1. Verify network: Mezo (31611)
+2. Verify wallet address matches
+3. Search by pool address: 0x7a8E...
+4. Contact support if still missing
+```
+
+### Payment didn't go through
+
+**Check:**
+
+1. **MUSD balance** - Enough for contribution?
+2. **Approval** - Still active?
+3. **Gas** - Enough ETH for transaction?
+4. **Due date** - Is it actually due yet?
+
+**Retry:**
+```
+Dashboard → Your Pool → "Pay Now" button → Sign transaction
+```
+
+### Payout is less than expected
+
+**Common reasons:**
+
+1. **Late payment penalties** applied to you
+2. **Market yields** lower than estimated
+3. **Another member** defaulted (pool size reduced)
+
+**Verify:**
+```
+View payout breakdown:
+- Base pot: Expected amount
+- Yields: Actual earned
+- Penalties: Any deductions
+- Fees: Platform fee on yields
+```
+
+## Advanced Topics
+
+### Can I create private pools?
+
+**Yes:**
+
+```
+Privacy Settings:
+- Unlisted: Not shown in public marketplace
+- Invite-only: Requires approval to join
+- Private metadata: Only members see details
+```
+
+**Still on-chain:** Transactions are public, but pool is not advertised.
+
+**Use case:** Family pools, close friend groups, exclusive communities.
+
+### What about bidding ROSCAs?
+
+**Advanced feature** for sophisticated groups:
+
+**How it works:**
+```
+Round 1 bidding:
+- Member A bids: 5% discount (receive $950 now)
+- Member B bids: 8% discount (receive $920 now)
+- Member C: No bid
+
+Winner: Member B (highest discount)
+Members A & C: Keep bidding in future rounds
+```
+
+**Advantages:**
+- Urgency rewarded
+- Market-driven order
+- Flexibility
+
+**Disadvantages:**
+- Complexity
+- Favors wealthy members
+- Confusing for traditional users
+
+**Recommendation:** Stick with fixed-order for cultural authenticity.
+
+### Can I integrate pools with other DeFi?
+
+**Current:** KhipuVault pools are standalone.
+
+**Future possibilities:**
+- Collateral from other protocols (e.g., deposit Aave tokens)
+- Payouts auto-swap to other assets
+- Yield from multiple sources
+- Cross-chain pools
+
+**Developers:** Open to integrations. Contact us.
+
+### What's the maximum pool size?
+
+**Technical limit:** 50 members (gas efficiency)
+
+**Practical limit:** 15-20 members
+
+**Why?**
+- Coordination difficulty
+- Default risk increases
+- Cycle becomes very long
+  ```
+  50 members × 30 days = 50 months (4+ years!)
+  ```
+
+**Better approach:** Multiple smaller pools or split into cohorts.
+
+### Can I create pools with other assets besides MUSD?
+
+**Currently:** MUSD only.
+
+**Planned:**
+- BTC-backed pools
+- ETH pools
+- Multi-asset options
+
+**Why start with MUSD?**
+- Stable value (no price volatility risk)
+- Easy yield generation
+- Simple accounting
+- Familiar (dollar-denominated)
+
+## Getting Help
+
+### Where can I get support?
+
+**Resources:**
+
+1. **Documentation** - docs.khipuvault.com (you're here!)
+2. **Discord community** - discord.gg/khipuvault
+3. **Email support** - support@khipuvault.com
+4. **Video tutorials** - youtube.com/@khipuvault
+5. **FAQ** - This page!
+
+### How do I report a bug?
+
+**Found an issue?**
+
+```
+Report via:
+1. Discord #bug-reports channel
+2. Email: bugs@khipuvault.com
+3. GitHub: github.com/khipuvault/issues
+
+Include:
+- What you were doing
+- What happened vs expected
+- Screenshots
+- Transaction hash (if applicable)
+- Wallet address (if comfortable)
+```
+
+**Critical security issues:** security@khipuvault.com (encrypted)
+
+### Can I suggest a feature?
+
+**We love feedback!**
+
+```
+Suggest via:
+1. Discord #feature-requests
+2. Email: feedback@khipuvault.com
+3. Community calls (monthly)
+
+Popular requests often implemented!
+```
+
+### Is there a referral program?
+
+**Currently:** No formal program.
+
+**Informally:**
+- Share pools with friends
+- Earn reputation for organizing successful pools
+- Community recognition
+
+**Future:** May add incentives for growth.
+
+---
+
+## Still Have Questions?
+
+Can't find your answer?
+
+- [Join our Discord](https://discord.gg/khipuvault)
+- [Email support](mailto:support@khipuvault.com)
+- [Book office hours](https://cal.com/khipuvault)
+
+**Or explore more:**
+
+- [What is ROSCA?](/docs/products/rotating-pool/what-is-rosca) - Cultural background
+- [How It Works](/docs/products/rotating-pool/how-it-works) - Technical details
+- [Creating a Pool](/docs/products/rotating-pool/creating-rosca) - Organizer guide
+- [Participating](/docs/products/rotating-pool/participating) - Member guide
+- [Receiving Payout](/docs/products/rotating-pool/receiving-payout) - Claiming process
+
+---
+
+**Ready to start?** [Create or join a rotating pool →](https://app.khipuvault.com/pools/rotating)

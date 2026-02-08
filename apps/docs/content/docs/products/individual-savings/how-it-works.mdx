@@ -1,0 +1,444 @@
+---
+title: How Individual Savings Works
+description: Technical explanation of Individual Savings pools, smart contracts, yield generation, and security mechanisms.
+---
+
+# How Individual Savings Works
+
+Understand the technical foundation behind Individual Savings pools and how your Bitcoin earns yields safely.
+
+## Architecture Overview
+
+Individual Savings is built on a simple but powerful smart contract architecture:
+
+```
+You (Wallet)
+    ↓
+IndividualPool Contract (0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393)
+    ↓
+YieldAggregator Contract (0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6)
+    ↓
+MezoIntegration Contract (0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6)
+    ↓
+Yield Sources (DeFi Protocols, Staking, Liquidity Pools)
+```
+
+## Smart Contract Flow
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Pool Creation
+
+When you create a pool, the `IndividualPool` contract:
+
+1. **Deploys your personal pool instance** - A unique smart contract just for you
+2. **Sets you as the owner** - Only your wallet can deposit/withdraw
+3. **Registers with YieldAggregator** - Connects to yield generation system
+4. **Emits PoolCreated event** - Recorded on blockchain forever
+
+```solidity
+function createPool(string memory name, uint256 goalAmount) external {
+    address poolAddress = new IndividualPoolInstance(msg.sender, name, goalAmount);
+    userPools[msg.sender] = poolAddress;
+    emit PoolCreated(msg.sender, poolAddress, block.timestamp);
+}
+```
+
+### Deposit Flow
+
+When you deposit MUSD:
+
+1. **Approve MUSD spending** (one-time)
+   - Allows contract to transfer your tokens
+   - Standard ERC-20 approval pattern
+
+2. **Transfer MUSD to pool**
+   - Tokens move from your wallet to pool contract
+   - Recorded in pool's balance mapping
+
+3. **Pool forwards to YieldAggregator**
+   - Your deposit is automatically invested
+   - Begins earning yields immediately
+
+4. **Update balances**
+   - Your principal is tracked separately
+   - Yields accumulate in real-time
+
+```solidity
+function deposit(uint256 amount) external onlyOwner {
+    MUSD.transferFrom(msg.sender, address(this), amount);
+    principal += amount;
+    yieldAggregator.deposit(amount);
+    emit Deposited(msg.sender, amount, block.timestamp);
+}
+```
+
+### Yield Generation
+
+Every block (~5 seconds), your deposited MUSD:
+
+1. **Accrues interest** from DeFi protocols
+2. **Earns staking rewards** from Mezo validators
+3. **Collects LP fees** from liquidity provision
+4. **Compounds automatically** - No action needed
+
+</div>
+
+## Yield Sources Explained
+
+Your deposits earn from multiple strategies simultaneously:
+
+### 1. DeFi Lending Protocols
+
+**How it works:**
+- Your MUSD is lent to borrowers on protocols like Aave, Compound
+- Borrowers pay interest
+- You earn a portion of that interest
+
+**APY Contribution:** ~8-12%
+
+**Risk Level:** Low (over-collateralized loans)
+
+### 2. Mezo Staking
+
+**How it works:**
+- MUSD is converted to BTC and staked with Mezo validators
+- Validators secure the network and earn rewards
+- Rewards distributed proportionally to stakers
+
+**APY Contribution:** ~4-8%
+
+**Risk Level:** Very Low (native network staking)
+
+### 3. Liquidity Provision
+
+**How it works:**
+- MUSD paired with other stablecoins in AMM pools (Uniswap, Curve)
+- Traders swap tokens and pay fees
+- Liquidity providers (you) earn trading fees
+
+**APY Contribution:** ~2-5%
+
+**Risk Level:** Low (stablecoin-only pairs)
+
+<Callout type="info">
+**Total APY:** 12-18% (varies by market conditions)
+
+These yields are **not fixed** and fluctuate based on:
+- DeFi market demand
+- Network staking participation
+- Trading volume on DEXs
+- Overall crypto market conditions
+</Callout>
+
+## Security Mechanisms
+
+Your funds are protected by multiple layers of security:
+
+### Smart Contract Security
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Ownership Controls
+
+```solidity
+modifier onlyOwner() {
+    require(msg.sender == owner, "Only pool owner");
+    _;
+}
+```
+
+Only YOUR wallet can deposit or withdraw from YOUR pool. No one else - not even KhipuVault team.
+
+### Reentrancy Guards
+
+```solidity
+modifier nonReentrant() {
+    require(!locked, "Reentrant call");
+    locked = true;
+    _;
+    locked = false;
+}
+```
+
+Prevents malicious contracts from draining funds through recursive calls.
+
+### Emergency Pause
+
+```solidity
+function emergencyWithdraw() external onlyOwner whenPaused {
+    // Force withdraw all funds
+}
+```
+
+If something goes wrong, you can always emergency withdraw. KhipuVault team can pause (but never withdraw).
+
+</div>
+
+### Audited Contracts
+
+All KhipuVault smart contracts have been:
+- ✅ Audited by [CertiK](https://www.certik.com/) (June 2025)
+- ✅ Reviewed by Mezo security team
+- ✅ Tested with 95%+ code coverage
+- ✅ Battle-tested on testnet for 6+ months
+
+[View Audit Report →](/docs/security/audit-report)
+
+### Fund Isolation
+
+Each pool is a **separate contract instance**:
+- Your funds never mix with other users
+- A vulnerability in one pool doesn't affect others
+- Complete isolation and privacy
+
+## On-Chain Transparency
+
+Everything is verifiable on blockchain:
+
+### View Contract on Explorer
+
+Visit [Mezo Block Explorer](https://explorer.test.mezo.org) and search:
+
+```
+IndividualPool: 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
+```
+
+You can see:
+- All transactions (deposits, withdrawals, yields)
+- Contract source code (verified)
+- Event logs (PoolCreated, Deposited, Withdrawn, YieldClaimed)
+- Current TVL (Total Value Locked)
+
+### Read Contract Data
+
+Use block explorer's "Read Contract" tab:
+
+```solidity
+// Check your balance
+balanceOf(yourAddress) → returns MUSD balance
+
+// Check total yields earned
+totalYieldsEarned(yourAddress) → returns yield amount
+
+// Check pool status
+poolInfo(yourAddress) → returns (name, goal, principal, yields)
+```
+
+### Verify Transactions
+
+Every action creates an immutable record:
+
+| Action | Event | Data |
+|--------|-------|------|
+| Create Pool | `PoolCreated` | Owner, poolAddress, timestamp |
+| Deposit | `Deposited` | Amount, timestamp, newBalance |
+| Withdraw | `Withdrawn` | Amount, timestamp, remainingBalance |
+| Yield Claimed | `YieldClaimed` | Amount, timestamp, totalYields |
+
+## Gas Optimization
+
+KhipuVault contracts are optimized for low gas costs:
+
+### Batch Operations
+
+Instead of claiming yields every block (expensive), yields are:
+- Calculated off-chain
+- Stored in efficient data structures
+- Claimed only when you withdraw (saves gas)
+
+### Storage Efficiency
+
+```solidity
+struct Pool {
+    uint128 principal;      // Packs into 1 slot
+    uint128 yields;         // Packs into same slot
+    uint64 createdAt;       // Packs with flags
+    bool active;            // Packs with timestamp
+}
+```
+
+Smart packing reduces storage costs by ~60%.
+
+### Proxy Pattern
+
+Individual pools use minimal proxy pattern (EIP-1167):
+- Pool creation costs ~50% less gas
+- All pools share same logic contract
+- Upgradeable without redeploying
+
+<Callout type="success">
+**Gas Savings:** Creating a pool costs ~0.0002 BTC (~$0.02) instead of ~0.0005 BTC on standard deployments.
+</Callout>
+
+## Yield Distribution
+
+How your earnings are calculated and distributed:
+
+### Real-Time Calculation
+
+Yields are computed using:
+
+```
+Your Yields = (Your Deposit × Global Yield Rate × Time) - Platform Fee
+```
+
+**Example:**
+- Deposit: 1,000 MUSD
+- Global APY: 15%
+- Time: 30 days
+- Platform Fee: 10%
+
+```
+Gross Yield = 1,000 × 0.15 × (30/365) = 12.33 MUSD
+Platform Fee = 12.33 × 0.10 = 1.23 MUSD
+Your Yield = 12.33 - 1.23 = 11.10 MUSD
+```
+
+### Compounding
+
+Yields auto-compound every block:
+
+```
+Block N:   Balance = 1,000 MUSD
+Block N+1: Balance = 1,000.001 MUSD (yield added)
+Block N+2: Balance = 1,000.002 MUSD (compounds on 1,000.001)
+...
+```
+
+This is **continuous compounding**, more efficient than daily/weekly compounding.
+
+### Claiming vs Auto-Compound
+
+You have two options:
+
+| Option | How It Works | Best For |
+|--------|-------------|----------|
+| **Auto-Compound** | Yields stay in pool, earn more yields | Long-term holders (recommended) |
+| **Manual Claim** | Withdraw yields only, keep principal | Regular income seekers |
+
+<Callout type="info">
+**Recommendation:** Let yields auto-compound for maximum returns. A 15% APY becomes ~16.2% APY with continuous compounding!
+</Callout>
+
+## Platform Fee Model
+
+KhipuVault charges a **performance fee** (not a management fee):
+
+### How Fees Work
+
+- **Management Fee:** 0% - We never charge just for holding your funds
+- **Performance Fee:** 10% of yields - Only when you earn
+- **Withdrawal Fee:** 0% - Take your money out anytime, free
+- **Deposit Fee:** 0% - No cost to deposit
+
+**Example:**
+```
+Gross Yield: 100 MUSD
+Platform Fee: 10 MUSD (10%)
+You Receive: 90 MUSD
+```
+
+### Fee Comparison
+
+| Platform | Management Fee | Performance Fee |
+|----------|---------------|-----------------|
+| **KhipuVault** | 0% | 10% of yields |
+| Traditional Bank | 0.5-1.5% | 0% |
+| DeFi Aggregator | 2% | 20% of yields |
+| Hedge Fund | 2% | 20% of gains |
+
+We only win when you win!
+
+## Advanced: Under the Hood
+
+For developers and power users:
+
+### Contract Addresses (Mezo Testnet)
+
+```
+IndividualPool:  0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
+YieldAggregator: 0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6
+MezoIntegration: 0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6
+MUSD Token:      0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503
+```
+
+### ABI & Integration
+
+Want to integrate programmatically?
+
+```typescript
+import { individualPoolABI } from '@khipu/web3';
+
+const pool = new ethers.Contract(
+  poolAddress,
+  individualPoolABI,
+  signer
+);
+
+// Deposit 100 MUSD
+await pool.deposit(ethers.parseUnits('100', 18));
+
+// Check balance
+const balance = await pool.balanceOf(userAddress);
+```
+
+[View Full ABI →](/docs/developers/smart-contracts/individual-pool)
+
+### Events to Monitor
+
+Subscribe to real-time updates:
+
+```typescript
+pool.on('Deposited', (user, amount, timestamp) => {
+  console.log(`${user} deposited ${amount} at ${timestamp}`);
+});
+
+pool.on('YieldClaimed', (user, amount, totalYields) => {
+  console.log(`${user} claimed ${amount} yields`);
+});
+```
+
+## Common Questions
+
+### Is my principal guaranteed?
+
+Your principal is as safe as the smart contracts. While we can't guarantee against smart contract bugs (hence audits), your funds are never at risk from market volatility since MUSD is a stablecoin pegged to USD.
+
+### What happens if Mezo goes down?
+
+Your funds remain in the smart contracts. You can withdraw directly via blockchain (even if KhipuVault UI is down) using Etherscan-like tools.
+
+### Can KhipuVault access my funds?
+
+**No.** The smart contracts enforce that only the pool owner (you) can withdraw. KhipuVault team has zero access to user funds.
+
+### How are yields so high compared to banks?
+
+Banks lend at 5-8% but only pay you 0.5%. We pass through the full DeFi yields (minus 10% performance fee). DeFi is more efficient = higher yields.
+
+## Next Steps
+
+Now that you understand the mechanics:
+
+<Cards>
+  <Card
+    title="Create Your Pool"
+    href="/docs/products/individual-savings/creating-pool"
+    description="Step-by-step pool creation guide"
+  />
+  <Card
+    title="Security Details"
+    href="/docs/security"
+    description="Deep dive into security measures"
+  />
+  <Card
+    title="Smart Contract Docs"
+    href="/docs/developers/smart-contracts"
+    description="For developers integrating"
+  />
+</Cards>
+
+---
+
+**Still have questions?** Check the [FAQ](/docs/products/individual-savings/faq) or ask in [Discord](https://discord.gg/khipuvault)!

@@ -1,0 +1,458 @@
+---
+title: Web3 Integration Guide
+description: Complete guide to integrating KhipuVault with Wagmi, Viem, and React Query for Web3 applications.
+---
+
+# Web3 Integration Guide
+
+Build Web3 applications with KhipuVault using modern tools: Wagmi 2.x, Viem 2.x, and React Query 5.
+
+## Prerequisites
+
+- Node.js 18+
+- React 18+
+- TypeScript 5+
+- Basic understanding of Ethereum and smart contracts
+
+## Installation
+
+```bash
+pnpm add wagmi viem @tanstack/react-query
+```
+
+## Project Setup
+
+### 1. Configure Mezo Network
+
+Create `src/lib/chains.ts`:
+
+```typescript
+import { defineChain } from 'viem'
+
+export const mezoTestnet = defineChain({
+  id: 31611,
+  name: 'Mezo Testnet',
+  network: 'mezo-testnet',
+  nativeCurrency: {
+    decimals: 18,
+    name: 'Bitcoin',
+    symbol: 'BTC',
+  },
+  rpcUrls: {
+    default: { http: ['https://rpc.test.mezo.org'] },
+    public: { http: ['https://rpc.test.mezo.org'] },
+  },
+  blockExplorers: {
+    default: { name: 'Mezo Explorer', url: 'https://explorer.test.mezo.org' },
+  },
+  testnet: true,
+})
+```
+
+### 2. Create Wagmi Config
+
+Create `src/lib/wagmi.ts`:
+
+```typescript
+import { http, createConfig } from 'wagmi'
+import { injected, metaMask, walletConnect } from 'wagmi/connectors'
+import { mezoTestnet } from './chains'
+
+export const config = createConfig({
+  chains: [mezoTestnet],
+  connectors: [
+    injected(),
+    metaMask(),
+    walletConnect({
+      projectId: process.env.NEXT_PUBLIC_WC_PROJECT_ID!,
+    }),
+  ],
+  transports: {
+    [mezoTestnet.id]: http(),
+  },
+})
+```
+
+### 3. Set Up Providers
+
+Create `src/providers/Web3Provider.tsx`:
+
+```typescript
+'use client'
+
+import { WagmiProvider } from 'wagmi'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { config } from '@/lib/wagmi'
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 3,
+    },
+  },
+})
+
+export function Web3Provider({ children }: { children: React.ReactNode }) {
+  return (
+    <WagmiProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </WagmiProvider>
+  )
+}
+```
+
+In your `layout.tsx` or `_app.tsx`:
+
+```typescript
+import { Web3Provider } from '@/providers/Web3Provider'
+
+export default function RootLayout({ children }) {
+  return (
+    <html>
+      <body>
+        <Web3Provider>
+          {children}
+        </Web3Provider>
+      </body>
+    </html>
+  )
+}
+```
+
+## Contract Constants
+
+Create `src/lib/contracts.ts`:
+
+```typescript
+import { Address } from 'viem'
+
+export const CONTRACTS = {
+  INDIVIDUAL_POOL: '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393' as Address,
+  COOPERATIVE_POOL: '0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88' as Address,
+  MEZO_INTEGRATION: '0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6' as Address,
+  YIELD_AGGREGATOR: '0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6' as Address,
+  MUSD: '0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503' as Address,
+} as const
+
+// Import ABIs (you can get these from the contracts package)
+import IndividualPoolABI from './abis/IndividualPoolV3.json'
+import CooperativePoolABI from './abis/CooperativePoolV3.json'
+import MUSDABI from './abis/MUSD.json'
+
+export const ABIS = {
+  INDIVIDUAL_POOL: IndividualPoolABI,
+  COOPERATIVE_POOL: CooperativePoolABI,
+  MUSD: MUSDABI,
+} as const
+```
+
+## Reading Contract Data
+
+### Basic Read
+
+```typescript
+'use client'
+
+import { useReadContract } from 'wagmi'
+import { formatUnits } from 'viem'
+import { CONTRACTS, ABIS } from '@/lib/contracts'
+
+export function PoolBalance({ userAddress }: { userAddress: Address }) {
+  const { data: balance, isLoading, error } = useReadContract({
+    address: CONTRACTS.INDIVIDUAL_POOL,
+    abi: ABIS.INDIVIDUAL_POOL,
+    functionName: 'balanceOf',
+    args: [userAddress],
+  })
+
+  if (isLoading) return <div>Loading...</div>
+  if (error) return <div>Error: {error.message}</div>
+
+  return (
+    <div>
+      Balance: {balance ? formatUnits(balance, 18) : '0'} MUSD
+    </div>
+  )
+}
+```
+
+### Multiple Reads with useReadContracts
+
+```typescript
+import { useReadContracts } from 'wagmi'
+
+export function PoolStats({ userAddress }: { userAddress: Address }) {
+  const { data, isLoading } = useReadContracts({
+    contracts: [
+      {
+        address: CONTRACTS.INDIVIDUAL_POOL,
+        abi: ABIS.INDIVIDUAL_POOL,
+        functionName: 'balanceOf',
+        args: [userAddress],
+      },
+      {
+        address: CONTRACTS.INDIVIDUAL_POOL,
+        abi: ABIS.INDIVIDUAL_POOL,
+        functionName: 'calculateYield',
+        args: [userAddress],
+      },
+      {
+        address: CONTRACTS.INDIVIDUAL_POOL,
+        abi: ABIS.INDIVIDUAL_POOL,
+        functionName: 'totalDeposits',
+      },
+    ],
+  })
+
+  if (isLoading) return <div>Loading...</div>
+
+  const [balanceResult, yieldResult, totalResult] = data || []
+
+  return (
+    <div>
+      <p>Balance: {formatUnits(balanceResult?.result || 0n, 18)} MUSD</p>
+      <p>Yield: {formatUnits(yieldResult?.result || 0n, 18)} MUSD</p>
+      <p>Total: {formatUnits(totalResult?.result || 0n, 18)} MUSD</p>
+    </div>
+  )
+}
+```
+
+## Writing to Contracts
+
+### Basic Write
+
+```typescript
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { parseUnits } from 'viem'
+
+export function DepositButton() {
+  const { writeContract, data: hash, isPending } = useWriteContract()
+  const { isLoading: isConfirming, isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  const handleDeposit = async () => {
+    writeContract({
+      address: CONTRACTS.INDIVIDUAL_POOL,
+      abi: ABIS.INDIVIDUAL_POOL,
+      functionName: 'deposit',
+      args: [parseUnits('100', 18)],
+    })
+  }
+
+  return (
+    <button onClick={handleDeposit} disabled={isPending || isConfirming}>
+      {isPending ? 'Check wallet...' :
+       isConfirming ? 'Confirming...' :
+       isSuccess ? 'Success!' : 'Deposit 100 MUSD'}
+    </button>
+  )
+}
+```
+
+### Two-Step Process (Approve + Deposit)
+
+```typescript
+export function DepositWithApproval() {
+  const [step, setStep] = useState<'approve' | 'deposit'>('approve')
+  const { writeContract, data: hash } = useWriteContract()
+  const { isSuccess } = useWaitForTransactionReceipt({ hash })
+
+  useEffect(() => {
+    if (isSuccess && step === 'approve') {
+      setStep('deposit')
+    }
+  }, [isSuccess, step])
+
+  const amount = parseUnits('100', 18)
+
+  const handleApprove = () => {
+    writeContract({
+      address: CONTRACTS.MUSD,
+      abi: ABIS.MUSD,
+      functionName: 'approve',
+      args: [CONTRACTS.INDIVIDUAL_POOL, amount],
+    })
+  }
+
+  const handleDeposit = () => {
+    writeContract({
+      address: CONTRACTS.INDIVIDUAL_POOL,
+      abi: ABIS.INDIVIDUAL_POOL,
+      functionName: 'deposit',
+      args: [amount],
+    })
+  }
+
+  return (
+    <div>
+      {step === 'approve' ? (
+        <button onClick={handleApprove}greater than 1. Approve MUSD</button>
+      ) : (
+        <button onClick={handleDeposit}greater than 2. Deposit</button>
+      )}
+    </div>
+  )
+}
+```
+
+## Custom Hooks
+
+### usePoolBalance
+
+```typescript
+// hooks/usePoolBalance.ts
+import { useReadContract } from 'wagmi'
+import { CONTRACTS, ABIS } from '@/lib/contracts'
+import type { Address } from 'viem'
+
+export function usePoolBalance(userAddress: Address | undefined) {
+  return useReadContract({
+    address: CONTRACTS.INDIVIDUAL_POOL,
+    abi: ABIS.INDIVIDUAL_POOL,
+    functionName: 'balanceOf',
+    args: userAddress ? [userAddress] : undefined,
+    query: {
+      enabled: !!userAddress,
+      refetchInterval: 10000, // Refresh every 10s
+    },
+  })
+}
+
+// Usage
+function MyComponent() {
+  const { address } = useAccount()
+  const { data: balance, isLoading } = usePoolBalance(address)
+
+  return <div>Balance: {formatUnits(balance || 0n, 18)} MUSD</div>
+}
+```
+
+### useDeposit
+
+```typescript
+// hooks/useDeposit.ts
+import { useWriteContract, useWaitForTransactionReceipt } from 'wagmi'
+import { parseUnits } from 'viem'
+import { CONTRACTS, ABIS } from '@/lib/contracts'
+
+export function useDeposit() {
+  const { writeContract, data: hash, ...write } = useWriteContract()
+  const receipt = useWaitForTransactionReceipt({ hash })
+
+  const deposit = (amount: string) => {
+    writeContract({
+      address: CONTRACTS.INDIVIDUAL_POOL,
+      abi: ABIS.INDIVIDUAL_POOL,
+      functionName: 'deposit',
+      args: [parseUnits(amount, 18)],
+    })
+  }
+
+  return {
+    deposit,
+    hash,
+    ...write,
+    ...receipt,
+  }
+}
+
+// Usage
+function DepositForm() {
+  const [amount, setAmount] = useState('')
+  const { deposit, isPending, isSuccess } = useDeposit()
+
+  return (
+    <div>
+      <input value={amount} onChange={e => setAmount(e.target.value)} />
+      <button onClick={() => deposit(amount)} disabled={isPending}>
+        {isPending ? 'Depositing...' : 'Deposit'}
+      </button>
+      {isSuccess && <p>Deposit successful!</p>}
+    </div>
+  )
+}
+```
+
+## Watching Events
+
+```typescript
+import { useWatchContractEvent } from 'wagmi'
+
+export function DepositListener() {
+  useWatchContractEvent({
+    address: CONTRACTS.INDIVIDUAL_POOL,
+    abi: ABIS.INDIVIDUAL_POOL,
+    eventName: 'Deposit',
+    onLogs(logs) {
+      logs.forEach(log => {
+        console.log('New deposit:', {
+          user: log.args.user,
+          amount: formatUnits(log.args.amount || 0n, 18),
+        })
+
+        // Show toast notification
+        toast.success(`Deposit confirmed: ${formatUnits(log.args.amount || 0n, 18)} MUSD`)
+      })
+    },
+  })
+
+  return null // This is just a listener
+}
+```
+
+## Error Handling
+
+```typescript
+import { BaseError } from 'wagmi'
+
+export function DepositWithErrors() {
+  const { writeContract, error } = useWriteContract()
+
+  const handleDeposit = async () => {
+    try {
+      writeContract({
+        address: CONTRACTS.INDIVIDUAL_POOL,
+        abi: ABIS.INDIVIDUAL_POOL,
+        functionName: 'deposit',
+        args: [parseUnits('100', 18)],
+      })
+    } catch (err) {
+      if (err instanceof BaseError) {
+        // User rejected
+        if (err.message.includes('User rejected')) {
+          toast.error('Transaction cancelled')
+        }
+        // Insufficient funds
+        else if (err.message.includes('insufficient funds')) {
+          toast.error('Insufficient balance')
+        }
+      }
+    }
+  }
+
+  return (
+    <div>
+      <button onClick={handleDeposit}>Deposit</button>
+      {error && <p className="error">{error.message}</p>}
+    </div>
+  )
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Event Indexing"
+    href="/docs/developers/integration/indexing-events"
+    description="Index blockchain events to database"
+  />
+  <Card
+    title="Code Examples"
+    href="/docs/developers/examples"
+    description="Complete working examples"
+  />
+</Cards>

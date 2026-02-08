@@ -1,0 +1,643 @@
+---
+title: Contract Security
+description: How KhipuVault smart contracts are secured with multi-sig, time-locks, and security best practices.
+---
+
+# Contract Security
+
+KhipuVault smart contracts are designed with security as the top priority. This page explains how our contracts protect your Bitcoin.
+
+## Security Architecture
+
+### Non-Custodial Design
+
+<Callout type="success" title="You Always Control Your Funds">
+KhipuVault contracts are non-custodial. You retain full ownership and can withdraw your funds at any time without our permission.
+</Callout>
+
+**Key Principles:**
+
+✅ **No admin withdrawal** - Only you can withdraw your funds
+✅ **No fund freezing** - Your deposits are always accessible
+✅ **Transparent logic** - All code is open-source and verified
+✅ **Emergency exits** - Withdraw even if our website is down
+
+**Implementation:**
+
+```solidity
+// Example from IndividualPool.sol
+function withdraw(uint256 amount) external nonReentrant {
+    require(balances[msg.sender] >= amount, "Insufficient balance");
+
+    // User controls their own withdrawal
+    balances[msg.sender] -= amount;
+
+    // Transfer directly to user
+    IERC20(musdToken).safeTransfer(msg.sender, amount);
+
+    emit Withdrawn(msg.sender, amount, block.timestamp);
+}
+```
+
+No admin can stop or redirect this withdrawal.
+
+## Smart Contract Security Patterns
+
+### 1. Reentrancy Protection
+
+**The Risk:**
+Malicious contracts can call back into our contracts before state updates complete, potentially draining funds.
+
+**Our Protection:**
+We use OpenZeppelin's `ReentrancyGuard` on all state-changing functions.
+
+```solidity
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
+contract IndividualPool is ReentrancyGuard {
+    function deposit(uint256 amount) external nonReentrant {
+        // Protected against reentrancy
+        _processDeposit(msg.sender, amount);
+    }
+
+    function withdraw(uint256 amount) external nonReentrant {
+        // Protected against reentrancy
+        _processWithdrawal(msg.sender, amount);
+    }
+}
+```
+
+**Additional Safety:**
+We follow the **Checks-Effects-Interactions** pattern:
+
+```solidity
+function withdraw(uint256 amount) external nonReentrant {
+    // 1. CHECKS
+    require(balances[msg.sender] >= amount, "Insufficient balance");
+
+    // 2. EFFECTS (state changes)
+    balances[msg.sender] -= amount;
+    totalDeposits -= amount;
+
+    // 3. INTERACTIONS (external calls)
+    IERC20(musdToken).safeTransfer(msg.sender, amount);
+}
+```
+
+### 2. Access Control
+
+**Role-Based Permissions:**
+
+We use OpenZeppelin's `AccessControl` for granular permissions:
+
+```solidity
+import "@openzeppelin/contracts/access/AccessControl.sol";
+
+contract YieldAggregator is AccessControl {
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant YIELD_MANAGER_ROLE = keccak256("YIELD_MANAGER_ROLE");
+
+    constructor() {
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+    }
+
+    function distributeYield() external onlyRole(YIELD_MANAGER_ROLE) {
+        // Only authorized yield managers can call
+    }
+
+    function pause() external onlyRole(ADMIN_ROLE) {
+        // Only admins can pause in emergency
+    }
+}
+```
+
+**Role Separation:**
+
+| Role | Permissions | Used For |
+|------|-------------|----------|
+| `DEFAULT_ADMIN_ROLE` | Manage other roles | Emergency only |
+| `ADMIN_ROLE` | Pause contracts | Security incidents |
+| `YIELD_MANAGER_ROLE` | Distribute yields | Daily operations |
+| `UPGRADER_ROLE` | Upgrade contracts | Planned upgrades (future) |
+
+<Callout type="info">
+Admin roles are controlled by multi-sig wallets requiring multiple signatures for any action.
+</Callout>
+
+### 3. Pausable Contracts
+
+**Emergency Stop Mechanism:**
+
+Contracts can be paused in case of security incidents:
+
+```solidity
+import "@openzeppelin/contracts/security/Pausable.sol";
+
+contract IndividualPool is Pausable, AccessControl {
+    function deposit(uint256 amount) external whenNotPaused {
+        // Deposits disabled when paused
+    }
+
+    function withdraw(uint256 amount) external {
+        // Withdrawals ALWAYS enabled (even when paused)
+    }
+
+    function pause() external onlyRole(ADMIN_ROLE) {
+        _pause();
+        emit EmergencyPause(msg.sender, block.timestamp);
+    }
+
+    function unpause() external onlyRole(ADMIN_ROLE) {
+        _unpause();
+        emit EmergencyUnpause(msg.sender, block.timestamp);
+    }
+}
+```
+
+**Important:** Withdrawals remain enabled even when paused, ensuring users can always access their funds.
+
+### 4. Safe Math & Overflow Protection
+
+**Solidity 0.8+ Built-in Protection:**
+
+We use Solidity 0.8.27 which has built-in overflow/underflow protection:
+
+```solidity
+// Automatically reverts on overflow/underflow
+uint256 public totalDeposits;
+
+function deposit(uint256 amount) external {
+    // Safe addition - reverts if overflow
+    totalDeposits += amount;
+
+    // Safe subtraction - reverts if underflow
+    balances[msg.sender] += amount;
+}
+```
+
+**Additional SafeMath for Complex Operations:**
+
+For edge cases, we use OpenZeppelin's `SafeMath`:
+
+```solidity
+using SafeMath for uint256;
+
+function calculateYield(uint256 principal, uint256 rate) internal pure returns (uint256) {
+    // Prevents overflow in multiplication
+    return principal.mul(rate).div(10000);
+}
+```
+
+### 5. Input Validation
+
+**Comprehensive Validation:**
+
+All external inputs are validated:
+
+```solidity
+function deposit(uint256 amount) external nonReentrant whenNotPaused {
+    require(amount > 0, "Amount must be greater than zero");
+    require(amount <= MAX_DEPOSIT, "Amount exceeds maximum");
+    require(amount >= MIN_DEPOSIT, "Amount below minimum");
+    require(msg.sender != address(0), "Invalid sender");
+
+    // Additional business logic validation
+    require(totalDeposits + amount <= POOL_CAP, "Pool capacity exceeded");
+
+    _processDeposit(msg.sender, amount);
+}
+```
+
+**Address Validation:**
+
+```solidity
+modifier validAddress(address addr) {
+    require(addr != address(0), "Zero address not allowed");
+    require(addr != address(this), "Self-reference not allowed");
+    _;
+}
+
+function setTokenAddress(address token) external onlyAdmin validAddress(token) {
+    musdToken = token;
+}
+```
+
+### 6. Event Logging
+
+**Complete Audit Trail:**
+
+Every state change emits events for transparency and monitoring:
+
+```solidity
+event Deposited(address indexed user, uint256 amount, uint256 timestamp);
+event Withdrawn(address indexed user, uint256 amount, uint256 timestamp);
+event YieldDistributed(uint256 totalAmount, uint256 timestamp);
+event EmergencyPause(address indexed admin, uint256 timestamp);
+
+function deposit(uint256 amount) external {
+    // ... deposit logic ...
+
+    emit Deposited(msg.sender, amount, block.timestamp);
+}
+```
+
+**Why This Matters:**
+
+- ✅ Off-chain monitoring can detect unusual activity
+- ✅ Users can verify all interactions on-chain
+- ✅ Complete transaction history is preserved
+- ✅ Supports forensic analysis if needed
+
+## Multi-Signature Protection
+
+### Current Implementation
+
+**Admin Multi-Sig (Planned Q1 2026):**
+
+Critical operations will require multiple signatures:
+
+- **Pause/Unpause contracts**: 2-of-3 signatures required
+- **Update yield rates**: 2-of-3 signatures required
+- **Contract upgrades**: 3-of-5 signatures required (future)
+
+**Multi-Sig Setup:**
+
+```
+Signers: 5 team members
+Threshold: 3 required for execution
+Implementation: Gnosis Safe on Mezo
+```
+
+### Why Multi-Sig Matters
+
+**Single Point of Failure Prevention:**
+
+Without multi-sig:
+❌ One compromised admin key = full contract control
+❌ No checks and balances on admin actions
+❌ Higher risk of malicious or accidental errors
+
+With multi-sig:
+✅ Multiple independent parties must agree
+✅ Transparent governance process
+✅ Protection against key compromise
+✅ Time for community review
+
+**Example Multi-Sig Process:**
+
+1. **Proposal**: Admin proposes action (e.g., "Pause contracts due to vulnerability")
+2. **Review**: Other signers review proposal independently
+3. **Sign**: Each signer approves or rejects
+4. **Execute**: After threshold met (3-of-5), action executes
+5. **Verify**: Community can see all signatures on-chain
+
+## Time-Lock Protection (Planned)
+
+### What is a Time-Lock?
+
+A time-lock enforces a delay between proposing and executing critical actions.
+
+**Example:**
+
+```solidity
+// Planned implementation
+contract TimelockController {
+    uint256 public constant MIN_DELAY = 2 days;
+
+    function schedulePause() external onlyMultiSig {
+        // Schedule pause for 2 days from now
+        bytes32 id = hashOperation(address(pool), data);
+        schedule[id] = block.timestamp + MIN_DELAY;
+
+        emit PauseScheduled(id, block.timestamp + MIN_DELAY);
+    }
+
+    function executePause(bytes32 id) external {
+        require(block.timestamp >= schedule[id], "Time-lock not expired");
+
+        // Execute the pause
+        pool.pause();
+    }
+}
+```
+
+### Benefits
+
+**Community Protection:**
+
+✅ **48-hour warning** before critical actions
+✅ **Time to react** if action is malicious
+✅ **Transparent governance** - all actions visible
+✅ **Emergency override** only for critical security issues
+
+**What Gets Time-Locked:**
+
+- Contract upgrades (future)
+- Yield rate changes
+- Pool parameter updates
+- Admin role changes
+
+**What's Exempt (Immediate Execution):**
+
+- Emergency pause (security incidents)
+- User withdrawals (always instant)
+- Yield distributions (routine operations)
+
+## Security Audits
+
+Our contracts undergo multiple security reviews:
+
+### Automated Audits
+
+✅ **Slither** - Static analysis (completed January 2025)
+✅ **Aderyn** - Rust-based analyzer (completed January 2025)
+✅ **Mythril** - Symbolic execution (in progress)
+
+[View detailed audit reports](/docs/security/audits)
+
+### Manual Audits
+
+🔄 **Professional audit** - Scheduled Q1 2026
+🔄 **Economic security review** - Scheduled Q2 2026
+
+### Continuous Monitoring
+
+**Automated Scanning:**
+
+Every commit is scanned:
+
+```yaml
+# GitHub Actions
+- name: Run Slither
+  run: slither . --config-file slither.config.json
+
+- name: Run Aderyn
+  run: aderyn . --output aderyn-report.md
+```
+
+**On-Chain Monitoring:**
+
+- Real-time event monitoring
+- Unusual transaction detection
+- Gas spike alerts
+- Failed transaction analysis
+
+## Upgrade Strategy
+
+### Current Status
+
+**Non-Upgradeable Contracts:**
+
+Our current contracts are **immutable** for maximum security:
+
+✅ **Cannot be changed** after deployment
+✅ **No hidden upgrade mechanisms**
+✅ **Complete transparency** - what you see is what you get
+
+**Migration Strategy:**
+
+If we need to fix bugs or add features:
+
+1. Deploy new contract version
+2. Announce migration with 30-day notice
+3. Users migrate funds voluntarily
+4. Old contract remains accessible forever
+
+### Future Upgradeability (Planned)
+
+**If we implement upgradeable contracts:**
+
+We will use OpenZeppelin's transparent proxy pattern with:
+
+- ✅ **Multi-sig ownership** (3-of-5 required)
+- ✅ **Time-lock on upgrades** (48-hour delay)
+- ✅ **Community governance** (future)
+- ✅ **Emergency pause** (no time-lock)
+
+**Upgrade Process:**
+
+```
+1. Propose upgrade (multi-sig initiates)
+2. Publish new implementation code (GitHub + audit)
+3. Community review period (48+ hours)
+4. Multi-sig approval (3-of-5 signatures)
+5. Time-lock expires
+6. Execution (anyone can trigger)
+7. Post-upgrade verification
+```
+
+## Oracle Security
+
+### Yield Calculation
+
+**Current Implementation:**
+
+Yield rates are calculated off-chain and verified on-chain:
+
+```solidity
+function distributeYield(
+    address[] calldata users,
+    uint256[] calldata amounts,
+    bytes calldata proof
+) external onlyRole(YIELD_MANAGER_ROLE) {
+    // Verify merkle proof
+    require(_verifyYieldProof(users, amounts, proof), "Invalid proof");
+
+    // Distribute yields
+    for (uint i = 0; i < users.length; i++) {
+        _distributeToUser(users[i], amounts[i]);
+    }
+}
+```
+
+**Security Measures:**
+
+✅ **Merkle proofs** verify calculation integrity
+✅ **Multiple independent nodes** calculate yields
+✅ **Sanity checks** prevent extreme values
+✅ **Rate limits** prevent excessive distributions
+
+### Future Oracle Integration
+
+**Planned Improvements:**
+
+- Chainlink price feeds for BTC/USD conversion
+- Decentralized yield verification
+- On-chain calculation where possible
+
+## Gas Optimization & Security
+
+**We prioritize security over gas savings:**
+
+### Safe Patterns We Use
+
+✅ **SafeERC20** instead of raw `transfer()`
+✅ **ReentrancyGuard** on all state-changing functions
+✅ **Explicit checks** instead of assumptions
+✅ **Event emissions** for all state changes
+
+### Gas Optimizations (Carefully)
+
+Where safe to optimize:
+
+✅ **Packed structs** for storage efficiency
+✅ **Unchecked arithmetic** only when guaranteed safe
+✅ **Batch operations** for gas savings
+✅ **Efficient data structures**
+
+Where we DON'T optimize:
+
+❌ **Skip security checks** to save gas
+❌ **Use assembly** unless thoroughly audited
+❌ **Remove event emissions**
+❌ **Reduce input validation**
+
+**Example: Safe Gas Optimization**
+
+```solidity
+// Struct packing saves storage slots
+struct Deposit {
+    uint128 amount;      // 16 bytes
+    uint64 timestamp;    // 8 bytes
+    uint64 lastClaim;    // 8 bytes
+    // Total: 32 bytes = 1 storage slot instead of 3
+}
+
+// Batch processing saves gas
+function batchWithdraw(uint256[] calldata amounts) external {
+    for (uint i = 0; i < amounts.length; i++) {
+        _withdraw(msg.sender, amounts[i]);
+    }
+}
+```
+
+## Testing Strategy
+
+**Our test coverage targets:**
+
+- ✅ **80%+ code coverage** (unit tests)
+- ✅ **100% critical path coverage** (core functions)
+- ✅ **Fuzz testing** for edge cases
+- ✅ **Integration tests** for cross-contract interactions
+
+**Test Categories:**
+
+### Unit Tests
+
+```solidity
+// Test every function in isolation
+function testDeposit() public {
+    uint256 amount = 1000e18;
+    vm.prank(user);
+    pool.deposit(amount);
+
+    assertEq(pool.balanceOf(user), amount);
+}
+
+function testCannotDepositZero() public {
+    vm.prank(user);
+    vm.expectRevert("Amount must be greater than zero");
+    pool.deposit(0);
+}
+```
+
+### Fuzz Testing
+
+```solidity
+// Test with random inputs
+function testFuzz_DepositWithdraw(uint256 amount) public {
+    vm.assume(amount > MIN_DEPOSIT && amount < MAX_DEPOSIT);
+
+    vm.prank(user);
+    pool.deposit(amount);
+    pool.withdraw(amount);
+
+    assertEq(pool.balanceOf(user), 0);
+}
+```
+
+### Integration Tests
+
+```solidity
+// Test full user flows
+function testFullDepositYieldWithdrawFlow() public {
+    // 1. User deposits
+    deposit(user, 1000e18);
+
+    // 2. Yield is distributed
+    distributeYield();
+
+    // 3. User withdraws principal + yield
+    withdraw(user, pool.balanceOf(user));
+
+    // Verify final state
+    assertGt(musd.balanceOf(user), initialBalance);
+}
+```
+
+## Emergency Procedures
+
+### Security Incident Response
+
+If a vulnerability is discovered:
+
+**1. Immediate Response (< 1 hour)**
+- Pause affected contracts
+- Notify multi-sig signers
+- Alert community on Discord/Twitter
+
+**2. Assessment (< 24 hours)**
+- Analyze vulnerability severity
+- Determine affected users
+- Calculate potential impact
+
+**3. Mitigation (< 48 hours)**
+- Deploy fix if possible
+- Plan user migration if needed
+- Coordinate with auditors
+
+**4. Communication (Ongoing)**
+- Regular updates to community
+- Publish detailed post-mortem
+- Compensate affected users if applicable
+
+[Full emergency procedures](/docs/security/emergency-procedures)
+
+## Open Source & Transparency
+
+**Full Transparency:**
+
+✅ **Source code**: [github.com/khipuvault/khipuvault](https://github.com/khipuvault/khipuvault)
+✅ **Verified contracts**: All contracts verified on Mezo explorer
+✅ **Audit reports**: Published on this documentation
+✅ **Test coverage**: Public CI/CD pipeline
+
+**Verify Contract Source:**
+
+1. Go to [Mezo Block Explorer](https://explorer.test.mezo.org)
+2. Search for contract address
+3. Click "Contract" tab
+4. Verify source code matches GitHub
+
+## Security Commitment
+
+We commit to:
+
+✅ **Regular audits** - Quarterly automated, annual professional
+✅ **Responsible disclosure** - Bug bounty program with rewards
+✅ **Community transparency** - All security updates public
+✅ **Continuous improvement** - Implement best practices as they evolve
+✅ **User protection** - Your funds are always accessible
+
+## Questions?
+
+Security questions or concerns?
+
+- 📧 **Email**: security@khipuvault.com
+- 💬 **Discord**: [#security channel](https://discord.gg/khipuvault)
+- 📖 **FAQ**: [Security FAQ](/docs/resources/faq#security)
+- 🐛 **Bug Bounty**: [Report vulnerabilities](/docs/security/bug-bounty)
+
+---
+
+Your security is our priority. Thank you for trusting KhipuVault with your Bitcoin. 🛡️

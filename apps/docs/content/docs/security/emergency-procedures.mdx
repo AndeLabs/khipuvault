@@ -1,0 +1,656 @@
+---
+title: Emergency Procedures
+description: What to do if something goes wrong. Emergency contacts and incident response procedures for KhipuVault users.
+---
+
+# Emergency Procedures
+
+This page explains what to do in various emergency scenarios. Stay calm and follow the appropriate steps.
+
+<Callout type="error" title="Security Emergency?">
+If you've discovered a critical security vulnerability, email security@khipuvault.com immediately. DO NOT post publicly.
+</Callout>
+
+## Quick Emergency Contacts
+
+**Security Vulnerabilities:**
+- 📧 security@khipuvault.com (24/7 monitoring)
+- 🔒 PGP Key: [Download](https://khipuvault.com/security/pgp-key.asc)
+
+**User Support:**
+- 💬 Discord: [discord.gg/khipuvault](https://discord.gg/khipuvault)
+- 📧 support@khipuvault.com
+- 🐦 Twitter: [@KhipuVault](https://twitter.com/khipuvault)
+
+**Platform Status:**
+- 📊 [status.khipuvault.com](https://status.khipuvault.com)
+
+## Emergency Scenarios
+
+### 1. Compromised Wallet
+
+**Symptoms:**
+- Unauthorized transactions from your wallet
+- Unexpected token approvals
+- Wallet drained or funds missing
+- Suspicious activity on block explorer
+
+**Immediate Actions (< 5 minutes):**
+
+<div className="fd-steps [&_h4]:fd-step">
+
+#### Stop Using the Wallet
+Do not make any more transactions from the compromised wallet.
+
+#### Create New Wallet
+On a secure device, create a new wallet immediately:
+- Use a hardware wallet if possible
+- Or create new MetaMask wallet on clean device
+
+#### Transfer Remaining Funds
+If there are still funds in the compromised wallet:
+
+```bash
+# Priority order:
+1. Transfer MUSD first (most liquid)
+2. Withdraw from all pools immediately
+3. Transfer any other tokens
+4. Send any remaining ETH/native tokens
+```
+
+#### Revoke All Approvals
+Go to [Revoke.cash](https://revoke.cash) and revoke ALL approvals on the compromised wallet.
+
+</div>
+
+**Next Steps (< 24 hours):**
+
+1. **Document Everything**
+   - Screenshot all unauthorized transactions
+   - Note timestamps and amounts
+   - Save transaction hashes
+   - Record wallet addresses involved
+
+2. **Scan for Malware**
+   - Run full antivirus scan
+   - Check browser extensions
+   - Review recent downloads
+   - Consider reformatting device
+
+3. **Report the Incident**
+   - Email support@khipuvault.com with details
+   - Report to wallet provider (MetaMask, etc.)
+   - File police report if large amount stolen
+   - Report scam addresses to block explorers
+
+4. **Security Audit**
+   - Review how wallet was compromised
+   - Update all passwords
+   - Enable 2FA everywhere possible
+   - Review seed phrase storage
+
+**Prevention for Future:**
+
+✅ Use hardware wallet for large amounts
+✅ Keep seed phrase offline and secure
+✅ Never share private keys
+✅ Verify URLs before connecting wallet
+✅ Use dedicated device for crypto
+
+[Full wallet security guide](/docs/security/best-practices#wallet-security)
+
+### 2. Phishing Attack
+
+**Symptoms:**
+- You signed a transaction you don't recognize
+- Clicked a suspicious link
+- Entered seed phrase on a website
+- Received urgent "security alert" email
+
+**If You Entered Seed Phrase on Phishing Site:**
+
+<Callout type="error" title="CRITICAL: Act Immediately">
+Your wallet is compromised. Funds will be stolen within minutes.
+</Callout>
+
+**Immediate Actions (< 2 minutes):**
+
+1. **Transfer ALL funds** to a new wallet NOW
+2. **Do not delay** - attackers work fast
+3. **Skip revocations** - no time, just move funds
+
+**After Funds Are Safe:**
+
+1. Never use the compromised wallet again
+2. Report the phishing site:
+   - [Google Safe Browsing](https://safebrowsing.google.com/safebrowsing/report_phish/)
+   - [MetaMask Phishing Detector](https://github.com/MetaMask/eth-phishing-detect)
+   - security@khipuvault.com
+
+**If You Signed a Malicious Transaction:**
+
+1. **Check what you approved:**
+   - Go to [Revoke.cash](https://revoke.cash)
+   - Review recent approvals
+   - Look for unlimited approvals
+
+2. **Revoke immediately:**
+   - Revoke the malicious approval
+   - Revoke ALL unlimited approvals
+   - Monitor for unauthorized transactions
+
+3. **Transfer funds** to new wallet if approval was high-value
+
+**If You Just Clicked a Link (didn't sign anything):**
+
+1. **Don't panic** - clicking alone doesn't compromise wallet
+2. **Don't enter any information** on the site
+3. **Close the tab** immediately
+4. **Scan for malware** - run antivirus
+5. **Monitor your wallet** for next 24 hours
+
+**Prevention:**
+
+✅ Always verify URLs before connecting
+✅ Bookmark official sites
+✅ Read transaction details before signing
+✅ Never enter seed phrase on any website
+✅ Be suspicious of urgent messages
+
+[Phishing prevention guide](/docs/security/best-practices#phishing-prevention)
+
+### 3. Contract Vulnerability Discovered
+
+**What We'll Do:**
+
+If a vulnerability is discovered in KhipuVault contracts:
+
+**Phase 1: Immediate Response (< 1 hour)**
+
+1. **Pause Affected Contracts**
+   - Multi-sig admins pause deposits
+   - Withdrawals remain enabled
+   - New interactions are blocked
+
+2. **Alert Community**
+   - Discord announcement
+   - Twitter alert
+   - Email to registered users
+   - Status page update
+
+3. **Assess Impact**
+   - Identify affected pools
+   - Calculate potential exposure
+   - Determine affected users
+
+**Phase 2: Mitigation (< 24 hours)**
+
+1. **Develop Fix**
+   - Emergency patch if possible
+   - Security review of fix
+   - Test on testnet
+
+2. **Deploy Solution**
+   - Deploy new contracts if needed
+   - Provide migration path
+   - Announce timeline
+
+3. **Communicate Plan**
+   - Detailed incident report
+   - Step-by-step user instructions
+   - FAQ for common questions
+   - Regular status updates
+
+**Phase 3: Recovery (< 7 days)**
+
+1. **User Migration**
+   - Withdraw from old contracts
+   - Deposit to new contracts
+   - Verify all funds accounted for
+
+2. **Post-Mortem**
+   - Publish detailed analysis
+   - Explain root cause
+   - Describe lessons learned
+   - Outline prevention measures
+
+**What You Should Do:**
+
+✅ **Monitor official channels** for updates
+✅ **Follow migration instructions** carefully
+✅ **Don't panic sell** - assess calmly
+✅ **Ask questions** if confused
+✅ **Verify all communications** are from official sources
+
+❌ **Don't trust random DMs** offering "help"
+❌ **Don't use third-party migration tools**
+❌ **Don't share your private keys** with anyone
+❌ **Don't make hasty decisions**
+
+### 4. Unable to Withdraw
+
+**Symptoms:**
+- Withdrawal transaction fails
+- "Insufficient balance" error but balance shows funds
+- Transaction pending indefinitely
+- Contract reverts with error
+
+**Troubleshooting Steps:**
+
+<div className="fd-steps [&_h4]:fd-step">
+
+#### Check Contract Status
+Is the contract paused?
+- Go to [status.khipuvault.com](https://status.khipuvault.com)
+- Check Discord #announcements
+- Verify on block explorer
+
+#### Verify Your Balance
+Confirm you have funds:
+- Check pool balance in UI
+- Verify on block explorer
+- Ensure no pending withdrawals
+
+#### Check Network Status
+Verify blockchain is operating:
+- Check [Mezo Status](https://status.test.mezo.org)
+- Verify your RPC connection
+- Try different RPC endpoint
+
+#### Review Transaction Details
+If transaction failed:
+- Check error message on block explorer
+- Verify gas settings (not too low)
+- Ensure wallet has gas for fees
+- Try increasing gas limit
+
+</div>
+
+**Common Issues & Solutions:**
+
+**Issue: Insufficient Gas**
+```
+Solution: Increase gas limit in MetaMask
+- Open MetaMask
+- Edit gas settings
+- Increase gas limit by 20%
+- Retry transaction
+```
+
+**Issue: Slippage Too Low**
+```
+Solution: Not applicable to KhipuVault
+(No slippage for deposits/withdrawals)
+```
+
+**Issue: Contract Paused**
+```
+Solution: Wait for unpause announcement
+- Withdrawals should still work even when paused
+- If not, contact support immediately
+- Check status page for updates
+```
+
+**Issue: Pending Transaction Stuck**
+```
+Solution: Speed up or cancel
+- In MetaMask, click pending transaction
+- Click "Speed Up" or "Cancel"
+- Increase gas price
+- Submit new transaction
+```
+
+**When to Contact Support:**
+
+📧 Contact support@khipuvault.com if:
+
+- Withdrawal fails repeatedly with no error
+- Contract says paused but no announcement
+- Your balance shows 0 but you had deposits
+- Transaction succeeds but funds don't arrive
+- You see error messages you don't understand
+
+**Include in Your Message:**
+
+- Wallet address (public)
+- Transaction hash (if available)
+- Error message (screenshot)
+- Steps you already tried
+- Pool type and amount
+
+### 5. Website Down or Unreachable
+
+**Symptoms:**
+- khipuvault.com won't load
+- "Site can't be reached" error
+- Infinite loading
+- 404 or 500 errors
+
+**Don't Panic - Your Funds Are Safe:**
+
+<Callout type="success">
+Your Bitcoin is in smart contracts on the blockchain, NOT on our website. Even if our website is permanently offline, your funds are safe and accessible.
+</Callout>
+
+**Immediate Steps:**
+
+1. **Check if it's just you:**
+   - Try different browser
+   - Try different device
+   - Try mobile data (not WiFi)
+   - Check [DownDetector](https://downdetector.com)
+
+2. **Check official status:**
+   - Status page: [status.khipuvault.com](https://status.khipuvault.com)
+   - Twitter: [@KhipuVault](https://twitter.com/khipuvault)
+   - Discord: [discord.gg/khipuvault](https://discord.gg/khipuvault)
+
+3. **Try backup access:**
+   - IPFS gateway: [khipuvault.ipfs.io](https://khipuvault.ipfs.io) (planned)
+   - Direct contract interaction (see below)
+
+**Direct Contract Interaction:**
+
+If the website is down, you can still withdraw directly:
+
+**Option 1: Using Etherscan/Block Explorer**
+
+```
+1. Go to Mezo Block Explorer: explorer.test.mezo.org
+2. Search for your pool contract address:
+   - IndividualPool: 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
+   - CooperativePool: 0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88
+3. Click "Write Contract"
+4. Connect your wallet
+5. Find "withdraw" function
+6. Enter amount (in wei: amount × 10^18)
+7. Click "Write" and confirm transaction
+```
+
+**Option 2: Using Foundry Cast**
+
+```bash
+# Install Foundry
+curl -L https://foundry.paradigm.xyz | bash
+foundryup
+
+# Withdraw from IndividualPool
+cast send 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393 \
+  "withdraw(uint256)" 1000000000000000000 \
+  --rpc-url https://rpc.test.mezo.org \
+  --private-key $PRIVATE_KEY
+
+# Check your balance
+cast call 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393 \
+  "balanceOf(address)" $YOUR_ADDRESS \
+  --rpc-url https://rpc.test.mezo.org
+```
+
+**Option 3: Using ethers.js**
+
+```javascript
+const { ethers } = require('ethers');
+
+const provider = new ethers.JsonRpcProvider('https://rpc.test.mezo.org');
+const wallet = new ethers.Wallet(PRIVATE_KEY, provider);
+
+const poolABI = ['function withdraw(uint256 amount)'];
+const pool = new ethers.Contract(POOL_ADDRESS, poolABI, wallet);
+
+// Withdraw 1000 MUSD
+await pool.withdraw(ethers.parseEther('1000'));
+```
+
+### 6. Suspicious Activity Detected
+
+**Symptoms:**
+- Unusual transactions in your account
+- Unexpected yield amounts
+- Unknown pools in your dashboard
+- Balance discrepancies
+
+**Investigation Steps:**
+
+1. **Verify on Blockchain:**
+   - Go to [Mezo Explorer](https://explorer.test.mezo.org)
+   - Search your wallet address
+   - Review ALL transactions chronologically
+   - Compare with your records
+
+2. **Check for Approvals:**
+   - Go to [Revoke.cash](https://revoke.cash)
+   - Connect wallet
+   - Review all token approvals
+   - Revoke anything suspicious
+
+3. **Review Pool Memberships:**
+   - Log into KhipuVault
+   - Check all your pools
+   - Verify deposits match expectations
+   - Check yield history
+
+**If Activity is Unauthorized:**
+
+1. **Secure your wallet immediately** (see [Compromised Wallet](#1-compromised-wallet))
+2. **Document everything** with screenshots
+3. **Report to support** with evidence
+4. **File report** if significant amount
+
+**If Activity Seems Wrong but Authorized:**
+
+1. **Contact support** for clarification
+2. **Check Discord** for similar reports
+3. **Review yield calculations** documentation
+4. **Ask questions** before taking action
+
+### 7. Lost Access to Wallet
+
+**Scenarios:**
+
+#### Lost Device (but have seed phrase)
+
+✅ **You CAN recover:**
+
+1. Get new device
+2. Install wallet software (MetaMask, hardware wallet)
+3. Select "Import using seed phrase"
+4. Enter your 12/24 word seed phrase
+5. Verify funds are restored
+
+#### Lost Seed Phrase (but have device)
+
+⚠️ **Partial recovery possible:**
+
+1. **Transfer funds NOW** to new wallet
+2. Create new wallet on secure device
+3. Transfer ALL funds from old to new wallet
+4. Never use old wallet again (can't recover if device is lost)
+
+#### Lost Both Device and Seed Phrase
+
+❌ **Cannot recover:**
+
+Unfortunately, your funds are **permanently lost**. No one (including us) can recover them.
+
+**Prevention:**
+- ✅ Backup seed phrase in multiple secure locations
+- ✅ Use fireproof/waterproof storage
+- ✅ Tell trusted person where backups are (in case of emergency)
+- ✅ Consider metal seed phrase backup
+
+### 8. Gas Price Spike
+
+**Symptoms:**
+- Transaction costs extremely high
+- Wallet shows $50+ for simple transaction
+- All transactions timing out
+
+**What to Do:**
+
+1. **Wait if Not Urgent:**
+   - Gas prices fluctuate
+   - Check [Mezo Gas Tracker](https://explorer.test.mezo.org)
+   - Wait for network to calm down
+
+2. **Adjust Gas Settings:**
+   ```
+   In MetaMask:
+   1. Click transaction
+   2. Click "Edit" on gas
+   3. Select "Low" priority
+   4. Wait longer for confirmation
+   ```
+
+3. **Time Your Transactions:**
+   - Avoid peak hours (US/EU business hours)
+   - Early morning (UTC) usually cheaper
+   - Weekends sometimes quieter
+
+**Emergency Withdrawal During High Gas:**
+
+If you MUST withdraw during high gas:
+
+1. Withdraw maximum amount (not multiple small withdrawals)
+2. Use "Fast" gas setting
+3. Batch operations if possible
+4. Accept higher cost as emergency fee
+
+## Communication Channels
+
+### Official Channels (Trust These)
+
+✅ **Website**: https://khipuvault.com
+✅ **Documentation**: https://docs.khipuvault.com
+✅ **Discord**: https://discord.gg/khipuvault
+✅ **Twitter**: https://twitter.com/KhipuVault (@KhipuVault)
+✅ **GitHub**: https://github.com/khipuvault
+✅ **Email**: support@khipuvault.com, security@khipuvault.com
+
+### Fake/Scam Channels (Don't Trust)
+
+❌ Telegram (we don't have official Telegram)
+❌ WhatsApp (we don't use WhatsApp)
+❌ Unsolicited DMs on any platform
+❌ Email from non-@khipuvault.com domains
+❌ Accounts without verification badges
+
+**How to Verify:**
+
+1. **Check our website** for official social links
+2. **Look for verification badges** (blue checkmark)
+3. **Compare follower counts** (scam accounts have few followers)
+4. **Never trust DMs** - we won't DM you first
+5. **Cross-reference** announcements across multiple platforms
+
+## Incident Response Timeline
+
+### For Security Vulnerabilities
+
+| Phase | Timeline | Actions |
+|-------|----------|---------|
+| Detection | T+0 | Vulnerability discovered |
+| Acknowledgment | T+1 hour | Security team notified |
+| Assessment | T+6 hours | Severity determined |
+| Mitigation | T+24 hours | Fix developed and tested |
+| Deployment | T+48 hours | Fix deployed to production |
+| Communication | Ongoing | Regular status updates |
+| Post-Mortem | T+7 days | Detailed report published |
+
+### For User Support Issues
+
+| Issue Type | Response Time | Resolution Time |
+|------------|---------------|-----------------|
+| Critical (funds at risk) | < 1 hour | < 24 hours |
+| High (cannot withdraw) | < 4 hours | < 48 hours |
+| Medium (UI issues) | < 24 hours | < 7 days |
+| Low (questions) | < 48 hours | < 14 days |
+
+## Emergency Contact Information
+
+### Security Team
+
+**Critical Security Issues:**
+- 📧 security@khipuvault.com
+- 🔒 PGP: [Download Key](https://khipuvault.com/security/pgp-key.asc)
+- Response time: < 1 hour (24/7)
+
+### Support Team
+
+**User Support:**
+- 📧 support@khipuvault.com
+- 💬 Discord: [#support channel](https://discord.gg/khipuvault)
+- Response time: < 4 hours (business hours)
+
+### Community Managers
+
+**General Questions:**
+- 💬 Discord: [General chat](https://discord.gg/khipuvault)
+- 🐦 Twitter: [@KhipuVault](https://twitter.com/khipuvault)
+- Response time: < 24 hours
+
+## Post-Incident Actions
+
+After an emergency is resolved:
+
+### 1. Verify Everything
+
+- [ ] Confirm all funds are accounted for
+- [ ] Check transaction history
+- [ ] Verify balances match expectations
+- [ ] Review wallet security
+
+### 2. Update Security
+
+- [ ] Change passwords if applicable
+- [ ] Review seed phrase backup
+- [ ] Update security software
+- [ ] Enable additional 2FA
+
+### 3. Document Lessons
+
+- [ ] Write down what happened
+- [ ] Identify how it could have been prevented
+- [ ] Update your security practices
+- [ ] Share learnings with community (anonymously)
+
+### 4. Stay Informed
+
+- [ ] Join Discord for updates
+- [ ] Follow Twitter for announcements
+- [ ] Subscribe to newsletter
+- [ ] Bookmark this emergency guide
+
+## Prevention is Best Protection
+
+**Regular Security Audit:**
+
+Monthly checklist:
+- [ ] Review token approvals and revoke unused
+- [ ] Check transaction history for anomalies
+- [ ] Verify seed phrase backup is secure
+- [ ] Update wallet software
+- [ ] Review connected dApps
+- [ ] Test small withdrawal to verify access
+
+**Stay Educated:**
+
+- 📖 Read [Security Best Practices](/docs/security/best-practices)
+- 💬 Join [Discord security channel](https://discord.gg/khipuvault)
+- 📧 Subscribe to security newsletter
+- 🎓 Take crypto security courses
+
+## Questions?
+
+Emergency not covered here?
+
+- 📖 Check [FAQ](/docs/resources/faq#emergencies)
+- 💬 Ask in [Discord](https://discord.gg/khipuvault)
+- 📧 Email: support@khipuvault.com
+
+For security vulnerabilities:
+- 🔒 security@khipuvault.com
+- 💰 [Bug Bounty Program](/docs/security/bug-bounty)
+
+---
+
+Stay safe and prepared. Most emergencies can be avoided with good security practices. 🛡️

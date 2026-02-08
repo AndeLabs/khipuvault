@@ -1,0 +1,746 @@
+---
+title: Maximize Your Yields
+description: Advanced techniques and strategies for optimizing APY on your Bitcoin savings
+---
+
+import { Callout } from 'fumadocs-ui/components/callout';
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+# Maximize Your Yields
+
+Master advanced yield optimization techniques to extract maximum returns from your Bitcoin savings on KhipuVault. Learn compounding strategies, timing optimization, and yield arbitrage opportunities.
+
+## Prerequisites
+
+Before starting this tutorial, you should have:
+
+- Completed [Earn First Yield](/docs/tutorials/beginner/earn-first-yield) tutorial
+- Experience with multiple pool types
+- Understanding of [Multi-Pool Strategy](/docs/tutorials/advanced/multi-pool-strategy)
+- Active positions in at least 2 different pool types
+- Comfort with advanced financial concepts (compounding, APY vs APR, etc.)
+- Time to actively manage your positions (at least 1 hour per week)
+
+## What You'll Learn
+
+By the end of this tutorial, you will:
+
+- Understand the mathematics of yield optimization
+- Implement auto-compounding strategies for maximum returns
+- Time your deposits and withdrawals for optimal yield capture
+- Identify and exploit yield arbitrage opportunities
+- Optimize gas fees and transaction costs
+- Build automated yield farming systems
+- Measure and improve your yield efficiency
+
+<Callout type="info">
+  A 1-2% improvement in APY might seem small, but through compounding, it can lead to 15-20% higher returns over multiple years.
+</Callout>
+
+## Understanding Yield Fundamentals
+
+### APY vs APR: The Power of Compounding
+
+```typescript
+// APR (Annual Percentage Rate) - Simple Interest
+APR Formula: Principal × Rate × Time
+
+Example: 1 BTC at 10% APR for 1 year
+Returns: 1.0 + (1.0 × 0.10 × 1) = 1.10 BTC
+
+// APY (Annual Percentage Yield) - Compound Interest
+APY Formula: Principal × (1 + Rate/n)^(n×Time)
+
+Example: 1 BTC at 10% APR compounded daily
+Returns: 1.0 × (1 + 0.10/365)^(365×1) = 1.1052 BTC
+
+Difference: 0.0052 BTC (0.52% higher with compounding)
+```
+
+### Compounding Frequency Impact
+
+| Frequency | APR 10% → Effective APY | Extra Yield per 1 BTC |
+|-----------|-------------------------|----------------------|
+| No Compounding | 10.00% | 0 BTC |
+| Monthly | 10.47% | 0.0047 BTC |
+| Weekly | 10.51% | 0.0051 BTC |
+| Daily | 10.52% | 0.0052 BTC |
+| Continuous | 10.52% | 0.0052 BTC |
+
+**Key Insight:** Daily compounding captures 99% of maximum possible yield. More frequent than daily provides minimal benefit.
+
+## Step-by-Step Yield Optimization
+
+<Steps>
+
+### Step 1: Enable Maximum Compounding
+
+#### 1.1 Configure Auto-Compounding on Individual Pool
+
+```typescript
+// Individual Pool Settings
+1. Navigate to Individual Pool dashboard
+2. Click "Settings" → "Auto-Compound"
+3. Enable auto-compounding
+4. Set reinvestment threshold: 0.001 BTC (balance gas fees vs frequency)
+5. Confirm transaction
+```
+
+**Optimal Settings:**
+- **Small positions (less than 0.5 BTC):** Reinvest at 0.001 BTC threshold
+- **Medium positions (0.5-2 BTC):** Reinvest at 0.005 BTC threshold
+- **Large positions (greater than 2 BTC):** Reinvest at 0.01 BTC threshold
+
+**Why?** Lower thresholds mean more frequent compounding, but you must balance against gas fees.
+
+#### 1.2 Manual Compounding for Cooperative Pools
+
+Many cooperative pools require manual yield claims:
+
+```typescript
+// Weekly Compounding Routine
+1. Monday morning: Check all cooperative pool yields
+2. If yield > threshold:
+   a. Claim yields
+   b. Immediately re-deposit to same pool
+   c. Record transaction for tax purposes
+3. Track compounding frequency for each pool
+```
+
+**Best Practice:** Claim and re-deposit weekly for optimal compounding while minimizing gas fees.
+
+<Callout type="tip">
+  Set a recurring calendar reminder every Monday at 9 AM to claim and re-compound cooperative pool yields.
+</Callout>
+
+### Step 2: Optimize Deposit Timing
+
+#### 2.1 Understanding Yield Accrual Mechanics
+
+```typescript
+// Yield Accrual on KhipuVault
+├── Individual Pool: Accrues per block (instant start)
+├── Cooperative Pool: Accrues per block after deposit confirmation
+├── ROSCA: Accrues after position confirmation
+└── Prize Pool: Accrues from next draw cycle
+
+Key: All deposits start earning immediately or next cycle
+```
+
+#### 2.2 Strategic Deposit Timing
+
+**For ROSCA Positions:**
+```
+Bad Timing: Deposit mid-cycle → Miss partial yield
+Good Timing: Deposit start of cycle → Capture full cycle yield
+
+Example:
+├── 30-day ROSCA cycle
+├── Deposit on day 15 → Only 15 days of yield (50% lost)
+└── Deposit on day 1 → Full 30 days of yield
+
+Impact: 2× yield capture efficiency
+```
+
+**For Prize Pools:**
+```
+Best Practice: Deposit before draw cutoff
+├── Check next draw date
+├── Deposit at least 1 day before
+├── Ensure deposit confirmed before snapshot
+└── Maximize tickets for upcoming draw
+```
+
+#### 2.3 Timing Larger Deposits
+
+When making significant deposits (greater than 1 BTC):
+
+```typescript
+// Large Deposit Strategy
+Option A: Lump Sum (Market timing risk)
+├── Deposit entire amount immediately
+├── Start compounding immediately
+└── Risk: Potential for better rates later
+
+Option B: Dollar-Cost Averaging (Reduced risk)
+├── Split deposit into 4-6 portions
+├── Deposit weekly or biweekly
+├── Average into different yield rates
+└── Lower risk but slower compounding
+
+Recommendation: Lump sum if high confidence in rates,
+DCA if uncertain or new to platform
+```
+
+### Step 3: Implement Yield Arbitrage
+
+#### 3.1 Identify Arbitrage Opportunities
+
+Yield arbitrage is moving funds to higher-yielding pools when opportunities arise:
+
+```typescript
+// Arbitrage Opportunity Detection
+Current Positions:
+├── Pool A: 0.5 BTC at 10% APY
+├── Pool B: 0.3 BTC at 11% APY
+└── Pool C: 0.2 BTC at 9% APY
+
+New Pool D Launches: 14% APY
+
+Arbitrage Actions:
+1. Withdraw 0.2 BTC from Pool C (lowest yield)
+2. Deposit into Pool D (highest yield)
+3. Net gain: +5% APY on 0.2 BTC = 0.01 BTC/year
+```
+
+#### 3.2 Calculate Arbitrage Profitability
+
+Before moving funds, calculate if it's worth the gas fees:
+
+```typescript
+// Arbitrage Profit Calculator
+function isArbitrageProfitable(
+  amount: number,
+  currentAPY: number,
+  newAPY: number,
+  gasCost: number,
+  holdingPeriod: number // days
+): boolean {
+  const yieldDiff = (newAPY - currentAPY) / 100
+  const dailyYield = yieldDiff / 365
+  const totalExtraYield = amount * dailyYield * holdingPeriod
+
+  return totalExtraYield > gasCost
+}
+
+// Example
+isArbitrageProfitable(
+  0.5,      // 0.5 BTC
+  10,       // Current 10% APY
+  14,       // New 14% APY
+  0.0001,   // 0.0001 BTC gas cost
+  90        // 90-day holding period
+)
+// = (0.5 × 0.04 / 365 × 90) > 0.0001
+// = 0.00493 > 0.0001 ✅ Profitable
+```
+
+**Rule of Thumb:** Move funds if:
+- Yield difference ≥2% APY AND holding period ≥30 days, OR
+- Yield difference ≥4% APY for any holding period
+
+#### 3.3 Automated Yield Arbitrage Monitoring
+
+Set up alerts for arbitrage opportunities:
+
+```typescript
+// Arbitrage Alert System
+Monitor:
+├── All active pools you're in
+├── New pools launching
+├── Pools with recently increased rates
+└── Pools with bonus APY periods
+
+Alert Triggers:
+├── New pool greater than 2% higher than your lowest position
+├── Existing pool increases rate by greater than 2%
+├── Your pool decreases rate by greater than 1%
+└── Limited-time bonus APY opportunities
+
+Action: Review and rebalance within 24 hours
+```
+
+### Step 4: Gas Fee Optimization
+
+Gas fees can significantly erode yields. Optimize them:
+
+#### 4.1 Batch Transactions
+
+```typescript
+// Instead of:
+❌ Monday: Claim Pool A (0.0001 BTC gas)
+❌ Tuesday: Claim Pool B (0.0001 BTC gas)
+❌ Wednesday: Claim Pool C (0.0001 BTC gas)
+❌ Total Gas: 0.0003 BTC
+
+// Do this:
+✅ Monday: Batch claim Pool A + B + C (0.00012 BTC gas)
+✅ Total Gas: 0.00012 BTC (60% savings)
+```
+
+**Implementation:**
+1. Use KhipuVault's batch transaction feature
+2. Queue multiple claims/deposits
+3. Execute in single transaction
+4. Save on gas fees
+
+#### 4.2 Optimize Gas Timing
+
+Gas fees vary by network congestion:
+
+```typescript
+// Gas Price Patterns (Mezo Network)
+Low Gas (Best):
+├── Late night: 11 PM - 4 AM UTC
+├── Weekends: Saturday-Sunday
+└── Holidays
+
+High Gas (Avoid):
+├── Business hours: 9 AM - 5 PM UTC
+├── Weekdays: Monday-Friday
+└── Major market events
+
+Strategy: Schedule non-urgent transactions during low gas periods
+```
+
+#### 4.3 Gas Fee Threshold Optimization
+
+Calculate optimal reinvestment thresholds:
+
+```typescript
+// Reinvestment Threshold Calculator
+function optimalReinvestThreshold(
+  gasCost: number,        // Current gas cost in BTC
+  apy: number,            // Pool APY
+  compoundingBoost: number // Additional APY from compounding (typically 0.5%)
+): number {
+  // You want gas cost < 1% of extra yield generated
+  const dailyBoost = compoundingBoost / 365
+  const minAmount = gasCost / (dailyBoost * 30) // 30-day payback
+
+  return minAmount
+}
+
+// Example
+optimalReinvestThreshold(
+  0.0001,  // Gas cost
+  12,      // 12% base APY
+  0.5      // 0.5% compounding boost
+)
+// = 0.0001 / (0.005/365 × 30)
+// = 0.0024 BTC minimum to reinvest
+
+Recommendation: Set auto-compound threshold at 2-3× minimum
+```
+
+### Step 5: Leverage Bonus APY Periods
+
+Many pools offer temporary APY boosts. Maximize them:
+
+#### 5.1 Identify Bonus Periods
+
+```typescript
+// Common Bonus APY Patterns
+New Pool Launch:
+├── Week 1-2: +5% bonus APY
+├── Week 3-4: +3% bonus APY
+└── Week 5+: Standard APY
+
+Liquidity Mining:
+├── First 1000 depositors: +2% APY
+├── Deposits greater than 1 BTC: +1% APY
+└── 30-day lockup: +1.5% APY
+
+Seasonal Promotions:
+├── Holiday periods: +3-5% APY
+├── Platform anniversaries: +4% APY
+└── Referral bonuses: +1% APY per referral
+```
+
+#### 5.2 Bonus APY Strategy
+
+```typescript
+// Maximizing Bonuses
+1. Monitor upcoming launches and promotions
+2. Allocate 10-20% of portfolio for "bonus chasing"
+3. Move quickly when bonuses announced
+4. Calculate breakeven including gas fees
+5. Set calendar reminders for bonus end dates
+6. Exit or rebalance when bonus period ends
+
+Example:
+├── New pool launches with 14% APY (vs 10% elsewhere)
+├── Move 0.5 BTC for 30-day bonus period
+├── Extra yield: 0.5 × 0.04 / 12 = 0.00167 BTC
+├── Gas costs: 0.0002 BTC (in + out)
+└── Net gain: 0.00147 BTC (735% ROI on gas fees)
+```
+
+### Step 6: Build Automated Yield Farming System
+
+#### 6.1 Create Yield Farming Workflow
+
+```typescript
+// Weekly Yield Farming Routine
+Monday Morning (30 mins):
+├── Check all pool yields accumulated
+├── Claim yields from manual pools
+├── Review arbitrage opportunities
+├── Execute rebalancing if needed
+└── Record all transactions
+
+Wednesday Evening (15 mins):
+├── Monitor pool performance
+├── Check for new pool launches
+├── Review bonus APY opportunities
+└── Update yield tracking spreadsheet
+
+Sunday Evening (20 mins):
+├── Weekly performance review
+├── Calculate blended APY
+├── Plan next week's actions
+└── Rebalance if greater than 15% drift from targets
+```
+
+#### 6.2 Automated Monitoring Dashboard
+
+Set up a personal yield tracking system:
+
+```typescript
+// Yield Tracking Metrics
+Track Weekly:
+├── Total Portfolio Value (BTC)
+├── Yield Generated (BTC)
+├── Blended APY (%)
+├── APY by Pool
+├── Gas Fees Spent (BTC)
+├── Net Yield (after gas)
+└── Yield Efficiency (%)
+
+Calculate Monthly:
+├── YTD Returns (%)
+├── Best Performing Pool
+├── Worst Performing Pool
+├── Total Compounding Benefit
+├── Arbitrage Profits
+└── Bonus APY Captured
+```
+
+### Step 7: Advanced Compounding Techniques
+
+#### 7.1 Cross-Pool Compounding
+
+Don't reinvest yields in the same pool if better options exist:
+
+```typescript
+// Smart Yield Reinvestment
+Scenario:
+├── Individual Pool: Generated 0.01 BTC at 10% APY
+├── Cooperative Pool: Currently offering 13% APY
+└── Gas cost to move: 0.0001 BTC
+
+Action:
+❌ Bad: Reinvest 0.01 BTC back into Individual Pool
+✅ Good: Move 0.01 BTC to Cooperative Pool
+
+Impact:
+├── Old approach: 0.01 × 10% = 0.001 BTC/year
+├── New approach: 0.01 × 13% = 0.0013 BTC/year
+└── Extra: 0.0003 BTC/year (30% more)
+```
+
+#### 7.2 The "Harvest and Deploy" Strategy
+
+```typescript
+// Harvest and Deploy Weekly
+Step 1: Harvest Phase
+├── Claim all yields across pools
+├── Aggregate into single position
+└── Total: e.g., 0.015 BTC collected
+
+Step 2: Analysis Phase
+├── Identify highest current APY pool
+├── Calculate gas costs to deploy
+└── Verify profitability
+
+Step 3: Deploy Phase
+├── Deploy aggregated yields to highest APY pool
+├── This pool compounds at maximum rate
+└── Repeat weekly
+
+Result: All yields compound at highest available rate
+```
+
+#### 7.3 Compound Interest Laddering
+
+```typescript
+// Laddering for Continuous Compounding
+Strategy:
+├── Split positions across multiple timeframes
+├── Shorter positions compound more frequently
+└── Longer positions capture higher rates
+
+Example:
+├── Position A: 0.3 BTC, daily compounding, 10% APY
+├── Position B: 0.4 BTC, weekly compounding, 12% APY
+├── Position C: 0.3 BTC, monthly compounding, 14% APY
+
+Benefits:
+├── Balanced liquidity access
+├── Optimized compounding frequency
+└── Diversified rate exposure
+```
+
+</Steps>
+
+## Advanced Yield Optimization Strategies
+
+### Strategy 1: The "Yield Stacking" Approach
+
+Combine multiple yield sources:
+
+```typescript
+// Yield Stacking Example
+Base Layer: Individual Pool at 10% APY
+├── 1.0 BTC deposited
+└── Expected: 0.10 BTC/year
+
+Layer 2: Referral Bonuses (+1% APY)
+├── Refer 5 friends
+└── Extra: 0.01 BTC/year
+
+Layer 3: Loyalty Rewards (+0.5% APY)
+├── Hold for 6+ months
+└── Extra: 0.005 BTC/year
+
+Layer 4: Governance Participation (+0.5% APY)
+├── Vote in pool governance
+└── Extra: 0.005 BTC/year
+
+Total Stacked APY: 12%
+Total Yield: 0.12 BTC/year (20% boost)
+```
+
+### Strategy 2: Volatility-Adjusted Rebalancing
+
+Rebalance more aggressively during high volatility:
+
+```typescript
+// Dynamic Rebalancing Rules
+Market Volatility Low (less than 5% weekly):
+├── Rebalance quarterly
+├── Maintain current allocation
+└── Focus on compounding
+
+Market Volatility Medium (5-15% weekly):
+├── Rebalance monthly
+├── Slight shift to liquid positions
+└── Monitor closely
+
+Market Volatility High (greater than 15% weekly):
+├── Rebalance weekly or as needed
+├── Major shift to Individual Pool (liquid)
+├── Preserve capital
+└── Resume aggressive strategy when volatility drops
+```
+
+### Strategy 3: The "Barbell Strategy"
+
+Combine ultra-safe and ultra-aggressive positions:
+
+```typescript
+// Barbell Allocation
+Safe Side (50%):
+├── All in Individual Pool
+├── Instant liquidity
+└── Conservative 8-10% APY
+
+Aggressive Side (50%):
+├── High-yield ROSCAs
+├── New pool bonuses
+├── Prize pools
+└── Target 15-18% APY
+
+Blended APY: ~13%
+Risk: Moderate (hedged by 50% liquid)
+```
+
+## Measuring Yield Efficiency
+
+### Yield Efficiency Score
+
+Calculate how effectively you're capturing available yields:
+
+```typescript
+// Yield Efficiency Formula
+Efficiency = (Your Blended APY / Max Available APY) × 100
+
+Example:
+├── Your Blended APY: 11.5%
+├── Maximum APY Available: 14% (ROSCA with bonuses)
+└── Efficiency: (11.5 / 14) × 100 = 82%
+
+Target Efficiency:
+├── 90-100%: Excellent (expert-level optimization)
+├── 80-90%: Good (solid strategy)
+├── 70-80%: Fair (room for improvement)
+└── less than 70%: Poor (leaving money on table)
+```
+
+### Calculate Opportunity Cost
+
+Track what you could have earned:
+
+```typescript
+// Monthly Opportunity Cost Analysis
+Actual Earnings: 0.015 BTC
+Optimal Earnings: 0.018 BTC (if perfectly optimized)
+Opportunity Cost: 0.003 BTC
+
+Reasons for Gap:
+├── Delayed rebalancing: -0.001 BTC
+├── Missed bonus period: -0.001 BTC
+├── Sub-optimal compounding: -0.0005 BTC
+└── Excessive gas fees: -0.0005 BTC
+
+Actionable: Focus on timely rebalancing and bonus capture
+```
+
+## Real-World Optimization Examples
+
+### Example 1: Optimizing 1 BTC Position
+
+**Starting Position:**
+```
+Individual Pool: 1.0 BTC at 10% APY
+Monthly Yield: 0.0083 BTC
+Annual Yield: 0.10 BTC
+```
+
+**After Optimization:**
+```
+Individual Pool: 0.3 BTC at 10% APY (liquidity)
+Cooperative Pool: 0.5 BTC at 13% APY (auto-compound weekly)
+ROSCA: 0.2 BTC at 16% APY (6-month cycle)
+
+Monthly Yield: 0.0108 BTC
+Annual Yield: 0.13 BTC
+
+Improvement: +30% more yield (+0.03 BTC/year)
+```
+
+### Example 2: Gas Fee Optimization
+
+**Before Optimization:**
+```
+Weekly Activities:
+├── Claim Pool A: 0.0001 BTC gas
+├── Claim Pool B: 0.0001 BTC gas
+├── Reinvest Pool A: 0.0001 BTC gas
+└── Reinvest Pool B: 0.0001 BTC gas
+
+Monthly Gas: 0.0016 BTC
+Annual Gas: 0.0192 BTC (1.92% of 1 BTC position!)
+```
+
+**After Optimization:**
+```
+Weekly Activities:
+├── Batch claim A+B: 0.00012 BTC gas
+└── Batch reinvest A+B: 0.00012 BTC gas
+
+Monthly Gas: 0.00096 BTC
+Annual Gas: 0.01152 BTC (1.15% of position)
+
+Savings: 0.00768 BTC/year (40% gas reduction)
+```
+
+## Common Mistakes to Avoid
+
+<Callout type="error">
+  **Yield Optimization Pitfalls:**
+
+  1. **Over-optimization**: Spending more on gas than you gain in extra yield
+  2. **Chasing small gains**: Moving funds for less than 1% APY improvement
+  3. **Ignoring lock-up risks**: Sacrificing liquidity for marginal yield
+  4. **Neglecting compounding**: Letting yields sit idle instead of reinvesting
+  5. **Poor timing**: Depositing mid-cycle and missing yield
+  6. **Excessive rebalancing**: Transaction costs exceed yield gains
+  7. **Bonus APY tunnel vision**: Ignoring underlying pool quality
+  8. **No automation**: Manual processes leading to missed opportunities
+</Callout>
+
+## Troubleshooting
+
+### Issue: Yields Lower Than Expected
+
+**Symptoms:**
+- Expected 12% APY but only getting 10%
+- Not seeing compounding benefits
+
+**Diagnosis:**
+```typescript
+Checklist:
+├── ✓ Is auto-compounding enabled?
+├── ✓ Are yields being claimed regularly?
+├── ✓ Is reinvestment threshold set appropriately?
+├── ✓ Are you in the highest-yield pools for your risk tolerance?
+└── ✓ Have pool rates decreased recently?
+```
+
+**Solutions:**
+1. Enable auto-compounding on all pools that support it
+2. Set weekly claim reminder for manual pools
+3. Lower reinvestment threshold for more frequent compounding
+4. Review and rebalance to higher-yield pools
+5. Check pool announcements for rate changes
+
+### Issue: High Gas Fees Eating Into Yields
+
+**Symptoms:**
+- Gas fees greater than 1% of monthly yields
+- Net yield significantly below gross yield
+
+**Solutions:**
+1. Implement batch transactions
+2. Increase reinvestment thresholds
+3. Time transactions during low gas periods
+4. Consolidate positions into fewer pools
+5. Only rebalance when yield difference greater than 2%
+
+### Issue: Missing Bonus APY Opportunities
+
+**Symptoms:**
+- Frequently learning about bonuses after they've ended
+- Not capturing new pool launch bonuses
+
+**Solutions:**
+1. Enable all platform notifications
+2. Join KhipuVault Discord for announcements
+3. Set up Twitter/social media alerts
+4. Check dashboard daily for "Opportunities" section
+5. Allocate 10-20% of portfolio as "fast money" for bonuses
+
+## Next Steps
+
+Continue your yield mastery journey:
+
+<Cards>
+  <Card
+    title="Pool Management"
+    href="/docs/tutorials/advanced/pool-management"
+    description="Learn to create and manage high-yield cooperative pools"
+  />
+  <Card
+    title="Tax Reporting"
+    href="/docs/tutorials/advanced/tax-reporting"
+    description="Properly report and optimize your yield earnings for taxes"
+  />
+  <Card
+    title="Multi-Pool Strategy"
+    href="/docs/tutorials/advanced/multi-pool-strategy"
+    description="Build a comprehensive diversification strategy"
+  />
+</Cards>
+
+## Tools and Resources
+
+- [APY Calculator](/docs/tools/apy-calculator) - Calculate expected yields
+- [Compounding Simulator](/docs/tools/compounding-simulator) - Model compounding scenarios
+- [Gas Fee Estimator](/docs/tools/gas-estimator) - Optimize transaction timing
+- [Yield Comparison Tool](/docs/tools/yield-comparison) - Compare pool yields
+- [Portfolio Tracker](/docs/tools/portfolio-tracker) - Monitor performance
+
+<Callout type="success">
+  You now have the knowledge to maximize yields on your Bitcoin savings. Remember: consistency and discipline in applying these techniques will compound over time into significant additional returns.
+</Callout>

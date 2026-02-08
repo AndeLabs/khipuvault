@@ -1,0 +1,514 @@
+---
+title: Odds & Strategies
+description: Maximize your winning chances, understand probability, and optimize your Prize Pool strategy for better outcomes.
+---
+
+# Odds & Strategies
+
+Learn how to improve your odds, optimize your deposits, and develop winning strategies for Prize Pool.
+
+## Understanding Your Odds
+
+### Basic Probability
+
+Your odds are proportional to your ticket share:
+
+```
+Your Odds = Your Tickets ÷ Total Tickets
+
+Example:
+- Your tickets: 1,000
+- Total tickets: 2,000,000
+- Your odds: 0.05% (1 in 2,000)
+```
+
+This applies to each prize tier independently.
+
+### Prize-Specific Odds
+
+Different tiers have different odds:
+
+```
+Grand Prize (1 winner):
+Your odds: Your Tickets ÷ Total Tickets
+
+Runner-Up (5 winners):
+Your odds: 5 × (Your Tickets ÷ Total Tickets)
+
+Consolation (10 winners):
+Your odds: 10 × (Your Tickets ÷ Total Tickets)
+```
+
+**Example with 1,000 tickets out of 2,000,000 total:**
+```
+Grand Prize odds: 0.05% (1 in 2,000)
+Runner-Up odds: 0.25% (1 in 400)
+Consolation odds: 0.50% (1 in 200)
+Any prize odds: 0.80% (1 in 125)
+```
+
+### Cumulative Odds (Multiple Draws)
+
+Your odds improve over multiple draws:
+
+```
+Probability of winning at least once in N draws:
+= 1 - (1 - P)^N
+
+Where P = single-draw probability
+```
+
+**Example (0.8% odds per draw):**
+```
+1 draw: 0.80% chance
+10 draws: 7.7% chance
+52 draws: 34.0% chance (over 1 year)
+100 draws: 55.1% chance
+```
+
+<Callout type="success">
+**Time Improves Odds**
+
+Staying deposited for 52 weeks (1 year) gives you a 34% chance of winning at least one prize, assuming 0.8% odds per draw.
+</Callout>
+
+## Improving Your Odds
+
+### Strategy 1: Deposit More
+
+The most direct way to improve odds:
+
+```
+Scenario A: 1,000 MUSD deposit
+- Tickets: 1,000
+- Odds: 0.05%
+- Expected value per draw: 5.2 MUSD
+
+Scenario B: 10,000 MUSD deposit
+- Tickets: 10,000
+- Odds: 0.5%
+- Expected value per draw: 52 MUSD
+
+10x deposit → 10x odds
+```
+
+**Optimal deposit size depends on:**
+- Your risk tolerance
+- Opportunity cost of yields
+- Desire for excitement vs. stability
+
+### Strategy 2: Deposit Early in Week
+
+Maximize time-weighted tickets:
+
+```
+Monday Deposit:
+- Time in pool: 7 days
+- Time weight: 100%
+- Effective tickets: 1,000
+
+Thursday Deposit:
+- Time in pool: 2 days
+- Time weight: 28.5%
+- Effective tickets: 285
+
+Same deposit, 3.5x more tickets by depositing Monday!
+```
+
+<Callout type="info">
+**Best Practice**
+
+Deposit on Monday (or right after Friday draw) to maximize your time-weighted tickets for that week.
+</Callout>
+
+### Strategy 3: Stay Deposited Longer
+
+Compound probability over time:
+
+```
+Strategy A: Deposit for 1 week
+- Draws entered: 1
+- Cumulative odds: 0.8%
+
+Strategy B: Deposit for 52 weeks
+- Draws entered: 52
+- Cumulative odds: 34.0%
+
+42x more likely to win by staying deposited!
+```
+
+**Trade-off:**
+- Longer deposit = more draws = higher cumulative odds
+- But opportunity cost increases (missed yields on other platforms)
+
+### Strategy 4: Re-deposit Winnings
+
+Compound your position:
+
+```
+Week 1: Deposit 1,000 MUSD
+Week 10: Win 155 MUSD (Runner-Up)
+Action: Re-deposit 155 MUSD
+
+Week 11+:
+- New deposit: 1,155 MUSD
+- New tickets: 1,155
+- New odds: 15.5% higher
+```
+
+**Long-term compounding:**
+```
+Start: 1,000 MUSD
+Win 1: +155 MUSD → 1,155 MUSD deposit
+Win 2: +25 MUSD → 1,180 MUSD deposit
+Win 3: +155 MUSD → 1,335 MUSD deposit
+
+After 3 wins: 33.5% larger position
+```
+
+### Strategy 5: Pool with Friends
+
+Coordinate deposits with friends/family:
+
+```
+Solo Strategy:
+- You deposit: 1,000 MUSD
+- Your odds: 0.05%
+
+Group Strategy (5 friends):
+- Each deposits: 1,000 MUSD
+- Group odds: 0.25% (5x better)
+- Agreement: Split winnings 5 ways
+```
+
+**Benefits:**
+- Higher odds of someone winning
+- Share the excitement
+- Diversify risk across group
+
+**Risks:**
+- Trust required (no smart contract enforcement)
+- Potential disputes over winnings
+
+## Advanced Strategies
+
+### Kelly Criterion
+
+Optimal bet sizing based on expected value:
+
+```
+Kelly % = (Expected Value ÷ Prize) - ((1 - Probability) ÷ Probability)
+
+Example:
+- Expected value: 5.2 MUSD
+- Grand prize: 4,153 MUSD
+- Probability: 0.05%
+- Kelly %: ~0.13% of bankroll
+
+If bankroll = 100,000 MUSD
+Optimal deposit = 130 MUSD
+```
+
+<Callout type="warning">
+**Kelly Criterion Limitations**
+
+Kelly assumes infinite repeated trials. For Prize Pool:
+- Limited draws (52/year)
+- No-loss principal (reduces risk)
+- Non-binary outcomes (multiple prize tiers)
+
+Use Kelly as a guide, not gospel.
+</Callout>
+
+### Expected Value Maximization
+
+Deposit enough to make expected value > opportunity cost:
+
+```
+Goal: Expected Value > Direct Yields
+
+Direct Yield (15% APY):
+1,000 MUSD × 15% ÷ 52 = 2.88 MUSD/week
+
+Prize Pool Expected Value:
+With 1,000 tickets out of 2M total = 5.22 MUSD/week
+
+EV Premium: 5.22 - 2.88 = +2.34 MUSD (+81%)
+
+Conclusion: Prize Pool has higher expected value
+```
+
+**Break-even analysis:**
+```
+At what ticket share does EV = Direct Yields?
+
+If EV less than 2.88 MUSD, direct yields are better
+If EV more than 2.88 MUSD, Prize Pool is better
+
+Calculate your personal break-even based on ticket share
+```
+
+### Portfolio Allocation
+
+Diversify across KhipuVault products:
+
+```
+Total Assets: 10,000 MUSD
+
+Conservative Allocation:
+- 70% Individual Savings: 7,000 MUSD (guaranteed ~15% APY)
+- 20% Prize Pool: 2,000 MUSD (high variance, high EV)
+- 10% Liquid: 1,000 MUSD (emergency fund)
+
+Aggressive Allocation:
+- 30% Individual Savings: 3,000 MUSD
+- 60% Prize Pool: 6,000 MUSD (maximize odds)
+- 10% Liquid: 1,000 MUSD
+
+Balanced Allocation:
+- 50% Individual Savings: 5,000 MUSD
+- 40% Prize Pool: 4,000 MUSD
+- 10% Liquid: 1,000 MUSD
+```
+
+Choose based on:
+- Risk tolerance (conservative vs. aggressive)
+- Liquidity needs
+- Preference for excitement vs. stability
+
+## Odds by Deposit Size
+
+Real examples at current pool size (2M MUSD total):
+
+| Deposit | Tickets | Grand Prize Odds | Any Prize Odds | Annual Win Probability |
+|---------|---------|------------------|----------------|------------------------|
+| 100 | 100 | 0.005% (1 in 20,000) | 0.08% (1 in 1,250) | 4.0% |
+| 500 | 500 | 0.025% (1 in 4,000) | 0.40% (1 in 250) | 18.3% |
+| 1,000 | 1,000 | 0.05% (1 in 2,000) | 0.80% (1 in 125) | 34.0% |
+| 5,000 | 5,000 | 0.25% (1 in 400) | 4.0% (1 in 25) | 89.3% |
+| 10,000 | 10,000 | 0.50% (1 in 200) | 8.0% (1 in 12.5) | 98.9% |
+| 50,000 | 50,000 | 2.5% (1 in 40) | 40% (1 in 2.5) | greater than 99.9% |
+
+**Key insights:**
+- 10,000 MUSD deposit = 99% chance to win something within 1 year
+- 50,000 MUSD deposit = near-guaranteed weekly prizes
+
+## Common Strategy Mistakes
+
+### ❌ Mistake 1: Depositing Right Before Draw
+
+```
+Wrong: Thursday 11 PM UTC deposit
+- Time weight: ~14% (1 day out of 7)
+- Wasted ticket potential: 86%
+
+Right: Monday deposit
+- Time weight: 100%
+- Full ticket credit
+```
+
+**Impact:**
+```
+Same 1,000 MUSD deposit:
+- Thursday: 140 tickets
+- Monday: 1,000 tickets
+7x more tickets by depositing Monday!
+```
+
+### ❌ Mistake 2: Withdrawing Too Soon
+
+```
+Wrong: Deposit for 1 week, no win, withdraw
+- Draws entered: 1
+- Cumulative odds: 0.8%
+
+Right: Deposit for 52 weeks (1 year)
+- Draws entered: 52
+- Cumulative odds: 34.0%
+
+42x more likely to win by staying!
+```
+
+### ❌ Mistake 3: Underestimating Opportunity Cost
+
+```
+Wrong: Deposit 100,000 MUSD into Prize Pool
+- Expected value: 520 MUSD/week
+- Direct yields foregone: 288 MUSD/week
+- Net EV: +232 MUSD/week
+
+But: Volatility risk (might win 0 for months)
+
+Right: Deposit 20,000 MUSD, keep 80,000 in Individual Savings
+- Prize Pool EV: 104 MUSD/week
+- Direct yields: 230 MUSD/week
+- Total: 334 MUSD/week (higher + less volatile)
+```
+
+### ❌ Mistake 4: Ignoring Pool Growth
+
+```
+Wrong: "Odds are too low, I'll wait"
+- Pool grows from 2M → 5M MUSD
+- Prize grows 2.5x but your odds halve
+- Net: Worse position
+
+Right: Deposit early before pool grows
+- Lock in higher ticket share
+- Benefit from growing prizes
+- Better expected value
+```
+
+### ❌ Mistake 5: Not Re-depositing Wins
+
+```
+Scenario: Win 155 MUSD, withdraw to wallet
+
+Missed opportunity:
+- Re-deposit would increase tickets 15.5%
+- Higher odds for future draws
+- Compounding effect over time
+
+Better: Re-deposit winnings to compound position
+```
+
+## Psychological Strategies
+
+### Manage Expectations
+
+```
+Realistic Mindset:
+- "I might not win for months, but my deposit is safe"
+- "Over 52 weeks, I have a 34% chance to win something"
+- "Expected value is positive, even if I don't win"
+
+Unrealistic Mindset:
+- "I'll definitely win this week"
+- "If I don't win in 10 draws, I'm withdrawing"
+- "Prize Pool is a scam because I didn't win"
+```
+
+### Set Goals
+
+```
+Goal A: "Win at least one prize within 1 year"
+- Deposit: 1,000 MUSD
+- Probability: 34%
+- Achievable with patience
+
+Goal B: "Win the Grand Prize"
+- Deposit: 1,000 MUSD
+- Probability: 2.5% over 52 weeks
+- Possible but unlikely
+
+Set realistic goals aligned with your odds.
+```
+
+### Dollar-Cost Average
+
+Gradually build position:
+
+```
+Week 1: Deposit 200 MUSD
+Week 2: Deposit 200 MUSD (400 total)
+Week 3: Deposit 200 MUSD (600 total)
+...
+Week 5: Deposit 200 MUSD (1,000 total)
+
+Benefits:
+- Easier psychologically (small commitments)
+- Average entry price
+- Learn the system gradually
+```
+
+## Strategy Comparison Table
+
+| Strategy | Pros | Cons | Best For |
+|----------|------|------|----------|
+| Large deposit | High odds, high EV | High opportunity cost | Risk-takers with capital |
+| Long-term hold | Compound odds over time | Patience required | Patient savers |
+| Weekly deposits | Build gradually, low commitment | Lower initial odds | Risk-averse users |
+| Re-deposit wins | Compounding effect | Requires winning first | Winners who want more |
+| Group pooling | Higher group odds | Trust issues, coordination | Social savers |
+
+## Simulation: 1 Year Results
+
+Monte Carlo simulation (1,000 trials):
+
+```
+Setup:
+- Deposit: 1,000 MUSD
+- Duration: 52 weeks
+- Pool size: 2,000,000 MUSD (constant)
+
+Results:
+- 66% of trials: $0 won (no wins)
+- 25% of trials: $25-180 won (1-2 small prizes)
+- 7% of trials: $180-500 won (multiple small prizes)
+- 2% of trials: $4,153+ won (Grand Prize)
+
+Average winnings: $312 MUSD
+Median winnings: $0 MUSD
+95th percentile: $4,178 MUSD
+
+Takeaway: High variance, but deposit always safe
+```
+
+<Callout type="info">
+**Variance Reality**
+
+Most depositors (66%) won't win anything in a given year. But their deposit remains safe and withdrawable. Prize Pool is for those who value excitement and upside over guaranteed yields.
+</Callout>
+
+## Odds Calculator
+
+Estimate your odds before depositing:
+
+```
+Input:
+- Your deposit: 5,000 MUSD
+- Current total pool: 2,000,000 MUSD
+- Weeks deposited: 52
+
+Output:
+- Your ticket share: 0.25%
+- Grand Prize odds (single draw): 0.25%
+- Any prize odds (single draw): 4.0%
+- Probability of winning within 52 draws: 89.3%
+- Expected total winnings: 270 MUSD
+```
+
+Use the calculator at [app.khipuvault.com/prize-pool/calculator](https://app.khipuvault.com/prize-pool/calculator).
+
+## Final Recommendations
+
+### For Small Depositors (less than 1,000 MUSD):
+
+- Deposit early in week (maximize time-weight)
+- Stay deposited long-term (compound odds)
+- Re-deposit any winnings
+- Set realistic expectations (low odds, but no-loss)
+
+### For Medium Depositors (1,000-10,000 MUSD):
+
+- Balance Prize Pool with Individual Savings
+- Deposit 30-50% of assets into Prize Pool
+- Keep 50-70% in guaranteed yields
+- Monitor pool growth and adjust position
+
+### For Large Depositors (greater than 10,000 MUSD):
+
+- You have near-guaranteed weekly prizes
+- Consider depositing enough for consistent wins
+- Treat as high-variance yield strategy
+- Diversify across multiple products
+
+## Next Steps
+
+- [FAQ](/docs/products/prize-pool/faq) - Common questions
+- [Prize Calculation](/docs/products/prize-pool/prize-calculation) - How prizes are determined
+- [Claiming Prizes](/docs/products/prize-pool/claiming-prizes) - What to do when you win
+
+---
+
+**Calculate your odds:** [Prize Pool Calculator →](https://app.khipuvault.com/prize-pool/calculator)

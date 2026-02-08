@@ -1,0 +1,500 @@
+---
+title: Yield Generation
+description: Learn how KhipuVault generates yields on your Bitcoin deposits through DeFi strategies, staking, liquidity provision, and lending protocols.
+---
+
+# Yield Generation
+
+KhipuVault generates yields on your Bitcoin deposits through various DeFi (Decentralized Finance) strategies. This guide explains how your Bitcoin earns returns.
+
+## What Are Yields?
+
+**Yields** are the earnings you receive on your deposited funds - similar to interest from a bank savings account, but typically much higher.
+
+### Simple Analogy
+
+**Traditional Bank**:
+- You deposit $1,000
+- Bank pays 0.5% annual interest
+- After 1 year: You have $1,005 (+$5)
+
+**KhipuVault**:
+- You deposit 1,000 MUSD
+- Platform generates 15% APY through DeFi
+- After 1 year: You have 1,150 MUSD (+150 MUSD)
+
+<Callout type="success" title="Why Higher Yields?">
+**Banks**: Take your money, lend it out, keep most profits
+
+**DeFi**: Automated smart contracts, no middlemen, returns go directly to you
+</Callout>
+
+## How KhipuVault Generates Yields
+
+KhipuVault uses multiple DeFi strategies to maximize returns while minimizing risk:
+
+```
+Your Deposit (MUSD)
+        ↓
+┌───────────────────────────────────────┐
+│    KhipuVault Smart Contracts         │
+└───────────────┬───────────────────────┘
+                ↓
+        Yield Aggregator
+                ↓
+    ┌───────────┴───────────┐
+    ↓                       ↓
+Strategy 1              Strategy 2
+(Staking)               (Liquidity Pools)
+    ↓                       ↓
+    └───────────┬───────────┘
+                ↓
+        Yields Earned
+                ↓
+    Your Account (compounding)
+```
+
+### The Strategies Explained
+
+## 1. Liquidity Provision
+
+**What it is**: Providing funds to decentralized exchanges (DEXs) so traders can swap tokens.
+
+### How It Works
+
+Imagine a currency exchange booth at an airport:
+
+**Traditional Exchange**:
+- Company provides currency inventory
+- Charges fees on exchanges
+- Company keeps all profits
+
+**DeFi Liquidity Pool**:
+- Users provide currency (you!)
+- Traders pay fees to swap
+- Providers earn those fees
+
+### Example
+
+You deposit 1,000 MUSD into a liquidity pool:
+
+```
+Pool: MUSD/BTC
+Your share: 1,000 MUSD (1% of pool)
+
+Trader swaps 10,000 MUSD → BTC
+Trading fee: 0.3% = 30 MUSD
+
+Your earnings: 1% of 30 = 0.30 MUSD
+```
+
+Over a year, thousands of swaps generate significant yields.
+
+### Yields: 8-15% APY
+
+<Callout type="info">
+**Risk**: Impermanent loss (if token prices diverge). KhipuVault mitigates this by using stablecoin pairs (MUSD/USDC) where prices don't diverge.
+</Callout>
+
+## 2. Lending Protocols
+
+**What it is**: Lending your funds to borrowers who pay interest.
+
+### How It Works
+
+**Traditional Bank Lending**:
+```
+You deposit → Bank → Bank lends → Borrower
+           Bank takes 90% of interest
+           You get 0.5% APY
+```
+
+**DeFi Lending (e.g., Aave, Compound)**:
+```
+You deposit → Smart Contract → Borrower
+           Smart contract takes 10% fee
+           You get 5-12% APY
+```
+
+### Example
+
+KhipuVault deposits your MUSD into a lending protocol:
+
+1. Borrowers need MUSD for trading, arbitrage, etc.
+2. They deposit collateral (e.g., ETH worth $1,500)
+3. They borrow $1,000 MUSD
+4. They pay 8% annual interest
+5. You earn that interest (minus protocol fee)
+
+### Why People Borrow
+
+- **Traders**: Need liquidity for margin trading
+- **Arbitrageurs**: Exploit price differences across exchanges
+- **Yield farmers**: Use borrowed funds in other protocols
+- **Businesses**: Working capital without selling crypto
+
+### Yields: 5-12% APY
+
+<Callout type="info">
+**Safety**: Borrowers must over-collateralize (deposit $1,500 to borrow $1,000). If collateral value drops, smart contract auto-liquidates to protect lenders.
+</Callout>
+
+## 3. Staking
+
+**What it is**: Locking tokens to secure a blockchain network and earning rewards.
+
+### How It Works
+
+**Proof-of-Stake** blockchains need validators to process transactions:
+
+```
+You stake tokens → Validator uses them → Network rewards you
+```
+
+Think of it like:
+- **Traditional**: Buying a certificate of deposit (CD) at a bank
+- **Staking**: Locking tokens to support network security
+
+### Example
+
+KhipuVault stakes your MUSD in yield-bearing protocols:
+
+1. MUSD is staked in Mezo staking contract
+2. Stakers help secure the network
+3. Network mints new tokens as rewards
+4. Rewards distributed to stakers (you)
+
+### Yields: 10-20% APY
+
+<Callout type="success">
+**No risk of loss**: Unlike trading or liquidity pools, staking doesn't expose you to impermanent loss or liquidation risk.
+</Callout>
+
+## 4. Yield Aggregation
+
+**What it is**: Automatically moving funds between strategies to maximize yields.
+
+KhipuVault uses a **Yield Aggregator** smart contract that:
+
+1. Monitors yields across multiple protocols
+2. Automatically shifts funds to highest-yielding strategies
+3. Compounds earnings (reinvests yields)
+4. Rebalances to manage risk
+
+### The Power of Compounding
+
+**Without compounding** (simple interest):
+```
+Year 1: 1,000 MUSD + 15% = 1,150 MUSD
+Year 2: 1,000 MUSD + 15% = 1,150 MUSD (+150 more)
+Total: 1,300 MUSD
+```
+
+**With compounding** (KhipuVault auto-compounds):
+```
+Year 1: 1,000 MUSD + 15% = 1,150 MUSD
+Year 2: 1,150 MUSD + 15% = 1,322.50 MUSD
+Total: 1,322.50 MUSD (+22.50 bonus from compounding)
+```
+
+Over time, compounding significantly increases returns.
+
+## Understanding APY vs. APR
+
+### APR (Annual Percentage Rate)
+
+**Simple interest** - doesn't include compounding.
+
+Example: 12% APR on 1,000 MUSD = 120 MUSD/year
+
+### APY (Annual Percentage Yield)
+
+**Compound interest** - includes reinvestment of yields.
+
+Example: 12% APR compounded daily = 12.75% APY
+
+**KhipuVault displays APY** because we auto-compound yields.
+
+<Callout type="info" title="Why It Matters">
+**APY is always higher than APR** when yields compound. Always compare apples to apples:
+- Compare APY to APY
+- Or APR to APR
+
+Never compare APY to APR.
+</Callout>
+
+## Current Yield Rates
+
+Actual yields vary by product and market conditions:
+
+| Product | Current APY | Source |
+|---------|-------------|--------|
+| **Individual Savings** | 12-18% | Lending + Staking |
+| **Community Pools** | 15-20% | Liquidity + Lending |
+| **ROSCA** | 0% | Social savings (no yields) |
+| **Prize Pool** | Variable | Lottery mechanics |
+
+<Callout type="warn">
+**APYs are variable** - they change based on:
+- Market demand for borrowing
+- Liquidity pool trading volume
+- Staking rewards
+- Protocol incentives
+
+Past performance doesn't guarantee future results.
+</Callout>
+
+## Where Do Yields Actually Come From?
+
+This is a common question. Here's the breakdown:
+
+### 1. Real Economic Activity
+
+**Lending yields** come from:
+- Traders paying interest to borrow
+- Arbitrageurs paying for leverage
+- Real demand for capital
+
+**Liquidity pool yields** come from:
+- Trading fees paid by swappers
+- Real trading volume
+
+**Staking yields** come from:
+- Network inflation (new token emissions)
+- Transaction fees
+
+### 2. Not a Ponzi Scheme
+
+Unlike Ponzi schemes (Bernie Madoff, BitConnect), DeFi yields are:
+
+✅ **Transparent** - all transactions on-chain
+✅ **Auditable** - anyone can verify yield sources
+✅ **Sustainable** - comes from real economic activity
+✅ **Variable** - rates go up and down (Ponzis promise fixed high returns)
+
+❌ **Not guaranteed** - yields can decrease
+❌ **Not from new deposits** - comes from trading/borrowing/staking
+
+## Risks of Yield Generation
+
+Every yield strategy has risks. Here's what to know:
+
+### 1. Smart Contract Risk
+
+**Risk**: Bugs in DeFi protocol code could be exploited.
+
+**Mitigation**:
+- KhipuVault uses audited protocols (Aave, Compound, etc.)
+- Multiple audits on our own contracts
+- Insurance protocols available
+- Conservative position sizing
+
+[See our security measures →](/docs/concepts/security)
+
+### 2. Market Risk
+
+**Risk**: Token prices could drop (if using non-stablecoin strategies).
+
+**Mitigation**:
+- KhipuVault primarily uses stablecoins (MUSD)
+- Diversification across strategies
+- Risk limits on volatile assets
+
+### 3. Impermanent Loss (Liquidity Pools)
+
+**Risk**: When providing liquidity, if prices diverge, you could lose value.
+
+**Example**:
+```
+Deposit: 1,000 MUSD + 1 ETH (ETH = $1,000)
+Later: ETH rises to $2,000
+Result: You'd have more profit just holding ETH
+```
+
+**Mitigation**:
+- Use stablecoin pairs (MUSD/USDC) - no divergence
+- Fees earned often exceed impermanent loss
+- Monitor and rebalance
+
+### 4. Protocol Risk
+
+**Risk**: Lending protocol could become insolvent if mass liquidations fail.
+
+**Mitigation**:
+- Use blue-chip protocols (Aave, Compound)
+- Diversify across protocols
+- Monitor protocol health
+
+<Callout type="warn" title="DYOR">
+**No investment is risk-free.** DeFi yields are higher than banks because they carry more risk. Only invest what you can afford to lose.
+</Callout>
+
+## How KhipuVault Manages Risk
+
+We use a multi-layered risk management approach:
+
+### 1. Diversification
+
+Don't put all eggs in one basket:
+- Multiple DeFi protocols
+- Multiple yield strategies
+- Multiple token pairs
+
+### 2. Conservative Allocation
+
+We prioritize safety over maximum yields:
+- 70% in low-risk strategies (stablecoins, blue-chip lending)
+- 20% in medium-risk (diversified liquidity pools)
+- 10% in higher-yield experimental strategies
+
+### 3. Continuous Monitoring
+
+Our Yield Aggregator:
+- Monitors protocol health 24/7
+- Auto-exits risky positions
+- Rebalances based on market conditions
+
+### 4. Insurance
+
+Where available, we use DeFi insurance protocols:
+- Nexus Mutual
+- InsurAce
+- Cover Protocol
+
+These insure against smart contract exploits.
+
+## Transparency: Track Your Yields
+
+Unlike banks, KhipuVault is fully transparent:
+
+### Real-Time Tracking
+
+Your dashboard shows:
+- Current APY
+- Yields earned today/week/month/all-time
+- Underlying strategies
+- Breakdown by source (lending, staking, etc.)
+
+### On-Chain Verification
+
+Every yield payment is on-chain:
+- View on block explorer
+- Verify smart contract calls
+- Audit yield calculations
+
+[See your yields →](https://app.khipuvault.com/portfolio)
+
+## Maximizing Your Yields
+
+Tips to get the most from KhipuVault:
+
+### 1. Choose the Right Product
+
+| Goal | Best Product | APY |
+|------|--------------|-----|
+| Max yields | Community Pools | 15-20% |
+| Flexibility | Individual Savings | 12-18% |
+| Fun + yields | Prize Pool | Variable |
+| Social savings | ROSCA | 0% (no yields) |
+
+### 2. Compound Regularly
+
+KhipuVault auto-compounds, but you can optimize:
+- Leave yields in the pool (don't withdraw)
+- Add deposits regularly (dollar-cost averaging)
+
+### 3. Start Early
+
+Thanks to compounding, time is your friend:
+
+**$1,000 deposited at 15% APY**:
+- After 1 year: $1,150
+- After 5 years: $2,011
+- After 10 years: $4,046
+
+Start today, let compounding work.
+
+### 4. Monitor and Rebalance
+
+Markets change. Periodically:
+- Review your allocations
+- Consider switching products
+- Adjust based on risk tolerance
+
+## The Future of Yield Generation
+
+DeFi yields are evolving:
+
+### Short-Term (2024-2025)
+- More sophisticated strategies
+- Cross-chain yield optimization
+- Lower fees (L2 scaling)
+
+### Medium-Term (2025-2027)
+- Institutional DeFi yields
+- Regulated yield products
+- Yield derivatives (hedging)
+
+### Long-Term (2027+)
+- DeFi yields competitive with TradFi
+- Mainstream adoption
+- Integration with traditional finance
+
+<Callout type="success">
+**KhipuVault is building for this future** - starting with simple, proven strategies today.
+</Callout>
+
+## FAQ
+
+### Are yields guaranteed?
+
+**No.** Yields fluctuate based on market conditions. While we display estimated APY, actual returns may vary.
+
+### How often are yields paid?
+
+Yields compound **continuously** (every block). You can withdraw anytime and receive all accrued yields.
+
+### Can yields go negative?
+
+Extremely unlikely. Worst case, yields drop to 0%. Your principal is not at risk from yield strategies (only from smart contract exploits, which are mitigated).
+
+### How are yields taxed?
+
+**Depends on your country.** In many jurisdictions, DeFi yields are taxable income. Consult a tax professional.
+
+### What if a DeFi protocol fails?
+
+KhipuVault diversifies across protocols. If one fails, your funds in other protocols are safe. We also use insurance where available.
+
+### Can I choose my own strategies?
+
+Currently, KhipuVault auto-allocates for optimal risk-adjusted returns. Advanced users can request specific strategies (coming soon).
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Smart Contracts"
+    href="/docs/concepts/smart-contracts"
+    description="Learn how smart contracts manage your yields"
+  />
+  <Card
+    title="Security"
+    href="/docs/concepts/security"
+    description="How your funds are protected"
+  />
+  <Card
+    title="Start Earning"
+    href="/docs/getting-started/your-first-deposit"
+    description="Make your first deposit and start earning"
+  />
+  <Card
+    title="Products Overview"
+    href="/docs/products"
+    description="Compare yield rates across products"
+  />
+</Cards>
+
+---
+
+**Questions?** Join our [Discord](https://discord.gg/khipuvault) or check the [FAQ](/docs/resources/faq)

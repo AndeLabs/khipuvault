@@ -1,0 +1,915 @@
+---
+title: Glossary
+description: Dictionary of key terms used in KhipuVault - DeFi, blockchain, Bitcoin, and cryptocurrency terminology explained simply.
+---
+
+# Glossary
+
+Quick reference for terms used throughout KhipuVault documentation. Definitions are kept simple and accessible.
+
+<Callout type="info">
+**New to crypto?** Start with the basics: [Blockchain](#blockchain), [Wallet](#wallet), [Smart Contract](#smart-contract), and [DeFi](#defi).
+</Callout>
+
+## A
+
+### ABI (Application Binary Interface)
+
+A JSON file that describes how to interact with a smart contract - which functions it has, what parameters they take, and what they return.
+
+**Analogy**: Like an instruction manual for talking to a smart contract.
+
+**Example**: KhipuVault's contract ABIs are in the `@khipu/web3` package.
+
+---
+
+### Address
+
+A unique identifier for a wallet or smart contract on the blockchain, usually starting with `0x` followed by 40 hexadecimal characters.
+
+**Example**: `0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393`
+
+**Analogy**: Like an email address or bank account number, but for crypto.
+
+---
+
+### APY (Annual Percentage Yield)
+
+The yearly return on investment, including compound interest.
+
+**Example**: 15% APY means $100 grows to $115 after one year (if compounded).
+
+**KhipuVault rates**:
+- Individual Pools: 12-18% APY
+- Community Pools: 15-20% APY
+
+<Callout type="warn">
+APY is not guaranteed and can fluctuate based on market conditions.
+</Callout>
+
+---
+
+### APR (Annual Percentage Rate)
+
+The yearly return without compounding.
+
+**APY vs APR**: APY is always higher than APR when compounding occurs.
+
+---
+
+### Audit (Smart Contract Audit)
+
+A security review of smart contract code by professional security firms to find vulnerabilities.
+
+**Why it matters**: Audited contracts are safer (but not risk-free).
+
+**KhipuVault**: All contracts audited by [CertiK/OpenZeppelin/etc].
+
+[Learn more →](/docs/concepts/security#audits-and-verification)
+
+---
+
+## B
+
+### Blockchain
+
+A distributed ledger (database) maintained by many computers simultaneously, where records (blocks) are linked together in a chain.
+
+**Analogy**: Like a Google Doc that thousands of people can see but no one person can delete or change historical entries.
+
+**Key properties**:
+- Transparent (anyone can read)
+- Immutable (can't change history)
+- Decentralized (no single owner)
+
+[Learn more →](/docs/concepts/bitcoin-defi)
+
+---
+
+### Block Explorer
+
+A website that lets you search and view blockchain transactions, addresses, and blocks.
+
+**Mezo Block Explorer**: [https://explorer.test.mezo.org](https://explorer.test.mezo.org)
+
+**Use case**: Verify your transaction went through, check balances, audit smart contracts.
+
+---
+
+### Bridge
+
+A system for transferring assets between different blockchains.
+
+**Example**: Moving Bitcoin from Bitcoin L1 to Mezo L2.
+
+**Risk**: Bridges are common attack vectors in crypto. Use audited bridges only.
+
+---
+
+## C
+
+### Censorship Resistance
+
+The property that no single entity can block, freeze, or reverse your transactions.
+
+**Why it matters**: Your money can't be seized like in traditional banking.
+
+[Learn more →](/docs/concepts/decentralization)
+
+---
+
+### Chain ID
+
+A unique number identifying a specific blockchain network.
+
+**Mezo Testnet Chain ID**: `31611`
+
+**Why you need it**: To prevent transactions meant for one chain (e.g., Ethereum) from working on another (e.g., Mezo).
+
+---
+
+### Collateral
+
+Assets locked as security for a loan or financial position.
+
+**Example**: In Bitcoin DeFi, your BTC is collateral that generates yields.
+
+---
+
+### Community Pool
+
+A savings product where multiple users pool funds together and share yields (also called Cooperative Savings).
+
+**Benefits**:
+- Higher yields than individual pools
+- Social accountability
+- Shared risk
+
+[Learn more →](/docs/products/community-pools)
+
+---
+
+### Consensus
+
+The mechanism by which blockchain nodes agree on the current state of the ledger.
+
+**Bitcoin consensus**: Proof of Work (mining)
+**Mezo consensus**: Secured by Bitcoin's consensus
+
+---
+
+### Contract Address
+
+The address where a smart contract is deployed on the blockchain.
+
+**KhipuVault contracts**: See [contract addresses](/docs/developers/smart-contracts#deployed-contracts)
+
+---
+
+## D
+
+### dApp (Decentralized Application)
+
+An application that runs on a blockchain instead of centralized servers.
+
+**Example**: KhipuVault is a dApp for Bitcoin savings.
+
+**Key feature**: No single company controls it.
+
+---
+
+### DeFi (Decentralized Finance)
+
+Financial services (lending, borrowing, saving, trading) built on blockchains without intermediaries like banks.
+
+**Traditional finance**: Bank controls your money
+**DeFi**: Smart contracts control funds automatically
+
+[Learn more →](/docs/concepts/bitcoin-defi)
+
+---
+
+### Deposit
+
+Adding funds to a KhipuVault pool to start earning yields.
+
+**Process**:
+1. Approve token spending
+2. Call deposit function
+3. Receive shares representing your position
+
+---
+
+## E
+
+### EOA (Externally Owned Account)
+
+A wallet controlled by a private key (as opposed to a contract account).
+
+**Example**: Your MetaMask wallet is an EOA.
+
+---
+
+### ERC-20
+
+A standard for fungible tokens on EVM-compatible blockchains.
+
+**Example**: MUSD is an ERC-20 token.
+
+**Why standards matter**: All wallets and dApps understand ERC-20, ensuring compatibility.
+
+---
+
+### EVM (Ethereum Virtual Machine)
+
+The runtime environment that executes smart contracts on Ethereum and EVM-compatible chains.
+
+**Mezo is EVM-compatible**, meaning Ethereum tools (Solidity, MetaMask, etc.) work on Mezo.
+
+[Learn more →](/docs/concepts/mezo-blockchain#evm-compatibility)
+
+---
+
+### Event (Smart Contract Event)
+
+A log emitted by a smart contract when something happens (like a deposit or withdrawal).
+
+**Use case**: The KhipuVault indexer listens to events to update the database.
+
+---
+
+## F
+
+### Faucet
+
+A service that gives free testnet tokens for testing purposes.
+
+**Mezo Faucet**: [https://faucet.test.mezo.org](https://faucet.test.mezo.org)
+
+**Important**: Testnet tokens have no real value.
+
+[Get MUSD →](/docs/getting-started/get-musd)
+
+---
+
+### Finality
+
+The point at which a transaction is considered irreversible.
+
+**Mezo**: ~10 seconds (soft finality), ~60 minutes (Bitcoin L1 finality)
+
+---
+
+### Foundry
+
+A Solidity development framework for building, testing, and deploying smart contracts.
+
+**KhipuVault uses Foundry** for all contract development.
+
+[Developer docs →](/docs/developers/smart-contracts)
+
+---
+
+## G
+
+### Gas
+
+The fee paid to execute transactions or smart contract functions on a blockchain.
+
+**Analogy**: Like paying for electricity to run a program.
+
+**Mezo gas fees**: ~$0.01-$0.10 (much cheaper than Ethereum)
+
+**Paid in**: The network's native token (tBTC on Mezo testnet)
+
+---
+
+### Gas Limit
+
+The maximum amount of gas you're willing to spend on a transaction.
+
+**Too low**: Transaction fails
+**Too high**: You pay for unused gas (waste money)
+
+**MetaMask estimates this automatically.**
+
+---
+
+### Gas Price
+
+How much you pay per unit of gas, usually measured in Gwei.
+
+**Higher gas price**: Faster transaction
+**Lower gas price**: Slower but cheaper
+
+---
+
+## H
+
+### Hash
+
+A unique fingerprint of data, generated by a cryptographic function.
+
+**Example**: Transaction hash, block hash
+
+**Properties**:
+- Fixed length (64 characters)
+- One-way (can't reverse)
+- Unique (different data = different hash)
+
+---
+
+### Hot Wallet
+
+A wallet connected to the internet (like MetaMask).
+
+**Pros**: Convenient, easy to use
+**Cons**: More vulnerable to hacks
+
+**Opposite**: Cold wallet (offline storage)
+
+---
+
+## I
+
+### Immutable
+
+Cannot be changed or deleted.
+
+**Blockchain is immutable**: Once a transaction is finalized, it's permanent.
+
+**Smart contracts**: Usually immutable after deployment (but can be upgradeable with proxies).
+
+---
+
+### Indexer
+
+A service that listens to blockchain events and stores data in a database for fast querying.
+
+**KhipuVault indexer**: Tracks deposits, withdrawals, yields in PostgreSQL.
+
+**Why needed**: Querying blockchain directly is slow.
+
+---
+
+### Individual Pool
+
+A solo savings vault where only you deposit and earn yields.
+
+**Benefits**:
+- Full control
+- Withdraw anytime
+- No coordination needed
+
+[Learn more →](/docs/products/individual-savings)
+
+---
+
+## K
+
+### KYC (Know Your Customer)
+
+Identity verification required by centralized services (banks, exchanges).
+
+**KhipuVault**: No KYC required. Permissionless and decentralized.
+
+---
+
+## L
+
+### Layer-1 (L1)
+
+The base blockchain layer (Bitcoin, Ethereum).
+
+**Characteristics**:
+- Most secure
+- Most decentralized
+- Slowest and most expensive
+
+---
+
+### Layer-2 (L2)
+
+A secondary layer built on top of Layer-1 to improve speed and reduce costs.
+
+**Example**: Mezo is a Bitcoin Layer-2.
+
+**Benefits**: Faster, cheaper, while inheriting L1 security.
+
+[Learn more →](/docs/concepts/mezo-blockchain)
+
+---
+
+### Liquidity
+
+How easily an asset can be bought or sold without affecting its price.
+
+**High liquidity**: Large pools, easy to trade
+**Low liquidity**: Small pools, price slippage
+
+---
+
+### Liquidity Pool
+
+A pool of tokens locked in a smart contract to facilitate trading or yield generation.
+
+**Example**: MUSD/BTC liquidity pool on a DEX.
+
+**Yield source**: KhipuVault uses liquidity pools to generate yields.
+
+[Learn more →](/docs/concepts/yield-generation)
+
+---
+
+## M
+
+### Mainnet
+
+The live, production blockchain where real assets have real value.
+
+**Opposite**: Testnet (for testing, no real value)
+
+**KhipuVault**: Currently on testnet, mainnet coming soon.
+
+---
+
+### Mempool
+
+The waiting area for unconfirmed transactions.
+
+**Process**: Tx submitted → mempool → miner picks it → block confirmation
+
+---
+
+### MetaMask
+
+The most popular browser wallet for Ethereum and EVM-compatible chains.
+
+**KhipuVault requires MetaMask** (or compatible wallet).
+
+[Setup guide →](/docs/getting-started/connect-wallet)
+
+---
+
+### Mezo
+
+The Bitcoin Layer-2 blockchain that powers KhipuVault.
+
+**Key features**:
+- Bitcoin security
+- EVM-compatible
+- Fast and cheap
+- DeFi-ready
+
+[Learn more →](/docs/concepts/mezo-blockchain)
+
+---
+
+### Miner
+
+A node that validates transactions and creates new blocks (in Proof of Work systems like Bitcoin).
+
+**Reward**: Block reward + transaction fees
+
+---
+
+### Mnemonic Phrase (Seed Phrase)
+
+A 12 or 24-word phrase that backs up your wallet.
+
+**Critical**: Never share your seed phrase. Anyone with it controls your funds.
+
+**Example**: `witch collapse practice feed shame open despair creek road again ice least`
+
+---
+
+### Multi-Signature (Multi-Sig)
+
+A wallet or contract that requires multiple signatures to execute transactions.
+
+**Example**: 3-of-5 multi-sig = 3 out of 5 owners must approve
+
+**KhipuVault uses multi-sig** for admin functions.
+
+[Learn more →](/docs/concepts/security#multi-signature-controls)
+
+---
+
+### MUSD (Mezo USD)
+
+A Bitcoin-backed stablecoin used on Mezo blockchain, pegged to $1 USD.
+
+**On testnet**: Free from faucet
+**On mainnet**: Backed by real Bitcoin collateral
+
+[Get MUSD →](/docs/getting-started/get-musd)
+
+---
+
+## N
+
+### Node
+
+A computer running blockchain software, validating and relaying transactions.
+
+**Full node**: Stores entire blockchain
+**Light node**: Stores only recent data
+
+**Bitcoin has 15,000+ nodes** worldwide.
+
+---
+
+### Non-Custodial
+
+You control your private keys and funds, not a third party.
+
+**KhipuVault is non-custodial**: Only you can withdraw your funds.
+
+**Opposite**: Custodial (like Coinbase, where they hold your keys)
+
+[Learn more →](/docs/concepts/security#non-custodial-design)
+
+---
+
+### Nonce
+
+A number used to order transactions from a single address.
+
+**Purpose**: Prevents replay attacks and ensures transaction order.
+
+---
+
+## O
+
+### Oracle
+
+A service that brings external data (like prices) onto the blockchain.
+
+**Example**: Chainlink price feeds
+
+**Use case**: DeFi protocols need price data for liquidations, yields, etc.
+
+---
+
+## P
+
+### Permissionless
+
+Anyone can participate without needing approval.
+
+**KhipuVault is permissionless**: No KYC, no geographic restrictions.
+
+**Opposite**: Permissioned systems (banks require approval)
+
+---
+
+### Private Key
+
+A secret key that controls a wallet and signs transactions.
+
+**Critical**: Never share your private key. It's like your password + bank PIN combined.
+
+**MetaMask stores your private key** locally (encrypted).
+
+---
+
+### Proof of Work (PoW)
+
+A consensus mechanism where miners solve computational puzzles to validate blocks.
+
+**Used by**: Bitcoin
+
+**Trade-off**: Very secure but energy-intensive.
+
+---
+
+### Proof of Stake (PoS)
+
+A consensus mechanism where validators stake tokens to validate blocks.
+
+**Used by**: Ethereum (after the Merge)
+
+**Trade-off**: Energy-efficient but potentially less secure.
+
+---
+
+### Public Key
+
+A cryptographic key derived from your private key, used to generate your address.
+
+**Can be shared publicly** (unlike private key).
+
+---
+
+## R
+
+### Reentrancy Attack
+
+A smart contract vulnerability where a malicious contract repeatedly calls a function before state updates.
+
+**Famous exploit**: The DAO hack (2016)
+
+**KhipuVault protection**: Reentrancy guards on all external calls.
+
+[Learn more →](/docs/concepts/security)
+
+---
+
+### ROSCA (Rotating Savings and Credit Association)
+
+A traditional community savings model where members contribute regularly and take turns receiving the pot.
+
+**Traditional**: Based on trust, informal
+**KhipuVault ROSCA**: Enforced by smart contracts, transparent
+
+[Learn more →](/docs/products/rotating-pool)
+
+---
+
+### RPC (Remote Procedure Call)
+
+An endpoint that lets you interact with a blockchain node.
+
+**Mezo RPC**: `https://rpc.test.mezo.org`
+
+**Use case**: MetaMask uses RPC to send transactions, query balances, etc.
+
+---
+
+## S
+
+### Seed Phrase
+
+See [Mnemonic Phrase](#mnemonic-phrase-seed-phrase)
+
+---
+
+### Slippage
+
+The difference between expected price and executed price.
+
+**Example**: You expect 100 tokens but get 98 due to liquidity changes.
+
+**Protection**: Set slippage tolerance (e.g., max 1%)
+
+---
+
+### Smart Contract
+
+Self-executing code deployed on a blockchain that automatically enforces rules.
+
+**Analogy**: Like a vending machine - you put money in, it follows programmed rules, you get product out. No human intermediary needed.
+
+**KhipuVault**: All savings products are smart contracts.
+
+[Learn more →](/docs/concepts/smart-contracts)
+
+---
+
+### Stablecoin
+
+A cryptocurrency designed to maintain a stable value (usually $1 USD).
+
+**Examples**: USDC, USDT, DAI, MUSD
+
+**Use case**: Avoid Bitcoin volatility while using DeFi.
+
+---
+
+### Staking
+
+Locking tokens to support network operations and earn rewards.
+
+**Yield source**: One way KhipuVault generates yields.
+
+[Learn more →](/docs/concepts/yield-generation)
+
+---
+
+### Solidity
+
+The programming language for Ethereum and EVM-compatible smart contracts.
+
+**Example**:
+```solidity
+contract Example {
+    function deposit() public payable {
+        // Store funds
+    }
+}
+```
+
+**KhipuVault contracts**: Written in Solidity.
+
+---
+
+## T
+
+### Testnet
+
+A blockchain network used for testing, where tokens have no real value.
+
+**Mezo Testnet**: Free tokens from faucet, safe to experiment.
+
+**Always test on testnet first** before using mainnet.
+
+[Add Mezo Testnet →](/docs/getting-started/add-mezo-network)
+
+---
+
+### Time-Lock
+
+A delay mechanism on smart contract functions.
+
+**Example**: Admin changes require 48-hour time-lock.
+
+**Security benefit**: Users can exit before malicious changes.
+
+[Learn more →](/docs/concepts/security#time-locked-upgrades)
+
+---
+
+### Token
+
+A digital asset on a blockchain.
+
+**Types**:
+- **Utility tokens**: Used within a protocol
+- **Governance tokens**: Voting rights
+- **Stablecoins**: Pegged to fiat
+- **NFTs**: Unique tokens
+
+---
+
+### Transaction (Tx)
+
+An action on the blockchain (transfer, smart contract call, etc.).
+
+**Components**:
+- From address
+- To address
+- Value
+- Gas fee
+- Data (for contract calls)
+
+---
+
+### TVL (Total Value Locked)
+
+The total amount of assets deposited in a DeFi protocol.
+
+**Industry standard**: Higher TVL often means more trust/adoption.
+
+**KhipuVault TVL**: Visible on dashboard.
+
+---
+
+## V
+
+### Validator
+
+A node that validates transactions and creates new blocks (in Proof of Stake systems).
+
+**Mezo validators**: Secure the Layer-2 network.
+
+---
+
+## W
+
+### Wallet
+
+Software or hardware that stores private keys and manages crypto assets.
+
+**Types**:
+- **Hot wallet**: Connected to internet (MetaMask)
+- **Cold wallet**: Offline (hardware wallets)
+
+**KhipuVault supports**: MetaMask, Coinbase Wallet, WalletConnect-compatible wallets.
+
+[Connect wallet →](/docs/getting-started/connect-wallet)
+
+---
+
+### Wei
+
+The smallest unit of Ethereum (and EVM-compatible) currency.
+
+**Conversion**: 1 ETH = 1,000,000,000,000,000,000 wei (10^18)
+
+**Why it matters**: Smart contracts use wei to avoid decimals.
+
+---
+
+### Whitelist
+
+A list of approved addresses allowed to perform certain actions.
+
+**Example**: Early access to a product launch.
+
+---
+
+### Withdrawal
+
+Removing funds from a KhipuVault pool back to your wallet.
+
+**Process**:
+1. Burn shares
+2. Receive principal + yields
+3. Pay gas fees
+
+---
+
+## Y
+
+### Yield
+
+Returns earned on deposited assets.
+
+**Sources**:
+- Staking rewards
+- Liquidity provision fees
+- Lending interest
+- Trading fees
+
+**KhipuVault yields**: 12-20% APY depending on product.
+
+[Learn more →](/docs/concepts/yield-generation)
+
+---
+
+### Yield Aggregator
+
+A protocol that automatically moves funds between yield strategies to optimize returns.
+
+**KhipuVault uses**: A yield aggregator to maximize your earnings.
+
+---
+
+## Z
+
+### Zero-Knowledge Proof
+
+A cryptographic method to prove something is true without revealing the underlying data.
+
+**Use case**: Privacy, scalability (rollups)
+
+**Mezo uses**: ZK proofs for Layer-2 security.
+
+---
+
+## Common Abbreviations
+
+Quick reference for frequently used abbreviations:
+
+| Abbreviation | Full Term |
+|--------------|-----------|
+| **APY** | Annual Percentage Yield |
+| **APR** | Annual Percentage Rate |
+| **BTC** | Bitcoin |
+| **CEX** | Centralized Exchange |
+| **DAO** | Decentralized Autonomous Organization |
+| **DEX** | Decentralized Exchange |
+| **DeFi** | Decentralized Finance |
+| **dApp** | Decentralized Application |
+| **EOA** | Externally Owned Account |
+| **ERC** | Ethereum Request for Comment (standard) |
+| **EVM** | Ethereum Virtual Machine |
+| **L1** | Layer-1 |
+| **L2** | Layer-2 |
+| **NFT** | Non-Fungible Token |
+| **PoS** | Proof of Stake |
+| **PoW** | Proof of Work |
+| **RPC** | Remote Procedure Call |
+| **TVL** | Total Value Locked |
+| **Tx** | Transaction |
+
+---
+
+## Still Have Questions?
+
+<Cards>
+  <Card
+    title="Read the Concepts"
+    href="/docs/concepts"
+    description="Deep dives into key topics"
+  />
+  <Card
+    title="Check the FAQ"
+    href="/docs/resources/faq"
+    description="Common questions answered"
+  />
+  <Card
+    title="Join Discord"
+    href="https://discord.gg/khipuvault"
+    description="Ask the community"
+  />
+  <Card
+    title="Developer Docs"
+    href="/docs/developers"
+    description="Technical documentation"
+  />
+</Cards>
+
+---
+
+**Suggest a term?** We're always improving this glossary. Suggest additions on [GitHub](https://github.com/your-org/khipuvault) or [Discord](https://discord.gg/khipuvault).

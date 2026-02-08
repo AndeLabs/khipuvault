@@ -1,0 +1,534 @@
+---
+title: Smart Contract Architecture
+description: Design patterns, inheritance hierarchy, and technical implementation of KhipuVault smart contracts.
+---
+
+# Smart Contract Architecture
+
+KhipuVault's smart contracts are built with security, upgradability, and gas efficiency in mind. This guide explains the contract architecture, design patterns, and how contracts interact with each other.
+
+## Contract Hierarchy
+
+```
+┌─────────────────────────────────────────────┐
+│          BasePoolV3 (Abstract)              │
+│  ├─ Ownable (OpenZeppelin)                  │
+│  ├─ ReentrancyGuard (OpenZeppelin)          │
+│  ├─ UUPSUpgradeable (OpenZeppelin)          │
+│  └─ Core pool logic                         │
+└──────────────┬──────────────────────────────┘
+               │
+       ┌───────┴───────┬──────────────┬─────────────┐
+       │               │              │             │
+┌──────▼──────┐ ┌──────▼──────┐ ┌────▼────┐ ┌──────▼──────┐
+│ Individual  │ │ Cooperative │ │ Lottery │ │   Rotating  │
+│   PoolV3    │ │   PoolV3    │ │ PoolV3  │ │     Pool    │
+└─────────────┘ └─────────────┘ └─────────┘ └─────────────┘
+       │               │              │             │
+       └───────┬───────┴──────────────┴─────────────┘
+               │
+        ┌──────▼──────────────┐
+        │  MezoIntegrationV3  │
+        │  (Yield Strategy)   │
+        └──────┬──────────────┘
+               │
+        ┌──────▼──────────────┐
+        │  YieldAggregatorV3  │
+        │  (Multiple          │
+        │   Strategies)       │
+        └─────────────────────┘
+               │
+        ┌──────▼──────────────┐
+        │ Mezo Protocol       │
+        │ (External)          │
+        │  - Stability Pool   │
+        │  - Trove Manager    │
+        │  - Price Feed       │
+        └─────────────────────┘
+```
+
+## Core Contracts
+
+### BasePoolV3
+
+**Purpose:** Abstract base contract providing core pool functionality.
+
+**Key Features:**
+- MUSD token deposits and withdrawals
+- Balance tracking per user
+- Yield calculation and distribution
+- Reentrancy protection
+- Upgradeable via UUPS proxy
+
+**Storage Layout:**
+```solidity
+contract BasePoolV3 {
+    IERC20 public musdToken;                    // MUSD token address
+    mapping(address => uint256) public balances; // User balances
+    uint256 public totalDeposits;               // Total pool deposits
+    uint256 public totalYield;                  // Accumulated yield
+    mapping(address => uint256) public lastYieldClaim; // Yield tracking
+}
+```
+
+**Critical Functions:**
+- `deposit(uint256 amount)` - Add funds to pool
+- `withdraw(uint256 amount)` - Remove funds from pool
+- `calculateYield(address user)` - Calculate user's yield
+- `claimYield()` - Withdraw earned yield
+- `_authorizeUpgrade()` - Upgrade authorization (owner only)
+
+### IndividualPoolV3
+
+**Address:** `0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393`
+
+**Purpose:** Personal savings pools with full user control.
+
+**Additional Features:**
+- Solo ownership (1 user per pool)
+- Flexible deposits/withdrawals
+- No governance required
+- Yield auto-compounding option
+
+**Unique Storage:**
+```solidity
+contract IndividualPoolV3 is BasePoolV3 {
+    address public owner;                  // Pool owner
+    bool public autoCompound;              // Auto-compound yield
+    uint256 public minimumDeposit;         // Min deposit (10 MUSD)
+    uint256 public createdAt;              // Creation timestamp
+}
+```
+
+### CooperativePoolV3
+
+**Address:** `0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88`
+
+**Purpose:** Multi-user pools with democratic governance.
+
+**Additional Features:**
+- Multiple members
+- Voting on withdrawals (if enabled)
+- Shared yield distribution
+- Member permissions
+
+**Unique Storage:**
+```solidity
+contract CooperativePoolV3 is BasePoolV3 {
+    address[] public members;              // Pool members
+    mapping(address => bool) public isMember;
+    bool public requiresVoting;            // Governance flag
+    uint256 public votingThreshold;        // % required to pass
+
+    struct Proposal {
+        address target;
+        uint256 amount;
+        uint256 votesFor;
+        uint256 votesAgainst;
+        bool executed;
+    }
+    mapping(uint256 => Proposal) public proposals;
+}
+```
+
+### LotteryPoolV3
+
+**Purpose:** No-loss lottery (Prize Pool).
+
+**Additional Features:**
+- Random winner selection
+- Prize distribution from yield
+- Ticket-based entries
+- Chainlink VRF (future) for randomness
+
+**Unique Storage:**
+```solidity
+contract LotteryPoolV3 is BasePoolV3 {
+    uint256 public drawInterval;           // Time between draws
+    uint256 public lastDrawTime;           // Last draw timestamp
+    address public lastWinner;             // Previous winner
+    uint256 public lastPrize;              // Previous prize amount
+
+    mapping(address => uint256) public tickets; // User entries
+}
+```
+
+### RotatingPool (ROSCA)
+
+**Purpose:** Traditional rotating savings and credit association.
+
+**Additional Features:**
+- Fixed rotation order
+- Predefined payout schedule
+- No yields (social credit)
+- Locked until user's turn
+
+**Unique Storage:**
+```solidity
+contract RotatingPool is BasePoolV3 {
+    address[] public rotationOrder;        // Payout order
+    uint256 public currentRound;           // Current rotation
+    mapping(address => bool) public hasClaimed; // Claim tracking
+    uint256 public contributionAmount;     // Fixed contribution
+    uint256 public roundInterval;          // Days between rounds
+}
+```
+
+## Integration Contracts
+
+### MezoIntegrationV3
+
+**Address:** `0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6`
+
+**Purpose:** Interface with Mezo protocol for yield generation.
+
+**Key Functions:**
+```solidity
+interface IMezoIntegration {
+    function depositToStabilityPool(uint256 amount) external;
+    function withdrawFromStabilityPool(uint256 amount) external;
+    function claimRewards() external returns (uint256);
+    function calculateAPY() external view returns (uint256);
+}
+```
+
+**How It Works:**
+1. Pools deposit MUSD to MezoIntegration
+2. MezoIntegration deposits to Mezo Stability Pool
+3. Stability Pool generates yield
+4. MezoIntegration claims and distributes back to pools
+
+### YieldAggregatorV3
+
+**Address:** `0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6`
+
+**Purpose:** Route deposits to best-performing yield strategies.
+
+**Strategies:**
+- Mezo Stability Pool (primary)
+- Future: Lending protocols
+- Future: Liquidity mining
+
+**Key Functions:**
+```solidity
+interface IYieldAggregator {
+    function deposit(uint256 amount) external;
+    function withdraw(uint256 amount) external;
+    function harvest() external returns (uint256);
+    function getAPY() external view returns (uint256);
+    function rebalance() external; // Owner only
+}
+```
+
+## Design Patterns
+
+### 1. UUPS Upgradeable Pattern
+
+All pool contracts use OpenZeppelin's UUPS (Universal Upgradeable Proxy Standard):
+
+```solidity
+import "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+
+contract IndividualPoolV3 is UUPSUpgradeable {
+    function _authorizeUpgrade(address newImplementation)
+        internal
+        override
+        onlyOwner
+    {}
+}
+```
+
+**Benefits:**
+- Fix bugs without losing state
+- Add features without migration
+- Gas-efficient (minimal proxy overhead)
+- Owner-controlled upgrades
+
+**Safety:**
+- Storage layout must be preserved
+- Use storage gaps for future variables
+- Test upgrades on testnet first
+
+### 2. Reentrancy Protection
+
+All state-changing functions use OpenZeppelin's ReentrancyGuard:
+
+```solidity
+function withdraw(uint256 amount) external nonReentrant {
+    require(balances[msg.sender] >= amount, "Insufficient balance");
+
+    balances[msg.sender] -= amount;
+    totalDeposits -= amount;
+
+    musdToken.safeTransfer(msg.sender, amount);
+
+    emit Withdrawal(msg.sender, amount);
+}
+```
+
+**Pattern:** Checks → Effects → Interactions (CEI)
+
+### 3. Custom Errors (Gas Optimization)
+
+Replace `require` strings with custom errors:
+
+```solidity
+// Before (expensive)
+require(amount > 0, "Amount must be greater than zero");
+
+// After (cheaper)
+error InvalidAmount();
+if (amount == 0) revert InvalidAmount();
+```
+
+**Savings:** ~50 gas per error
+
+### 4. Events for Indexing
+
+Comprehensive events for off-chain indexing:
+
+```solidity
+event Deposit(
+    address indexed user,
+    uint256 amount,
+    uint256 newBalance,
+    uint256 timestamp
+);
+
+event Withdrawal(
+    address indexed user,
+    uint256 amount,
+    uint256 newBalance,
+    uint256 timestamp
+);
+
+event YieldClaimed(
+    address indexed user,
+    uint256 yieldAmount,
+    uint256 timestamp
+);
+```
+
+**Best Practices:**
+- Index frequently-queried fields (user addresses)
+- Include timestamps for analytics
+- Emit after state changes confirm
+
+### 5. Access Control
+
+Use OpenZeppelin Ownable for admin functions:
+
+```solidity
+import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+
+contract IndividualPoolV3 is OwnableUpgradeable {
+    function setMinimumDeposit(uint256 newMin) external onlyOwner {
+        minimumDeposit = newMin;
+        emit MinimumDepositUpdated(newMin);
+    }
+}
+```
+
+For multi-role systems (future):
+```solidity
+import "@openzeppelin/contracts/access/AccessControl.sol";
+
+contract CooperativePoolV3 is AccessControl {
+    bytes32 public constant ADMIN_ROLE = keccak256("ADMIN_ROLE");
+    bytes32 public constant MEMBER_ROLE = keccak256("MEMBER_ROLE");
+}
+```
+
+## Security Features
+
+### 1. Input Validation
+
+```solidity
+function deposit(uint256 amount) external {
+    if (amount == 0) revert InvalidAmount();
+    if (amount < minimumDeposit) revert BelowMinimum();
+    if (balances[msg.sender] + amount > type(uint256).max) revert Overflow();
+
+    // ... rest of logic
+}
+```
+
+### 2. Safe Math (Solidity 0.8+)
+
+Built-in overflow/underflow protection:
+
+```solidity
+// Automatically reverts on overflow
+balances[msg.sender] += amount;
+
+// Use unchecked for gas savings when safe
+unchecked {
+    totalDeposits += amount; // Known to be safe
+}
+```
+
+### 3. Pull Over Push (Withdrawal Pattern)
+
+Users withdraw their funds (pull) instead of contract sending (push):
+
+```solidity
+// Good (pull)
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount);
+    balances[msg.sender] -= amount;
+    musdToken.safeTransfer(msg.sender, amount);
+}
+
+// Bad (push)
+function distributeYield() external {
+    for (uint i = 0; i < users.length; i++) {
+        musdToken.safeTransfer(users[i], yield[i]); // Can fail
+    }
+}
+```
+
+### 4. Pause Mechanism (Emergency)
+
+```solidity
+import "@openzeppelin/contracts/security/Pausable.sol";
+
+contract IndividualPoolV3 is Pausable {
+    function deposit(uint256 amount) external whenNotPaused {
+        // Normal logic
+    }
+
+    function pause() external onlyOwner {
+        _pause();
+    }
+}
+```
+
+## Gas Optimizations
+
+### 1. Storage Packing
+
+```solidity
+// Packed in single slot (save gas)
+struct PoolInfo {
+    uint128 balance;      // 128 bits
+    uint64 createdAt;     // 64 bits
+    uint64 lastUpdate;    // 64 bits
+}
+
+// Total: 256 bits = 1 storage slot
+```
+
+### 2. Memory vs Storage
+
+```solidity
+// Load to memory once
+function calculateTotal() external view returns (uint256) {
+    uint256 _totalDeposits = totalDeposits; // Memory copy
+    uint256 _totalYield = totalYield;       // Memory copy
+    return _totalDeposits + _totalYield;
+}
+```
+
+### 3. Short-Circuit Evaluation
+
+```solidity
+// Most likely to fail first
+if (amount == 0 || balances[msg.sender] < amount || paused()) {
+    revert();
+}
+```
+
+## Testing Strategy
+
+### Unit Tests (Foundry)
+
+```solidity
+// test/IndividualPoolV3.t.sol
+contract IndividualPoolV3Test is Test {
+    function testDeposit() public {
+        pool.deposit(100 ether);
+        assertEq(pool.balances(user), 100 ether);
+    }
+
+    function testDepositRevertsOnZero() public {
+        vm.expectRevert(InvalidAmount.selector);
+        pool.deposit(0);
+    }
+}
+```
+
+### Integration Tests
+
+```solidity
+function testDepositWithYield() public {
+    // 1. Deposit
+    pool.deposit(100 ether);
+
+    // 2. Generate yield
+    vm.warp(block.timestamp + 365 days);
+    mezoIntegration.harvest();
+
+    // 3. Check yield
+    uint256 yield = pool.calculateYield(user);
+    assertGt(yield, 0);
+}
+```
+
+### Invariant Tests
+
+```solidity
+function invariant_totalDepositsSumOfBalances() public {
+    uint256 sum = 0;
+    for (uint i = 0; i < users.length; i++) {
+        sum += pool.balances(users[i]);
+    }
+    assertEq(sum, pool.totalDeposits());
+}
+```
+
+## Deployment Process
+
+1. **Compile Contracts**
+   ```bash
+   cd packages/contracts
+   forge build
+   ```
+
+2. **Run Tests**
+   ```bash
+   forge test --gas-report
+   ```
+
+3. **Deploy to Testnet**
+   ```bash
+   forge script script/DeployPools.s.sol --rpc-url mezo-testnet --broadcast
+   ```
+
+4. **Verify on Explorer**
+   ```bash
+   forge verify-contract <address> <contract> --chain mezo-testnet
+   ```
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="IndividualPool Reference"
+    href="/docs/developers/smart-contracts/individual-pool"
+    description="Complete IndividualPool documentation"
+  />
+  <Card
+    title="CooperativePool Reference"
+    href="/docs/developers/smart-contracts/cooperative-pool"
+    description="Complete CooperativePool documentation"
+  />
+  <Card
+    title="API Design"
+    href="/docs/developers/architecture/api-design"
+    description="Backend architecture patterns"
+  />
+</Cards>
+
+---
+
+**Questions?** Join [Discord](https://discord.gg/khipuvault) #smart-contracts or email dev@khipuvault.com

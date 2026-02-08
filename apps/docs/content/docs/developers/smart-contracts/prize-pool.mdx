@@ -1,0 +1,162 @@
+---
+title: Prize Pool (Lottery) Contract
+description: No-loss lottery where users deposit, earn yields, and win prizes without risking principal.
+---
+
+# Prize Pool Contract
+
+LotteryPoolV3 implements a no-loss lottery: deposit funds, earn yields, and have a chance to win prizes - all without risking your principal.
+
+## Contract Details
+
+**Features:**
+- Deposit-based lottery (1 MUSD = 1 ticket)
+- Prizes funded by pool yields
+- No principal loss
+- Withdraw anytime
+- Regular draws
+- Random winner selection
+
+## How It Works
+
+1. Users deposit MUSD (each MUSD = 1 ticket)
+2. Pool earns yields from Mezo protocol
+3. Weekly draw: 1 winner gets all yield
+4. Users can withdraw principal anytime
+
+## State Variables
+
+```solidity
+contract LotteryPoolV3 {
+    mapping(address => uint256) public tickets;
+    uint256 public totalTickets;
+    uint256 public drawInterval; // 7 days
+    uint256 public lastDrawTime;
+    address public lastWinner;
+    uint256 public lastPrize;
+}
+```
+
+## Read Functions
+
+### getTickets
+
+```solidity
+function getTickets(address user) external view returns (uint256)
+```
+
+### nextDrawTime
+
+```solidity
+function nextDrawTime() external view returns (uint256)
+```
+
+### estimatedPrize
+
+```solidity
+function estimatedPrize() external view returns (uint256)
+```
+
+### getWinProbability
+
+```solidity
+function getWinProbability(address user) external view returns (uint256)
+```
+
+Returns probability in basis points (e.g., 500 = 5%)
+
+## Write Functions
+
+### deposit
+
+Buy lottery tickets.
+
+```solidity
+function deposit(uint256 amount) external nonReentrant
+```
+
+**Example:**
+```typescript
+// Deposit 100 MUSD = 100 tickets
+writeContract({
+  address: LOTTERY_POOL_ADDRESS,
+  abi: LOTTERY_POOL_ABI,
+  functionName: 'deposit',
+  args: [parseUnits('100', 18)]
+})
+```
+
+### withdraw
+
+Withdraw principal (doesn't affect past drawings).
+
+```solidity
+function withdraw(uint256 amount) external nonReentrant
+```
+
+### executeDraw
+
+Execute lottery draw (anyone can call if time passed).
+
+```solidity
+function executeDraw() external nonReentrant returns (address winner, uint256 prize)
+```
+
+## Events
+
+```solidity
+event TicketsPurchased(address indexed user, uint256 amount, uint256 totalTickets);
+event DrawExecuted(address indexed winner, uint256 prize, uint256 timestamp);
+event PrizeWithdrawn(address indexed winner, uint256 amount);
+```
+
+## Complete Example
+
+```typescript
+function LotteryDashboard() {
+  const { address } = useAccount()
+
+  // User's tickets
+  const { data: tickets } = useReadContract({
+    address: LOTTERY_POOL_ADDRESS,
+    abi: LOTTERY_POOL_ABI,
+    functionName: 'getTickets',
+    args: [address]
+  })
+
+  // Win probability
+  const { data: probability } = useReadContract({
+    address: LOTTERY_POOL_ADDRESS,
+    abi: LOTTERY_POOL_ABI,
+    functionName: 'getWinProbability',
+    args: [address]
+  })
+
+  // Estimated prize
+  const { data: prize } = useReadContract({
+    address: LOTTERY_POOL_ADDRESS,
+    abi: LOTTERY_POOL_ABI,
+    functionName: 'estimatedPrize'
+  })
+
+  return (
+    <div>
+      <h2>Your Stats</h2>
+      <p>Tickets: {tickets?.toString() || '0'}</p>
+      <p>Win Probability: {(Number(probability || 0) / 100).toFixed(2)}%</p>
+      <p>Current Prize Pool: {formatUnits(prize || 0n, 18)} MUSD</p>
+
+      <button onClick={() => deposit('100')}>
+        Buy 100 Tickets
+      </button>
+    </div>
+  )
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Integration Guide" href="/docs/developers/integration/web3-integration" />
+  <Card title="Examples" href="/docs/developers/examples" />
+</Cards>
