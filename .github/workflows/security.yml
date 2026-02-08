@@ -91,10 +91,81 @@ jobs:
           exit 1
 
   snyk-scan:
-    name: Snyk Security Scan
+    name: Snyk Security Scan (Optional)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    if: |
+      (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) &&
+      github.event.repository.private == false
+    # NOTE: This job requires SNYK_TOKEN secret to be configured
+    # If not configured, the job will be skipped (optional paid service)
+
+    steps:
+      - name: Check for Snyk token
+        id: check-token
+        run: |
+          if [ -z "${{ secrets.SNYK_TOKEN }}" ]; then
+            echo "skipped=true" >> $GITHUB_OUTPUT
+            echo "::notice::Snyk scan skipped - SNYK_TOKEN not configured (optional paid service)"
+          else
+            echo "skipped=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Checkout code
+        if: steps.check-token.outputs.skipped == 'false'
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        if: steps.check-token.outputs.skipped == 'false'
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        if: steps.check-token.outputs.skipped == 'false'
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        if: steps.check-token.outputs.skipped == 'false'
+        run: pnpm install --frozen-lockfile
+
+      - name: Run Snyk test
+        if: steps.check-token.outputs.skipped == 'false'
+        id: snyk-test
+        continue-on-error: true
+        run: pnpm security:snyk:test
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Run Snyk code test
+        if: steps.check-token.outputs.skipped == 'false'
+        id: snyk-code
+        continue-on-error: true
+        run: pnpm security:snyk:code
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+      - name: Upload Snyk results
+        if: steps.check-token.outputs.skipped == 'false' && always()
+        run: |
+          echo "## Snyk Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- Dependencies: ${{ steps.snyk-test.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "- Code: ${{ steps.snyk-code.outcome }}" >> $GITHUB_STEP_SUMMARY
+
+      - name: Monitor on main branch
+        if: steps.check-token.outputs.skipped == 'false' && github.ref == 'refs/heads/main' && github.event_name == 'push'
+        run: pnpm security:snyk:monitor
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+
+  license-checker:
+    name: License Compliance Check (Free)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: Checkout code
@@ -114,33 +185,65 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run Snyk test
-        id: snyk-test
+      - name: Run license compliance check
+        id: license-check
         continue-on-error: true
-        run: pnpm security:snyk:test
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: pnpm license:check
 
-      - name: Run Snyk code test
-        id: snyk-code
-        continue-on-error: true
-        run: pnpm security:snyk:code
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Upload license reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: license-compliance-report
+          path: |
+            license-report.json
+            license-report.md
+          retention-days: 30
 
-      - name: Upload Snyk results
+      - name: Comment on PR with results
+        if: github.event_name == 'pull_request' && always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## License Compliance Report\n\n';
+
+            try {
+              if (fs.existsSync('license-report.md')) {
+                const report = fs.readFileSync('license-report.md', 'utf8');
+                comment += report;
+              } else {
+                comment += 'Report not generated. Check workflow logs for details.';
+              }
+            } catch (error) {
+              comment += `Error reading report: ${error.message}`;
+            }
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+
+      - name: Add to summary
         if: always()
         run: |
-          echo "## Snyk Scan Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "- Dependencies: ${{ steps.snyk-test.outcome }}" >> $GITHUB_STEP_SUMMARY
-          echo "- Code: ${{ steps.snyk-code.outcome }}" >> $GITHUB_STEP_SUMMARY
+          if [ -f license-report.md ]; then
+            cat license-report.md >> $GITHUB_STEP_SUMMARY
+          fi
 
-      - name: Monitor on main branch
-        if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: pnpm security:snyk:monitor
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Fail on blocked licenses
+        if: steps.license-check.outcome == 'failure'
+        run: |
+          echo "::error::License compliance check failed. Blocked licenses detected."
+          exit 1
+
+      - name: Fail on forbidden licenses
+        if: steps.license-check.outputs.exit_code == '1'
+        run: |
+          echo "::error::Forbidden licenses detected. Review the report above."
+          exit 1
 
   semgrep-scan:
     name: Semgrep SAST Scan
@@ -339,6 +442,7 @@ jobs:
     needs:
       - dependency-audit
       - snyk-scan
+      - license-checker
       - semgrep-scan
       - codeql-analysis
       - secret-scanning
@@ -347,21 +451,34 @@ jobs:
     steps:
       - name: Generate summary
         run: |
-          echo "## Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# 🔒 Security Scan Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Scan Type | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Dependency Audit | ${{ needs.dependency-audit.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Snyk Scan | ${{ needs.snyk-scan.result == 'success' && '✅ Passed' || (needs.snyk-scan.result == 'skipped' && '⏭️ Skipped' || '❌ Failed') }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Semgrep SAST | ${{ needs.semgrep-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| CodeQL | ${{ needs.codeql-analysis.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Secret Scanning | ${{ needs.secret-scanning.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "## Free Security Checks (Always Run)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Scan Type | Status | Free |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----------|--------|------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Dependency Audit (npm audit) | ${{ needs.dependency-audit.result == 'success' && '✅ Passed' || '❌ Failed' }} | ✅ Free |" >> $GITHUB_STEP_SUMMARY
+          echo "| License Compliance | ${{ needs.license-checker.result == 'success' && '✅ Passed' || '❌ Failed' }} | ✅ Free |" >> $GITHUB_STEP_SUMMARY
+          echo "| Semgrep SAST | ${{ needs.semgrep-scan.result == 'success' && '✅ Passed' || '❌ Failed' }} | ✅ Free |" >> $GITHUB_STEP_SUMMARY
+          echo "| CodeQL Analysis | ${{ needs.codeql-analysis.result == 'success' && '✅ Passed' || '❌ Failed' }} | ✅ Free |" >> $GITHUB_STEP_SUMMARY
+          echo "| Secret Scanning (Gitleaks) | ${{ needs.secret-scanning.result == 'success' && '✅ Passed' || '❌ Failed' }} | ✅ Free |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Optional Paid Services" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Service | Status | Setup Required |" >> $GITHUB_STEP_SUMMARY
+          echo "|---------|--------|----------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Snyk Scan | ${{ needs.snyk-scan.result == 'success' && '✅ Passed' || (needs.snyk-scan.result == 'skipped' && '⏭️ Skipped (no token)' || '❌ Failed') }} | Add SNYK_TOKEN secret |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "💡 **Note**: All core security checks run for FREE without any token setup!" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "Review individual job outputs for detailed findings." >> $GITHUB_STEP_SUMMARY
 
       - name: Check critical failures
         if: |
           needs.dependency-audit.result == 'failure' ||
+          needs.license-checker.result == 'failure' ||
           needs.secret-scanning.result == 'failure'
         run: |
           echo "::error::Critical security checks failed. Please review the scan results."

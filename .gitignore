@@ -204,3 +204,8 @@ packages/contracts/*_REPORT.md
 packages/contracts/slither-report.json
 security/shannon/
 semgrep-report.json
+
+# License compliance reports
+license-report.json
+license-report.csv
+license-report.md

@@ -25,6 +25,7 @@
 - 🏗️ **[Architecture](./audit/ARCHITECTURE.md)** - System design
 - 🛡️ **[Security](./audit/SECURITY.md)** - Security model
 - 📊 **[Development Guide](./docs/archive/CLAUDE.md)** - For contributors
+- 🤖 **[CI/CD Quick Start](./.github/CI_QUICK_START.md)** - 100% free CI/CD setup
 
 ---
 
@@ -141,6 +142,7 @@ pnpm security:audit           # npm audit
 pnpm lint             # Lint all packages
 pnpm typecheck        # TypeScript check
 pnpm format           # Format with Prettier
+pnpm spell:check      # Spell check code & docs
 ```
 
 ---

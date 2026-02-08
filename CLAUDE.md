@@ -31,6 +31,11 @@ pnpm lint             # Lint all packages
 pnpm typecheck        # TypeScript check
 pnpm test             # Run all tests
 pnpm format           # Format with Prettier
+
+# Git Hooks
+pnpm push:check       # Verify code is ready to push
+pnpm push:help        # View pre-push guide
+pnpm commit:help      # View commit conventions
 ```
 
 ## Architecture
@@ -126,12 +131,22 @@ pnpm dev
 - ESLint with circular dependency detection (max depth 3)
 - Prettier for formatting
 - No console.log in production code (use Pino logger)
+- cspell for spell checking (see `SPELLING_GUIDE.md`)
+  - Runs on markdown files during pre-commit
+  - Manual check: `pnpm spell:check`
+  - Add project terms to `.cspell-custom.txt`
 
 ### Git
 
 - Conventional commits: `feat:`, `fix:`, `chore:`, `docs:`
 - PRs require passing CI (lint → typecheck → test → build)
 - Squash merge to main
+- Pre-push hooks enforce quality gates (see `.husky/PRE_PUSH_GUIDE.md`)
+  - TypeScript type checking (always)
+  - Test suite (full on protected branches, changed files on feature branches)
+  - No `.only()` or `.skip()` in tests
+  - No `console.log` in production code
+  - Bundle size monitoring
 
 ### Testing
 
@@ -242,6 +257,13 @@ Before committing, ALWAYS run:
 
 ```bash
 pnpm lint && pnpm typecheck && pnpm test
+```
+
+For spell checking:
+
+```bash
+pnpm spell:check              # Check all files
+pnpm spell:check:changed      # Check only staged files
 ```
 
 For security scanning:
