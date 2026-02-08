@@ -23,7 +23,8 @@ export interface CreatePoolParams {
   memberCount: bigint;
   contributionAmount: bigint; // in wei
   periodDuration: bigint; // in seconds
-  autoAdvance: boolean;
+  useNativeBtc: boolean; // true = BTC, false = WBTC
+  memberAddresses?: Address[]; // Optional: pre-defined members, empty = open join
 }
 
 /**
@@ -57,13 +58,14 @@ export function useCreateRotatingPool() {
     memberCount,
     contributionAmount,
     periodDuration,
-    autoAdvance,
+    useNativeBtc,
+    memberAddresses = [], // Default to empty array (open join)
   }: CreatePoolParams) => {
     writeContract({
       address: ROTATING_POOL_ADDRESS,
       abi: RotatingPoolABI.abi,
       functionName: "createPool",
-      args: [name, memberCount, contributionAmount, periodDuration, autoAdvance],
+      args: [name, memberCount, contributionAmount, periodDuration, useNativeBtc, memberAddresses],
     });
   };
 

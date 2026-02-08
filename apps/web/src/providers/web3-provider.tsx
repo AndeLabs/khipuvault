@@ -119,9 +119,7 @@ export function Web3Provider({
       return;
     }
     // eslint-disable-next-line no-console
-    console.log(
-      "🔌 Web3Provider Initialized | Network: Mezo Testnet (31611) | Wallets: MetaMask + Unisat"
-    );
+    console.log("🔌 Web3Provider Initialized | Network: Mezo Testnet (31611) | EIP-6963: ✓");
   }, []);
 
   // Render providers with config and initialState for SSR hydration

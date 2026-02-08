@@ -15,7 +15,7 @@ import { useAccount, useBalance } from "wagmi";
 
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { SmartConnectButton } from "@/components/wallet/smart-connect-button";
+import { ConnectButton } from "@/components/wallet/connect-button";
 
 interface DashboardHeaderProps {
   onMenuClick?: () => void;
@@ -57,7 +57,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps = {}) {
       )}
 
       <div className="ml-auto flex items-center gap-3">
-        {/* BTC Balance Display (when connected) - Hidden on mobile as SmartConnectButton shows it */}
+        {/* BTC Balance Display (when connected) - Hidden on mobile as ConnectButton shows it */}
         {isConnected && balanceData && (
           <div className="hidden items-center gap-2 rounded-lg border border-primary/10 bg-background/50 px-3 py-2 lg:flex">
             <Icons.bitcoin className="h-5 w-5" style={{ color: "#F7931A" }} />
@@ -68,7 +68,7 @@ export function DashboardHeader({ onMenuClick }: DashboardHeaderProps = {}) {
         )}
 
         {/* Smart Connect Button - handles Privy or basic wallet */}
-        <SmartConnectButton />
+        <ConnectButton />
       </div>
     </header>
   );

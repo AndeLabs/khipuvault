@@ -1,25 +1,31 @@
 /**
- * @fileoverview Pure Wagmi configuration for KhipuVault
+ * @fileoverview Clean Wagmi Configuration with Pure EIP-6963
  * @module lib/web3/config
  *
- * Production-ready Web3 configuration with MetaMask + Unisat only
- * No WalletConnect, no RainbowKit, no external dependencies
- * Configured for Mezo Testnet with Bitcoin native currency
+ * PRODUCTION-READY: Pure EIP-6963 Multi-Wallet Discovery
  *
- * SSR-Compatible Configuration:
- * - All browser APIs are strictly guarded with typeof window checks
- * - Config creation is deferred to client-side only
- * - Proper wallet state persistence across page reloads
- * - Graceful degradation when localStorage unavailable
+ * Key Features:
+ * ✅ Pure EIP-6963 implementation (no MetaMask SDK bloat)
+ * ✅ Works with Yoroi, OKX, MetaMask, and all EIP-6963 wallets
+ * ✅ No window.ethereum conflicts
+ * ✅ Mezo Testnet configured
+ * ✅ SSR-compatible
  *
- * IMPORTANT: This module MUST NOT access window, localStorage, or any
- * browser APIs at module load time. All such access must be deferred
- * to function calls that are only invoked on the client side.
+ * How It Works:
+ * - injected() connector with multiInjectedProviderDiscovery: true
+ * - EIP-6963 uses browser events (eip6963:announceProvider)
+ * - No dependency on window.ethereum
+ * - Detects all installed wallets automatically
+ *
+ * References:
+ * - https://wagmi.sh/react/api/connectors/injected
+ * - https://wagmi.sh/react/api/createConfig#multiinjectedproviderdiscovery
+ * - https://eips.ethereum.org/EIPS/eip-6963
  */
 
 import { createPublicClient } from "viem";
 import { createConfig, http, createStorage } from "wagmi";
-import { metaMask } from "wagmi/connectors";
+import { injected } from "wagmi/connectors";
 
 import { mezoTestnet } from "./chains";
 
@@ -74,39 +80,15 @@ function createClientStorage() {
 }
 
 /**
- * Extend Window interface for Unisat
- */
-declare global {
-  interface Window {
-    unisat?: {
-      requestAccounts: () => Promise<string[]>;
-      getAccounts: () => Promise<string[]>;
-      signMessage: (message: string) => Promise<string>;
-      signPsbt: (psbt: string) => Promise<string>;
-      pushPsbt: (psbt: string) => Promise<string>;
-      switchNetwork: (network: string) => Promise<void>;
-      getNetwork: () => Promise<{ name: string; chain: string }>;
-      getBalance: () => Promise<{
-        confirmed: number;
-        unconfirmed: number;
-        total: number;
-      }>;
-      sendBitcoin: (toAddress: string, satoshis: number) => Promise<string>;
-      inscribeTransfer: (tick: string, amount: number) => Promise<string>;
-    };
-  }
-}
-
-/**
- * Pure Wagmi configuration for Mezo Testnet
+ * Wagmi Configuration for Mezo Testnet with Pure EIP-6963
  *
  * Features:
- * - MetaMask connector for Ethereum wallets
- * - Unisat connector for Bitcoin wallets
- * - Mezo Testnet with native BTC
- * - No WalletConnect Project ID required
- * - Production-ready with proper error handling
- * - SSR-compatible with cookieStorage
+ * - Pure EIP-6963 via injected() connector
+ * - multiInjectedProviderDiscovery: true enables EIP-6963
+ * - No MetaMask SDK (avoids window.ethereum injection conflicts)
+ * - Works with Yoroi, OKX, MetaMask, Coinbase, and all EIP-6963 wallets
+ * - SSR-compatible with localStorage persistence
+ * - Production-ready
  */
 
 // Singleton config instance - only created on client
@@ -132,22 +114,36 @@ export function getWagmiConfig(): WagmiConfigInstance {
     return wagmiConfigInstance;
   }
 
-  // Determine dApp URL - use fallback for SSR
-  const dappUrl =
-    typeof window !== "undefined" ? window.location.origin : "https://khipuvault.vercel.app";
-
-  // Create connectors array
-  // MetaMask connector is safe to initialize during SSR
+  /**
+   * EIP-6963 CONFIGURATION FOR METAMASK
+   *
+   * Uses the EIP-6963 standard to detect MetaMask via browser events.
+   * This works even when Yoroi/Rabby block window.ethereum.
+   *
+   * How it works:
+   * 1. MetaMask emits 'eip6963:announceProvider' event on page load
+   * 2. Wagmi listens for this event with multiInjectedProviderDiscovery: true
+   * 3. We filter connectors to show ONLY MetaMask in the UI
+   *
+   * Why this works:
+   * - EIP-6963 doesn't use window.ethereum at all
+   * - MetaMask announces itself via events even if blocked
+   * - Modern, standard approach (supported by all major wallets)
+   *
+   * References:
+   * - https://wagmi.sh/react/api/createConfig#multiinjectedproviderdiscovery
+   * - https://eips.ethereum.org/EIPS/eip-6963
+   * - https://docs.metamask.io/wallet/concepts/wallet-interoperability/
+   */
   const connectors = [
-    metaMask({
-      dappMetadata: {
-        name: "KhipuVault",
-        url: dappUrl,
-      },
+    // Use basic injected connector - EIP-6963 will detect all wallets
+    // shimDisconnect: false to prevent auto-reconnect issues
+    injected({
+      shimDisconnect: false,
     }),
   ];
 
-  // Create config with SSR-safe settings
+  // Create config with SSR-safe settings and EIP-6963 enabled
   wagmiConfigInstance = createConfig({
     chains: [mezoTestnet],
     connectors,
@@ -166,6 +162,8 @@ export function getWagmiConfig(): WagmiConfigInstance {
     // Use SSR-safe storage that returns no-op on server
     storage: createClientStorage(),
     pollingInterval: 4_000, // poll every 4 seconds
+    // CRITICAL: Enable EIP-6963 to detect MetaMask via events (works when window.ethereum is blocked)
+    multiInjectedProviderDiscovery: true,
   });
 
   return wagmiConfigInstance;
@@ -244,39 +242,4 @@ export function getNetworkMismatchMessage(currentChainId?: number): string {
     return "Por favor conecta tu wallet a Mezo Testnet (Chain ID: 31611)";
   }
   return `Red incorrecta. Estás en Chain ID ${currentChainId}. Por favor cambia a Mezo Testnet (31611)`;
-}
-
-/**
- * Check if Unisat wallet is available
- * @returns true if Unisat extension is installed
- */
-export function isUnisatAvailable(): boolean {
-  return typeof window !== "undefined" && !!window.unisat;
-}
-
-/**
- * Get wallet connection status
- * @returns object with availability status for each wallet
- */
-export function getWalletAvailability() {
-  return {
-    metaMask: typeof window !== "undefined" && !!window.ethereum,
-    unisat: isUnisatAvailable(),
-  };
-}
-
-/**
- * Environment Configuration
- * No required environment variables for this simplified setup
- */
-export function validateEnvironment(): { valid: boolean; warnings: string[] } {
-  const warnings: string[] = [];
-
-  // No WalletConnect Project ID required anymore
-  // No external dependencies that need env vars
-
-  return {
-    valid: warnings.length === 0,
-    warnings,
-  };
 }

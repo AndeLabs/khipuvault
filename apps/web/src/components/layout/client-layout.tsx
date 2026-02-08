@@ -4,7 +4,9 @@ import dynamic from "next/dynamic";
 import { ReactNode } from "react";
 
 import { ErrorBoundary } from "@/components/error-boundary";
+import { NetworkGate } from "@/components/network-gate";
 import { OnboardingModal } from "@/components/onboarding";
+import { TestnetBanner } from "@/components/testnet-banner";
 
 // Dynamically import ClientProviders with ssr: false to avoid MetaMask SDK localStorage issues
 const ClientProviders = dynamic(
@@ -50,8 +52,11 @@ export function ClientLayout({ children, initialState }: ClientLayoutProps) {
       }}
     >
       <ClientProviders initialState={initialState}>
-        {children}
-        <OnboardingModal />
+        <NetworkGate>
+          <TestnetBanner />
+          {children}
+          <OnboardingModal />
+        </NetworkGate>
       </ClientProviders>
     </ErrorBoundary>
   );

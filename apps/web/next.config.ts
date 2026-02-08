@@ -64,9 +64,10 @@ const nextConfig: NextConfig = {
             value: "max-age=31536000; includeSubDomains; preload",
           },
           // Permissions Policy (disable unused features)
+          // Note: interest-cohort is deprecated, removed to avoid browser warnings
           {
             key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), interest-cohort=()",
+            value: "camera=(), microphone=(), geolocation=()",
           },
           // Content Security Policy - Allow wallet connections and essential resources
           {
@@ -74,17 +75,18 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               // Scripts: self, inline (needed for Next.js), and eval (needed for wagmi/viem)
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.metamask.io https://*.privy.io",
               // Styles: self and inline (needed for Tailwind)
               "style-src 'self' 'unsafe-inline'",
               // Images: self, data URIs, and common image hosts
               "img-src 'self' data: blob: https: http:",
               // Fonts: self and data URIs
               "font-src 'self' data:",
-              // Connect: Allow RPC, API, and wallet connections
-              "connect-src 'self' https://rpc.test.mezo.org https://rpc.mezo.org wss://rpc.test.mezo.org wss://rpc.mezo.org https://explorer.test.mezo.org https://api.coingecko.com https://*.infura.io https://*.alchemy.com https://*.walletconnect.com wss://*.walletconnect.com https://*.walletconnect.org wss://*.walletconnect.org",
-              // Frame: Allow wallet popups
-              "frame-src 'self' https://*.walletconnect.com https://*.walletconnect.org",
+              // Connect: Allow RPC, API, and wallet connections (MetaMask SDK and analytics)
+              // In development: also allow localhost:3001 for backend API
+              `connect-src 'self' ${process.env.NODE_ENV === "development" ? "http://localhost:3001 http://127.0.0.1:3001" : ""} https://rpc.test.mezo.org https://rpc.mezo.org wss://rpc.test.mezo.org wss://rpc.mezo.org https://explorer.test.mezo.org https://api.coingecko.com https://*.metamask.io https://*.cx.metamask.io https://mm-sdk-analytics.api.cx.metamask.io https://mm-sdk.metamask.io`,
+              // Frame: Allow wallet popups and iframes
+              "frame-src 'self' https://*.walletconnect.com https://*.walletconnect.org https://*.metamask.io https://*.coinbase.com https://verify.walletconnect.com https://verify.walletconnect.org https://*.privy.io https://*.rainbow.me",
               // Object: Disallow plugins
               "object-src 'none'",
               // Base: self
@@ -94,7 +96,7 @@ const nextConfig: NextConfig = {
               // Frame ancestors: none (prevent framing)
               "frame-ancestors 'none'",
               // Upgrade insecure requests in production
-              "upgrade-insecure-requests",
+              ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
             ].join("; "),
           },
         ],

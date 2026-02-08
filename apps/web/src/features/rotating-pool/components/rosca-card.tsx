@@ -1,6 +1,7 @@
 "use client";
 
 import { Users, Calendar, Coins, ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { formatEther } from "viem";
 
 import { Badge } from "@/components/ui/badge";
@@ -166,15 +167,19 @@ export function RoscaCard({ poolId }: RoscaCardProps) {
 
       <CardFooter>
         {status === PoolStatus.FORMING ? (
-          <Button className="w-full" size="sm">
-            Join Pool
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <Link href={`/dashboard/rotating-pool/${poolId.toString()}`} className="w-full">
+            <Button className="w-full" size="sm">
+              Join Pool
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
         ) : status === PoolStatus.ACTIVE ? (
-          <Button variant="outline" className="w-full" size="sm">
-            View Details
-            <ArrowRight className="ml-2 h-4 w-4" />
-          </Button>
+          <Link href={`/dashboard/rotating-pool/${poolId.toString()}`} className="w-full">
+            <Button variant="outline" className="w-full" size="sm">
+              View Details
+              <ArrowRight className="ml-2 h-4 w-4" />
+            </Button>
+          </Link>
         ) : (
           <Button variant="secondary" className="w-full" size="sm" disabled>
             {status === PoolStatus.COMPLETED ? "Completed" : "Cancelled"}

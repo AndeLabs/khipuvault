@@ -8,7 +8,7 @@ import { useState, useEffect } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
-import { SmartConnectButton } from "@/components/wallet/smart-connect-button";
+import { ConnectButton } from "@/components/wallet/connect-button";
 
 export function Header() {
   const [mounted, setMounted] = useState(false);
@@ -46,7 +46,7 @@ export function Header() {
 
         <div className="flex items-center gap-3">
           {/* Connect Wallet Button */}
-          {mounted && <SmartConnectButton />}
+          {mounted && <ConnectButton />}
 
           <div className="hidden md:flex">
             <Link href="/dashboard">
@@ -84,7 +84,7 @@ export function Header() {
                   {/* Connect Wallet Button en mobile */}
                   {mounted && (
                     <div className="w-full">
-                      <SmartConnectButton />
+                      <ConnectButton />
                     </div>
                   )}
                   <Link href="/dashboard">

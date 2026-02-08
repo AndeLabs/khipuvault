@@ -26,32 +26,32 @@ export function Hero() {
             {/* Left: Content */}
             <AnimateOnScroll className="text-center lg:text-left">
               {/* Badge */}
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/10 px-4 py-2">
+              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-4 py-2">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
                 </span>
-                <span className="text-sm font-medium text-primary">Live on Mezo Testnet</span>
+                <span className="text-sm font-medium text-success">✓ All Systems Live on Mezo</span>
               </div>
 
               {/* Headline */}
               <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-6xl xl:text-7xl">
-                Bitcoin Savings
+                Your Bitcoin,
                 <br />
                 <span className="animate-gradient bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent">
-                  That Actually Grow
+                  Earning Real Yields
                 </span>
               </h1>
 
               {/* Subheadline */}
               <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:text-xl lg:mx-0">
-                Earn real yields on your Bitcoin through Mezo&apos;s stability pool. From individual
-                savings to rotating pools (ROSCA), we offer secure, audited, and gas-optimized
-                solutions.
+                Earn sustainable yields on Bitcoin through Mezo&apos;s stability pool. Choose from
+                individual savings, community pools, rotating ROSCAs, or prize pools—all audited,
+                gas-optimized, and non-custodial.
               </p>
 
               {/* CTA Button */}
-              <div className="mt-8 flex items-center justify-center lg:justify-start">
+              <div className="mt-8 flex items-center justify-center gap-4 lg:justify-start">
                 <Link
                   href="/dashboard"
                   className={cn(
@@ -59,7 +59,7 @@ export function Hero() {
                     "group bg-gradient-to-r from-primary to-accent px-8 font-semibold text-white hover:opacity-90"
                   )}
                 >
-                  Start Earning
+                  Start Earning Now
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Link>
               </div>

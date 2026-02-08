@@ -78,19 +78,23 @@ let sentryInitialized = false;
 
 /**
  * Try to load Sentry module dynamically
+ * TEMPORARILY DISABLED: Sentry integration is causing issues with Next.js 15
  */
 async function loadSentry(): Promise<SentryModule | null> {
-  if (sentryInitialized) {
-    return SentryModule;
-  }
+  // Temporarily disable Sentry loading
+  return null;
 
-  try {
-    // Dynamic import with error handling
-    const sentryModule = await import("@sentry/nextjs");
-    return sentryModule as SentryModule;
-  } catch {
-    return null;
-  }
+  // if (sentryInitialized) {
+  //   return SentryModule;
+  // }
+
+  // try {
+  //   // Dynamic import with error handling
+  //   const sentryModule = await import("@sentry/nextjs");
+  //   return sentryModule as SentryModule;
+  // } catch {
+  //   return null;
+  // }
 }
 
 /**

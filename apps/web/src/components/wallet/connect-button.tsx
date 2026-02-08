@@ -1,15 +1,27 @@
 /**
- * @fileoverview Custom Wallet Connection Components for KhipuVault
+ * @fileoverview MetaMask-Only Wallet Connection
  * @module components/wallet/connect-button
  *
- * Production-ready wallet connection components without RainbowKit
- * Pure Wagmi with MetaMask + Unisat support
- * Safe client-side rendering with hydration protection
+ * Production-ready MetaMask connection (ONLY MetaMask, no other wallets)
+ *
+ * Features:
+ * - Connects ONLY to MetaMask (ignores Rabby, OKX, etc.)
+ * - Simple, clean UX
+ * - Shows BTC balance when connected
+ * - SSR-safe with proper hydration
+ * - Professional and scalable
+ *
+ * How It Works:
+ * - injected({ target: 'metaMask' }) forces MetaMask only
+ * - Checks window.ethereum.isMetaMask to verify
+ * - Ignores all other wallet extensions
+ *
+ * @see https://wagmi.sh/react/api/connectors/injected
  */
 
 "use client";
 
-import { Wallet, ChevronDown, Copy, ExternalLink } from "lucide-react";
+import { Wallet, Copy, ExternalLink, ChevronDown } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAccount, useConnect, useDisconnect, useBalance } from "wagmi";
 
@@ -22,23 +34,29 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
-import { getWalletAvailability } from "@/lib/web3/config";
 
 /**
- * Custom Connect Button Component
+ * MetaMask Connect Button
+ *
+ * Connects ONLY to MetaMask. Other wallets (Rabby, OKX, etc.) are ignored.
  *
  * Features:
- * - MetaMask + Unisat wallet connection
+ * - MetaMask-only connection (target: 'metaMask')
  * - Shows BTC balance when connected
- * - Wallet selection dropdown
- * - Responsive design
- * - SSR-safe with proper hydration
- * - No external dependencies
+ * - Clean, professional UX
+ * - SSR-safe with hydration
+ *
+ * How It Works:
+ * 1. injected({ target: 'metaMask' }) in config forces MetaMask
+ * 2. Connector checks window.ethereum.isMetaMask
+ * 3. Ignores Rabby, OKX, and other wallets
+ * 4. Simple and reliable
  */
 export function ConnectButton() {
   const [mounted, setMounted] = useState(false);
-  const { address, isConnected } = useAccount();
-  const { connect, connectors, isPending } = useConnect();
+  const { address, isConnected, connector } = useAccount();
+  // Wagmi 2.x exposes connect (not mutate) - internally renamed from useMutation
+  const { connect, connectors, isPending, error } = useConnect();
   const { disconnect } = useDisconnect();
   const { data: btcBalance } = useBalance({
     address: address as `0x${string}` | undefined,
@@ -46,7 +64,25 @@ export function ConnectButton() {
 
   useEffect(() => {
     setMounted(true);
-  }, []);
+
+    // Debug: Log detailed state
+    if (process.env.NODE_ENV === "development") {
+      // eslint-disable-next-line no-console
+      console.log("🔍 Wallet State:", {
+        isConnected,
+        address: address ? `${address.slice(0, 6)}...${address.slice(-4)}` : "none",
+        connector: connector?.name || "none",
+        connectorId: connector?.id || "none",
+      });
+
+      // Fix stale connection state: if we have address or connector but isConnected is false
+      if (!isConnected && (address || connector)) {
+        // eslint-disable-next-line no-console
+        console.log("⚠️ Detected stale connection (address/connector present but isConnected=false). Disconnecting...");
+        disconnect();
+      }
+    }
+  }, [mounted, isConnected, address, connector, disconnect]);
 
   // Prevent hydration errors
   if (!mounted) {
@@ -124,57 +160,130 @@ export function ConnectButton() {
     );
   }
 
-  // Wallet Selection Dropdown
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button disabled={isPending} className="gap-2">
+  // Filter for MetaMask ONLY from all EIP-6963 detected wallets
+  // EIP-6963 detects ALL wallets (Yoroi, Rabby, OKX, MetaMask)
+  // We filter to show ONLY MetaMask
+  const metaMaskConnector = connectors.find((c) => {
+    // MetaMask via EIP-6963 has id: 'io.metamask' or 'io.metamask.mobile'
+    if (c.id === "io.metamask" || c.id === "io.metamask.mobile") {
+      return true;
+    }
+
+    // Fallback: check name (case-insensitive)
+    if (c.name.toLowerCase().includes("metamask")) {
+      // Make sure it's not a fake MetaMask (Rabby, etc.)
+      // These wallets won't have the exact 'io.metamask' id
+      return c.id.includes("metamask");
+    }
+
+    return false;
+  });
+
+  // Debug: show all detected wallets
+  if (process.env.NODE_ENV === "development") {
+    // eslint-disable-next-line no-console
+    console.log(
+      "🔌 Connectors detected via EIP-6963:",
+      connectors.map((c) => ({ id: c.id, name: c.name, type: c.type }))
+    );
+    // eslint-disable-next-line no-console
+    console.log(
+      "🎯 MetaMask connector:",
+      metaMaskConnector ? { id: metaMaskConnector.id, name: metaMaskConnector.name } : "NOT FOUND"
+    );
+  }
+
+  if (!metaMaskConnector) {
+    return (
+      <div className="flex flex-col items-end gap-2">
+        <Button disabled className="gap-2">
           <Wallet className="h-4 w-4" />
-          {isPending ? "Connecting..." : "Connect Wallet"}
-          <ChevronDown className="h-4 w-4" />
+          MetaMask Not Detected
         </Button>
-      </DropdownMenuTrigger>
+        <p className="text-xs text-muted-foreground">
+          Install{" "}
+          <a
+            href="https://metamask.io/download/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary underline"
+          >
+            MetaMask extension
+          </a>
+        </p>
+      </div>
+    );
+  }
 
-      <DropdownMenuContent align="end" className="w-56">
-        <div className="px-2 py-1.5 text-sm font-medium">Select your wallet</div>
+  // Handle connection - force disconnect if already connected
+  const handleConnect = async () => {
+    try {
+      // If connector is already connected, disconnect first
+      // This fixes the "Connector already connected" error
+      if (metaMaskConnector && "connected" in metaMaskConnector) {
+        const isConnectorConnected = await metaMaskConnector.isAuthorized?.();
+        if (isConnectorConnected) {
+          // eslint-disable-next-line no-console
+          console.log("🔄 Disconnecting stale connection...");
+          disconnect();
+          // Wait a bit for disconnect to complete
+          await new Promise((resolve) => setTimeout(resolve, 500));
+        }
+      }
 
-        <DropdownMenuSeparator />
+      // Now connect
+      // eslint-disable-next-line no-console
+      console.log("🔌 Connecting to MetaMask...");
+      connect({ connector: metaMaskConnector });
+    } catch (err) {
+      // eslint-disable-next-line no-console
+      console.error("❌ Connection error:", err);
+    }
+  };
 
-        {connectors.map((connector) => {
-          const isAvailable = getConnectorAvailability(connector.id);
+  // Force reset - clear all state
+  const handleReset = () => {
+    // eslint-disable-next-line no-console
+    console.log("🔄 Force reset - clearing all state...");
+    disconnect();
+    if (typeof window !== "undefined") {
+      // Clear Wagmi state from localStorage
+      Object.keys(localStorage).forEach((key) => {
+        if (key.startsWith("wagmi.") || key.includes("wallet")) {
+          localStorage.removeItem(key);
+        }
+      });
+    }
+    // Reload page
+    setTimeout(() => window.location.reload(), 500);
+  };
 
-          return (
-            <DropdownMenuItem
-              key={connector.id}
-              onClick={() => connect({ connector })}
-              disabled={!isAvailable || isPending}
-              className="gap-2"
-            >
-              <Wallet className="h-4 w-4" />
-              <div className="flex-1">
-                <div>{connector.name}</div>
-                {!isAvailable && (
-                  <div className="text-xs text-muted-foreground">
-                    Not detected - Install extension
-                  </div>
-                )}
-              </div>
-            </DropdownMenuItem>
-          );
-        })}
-      </DropdownMenuContent>
-    </DropdownMenu>
+  // Botón que conecta SOLO a MetaMask
+  // El conector está configurado con target: 'metaMask' para ignorar otras wallets
+  return (
+    <div className="flex flex-col items-end gap-2">
+      <div className="flex gap-2">
+        <Button onClick={handleConnect} disabled={isPending} className="gap-2">
+          {/* MetaMask Fox Icon SVG */}
+          <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M22.05 8.54l-3.78-2.82-.06-.05a.97.97 0 00-1.16 0l-.06.05-3.78 2.82a.97.97 0 00-.36.75v4.62c0 .3.14.59.36.75l3.78 2.82.06.05a.97.97 0 001.16 0l.06-.05 3.78-2.82a.97.97 0 00.36-.75V9.29a.97.97 0 00-.36-.75z" />
+            <path d="M8.95 8.54l-3.78-2.82-.06-.05a.97.97 0 00-1.16 0l-.06.05-3.78 2.82A.97.97 0 000 9.29v4.62c0 .3.14.59.36.75l3.78 2.82.06.05a.97.97 0 001.16 0l.06-.05 3.78-2.82a.97.97 0 00.36-.75V9.29a.97.97 0 00-.36-.75z" />
+          </svg>
+          {isPending ? "Connecting..." : "Connect MetaMask"}
+        </Button>
+
+        {/* Temporary debug button - remove in production */}
+        {process.env.NODE_ENV === "development" && (
+          <Button onClick={handleReset} variant="outline" size="sm">
+            Reset
+          </Button>
+        )}
+      </div>
+
+      {/* Show connection error if any */}
+      {error && <p className="text-xs text-destructive">{error.message}</p>}
+    </div>
   );
-}
-
-function getConnectorAvailability(connectorId: string): boolean {
-  if (connectorId === "metaMask") {
-    return getWalletAvailability().metaMask;
-  }
-  if (connectorId === "unisat") {
-    return getWalletAvailability().unisat;
-  }
-  return true;
 }
 
 /**

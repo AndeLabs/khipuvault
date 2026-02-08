@@ -22,7 +22,6 @@ interface PositionCardProps {
   totalDeposited?: string;
   currentValue?: string;
   totalYields?: string;
-  referralRewards?: string;
   apy?: number;
   change24h?: number;
   lastUpdate?: number;
@@ -34,7 +33,6 @@ export function PositionCard({
   totalDeposited = "0",
   currentValue = "0",
   totalYields = "0",
-  referralRewards = "0",
   apy = 12.5,
   change24h = 0,
   lastUpdate,
@@ -58,7 +56,6 @@ export function PositionCard({
   const formattedDeposited = formatBalance(totalDeposited);
   const formattedValue = formatBalance(currentValue);
   const formattedYields = formatBalance(totalYields);
-  const formattedRewards = formatBalance(referralRewards);
 
   if (isLoading) {
     return (
@@ -68,8 +65,8 @@ export function PositionCard({
           <Skeleton className="h-4 w-48" />
         </CardHeader>
         <CardContent>
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {[...Array(4)].map((_, i) => (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
               <div key={`skeleton-${i}`} className="space-y-2">
                 <Skeleton className="h-4 w-20" />
                 <Skeleton className="h-8 w-32" />
@@ -116,7 +113,7 @@ export function PositionCard({
 
       <CardContent className="space-y-6">
         {/* Main Stats Grid */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
           {/* Total Deposited */}
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
@@ -197,31 +194,6 @@ export function PositionCard({
             </div>
             <StatValue trend={Number(formattedYields) > 0 ? "up" : "neutral"}>
               <AmountDisplay amount={formattedYields} symbol="mUSD" size="lg" />
-            </StatValue>
-          </div>
-
-          {/* Referral Rewards */}
-          <div className="space-y-1">
-            <div className="flex items-center gap-1.5">
-              <StatLabel>Referral Rewards</StatLabel>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
-                      <Info className="h-3 w-3" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="max-w-xs text-sm">
-                      Earn 0.5% of deposits from users you refer to KhipuVault. Share your referral
-                      link to start earning passive rewards!
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
-            <StatValue trend={Number(formattedRewards) > 0 ? "up" : "neutral"}>
-              <AmountDisplay amount={formattedRewards} symbol="mUSD" size="lg" />
             </StatValue>
           </div>
         </div>

@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { ArrowDownCircle, ArrowUpCircle, BarChart3, Gift, Database } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, BarChart3, Database } from "lucide-react";
 import nextDynamic from "next/dynamic";
 import * as React from "react";
 import { formatUnits } from "viem";
@@ -55,23 +55,14 @@ const YieldAnalytics = nextDynamic(
   }
 );
 
-const ReferralDashboard = nextDynamic(
-  () => import("@/features/individual-savings").then((mod) => ({ default: mod.ReferralDashboard })),
-  {
-    loading: () => <Skeleton className="h-[400px] w-full rounded-lg" />,
-    ssr: false,
-  }
-);
-
 /**
- * Individual Savings Page - V4 Production Ready with ALL V3 Features
+ * Individual Savings Page - V4 Production Ready with V3 Features
  *
  * Comprehensive Features:
  * ✅ Real blockchain data (100% - zero mock data)
  * ✅ Connected to actual smart contract functions
  * ✅ Real transaction history from blockchain events
  * ✅ Auto-compound and yield claiming
- * ✅ Referral System with dashboard
  * ✅ Pool statistics and analytics
  * ✅ Yield projections calculator
  * ✅ Proper error handling and loading states
@@ -97,8 +88,8 @@ export default function IndividualSavingsPage() {
   // Real transaction history from blockchain events
   const { data: transactions = [], isLoading: isLoadingTransactions } = useUserTransactionHistory();
 
-  // Real deposit handler - with optional referral code support
-  const handleDeposit = async (amount: string, _referralCode?: string) => {
+  // Real deposit handler
+  const handleDeposit = async (amount: string) => {
     try {
       await deposit(amount);
       // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
@@ -201,7 +192,6 @@ export default function IndividualSavingsPage() {
             totalDeposited={poolData.userInfo?.deposit?.toString() ?? "0"}
             currentValue={poolData.userTotalBalance?.toString() ?? "0"}
             totalYields={poolData.userInfo?.netYields?.toString() ?? "0"}
-            referralRewards={poolData.referralStats?.rewards?.toString() ?? "0"}
             apy={apy}
             change24h={poolStats.change24h}
             isLoading={poolData.isLoading || poolStats.isLoading}
@@ -257,15 +247,6 @@ export default function IndividualSavingsPage() {
               </TabsContent>
             </Tabs>
 
-            {/* Referral Dashboard */}
-            <ReferralDashboard
-              referralCount={poolData.referralStats?.count ?? BigInt(0)}
-              totalRewards={poolData.referralStats?.rewards ?? BigInt(0)}
-              referrerAddress={poolData.referralStats?.referrer}
-              isLoading={poolData.isLoading}
-              onRefresh={poolData.refetchAll}
-            />
-
             {/* Yield Analytics */}
             <YieldAnalytics
               currentAPR={apy}
@@ -309,7 +290,7 @@ export default function IndividualSavingsPage() {
         </div>
 
         {/* Bottom Section - Additional Features */}
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-8 md:grid-cols-2">
           {/* Feature Cards */}
           <div className="bg-gradient-lavanda rounded-lg border border-lavanda/20 p-6">
             <div className="mb-4 flex items-center gap-3">
@@ -333,32 +314,6 @@ export default function IndividualSavingsPage() {
               <li className="flex items-center gap-2">
                 <div className="h-1 w-1 rounded-full bg-lavanda" />
                 <span>Gas-free automation</span>
-              </li>
-            </ul>
-          </div>
-
-          <div className="bg-gradient-accent rounded-lg border border-accent/20 p-6">
-            <div className="mb-4 flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/20">
-                <Gift className="h-5 w-5 text-accent" />
-              </div>
-              <h3 className="font-semibold">Referral System</h3>
-            </div>
-            <p className="mb-3 text-sm text-muted-foreground">
-              Earn 0.5% of every deposit from users you refer to KhipuVault
-            </p>
-            <ul className="space-y-2 text-xs text-muted-foreground">
-              <li className="flex items-center gap-2">
-                <div className="h-1 w-1 rounded-full bg-accent" />
-                <span>Passive income stream</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="h-1 w-1 rounded-full bg-accent" />
-                <span>Unlimited referrals</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="h-1 w-1 rounded-full bg-accent" />
-                <span>Instant reward payments</span>
               </li>
             </ul>
           </div>
