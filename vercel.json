@@ -44,6 +44,5 @@
       "destination": "/dashboard",
       "permanent": false
     }
-  ],
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./"
+  ]
 }
