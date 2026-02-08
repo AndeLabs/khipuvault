@@ -78,7 +78,7 @@ This is intentional and follows best practice: **Audit BEFORE public launch**. T
 1. ✅ **ARCHITECTURE.md** - System design, contract hierarchy, data flow
 2. ✅ **SECURITY.md** - Security model, access control, risk mitigation
 3. ✅ **PRE_AUDIT_CHECKLIST.md** - Comprehensive audit preparation guide
-4. ✅ **CLAUDE.md** - Development guide, code patterns, anti-patterns
+4. ✅ **Development Guide** - Code patterns, anti-patterns, setup instructions
 
 **For Grant Application:** 5. ✅ **MAINNET_LAUNCH_PLAN.md** - Marketing strategy, timeline, budget 6. ✅ **DEPLOYMENT_FINAL_STATUS.md** - Current deployment status 7. ✅ **INTEGRATION_WEB_DOCS.md** - Web ↔ Docs integration guide
 
@@ -260,7 +260,6 @@ cp -r test audit-package/tests
 cp ARCHITECTURE.md audit-package/
 cp SECURITY.md audit-package/
 cp PRE_AUDIT_CHECKLIST.md audit-package/
-cp CLAUDE.md audit-package/
 
 # Copy reports
 cp -r reports audit-package/
@@ -471,7 +470,7 @@ If you have questions about this summary or need help with next steps:
    - Check `MAINNET_LAUNCH_PLAN.md` for post-audit strategy
 
 2. **Technical questions:**
-   - Consult `ARCHITECTURE.md` and `CLAUDE.md`
+   - Consult `ARCHITECTURE.md` and development guide
    - Review smart contract comments (NatSpec)
 
 3. **Community:**

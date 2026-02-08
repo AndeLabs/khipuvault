@@ -215,7 +215,7 @@ forge coverage
 ### For Auditors
 
 - [x] README.md with project overview
-- [x] CLAUDE.md with architecture and setup
+- [x] Development guide with architecture and setup
 - [x] Smart contract comments and NatSpec
 - [ ] **CREATE:** `AUDIT_GUIDE.md` with:
   - Architecture diagrams
@@ -522,8 +522,8 @@ Subject: "KhipuVault - Mezo Hackathon Winner - Audit Submission"
 | Gather testnet metrics             | 2 hours       | You          |
 | Run Slither analysis               | 1 hour        | You          |
 | Generate coverage report           | 1 hour        | You          |
-| Review contracts against checklist | 6 hours       | You + Claude |
-| Write missing documentation        | 4 hours       | You + Claude |
+| Review contracts against checklist | 6 hours       | Dev Team     |
+| Write missing documentation        | 4 hours       | Dev Team     |
 | Create mainnet launch plan         | 4 hours       | You          |
 | Package audit materials            | 2 hours       | You          |
 | **TOTAL**                          | **~20 hours** | **2-3 days** |

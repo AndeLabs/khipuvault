@@ -24,7 +24,7 @@
 - 🚀 **[Launch Plan](./docs/planning/MAINNET_LAUNCH_PLAN.md)** - Go-to-market strategy
 - 🏗️ **[Architecture](./audit/ARCHITECTURE.md)** - System design
 - 🛡️ **[Security](./audit/SECURITY.md)** - Security model
-- 📊 **[Development Guide](./CLAUDE.md)** - For contributors
+- 📊 **[Development Guide](./docs/archive/CLAUDE.md)** - For contributors
 
 ---
 
@@ -248,7 +248,7 @@ forge test --gas-report
 
 ### For Developers
 
-- **[Development Guide (CLAUDE.md)](./CLAUDE.md)** - Comprehensive guide for contributors:
+- **[Development Guide](./docs/archive/CLAUDE.md)** - Comprehensive guide for contributors:
   - Architecture overview
   - Code patterns & anti-patterns
   - Package import map
@@ -375,7 +375,7 @@ We welcome contributions! Please follow these steps:
 1. **Fork** the repository
 2. **Clone** your fork: `git clone https://github.com/YOUR_USERNAME/khipuvault.git`
 3. **Create branch:** `git checkout -b feature/amazing-feature`
-4. **Make changes** following our code style (see CLAUDE.md)
+4. **Make changes** following our code style (see development guide)
 5. **Test:** `pnpm test && pnpm lint && pnpm typecheck`
 6. **Commit:** `git commit -m 'feat: add amazing feature'`
 7. **Push:** `git push origin feature/amazing-feature`
@@ -389,7 +389,7 @@ We welcome contributions! Please follow these steps:
 - **Tests:** Required for new features
 - **Documentation:** Update relevant docs
 
-See [CLAUDE.md](./CLAUDE.md) for detailed contribution guide.
+See the development guide in docs/archive for detailed contribution information.
 
 ---
 
@@ -504,5 +504,5 @@ MIT License - see [LICENSE](LICENSE) file for details.
 **Built with ❤️ on Mezo**
 
 For auditors: Start with [`audit/README.md`](./audit/README.md)
-For developers: Read [`CLAUDE.md`](./CLAUDE.md)
+For developers: See development guide in docs/archive
 For users: Visit [docs.khipuvault.com](https://docs.khipuvault.com)
