@@ -23,6 +23,8 @@ if (typeof globalThis.localStorage === "undefined") {
 }
 
 const nextConfig: NextConfig = {
+  // CRITICAL: Set output file tracing root to monorepo root for proper dependency resolution
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   typescript: {
     // Enable type checking during builds for production safety
     ignoreBuildErrors: process.env.NODE_ENV !== "production",
@@ -104,15 +106,12 @@ const nextConfig: NextConfig = {
     ];
   },
   // Transpile Mezo Passport and dependencies for Next.js 15
-  // CRITICAL: Also transpile internal monorepo packages for Vercel deployment
+  // NOTE: Internal @khipu/* packages are pre-built with tsup, not transpiled
   transpilePackages: [
     "@mezo-org/passport",
     "@mezo-org/orangekit",
     "@mezo-org/orangekit-smart-account",
     "@mezo-org/orangekit-contracts",
-    "@khipu/shared",
-    "@khipu/web3",
-    "@khipu/ui",
   ],
   webpack: (config, { isServer }) => {
     config.resolve.alias = {
