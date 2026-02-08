@@ -1,0 +1,1024 @@
+---
+title: Governance & Voting
+description: Complete guide to democratic decision-making in community pools - proposals, voting mechanisms, and governance best practices.
+---
+
+# Governance & Voting
+
+Learn how to participate in community pool governance, create proposals, vote on decisions, and ensure democratic, transparent management.
+
+## What is Pool Governance?
+
+Governance is how community pools make collective decisions. Unlike individual pools where you have full control, community pools require member consensus for important actions.
+
+**Governed by Smart Contracts:**
+```
+Traditional Organizations          Community Pools (KhipuVault)
+─────────────────────              ────────────────────────────
+✗ Trust board members              ✓ Trust code (transparent)
+✗ Opaque decision-making           ✓ All votes on-chain
+✗ Can change rules arbitrarily     ✓ Rules enforced by contract
+✗ Manual vote counting             ✓ Automatic execution
+```
+
+## Governance Structure
+
+### Decision-Making Hierarchy
+
+```
+┌─────────────────────────────────────────┐
+│         Governance Pyramid              │
+├─────────────────────────────────────────┤
+│                                         │
+│  🔴 Critical Decisions                  │
+│  ├─ Remove members                      │
+│  ├─ Change voting rules                 │
+│  ├─ Upgrade smart contract              │
+│  └─ Threshold: 70-80% approval          │
+│                                         │
+│  🟡 Major Decisions                     │
+│  ├─ Change pool parameters              │
+│  ├─ Large fund allocations              │
+│  ├─ Add new members (closed pools)      │
+│  └─ Threshold: 60% approval             │
+│                                         │
+│  🟢 Minor Decisions                     │
+│  ├─ Small treasury expenses             │
+│  ├─ Update pool description             │
+│  ├─ Schedule events                     │
+│  └─ Threshold: 51% approval             │
+│                                         │
+│  ⚪ Automatic (No Vote)                 │
+│  ├─ Yield distribution                  │
+│  ├─ Individual withdrawals (within limit)│
+│  ├─ Member deposits                     │
+│  └─ Platform fee deductions             │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+### Voting Systems
+
+Community pools support two main voting mechanisms:
+
+#### 1. Democratic Voting (One Person, One Vote)
+
+**How it works:**
+```solidity
+// Each member gets exactly 1 vote
+mapping(address => uint256) public votes;
+
+function vote(uint256 proposalId, bool support) external {
+    require(isMember(msg.sender), "Not a member");
+    votes[proposalId][msg.sender] = support ? 1 : 0;
+}
+```
+
+**Best for:**
+- Neighborhood associations
+- Churches and religious groups
+- Family funds
+- Sports teams
+- Any group valuing equality
+
+**Pros:**
+- ✅ Everyone has equal say
+- ✅ Prevents wealth concentration
+- ✅ Encourages participation
+- ✅ Builds community
+
+**Cons:**
+- ❌ New members have same power as founders
+- ❌ Small contributors equal to large ones
+- ❌ May not reflect financial risk
+
+**Example:**
+```
+Proposal: "Distribute 1,000 MUSD to member emergency fund"
+
+Member A (Balance: 5,000 MUSD) → Vote: YES (weight: 1)
+Member B (Balance: 100 MUSD)   → Vote: YES (weight: 1)
+Member C (Balance: 2,000 MUSD) → Vote: NO (weight: 1)
+
+Result: 2 YES, 1 NO → Passes (67% approval)
+```
+
+#### 2. Weighted Voting (Vote Power by Contribution)
+
+**How it works:**
+```solidity
+// Vote weight proportional to deposit
+function vote(uint256 proposalId, bool support) external {
+    uint256 weight = memberBalance[msg.sender];
+    votes[proposalId][msg.sender] = support ? weight : 0;
+}
+```
+
+**Best for:**
+- Investment clubs
+- Professional networks
+- Large diverse pools
+- Business cooperatives
+
+**Pros:**
+- ✅ Reflects financial stake
+- ✅ Larger contributors have more say
+- ✅ Aligns risk with control
+- ✅ Incentivizes larger deposits
+
+**Cons:**
+- ❌ Wealth can dominate
+- ❌ Small members feel powerless
+- ❌ Can create inequality
+- ❌ Risk of centralization
+
+**Example:**
+```
+Proposal: "Invest 50% of pool in higher-risk strategy"
+
+Member A (5,000 MUSD)  → Vote: YES (weight: 5,000)
+Member B (100 MUSD)    → Vote: NO (weight: 100)
+Member C (2,000 MUSD)  → Vote: NO (weight: 2,000)
+Total Pool: 10,000 MUSD
+
+YES: 5,000 MUSD (50%)
+NO: 2,100 MUSD (21%)
+Abstain: 2,900 MUSD (29%)
+
+Result: Passes (50% > 49%)
+```
+
+<Callout type="info">
+**Hybrid Option**: Some pools use weighted voting for financial decisions and democratic for member/governance decisions.
+</Callout>
+
+## Creating Proposals
+
+Any member can create proposals (unless restricted). Here's how:
+
+### Proposal Types
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### 1. Add Member Proposal
+
+**When to use:** Invite new person to closed pool
+
+```yaml
+Proposal Type: Add Member
+Title: "Add Maria Garcia to Pool"
+
+Details:
+  New Member Address: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+  Name: Maria Garcia
+  Justification: |
+    Maria is a Villa Esperanza resident for 10 years.
+    Active in neighborhood association. Referred by Juan Rodriguez.
+    Will contribute 200 MUSD initially.
+
+  Verification:
+    - Email: maria@example.com ✓
+    - Referral: Juan Rodriguez (Member #12) ✓
+    - Background: Clean ✓
+
+Voting Period: 3 days
+Required Approval: 60%
+Quorum: 51%
+```
+
+### 2. Remove Member Proposal
+
+**When to use:** Member violates rules, inactive, or voluntary exit with notice
+
+```yaml
+Proposal Type: Remove Member
+Title: "Remove Carlos Mendez for Inactivity"
+
+Details:
+  Member to Remove: Carlos Mendez (0x8626...1199)
+  Member ID: #33
+
+  Reason: |
+    Carlos has not voted on any proposal in 120 days (last vote: Feb 15).
+    Sent 3 reminder emails - no response.
+    Has not made deposits in 180 days.
+    Pool rules require active participation.
+
+  Member's Balance: 50 MUSD + 4 MUSD yields
+  Withdrawal Timeline: 30 days after approval
+
+  Grace Period: 7 days to contest this proposal
+
+Voting Period: 5 days (longer for removals)
+Required Approval: 70% (higher threshold for removals)
+Quorum: 60%
+```
+
+<Callout type="warning">
+**Fairness Requirement**: Removed members always keep their funds. They have 30 days to withdraw after approval.
+</Callout>
+
+### 3. Withdraw Funds Proposal
+
+**When to use:** Large pool-level withdrawal or emergency distribution
+
+```yaml
+Proposal Type: Withdraw Pool Funds
+Title: "Emergency Distribution for Community Crisis"
+
+Details:
+  Amount: 5,000 MUSD (4% of pool)
+
+  Purpose: |
+    Severe flooding in Villa Esperanza neighborhood.
+    12 member families affected, need immediate assistance.
+    Distribute 400 MUSD to each affected family.
+
+  Distribution:
+    - Family 1 (Member #5): 400 MUSD
+    - Family 2 (Member #12): 400 MUSD
+    - ... (10 more families)
+
+  Timeline: Immediate upon approval
+
+  Impact on Pool:
+    - Total Pool: 125,000 → 120,000 MUSD (-4%)
+    - Estimated yield impact: -0.58% APY reduction
+    - Recovery time: ~3 months
+
+Voting Period: 24 hours (emergency fast-track)
+Required Approval: 51%
+Quorum: 40% (lower for emergencies)
+```
+
+### 4. Change Parameters Proposal
+
+**When to use:** Adjust pool settings
+
+```yaml
+Proposal Type: Change Pool Parameters
+Title: "Increase Minimum Deposit to 100 MUSD"
+
+Current Settings:
+  Minimum Deposit: 50 MUSD
+  Individual Withdrawal Limit: 10%
+  Voting Period: 3 days
+  Quorum: 51%
+
+Proposed Changes:
+  Minimum Deposit: 50 → 100 MUSD
+
+Justification: |
+  Pool has grown to 45 members. Higher minimum will:
+  1. Attract more committed members
+  2. Reduce administrative overhead (fewer small accounts)
+  3. Increase average member stake
+  4. Not affect existing members (grandfathered in)
+
+Expected Impact:
+  - New members must deposit 100+ MUSD
+  - Existing members not affected
+  - May slow growth but improve quality
+
+Voting Period: 7 days
+Required Approval: 60%
+Quorum: 51%
+```
+
+### 5. Change Strategy Proposal
+
+**When to use:** Modify yield generation approach
+
+```yaml
+Proposal Type: Change Yield Strategy
+Title: "Reallocate 20% to Higher-Yield DeFi Protocols"
+
+Current Strategy:
+  - Mezo Staking: 50% (8-12% APY)
+  - DeFi Lending: 30% (15-20% APY)
+  - Liquidity Pools: 20% (20-30% APY)
+
+Proposed Strategy:
+  - Mezo Staking: 40% (-10%)
+  - DeFi Lending: 30% (no change)
+  - Liquidity Pools: 30% (+10%)
+
+Rationale: |
+  Recent market analysis shows LP yields stable at 25%.
+  Mezo staking yields dropped to 8%.
+  Reallocation could increase pool APY from 14% to 16%.
+
+Risk Assessment:
+  - Mezo staking: Very Low Risk
+  - Liquidity Pools: Low-Medium Risk
+  - Increased risk: Minimal
+  - Potential reward: +2% APY = +2,500 MUSD/year
+
+Voting Period: 7 days
+Required Approval: 60%
+Quorum: 51%
+```
+
+### 6. Distribute Yields Proposal
+
+**When to use:** Pay out accumulated yields to members
+
+```yaml
+Proposal Type: Distribute Accumulated Yields
+Title: "Quarterly Yield Distribution - June 2026"
+
+Details:
+  Total Yields Available: 3,450 MUSD
+  Distribution Method: Proportional to balance
+
+  Example Distributions:
+    Member A (5,000 MUSD balance) → 1,200 MUSD
+    Member B (2,500 MUSD balance) → 600 MUSD
+    Member C (1,000 MUSD balance) → 240 MUSD
+    ... (42 more members)
+
+  Remaining in Pool: 0 MUSD (full distribution)
+
+  Or, Alternative Option:
+  - Distribute 80%: 2,760 MUSD
+  - Keep 20% in treasury: 690 MUSD
+
+Execution: Within 48 hours of approval
+Gas Fees: Covered by pool treasury
+
+Voting Period: 3 days
+Required Approval: 51%
+Quorum: 40%
+```
+
+</div>
+
+## Voting Process
+
+### How to Vote
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### View Active Proposals
+
+Navigate to **Pool Dashboard** → **Governance** → **Active Proposals**
+
+```
+🗳️ Active Proposals (3)
+
+Proposal #47 - Add Maria Garcia to Pool
+├─ Created by: Juan Rodriguez (Member #12)
+├─ Created: 2 days ago
+├─ Voting ends: In 1 day, 6 hours
+├─ Current Status: ✅ Passing (67% YES)
+├─ Votes: 30/45 members (67% participation)
+├─ Quorum: 51% ✓ Met
+└─ [View Details] [Vote]
+
+Proposal #48 - Distribute Quarterly Yields
+├─ Created by: Admin
+├─ Created: 5 hours ago
+├─ Voting ends: In 2 days, 19 hours
+├─ Current Status: ⏳ Pending (45% YES)
+├─ Votes: 18/45 members (40% participation)
+├─ Quorum: 40% ✓ Met
+└─ [View Details] [Vote]
+
+Proposal #49 - Remove Carlos for Inactivity
+├─ Created by: Maria Lopez (Member #1)
+├─ Created: 30 minutes ago
+├─ Voting ends: In 4 days, 23.5 hours
+├─ Current Status: 🆕 Just Created (0% votes)
+├─ Votes: 0/45 members (0% participation)
+├─ Quorum: 60% ✗ Not Met
+└─ [View Details] [Vote]
+```
+
+### Read Proposal Details
+
+Click **"View Details"** to see full proposal:
+
+```
+Proposal #47: Add Maria Garcia to Pool
+════════════════════════════════════════
+
+📋 Proposal Information
+├─ Type: Add Member
+├─ Proposer: Juan Rodriguez (Member #12)
+├─ Created: Jun 8, 2026 14:23 UTC
+├─ Voting Period: 3 days
+├─ Voting Ends: Jun 11, 2026 14:23 UTC
+
+📊 Current Results
+├─ YES: 20 votes (67%)
+├─ NO: 10 votes (33%)
+├─ Abstain: 0 votes (0%)
+├─ Not Voted: 15 members (33%)
+├─ Quorum: 30/45 = 67% ✓ Met (need 51%)
+├─ Status: ✅ Currently Passing
+
+📝 Description
+Maria Garcia is a long-time Villa Esperanza resident...
+[full description]
+
+🔍 Verification
+├─ Address: 0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+├─ Email Verified: ✓
+├─ Referral: Juan Rodriguez ✓
+├─ Background Check: ✓
+
+💬 Discussion (23 comments)
+├─ Juan: "Maria will be a great addition..."
+├─ Ana: "I know Maria, she's trustworthy..."
+├─ Pedro: "What will her initial deposit be?"
+└─ Juan: "@Pedro, 200 MUSD initially..."
+
+Your Vote: ⏳ Not Voted Yet
+[Vote YES] [Vote NO] [Abstain]
+```
+
+### Cast Your Vote
+
+Click your choice:
+
+**Option 1: Vote YES**
+```
+✓ You voted YES on Proposal #47
+
+Confirm your vote:
+├─ Proposal: Add Maria Garcia to Pool
+├─ Your Vote: YES
+├─ Voting Weight: 1 vote (democratic)
+├─ Gas Fee: ~0.00005 BTC (~$0.005)
+└─ This action is final (cannot change vote)
+
+[Confirm Vote] [Cancel]
+```
+
+**Option 2: Vote NO**
+```
+✗ You voted NO on Proposal #47
+
+Reason for voting NO (optional):
+[Text box: "I don't know Maria personally and want
+more verification before adding new members."]
+
+[Confirm Vote] [Cancel]
+```
+
+**Option 3: Abstain**
+```
+⊘ You abstain from voting on Proposal #47
+
+Abstaining means:
+- You participate in quorum count
+- But don't vote YES or NO
+- Useful when neutral or conflicted
+
+[Confirm Abstain] [Cancel]
+```
+
+### Transaction Confirmation
+
+MetaMask prompts for signature:
+
+```
+MetaMask: Sign Message
+
+Contract: CooperativePool (0x323F...5F88)
+Function: vote(proposalId: 47, support: true)
+Gas: ~0.00005 BTC (~$0.005)
+
+⚠️ Voting is final - you cannot change your vote after signing.
+
+[Reject] [Confirm]
+```
+
+### Vote Recorded
+
+Success! Your vote is on-chain:
+
+```
+✅ Vote Recorded!
+
+Proposal #47: Add Maria Garcia to Pool
+Your Vote: YES
+Transaction: 0x1234...abcd
+Block: 12,345,678
+
+Updated Results:
+├─ YES: 21 votes (68%) ← You contributed here
+├─ NO: 10 votes (32%)
+├─ Participation: 31/45 (69%)
+└─ Status: ✅ Passing
+
+[View on Explorer] [Share Vote]
+```
+
+</div>
+
+### Voting Best Practices
+
+<Callout type="success" title="Good Voter Checklist">
+✅ **DO:**
+- Read full proposal before voting
+- Review discussion comments
+- Consider pool's best interest
+- Vote on every proposal
+- Ask questions if unclear
+- Respect different opinions
+- Vote based on facts, not emotions
+
+❌ **DON'T:**
+- Vote without reading
+- Vote just to agree with friends
+- Ignore proposals
+- Change your mind after voting (you can't!)
+- Vote Yes on everything
+- Personal attacks in discussions
+- Vote late and miss deadlines
+</Callout>
+
+## Proposal Lifecycle
+
+Understanding what happens after voting:
+
+### 1. Proposal Creation
+
+```
+Day 0, 14:00
+├─ Member creates proposal
+├─ Smart contract validates
+├─ Proposal goes live
+├─ Members notified
+└─ Voting begins immediately
+```
+
+### 2. Voting Period
+
+```
+Days 0-3 (3-day voting period)
+├─ Members review proposal
+├─ Discussions happen
+├─ Votes are cast
+├─ Real-time results visible
+└─ Reminder sent 24h before end
+```
+
+### 3. Voting Closes
+
+```
+Day 3, 14:00
+├─ Voting period ends
+├─ No more votes accepted
+├─ Final tally calculated
+├─ Quorum checked
+└─ Pass/fail determined
+```
+
+### 4. Outcome Determination
+
+```
+Proposal Passes IF:
+✓ Quorum Met (enough participation)
+    AND
+✓ Approval Met (enough YES votes)
+
+Example (Democratic, 51% quorum, 60% approval):
+├─ Total Members: 45
+├─ Votes Cast: 30 (67% participation) ✓ Quorum met (need 51%)
+├─ YES Votes: 20 (67% of votes) ✓ Approval met (need 60%)
+└─ Result: ✅ PASSED
+```
+
+### 5. Execution
+
+```
+Passed Proposals:
+├─ Queued for execution
+├─ Timelock delay (if configured): 24-48 hours
+├─ Executed automatically or manually
+├─ On-chain event emitted
+└─ Members notified
+
+Failed Proposals:
+├─ Marked as rejected
+├─ No action taken
+├─ Can be re-proposed with changes
+└─ Members notified
+```
+
+**Execution Examples:**
+
+```solidity
+// Add Member - Executed Automatically
+function executeAddMember(uint256 proposalId) internal {
+    Proposal memory proposal = proposals[proposalId];
+    address newMember = abi.decode(proposal.data, (address));
+
+    members.push(newMember);
+    memberStatus[newMember] = MemberStatus.ACTIVE;
+
+    emit MemberAdded(newMember, block.timestamp);
+}
+
+// Distribute Yields - Executed Automatically
+function executeDistributeYields(uint256 proposalId) internal {
+    uint256 totalYields = accumulatedYields;
+
+    for (uint i = 0; i < members.length; i++) {
+        address member = members[i];
+        uint256 share = calculateMemberShare(member, totalYields);
+        MUSD.transfer(member, share);
+    }
+
+    emit YieldsDistributed(totalYields, block.timestamp);
+}
+```
+
+### 6. Post-Execution
+
+```
+After execution:
+├─ Results published
+├─ Impact measured
+├─ Feedback collected
+├─ Lessons learned
+└─ Documentation updated
+```
+
+## Quorum & Approval Thresholds
+
+Understanding these critical concepts:
+
+### Quorum (Minimum Participation)
+
+**What it is:**
+Minimum percentage of members who must vote for proposal to be valid.
+
+**Why it matters:**
+Prevents small groups from making decisions for entire pool.
+
+**Common Settings:**
+```
+Low Quorum (30-40%):
+├─ Pros: Easier to pass proposals
+├─ Cons: Small group can decide
+└─ Best for: Large pools, routine decisions
+
+Medium Quorum (51%):
+├─ Pros: Balanced participation
+├─ Cons: May be hard to reach
+└─ Best for: Most pools, most decisions
+
+High Quorum (60-75%):
+├─ Pros: Strong mandate
+├─ Cons: Very hard to reach
+└─ Best for: Critical decisions only
+```
+
+**Example:**
+```
+Pool: 100 members
+Quorum: 51%
+
+Scenario A: 60 members vote (60% participation)
+├─ Quorum: ✓ Met (60% > 51%)
+├─ Proposal: Can pass if approval threshold met
+
+Scenario B: 40 members vote (40% participation)
+├─ Quorum: ✗ Not Met (40% < 51%)
+├─ Proposal: Fails automatically, regardless of YES/NO ratio
+```
+
+### Approval Threshold (YES Vote Requirement)
+
+**What it is:**
+Minimum percentage of YES votes (out of votes cast) to pass.
+
+**Common Settings:**
+```
+Simple Majority (51%):
+├─ 51% YES votes needed
+├─ Standard for routine decisions
+└─ Example: Small treasury expenses
+
+Supermajority (60-67%):
+├─ 60-67% YES votes needed
+├─ For important decisions
+└─ Example: Add/remove members, parameter changes
+
+Supermajority (75-80%):
+├─ 75-80% YES votes needed
+├─ For critical decisions
+└─ Example: Smart contract upgrades, dissolve pool
+```
+
+**Example:**
+```
+Votes Cast: 50
+Approval Threshold: 60%
+
+Scenario A:
+├─ YES: 32 (64%)
+├─ NO: 18 (36%)
+└─ Result: ✓ Passes (64% > 60%)
+
+Scenario B:
+├─ YES: 28 (56%)
+├─ NO: 22 (44%)
+└─ Result: ✗ Fails (56% < 60%)
+```
+
+### Combined Example
+
+```
+Pool Configuration:
+├─ Total Members: 45
+├─ Quorum: 51%
+└─ Approval: 60%
+
+Proposal Results:
+├─ Votes Cast: 30 (67% participation)
+├─ YES: 20
+├─ NO: 10
+
+Check 1: Quorum
+├─ 30/45 = 67% participation
+├─ Need: 51%
+└─ ✓ Met
+
+Check 2: Approval
+├─ 20/30 = 67% YES votes
+├─ Need: 60%
+└─ ✓ Met
+
+Final Result: ✅ PASSED
+```
+
+## Governance Strategies
+
+### For Active Participants
+
+**Maximize Your Impact:**
+
+1. **Vote Early**
+   - Shows engagement
+   - Influences others
+   - Avoids last-minute rush
+
+2. **Explain Your Vote**
+   - Comment on proposals
+   - Share reasoning
+   - Educate others
+
+3. **Create Quality Proposals**
+   - Clear title and description
+   - Detailed justification
+   - Expected impact analysis
+   - Supporting data
+
+4. **Build Consensus**
+   - Discuss before proposing
+   - Gauge member sentiment
+   - Address concerns proactively
+   - Revise based on feedback
+
+### For Pool Success
+
+**Healthy Governance Indicators:**
+
+```
+✅ Good Governance Pool:
+├─ 60-80% average voter turnout
+├─ 5-10 proposals per month
+├─ 70-80% proposal pass rate
+├─ Active discussions (comments)
+├─ Respectful disagreements
+├─ Quick quorum achievement
+└─ Diverse proposal creators
+
+⚠️ Warning Signs:
+├─ less than 40% average turnout
+├─ Same people always proposing
+├─ Most proposals fail
+├─ No discussion/comments
+├─ Voting deadline extensions needed
+└─ Member complaints about governance
+```
+
+### Improving Participation
+
+**If turnout is low:**
+
+1. **Shorten voting period** (7d → 3d)
+2. **Send reminders** (24h before end)
+3. **Lower quorum** (if appropriate)
+4. **Gamify** (badges for voters)
+5. **Make it easier** (better UX)
+6. **Explain impact** ("This affects you because...")
+7. **Reward voters** (from treasury)
+
+**Example Incentive Program:**
+```
+Voting Rewards (Quarterly):
+
+Tier 1 - Perfect Voter (100% participation)
+└─ Reward: 20 MUSD bonus from treasury
+
+Tier 2 - Active Voter (80-99%)
+└─ Reward: 10 MUSD bonus
+
+Tier 3 - Regular Voter (60-79%)
+└─ Reward: 5 MUSD bonus
+
+Cost: ~450 MUSD/quarter for 45 members
+Benefit: 90%+ participation, better decisions
+```
+
+## Advanced Governance Features
+
+### Delegation (Coming Soon)
+
+Delegate your voting power:
+
+```typescript
+// Allow trusted member to vote on your behalf
+delegate(delegateAddress: "0x742d...");
+
+// Useful when:
+// - You're traveling/busy
+// - You trust another member's judgment
+// - You want to consolidate voting power
+// - You're inactive but want to participate
+
+// You can reclaim anytime
+undelegate();
+```
+
+### Proposal Templates
+
+Pre-configured proposal types:
+
+```yaml
+Template: "Monthly Yield Distribution"
+├─ Auto-fills common parameters
+├─ Standard approval: 51%
+├─ Standard quorum: 40%
+├─ Voting period: 3 days
+└─ Saves time for recurring proposals
+
+Template: "Emergency Member Removal"
+├─ Higher approval: 70%
+├─ Higher quorum: 60%
+├─ Longer period: 5 days
+├─ Grace period: 7 days
+└─ Ensures fairness
+```
+
+### Governance Analytics
+
+Track governance health:
+
+```
+📊 Governance Dashboard
+
+Participation Trends
+├─ Last 30 days: 72% avg turnout ↑ +5%
+├─ Last 90 days: 67% avg turnout
+├─ All-time: 64% avg turnout
+└─ Trend: Improving ✅
+
+Proposal Statistics
+├─ Total Proposals: 47
+├─ Passed: 32 (68%)
+├─ Failed: 12 (26%)
+├─ Expired: 3 (6%)
+└─ Average time to quorum: 1.8 days
+
+Top Voters (Last 30 Days)
+1. Maria Lopez - 8/8 votes (100%)
+2. Juan Rodriguez - 8/8 votes (100%)
+3. Ana Garcia - 7/8 votes (88%)
+...
+
+Top Proposers
+1. Admin - 12 proposals
+2. Maria Lopez - 8 proposals
+3. Juan Rodriguez - 5 proposals
+...
+```
+
+## Common Governance Scenarios
+
+### Scenario 1: Disputed Proposal
+
+**Situation:** Controversial proposal with community split
+
+**Resolution Process:**
+1. **Extended Discussion Period**
+   - Pause voting temporarily
+   - Host community call/meeting
+   - Let both sides present arguments
+
+2. **Mediator Involvement**
+   - Neutral third party
+   - Facilitates discussion
+   - Proposes compromise
+
+3. **Revised Proposal**
+   - Address concerns
+   - Find middle ground
+   - Re-vote on new version
+
+**Example:**
+```
+Original Proposal: "Increase minimum to 500 MUSD"
+├─ Supporters: Want serious, committed members
+├─ Opponents: Too exclusive, hurts accessibility
+└─ Split: 48% YES, 52% NO
+
+Compromise Proposal: "Increase to 150 MUSD, grandfather existing"
+├─ New members: 150 MUSD minimum
+├─ Existing members: Keep current balances
+└─ Result: 78% YES ✓ Passed
+```
+
+### Scenario 2: Low Participation
+
+**Situation:** Only 30% voting, quorum not met
+
+**Actions:**
+1. **Send Urgent Reminders**
+   - Email all non-voters
+   - Discord/Telegram announcements
+   - Explain importance
+
+2. **Extend Voting** (if rules allow)
+   - Add 24-48 hours
+   - Give more time
+   - One-time exception
+
+3. **Lower Quorum** (via separate proposal)
+   - Adjust to realistic level
+   - 51% → 40%
+   - Only if persistent issue
+
+### Scenario 3: Admin Abuse
+
+**Situation:** Admin creating unfair proposals
+
+**Member Protection:**
+1. **Create Counter-Proposal**
+   - Any member can propose
+   - Vote to remove admin rights
+   - Transfer to multi-sig
+
+2. **Emergency Community Vote**
+   - Fast-track removal
+   - Restore democratic control
+   - Document for transparency
+
+3. **Fork the Pool** (last resort)
+   - Create new pool
+   - Invite members to migrate
+   - Leave toxic environment
+
+**Prevention:**
+- Use multi-sig admin from start
+- Limit admin powers
+- Regular admin elections
+- Transparent decision-making
+
+## Next Steps
+
+Master governance in your pool:
+
+<Cards>
+  <Card
+    title="Pool Management"
+    href="/docs/products/community-pools/pool-management"
+    description="Admin tools and member management"
+  />
+  <Card
+    title="Creating Your Pool"
+    href="/docs/products/community-pools/creating-pool"
+    description="Set up governance from scratch"
+  />
+  <Card
+    title="FAQ"
+    href="/docs/products/community-pools/faq#governance"
+    description="Common governance questions"
+  />
+  <Card
+    title="Smart Contracts"
+    href="/docs/developers/smart-contracts/cooperative-pool"
+    description="Technical governance details"
+  />
+</Cards>
+
+---
+
+**Building better governance?** Share your strategies in [Discord](https://discord.gg/khipuvault)!
+
+**Questions?** Check the [FAQ](/docs/products/community-pools/faq) or ask the community.

@@ -1,0 +1,855 @@
+---
+title: Pool Management
+description: Admin features, member management, monitoring tools, and best practices for managing community pools on KhipuVault.
+---
+
+# Pool Management
+
+Master the tools and strategies to effectively manage your community pool, from member onboarding to financial oversight and governance coordination.
+
+## Admin Roles & Permissions
+
+Community pools can have different administrative structures:
+
+### Founder/Creator Role
+
+The pool creator automatically becomes the first admin with special privileges:
+
+```typescript
+Founder Permissions:
+- Add/remove initial members (before first vote)
+- Approve join requests (Hybrid pools)
+- Create proposals
+- Vote on all matters
+- Update pool metadata
+- Emergency pause (if compromised)
+- Transfer admin to multi-sig (recommended)
+```
+
+<Callout type="warning">
+**Security Best Practice**: Transfer admin rights to a multi-sig wallet within the first week. This prevents single-point-of-failure risks.
+</Callout>
+
+### Multi-Sig Admin (Recommended)
+
+Set up shared admin control:
+
+```
+3-of-5 Multi-Sig
+- Requires 3 signatures for admin actions
+- Protects against single compromised wallet
+- Distributes trust among trusted members
+- Standard for pools >$10k
+```
+
+**How to set up:**
+1. Create proposal: "Transfer admin to multi-sig"
+2. Deploy Gnosis Safe or similar
+3. Add 5 trusted member addresses
+4. Set threshold: 3-of-5 required
+5. Vote to approve transfer
+
+### Role-Based Access (Advanced)
+
+Larger pools can implement tiered roles:
+
+| Role | Permissions | Who Gets It |
+|------|------------|-------------|
+| **Founder** | Full control initially | Pool creator |
+| **Admin** | Approve members, pause pool | Elected by vote |
+| **Moderator** | Review proposals, manage Discord | Appointed by admins |
+| **Member** | Vote, propose, deposit, withdraw | All members |
+| **Observer** | View only, no voting | Public/visitors |
+
+## Member Management
+
+### Inviting Members
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### For Closed Pools
+
+Navigate to **Pool Dashboard** → **Members** → **Invite**
+
+**Option 1: Email Invitations**
+```
+Enter email addresses (one per line):
+juan@example.com
+maria@example.com
+carlos@example.com
+
+Message (optional):
+"Join our community savings pool! We're pooling funds
+for neighborhood projects and emergencies."
+
+[Send Invitations]
+```
+
+They receive:
+- Email with pool details
+- Unique join link (expires in 7 days)
+- Instructions to connect wallet and deposit
+
+**Option 2: Wallet Address Invitations**
+```
+Enter wallet addresses:
+0x742d35Cc6634C0532925a3b844Bc9e7595f0bEb
+0x8626f6940E2eb28930eFb4CeF49B2d1F2C9C1199
+
+Add to whitelist: ✅
+Reduce minimum deposit: 25 MUSD (from 50)
+Welcome bonus from treasury: 5 MUSD
+
+[Send Invitations]
+```
+
+**Option 3: Referral Links**
+```
+Your personal referral link:
+https://khipuvault.com/pools/42?ref=0x742d35Cc...
+
+Share this link with trusted people. They get:
+- Fast-track approval
+- 10% discount on minimum deposit
+- You earn: 1% of their first deposit
+```
+
+### For Hybrid Pools
+
+Members request to join; you approve/reject:
+
+```
+📬 Pending Join Requests (3)
+
+Request #1
+- Applicant: Juan Rodriguez (0x742d...bEb)
+- Email: juan@example.com
+- Reason: "Villa Esperanza resident, want to save for emergencies"
+- Intended Deposit: 100 MUSD
+- Referral: Maria Lopez (member #12)
+- Wallet Activity: 47 transactions, active since 2024
+- Actions: [Approve] [Reject] [Request More Info]
+
+Request #2
+- Applicant: 0x8626...1199 (anonymous)
+- Email: Not provided
+- Reason: "Want to join"
+- Intended Deposit: 50 MUSD (minimum)
+- Referral: None
+- Wallet Activity: 2 transactions, new wallet
+- ⚠️ Warning: Low activity, vague application
+```
+
+**Approval Checklist:**
+- ✅ Clear reason for joining
+- ✅ Referral from existing member (if required)
+- ✅ Wallet has transaction history
+- ✅ Meets deposit requirement
+- ✅ Aligns with pool purpose
+
+### For Open Pools
+
+Members join automatically upon deposit. Monitor for:
+
+```
+🆕 Recent Joins (Last 24h)
+
+Member #46
+- Joined: 2 hours ago
+- Deposit: 50 MUSD (minimum)
+- Wallet: 0x742d...bEb
+- First-time: Yes
+- Flagged: No
+
+Member #47
+- Joined: 5 hours ago
+- Deposit: 2,000 MUSD
+- Wallet: 0x8626...1199
+- First-time: No (was member before)
+- ⚠️ Flagged: Large deposit, verify legitimacy
+```
+
+**Red Flags to Watch:**
+- 🚩 Very large first deposit (greater than 10x average)
+- 🚩 Wallet with suspicious transaction patterns
+- 🚩 Members who join/leave repeatedly
+- 🚩 Deposits immediately before major votes
+
+</div>
+
+### Managing Active Members
+
+#### Member Directory
+
+View and manage all members:
+
+```
+👥 All Members (45)
+
+Sort by: [Most Recent] [Highest Balance] [Most Active]
+Filter: [Active] [Inactive] [Suspended]
+
+Member #1 - Maria Lopez (Admin)
+- Joined: 187 days ago
+- Balance: 5,234 MUSD
+- Yields Earned: 623 MUSD
+- Proposals Created: 12
+- Votes Cast: 45/47 (96%)
+- Status: Active ✅
+- Actions: [View Profile] [Send Message] [Modify Role]
+
+Member #12 - Juan Rodriguez
+- Joined: 156 days ago
+- Balance: 2,100 MUSD
+- Yields Earned: 243 MUSD
+- Proposals Created: 3
+- Votes Cast: 38/47 (81%)
+- Status: Active ✅
+- Actions: [View Profile] [Send Message]
+
+Member #33 - Carlos Mendez
+- Joined: 45 days ago
+- Balance: 50 MUSD (minimum)
+- Yields Earned: 4 MUSD
+- Proposals Created: 0
+- Votes Cast: 2/15 (13%)
+- Status: Inactive ⚠️
+- Actions: [Send Reminder] [Create Removal Proposal]
+```
+
+#### Member Actions
+
+**Send Messages**
+- Notify about important proposals
+- Remind to vote
+- Welcome new members
+- Request information
+
+**Modify Roles** (admin only)
+- Promote to moderator
+- Grant temporary privileges
+- Revoke permissions
+- Transfer admin rights
+
+**Monitor Activity**
+- Track voting participation
+- Review deposit/withdrawal patterns
+- Identify inactive members
+- Recognize top contributors
+
+### Removing Members
+
+Sometimes members need to be removed:
+
+#### Voluntary Exit
+
+Member chooses to leave:
+1. Member clicks "Leave Pool"
+2. Withdraws full balance
+3. Membership automatically removed
+4. No vote required
+
+#### Involuntary Removal (Governance Vote)
+
+Create removal proposal for:
+- **Inactivity**: No votes in 90+ days, no deposits in 180+ days
+- **Violations**: Breaking pool rules, malicious behavior
+- **Non-compliance**: Not maintaining minimum balance
+- **Conflict of interest**: Behavior harming pool
+
+**Process:**
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### Create Removal Proposal
+
+```
+Proposal Type: Remove Member
+Member: Carlos Mendez (0x8626...1199)
+
+Reason (required):
+"Carlos has not voted on any proposal in 120 days despite
+being notified multiple times. Pool requires active
+participation per our guidelines."
+
+Grace Period: 7 days
+- Member can contest
+- Member can withdraw balance
+- If no response, removal proceeds
+
+Voting Period: 3 days
+Required Approval: 60% (higher for removals)
+```
+
+### Notification Sent
+
+Member receives:
+- Email/on-platform notification
+- Proposal details and reason
+- 7 days to respond/withdraw
+- Option to contest removal
+
+### Voting Occurs
+
+Members vote on removal:
+- Requires 60% approval (typically)
+- Higher threshold protects members
+- Discussion period for context
+
+### If Approved
+
+Member removal executed:
+- Membership status: Removed
+- Balance: Must withdraw within 30 days
+- Access: Can't rejoin for 180 days
+- Record: Kept for transparency
+
+</div>
+
+<Callout type="error">
+**Member Protection**: Removed members always retain the right to withdraw their full balance (principal + yields). Funds cannot be confiscated.
+</Callout>
+
+## Financial Oversight
+
+### Pool Treasury Dashboard
+
+Monitor pool finances in real-time:
+
+```
+💰 Financial Overview
+
+Total Assets
+- Member Deposits: 125,000 MUSD
+- Accumulated Yields: 15,230 MUSD
+- Pool Treasury: 1,450 MUSD (from admin fees)
+- Pending Withdrawals: 2,300 MUSD
+- Available Liquidity: 139,380 MUSD
+
+Yield Performance
+- Current APY: 14.5%
+- 7-day average: 14.2%
+- 30-day average: 13.9%
+- All-time average: 13.6%
+- Total earned: 15,230 MUSD
+
+Cash Flow (Last 30 Days)
+- Deposits: +12,500 MUSD (23 transactions)
+- Withdrawals: -8,200 MUSD (15 transactions)
+- Yields: +1,834 MUSD
+- Platform Fees: -203 MUSD
+- Net Change: +5,931 MUSD (+4.5%)
+
+Withdrawal Limits
+- Individual limit: 10% of member balance
+- Daily pool limit: 25,000 MUSD
+- Today's withdrawals: 2,300 MUSD (9.2% used)
+- Remaining today: 22,700 MUSD
+```
+
+### Financial Health Indicators
+
+**Healthy Pool Metrics:**
+```
+✅ Growth Rate: +4-6% monthly
+✅ Withdrawal/Deposit Ratio: less than 0.8
+✅ Liquidity: greater than 90% available
+✅ Member Activity: greater than 70% active
+✅ Yield Consistency: ±2% variance
+```
+
+**Warning Signs:**
+```
+⚠️ Declining deposits for 2+ months
+⚠️ Withdrawal ratio greater than 1.2 (more out than in)
+⚠️ Liquidity less than 70% (too much locked)
+⚠️ Active members less than 50%
+⚠️ Yield volatility greater than 5% swings
+```
+
+**Crisis Indicators:**
+```
+🚨 Bank run: greater than 40% pool withdrawn in 24h
+🚨 Mass exodus: greater than 20% members leaving
+🚨 Yield collapse: APY less than 5%
+🚨 Governance failure: No quorum for 3+ proposals
+🚨 Liquidity crisis: Can't process withdrawals
+```
+
+### Budget & Expense Tracking
+
+Manage pool treasury funds:
+
+```
+🏛️ Pool Treasury (1,450 MUSD)
+
+Sources
+- Admin Fee Collections: 1,230 MUSD
+- Penalty Fees: 120 MUSD (late withdrawals, etc.)
+- Donations: 100 MUSD
+- Total: 1,450 MUSD
+
+Planned Expenses
+- Community Events: 300 MUSD (approved)
+- Marketing: 200 MUSD (proposed)
+- Platform Upgrades: 150 MUSD (proposed)
+- Reserve Fund: 500 MUSD (emergency)
+- Available: 300 MUSD
+
+Recent Transactions
+- May 15: -50 MUSD - Discord Nitro subscription
+- May 10: +23 MUSD - Admin fees collected
+- May 5: -100 MUSD - Community BBQ event
+- May 1: +45 MUSD - Admin fees collected
+```
+
+**Treasury Best Practices:**
+- Keep 30-40% as emergency reserve
+- Require governance vote for expenses greater than 100 MUSD
+- Publish monthly financial reports
+- Transparent expense tracking
+
+## Communication & Coordination
+
+### Announcement System
+
+Keep members informed:
+
+```
+📢 Announcements
+
+Create New Announcement
+- Type: [Info] [Warning] [Urgent] [Celebration]
+- Title: "Pool Reaches 50 Members Milestone!"
+- Message: "We've grown to 50 active members..."
+- Send via: [Email] [Discord] [In-app] [All]
+- Schedule: [Now] [Scheduled]
+
+Recent Announcements
+- 2 days ago: "New proposal: Increase minimum deposit"
+- 5 days ago: "Voting reminder: 2 proposals closing soon"
+- 1 week ago: "Welcome to 5 new members!"
+- 2 weeks ago: "Pool APY update: Now 14.5%"
+```
+
+### Notification Preferences
+
+Set up automated notifications:
+
+**For Admins:**
+- ✅ New join requests (Hybrid pools)
+- ✅ Large withdrawals (greater than 5% of pool)
+- ✅ Low voting participation (less than 40%)
+- ✅ Financial milestones
+- ✅ Member disputes/flags
+- ✅ Smart contract events
+
+**For Members:**
+- ✅ New proposals created
+- ✅ Voting deadline approaching (24h)
+- ✅ Proposal results
+- ✅ Major pool changes
+- ✅ Yield distributions
+- ✅ Monthly summaries
+
+### External Communication Channels
+
+**Recommended Setup:**
+
+1. **Discord/Telegram** - Real-time chat
+   - #announcements - Official updates
+   - #general - Member discussions
+   - #proposals - Governance debate
+   - #help - Support questions
+
+2. **Email** - Official communications
+   - Weekly summaries
+   - Important votes
+   - Financial reports
+   - Compliance notices
+
+3. **Twitter/Social** - Public updates
+   - Milestones
+   - Success stories
+   - Recruiting
+   - Transparency reports
+
+## Monitoring & Analytics
+
+### Key Metrics Dashboard
+
+Track pool performance:
+
+```
+📊 Pool Analytics (Last 30 Days)
+
+Member Metrics
+- Active Members: 38/45 (84%)
+- New Joins: 7
+- Departures: 2
+- Avg Balance: 2,777 MUSD
+- Retention Rate: 95%
+
+Financial Metrics
+- Total Deposits: +12,500 MUSD
+- Total Withdrawals: -8,200 MUSD
+- Net Growth: +4,300 MUSD
+- Yield Generated: 1,834 MUSD
+- APY Realized: 14.2%
+
+Governance Metrics
+- Proposals Created: 8
+- Proposals Passed: 6 (75%)
+- Avg Voter Turnout: 67%
+- Avg Time to Quorum: 1.5 days
+- Participation Trend: ↑ +5%
+
+Engagement Metrics
+- Discord Messages: 234
+- Proposal Comments: 89
+- Help Requests: 12
+- Member Satisfaction: 4.2/5 ⭐
+```
+
+### Performance Reports
+
+Generate reports for transparency:
+
+**Monthly Report Example:**
+```markdown
+# Villa Esperanza Pool - May 2026 Report
+
+## Executive Summary
+- Members: 45 (+7 new, -2 left)
+- Total Value: 140,230 MUSD (+5.1%)
+- Yields Earned: 1,834 MUSD
+- APY: 14.2%
+- Governance: 8 proposals, 67% participation
+
+## Financial Highlights
+- Total Deposits: 125,000 MUSD
+- Total Yields: 15,230 MUSD (lifetime)
+- Platform Fees Paid: 1,692 MUSD (10%)
+- Net Earnings: 13,538 MUSD (90%)
+
+## Top Contributors
+1. Maria Lopez - 5,234 MUSD
+2. Juan Rodriguez - 2,100 MUSD
+3. Ana Garcia - 1,876 MUSD
+
+## Governance Summary
+- Passed: Add 3 new members
+- Passed: Distribute 500 MUSD yields to members
+- Passed: Community BBQ budget (100 MUSD)
+- Rejected: Increase minimum deposit to 100 MUSD
+- Active: Update withdrawal limits (voting)
+
+## Upcoming
+- June 1: Quarterly yield distribution
+- June 15: Pool 6-month anniversary celebration
+- July 1: Admin election vote
+```
+
+### Alerts & Warnings
+
+Set up automated alerts:
+
+```
+🔔 Active Alerts
+
+⚠️ Low Voting Participation (3 days ago)
+Proposal #42 has only 35% turnout with 6 hours left.
+Action: Send reminder to non-voters
+
+⚠️ Large Withdrawal Request (1 hour ago)
+Member #12 requested 10,000 MUSD (47% of their balance)
+Action: Review and approve if legitimate
+
+✅ Milestone Reached (2 days ago)
+Pool reached 50 members!
+Action: Send celebration announcement
+
+ℹ️ APY Change (5 days ago)
+Pool APY increased from 13.8% to 14.5%
+Action: Notify members of improved returns
+```
+
+## Best Practices for Pool Management
+
+### Daily Tasks (5-10 minutes)
+
+- ✅ Check pending join requests (Hybrid pools)
+- ✅ Review recent deposits/withdrawals
+- ✅ Monitor active proposals
+- ✅ Respond to member questions
+- ✅ Check alerts/notifications
+
+### Weekly Tasks (30-60 minutes)
+
+- ✅ Review financial health metrics
+- ✅ Analyze member activity
+- ✅ Send governance reminders
+- ✅ Update pool description if needed
+- ✅ Engage in Discord/community
+- ✅ Plan upcoming proposals
+
+### Monthly Tasks (2-3 hours)
+
+- ✅ Generate performance report
+- ✅ Host community call/meeting
+- ✅ Review and adjust parameters
+- ✅ Recognize top contributors
+- ✅ Plan next month's goals
+- ✅ Financial audit
+
+### Quarterly Tasks (half day)
+
+- ✅ Comprehensive pool review
+- ✅ Member satisfaction survey
+- ✅ Governance effectiveness analysis
+- ✅ Budget planning for next quarter
+- ✅ Admin role review/elections
+- ✅ Strategic planning session
+
+## Common Management Challenges
+
+### Challenge 1: Low Engagement
+
+**Symptoms:**
+- Voting turnout less than 40%
+- Few proposal creations
+- Quiet Discord/communication channels
+
+**Solutions:**
+- Reduce voting period (7d → 3d)
+- Lower quorum requirement
+- Create engaging proposals
+- Host virtual meetups
+- Reward active participants
+- Simplify voting process
+
+### Challenge 2: Rapid Growth
+
+**Symptoms:**
+- Many new members joining quickly
+- Governance becoming slow
+- Communication overwhelming
+
+**Solutions:**
+- Temporarily close pool to new members
+- Increase minimum deposit
+- Switch from Open to Hybrid
+- Add moderators to help
+- Implement tiered governance
+- Create onboarding automation
+
+### Challenge 3: Financial Stress
+
+**Symptoms:**
+- High withdrawal rate
+- Declining deposits
+- Members leaving
+
+**Solutions:**
+- Communicate transparently about causes
+- Review and possibly increase withdrawal limits
+- Create retention incentives
+- Address underlying issues (low yields, disputes)
+- Consider merger with another pool
+- Emergency liquidity measures
+
+### Challenge 4: Governance Gridlock
+
+**Symptoms:**
+- Proposals failing to reach quorum
+- Highly controversial votes
+- Faction formation
+
+**Solutions:**
+- Facilitate open discussions
+- Use mediators for disputes
+- Break complex proposals into smaller ones
+- Adjust quorum requirements
+- Implement weighted voting if appropriate
+- Create conflict resolution process
+
+## Tools & Integrations
+
+### Recommended Tools
+
+**Communication:**
+- Discord/Telegram - Real-time chat
+- EmailOctopus - Email campaigns
+- Twitter - Public updates
+
+**Financial:**
+- Dune Analytics - On-chain analytics
+- Excel/Google Sheets - Financial modeling
+- QuickBooks - Expense tracking (if needed)
+
+**Governance:**
+- Snapshot - Off-chain voting (supplements)
+- Tally - Governance dashboard
+- Commonwealth - Proposal discussions
+
+**Project Management:**
+- Notion - Documentation
+- Trello - Task tracking
+- Calendly - Meeting scheduling
+
+### Smart Contract Tools
+
+**For Advanced Admins:**
+
+```typescript
+// Read pool data programmatically
+import { cooperativePoolABI } from '@khipu/web3';
+
+const pool = new ethers.Contract(
+  poolAddress,
+  cooperativePoolABI,
+  provider
+);
+
+// Get pool statistics
+const stats = await pool.getPoolStats();
+console.log('Total Members:', stats.totalMembers);
+console.log('Total Deposits:', ethers.formatUnits(stats.totalDeposits, 18));
+
+// Monitor events
+pool.on('MemberAdded', (member, timestamp) => {
+  console.log(`New member: ${member}`);
+  // Send welcome message
+});
+
+pool.on('ProposalCreated', (proposalId, creator, title) => {
+  console.log(`New proposal #${proposalId}: ${title}`);
+  // Notify members
+});
+```
+
+## Emergency Procedures
+
+### When to Pause the Pool
+
+Pause in these situations:
+- 🚨 Smart contract vulnerability discovered
+- 🚨 Suspicious activity detected
+- 🚨 Coordinated attack on pool
+- 🚨 Major bug in yield calculation
+- 🚨 Governance compromise
+
+**How to Pause:**
+1. Admin calls `emergencyPause()` function
+2. All deposits/withdrawals frozen
+3. Yields continue accumulating
+4. Members notified immediately
+5. Issue investigation begins
+
+**Communication Template:**
+```
+🚨 POOL PAUSED - IMPORTANT NOTICE
+
+The pool has been temporarily paused due to [reason].
+
+What this means:
+- Deposits are temporarily disabled
+- Withdrawals are temporarily disabled
+- Your funds remain safe and yields continue
+- We are investigating and will update within 24h
+
+What you should do:
+- Stay calm - your funds are safe
+- Do NOT sign any suspicious transactions
+- Join emergency Discord call: [link]
+- Check for updates every 6 hours
+
+We will resolve this as quickly as possible.
+- Pool Admin Team
+```
+
+### Recovery Plan
+
+After emergency is resolved:
+
+1. **Identify root cause**
+2. **Implement fix** (smart contract upgrade if needed)
+3. **Test thoroughly** on testnet
+4. **Community vote** to unpause
+5. **Gradual unpause** (withdrawals first, then deposits)
+6. **Post-mortem report** published
+7. **Compensation** if members were harmed
+
+## Scaling Your Pool
+
+### Growth Milestones
+
+**10 Members → 25 Members**
+- Focus: Building core community
+- Challenge: Establishing culture
+- Action: Clear guidelines, active engagement
+
+**25 Members → 50 Members**
+- Focus: Governance optimization
+- Challenge: Maintaining participation
+- Action: Add moderators, streamline voting
+
+**50 Members → 100 Members**
+- Focus: Operational efficiency
+- Challenge: Communication overhead
+- Action: Automation, better tooling
+
+**100+ Members**
+- Focus: Decentralization
+- Challenge: Complexity
+- Action: Multi-sig admin, tiered roles, sub-committees
+
+### When to Split a Pool
+
+Consider creating sub-pools when:
+- Pool exceeds 200 members (governance becomes unwieldy)
+- Clear factions emerge (different goals)
+- Geographic distribution creates time zone issues
+- Specialized use cases develop
+
+**Example Split:**
+```
+Original: "Lima Community Pool" (250 members)
+    ↓
+Split into:
+- "Lima North Community Pool" (125 members)
+- "Lima South Community Pool" (125 members)
+- Both pools maintain cooperation agreement
+```
+
+## Next Steps
+
+Master pool management:
+
+<Cards>
+  <Card
+    title="Governance Deep Dive"
+    href="/docs/products/community-pools/governance"
+    description="Advanced governance strategies"
+  />
+  <Card
+    title="Member Onboarding"
+    href="/docs/products/community-pools/joining-pool"
+    description="Help new members get started"
+  />
+  <Card
+    title="FAQ for Admins"
+    href="/docs/products/community-pools/faq#admin-questions"
+    description="Common admin questions"
+  />
+  <Card
+    title="Smart Contract Docs"
+    href="/docs/developers/smart-contracts/cooperative-pool"
+    description="Technical integration"
+  />
+</Cards>
+
+---
+
+**Managing a successful pool?** Share your story in [Discord](https://discord.gg/khipuvault) to help others!
+
+**Questions?** Check the [FAQ](/docs/products/community-pools/faq) or ask the community.

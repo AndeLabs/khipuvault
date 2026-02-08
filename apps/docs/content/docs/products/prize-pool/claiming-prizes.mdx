@@ -1,0 +1,510 @@
+---
+title: Claiming Prizes
+description: Complete guide to winning, verifying, and claiming your prizes in KhipuVault Prize Pool.
+---
+
+# Claiming Prizes
+
+You've won! Here's everything you need to know about claiming your prize.
+
+## How You'll Know You Won
+
+### Notification Methods
+
+Winners are notified through multiple channels:
+
+**1. On-Chain Event**
+```
+Event: PrizeAwarded(address winner, uint256 amount, uint8 tier)
+
+Emitted immediately after draw
+Visible on Mezo block explorer
+```
+
+**2. Email Notification**
+```
+Subject: You won 4,153 MUSD in KhipuVault Prize Pool!
+
+Sent to email address (if provided in settings)
+Arrives within 5 minutes of draw
+```
+
+**3. In-App Notification**
+```
+Pop-up banner on KhipuVault app
+"Congratulations! You won the Grand Prize!"
+Visible when you visit app.khipuvault.com
+```
+
+**4. Discord/Telegram Bot**
+```
+@khipubot: "🎉 Winner announcement!
+Grand Prize: 0x742d...3f5a (4,153 MUSD)
+Runner-Up: 5 winners..."
+```
+
+**5. Manual Check**
+```
+Visit app.khipuvault.com/prize-pool
+Section: "My Prizes"
+Shows all unclaimed prizes
+```
+
+<Callout type="success">
+**Winner Privacy**
+
+Winners are announced by wallet address only (e.g., 0x742d...3f5a). Your identity remains private unless you choose to share.
+</Callout>
+
+## Prize Claiming Process
+
+### Step 1: Verify Your Win
+
+Before claiming, verify you're a legitimate winner:
+
+**Check on KhipuVault App:**
+```
+1. Go to app.khipuvault.com/prize-pool
+2. Connect your wallet
+3. Section: "My Prizes"
+4. You'll see:
+
+Unclaimed Prizes
+├─ Week 23 Grand Prize: 4,153 MUSD
+└─ Status: Ready to claim
+```
+
+**Check on Mezo Explorer:**
+```
+1. Go to explorer.mezo.org
+2. Search for Prize Pool contract: 0x...
+3. Events tab → Filter "PrizeAwarded"
+4. Find your address in recent events
+```
+
+### Step 2: Claim Your Prize
+
+Click **"Claim Prize"** in the app:
+
+```
+Prize Details:
+- Week: 23
+- Tier: Grand Prize
+- Amount: 4,153 MUSD
+- Claimable: Yes
+
+[Claim Prize Button]
+```
+
+**Transaction Details:**
+```
+Function: claimPrize(uint256 weekNumber)
+Gas Cost: ~0.0002 MBTC
+Estimated Time: 5 seconds
+```
+
+### Step 3: Confirm Transaction
+
+Approve the transaction in your wallet:
+
+```
+KhipuVault Prize Pool
+Request to claim prize
+
+Amount: 4,153 MUSD
+To: Your wallet (0x742d...3f5a)
+Gas: 0.0002 MBTC
+
+[Reject] [Confirm]
+```
+
+### Step 4: Receive Prize
+
+After confirmation (~5 seconds):
+
+```
+✅ Prize Claimed Successfully!
+
+4,153 MUSD sent to 0x742d...3f5a
+
+Transaction: 0xabc123...
+View on Explorer →
+
+Your new MUSD balance: 5,153 MUSD
+(1,000 deposit + 4,153 prize)
+```
+
+## Claiming Timeline
+
+### When Can You Claim?
+
+Prizes are claimable immediately after the draw:
+
+```
+Friday 12:00 PM UTC: Draw executes
+Friday 12:01 PM UTC: Winners selected
+Friday 12:01 PM UTC: Prizes become claimable
+```
+
+**No waiting period** - claim anytime after draw completes.
+
+### Claim Deadline
+
+Prizes expire if unclaimed:
+
+```
+Claim Window: 90 days (13 weeks)
+
+Example:
+- Won: Week 23 (May 1)
+- Deadline: Week 36 (July 30)
+- Expired: Week 37+ (unclaimed prizes returned to reserve)
+```
+
+<Callout type="warning">
+**Expiration Policy**
+
+Unclaimed prizes after 90 days are returned to the Prize Pool reserve to fund future prizes. Set up email notifications to avoid missing claims!
+</Callout>
+
+## Multiple Prize Claims
+
+### Winning Multiple Tiers
+
+You can win multiple prizes in a single draw:
+
+```
+Your Wins (Week 23):
+├─ Grand Prize: 4,153 MUSD
+└─ Consolation: 25 MUSD
+
+Total Claimable: 4,178 MUSD
+```
+
+**Claim Options:**
+
+**Option A: Claim All Together**
+```
+Click "Claim All Prizes"
+Gas: ~0.0003 MBTC (single transaction)
+Receive: 4,178 MUSD
+```
+
+**Option B: Claim Individually**
+```
+Claim Grand Prize: 4,153 MUSD (Gas: 0.0002 MBTC)
+Claim Consolation: 25 MUSD (Gas: 0.0002 MBTC)
+
+Total Gas: 0.0004 MBTC (more expensive)
+```
+
+**Recommendation**: Use "Claim All" to save gas.
+
+### Winning Multiple Weeks
+
+You can accumulate prizes across weeks:
+
+```
+Unclaimed Prizes:
+├─ Week 20 Runner-Up: 155 MUSD
+├─ Week 22 Consolation: 25 MUSD
+└─ Week 23 Grand Prize: 4,153 MUSD
+
+Total Unclaimed: 4,333 MUSD
+```
+
+Claim individually or batch claim (if available).
+
+## Prize Claiming Options
+
+### Option 1: Claim to Wallet
+
+Default option - receive MUSD directly:
+
+```
+Prize: 4,153 MUSD
+Destination: Your wallet
+Action: Immediate transfer
+Use: Spend, swap, or withdraw
+```
+
+### Option 2: Re-deposit into Prize Pool
+
+Automatically reinvest your winnings:
+
+```
+Prize: 4,153 MUSD
+Destination: Prize Pool (re-deposited)
+Action: Increase your tickets
+Benefit: Bigger position for next draw
+```
+
+**Example:**
+```
+Before Win:
+- Deposit: 1,000 MUSD
+- Tickets: 1,000
+
+After Win + Re-deposit:
+- Deposit: 5,153 MUSD (1,000 + 4,153)
+- Tickets: 5,153
+- Odds: 5x higher for next draw
+```
+
+### Option 3: Claim to Individual Savings
+
+Deposit winnings into your Individual Savings pool:
+
+```
+Prize: 4,153 MUSD
+Destination: Individual Savings Pool
+Action: Earn guaranteed yields
+Benefit: Switch to steady returns
+```
+
+**Use case**: You won big and want to lock in guaranteed yields instead of continuing to gamble.
+
+## Claiming Fees
+
+<Callout type="success">
+**Zero Claim Fees**
+
+KhipuVault charges 0% fees on prize claims. You receive 100% of your prize amount. Only Mezo network gas fees apply.
+</Callout>
+
+**Cost Breakdown:**
+```
+Prize Amount: 4,153 MUSD
+Platform Fee: 0 MUSD (0%)
+Gas Fee: ~0.0002 MBTC (~$0.20 at $100,000 BTC)
+You Receive: 4,153 MUSD
+```
+
+## Verifying Your Claim
+
+### On-Chain Verification
+
+After claiming, verify receipt:
+
+**Method 1: Check Wallet Balance**
+```
+MetaMask → Assets → MUSD
+Before claim: 1,000 MUSD
+After claim: 5,153 MUSD
+Increase: 4,153 MUSD ✅
+```
+
+**Method 2: Check Transaction**
+```
+Mezo Explorer → Your Address → Transactions
+Recent Transaction:
+"Claim Prize from Prize Pool"
+Amount: +4,153 MUSD ✅
+```
+
+**Method 3: KhipuVault App**
+```
+app.khipuvault.com/prize-pool
+Section: "Prize History"
+
+Week 23:
+- Tier: Grand Prize
+- Amount: 4,153 MUSD
+- Status: ✅ Claimed
+- Date: May 1, 2026
+```
+
+## Prize Claim Troubleshooting
+
+### "Prize Not Found"
+
+**Cause**: You didn't win, or wrong week number
+
+**Solution**:
+```
+1. Double-check winner announcement
+2. Verify your address matches
+3. Check correct week number
+4. Confirm draw has occurred
+```
+
+### "Already Claimed"
+
+**Cause**: Prize was already claimed (possibly by you)
+
+**Solution**:
+```
+1. Check your transaction history
+2. Verify MUSD balance increased
+3. Contact support if balance unchanged
+```
+
+### "Claim Expired"
+
+**Cause**: Tried to claim after 90-day deadline
+
+**Solution**:
+```
+Unfortunately, expired prizes cannot be recovered.
+They're returned to the reserve to fund future prizes.
+
+Prevention: Enable email notifications
+```
+
+### "Insufficient Gas"
+
+**Cause**: Not enough MBTC for gas fees
+
+**Solution**:
+```
+1. Acquire ~0.001 MBTC from Mezo faucet or exchange
+2. Send to your wallet
+3. Retry claim transaction
+```
+
+## Prize Claim Best Practices
+
+### ✅ Do This:
+
+1. **Enable notifications** - Never miss a win
+2. **Claim promptly** - Don't risk expiration
+3. **Verify on-chain** - Confirm receipt
+4. **Batch claims** - Save gas when possible
+5. **Consider re-depositing** - Compound your position
+
+### ❌ Don't Do This:
+
+1. **Ignore notifications** - Risk 90-day expiration
+2. **Share private keys** - Never needed to claim
+3. **Pay claim fees** - KhipuVault never charges claim fees
+4. **Trust unverified DMs** - Scammers impersonate support
+
+<Callout type="warning">
+**Scam Alert**
+
+KhipuVault will NEVER:
+- Ask for your private keys to claim prizes
+- Charge claim fees beyond gas
+- DM you asking to "verify" your wallet
+- Request payment to release prizes
+
+Only claim through app.khipuvault.com or official smart contracts.
+</Callout>
+
+## Tax Reporting (USA)
+
+Prizes may be taxable income:
+
+```
+Prize Won: 4,153 MUSD
+Fair Market Value: $4,153 (assuming 1:1 USD peg)
+Tax Event: Income (at time of claim)
+Form: 1099-MISC or report as "Other Income"
+```
+
+**Recommendations:**
+- Track all prize claims with dates and amounts
+- Report prizes as income on tax return
+- Consult a tax professional for specific guidance
+- Keep transaction records for 7 years
+
+<Callout type="info">
+**Non-USA Users**
+
+Tax treatment varies by jurisdiction. Consult a local tax advisor to understand your obligations.
+</Callout>
+
+## Prize Claim Examples
+
+### Example 1: Grand Prize Winner
+
+```
+User: Alice
+Prize: 4,153 MUSD (Grand Prize, Week 23)
+Action: Claim to wallet
+
+Before:
+- Prize Pool Deposit: 2,000 MUSD
+- Wallet MUSD: 500 MUSD
+
+After Claim:
+- Prize Pool Deposit: 2,000 MUSD (unchanged)
+- Wallet MUSD: 4,653 MUSD (500 + 4,153)
+- Total Assets: 6,653 MUSD
+```
+
+### Example 2: Multiple Prize Winner
+
+```
+User: Bob
+Prizes:
+- Week 22 Consolation: 25 MUSD
+- Week 23 Runner-Up: 155 MUSD
+Action: Claim all
+
+Before:
+- Prize Pool Deposit: 5,000 MUSD
+- Wallet MUSD: 0 MUSD
+
+After Claim:
+- Prize Pool Deposit: 5,000 MUSD
+- Wallet MUSD: 180 MUSD (25 + 155)
+```
+
+### Example 3: Re-deposit Winner
+
+```
+User: Carol
+Prize: 4,153 MUSD (Grand Prize, Week 23)
+Action: Re-deposit into Prize Pool
+
+Before:
+- Prize Pool Deposit: 1,000 MUSD
+- Tickets: 1,000
+- Odds (Grand Prize): 0.05%
+
+After Re-deposit:
+- Prize Pool Deposit: 5,153 MUSD
+- Tickets: 5,153
+- Odds (Grand Prize): 0.26% (5x better!)
+```
+
+## After Claiming
+
+### Continue Playing
+
+Your Prize Pool deposit remains active:
+
+```
+Before Win:
+- Deposit: 1,000 MUSD
+- Eligible for future draws: ✅
+
+After Win + Claim:
+- Deposit: 1,000 MUSD (unchanged)
+- Eligible for future draws: ✅
+
+You automatically enter next week's draw!
+```
+
+### Withdraw Entirely
+
+Cash out deposit + prizes:
+
+```
+1. Claim prizes: +4,153 MUSD to wallet
+2. Withdraw deposit: +1,000 MUSD to wallet
+3. Total in wallet: 5,153 MUSD
+4. Prize Pool balance: 0 MUSD
+5. No longer eligible for draws
+```
+
+## Next Steps
+
+- [Odds & Strategies](/docs/products/prize-pool/odds-strategies) - Improve your chances
+- [FAQ](/docs/products/prize-pool/faq) - Common questions
+- [Prize Calculation](/docs/products/prize-pool/prize-calculation) - How prizes are determined
+
+---
+
+**Check your prizes:** [View My Prizes →](https://app.khipuvault.com/prize-pool)

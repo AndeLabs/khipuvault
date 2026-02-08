@@ -1,0 +1,473 @@
+---
+title: How Rotating Pools Work
+description: Technical implementation of blockchain ROSCAs on KhipuVault - smart contracts, rotation schedules, and payout mechanics.
+---
+
+# How Rotating Pools Work
+
+KhipuVault brings traditional ROSCAs to blockchain with smart contract enforcement, automated distributions, and transparent record-keeping.
+
+## Architecture Overview
+
+```
+┌─────────────────┐
+│  Pool Creator   │ Creates pool with parameters
+└────────┬────────┘
+         │
+         ↓
+┌─────────────────────────────────────────┐
+│     RotatingPool Smart Contract         │
+│  - Members list                         │
+│  - Contribution amount & schedule       │
+│  - Rotation order                       │
+│  - Collateral requirements             │
+│  - Penalty rules                        │
+└────────┬────────────────────────────────┘
+         │
+         ↓
+┌─────────────────────────────────────────┐
+│         Members Join                    │
+│  - Approve MUSD spending                │
+│  - Lock collateral (optional)           │
+│  - Accept pool rules                    │
+└────────┬────────────────────────────────┘
+         │
+         ↓
+┌─────────────────────────────────────────┐
+│      Rotation Cycle Begins              │
+│  - Automated contributions              │
+│  - Weekly/biweekly/monthly schedule     │
+│  - Each round → 1 member receives pot   │
+└────────┬────────────────────────────────┘
+         │
+         ↓
+┌─────────────────────────────────────────┐
+│         Payouts Execute                 │
+│  - Smart contract transfers full pot    │
+│  - Collateral returned to recipient     │
+│  - Continue to next member              │
+└─────────────────────────────────────────┘
+```
+
+## Pool Creation Parameters
+
+When creating a rotating pool, the organizer sets:
+
+### Basic Configuration
+
+**1. Contribution Amount**
+```solidity
+contributionAmount: 100 MUSD
+```
+How much each member pays per round.
+
+**2. Rotation Schedule**
+```solidity
+rotationInterval: 7 days  // Weekly
+// OR
+rotationInterval: 14 days // Biweekly
+// OR
+rotationInterval: 30 days // Monthly
+```
+
+**3. Member Count**
+```solidity
+maxMembers: 10
+```
+Total participants (typically 5-20).
+
+**4. Start Date**
+```solidity
+startDate: 1735689600 // Unix timestamp
+```
+When first contributions are due.
+
+### Advanced Options
+
+**5. Collateral Requirement**
+```solidity
+collateralPercentage: 50 // 50% of total pot
+```
+Optional security deposit to prevent defaults.
+
+**6. Late Payment Grace Period**
+```solidity
+gracePeriod: 2 days
+```
+Extra time before penalties apply.
+
+**7. Penalty Rate**
+```solidity
+penaltyRate: 500 // 5% per late period
+```
+Fee for missed deadlines.
+
+**8. Emergency Withdrawal**
+```solidity
+allowEmergencyExit: true
+earlyExitPenalty: 1000 // 10% penalty
+```
+
+## Rotation Order
+
+### Fixed-Order (Default)
+
+**How it works:**
+Order determined at pool creation.
+
+**Selection methods:**
+1. **First-come, first-served** - Join order
+2. **Lottery** - Random assignment on-chain
+3. **Manual** - Organizer sets order
+4. **Consensus** - Members vote
+
+```solidity
+rotationOrder: [
+  0xAddress1, // Receives Round 1
+  0xAddress2, // Receives Round 2
+  0xAddress3, // Receives Round 3
+  ...
+]
+```
+
+**Advantages:**
+- Predictable
+- Transparent
+- Fair
+- Simple
+
+**Example:**
+```
+10 members, $100/month each
+
+Round 1 (Jan): All pay $100 → Member A gets $1,000
+Round 2 (Feb): All pay $100 → Member B gets $1,000
+Round 3 (Mar): All pay $100 → Member C gets $1,000
+...
+Round 10 (Oct): All pay $100 → Member J gets $1,000
+
+CYCLE COMPLETE
+```
+
+### Bidding-Order (Advanced)
+
+**How it works:**
+Members bid each round for early payout.
+
+```solidity
+function bidForEarlyPayout(uint256 discountBps) external {
+  // Offer to receive less for earlier payout
+  // Example: Bid 500 bps (5%) discount
+  // Receive $950 instead of $1,000
+}
+```
+
+**Advantages:**
+- Rewards urgency
+- Creates price discovery
+- Flexible priority
+
+**Disadvantages:**
+- More complex
+- Favors wealthy bidders
+- Requires active participation
+
+## Contribution Mechanics
+
+### Automatic Pull Payments
+
+Unlike manual collection, KhipuVault automates contributions:
+
+```solidity
+// Step 1: One-time approval
+musd.approve(rotatingPoolAddress, type(uint256).max)
+
+// Step 2: Smart contract pulls on schedule
+function collectRoundContributions() external {
+  for (uint i = 0; i < members.length; i++) {
+    musd.transferFrom(members[i], address(this), contributionAmount);
+  }
+
+  // Immediately distribute to current recipient
+  distributeRound();
+}
+```
+
+**Advantages:**
+- No manual transfers
+- Atomic (all-or-nothing)
+- Time-locked to schedule
+- Transparent execution
+
+### Contribution States
+
+Each member's payment status:
+
+```solidity
+enum ContributionStatus {
+  PENDING,    // Not yet due
+  PAID,       // Paid on time
+  LATE,       // In grace period
+  DEFAULTED,  // Failed to pay
+  EXCUSED     // Emergency exception
+}
+```
+
+## Payout Distribution
+
+### Distribution Process
+
+```solidity
+function distributeRound() internal {
+  address recipient = rotationOrder[currentRound];
+
+  // Calculate total pot
+  uint256 pot = contributionAmount * members.length;
+
+  // Add yields earned (if any)
+  uint256 yields = calculateAccumulatedYields();
+
+  // Deduct platform fee
+  uint256 fee = (pot + yields) * platformFeeBps / 10000;
+
+  // Transfer to recipient
+  uint256 payout = pot + yields - fee;
+  musd.transfer(recipient, payout);
+
+  // Return recipient's collateral
+  if (collateralPercentage > 0) {
+    musd.transfer(recipient, collateral[recipient]);
+  }
+
+  // Emit event
+  emit RoundDistributed(currentRound, recipient, payout);
+
+  // Move to next round
+  currentRound++;
+}
+```
+
+### Enhanced Yields
+
+<Callout type="success">
+**Bonus feature: Contributions earn yields while waiting for distribution.**
+
+If the pool holds funds for a few days before payout, those funds earn yields on Mezo. This increases the pot size slightly.
+</Callout>
+
+**Example:**
+```
+10 members × $100 = $1,000 base pot
++ $15 yields earned over 7 days (at 12% APY)
+- $10 platform fee (10% of yields)
+= $1,005 final payout
+```
+
+## Default Prevention
+
+### Collateral System
+
+**Purpose:** Ensure members can't default after receiving payout.
+
+**Mechanism:**
+```solidity
+// Member A joins and locks 50% collateral
+function joinPool() external {
+  // Pay collateral upfront
+  uint256 collateralAmount = (contributionAmount * maxMembers * collateralPercentage) / 100;
+  musd.transferFrom(msg.sender, address(this), collateralAmount);
+
+  // Track collateral
+  collateral[msg.sender] = collateralAmount;
+
+  // Add to members
+  members.push(msg.sender);
+}
+
+// Member A receives payout → collateral returned
+// If Member A later defaults → collateral slashed
+```
+
+**Example:**
+```
+Pool: 10 members, $100/round
+Total risk: 10 × $100 = $1,000
+Collateral required: 50%
+
+Member A deposits: $500 collateral
+Member A receives payout in Round 1: $1,000 + $500 = $1,500 total back
+Member A must still contribute: 9 more rounds × $100 = $900
+If defaults: Loses $500 collateral (covers 5 rounds)
+```
+
+### Multi-Signature Requirements
+
+**For high-value pools:**
+
+```solidity
+// Require multiple organizers
+function setMultiSigOrganizers(address[] memory organizers, uint256 threshold) external {
+  // Example: 3 of 5 organizers must approve
+  multiSigThreshold = threshold;
+  multiSigOrganizers = organizers;
+}
+
+// Major actions need approval
+function executeEmergencyAction() external {
+  require(multiSigApprovals >= multiSigThreshold, "Insufficient approvals");
+  // Execute action
+}
+```
+
+### Penalty Escalation
+
+**Late payment penalties:**
+
+```solidity
+function calculatePenalty(address member) public view returns (uint256) {
+  uint256 daysLate = (block.timestamp - dueDate[member]) / 1 day;
+
+  if (daysLate == 0) return 0;
+  if (daysLate <= gracePeriod) return 0;
+
+  // Escalating penalty: 5% first week, 10% second week, etc.
+  uint256 weeksLate = (daysLate - gracePeriod) / 7;
+  uint256 penalty = contributionAmount * penaltyRate * weeksLate / 10000;
+
+  return penalty;
+}
+```
+
+**Default consequences:**
+1. **First late payment:** 5% penalty + warning
+2. **Second late payment:** 10% penalty + collateral at risk
+3. **Third late payment:** Expelled, collateral slashed, banned
+
+## Pool States
+
+### Lifecycle
+
+```solidity
+enum PoolState {
+  FORMING,      // Accepting members
+  ACTIVE,       // Running cycles
+  COMPLETED,    // All rounds finished
+  EMERGENCY,    // Paused for issue resolution
+  DISSOLVED     // Terminated early
+}
+```
+
+### State Transitions
+
+```
+FORMING (0-10 members)
+  ↓ (when full or organizer starts)
+ACTIVE (running rounds)
+  ↓ (all members received)
+COMPLETED (success)
+
+OR
+
+ACTIVE
+  ↓ (critical default or consensus)
+EMERGENCY
+  ↓ (resolved or voted to end)
+DISSOLVED (refund logic)
+```
+
+## Security Features
+
+### Smart Contract Audits
+
+<Callout type="warning">
+**All rotating pool contracts are audited by Mezo security team.**
+
+Audits verify:
+- No fund loss bugs
+- Fair distribution logic
+- Proper access controls
+- Reentrancy protection
+</Callout>
+
+### On-Chain Verification
+
+Every action is verifiable:
+
+```solidity
+// Check contribution history
+function getContributionHistory(address member) external view returns (Contribution[] memory);
+
+// Verify rotation order
+function getRotationOrder() external view returns (address[] memory);
+
+// Audit payout records
+function getPayoutHistory() external view returns (Payout[] memory);
+```
+
+### Emergency Controls
+
+**Member-initiated:**
+```solidity
+// Request emergency exit (with penalty)
+function requestEmergencyExit() external {
+  // Calculate penalty
+  uint256 penalty = calculateExitPenalty(msg.sender);
+
+  // Refund remaining balance minus penalty
+  uint256 refund = getMemberEquity(msg.sender) - penalty;
+
+  // Transfer
+  musd.transfer(msg.sender, refund);
+
+  // Remove from pool
+  removeMember(msg.sender);
+}
+```
+
+**Organizer-initiated:**
+```solidity
+// Pause in emergency
+function pausePool() external onlyOrganizer {
+  require(state == PoolState.ACTIVE, "Not active");
+  state = PoolState.EMERGENCY;
+}
+
+// Vote to dissolve
+function voteToDisssolve() external onlyMember {
+  dissolveVotes[msg.sender] = true;
+  if (countDissolveVotes() > members.length / 2) {
+    dissolvePool();
+  }
+}
+```
+
+## Transparency Dashboard
+
+Members can monitor in real-time:
+
+**Pool Health Metrics:**
+- On-time payment rate
+- Current round status
+- Next payout date and recipient
+- Total volume processed
+- Average yields earned
+
+**Member-Specific:**
+- Your contribution history
+- Your upcoming payment due date
+- Your projected payout date
+- Your penalty status
+- Your collateral balance
+
+## Learn More
+
+Now that you understand the technical implementation:
+
+- [Creating a Pool](/docs/products/rotating-pool/creating-rosca) - Setup walkthrough
+- [Participating](/docs/products/rotating-pool/participating) - Join and contribute
+- [Receiving Payout](/docs/products/rotating-pool/receiving-payout) - Claim your turn
+- [FAQ](/docs/products/rotating-pool/faq) - Common questions
+
+---
+
+**Ready to experience blockchain ROSCAs?** [Start participating →](/docs/getting-started/your-first-deposit)

@@ -1,0 +1,440 @@
+---
+title: Bug Bounty Program
+description: Responsible disclosure program for security vulnerabilities. Earn rewards for helping secure KhipuVault.
+---
+
+# Bug Bounty Program
+
+KhipuVault values the security research community. Our bug bounty program rewards responsible disclosure of security vulnerabilities.
+
+<Callout type="success" title="Rewards Up To $10,000">
+We offer competitive rewards for valid security findings. Critical vulnerabilities can earn up to $10,000.
+</Callout>
+
+## Program Overview
+
+### Scope
+
+**In-Scope Assets:**
+
+✅ **Smart Contracts** (All deployed contracts on Mezo testnet)
+- IndividualPool (`0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393`)
+- CooperativePool (`0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88`)
+- MezoIntegration (`0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6`)
+- YieldAggregator (`0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6`)
+- MUSD Token (`0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503`)
+
+✅ **Web Application**
+- Main website: `https://khipuvault.com`
+- API endpoints: `https://api.khipuvault.com`
+
+✅ **Backend Services**
+- Event indexer
+- Authentication service
+- Database layer
+
+**Out-of-Scope:**
+
+❌ Third-party dependencies (report to respective projects)
+❌ Social engineering attacks
+❌ Physical security
+❌ Denial of Service (DoS/DDoS)
+❌ Spam or social media account takeover
+❌ Issues in test/development environments
+
+## Reward Tiers
+
+Rewards are based on severity and impact using the OWASP Risk Rating:
+
+### Critical Severity: $5,000 - $10,000
+
+**Examples:**
+- Direct theft of user funds from contracts
+- Permanent freezing of funds
+- Unauthorized minting of tokens
+- Critical smart contract vulnerabilities (reentrancy, integer overflow, etc.)
+
+### High Severity: $2,000 - $5,000
+
+**Examples:**
+- Temporary freezing of funds
+- Smart contract griefing (gas DOS, etc.)
+- Unauthorized access to sensitive user data
+- Authentication bypass allowing fund manipulation
+
+### Medium Severity: $500 - $2,000
+
+**Examples:**
+- Smart contract unable to operate without user interaction
+- Block gas limit manipulation
+- Incorrect calculation of user balances or yields
+- Cross-site scripting (XSS) with meaningful impact
+
+### Low Severity: $100 - $500
+
+**Examples:**
+- Best practice violations with security implications
+- Information disclosure with limited impact
+- Cross-site request forgery (CSRF)
+- Missing input validation
+
+### Informational: $0 - $100
+
+**Examples:**
+- Code quality improvements
+- Gas optimization suggestions
+- Documentation errors
+- UI/UX issues without security impact
+
+<Callout type="info">
+Final reward amount is determined by our security team based on severity, impact, quality of report, and fix complexity.
+</Callout>
+
+## Severity Assessment
+
+We use the following framework to assess severity:
+
+### Impact
+
+- **Critical**: Direct loss of funds or complete system compromise
+- **High**: Significant loss of funds or major functionality impairment
+- **Medium**: Indirect loss of funds or partial functionality impairment
+- **Low**: Minimal loss or temporary inconvenience
+- **Informational**: No direct impact but worth addressing
+
+### Likelihood
+
+- **High**: Easy to exploit, requires minimal resources
+- **Medium**: Moderate difficulty, requires specific conditions
+- **Low**: Difficult to exploit, requires significant resources
+
+**Final Severity** = Impact × Likelihood
+
+## Eligibility Requirements
+
+To be eligible for rewards, you must:
+
+✅ **Be the first** to report the vulnerability
+✅ **Follow responsible disclosure** (no public disclosure before fix)
+✅ **Provide clear reproduction steps** and proof of concept
+✅ **Not exploit the vulnerability** beyond proof of concept
+✅ **Not access or modify** user data beyond what's necessary to demonstrate the issue
+✅ **Not perform actions** that could harm KhipuVault or its users
+✅ **Comply with all laws** and regulations
+
+### Ineligible Submissions
+
+We will NOT reward:
+
+❌ Duplicate reports (first reporter wins)
+❌ Known issues already disclosed or in our backlog
+❌ Issues found in third-party code (report to original project)
+❌ Theoretical vulnerabilities without proof of concept
+❌ Reports from automated scanning tools without validation
+❌ Social engineering or phishing attempts
+❌ Reports that violate our testing guidelines
+
+## How to Submit
+
+### 1. Prepare Your Report
+
+Include the following information:
+
+**Required:**
+- Vulnerability description
+- Asset(s) affected
+- Steps to reproduce
+- Proof of concept (code, screenshots, etc.)
+- Impact assessment
+- Suggested fix (optional but appreciated)
+
+**Recommended:**
+- Video demonstration for complex issues
+- Transaction hashes for on-chain issues
+- Network captures for API issues
+
+### 2. Submit Privately
+
+<Callout type="warning" title="DO NOT Disclose Publicly">
+Public disclosure before the issue is fixed will result in disqualification from the bounty program.
+</Callout>
+
+**Submission Channels:**
+
+**Email (Preferred):**
+📧 security@khipuvault.com
+
+- Use PGP encryption for sensitive reports
+- Include "[BUG BOUNTY]" in subject line
+- Attach all supporting materials
+
+**PGP Public Key:**
+```
+-----BEGIN PGP PUBLIC KEY BLOCK-----
+[Available at https://khipuvault.com/security/pgp-key.asc]
+-----END PGP PUBLIC KEY BLOCK-----
+```
+
+**Immunefi Platform (Coming Soon):**
+🔒 [khipuvault.immunefi.com](https://immunefi.com)
+
+### 3. Wait for Acknowledgment
+
+We commit to:
+
+- ✅ **Acknowledge receipt** within 24 hours
+- ✅ **Initial assessment** within 3 business days
+- ✅ **Severity confirmation** within 7 business days
+- ✅ **Fix timeline** within 14 business days
+
+## Testing Guidelines
+
+When testing for vulnerabilities, you MUST:
+
+### Allowed Activities
+
+✅ Testing on Mezo **Testnet only**
+✅ Using test accounts you control
+✅ Using small amounts of test MUSD
+✅ Reverting any changes you make
+✅ Testing against our public API with reasonable rate limits
+
+### Prohibited Activities
+
+❌ Testing on Mainnet (when deployed)
+❌ Accessing or modifying other users' data
+❌ Performing DoS/DDoS attacks
+❌ Social engineering of KhipuVault team or users
+❌ Physical attacks on infrastructure
+❌ Brute force attacks that could impact service
+❌ Testing in a way that could harm users or the platform
+
+### Safe Harbor
+
+We commit to:
+
+- ✅ **Not pursue legal action** against researchers following these guidelines
+- ✅ **Work with you** to understand and fix the issue
+- ✅ **Recognize your contribution** publicly (if you wish)
+
+## Disclosure Process
+
+### Our Commitment
+
+1. **Acknowledgment**: We'll confirm receipt within 24 hours
+2. **Investigation**: Our security team will validate the report
+3. **Communication**: We'll keep you updated on progress
+4. **Fix Development**: We'll develop and test a fix
+5. **Deployment**: We'll deploy the fix to production
+6. **Public Disclosure**: We'll publish details after 90 days (or earlier if agreed)
+7. **Reward Payment**: We'll process your bounty reward
+
+### Timeline Expectations
+
+| Phase | Timeline |
+|-------|----------|
+| Initial Response | 24 hours |
+| Severity Assessment | 3 business days |
+| Fix Development | 7-30 days (depends on severity) |
+| Fix Deployment | 1-7 days after development |
+| Public Disclosure | 90 days after fix (negotiable) |
+| Reward Payment | 14 days after fix verification |
+
+### Disclosure Coordination
+
+We prefer **coordinated disclosure**:
+
+- We'll work with you on an appropriate disclosure timeline
+- We'll give you credit in our security advisory (if you wish)
+- We may request embargo extension for critical issues
+- You can publish after the agreed disclosure date
+
+## Payment Process
+
+### Payment Methods
+
+We offer several payment options:
+
+💳 **Cryptocurrency** (Preferred)
+- Bitcoin (BTC)
+- Ethereum (ETH)
+- USDC/USDT
+
+💵 **Bank Transfer**
+- Wire transfer (international)
+- ACH (US only)
+
+🎁 **Other**
+- PayPal
+- GitHub Sponsors
+
+### Payment Timeline
+
+1. **Report Validated**: Severity confirmed by security team
+2. **Fix Deployed**: Vulnerability patched in production
+3. **Reward Approved**: Final amount determined
+4. **Payment Sent**: Within 14 days of fix deployment
+
+<Callout type="info">
+Tax reporting may be required for payments over $600 USD (US residents) or equivalent in other jurisdictions.
+</Callout>
+
+## Vulnerability Examples
+
+### Smart Contract Vulnerabilities
+
+**Critical Example: Reentrancy Attack**
+
+```solidity
+// Vulnerable Pattern (Hypothetical)
+function withdraw(uint256 amount) external {
+    require(balances[msg.sender] >= amount);
+    (bool success, ) = msg.sender.call{value: amount}("");
+    require(success);
+    balances[msg.sender] -= amount; // State update AFTER external call
+}
+
+// Attack: Reenter withdraw() before balance is updated
+```
+
+**Reward**: $8,000 - $10,000 (Critical)
+
+**Medium Example: Gas Griefing**
+
+```solidity
+// Vulnerable Pattern (Hypothetical)
+function batchProcess(address[] calldata users) external {
+    for(uint i = 0; i < users.length; i++) {
+        // Unbounded loop could hit gas limit
+        processUser(users[i]);
+    }
+}
+
+// Attack: Submit large array to DOS the function
+```
+
+**Reward**: $500 - $1,000 (Medium)
+
+### Web Application Vulnerabilities
+
+**High Example: Authentication Bypass**
+
+Finding a way to access user accounts without proper authentication or signature verification.
+
+**Reward**: $3,000 - $5,000 (High)
+
+**Low Example: CSRF**
+
+Cross-site request forgery that could trigger unintended actions.
+
+**Reward**: $200 - $500 (Low)
+
+## Recognition
+
+### Hall of Fame
+
+We maintain a security researcher hall of fame:
+
+**Top Contributors:**
+- [To be announced]
+
+Want to be featured? Submit a valid vulnerability report!
+
+### Public Recognition
+
+With your permission, we'll:
+
+- ✅ Credit you in our security advisories
+- ✅ Feature you in our hall of fame
+- ✅ Mention you in our changelog
+- ✅ Share on social media (optional)
+
+You can also choose to remain anonymous.
+
+## Responsible Disclosure Policy
+
+### Our Expectations
+
+We expect security researchers to:
+
+1. **Give us reasonable time** to fix the issue before public disclosure
+2. **Not exploit vulnerabilities** beyond proof of concept
+3. **Not access, modify, or delete** user data unnecessarily
+4. **Make good faith effort** to avoid privacy violations
+5. **Follow the law** and our testing guidelines
+
+### Our Commitments
+
+We commit to:
+
+1. **Respond promptly** to your report
+2. **Keep you informed** throughout the process
+3. **Work collaboratively** to understand the issue
+4. **Fix validated issues** in a timely manner
+5. **Recognize your contribution** appropriately
+6. **Not take legal action** against good-faith researchers
+
+## Frequently Asked Questions
+
+### How long does the review process take?
+
+Typically 3-7 days for initial assessment, but complex issues may take longer.
+
+### Can I test on the mainnet?
+
+No. All testing must be performed on testnet only. Mainnet testing is prohibited.
+
+### What if my report is a duplicate?
+
+The first reporter receives the bounty. Subsequent duplicate reports are not eligible.
+
+### Can I disclose the vulnerability publicly?
+
+Not until we've fixed it and agreed on a disclosure timeline (typically 90 days).
+
+### How is the reward amount determined?
+
+Based on severity (OWASP), impact, quality of report, and exploitability.
+
+### Can I remain anonymous?
+
+Yes. We respect researcher privacy. You can use a pseudonym or remain anonymous.
+
+### What if I'm not sure if something is a vulnerability?
+
+Submit it anyway! We'll help assess the security impact.
+
+### Do you offer swag or recognition?
+
+Yes! We can send stickers, t-shirts, and feature you in our hall of fame (with permission).
+
+## Contact
+
+### Security Team
+
+📧 **Email**: security@khipuvault.com
+🔒 **PGP Key**: [Download](https://khipuvault.com/security/pgp-key.asc)
+💬 **Discord**: [#security channel](https://discord.gg/khipuvault) (for questions, not submissions)
+
+### Support
+
+For non-security questions:
+- 📧 Email: support@khipuvault.com
+- 💬 Discord: [General chat](https://discord.gg/khipuvault)
+
+## Legal
+
+By participating in this program, you agree to:
+
+- Comply with all applicable laws and regulations
+- Follow our testing guidelines and responsible disclosure policy
+- Not disclose vulnerabilities publicly before resolution
+- Not harm KhipuVault or its users during testing
+
+This bug bounty program is subject to change. Check this page regularly for updates.
+
+Last updated: February 2025
+
+---
+
+Thank you for helping us keep KhipuVault secure! 🛡️

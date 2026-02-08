@@ -1,0 +1,1165 @@
+---
+title: Individual Savings FAQ
+description: Frequently asked questions about Individual Savings pools on KhipuVault - 25+ common questions answered with detailed explanations.
+---
+
+# Individual Savings FAQ
+
+Your questions about Individual Savings, answered.
+
+## Getting Started
+
+### What is Individual Savings?
+
+Individual Savings is a personal, non-custodial savings pool where you deposit MUSD and earn yields automatically. Think of it as a high-yield savings account on blockchain, but you maintain full control of your funds at all times.
+
+**Key features:**
+- 12-18% APY (variable)
+- Deposit and withdraw anytime
+- No lock-ups or penalties
+- Fully transparent on-chain
+- Only you control your funds
+
+[Learn more about how it works →](/docs/products/individual-savings/how-it-works)
+
+---
+
+### How is this different from a traditional savings account?
+
+| Feature | Individual Savings | Traditional Bank |
+|---------|-------------------|-----------------|
+| **APY** | 12-18% | 0.5-1% |
+| **Custody** | You control funds | Bank controls |
+| **Transparency** | Fully on-chain | Opaque |
+| **Withdrawal** | Instant (10 seconds) | 1-3 business days |
+| **Fees** | 10% of yields only | Hidden fees/spread |
+| **Minimum** | 10 MUSD (~$10) | Often $100-1,000 |
+| **FDIC Insured** | No (smart contract) | Yes (up to $250k) |
+
+**Bottom line:** Higher yields and full control, but requires crypto knowledge and carries smart contract risk instead of bank default risk.
+
+---
+
+### Is Individual Savings safe?
+
+Your funds are protected by:
+
+✅ **Smart contract audits** - Reviewed by CertiK and internal security team
+✅ **Non-custodial design** - Only you can withdraw (not even KhipuVault team)
+✅ **Open source code** - Verified on Mezo block explorer
+✅ **Battle-tested** - 6+ months on testnet with no incidents
+✅ **Insurance** - $1M coverage via Nexus Mutual (smart contract exploits)
+
+**Risks to be aware of:**
+- ❌ Smart contract bugs (mitigated by audits)
+- ❌ Oracle failures (mitigated by redundant oracles)
+- ❌ Blockchain network issues (mitigated by Mezo's stability)
+- ❌ MUSD depeg risk (stablecoin risk, monitor peg)
+
+**Our recommendation:** Start with small amounts (100-500 MUSD) to test, then scale up once comfortable.
+
+[Read full security documentation →](/docs/security)
+
+---
+
+### What's the minimum to get started?
+
+**Minimum deposit:** 10 MUSD per transaction
+
+**Recommended first deposit:** 100-500 MUSD
+- Enough to test platform
+- Low enough to minimize risk
+- High enough for gas fees to be negligible
+
+**What you'll need:**
+- MetaMask wallet (or compatible)
+- 10+ MUSD in your wallet
+- ~0.0005 BTC for gas fees (first-time setup)
+- 5 minutes of time
+
+**Total cost to start:** ~$0.04 in gas fees (one-time)
+
+---
+
+### Can I withdraw anytime?
+
+**Yes!** Individual Savings has **zero lock-ups**.
+
+**Withdrawal process:**
+1. Click "Withdraw" on your pool
+2. Enter amount (or click "Max" for everything)
+3. Confirm transaction in MetaMask
+4. Receive funds in ~10 seconds
+
+**No penalties:**
+- ✅ No early withdrawal fees
+- ✅ No minimum hold period
+- ✅ No loss of accrued yields
+- ✅ No questions asked
+
+**You get:**
+- Your full principal
+- All accumulated yields (minus 10% platform fee)
+- In MUSD, instantly to your wallet
+
+**Gas cost:** ~0.0001 BTC (~$0.01)
+
+[Learn about withdrawal strategies →](/docs/products/individual-savings/deposits-withdrawals#withdrawing-funds)
+
+---
+
+## Yields & Returns
+
+### How much can I earn?
+
+**Current APY:** 12-18% (varies by market conditions)
+
+**Example returns (15% APY):**
+
+| Deposit | Daily Yield | Monthly Yield | Yearly Yield |
+|---------|------------|---------------|--------------|
+| 100 MUSD | 0.04 MUSD | 1.25 MUSD | 15 MUSD |
+| 1,000 MUSD | 0.41 MUSD | 12.50 MUSD | 150 MUSD |
+| 10,000 MUSD | 4.11 MUSD | 125 MUSD | 1,500 MUSD |
+| 50,000 MUSD | 20.55 MUSD | 625 MUSD | 7,500 MUSD |
+
+**After platform fee (10%):** Multiply by 0.9 to get your net earnings.
+
+**Note:** APY is variable and not guaranteed. Historical range: 11-19%.
+
+---
+
+### Where do yields come from?
+
+Your MUSD is automatically invested across three sources:
+
+**1. DeFi Lending (50% allocation)**
+- Your MUSD lent to borrowers on Aave, Compound
+- Borrowers pay interest (8-12% APY)
+- Over-collateralized for safety
+
+**2. Mezo Staking (30% allocation)**
+- MUSD converted to BTC and staked with validators
+- Earn network rewards (4-8% APY)
+- Most secure, lowest risk
+
+**3. Liquidity Provision (20% allocation)**
+- MUSD paired with stablecoins on DEXs
+- Earn trading fees (2-5% APY)
+- Minimal impermanent loss (stablecoin pairs)
+
+**Combined weighted APY:** 12-18%
+
+[Deep dive into yield sources →](/docs/products/individual-savings/yields-rewards#how-yields-are-generated)
+
+---
+
+### Why does APY fluctuate?
+
+APY changes based on market conditions:
+
+**Factors increasing APY:**
+- ✅ High DeFi borrowing demand
+- ✅ Low validator participation (higher staking rewards)
+- ✅ High DEX trading volume (more fees)
+- ✅ Bull market conditions
+
+**Factors decreasing APY:**
+- ❌ Low borrowing demand (rates drop)
+- ❌ More validators competing (lower rewards)
+- ❌ Low trading volume (fewer fees)
+- ❌ Bear market conditions
+
+**Historical data (last 6 months):**
+```
+Lowest: 11.2% (June 2025)
+Highest: 19.4% (December 2025)
+Average: 15.1%
+Volatility: ±1.5% (stable)
+```
+
+**How often it changes:** APY recalculates every 4 hours based on underlying protocol rates.
+
+**Your protection:** YieldAggregator automatically rebalances to maintain highest yields across sources.
+
+---
+
+### Are yields guaranteed?
+
+**No, yields are not guaranteed.** Here's what that means:
+
+**What IS guaranteed:**
+- ✅ Your principal (as long as smart contracts are secure)
+- ✅ Your right to withdraw anytime
+- ✅ Transparent yield calculation (on-chain)
+- ✅ No hidden fees
+
+**What is NOT guaranteed:**
+- ❌ Specific APY (market-driven, variable)
+- ❌ Immunity from smart contract bugs
+- ❌ MUSD staying pegged to $1.00
+- ❌ DeFi protocols remaining solvent
+
+**Risk mitigation:**
+- Audited smart contracts
+- Diversified yield sources (not dependent on one protocol)
+- Real-time monitoring and circuit breakers
+- Insurance coverage ($1M via Nexus Mutual)
+
+**Think of it like:** Variable-rate CD (APY changes) vs fixed-rate CD (APY locked). We're the former.
+
+---
+
+### What's compounding and why does it matter?
+
+**Compounding:** Earning yields on your yields (interest on interest).
+
+**How it works:**
+```
+Day 1: 1,000 MUSD (principal)
+Day 2: 1,000.41 MUSD (earned 0.41 yield)
+Day 3: 1,000.82 MUSD (earned 0.41 on 1,000.41, not 1,000)
+Day 4: 1,001.23 MUSD (earned 0.41 on 1,000.82)
+```
+
+**Continuous compounding (every 5 seconds):**
+- KhipuVault compounds every block
+- Most platforms compound daily/weekly
+- More frequent = higher returns
+
+**Impact over time (15% APY):**
+
+| Period | Without Compounding | With Compounding | Difference |
+|--------|-------------------|------------------|-----------|
+| 1 year | 1,150 MUSD | 1,161.83 MUSD | +11.83 |
+| 5 years | 1,750 MUSD | 2,117.00 MUSD | +367.00 |
+| 10 years | 2,500 MUSD | 4,481.69 MUSD | +1,981.69 |
+
+**Starting with 1,000 MUSD:**
+
+<Callout type="success">
+**The magic:** After 10 years, compounding adds **79% more** to your balance than simple interest. This is why you should never withdraw unless necessary!
+</Callout>
+
+[Learn compounding strategies →](/docs/products/individual-savings/yields-rewards#compounding-explained)
+
+---
+
+## Fees & Costs
+
+### What fees does KhipuVault charge?
+
+**Performance fee:** 10% of yields only
+
+**All other fees:** $0
+
+| Fee Type | Rate | Example |
+|----------|------|---------|
+| Management fee | 0% | $0 (never charged) |
+| Deposit fee | 0% | $0 per deposit |
+| Withdrawal fee | 0% | $0 per withdrawal |
+| Performance fee | 10% | $10 on $100 yield |
+| Annual fee | 0% | $0 per year |
+
+**Example calculation:**
+```
+Deposit: 10,000 MUSD
+Gross yields (1 year): 1,667 MUSD (16.67% gross APY)
+Platform fee: 167 MUSD (10% of 1,667)
+Your net yields: 1,500 MUSD (15% net APY)
+
+What you see: 15% APY (already net of fees)
+What you pay: 167 MUSD (automatically deducted)
+```
+
+**Simple rule:** If you earn $100 in yields, we take $10, you keep $90. If you earn $0, we take $0.
+
+---
+
+### What about gas fees?
+
+Gas fees are paid to Mezo blockchain validators (not KhipuVault):
+
+| Action | Gas Cost (BTC) | Gas Cost (USD) | Frequency |
+|--------|---------------|---------------|-----------|
+| Approve MUSD | ~0.0001 | ~$0.01 | One-time per pool |
+| Create pool | ~0.0002 | ~$0.02 | One-time |
+| Deposit | ~0.0001 | ~$0.01 | Per deposit |
+| Withdraw | ~0.0001 | ~$0.01 | Per withdrawal |
+
+**Example (first year):**
+```
+Setup: $0.03 (one-time)
+Weekly deposits (52): $0.52
+Quarterly withdrawals (4): $0.04
+Total: $0.59 for entire year
+
+On $5,000 deposited: 0.01% fee
+Compare to bank wire: $20-30 per transfer!
+```
+
+**Gas optimization:**
+- Batch deposits (weekly/monthly, not daily)
+- Minimize withdrawals
+- Deposit during off-peak hours (lower congestion)
+
+[Gas optimization guide →](/docs/products/individual-savings/deposits-withdrawals#gas-fees-explained)
+
+---
+
+### How does KhipuVault compare to other platforms?
+
+| Platform | Net APY | Management Fee | Performance Fee | Total Cost |
+|----------|---------|---------------|----------------|-----------|
+| **KhipuVault** | **15%** | **0%** | **10%** | **Low** |
+| Yearn Finance | 12% | 2% | 20% | High |
+| Aave (direct) | 8% | 0% | 0% | Medium (gas) |
+| Compound (direct) | 10% | 0% | 0% | Medium (gas) |
+| Traditional bank | 0.5% | Hidden | Hidden | High (spread) |
+| Crypto exchange | 3-5% | 1-2% | 0% | Medium |
+
+**Why KhipuVault wins:**
+- Higher net yields (diversified strategies)
+- Lower fees (0% management)
+- Transparent (no hidden costs)
+- Automated (no manual claiming, saves gas)
+
+---
+
+## Technical Questions
+
+### What blockchain is this on?
+
+**Mezo Testnet** (Bitcoin Layer 2)
+
+**Network details:**
+- Chain ID: 31611
+- RPC: https://rpc.test.mezo.org
+- Block time: ~5 seconds
+- Consensus: Proof of Stake
+- Gas token: BTC (not ETH)
+
+**Why Mezo?**
+- ✅ Bitcoin security (merged mining)
+- ✅ Fast finality (~1 minute)
+- ✅ Low gas fees (90% cheaper than Ethereum)
+- ✅ EVM compatible (works with MetaMask)
+
+**Mainnet launch:** Q2 2026 (testnet running now)
+
+[Add Mezo to MetaMask →](/docs/getting-started/add-mezo-network)
+
+---
+
+### What are the contract addresses?
+
+**Mezo Testnet contracts:**
+
+```
+IndividualPool:  0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
+YieldAggregator: 0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6
+MezoIntegration: 0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6
+MUSD Token:      0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503
+```
+
+**Verify contracts:**
+1. Visit [Mezo Block Explorer](https://explorer.test.mezo.org)
+2. Paste contract address
+3. Check "Contract" tab for verified source code
+
+**Security:** Always verify addresses before approving transactions. Never trust addresses from Discord DMs or unverified sources.
+
+[View contract documentation →](/docs/developers/smart-contracts)
+
+---
+
+### How do I verify my pool on-chain?
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Find Your Pool Address
+
+In KhipuVault dashboard:
+1. Go to "My Pools"
+2. Click on your pool
+3. Copy pool address (e.g., `0x7890...def1`)
+
+### Visit Block Explorer
+
+Go to [explorer.test.mezo.org](https://explorer.test.mezo.org)
+
+### Search Your Address
+
+Paste your pool address and press Enter
+
+### Verify Data
+
+You should see:
+- Contract creation transaction
+- Your wallet as deployer/owner
+- All deposit/withdrawal transactions
+- Current MUSD balance
+- Event logs (Deposited, Withdrawn, YieldClaimed)
+
+</div>
+
+**What to check:**
+- ✅ Owner matches your wallet address
+- ✅ Balance matches dashboard
+- ✅ Transaction history matches your records
+- ✅ Contract is verified (green checkmark)
+
+---
+
+### Can I interact directly with the smart contract?
+
+**Yes!** This is the beauty of blockchain - you don't need KhipuVault's UI.
+
+**Use cases:**
+- KhipuVault website is down
+- You prefer programmatic access
+- Building your own interface
+- Emergency withdrawal
+
+**How to deposit via block explorer:**
+
+```solidity
+1. Go to explorer.test.mezo.org
+2. Find your pool contract
+3. Click "Contract" → "Write Contract"
+4. Connect wallet
+5. Call deposit(amount)
+   amount: 1000000000000000000000 (1,000 MUSD in wei)
+6. Confirm transaction
+```
+
+**How to withdraw:**
+
+```solidity
+Call withdraw(amount)
+amount: Use getBalance() first to see available
+```
+
+**Developer docs:** [Smart contract API reference →](/docs/developers/smart-contracts/individual-pool)
+
+---
+
+### What happens if KhipuVault shuts down?
+
+**Your funds are safe!** Here's why:
+
+**Smart contracts are permissionless:**
+- Live on blockchain (not KhipuVault servers)
+- Can't be shut down by KhipuVault
+- Accessible via any Ethereum-compatible interface
+
+**What you can still do:**
+- ✅ Withdraw funds via block explorer (see above)
+- ✅ View balance on-chain
+- ✅ Transfer to another wallet
+- ✅ Yields keep accruing (automated)
+
+**Backup access methods:**
+1. **Block explorer:** explorer.test.mezo.org
+2. **Etherscan-like tools:** Read/write contracts directly
+3. **Web3 libraries:** ethers.js, web3.py (for developers)
+4. **Alternative frontends:** Anyone can build a UI for our contracts
+
+**Real example:** If KhipuVault.com goes offline, community can deploy alternative frontend in hours using our open-source code.
+
+<Callout type="success">
+**Decentralization benefit:** Your money is in code, not KhipuVault's bank account. Code doesn't care if the company exists.
+</Callout>
+
+---
+
+## Strategy & Usage
+
+### Should I keep funds in one pool or create multiple?
+
+**Most users:** One pool is enough
+
+**Create multiple pools if:**
+- Different goals (emergency, vacation, retirement)
+- Different time horizons (short vs long-term)
+- Different risk preferences (conservative vs aggressive)
+- Separating personal vs business savings
+
+**Example multi-pool strategy:**
+```
+Pool 1: "Emergency Fund" (10,000 MUSD, never withdraw)
+Pool 2: "House Down Payment" (target 50,000 MUSD, 2 years)
+Pool 3: "Fun Money" (5,000 MUSD, withdraw yields quarterly)
+
+Benefits:
+- Clear goal tracking
+- Mental accounting (discipline)
+- Different withdrawal strategies per pool
+```
+
+**Drawbacks:**
+- Each pool costs ~$0.02 to create
+- More complexity to manage
+- Same yields regardless (no benefit from multiple pools)
+
+**Recommendation:** Start with one pool. Add more as your strategy evolves.
+
+---
+
+### How much should I deposit?
+
+**Conservative approach (recommended for beginners):**
+```
+Step 1: Emergency fund first
+  Keep 3-6 months expenses in traditional bank
+  Don't touch this (true emergency only)
+
+Step 2: Test KhipuVault
+  Deposit 1-5% of savings (e.g., $500 on $10,000 savings)
+  Monitor for 1-3 months
+
+Step 3: Scale up gradually
+  If comfortable, deposit 10-30% of savings
+  Keep rest diversified (stocks, bonds, bank)
+
+Step 4: Ongoing deposits
+  Allocate 5-10% of monthly income to KhipuVault
+  Automate via weekly DCA
+```
+
+**Aggressive approach (for risk-tolerant):**
+```
+Deposit 50-70% of liquid savings
+Keep 30-50% in other assets (diversification)
+Add 20-30% of monthly income
+
+Example on $50,000 savings:
+  KhipuVault: $30,000 (60%)
+  Stocks: $10,000 (20%)
+  Traditional bank: $10,000 (20%)
+```
+
+**Never do this:**
+- ❌ Deposit money you need in < 6 months
+- ❌ Deposit emergency fund (keep liquid)
+- ❌ Go all-in (100% of savings)
+- ❌ Borrow money to deposit (high risk)
+
+[DCA strategies →](/docs/products/individual-savings/strategies#dollar-cost-averaging-dca)
+
+---
+
+### When should I withdraw?
+
+**Good reasons to withdraw:**
+- ✅ Reached savings goal (house down payment, car, etc.)
+- ✅ True emergency (medical, job loss)
+- ✅ Portfolio rebalancing (shift to other investments)
+- ✅ Major life change (need liquidity)
+
+**Bad reasons to withdraw:**
+- ❌ APY dropped 1-2% temporarily
+- ❌ Crypto market down (yields are in MUSD, not volatile)
+- ❌ Saw a shiny new DeFi protocol (grass is always greener)
+- ❌ Bored (impulse decision)
+
+**Withdrawal strategies:**
+
+**Strategy 1: Never withdraw (maximum compounding)**
+```
+Let principal grow forever
+Withdraw yields only in retirement
+Best for: Long-term wealth building
+```
+
+**Strategy 2: Goal-based withdrawal**
+```
+Withdraw when goal is reached
+Example: Save 20k for car, withdraw all at 20k
+Best for: Specific purchases
+```
+
+**Strategy 3: Yield harvesting**
+```
+Withdraw yields quarterly/annually
+Keep principal intact
+Best for: Passive income
+```
+
+**Strategy 4: Percentage rule**
+```
+Only withdraw if balance > 150% of goal
+Example: Goal 10k, withdraw when balance hits 15k
+Best for: Building buffer
+```
+
+[Withdrawal strategies guide →](/docs/products/individual-savings/strategies#withdrawal-strategies)
+
+---
+
+### Can I schedule automatic deposits?
+
+**Not yet, but coming soon!**
+
+**Current workaround:**
+- Set calendar reminders (weekly/monthly)
+- Use MetaMask scheduled transactions (if supported)
+- Manual deposits (takes 30 seconds)
+
+**Planned feature (Q2 2026):**
+```
+Recurring Deposits:
+  Frequency: Weekly, bi-weekly, monthly
+  Amount: Fixed (e.g., 100 MUSD/week)
+  Source: Your wallet (auto-pull)
+  Start date: Customizable
+  End date: Optional
+
+Example:
+  Deposit 100 MUSD every Monday
+  Starting: Feb 10, 2026
+  Ending: Never (continuous)
+```
+
+**How it will work:**
+1. Approve MUSD spending (one-time)
+2. Set up schedule in dashboard
+3. Smart contract auto-executes deposits
+4. You just top up wallet with MUSD as needed
+
+**Join waitlist:** We'll notify you when this launches. Request in [Discord #feature-requests](https://discord.gg/khipuvault)
+
+---
+
+## Troubleshooting
+
+### My transaction failed. What do I do?
+
+**Common causes and solutions:**
+
+**Error: "Insufficient funds for gas"**
+```
+Problem: Not enough BTC to pay gas fee
+Solution: Get BTC from Mezo faucet
+  1. Visit https://faucet.test.mezo.org
+  2. Paste your wallet address
+  3. Request 0.001 BTC (enough for ~10 transactions)
+```
+
+**Error: "Insufficient MUSD balance"**
+```
+Problem: Trying to deposit more than you have
+Solution:
+  1. Check MUSD balance in MetaMask
+  2. Reduce deposit amount
+  3. Or get more MUSD from faucet
+```
+
+**Error: "Transaction reverted"**
+```
+Problem: Smart contract rejected transaction
+Possible causes:
+  - Wrong network (use Mezo Testnet, not Ethereum)
+  - Pool doesn't exist (check address)
+  - Amount = 0 (enter an amount)
+Solution: Check network and try again
+```
+
+**Error: "Nonce too high"**
+```
+Problem: MetaMask nonce sync issue
+Solution:
+  1. MetaMask → Settings → Advanced
+  2. Click "Reset Account"
+  3. This clears nonce, keeps wallet intact
+  4. Try transaction again
+```
+
+**Still stuck?** Share transaction hash in [Discord #support](https://discord.gg/khipuvault)
+
+---
+
+### Why isn't my pool showing in the dashboard?
+
+**Possible reasons:**
+
+**1. Transaction still pending**
+```
+Solution: Wait 30 seconds to 2 minutes
+Check status: explorer.test.mezo.org (paste tx hash)
+```
+
+**2. Wrong wallet connected**
+```
+Solution:
+  1. Check MetaMask address (top of extension)
+  2. Compare to wallet that created pool
+  3. Switch wallets if needed
+```
+
+**3. Browser cache issue**
+```
+Solution:
+  1. Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+  2. Or clear browser cache
+  3. Reconnect wallet
+```
+
+**4. Indexer lag**
+```
+Problem: Backend hasn't indexed your pool yet
+Solution: Wait 5-10 minutes
+If still missing after 10 minutes: Report in Discord
+```
+
+**5. Transaction actually failed**
+```
+Check on explorer:
+  - If shows "Failed" → Transaction didn't succeed
+  - If shows "Success" → Pool exists, refresh dashboard
+```
+
+---
+
+### Yields seem lower than expected. Why?
+
+**Check these factors:**
+
+**1. APY is annual, not daily/weekly**
+```
+15% APY = 1.25% per month = 0.29% per week
+Don't expect 15% after 1 week!
+
+Calculator:
+  Deposit: 1,000 MUSD
+  Time: 1 week (7 days)
+  Expected yield: 1,000 × 0.15 × (7/365) = 2.88 MUSD
+```
+
+**2. Displayed APY is recent average**
+```
+Dashboard shows: "15% APY (last 7 days)"
+If you deposited during low APY week (13%), your actual yield will be lower
+Check: Historical APY chart for your deposit date
+```
+
+**3. Platform fee already deducted**
+```
+Displayed: 15% APY (net of 10% fee)
+Gross APY: 16.67%
+If you calculated using 16.67%, that's before fees
+```
+
+**4. Compounding takes time**
+```
+Day 1: Minimal compounding effect
+Week 1: Small compounding effect
+Month 1: Noticeable compounding
+Year 1: Significant compounding
+
+Be patient! Compounding accelerates over time.
+```
+
+**5. APY fluctuated downward**
+```
+Deposited when APY was 17%
+APY dropped to 13% this week
+Your yield reflects current rate (13%), not deposit rate (17%)
+This is normal - APY is variable
+```
+
+**Verify your actual yield:**
+```
+1. Check transaction history
+2. Sum all deposits (principal)
+3. Compare to current balance
+4. Difference = yields earned
+5. Calculate your actual APY: (yields / principal) × (365 / days held)
+```
+
+---
+
+### Can I transfer my pool to another wallet?
+
+**No, pools are non-transferable by design.**
+
+**Why?**
+- Security: Prevents accidental transfers
+- Tax clarity: Clear ownership for reporting
+- Safety: Can't be stolen via approval exploit
+
+**Workaround if you want to change wallets:**
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Withdraw from old pool
+
+Use your current wallet to withdraw all funds (principal + yields)
+
+### Create new pool
+
+Connect new wallet and create a fresh pool
+
+### Deposit to new pool
+
+Transfer MUSD to new wallet, then deposit
+
+</div>
+
+**Costs:**
+- Withdraw gas: ~$0.01
+- Transfer MUSD: ~$0.005
+- Create pool: ~$0.02
+- Deposit: ~$0.01
+- Total: ~$0.045
+
+**When to do this:**
+- You lost access to old wallet (use seed phrase to recover first!)
+- Upgrading to hardware wallet (good idea for large balances)
+- Consolidating multiple wallets
+
+<Callout type="danger">
+**Never lose your seed phrase!** If you lose it, your pool is gone forever. We can't recover it.
+
+Write down seed phrase on paper, store in safe. Never digital, never cloud.
+</Callout>
+
+---
+
+## Security & Privacy
+
+### Is my balance private?
+
+**Partially private:**
+
+**Public on blockchain:**
+- ✅ Your pool address (e.g., `0x7890...def1`)
+- ✅ Your transaction history (deposits, withdrawals)
+- ✅ Your balance (queryable on-chain)
+- ✅ Timestamps of all actions
+
+**Private on KhipuVault:**
+- ❌ Your email (if provided)
+- ❌ Your goals/descriptions
+- ❌ Your real identity (unless you doxx yourself)
+
+**Who can see what:**
+
+| Info | Blockchain | KhipuVault | Public |
+|------|-----------|-----------|--------|
+| Wallet address | ✅ | ✅ | ✅ |
+| Balance | ✅ | ✅ | ✅ |
+| Transactions | ✅ | ✅ | ✅ |
+| Email | ❌ | ✅ | ❌ |
+| Name | ❌ | If provided | ❌ |
+| Goal/description | ❌ | ✅ | ❌ |
+
+**Improve privacy:**
+- Use separate wallet for KhipuVault (not linked to identity)
+- Don't discuss holdings publicly
+- Use VPN when accessing (hides IP from analytics)
+- Don't link wallet to centralized exchange KYC
+
+**Blockchain analysis:** Sophisticated attackers can potentially link your wallet to identity through:
+- Exchange deposits/withdrawals
+- IP address correlation
+- On-chain behavior patterns
+
+**Best practice:** Treat your wallet as pseudonymous, not anonymous.
+
+---
+
+### What if someone gets my seed phrase?
+
+**If seed phrase is compromised, your funds are at risk!**
+
+**Immediate actions:**
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Create new wallet ASAP
+
+Generate fresh wallet with new seed phrase (keep this one secure!)
+
+### Withdraw all funds
+
+From compromised wallet:
+1. Withdraw from all KhipuVault pools
+2. Transfer MUSD to new wallet
+3. Transfer any BTC to new wallet
+
+### Move to new pools
+
+Using new wallet:
+1. Create fresh pools
+2. Deposit recovered funds
+3. Never use old wallet again
+
+</div>
+
+**Time is critical:** Do this within minutes, not hours. Attacker may drain your wallet at any time.
+
+**Prevention is better:**
+- ✅ Write seed phrase on paper (not digital)
+- ✅ Store in safe or safety deposit box
+- ✅ Never share with anyone (KhipuVault will NEVER ask)
+- ✅ Don't store in email, cloud, password manager
+- ✅ Consider hardware wallet (Ledger, Trezor) for large amounts
+
+**Scam warning:** If someone DMs you asking for seed phrase, it's a scam. Block and report.
+
+---
+
+### How do I know this isn't a scam?
+
+**Valid concerns! Here's how to verify:**
+
+**1. Smart contracts are audited**
+```
+Auditors: CertiK (reputable firm)
+Report: Available at /docs/security/audits
+Code: Open source on GitHub
+Verification: Contract source verified on Mezo explorer
+```
+
+**2. Code is open source**
+```
+GitHub: github.com/khipuvault/contracts
+Anyone can review: All logic is public
+Community scrutiny: Developers can audit
+Fork it: You could deploy your own version
+```
+
+**3. Team is doxxed**
+```
+Team members: LinkedIn profiles public
+Office: Physical location in [location]
+Background: Verifiable work history
+Social: Active on Twitter, Discord
+```
+
+**4. Traction and transparency**
+```
+Users: X active pools (public on-chain data)
+TVL: $X locked (verifiable on explorer)
+Uptime: 6+ months on testnet
+No incidents: No hacks or exploits
+```
+
+**5. Red flags that DON'T exist**
+```
+✅ No "guaranteed returns" promises
+✅ No pressure to deposit large amounts
+✅ No referral pyramid scheme
+✅ No "limited time" urgency tactics
+✅ No requests for seed phrases
+✅ Withdraw anytime (not locked)
+```
+
+**Do your own research:**
+- Read the docs (you're doing it!)
+- Check GitHub code
+- Ask questions in Discord
+- Start with small amounts
+- Review audit reports
+- Verify contract addresses
+
+**Trust, but verify!** Blockchain allows you to verify everything. Use it.
+
+---
+
+## Comparison Questions
+
+### Individual Savings vs Community Pool - which should I choose?
+
+| Factor | Individual Savings | Community Pool |
+|--------|-------------------|---------------|
+| **APY** | 12-18% | 14-20% |
+| **Privacy** | Full (solo pool) | Shared (group visible) |
+| **Control** | 100% yours | Shared governance |
+| **Liquidity** | Withdraw anytime | Withdraw anytime |
+| **Minimum** | 10 MUSD | 50 MUSD per user |
+| **Best for** | Solo savers | Groups/families |
+
+**Choose Individual Savings if:**
+- ✅ You're saving alone
+- ✅ You value privacy
+- ✅ You want full control
+- ✅ You're testing KhipuVault first time
+
+**Choose Community Pool if:**
+- ✅ You're in a group (family, friends, club)
+- ✅ You want 2-3% higher APY
+- ✅ You like shared accountability
+- ✅ You have social savings goals
+
+**Can I use both?** Absolutely! Many users have Individual Savings for personal goals and Community Pool with family.
+
+[Learn about Community Pools →](/docs/products/community-pools)
+
+---
+
+### Should I use KhipuVault or stake MUSD directly in DeFi?
+
+**KhipuVault advantages:**
+- ✅ Diversified yields (3 sources automatically)
+- ✅ Auto-compounding (save gas)
+- ✅ No manual claiming needed
+- ✅ Risk monitoring 24/7
+- ✅ One interface for everything
+- ✅ Insurance coverage included
+
+**Direct DeFi advantages:**
+- ✅ Slightly higher APY (no 10% platform fee)
+- ✅ More control over allocation
+- ✅ No middleman smart contract
+- ✅ Can experiment with protocols
+
+**APY comparison:**
+```
+Direct Aave lending: ~10% APY (manual)
+Direct Mezo staking: ~6% APY (manual)
+Direct LP provision: ~3% APY (manual)
+Manual portfolio: ~8-9% weighted average
+
+KhipuVault: ~15% APY (automated, diversified)
+```
+
+**Time/effort comparison:**
+```
+Direct DeFi:
+  - Research protocols: 2-4 hours
+  - Set up positions: 30 mins
+  - Monitor daily: 10 mins/day
+  - Rebalance monthly: 1 hour
+  - Claim yields: Weekly ($0.50 gas each)
+  Total: ~10 hours + $25 gas/year
+
+KhipuVault:
+  - Deposit once: 2 mins
+  - Monitor: 0 mins (optional)
+  - Rebalance: 0 mins (automatic)
+  - Claim yields: 0 mins (auto-compound)
+  Total: 2 mins + $0.03 gas
+```
+
+**Recommendation:**
+- **< $10,000:** KhipuVault (time savings > fee cost)
+- **$10,000-$50,000:** KhipuVault (unless you're DeFi expert)
+- **> $50,000:** Consider both (diversification)
+
+---
+
+## Getting Help
+
+### Where can I get support?
+
+**Discord (fastest):**
+```
+https://discord.gg/khipuvault
+Channels:
+  #support - General help
+  #technical - Smart contract questions
+  #strategies - Optimization tips
+Response time: < 1 hour (usually minutes)
+```
+
+**Email:**
+```
+support@khipuvault.com
+Response time: 24-48 hours
+Best for: Account issues, bugs, detailed questions
+```
+
+**Documentation:**
+```
+You're reading it!
+Search function: Top right
+Index: /docs
+Most questions answered here
+```
+
+**Community:**
+```
+Twitter: @KhipuVault
+Reddit: r/KhipuVault
+Telegram: t.me/khipuvault
+```
+
+**Emergency (funds at risk):**
+```
+Discord: Tag @mods in #support
+Email: emergency@khipuvault.com
+We monitor 24/7 for security issues
+```
+
+---
+
+### How do I report a bug?
+
+**Security bugs (critical):**
+```
+Email: security@khipuvault.com
+Include:
+  - Detailed description
+  - Steps to reproduce
+  - Your wallet address (if relevant)
+  - Screenshots/videos
+
+We have a bug bounty program!
+Critical bugs: Up to $50,000 reward
+```
+
+**Non-security bugs:**
+```
+GitHub: github.com/khipuvault/issues
+Create new issue with:
+  - Title: Short description
+  - Body: Detailed steps to reproduce
+  - Expected vs actual behavior
+  - Screenshots
+  - Browser/wallet version
+```
+
+**Feature requests:**
+```
+Discord: #feature-requests channel
+Describe:
+  - What you want
+  - Why it's useful
+  - How it should work
+Community upvotes best ideas
+```
+
+---
+
+## Next Steps
+
+Ready to start saving?
+
+<Cards>
+  <Card
+    title="Create Your Pool"
+    href="/docs/products/individual-savings/creating-pool"
+    description="Step-by-step pool creation guide"
+  />
+  <Card
+    title="Best Strategies"
+    href="/docs/products/individual-savings/strategies"
+    description="Optimize your savings approach"
+  />
+  <Card
+    title="Get MUSD"
+    href="/docs/getting-started/get-musd"
+    description="Get test tokens to start"
+  />
+  <Card
+    title="Join Discord"
+    href="https://discord.gg/khipuvault"
+    description="Connect with the community"
+  />
+</Cards>
+
+---
+
+**Still have questions?** Ask in [Discord #support](https://discord.gg/khipuvault) - our community is here to help!

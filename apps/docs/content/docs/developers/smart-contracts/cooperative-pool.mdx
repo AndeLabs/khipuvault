@@ -1,0 +1,244 @@
+---
+title: CooperativePool Contract
+description: Multi-user savings pools with governance, voting, and shared yield distribution.
+---
+
+# CooperativePool Contract
+
+CooperativePool enables groups to save together with democratic governance and shared yields.
+
+## Contract Details
+
+**Address:** `0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88`
+
+**Chain ID:** 31611 (Mezo Testnet)
+
+**Features:**
+- Multiple members per pool
+- Democratic governance (optional)
+- Shared yield distribution
+- Member permissions
+- Proposal voting system
+
+## Key State Variables
+
+```solidity
+contract CooperativePoolV3 {
+    address[] public members;
+    mapping(address => bool) public isMember;
+    mapping(address => uint256) public balances;
+    uint256 public totalDeposits;
+    bool public requiresVoting;
+    uint256 public votingThreshold; // % required (e.g., 51)
+
+    struct Proposal {
+        address target;
+        uint256 amount;
+        uint256 votesFor;
+        uint256 votesAgainst;
+        bool executed;
+        mapping(address => bool) hasVoted;
+    }
+}
+```
+
+## Read Functions
+
+### members
+
+Get all pool members.
+
+```solidity
+function getMembers() external view returns (address[] memory)
+```
+
+**Example:**
+```typescript
+const { data: members } = useReadContract({
+  address: COOPERATIVE_POOL_ADDRESS,
+  abi: COOPERATIVE_POOL_ABI,
+  functionName: 'getMembers'
+})
+```
+
+### balanceOf
+
+Get member's balance.
+
+```solidity
+function balanceOf(address account) external view returns (uint256)
+```
+
+### isMember
+
+Check if address is a member.
+
+```solidity
+function isMember(address account) external view returns (bool)
+```
+
+## Write Functions
+
+### deposit
+
+Deposit MUSD (members only).
+
+```solidity
+function deposit(uint256 amount) external nonReentrant onlyMember
+```
+
+**Example:**
+```typescript
+const { writeContract } = useWriteContract()
+
+writeContract({
+  address: COOPERATIVE_POOL_ADDRESS,
+  abi: COOPERATIVE_POOL_ABI,
+  functionName: 'deposit',
+  args: [parseUnits('100', 18)]
+})
+```
+
+### proposeWithdrawal
+
+Create withdrawal proposal (if voting enabled).
+
+```solidity
+function proposeWithdrawal(uint256 amount) external onlyMember returns (uint256 proposalId)
+```
+
+**Example:**
+```typescript
+const { writeContract } = useWriteContract()
+
+writeContract({
+  address: COOPERATIVE_POOL_ADDRESS,
+  abi: COOPERATIVE_POOL_ABI,
+  functionName: 'proposeWithdrawal',
+  args: [parseUnits('500', 18)]
+})
+```
+
+### vote
+
+Vote on a proposal.
+
+```solidity
+function vote(uint256 proposalId, bool support) external onlyMember
+```
+
+**Example:**
+```typescript
+writeContract({
+  address: COOPERATIVE_POOL_ADDRESS,
+  abi: COOPERATIVE_POOL_ABI,
+  functionName: 'vote',
+  args: [1n, true] // Proposal #1, vote yes
+})
+```
+
+### executeProposal
+
+Execute approved proposal.
+
+```solidity
+function executeProposal(uint256 proposalId) external nonReentrant
+```
+
+### addMember
+
+Add new member (owner only).
+
+```solidity
+function addMember(address newMember) external onlyOwner
+```
+
+### removeMember
+
+Remove member (owner only).
+
+```solidity
+function removeMember(address member) external onlyOwner
+```
+
+## Events
+
+```solidity
+event MemberAdded(address indexed member, uint256 timestamp);
+event MemberRemoved(address indexed member, uint256 timestamp);
+event ProposalCreated(uint256 indexed proposalId, address indexed creator, uint256 amount);
+event VoteCast(uint256 indexed proposalId, address indexed voter, bool support);
+event ProposalExecuted(uint256 indexed proposalId, uint256 amount);
+```
+
+## Complete ABI
+
+```typescript
+export const COOPERATIVE_POOL_ABI = [
+  // Read
+  { name: 'getMembers', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'address[]' }] },
+  { name: 'balanceOf', type: 'function', stateMutability: 'view', inputs: [{ type: 'address' }], outputs: [{ type: 'uint256' }] },
+  { name: 'isMember', type: 'function', stateMutability: 'view', inputs: [{ type: 'address' }], outputs: [{ type: 'bool' }] },
+  { name: 'totalDeposits', type: 'function', stateMutability: 'view', inputs: [], outputs: [{ type: 'uint256' }] },
+  // Write
+  { name: 'deposit', type: 'function', stateMutability: 'nonpayable', inputs: [{ type: 'uint256' }], outputs: [] },
+  { name: 'proposeWithdrawal', type: 'function', stateMutability: 'nonpayable', inputs: [{ type: 'uint256' }], outputs: [{ type: 'uint256' }] },
+  { name: 'vote', type: 'function', stateMutability: 'nonpayable', inputs: [{ type: 'uint256' }, { type: 'bool' }], outputs: [] },
+  { name: 'executeProposal', type: 'function', stateMutability: 'nonpayable', inputs: [{ type: 'uint256' }], outputs: [] },
+  // Events
+  { name: 'MemberAdded', type: 'event', inputs: [{ name: 'member', type: 'address', indexed: true }, { name: 'timestamp', type: 'uint256' }] },
+  { name: 'ProposalCreated', type: 'event', inputs: [{ name: 'proposalId', type: 'uint256', indexed: true }, { name: 'creator', type: 'address', indexed: true }, { name: 'amount', type: 'uint256' }] }
+] as const
+```
+
+## Usage Example
+
+```typescript
+// Complete workflow
+function CooperativePoolDashboard() {
+  const { address } = useAccount()
+  const { writeContract } = useWriteContract()
+
+  // Check if user is member
+  const { data: isMember } = useReadContract({
+    address: COOPERATIVE_POOL_ADDRESS,
+    abi: COOPERATIVE_POOL_ABI,
+    functionName: 'isMember',
+    args: [address]
+  })
+
+  // Get user balance
+  const { data: balance } = useReadContract({
+    address: COOPERATIVE_POOL_ADDRESS,
+    abi: COOPERATIVE_POOL_ABI,
+    functionName: 'balanceOf',
+    args: [address]
+  })
+
+  // Deposit
+  const deposit = (amount: string) => {
+    writeContract({
+      address: COOPERATIVE_POOL_ADDRESS,
+      abi: COOPERATIVE_POOL_ABI,
+      functionName: 'deposit',
+      args: [parseUnits(amount, 18)]
+    })
+  }
+
+  if (!isMember) return <div>Not a member</div>
+
+  return (
+    <div>
+      <p>Balance: {formatUnits(balance || 0n, 18)} MUSD</p>
+      <button onClick={() => deposit('100')}>Deposit 100 MUSD</button>
+    </div>
+  )
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="RotatingPool (ROSCA)" href="/docs/developers/smart-contracts/rotating-pool" />
+  <Card title="Prize Pool" href="/docs/developers/smart-contracts/prize-pool" />
+</Cards>

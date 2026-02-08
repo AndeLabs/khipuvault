@@ -1,0 +1,173 @@
+---
+title: RotatingPool (ROSCA) Contract
+description: Traditional rotating savings and credit association digitized on blockchain.
+---
+
+# RotatingPool Contract (ROSCA)
+
+LotteryPoolV3 contract implements Rotating Savings and Credit Association (ROSCA/Pasanaku/Tanda) on blockchain.
+
+## Contract Details
+
+**Address:** Contact us for deployment
+
+**Features:**
+- Fixed rotation order
+- Predefined payout schedule
+- No yields (social credit)
+- Locked until user's turn
+- Trustless execution
+
+## Key Concepts
+
+**ROSCA**: Group of people who contribute fixed amounts regularly. Each period, one member receives the entire pot.
+
+**Example:**
+- 10 members contribute 100 MUSD monthly
+- Each month, 1 member receives 1,000 MUSD
+- After 10 months, everyone has received 1,000 MUSD
+
+## State Variables
+
+```solidity
+contract RotatingPool {
+    address[] public rotationOrder;
+    uint256 public currentRound;
+    uint256 public contributionAmount;
+    uint256 public roundInterval; // in seconds
+    uint256 public nextPayoutTime;
+    mapping(address => bool) public hasClaimed;
+    mapping(address => uint256) public totalContributed;
+}
+```
+
+## Read Functions
+
+### getRotationOrder
+
+```solidity
+function getRotationOrder() external view returns (address[] memory)
+```
+
+### getCurrentRecipient
+
+```solidity
+function getCurrentRecipient() external view returns (address)
+```
+
+### nextPayoutTime
+
+```solidity
+function nextPayoutTime() external view returns (uint256)
+```
+
+### hasClaimed
+
+```solidity
+function hasClaimed(address member) external view returns (bool)
+```
+
+## Write Functions
+
+### contribute
+
+Make monthly contribution.
+
+```solidity
+function contribute() external nonReentrant onlyMember
+```
+
+**Requirements:**
+- Must be current round
+- Haven't contributed this round
+- Pay exactly contributionAmount
+
+**Example:**
+```typescript
+const { writeContract } = useWriteContract()
+
+writeContract({
+  address: ROTATING_POOL_ADDRESS,
+  abi: ROTATING_POOL_ABI,
+  functionName: 'contribute'
+})
+```
+
+### claimPayout
+
+Claim payout when it's your turn.
+
+```solidity
+function claimPayout() external nonReentrant
+```
+
+**Requirements:**
+- Is current round recipient
+- Time >= nextPayoutTime
+- All members have contributed
+
+**Example:**
+```typescript
+writeContract({
+  address: ROTATING_POOL_ADDRESS,
+  abi: ROTATING_POOL_ABI,
+  functionName: 'claimPayout'
+})
+```
+
+## Events
+
+```solidity
+event Contribution(address indexed member, uint256 amount, uint256 round);
+event PayoutClaimed(address indexed recipient, uint256 amount, uint256 round);
+event RoundAdvanced(uint256 newRound, address nextRecipient);
+```
+
+## Complete Workflow
+
+```typescript
+function ROSCAInterface() {
+  const { address } = useAccount()
+
+  // Check if it's your turn
+  const { data: currentRecipient } = useReadContract({
+    address: ROTATING_POOL_ADDRESS,
+    abi: ROTATING_POOL_ABI,
+    functionName: 'getCurrentRecipient'
+  })
+
+  // Check payout time
+  const { data: nextPayout } = useReadContract({
+    address: ROTATING_POOL_ADDRESS,
+    abi: ROTATING_POOL_ABI,
+    functionName: 'nextPayoutTime'
+  })
+
+  const isMyTurn = currentRecipient?.toLowerCase() === address?.toLowerCase()
+  const canClaim = isMyTurn && Date.now() / 1000 >= Number(nextPayout)
+
+  return (
+    <div>
+      {isMyTurn ? (
+        <div>
+          <p>It's your turn!</p>
+          {canClaim ? (
+            <button onClick={claimPayout}>Claim Payout</button>
+          ) : (
+            <p>Wait until {new Date(Number(nextPayout) * 1000).toLocaleString()}</p>
+          )}
+        </div>
+      ) : (
+        <button onClick={contribute}>Contribute for this round</button>
+      )}
+    </div>
+  )
+}
+```
+
+## Next Steps
+
+<Cards>
+  <Card title="Prize Pool" href="/docs/developers/smart-contracts/prize-pool" />
+  <Card title="Examples" href="/docs/developers/examples" />
+</Cards>

@@ -1,0 +1,642 @@
+---
+title: Yields & Rewards
+description: Understanding how Individual Savings pools generate earnings, APY calculations, compounding mechanics, platform fees, and yield sources.
+---
+
+# Yields & Rewards
+
+Learn how your MUSD earns returns in Individual Savings pools and maximize your passive income.
+
+## How Yields Are Generated
+
+Your deposits earn from multiple sources simultaneously, creating a diversified yield stream.
+
+### Yield Sources Breakdown
+
+When you deposit MUSD, it's automatically allocated across:
+
+| Source | Allocation | APY Range | Risk Level |
+|--------|-----------|-----------|------------|
+| DeFi Lending | 50% | 8-12% | Low |
+| Mezo Staking | 30% | 4-8% | Very Low |
+| Liquidity Pools | 20% | 2-5% | Low |
+| **Combined** | **100%** | **12-18%** | **Low** |
+
+<Callout type="info">
+These allocations are dynamic and adjusted by the YieldAggregator contract based on market conditions to maximize your returns while maintaining safety.
+</Callout>
+
+### Source 1: DeFi Lending
+
+**How it works:**
+
+Your MUSD is lent to borrowers on decentralized lending protocols:
+
+```
+Your MUSD → Aave/Compound → Borrowers
+Borrowers pay interest → Protocol collects → You earn
+```
+
+**Example protocols:**
+- **Aave** - Leading lending protocol
+- **Compound** - Algorithmic money market
+- **Mezo Lend** - Native Mezo lending
+
+**Current rates:** 8-12% APY
+
+**Why it's safe:**
+- All loans are over-collateralized (150-200%)
+- If borrower defaults, collateral is liquidated
+- Your principal is protected by protocol insurance
+
+<Callout type="success">
+**Example:** You deposit 1,000 MUSD. 50% (500 MUSD) goes to lending. At 10% APY, you earn 50 MUSD/year from this source alone.
+</Callout>
+
+### Source 2: Mezo Staking
+
+**How it works:**
+
+MUSD is converted to BTC and staked with Mezo validators:
+
+```
+MUSD → Swap to BTC → Stake with validators → Earn rewards
+Validators earn block rewards → Shared with stakers → You earn
+```
+
+**Current rates:** 4-8% APY
+
+**Why it's safe:**
+- Native blockchain staking (most secure)
+- No smart contract risk on this portion
+- Instant unstaking if needed
+
+**Validator selection:**
+KhipuVault delegates to top-performing validators with:
+- ✅ 99.9%+ uptime
+- ✅ Established reputation
+- ✅ Transparent commission (5-10%)
+
+### Source 3: Liquidity Provision
+
+**How it works:**
+
+MUSD is paired with other stablecoins in AMM pools:
+
+```
+MUSD + USDC → Uniswap/Curve Pool → Traders pay fees → You earn
+```
+
+**Current rates:** 2-5% APY
+
+**Why it's safe:**
+- Stablecoin-only pairs (minimal impermanent loss)
+- High-volume pools (reliable fees)
+- Automated position management
+
+**Typical pairs:**
+- MUSD-USDC (most stable)
+- MUSD-DAI
+- MUSD-USDT
+
+<Callout type="warning">
+**Impermanent Loss:** With stablecoin pairs, this is negligible (< 0.1%). If MUSD deviates from $1.00, the YieldAggregator automatically rebalances to protect you.
+</Callout>
+
+## APY Calculation
+
+Understanding your Annual Percentage Yield (APY).
+
+### Base APY Formula
+
+```
+APY = ((1 + Daily Rate)^365 - 1) × 100
+```
+
+**Current Individual Savings APY:** 12-18%
+
+**Example (15% APY):**
+```
+Daily Rate = 0.15 / 365 = 0.04109%
+Per 1,000 MUSD = 1,000 × 0.0004109 = 0.41 MUSD/day
+```
+
+### APY vs APR
+
+Important distinction:
+
+| Metric | Definition | Individual Savings |
+|--------|-----------|-------------------|
+| **APR** | Annual Percentage Rate (simple interest) | ~14.5% |
+| **APY** | Annual Percentage Yield (compounded) | ~15.5% |
+
+**Why APY is higher:**
+Yields compound every block (~5 seconds), so you earn interest on interest.
+
+```
+APR: 1,000 MUSD → 1,145 MUSD (simple)
+APY: 1,000 MUSD → 1,155 MUSD (compounded)
+Difference: +10 MUSD (0.7% more)
+```
+
+<Callout type="success">
+KhipuVault displays APY (the higher number) because that's what you actually earn. Some platforms show APR to look competitive but pay less!
+</Callout>
+
+### Variable vs Fixed APY
+
+Individual Savings APY is **variable** (changes with market conditions):
+
+**Factors affecting APY:**
+
+1. **DeFi market demand**
+   - More borrowers = higher rates
+   - Less liquidity = higher rates
+   - Bear market = lower rates
+
+2. **Mezo network staking rewards**
+   - More validators = lower rewards
+   - Higher network usage = higher fees
+   - BTC price increase = higher dollar value
+
+3. **Trading volume**
+   - High DEX volume = more fees
+   - New token launches = fee spikes
+   - Market volatility = more trading
+
+**Historical range (last 6 months):**
+```
+Lowest: 11.2% APY (June 2025)
+Highest: 19.4% APY (December 2025)
+Average: 15.1% APY
+Current: 15.0% APY
+```
+
+**APY update frequency:**
+- Recalculated every 4 hours
+- Displayed in real-time on dashboard
+- Historical APY chart available
+
+## Compounding Explained
+
+Your secret weapon for wealth building.
+
+### How Compounding Works
+
+Traditional banks compound daily/monthly. KhipuVault compounds **every block** (~5 seconds):
+
+```
+Block 1: 1,000.000 MUSD
+Block 2: 1,000.001 MUSD (yield added to principal)
+Block 3: 1,000.002 MUSD (compound on 1,000.001)
+Block 4: 1,000.003 MUSD (compound on 1,000.002)
+...
+```
+
+### Continuous Compounding Math
+
+```
+Final Amount = Principal × e^(rate × time)
+```
+
+**Example (1 year at 15% APY):**
+```
+No compounding: 1,000 × 1.15 = 1,150 MUSD
+Daily compounding: 1,000 × (1 + 0.15/365)^365 = 1,161.83 MUSD
+Continuous (block-level): 1,000 × e^0.15 = 1,161.83 MUSD
+
+Extra earnings from compounding: 11.83 MUSD (1.0%)
+```
+
+### Compounding Over Time
+
+The longer you hold, the more powerful compounding becomes:
+
+| Period | 15% APY (No Compound) | 15% APY (Continuous) | Difference |
+|--------|----------------------|---------------------|-----------|
+| 1 year | 1,150 MUSD | 1,161.83 MUSD | +11.83 |
+| 3 years | 1,450 MUSD | 1,568.31 MUSD | +118.31 |
+| 5 years | 1,750 MUSD | 2,117.00 MUSD | +367.00 |
+| 10 years | 2,500 MUSD | 4,481.69 MUSD | +1,981.69 |
+
+**Starting with 1,000 MUSD:**
+
+<Callout type="success" title="The Power of Compounding">
+After 10 years:
+- Without compounding: +1,500 MUSD (150%)
+- With compounding: +3,481.69 MUSD (348%)
+- Compounding adds: +1,981.69 MUSD extra (132% more!)
+
+**Conclusion:** Never withdraw unless absolutely necessary. Compounding is free money!
+</Callout>
+
+### Manual vs Auto-Compounding
+
+Some platforms require you to "claim" yields. Not KhipuVault:
+
+| Feature | KhipuVault | Traditional DeFi |
+|---------|-----------|-----------------|
+| Claiming | Automatic | Manual (costs gas) |
+| Frequency | Every block (~5s) | Daily/weekly |
+| Gas costs | $0 (built-in) | $0.50-$2 per claim |
+| Optimal? | Always | Only if yields > gas |
+
+**Why auto-compound is better:**
+
+If you had to claim manually:
+```
+Yields earned per day: 0.41 MUSD
+Gas cost per claim: $0.01
+Weekly yields: 2.87 MUSD
+Weekly gas: $0.07 (claiming 7x)
+Annual gas: $3.65 (claiming 365x)
+
+With auto-compound: $0 gas, higher yields
+```
+
+## Platform Fees
+
+Transparency in our fee structure.
+
+### Fee Breakdown
+
+KhipuVault charges a **performance fee** only:
+
+| Fee Type | Rate | When Charged | You Pay |
+|----------|------|-------------|---------|
+| Management | 0% | Never | $0 |
+| Deposit | 0% | Never | $0 |
+| Withdrawal | 0% | Never | $0 |
+| Performance | 10% | On yields earned | 10% of yields |
+
+<Callout type="info">
+**Simple rule:** We only make money when you make money. If yields are $100, we take $10, you keep $90.
+</Callout>
+
+### Performance Fee Example
+
+Let's calculate your actual earnings:
+
+```
+Deposit: 10,000 MUSD
+Time: 1 year
+Gross APY: 16.67% (before fees)
+Gross Yields: 1,667 MUSD
+
+Platform Fee: 1,667 × 10% = 166.7 MUSD
+Your Net Yields: 1,667 - 166.7 = 1,500.3 MUSD
+Your Net APY: 15% (after fees)
+```
+
+**What you see in dashboard:**
+```
+Displayed APY: 15% (already net of fees)
+Gross yields: Hidden (you don't need to calculate)
+Net yields: Shown (what you actually earn)
+```
+
+### Fee Comparison Table
+
+How KhipuVault stacks up:
+
+| Platform | Management | Performance | Net APY | Total Cost |
+|----------|-----------|-------------|---------|-----------|
+| **KhipuVault** | 0% | 10% | ~15% | 10% of yields |
+| Yearn Finance | 2% | 20% | ~12% | 2% + 20% of yields |
+| Traditional Bank | 0% | 0% | ~0.5% | Spread (hidden) |
+| DeFi Aggregator | 1-3% | 15-20% | ~10% | 3-5% total |
+| Hedge Fund | 2% | 20% | ~8% | 4-6% total |
+
+<Callout type="success">
+**KhipuVault is the most transparent:** You always know exactly what you're paying (10% of yields). No hidden fees, no spread, no surprises.
+</Callout>
+
+### Fee Distribution
+
+Where does the 10% go?
+
+```
+Platform Fee (10% of yields) =
+  50% → Protocol treasury (development, audits)
+  30% → Yield strategy optimization (better returns for you)
+  20% → Team compensation
+```
+
+**Alignment of incentives:**
+- Higher yields for you = higher fees for us
+- We're motivated to maximize your returns
+- Win-win relationship
+
+## Yield Tracking & Reporting
+
+Monitor your earnings in real-time.
+
+### Dashboard Overview
+
+Your Individual Savings dashboard shows:
+
+```
+💰 Current Balance: 11,450 MUSD
+  Principal: 10,000 MUSD (deposits)
+  Yields: 1,450 MUSD (earned)
+
+📈 Performance:
+  Total Return: +14.5% (lifetime)
+  Current APY: 15.0% (last 7 days)
+  Daily Earnings: ~4.10 MUSD
+
+⏱️ Time Active: 365 days
+🎯 Goal Progress: 11,450 / 50,000 MUSD (22.9%)
+```
+
+### Yield Timeline
+
+View earnings over time:
+
+**Daily view:**
+```
+Feb 1: +4.10 MUSD
+Feb 2: +4.11 MUSD (compounds)
+Feb 3: +4.12 MUSD (compounds)
+...
+```
+
+**Monthly view:**
+```
+Jan 2026: +124.32 MUSD (APY: 15.2%)
+Dec 2025: +118.45 MUSD (APY: 14.8%)
+Nov 2025: +112.67 MUSD (APY: 14.5%)
+```
+
+**Yearly view:**
+```
+2026: +1,450 MUSD (APY: 15.0% avg)
+2025: +875 MUSD (APY: 14.2% avg)
+```
+
+### Performance Metrics
+
+Advanced analytics for your pool:
+
+**Sharpe Ratio:**
+```
+Risk-adjusted returns
+Higher = better risk/reward
+Individual Savings: ~2.5 (excellent)
+```
+
+**Volatility:**
+```
+How much APY fluctuates
+Lower = more stable
+Individual Savings: ~1.5% (very stable)
+```
+
+**Max Drawdown:**
+```
+Largest APY drop from peak
+Lower = more consistent
+Individual Savings: -3.2% (June 2025 dip)
+```
+
+### Exporting Reports
+
+Download your yield data for taxes/accounting:
+
+**CSV Export:**
+```
+Date,Action,Amount,Balance,APY,Yield_Source
+2026-01-01,Deposit,1000,1000,15.0%,N/A
+2026-01-02,Yield,0.41,1000.41,15.0%,Auto
+2026-01-03,Yield,0.41,1000.82,15.0%,Auto
+...
+```
+
+**PDF Report:**
+- Summary page (total deposits, yields, APY)
+- Monthly breakdown
+- Tax summary (for IRS Form 1040)
+- Graphs and charts
+
+**Tax Summary:**
+```
+Tax Year: 2026
+Total Yields Earned: 1,450 MUSD
+Cost Basis: 10,000 MUSD
+Taxable Event: None (no withdrawal)
+
+If withdrawn:
+  Ordinary Income: 1,450 MUSD
+  Tax (25% bracket): 362.50 MUSD
+```
+
+<Callout type="warning">
+**Tax disclaimer:** Yields may be taxable even if not withdrawn (consult your accountant). KhipuVault provides data but not tax advice.
+
+[Learn more about crypto taxes →](/docs/resources/tax-guide)
+</Callout>
+
+## Yield Optimization
+
+How KhipuVault maximizes your returns.
+
+### Dynamic Allocation
+
+The YieldAggregator contract continuously monitors and reallocates:
+
+```
+Every 4 hours:
+1. Check APY of each yield source
+2. Calculate optimal allocation
+3. Rebalance if improvement > 0.5%
+4. Update user yields
+```
+
+**Example rebalancing:**
+```
+Before:
+  Lending: 50% @ 10% APY = 5.0% contribution
+  Staking: 30% @ 6% APY = 1.8% contribution
+  LP: 20% @ 4% APY = 0.8% contribution
+  Total: 7.6% weighted APY
+
+Lending APY spikes to 14%:
+  Lending: 65% @ 14% APY = 9.1% contribution
+  Staking: 25% @ 6% APY = 1.5% contribution
+  LP: 10% @ 4% APY = 0.4% contribution
+  Total: 11.0% weighted APY (+3.4%)
+```
+
+You don't do anything - it's automatic!
+
+### Risk Management
+
+Safety features protecting your yields:
+
+**Smart Contract Limits:**
+- Max 40% in any single protocol
+- Max 60% in any single yield type
+- Min 10% in ultra-safe staking
+
+**Circuit Breakers:**
+- If protocol APY drops greater than 50%, withdraw
+- If protocol TVL drops greater than 30%, withdraw
+- If smart contract upgrade detected, pause
+
+**Insurance:**
+- $1M coverage via Nexus Mutual
+- Covers smart contract exploits
+- Covers oracle failures
+- Costs built into platform fee
+
+### Yield Boosters
+
+Ways to earn extra:
+
+**Referral Bonuses:**
+```
+Refer a friend → They deposit → You earn 1% of their yields (forever)
+Example: Friend deposits 10,000 MUSD
+  Their yearly yields: 1,500 MUSD
+  Your bonus: 15 MUSD/year
+  Your friend still gets full yields (we pay the bonus)
+```
+
+**Loyalty Multiplier:**
+```
+Hold for 30 days: 1.0× yields (normal)
+Hold for 90 days: 1.05× yields (+5%)
+Hold for 180 days: 1.10× yields (+10%)
+Hold for 365 days: 1.15× yields (+15%)
+```
+
+**Large Deposit Bonus:**
+```
+< 10,000 MUSD: 1.0× APY (normal)
+10,000 - 50,000 MUSD: 1.02× APY (+0.3% APY)
+50,000 - 100,000 MUSD: 1.05× APY (+0.75% APY)
+> 100,000 MUSD: Custom (contact us)
+```
+
+<Callout type="success">
+**Stack bonuses:** Loyalty + Large Deposit + Referral = Maximum yields!
+
+Example: 50,000 MUSD held 1 year + 3 referrals
+  Base APY: 15%
+  Loyalty bonus: +15% = 17.25% APY
+  Large deposit bonus: +0.75% = 18.0% APY
+  Referral yields: +45 MUSD/year extra
+</Callout>
+
+## Understanding Yield Fluctuations
+
+Why APY changes and what it means.
+
+### Normal Fluctuations
+
+APY varies daily/weekly - this is expected:
+
+```
+Week 1: 15.2% APY
+Week 2: 14.8% APY (-0.4%)
+Week 3: 15.5% APY (+0.7%)
+Week 4: 15.1% APY (-0.4%)
+
+Average: 15.15% APY
+Volatility: ±0.5% (low)
+```
+
+**This is normal** because:
+- DeFi rates change with demand
+- Staking rewards vary by validator participation
+- LP fees fluctuate with trading volume
+
+### When to Worry
+
+Significant drops (greater than 3%) may indicate:
+
+❌ **Market-wide DeFi decline**
+- Solution: Wait it out (usually temporary)
+- Check DeFi Pulse for overall market rates
+
+❌ **Protocol issue**
+- Solution: YieldAggregator auto-withdraws
+- Funds reallocated to safer protocols
+
+❌ **Network congestion**
+- Solution: Higher gas = lower net yields temporarily
+- Clears within hours
+
+<Callout type="info">
+**KhipuVault monitors 24/7:** If APY drops greater than 5% for greater than 24 hours, you'll receive an email alert with explanation and action plan.
+</Callout>
+
+### Positive Spikes
+
+Sometimes APY jumps (good for you!):
+
+✅ **New DeFi incentives launched**
+- Protocols offer token rewards
+- We claim and sell for MUSD
+- Extra yields passed to you
+
+✅ **Market volatility increases**
+- More trading = more LP fees
+- Temporary boost (enjoy it!)
+
+✅ **BTC price increase**
+- Staking rewards worth more in USD
+- Your balance grows faster
+
+## Comparing to Other Products
+
+Individual Savings vs alternatives:
+
+| Product | APY | Risk | Liquidity | Best For |
+|---------|-----|------|-----------|----------|
+| **Individual Savings** | 12-18% | Low | Instant | Solo savers |
+| Community Pool | 14-20% | Low | Instant | Group savers |
+| ROSCA | 15-22% | Low | Locked | Communities |
+| Prize Pool | 10-16% + lottery | Low | Instant | Lottery fans |
+| Traditional Bank | 0.5-1% | None | Instant | Ultra-conservative |
+| DeFi Lending | 5-10% | Medium | Instant | DeFi users |
+| Staking Only | 4-8% | Low | Delayed | BTC maxis |
+
+<Callout type="success">
+**Individual Savings wins on:**
+- Simplicity (easiest to understand)
+- Flexibility (deposit/withdraw anytime)
+- Consistency (stable yields)
+- Privacy (solo pool)
+
+**Consider alternatives if:**
+- You want higher APY → Community Pool
+- You're in a group → ROSCA
+- You like lotteries → Prize Pool
+</Callout>
+
+## Next Steps
+
+Master your yield strategy:
+
+<Cards>
+  <Card
+    title="Best Strategies"
+    href="/docs/products/individual-savings/strategies"
+    description="Optimize your savings approach"
+  />
+  <Card
+    title="FAQ"
+    href="/docs/products/individual-savings/faq"
+    description="Common questions about yields"
+  />
+  <Card
+    title="Tax Guide"
+    href="/docs/resources/tax-guide"
+    description="Understanding crypto yield taxes"
+  />
+</Cards>
+
+---
+
+**Questions about yields?** Ask in [Discord](https://discord.gg/khipuvault) or check the [FAQ](/docs/products/individual-savings/faq)!

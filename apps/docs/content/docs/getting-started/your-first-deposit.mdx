@@ -1,0 +1,330 @@
+---
+title: Your First Deposit
+description: Step-by-step guide to make your first deposit in KhipuVault and start earning yields on Bitcoin.
+---
+
+# Your First Deposit
+
+Congrats on making it this far! Let's make your first deposit and start earning yields. 🎉
+
+## Prerequisites
+
+Before depositing, make sure you have:
+
+- ✅ MetaMask installed and connected
+- ✅ Mezo Testnet added to your wallet
+- ✅ MUSD tokens in your wallet
+
+Not ready? Go back to:
+- [Connect Wallet](/docs/getting-started/connect-wallet)
+- [Add Mezo Network](/docs/getting-started/add-mezo-network)
+- [Get MUSD](/docs/getting-started/get-musd)
+
+## Choose Your Product
+
+KhipuVault offers four savings products. For your first deposit, we recommend **Individual Savings** (simplest):
+
+| Product | Best For | Minimum | Flexibility |
+|---------|----------|---------|-------------|
+| **Individual Savings** | Solo savers | 10 MUSD | Withdraw anytime ✅ |
+| **Community Pool** | Groups | 50 MUSD | Withdraw anytime ✅ |
+| **Rotating Pool (ROSCA)** | Communities | 100 MUSD | Locked until payout ⏳ |
+| **Prize Pool** | Risk-free lottery | 10 MUSD | Withdraw anytime ✅ |
+
+Let's start with **Individual Savings** for this guide.
+
+## Making Your First Deposit
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### Go to KhipuVault
+
+Visit [https://khipuvault.com](https://khipuvault.com)
+
+### Connect Your Wallet
+
+1. Click "Connect Wallet" (top right)
+2. Select MetaMask
+3. Approve the connection
+
+### Verify Network
+
+Make sure MetaMask shows "Mezo Testnet" at the top. If not, switch networks.
+
+### Navigate to Individual Savings
+
+1. Click "Products" in the navigation
+2. Select "Individual Savings"
+3. OR click "Get Started" on the homepage
+
+### Create a New Pool (First Time)
+
+If this is your first time:
+
+1. Click "Create New Pool"
+2. Enter pool details:
+   - **Pool Name**: "My First Pool"
+   - **Goal Amount** (optional): 1000 MUSD
+   - **Description** (optional): "Learning KhipuVault"
+3. Click "Create Pool"
+
+### Approve Transaction (One-Time)
+
+MetaMask will ask you to approve two transactions:
+
+**Transaction 1: Approve MUSD**
+- This allows the smart contract to access your MUSD
+- This is a standard security measure
+- Click "Confirm" in MetaMask
+
+<Callout type="info">
+You only need to approve once. Future deposits to this pool won't require approval again.
+</Callout>
+
+**Transaction 2: Create Pool**
+- This creates your personal savings pool
+- Gas fee: ~0.0001 BTC (~$0.01)
+- Click "Confirm" in MetaMask
+
+### Wait for Confirmation
+
+- Transactions usually complete in 5-10 seconds
+- You'll see a "Transaction Pending" notification
+- Then "Pool Created Successfully!"
+
+### Make Your First Deposit
+
+Now that your pool exists:
+
+1. Enter deposit amount: **100 MUSD** (for testing)
+2. Click "Deposit"
+3. Confirm transaction in MetaMask
+4. Wait for confirmation (~10 seconds)
+5. Success! 🎉
+
+</div>
+
+<Callout type="success" title="Congratulations!">
+You've just made your first deposit in KhipuVault! Your MUSD is now earning yields automatically. 🚀
+</Callout>
+
+## What Happens After Deposit?
+
+### Immediate Effects
+
+1. **Your MUSD is locked in the smart contract**
+   - Visible on-chain (transparent)
+   - You still control it (can withdraw anytime)
+
+2. **Yields start accumulating**
+   - Updated every block (~5 seconds)
+   - Visible in your dashboard
+
+3. **Your balance updates**
+   - MetaMask shows reduced MUSD
+   - KhipuVault shows your deposit + accumulated yields
+
+### Viewing Your Pool
+
+Go to your dashboard to see:
+
+```
+💰 Total Deposited: 100 MUSD
+📈 Current Yields: 0.5 MUSD (0.5% APY)
+📊 Pool Status: Active
+⏰ Time Active: 5 minutes
+```
+
+### How Yields Work
+
+Your yields come from:
+1. **DeFi strategies** - Smart contracts invest your MUSD in yield protocols
+2. **Mezo staking** - Bitcoin staking rewards
+3. **Liquidity provision** - Providing liquidity to DEXs
+
+<Callout type="info">
+**Current APY**: ~12-18% on Individual Savings (varies by market conditions)
+
+**Platform Fee**: 10% of yields (you keep 90%)
+</Callout>
+
+[Learn more about yields →](/docs/concepts/yield-generation)
+
+## Monitoring Your Investment
+
+### Dashboard Overview
+
+Your KhipuVault dashboard shows:
+
+- 💼 **Total Balance**: All your deposits across products
+- 📈 **Total Yields Earned**: Lifetime earnings
+- 🏦 **Active Pools**: All your pools
+- 📊 **Performance Graph**: Visual earnings over time
+
+### Real-Time Updates
+
+Yields update automatically:
+- **Every block** (~5 seconds)
+- **No refresh needed** - React Query handles updates
+- **Visible in USD** and **percentage**
+
+### Transaction History
+
+View all your transactions:
+- Deposits
+- Withdrawals
+- Yields claimed
+- Pool creations
+
+Click "History" in your dashboard to see the full list.
+
+## Withdrawing Funds (Anytime)
+
+Want to withdraw? Easy:
+
+<div className="fd-steps [[[<Steps>_h3]_h3]_h3]:fd-step">
+
+### Go to Your Pool
+
+Navigate to "My Pools" and select the pool.
+
+### Click "Withdraw"
+
+Enter the amount to withdraw (or click "Max" for everything).
+
+### Confirm Transaction
+
+MetaMask will ask to confirm. Approve it.
+
+### Receive Your Funds
+
+- Principal + accumulated yields returned to your wallet
+- Usually completes in ~10 seconds
+- Check MetaMask to verify
+
+</div>
+
+<Callout type="warning">
+**Early Withdrawal**: For Individual Savings, there's NO penalty for withdrawing early. You get your principal + all accumulated yields!
+
+For **ROSCA pools**, you must wait until your scheduled payout.
+</Callout>
+
+## Understanding Gas Fees
+
+Each transaction costs a small gas fee (paid in BTC):
+
+| Action | Gas Fee (Testnet) |
+|--------|-------------------|
+| Approve MUSD | ~0.0001 BTC (~$0.01) |
+| Create Pool | ~0.0002 BTC (~$0.02) |
+| Deposit | ~0.0001 BTC (~$0.01) |
+| Withdraw | ~0.0001 BTC (~$0.01) |
+
+<Callout type="info">
+Gas fees on **testnet** are negligible. On **mainnet**, they'll be higher but still much cheaper than Ethereum (~$0.10-$0.50 per transaction).
+</Callout>
+
+## Common Questions
+
+### When do yields start?
+
+**Immediately** after your deposit is confirmed. Yields accumulate every block.
+
+### Can I add more later?
+
+**Yes!** Click "Deposit" again to add more MUSD to your pool.
+
+### What if I need my money urgently?
+
+**Withdraw anytime** for Individual Savings. Your principal + yields are returned to your wallet in ~10 seconds.
+
+### Is there a minimum lock period?
+
+**No** for Individual Savings, Community Pools, and Prize Pools. You have full flexibility.
+
+**Yes** for ROSCA - you commit to the rotation cycle.
+
+### What's the maximum I can deposit?
+
+There's no hard maximum, but large deposits (greater than 100K MUSD) should be discussed with the team for optimal yield strategies.
+
+### Are my funds safe?
+
+Your funds are in **audited smart contracts** that you control. We never have custody. [Learn about security →](/docs/security)
+
+## Next Steps
+
+Now that you've made your first deposit, explore more:
+
+<Cards>
+  <Card
+    title="Try Other Products"
+    href="/docs/products"
+    description="Explore Community Pools, ROSCA, and Prize Pool"
+  />
+  <Card
+    title="Understand Yields"
+    href="/docs/concepts/yield-generation"
+    description="Learn how your earnings are generated"
+  />
+  <Card
+    title="Maximize Returns"
+    href="/docs/tutorials/advanced/maximize-yields"
+    description="Strategies to optimize your earnings"
+  />
+  <Card
+    title="Join the Community"
+    href="https://discord.gg/khipuvault"
+    description="Connect with other KhipuVault users"
+  />
+</Cards>
+
+## Troubleshooting
+
+### Transaction Failed
+
+**Possible causes:**
+1. **Insufficient MUSD**: Check your balance
+2. **Insufficient BTC for gas**: Get more from faucet
+3. **Network congestion**: Wait a minute and try again
+4. **Wrong network**: Switch to Mezo Testnet
+
+### Transaction Pending for Too Long
+
+1. Check [Mezo Explorer](https://explorer.test.mezo.org)
+2. Search your transaction hash
+3. If it's pending greater than 5 minutes, it might be stuck
+4. Try with higher gas (in MetaMask advanced settings)
+
+### MetaMask Errors
+
+- **"User denied transaction"**: You clicked "Reject". Try again and click "Confirm".
+- **"Insufficient funds for gas"**: You need more BTC. Get from faucet.
+- **"Nonce too high"**: Reset your MetaMask account (Settings → Advanced → Reset Account)
+
+### Pool Not Showing
+
+1. Refresh the page
+2. Check that you're connected to the correct wallet
+3. Check the transaction on Mezo Explorer to confirm it succeeded
+
+---
+
+## Congratulations! 🎉
+
+You're now a KhipuVault user! Your Bitcoin is working for you, earning yields 24/7.
+
+**What you've learned:**
+- ✅ How to connect your wallet
+- ✅ How to deposit MUSD
+- ✅ How to monitor yields
+- ✅ How to withdraw funds
+
+**Share your success:**
+- Tweet about it and tag [@KhipuVault](https://twitter.com/khipuvault)
+- Join our [Discord](https://discord.gg/khipuvault) to connect with the community
+
+---
+
+**Questions?** Read our [FAQ](/docs/resources/faq) or ask in [Discord](https://discord.gg/khipuvault)!

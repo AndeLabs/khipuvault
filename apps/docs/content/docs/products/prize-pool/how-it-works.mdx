@@ -1,0 +1,344 @@
+---
+title: How Prize Pool Works
+description: Deep dive into no-loss lottery mechanics, yield aggregation, ticket allocation, and prize distribution on KhipuVault.
+---
+
+# How Prize Pool Works
+
+Understanding the mechanics behind the no-loss lottery: from deposits to prizes.
+
+## The No-Loss Principle
+
+Prize Pool operates on a simple but powerful concept: **your principal is never used to fund prizes**.
+
+### Traditional Lottery
+```
+You pay $10 → Ticket purchased → Draw happens → You lose $10 (if no win)
+```
+
+### Prize Pool (No-Loss)
+```
+You deposit 1,000 MUSD → Earn tickets → Draw happens → Withdraw 1,000 MUSD + prize (if win)
+```
+
+The key difference: **deposits are held safely in smart contracts, only yields fund prizes**.
+
+## The Lifecycle of Your Deposit
+
+### 1. Deposit Phase
+
+When you deposit MUSD into Prize Pool:
+
+```solidity
+// Simplified flow
+deposit(1000 MUSD) → {
+  - MUSD sent to Prize Pool contract
+  - User balance recorded: 1,000 MUSD
+  - Funds deposited into Mezo yield vault
+  - Lottery tickets assigned: ~1,000 tickets
+  - User eligible for next draw
+}
+```
+
+**What happens to your MUSD:**
+- 100% deposited into Mezo's yield-generating vault
+- Your balance is tracked on-chain
+- You can withdraw anytime (no lock-up)
+
+### 2. Yield Accumulation Phase
+
+Every block (~5 seconds), all deposits earn yields:
+
+```
+Total Pool: 2,000,000 MUSD
+APY: 15%
+Daily Yield: ~821 MUSD
+Weekly Yield: ~5,750 MUSD
+```
+
+**Where yields go:**
+- ✅ 90% → Prize pool for distribution
+- ✅ 10% → Protocol treasury (operational costs)
+
+Your individual deposit contributes to the collective yield pool.
+
+### 3. Ticket Allocation
+
+Lottery tickets are dynamically calculated based on your deposit:
+
+```
+Your Tickets = Your Deposit Balance × Ticket Multiplier
+```
+
+**Example:**
+- You deposit: 1,000 MUSD
+- Ticket multiplier: 1.0 (1 MUSD = 1 ticket)
+- Your tickets: 1,000
+
+**Important:**
+- Tickets update in real-time as balances change
+- More deposit = more tickets = better odds
+- Tickets are not transferable NFTs, just accounting
+
+### 4. Draw Phase (Weekly)
+
+Every Friday at 12:00 PM UTC, the draw executes:
+
+```
+1. Snapshot all balances → Total tickets calculated
+2. Generate random number (Chainlink VRF)
+3. Select winning tickets
+4. Identify winners
+5. Distribute prizes
+6. Reset for next week
+```
+
+**Randomness source:** Chainlink VRF (Verifiable Random Function)
+- Provably fair
+- Cannot be manipulated
+- Verified on-chain
+
+### 5. Prize Distribution
+
+Prizes are allocated from the weekly yield pool:
+
+```
+Weekly Yield Pool: 5,750 MUSD (90% of yields)
+
+Prize Tiers:
+- Grand Prize (80%): 4,600 MUSD → 1 winner
+- Runner-Up (15%): 862 MUSD → 5 winners (~172 MUSD each)
+- Consolation (5%): 287 MUSD → 10 winners (~28 MUSD each)
+```
+
+Winners are notified and prizes are claimable immediately.
+
+### 6. Withdrawal Phase
+
+You can withdraw anytime:
+
+```solidity
+withdraw(amount) → {
+  - Check user balance ≥ amount
+  - Reduce ticket count proportionally
+  - Withdraw MUSD from Mezo vault
+  - Transfer to user wallet
+  - Update balances on-chain
+}
+```
+
+**Withdrawal scenarios:**
+- **No win**: Get back exact deposit
+- **Won prize**: Get deposit + unclaimed prizes
+- **Partial withdraw**: Reduce tickets, stay in next draw
+
+## The Math Behind Tickets
+
+### Ticket Calculation
+
+```
+Tickets = Deposit Balance × Time-Weighted Average
+```
+
+**Time-weighted average**: Rewards longer deposits
+
+**Example:**
+- Deposit 1,000 MUSD on Monday
+- By Friday draw: 1,000 tickets
+- Deposit 1,000 MUSD on Thursday
+- By Friday draw: ~285 tickets (2 days out of 7)
+
+<Callout type="info">
+**Why time-weighting?**
+
+To prevent "sniping" - depositing right before draws and withdrawing after. Time-weighting encourages sustained savings.
+</Callout>
+
+### Odds Calculation
+
+Your odds of winning are proportional to your ticket share:
+
+```
+Your Odds = Your Tickets ÷ Total Tickets
+
+Example:
+- Your tickets: 1,000
+- Total tickets: 1,000,000
+- Your odds: 0.1% (1 in 1,000)
+```
+
+**For Grand Prize:**
+```
+Probability = Your Tickets ÷ Total Tickets
+Expected Value = Probability × Prize Amount
+```
+
+**Example:**
+- Your tickets: 10,000
+- Total tickets: 2,000,000
+- Your odds: 0.5%
+- Grand prize: 4,600 MUSD
+- Expected value: 23 MUSD per draw
+
+## Smart Contract Architecture
+
+### Key Contracts
+
+1. **PrizePool.sol** - Main entry point
+   - Handles deposits/withdrawals
+   - Tracks user balances
+   - Manages ticket accounting
+
+2. **YieldVault.sol** - Yield generation
+   - Interfaces with Mezo vaults
+   - Accumulates yields
+   - Funds prize distribution
+
+3. **DrawManager.sol** - Lottery execution
+   - Schedules weekly draws
+   - Interfaces with Chainlink VRF
+   - Selects winners
+
+4. **PrizeDistributor.sol** - Prize claims
+   - Tracks winners
+   - Handles prize claims
+   - Prevents double-claiming
+
+### Security Features
+
+<Callout type="warning">
+**Safety Mechanisms**
+
+- **Deposit segregation**: User funds isolated from prize pool
+- **Withdrawal guarantees**: Always 1:1 redemption
+- **Reentrancy guards**: Prevent exploit attacks
+- **Access controls**: Admin functions limited
+- **Emergency pause**: Protocol can pause in crisis
+</Callout>
+
+## Yield Sources
+
+Prize Pool aggregates yields from multiple Mezo strategies:
+
+| Strategy | Allocation | APY | Risk |
+|----------|-----------|-----|------|
+| Mezo Native Staking | 60% | 12-15% | Low |
+| Mezo LP Pools | 30% | 18-22% | Medium |
+| Mezo Money Markets | 10% | 10-12% | Low |
+
+**Blended APY**: ~15% (weighted average)
+
+This diversification:
+- Reduces risk exposure
+- Stabilizes yields
+- Ensures consistent prizes
+
+## Prize Pool Economics
+
+### Revenue Model
+
+```
+Weekly Yield: 5,750 MUSD
+
+Distribution:
+- 90% (5,175 MUSD) → Prize pool
+- 10% (575 MUSD) → Protocol treasury
+
+Prize pool allocation:
+- 80% (4,140 MUSD) → Grand prize
+- 15% (776 MUSD) → Runner-up prizes
+- 5% (258 MUSD) → Consolation prizes
+```
+
+### Growth Mechanics
+
+Larger prize pools attract more deposits:
+
+```
+More Deposits → Higher Yields → Bigger Prizes → More Deposits → ...
+```
+
+This creates a virtuous cycle where everyone benefits from growth.
+
+## Comparison to PoolTogether
+
+Prize Pool is inspired by PoolTogether V5:
+
+| Feature | PoolTogether V5 | KhipuVault Prize Pool |
+|---------|-----------------|----------------------|
+| Blockchain | Ethereum, Optimism, Polygon | Mezo (Bitcoin L2) |
+| Asset | USDC, DAI | MUSD |
+| Draw Frequency | Daily | Weekly |
+| Prize Tiers | 10+ tiers | 3 tiers (Grand, Runner-Up, Consolation) |
+| Randomness | Chainlink VRF | Chainlink VRF |
+| Yield Source | Aave, Compound | Mezo vaults |
+
+We've adapted the core no-loss mechanics for Bitcoin DeFi on Mezo.
+
+## FAQ on Mechanics
+
+**Q: Can the protocol use my deposit for prizes?**
+
+A: No. Your deposit is segregated and can only be withdrawn by you. Prizes come exclusively from yields.
+
+**Q: What happens if yields are low one week?**
+
+A: Prizes will be smaller, but your deposit remains safe. If yields are zero, no draw occurs.
+
+**Q: Can I increase my tickets after depositing?**
+
+A: Yes, deposit more MUSD anytime to increase your ticket count.
+
+**Q: Do my tickets carry over week-to-week?**
+
+A: Yes, as long as you maintain your deposit, you participate in every draw.
+
+**Q: What if I withdraw during a week?**
+
+A: Your tickets are calculated based on time-weighted average, so partial week participation gives partial tickets.
+
+## Technical Deep Dive
+
+For developers interested in implementation details:
+
+```solidity
+// Simplified ticket calculation
+function getTickets(address user) public view returns (uint256) {
+  uint256 balance = balances[user];
+  uint256 timeWeightedBalance = calculateTimeWeighted(user);
+  return timeWeightedBalance; // 1:1 MUSD to tickets
+}
+
+// Prize distribution
+function distributePrizes(uint256 randomness) internal {
+  uint256 totalTickets = getTotalTickets();
+
+  // Grand prize
+  address grandWinner = selectWinner(randomness, totalTickets);
+  prizes[grandWinner] += grandPrize;
+
+  // Runner-up prizes
+  for (uint i = 0; i < 5; i++) {
+    randomness = uint256(keccak256(abi.encode(randomness, i)));
+    address winner = selectWinner(randomness, totalTickets);
+    prizes[winner] += runnerUpPrize;
+  }
+
+  // Consolation prizes
+  // ... similar logic
+}
+```
+
+See our [GitHub repository](https://github.com/khipuvault) for full source code.
+
+## Next Steps
+
+Now that you understand the mechanics:
+
+- [Entering the Lottery](/docs/products/prize-pool/entering-lottery) - How to participate
+- [Prize Calculation](/docs/products/prize-pool/prize-calculation) - Prize math explained
+- [Odds & Strategies](/docs/products/prize-pool/odds-strategies) - Improve your chances
+
+---
+
+**Questions?** Check the [FAQ](/docs/products/prize-pool/faq) or [join our Discord](https://discord.gg/khipuvault).

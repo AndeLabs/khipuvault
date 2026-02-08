@@ -1,0 +1,652 @@
+---
+title: Create a Community Pool
+description: Full guide to creating and managing your own community savings pool
+---
+
+# Create a Community Pool
+
+Learn how to create and manage a community savings pool, bringing together friends, family, or community members for collaborative Bitcoin savings.
+
+## Prerequisites
+
+- [First deposit completed](/docs/tutorials/beginner/first-deposit)
+- Understanding of [yield mechanics](/docs/tutorials/beginner/earn-first-yield)
+- Minimum 0.1 BTC for pool creation
+- At least 2-3 potential members identified
+- 20-30 minutes of time
+
+## What You'll Learn
+
+By the end of this tutorial, you will:
+
+- Understand different community pool types
+- Configure pool parameters and rules
+- Set up member management and permissions
+- Create your first community pool
+- Invite members and manage joining process
+- Monitor pool health and member activity
+- Handle common pool management scenarios
+
+## Understanding Community Pools
+
+### What is a Community Pool?
+
+A community pool is a shared savings vehicle where multiple members pool their Bitcoin together to:
+
+- Earn enhanced yields through collective bargaining power
+- Build community trust and social accountability
+- Access group benefits and bonuses
+- Share resources and financial knowledge
+
+### Pool Types
+
+KhipuVault offers three community pool types:
+
+#### 1. Cooperative Pool
+
+Standard shared savings with flexible terms:
+
+- Members deposit and withdraw freely
+- Shared yield distribution
+- Democratic governance
+- Best for: Friends, families, trusted communities
+
+#### 2. ROSCA (Rotating Savings and Credit Association)
+
+Structured rotation system:
+
+- Fixed deposit schedule (e.g., weekly, monthly)
+- Members take turns receiving the pot
+- Builds savings discipline
+- Best for: Groups wanting forced savings + periodic payouts
+
+#### 3. Prize Pool (Lottery)
+
+Gamified savings with chance element:
+
+- Regular deposits required
+- Random winners receive prizes
+- No-loss lottery (keep your principal)
+- Best for: Engaging new savers, larger communities
+
+<Callout type="info">
+  **First Pool Recommendation**: Start with a Cooperative Pool for maximum flexibility while learning pool management.
+</Callout>
+
+## Step 1: Plan Your Pool
+
+### Define Your Pool's Purpose
+
+Before creating, clarify:
+
+1. **Goal**: Emergency fund? Down payment savings? General wealth building?
+2. **Members**: Who will join? How many? (Minimum 3, maximum varies by type)
+3. **Terms**: Flexible or structured deposits?
+4. **Duration**: Ongoing or fixed term?
+
+### Calculate Pool Economics
+
+Example planning for a 10-member pool:
+
+```
+Target Pool Size:      1 BTC total
+Per Member:            0.1 BTC minimum
+Expected APY:          10% (higher than individual)
+Duration:              12 months
+Expected Pool Yield:   0.1 BTC total
+Per Member Return:     0.01 BTC (10% return)
+```
+
+### Choose Pool Type
+
+| If you want...                          | Choose           |
+|-----------------------------------------|------------------|
+| Maximum flexibility                     | Cooperative Pool |
+| Forced savings discipline               | ROSCA           |
+| Engagement and excitement               | Prize Pool      |
+| Trust-building with new members         | ROSCA           |
+| Long-term family wealth building        | Cooperative Pool |
+
+## Step 2: Navigate to Pool Creation
+
+### Access the Interface
+
+1. Visit [app.khipuvault.com](https://app.khipuvault.com)
+2. Connect your wallet
+3. Navigate to "Community Savings" in the sidebar
+4. Click "Create New Pool" button
+
+### Pool Creation Dashboard
+
+You'll see three creation options:
+
+```
+┌─────────────────────────────────────────────┐
+│         Create Community Pool               │
+├─────────────────────────────────────────────┤
+│                                             │
+│  [Cooperative Pool]  [ROSCA]  [Prize Pool]  │
+│                                             │
+│  Click to select pool type                  │
+└─────────────────────────────────────────────┘
+```
+
+## Step 3: Configure Pool Parameters (Cooperative Pool Example)
+
+### Basic Information
+
+Fill in the pool details form:
+
+#### Pool Name
+```
+Example: "Tech Workers Savings Circle"
+Guidelines:
+- Clear and descriptive
+- Identifies the group
+- Professional (others will see this)
+- Max 50 characters
+```
+
+#### Pool Description
+```
+Example: "Monthly savings pool for tech professionals
+in San Francisco. Goal: Build emergency funds and
+learn DeFi together."
+
+Guidelines:
+- Explain pool purpose
+- Target member profile
+- Goals and expectations
+- 200-500 characters
+```
+
+#### Pool Icon (Optional)
+- Upload custom icon or choose from templates
+- Represents pool in UI
+- Recommended: 512x512px PNG
+
+### Membership Settings
+
+Configure who can join and how:
+
+#### Maximum Members
+```
+Recommended: 10-20 for first pool
+Minimum: 3
+Maximum: 100
+```
+
+<Callout type="warning">
+  **Start Small**: Easier to manage smaller pools initially. You can always create larger pools later with experience.
+</Callout>
+
+#### Joining Requirements
+
+**Membership Type**:
+- **Open**: Anyone can join (subject to minimum deposit)
+- **Approval Required**: Admin approves each member
+- **Invite-Only**: Only invited addresses can join
+
+**Recommended for first pool**: Invite-Only or Approval Required
+
+#### Minimum Deposit Per Member
+```
+Example: 0.05 BTC
+Considerations:
+- Should be affordable for all target members
+- High enough to show commitment
+- Typically 5-20% of target pool size
+```
+
+### Financial Rules
+
+#### Yield Distribution
+
+How are earnings shared?
+
+**Proportional (Recommended)**:
+- Each member earns based on their deposit size
+- Fair and transparent
+- Example: 10% of pool = 10% of yield
+
+**Equal Split**:
+- All members earn same yield regardless of deposit
+- Encourages smaller savers
+- May feel unfair to larger depositors
+
+**Hybrid**:
+- Combination of proportional and equal
+- Example: 70% proportional + 30% equal split
+
+#### Withdrawal Rules
+
+**Flexible (Recommended for first pool)**:
+- Members can withdraw anytime
+- May have cooldown period (e.g., 7 days notice)
+
+**Lock Period**:
+- Funds locked for specified duration
+- Higher yields due to predictability
+- Example: 90-day lock periods
+
+**Vote Required**:
+- Withdrawals need member approval
+- Highest accountability
+- Slower process
+
+### Governance Settings
+
+#### Admin Structure
+
+**Single Admin (You)**:
+- Fastest decisions
+- Simplest management
+- Recommended for first pool
+
+**Multi-Sig Admin**:
+- Requires multiple admins to approve actions
+- Higher security
+- Slower but more democratic
+
+**DAO Governance**:
+- Members vote on decisions
+- Most democratic
+- Complex to manage
+
+#### Votable Actions
+
+Choose what requires member votes:
+
+- [ ] Pool parameter changes
+- [ ] New member approvals
+- [ ] Emergency withdrawals
+- [ ] Yield distribution changes
+- [ ] Pool closure
+
+<Callout type="info">
+  **Balance**: Too many votes slow things down. Too few reduce member input. Start conservative with admin control.
+</Callout>
+
+## Step 4: Review and Create
+
+### Configuration Summary
+
+Review all settings before deployment:
+
+```
+═══════════════════════════════════════════════
+           POOL CONFIGURATION SUMMARY
+═══════════════════════════════════════════════
+Pool Name:           Tech Workers Savings Circle
+Type:                Cooperative Pool
+Max Members:         15
+Joining:             Invite-Only
+Min Deposit:         0.05 BTC
+Yield Distribution:  Proportional
+Withdrawal:          Flexible (48h notice)
+Governance:          Single Admin
+───────────────────────────────────────────────
+Creation Fee:        0.001 BTC (one-time)
+Initial Deposit:     0.1 BTC (your contribution)
+Estimated Gas:       0.0002 BTC
+Total Cost:          0.1012 BTC
+═══════════════════════════════════════════════
+```
+
+### Important Checks
+
+Before confirming:
+
+- [ ] Pool name is spelled correctly
+- [ ] Member limits are appropriate
+- [ ] Minimum deposit is affordable for members
+- [ ] Withdrawal rules align with group expectations
+- [ ] You have sufficient funds (initial deposit + fees)
+
+### Deploy Pool Contract
+
+1. Click "Create Pool"
+2. Review transaction in MetaMask
+3. Confirm gas fee and total cost
+4. Click "Confirm" in MetaMask
+5. Wait for transaction confirmation (30-60 seconds)
+
+<Callout type="success">
+  **Pool Created!** You'll receive a unique pool address and shareable link for inviting members.
+</Callout>
+
+## Step 5: Make Initial Deposit
+
+After pool creation:
+
+1. Pool creation modal shows success message
+2. Prompted to make your initial deposit
+3. Enter your contribution amount (recommended: at least minimum deposit)
+4. Confirm deposit transaction
+5. You're now the first pool member!
+
+### Why Initial Deposit Matters
+
+- Shows commitment to potential members
+- Bootstraps pool with initial liquidity
+- Demonstrates pool functionality
+- Builds trust ("skin in the game")
+
+**Recommended**: Deposit 10-20% of target pool size initially.
+
+## Step 6: Invite Members
+
+### Generate Invite Links
+
+1. Navigate to your pool dashboard
+2. Click "Invite Members" tab
+3. Options for sharing:
+
+#### Direct Invite Link
+```
+https://app.khipuvault.com/pool/0x123...abc?invite=xyz
+```
+Copy and share via:
+- Email
+- Messaging apps
+- Social media (private groups)
+
+#### QR Code
+- Generate QR code for in-person invites
+- Members scan to join directly
+- Useful for community meetings
+
+#### Address Whitelist
+For invite-only pools:
+1. Enter member wallet addresses
+2. Click "Add to Whitelist"
+3. Share pool link with whitelisted members
+4. Only they can join
+
+### Invitation Best Practices
+
+#### Invitation Message Template
+
+```
+Subject: Join Our Bitcoin Savings Pool!
+
+Hi [Name],
+
+I've created a community savings pool on KhipuVault
+and would love for you to join!
+
+Pool Name: Tech Workers Savings Circle
+Goal: Build emergency funds together
+Min Deposit: 0.05 BTC
+Expected APY: ~10%
+Members: 5/15 slots filled
+
+Why join?
+- Higher yields than solo saving
+- Community accountability
+- Learn DeFi together
+- Transparent and secure (blockchain-based)
+
+Join here: [Invite Link]
+
+Questions? Let's chat!
+
+[Your Name]
+```
+
+#### Member Onboarding Checklist
+
+Before inviting, prepare:
+
+- [ ] Pool rules document (shared Google Doc or Notion)
+- [ ] FAQ for common member questions
+- [ ] Communication channel (Telegram, Discord, WhatsApp group)
+- [ ] Meeting schedule (if applicable)
+- [ ] Support contact info
+
+## Step 7: Manage Member Applications
+
+### Review Applications (Approval Required Pools)
+
+When members apply:
+
+1. You receive notification (email + in-app)
+2. Navigate to "Pending Applications" tab
+3. Review applicant details:
+   - Wallet address
+   - Proposed deposit amount
+   - Application message (if required)
+
+### Approval Process
+
+For each application:
+
+1. Click "Review Application"
+2. Check applicant meets requirements:
+   - Knows the pool purpose
+   - Meets minimum deposit
+   - Trusted/known member
+3. Decision options:
+   - **Approve**: Member can join and deposit
+   - **Reject**: Application declined
+   - **Request Info**: Ask follow-up questions
+
+### Member Onboarding
+
+Once approved:
+
+1. Member receives approval notification
+2. They complete deposit transaction
+3. Automatically added to pool
+4. Appears in "Active Members" list
+
+<Callout type="info">
+  **First Members**: The first 3-5 members set the pool culture. Choose thoughtfully and onboard them personally.
+</Callout>
+
+## Step 8: Monitor Pool Health
+
+### Pool Dashboard Overview
+
+Your pool admin dashboard shows:
+
+```
+═══════════════════════════════════════════════
+      TECH WORKERS SAVINGS CIRCLE
+═══════════════════════════════════════════════
+Total Pool Value:        1.25 BTC
+Members:                 8/15
+Total Yield Earned:      0.0523 BTC
+Current APY:             10.2%
+Pool Health:             Excellent ✓
+───────────────────────────────────────────────
+Last Activity:           2 hours ago
+Next Payout:             N/A (continuous)
+Pending Actions:         0
+═══════════════════════════════════════════════
+```
+
+### Key Metrics to Track
+
+#### Member Activity
+- Deposit frequency
+- Withdrawal patterns
+- Engagement level (votes, proposals)
+
+#### Financial Health
+- Total pool size (growing or shrinking?)
+- Yield generation (meeting expectations?)
+- Member contribution diversity (one dominant member?)
+
+#### Engagement Metrics
+- Active vs inactive members
+- Participation in governance
+- Communication channel activity
+
+### Health Indicators
+
+**Green (Healthy)**:
+- Steady or growing pool size
+- Regular member activity
+- High engagement
+- Yield meeting projections
+
+**Yellow (Attention Needed)**:
+- Stagnant pool size
+- Several inactive members
+- Below-target yields
+
+**Red (Action Required)**:
+- Declining pool size
+- Multiple withdrawal requests
+- Very low engagement
+- Conflict among members
+
+## Step 9: Handle Common Scenarios
+
+### Scenario 1: Member Wants to Withdraw
+
+**Process**:
+1. Member submits withdrawal request
+2. You receive notification
+3. Review request against pool rules
+4. If flexible: Auto-approved after cooldown
+5. If restricted: Vote or admin decision required
+
+**Best Practice**:
+- Communicate reason for withdrawal
+- Offer alternatives (reduce deposit instead of full withdrawal?)
+- Ensure smooth process to maintain trust
+
+### Scenario 2: New Member Request Above Limit
+
+**Issue**: Pool at max capacity (15/15) but new applicant wants to join
+
+**Options**:
+1. Increase max member limit (requires parameter change)
+2. Create waiting list
+3. Start second pool for overflow
+4. Invite applicant to different pool type
+
+### Scenario 3: Low Engagement
+
+**Signs**: No votes, silent communication channels, decreasing deposits
+
+**Solutions**:
+1. Host pool meeting (virtual or in-person)
+2. Share yield updates and progress
+3. Create engagement incentives (e.g., bonus for active members)
+4. Survey members on how to improve
+5. Gamify with challenges ("Savings Sprint Month")
+
+### Scenario 4: Dispute Resolution
+
+**Issue**: Members disagree on pool decisions
+
+**Process**:
+1. Facilitate open discussion in communication channel
+2. Present facts (on-chain data, pool rules)
+3. Call for vote if governance allows
+4. Implement majority decision
+5. Document outcome for transparency
+
+**Prevention**:
+- Clear pool rules from day one
+- Regular communication
+- Fair and transparent decision-making
+- Quick response to concerns
+
+## Advanced Pool Features
+
+### Yield Boosters
+
+Activate bonus features for pool:
+
+**Loyalty Bonus**: +0.5% APY for members in pool greater than 90 days
+
+**Size Bonus**: Tiered APY based on total pool size
+- 1-5 BTC: Base APY
+- 5-10 BTC: +0.3% APY
+- 10+ BTC: +0.5% APY
+
+**Activity Bonus**: Extra yield for active governance participation
+
+### Automated Rules
+
+Set up smart contract automation:
+
+**Auto-Rebalance**: Automatically optimize yield strategies monthly
+
+**Scheduled Payouts**: Distribute portion of yield to members quarterly
+
+**Contribution Reminders**: On-chain notifications for deposit goals
+
+### Integration with Other Pools
+
+**Pool-to-Pool Deposits**: Allocate portion of community pool to higher-yield strategies
+
+**Shared Governance**: Link pools for coordinated decision-making
+
+**Pool Network**: Join network of pools for benefits and knowledge sharing
+
+## Troubleshooting
+
+### Can't Create Pool
+
+**Solutions**:
+1. Check minimum BTC requirement met
+2. Verify wallet connected to Mezo testnet
+3. Ensure sufficient balance for creation fee + gas
+4. Try different pool name (may be taken)
+5. Clear browser cache and retry
+
+### Members Can't Join
+
+**Common Issues**:
+1. Pool at capacity → Increase member limit
+2. Below minimum deposit → Communicate requirement
+3. Not whitelisted → Add their address
+4. Wrong network → Guide them to Mezo testnet
+
+### Yield Lower Than Expected
+
+**Reasons**:
+1. Recent APY market changes
+2. Pool too small for size bonuses
+3. High withdrawal activity (reduces compounding)
+4. Member deposits too recent
+
+**Check**: Pool analytics for detailed yield breakdown
+
+## Next Steps
+
+Congratulations on creating your community pool!
+
+<Cards>
+  <Card
+    title="Pool Management Advanced"
+    href="/docs/tutorials/advanced/pool-management"
+    description="Master advanced pool administration"
+  />
+  <Card
+    title="Join a ROSCA"
+    href="/docs/tutorials/intermediate/join-rosca"
+    description="Experience structured community savings"
+  />
+  <Card
+    title="Multi-Pool Strategy"
+    href="/docs/tutorials/advanced/multi-pool-strategy"
+    description="Manage multiple pools effectively"
+  />
+</Cards>
+
+## Additional Resources
+
+- [Community Pool Smart Contract](/docs/technical/contracts/cooperative-pool)
+- [Governance Best Practices](/docs/guides/governance)
+- [Member Communication Templates](/docs/resources/templates)
+- [Video: Creating Your First Pool](https://youtube.com/@khipuvault)
+
+<Callout type="success">
+  **You're a Pool Creator!** Building community wealth starts here. Focus on member experience and transparent communication for success.
+</Callout>

@@ -1,0 +1,330 @@
+---
+title: Developers Overview
+description: Build on KhipuVault - APIs, smart contracts, and integration guides for Bitcoin DeFi on Mezo blockchain.
+---
+
+# Developers Overview
+
+Welcome to the KhipuVault developer documentation. Build decentralized Bitcoin savings applications on the Mezo blockchain using our comprehensive APIs, smart contracts, and integration tools.
+
+## What You Can Build
+
+<Cards>
+  <Card
+    title="DeFi Applications"
+    description="Build savings apps, yield aggregators, or portfolio managers on top of KhipuVault"
+  />
+  <Card
+    title="Community Tools"
+    description="Create ROSCA platforms, community pools, or group savings interfaces"
+  />
+  <Card
+    title="Analytics Platforms"
+    description="Build dashboards, yield trackers, or risk analysis tools using our APIs"
+  />
+  <Card
+    title="Smart Contract Integrations"
+    description="Compose KhipuVault contracts into your own DeFi protocols"
+  />
+</Cards>
+
+## Quick Links
+
+<Cards>
+  <Card
+    title="Quickstart Guide"
+    href="/docs/developers/quickstart"
+    description="Integrate KhipuVault in 5 minutes"
+  />
+  <Card
+    title="Smart Contracts"
+    href="/docs/developers/smart-contracts/individual-pool"
+    description="Contract addresses, ABIs, and methods"
+  />
+  <Card
+    title="REST API"
+    href="/docs/developers/api-reference/rest-api"
+    description="Backend API endpoints and responses"
+  />
+  <Card
+    title="Code Examples"
+    href="/docs/developers/examples"
+    description="TypeScript examples for common tasks"
+  />
+</Cards>
+
+## Technology Stack
+
+KhipuVault is a modern full-stack monorepo built with:
+
+### Frontend
+- **Next.js 15** - React framework with App Router
+- **Wagmi 2.x** - React hooks for Ethereum
+- **Viem 2.x** - TypeScript Ethereum library
+- **React Query 5** - Server state management
+- **Tailwind CSS** - Styling framework
+
+### Backend
+- **Express.js** - REST API server
+- **Prisma** - Database ORM (PostgreSQL)
+- **SIWE** - Sign-In With Ethereum authentication
+- **Pino** - Structured logging
+
+### Smart Contracts
+- **Solidity 0.8.26** - Smart contract language
+- **Foundry** - Development framework (Forge, Cast, Anvil)
+- **OpenZeppelin** - Security libraries
+- **Mezo Blockchain** - Bitcoin-backed L2
+
+### Blockchain
+- **ethers.js 6.x** - Event indexing
+- **PostgreSQL** - Indexed event storage
+
+## Network Details
+
+### Mezo Testnet
+
+```typescript
+{
+  chainId: 31611,
+  rpcUrl: "https://rpc.test.mezo.org",
+  blockExplorer: "https://explorer.test.mezo.org",
+  nativeCurrency: {
+    name: "Bitcoin",
+    symbol: "BTC",
+    decimals: 18
+  }
+}
+```
+
+### Contract Addresses
+
+| Contract | Address |
+|----------|---------|
+| IndividualPool | `0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393` |
+| CooperativePool | `0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88` |
+| LotteryPoolV3 (ROSCA) | Contact us for deployment |
+| MezoIntegration | `0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6` |
+| YieldAggregator | `0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6` |
+| MUSD (Test Token) | `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503` |
+
+## Architecture Overview
+
+```
+┌─────────────┐
+│   Frontend  │  Next.js + Wagmi + Viem
+│  (Port 9002)│  React Query + Zustand
+└──────┬──────┘
+       │
+       ├─────────────┐
+       ▼             ▼
+┌─────────────┐  ┌──────────────┐
+│  REST API   │  │ Smart        │
+│ (Port 3001) │  │ Contracts    │
+│  Express.js │  │ Mezo Testnet │
+└──────┬──────┘  └──────┬───────┘
+       │                │
+       ▼                ▼
+┌──────────────────────────┐
+│   PostgreSQL Database    │
+│   - User data            │
+│   - Indexed events       │
+│   - Pool metadata        │
+└──────────────────────────┘
+       ▲
+       │
+┌──────┴──────┐
+│   Indexer   │  ethers.js event listeners
+│  (Service)  │  Real-time blockchain sync
+└─────────────┘
+```
+
+[Learn more →](/docs/developers/architecture/overview)
+
+## Developer Resources
+
+### Documentation Sections
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Architecture
+
+Understand system design, contract architecture, and API patterns.
+
+[View Architecture →](/docs/developers/architecture/overview)
+
+### API Reference
+
+REST endpoints, authentication, and rate limits.
+
+[View API Docs →](/docs/developers/api-reference/rest-api)
+
+### Smart Contracts
+
+Detailed contract documentation with methods, events, and examples.
+
+[View Contracts →](/docs/developers/smart-contracts/individual-pool)
+
+### Integration Guides
+
+Step-by-step guides for Wagmi, Viem, and event indexing.
+
+[View Guides →](/docs/developers/integration/web3-integration)
+
+### Code Examples
+
+Working TypeScript examples for deposits, withdrawals, and pool management.
+
+[View Examples →](/docs/developers/examples)
+
+</div>
+
+## NPM Packages
+
+KhipuVault uses a monorepo structure with these packages:
+
+```bash
+@khipu/web3        # ABIs, contract addresses, type definitions
+@khipu/database    # Prisma client (PostgreSQL)
+@khipu/shared      # Shared types, constants, utilities
+@khipu/ui          # React components (Radix/shadcn)
+```
+
+Currently for internal use. Public npm packages coming soon.
+
+## Getting Started
+
+### 5-Minute Integration
+
+1. **Install Dependencies**
+   ```bash
+   npm install wagmi viem @tanstack/react-query
+   ```
+
+2. **Configure Wagmi**
+   ```typescript
+   import { createConfig, http } from 'wagmi'
+   import { mezoTestnet } from './chains'
+
+   export const config = createConfig({
+     chains: [mezoTestnet],
+     transports: {
+       [mezoTestnet.id]: http('https://rpc.test.mezo.org')
+     }
+   })
+   ```
+
+3. **Make Your First Contract Call**
+   ```typescript
+   import { useReadContract } from 'wagmi'
+   import { INDIVIDUAL_POOL_ABI } from '@khipu/web3'
+
+   const { data: balance } = useReadContract({
+     address: '0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393',
+     abi: INDIVIDUAL_POOL_ABI,
+     functionName: 'balanceOf',
+     args: [userAddress]
+   })
+   ```
+
+[Full Quickstart →](/docs/developers/quickstart)
+
+## Common Use Cases
+
+### Read Pool Data
+
+```typescript
+// Get user's savings balance
+const balance = await readContract({
+  address: INDIVIDUAL_POOL_ADDRESS,
+  abi: INDIVIDUAL_POOL_ABI,
+  functionName: 'balanceOf',
+  args: [userAddress]
+})
+```
+
+### Make a Deposit
+
+```typescript
+// Deposit 100 MUSD
+const { hash } = await writeContract({
+  address: INDIVIDUAL_POOL_ADDRESS,
+  abi: INDIVIDUAL_POOL_ABI,
+  functionName: 'deposit',
+  args: [parseUnits('100', 18)]
+})
+```
+
+### Query API
+
+```typescript
+// Get pool analytics
+const response = await fetch('https://api.khipuvault.com/pools/individual')
+const data = await response.json()
+```
+
+[More Examples →](/docs/developers/examples)
+
+## Support & Community
+
+<Callout type="info">
+**Developer Support**
+
+- GitHub: [github.com/khipuvault](https://github.com/khipuvault)
+- Discord: [discord.gg/khipuvault](https://discord.gg/khipuvault) (#developers channel)
+- Email: dev@khipuvault.com
+- Bug Reports: [GitHub Issues](https://github.com/khipuvault/issues)
+</Callout>
+
+## Contributing
+
+KhipuVault is open source! Contributions welcome:
+
+- **Smart Contracts**: Security audits, gas optimization
+- **Frontend**: UI improvements, new features
+- **Backend**: API endpoints, event indexing
+- **Documentation**: Guides, examples, translations
+
+See our [Contributing Guide](https://github.com/khipuvault/CONTRIBUTING.md)
+
+## Roadmap
+
+### Q1 2026
+- Mainnet launch on Mezo
+- Public npm packages
+- GraphQL API
+- Subgraph indexing
+
+### Q2 2026
+- SDK libraries (TypeScript, Python)
+- Webhook notifications
+- Advanced analytics API
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="5-Minute Quickstart"
+    href="/docs/developers/quickstart"
+    description="Get started with your first integration"
+  />
+  <Card
+    title="System Architecture"
+    href="/docs/developers/architecture/overview"
+    description="Understand how KhipuVault works"
+  />
+  <Card
+    title="Smart Contracts Reference"
+    href="/docs/developers/smart-contracts/individual-pool"
+    description="Complete contract documentation"
+  />
+  <Card
+    title="Working Examples"
+    href="/docs/developers/examples"
+    description="Copy-paste code for common tasks"
+  />
+</Cards>
+
+---
+
+**Ready to build?** Start with our [Quickstart Guide](/docs/developers/quickstart) or explore the [Smart Contracts](/docs/developers/smart-contracts/individual-pool).

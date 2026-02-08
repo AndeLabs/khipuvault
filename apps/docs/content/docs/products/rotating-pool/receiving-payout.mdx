@@ -1,0 +1,606 @@
+---
+title: Receiving Your Payout
+description: How to claim your rotating pool distribution when it's your turn, understanding yields, and managing your windfall.
+---
+
+# Receiving Your Payout
+
+When it's your turn in the rotation, you receive the full pot collected from all members. This guide covers the claiming process and what to do with your payout.
+
+## When Is Your Turn?
+
+### Check Your Position
+
+View your scheduled payout round on the pool dashboard:
+
+```
+Your Position in Rotation:
+
+Member: You (0xMnop...3456)
+Position: 9 of 10
+Payout Round: Round 9
+Scheduled Date: October 1, 2026, 12:00 PM UTC
+
+Countdown: 143 days remaining
+```
+
+### Rotation Order
+
+See the full rotation schedule:
+
+```
+Round 1 (Feb): Member A ✓ Received $1,005
+Round 2 (Mar): Member B ✓ Received $1,008
+Round 3 (Apr): Member C ✓ Received $1,012
+Round 4 (May): Member D ✓ Received $1,006
+Round 5 (Jun): Member E ✓ Received $1,010
+Round 6 (Jul): Member F ⏳ Current round
+Round 7 (Aug): Member G → Next
+Round 8 (Sep): Member H
+Round 9 (Oct): YOU → Your payout round
+Round 10 (Nov): Member J
+```
+
+### Payout Notifications
+
+You'll receive alerts as your turn approaches:
+
+**30 days before:**
+```
+📅 Your payout round is coming up!
+Round 9 scheduled for October 1, 2026
+Estimated payout: ~1,010 MUSD
+```
+
+**7 days before:**
+```
+🎉 Your turn is next week!
+Ensure your wallet is ready to receive.
+Check gas fees and claim settings.
+```
+
+**1 day before:**
+```
+🚀 Tomorrow is your payout day!
+October 1, 2026 at 12:00 PM UTC
+Keep your wallet connected.
+```
+
+## Understanding Your Payout
+
+### Base Payout Calculation
+
+```
+Members: 10
+Contribution per member: 100 MUSD
+Base pot: 10 × 100 = 1,000 MUSD
+```
+
+### Enhanced with Yields
+
+<Callout type="success">
+**Bonus: Contributions earn yields while held in the pool.**
+
+The longer funds sit before distribution, the more yields accumulate.
+</Callout>
+
+**Example calculation:**
+
+```
+Base pot: 1,000 MUSD
+Holding period: 7 days average
+Yield rate: 12% APY → ~0.23% per week
+Yields earned: 1,000 × 0.23% = 2.30 MUSD
+
+Yields after platform fee (10%):
+2.30 × 0.90 = 2.07 MUSD
+
+Final payout: 1,000 + 2.07 = 1,002.07 MUSD
+```
+
+**Factors affecting yield amount:**
+
+1. **Position in rotation**
+   - Early recipients (Round 1-3): Lower yields (less time)
+   - Middle recipients (Round 4-7): Moderate yields
+   - Late recipients (Round 8-10): Higher yields (more time)
+
+2. **Market conditions**
+   - APY fluctuates: 10-18% typically
+   - Bull markets: Higher yields
+   - Bear markets: Lower yields
+
+3. **Pool size**
+   - Larger pots → More absolute yield
+   - 10 members × $100 = $2-3 yields
+   - 20 members × $100 = $4-6 yields
+
+### Collateral Return
+
+If the pool required collateral, you receive it back with your payout:
+
+```
+Payout Breakdown:
+
+Current round pot: 1,002.07 MUSD
++ Your collateral: 500.00 MUSD
+───────────────────────────────
+Total received: 1,502.07 MUSD
+```
+
+<Callout type="info">
+**Why collateral is returned:**
+
+You deposited collateral to protect the pool in case you received early and then defaulted. Once you receive your payout, you still owe future contributions, so the collateral is returned as you no longer pose default risk (you haven't been paid yet relative to others).
+</Callout>
+
+### Deductions
+
+**Platform Fee:**
+```
+Only applied to yields: 10% of 2.07 = $0.21
+NOT applied to base pot
+```
+
+**Late Payment Penalties (if any):**
+```
+If you were late in Round 3:
+Penalty: 5.00 MUSD
+Deducted from payout: 1,002.07 - 5.00 = 997.07 MUSD
+```
+
+## Claiming Your Payout
+
+### Automatic Distribution (Default)
+
+Most pools use automatic distribution:
+
+<Steps>
+
+### Round Begins
+
+On the scheduled date (Oct 1, 12:00 PM UTC), the smart contract executes.
+
+### Contributions Collected
+
+Contract pulls 100 MUSD from each member automatically.
+
+### Payout Distributed
+
+Contract immediately transfers total pot to you.
+
+```
+Transaction: 0xabc123...
+From: Pool Contract (0x7a8E9F...)
+To: You (0xMnop...3456)
+Amount: 1,002.07 MUSD
+Timestamp: 2026-10-01 12:00:15 UTC
+Status: Confirmed ✓
+```
+
+### Confirmation
+
+You receive notification:
+
+```
+✅ Payout Received!
+
+Amount: 1,002.07 MUSD
+Round: 9
+Transaction: 0xabc123...
+
+Your wallet balance updated.
+Collateral of 500 MUSD also returned.
+```
+
+</Steps>
+
+**No action needed from you.** Just ensure your wallet is accessible.
+
+### Manual Claim (Rare)
+
+Some pools require manual claiming:
+
+<Steps>
+
+### Round Completes
+
+All contributions collected and verified.
+
+### Claim Button Appears
+
+```
+🎉 Your payout is ready!
+
+Amount: 1,002.07 MUSD
+Status: Ready to claim
+Action: Click "Claim Payout"
+```
+
+### Sign Transaction
+
+```
+Claim payout from rotating pool
+Amount: 1,002.07 MUSD
+Gas fee: ~$0.10
+```
+
+### Receive Funds
+
+Transferred to your wallet immediately.
+
+</Steps>
+
+## After Receiving Payout
+
+### Your Ongoing Commitment
+
+**IMPORTANT:** Receiving your payout does NOT end your commitment.
+
+```
+You received: Round 9 (October)
+You still owe: Round 10 (November)
+
+Remaining contributions: 1 × 100 = 100 MUSD
+```
+
+**Full timeline:**
+
+```
+Feb-Sep: Paid 8 × $100 = $800 ✓
+Oct: Paid $100 + RECEIVED $1,002 ← You are here
+Nov: Must pay final $100 ✓
+
+Total paid: $900
+Total received: $1,002
+Net gain: $102 (from yields)
+```
+
+<Callout type="warning">
+**Don't default after receiving!**
+
+This is the most critical time. Some members are tempted to default after getting their payout. Don't be that person. Your collateral was already returned, and defaulting now will:
+
+- Trigger penalties
+- Damage your reputation permanently
+- Get you banned from future pools
+- Hurt your fellow members
+</Callout>
+
+### Payment Reminder Setup
+
+After receiving, set strong reminders for remaining contributions:
+
+```
+October payout received ✓
+November payment (FINAL): Set 3 reminders
+  - Oct 25: "Remember final payment Nov 1"
+  - Oct 29: "Final payment in 3 days"
+  - Oct 31: "Final payment tomorrow!"
+```
+
+## Using Your Payout Wisely
+
+### Planned Uses
+
+**Debt Payoff:**
+```
+Payout: $1,002
+Use: Pay off credit card ($800 balance)
+Result: Save 18% APR interest
+Remaining: $202 for emergency fund
+```
+
+**Major Purchase:**
+```
+Payout: $1,002
+Use: Down payment on vehicle
+Impact: Avoid high-interest auto loan
+```
+
+**Emergency Fund:**
+```
+Payout: $1,002
+Use: 3-month emergency reserve
+Peace of mind: Priceless
+```
+
+**Education:**
+```
+Payout: $1,002
+Use: Tuition, books, certification
+ROI: Career advancement
+```
+
+**Business Investment:**
+```
+Payout: $1,002
+Use: Inventory, equipment, marketing
+Goal: Income-generating asset
+```
+
+### Avoid These Mistakes
+
+❌ **Splurging on luxuries**
+```
+Payout: $1,002
+Spent: New phone ($800) + clothes ($200)
+Result: Regret when emergency arises
+```
+
+❌ **Forgetting final contributions**
+```
+Payout: Received in Round 9
+Forgot: Still owe Round 10
+Result: Default, penalties, banned
+```
+
+❌ **Risky investments**
+```
+Payout: $1,002
+Invested: Speculative meme coin
+Result: Lost most of it
+```
+
+❌ **Immediate withdrawal to fiat**
+```
+Payout: 1,002 MUSD
+Cashed out: Paid exchange fees + taxes
+Could have: Kept in MUSD earning 12% APY
+```
+
+### Smart Strategies
+
+**Strategy 1: Reinvest in Individual Savings**
+```
+Received: 1,002 MUSD from rotating pool
+Action: Deposit into Individual Savings Pool
+Earn: 12-18% APY ongoing
+Benefit: Compound previous ROSCA savings
+```
+
+**Strategy 2: Start Your Own Pool**
+```
+Received: 1,002 MUSD
+Action: Become organizer of new rotating pool
+Use: 500 MUSD as your collateral + contributions
+Benefit: Help others while staying invested
+```
+
+**Strategy 3: Split Approach**
+```
+Payout: 1,002 MUSD
+- 50% (501) → Emergency fund (Individual Savings)
+- 30% (301) → Planned expense (debt/purchase)
+- 20% (200) → New rotating pool
+Benefit: Balanced, diversified approach
+```
+
+## Payout History & Records
+
+### Transaction Records
+
+View your complete payout details:
+
+```
+Payout Transaction Details:
+
+Pool: Neighborhood Tanda #42
+Round: 9 of 10
+Date: October 1, 2026, 12:00:15 UTC
+Transaction Hash: 0xabc123456...
+
+Breakdown:
+├─ Base pot: 1,000.00 MUSD (10 members × 100)
+├─ Yields earned: 2.30 MUSD
+├─ Platform fee: -0.23 MUSD (10% of yields)
+├─ Net yields: 2.07 MUSD
+├─ Late penalties: 0.00 MUSD
+├─ Collateral returned: 500.00 MUSD
+└─ Total received: 1,502.07 MUSD
+
+Your Contributions to Date: 800.00 MUSD (Rounds 1-8)
+Current contribution: 100.00 MUSD (Round 9)
+Net position: +602.07 MUSD (received - paid so far)
+```
+
+### Download Proof
+
+Export records for taxes or personal records:
+
+```
+Options:
+- PDF receipt
+- CSV transaction log
+- Blockchain explorer link
+- Tax summary (1099 format for US)
+```
+
+### Tax Implications
+
+<Callout type="warning">
+**Consult a tax professional.**
+
+Depending on your jurisdiction, yields may be taxable income. The base pot (your own contributions returned) typically is not taxable.
+</Callout>
+
+**Typical treatment (varies by country):**
+
+```
+Received: 1,502.07 MUSD
+
+Taxable:
+- Yields: 2.07 MUSD (may be taxable as interest)
+
+Non-taxable:
+- Base pot: 1,000 MUSD (return of your contributions)
+- Collateral: 500 MUSD (return of deposit)
+```
+
+## Handling Issues
+
+### Payout Delay
+
+**Problem:** Round date passed but you haven't received payout.
+
+**Causes:**
+1. Some members haven't paid yet
+2. Technical issue with distribution
+3. Organizer manually reviewing
+
+**Solution:**
+```
+1. Check pool dashboard: See payment status
+2. Contact organizer: Ask for update
+3. View contract: Check if funds are ready
+4. Manual claim: Try claiming if available
+```
+
+### Incorrect Amount
+
+**Problem:** Received different amount than expected.
+
+**Causes:**
+1. Late payment penalties applied
+2. Market yield changes
+3. Missing contributions from members
+
+**Solution:**
+```
+1. Review breakdown: Check payout details
+2. Verify on-chain: Compare with smart contract
+3. Contact organizer: If discrepancy found
+4. Dispute if needed: On-chain evidence
+```
+
+### Wallet Issues
+
+**Problem:** Can't access wallet to receive payout.
+
+**Prevention:**
+```
+Before your round:
+- Backup seed phrase securely
+- Test wallet access
+- Ensure wallet app is updated
+- Have recovery plan
+```
+
+**Emergency solution:**
+```
+If locked out:
+1. Recover wallet with seed phrase
+2. Contact organizer for delay (if manual claim)
+3. Use recovery service if needed
+```
+
+## Special Scenarios
+
+### Early Payout (Round 1-2)
+
+**Pros:**
+- Get lump sum immediately
+- Use for urgent needs
+- Start benefiting early
+
+**Cons:**
+- Lower yields (less time to accumulate)
+- Longer commitment after receiving
+- Higher default temptation
+
+**Example:**
+```
+Round 1 payout: 1,000.50 MUSD (minimal yields)
+Remaining payments: 9 × 100 = 900 MUSD
+Duration: 9 more months
+```
+
+### Late Payout (Round 8-10)
+
+**Pros:**
+- Higher yields (more time accumulating)
+- Shorter commitment after receiving
+- Most members already proven reliable
+
+**Cons:**
+- Wait longer for lump sum
+- Paid more before receiving
+- Slight default risk from early recipients
+
+**Example:**
+```
+Round 10 payout: 1,015 MUSD (max yields)
+Remaining payments: 0 (COMPLETE!)
+Duration: Done immediately after
+```
+
+### Position Swaps
+
+If you swapped positions with another member:
+
+```
+Original: You → Round 9, Member X → Round 4
+Swapped: You → Round 4, Member X → Round 9
+
+Your new payout: May instead of October
+Member X: Benefits from later position
+Both: Sign on-chain swap agreement
+```
+
+## Post-Payout Community
+
+### Share Your Success
+
+Celebrate with your pool members:
+
+```
+Pool Chat:
+You: "Just received my Round 9 payout! 🎉 Thanks everyone for staying committed. One more round to go!"
+
+Member A: "Congrats! Use it wisely 🙌"
+Member B: "Amazing! Looking forward to my turn next month 😊"
+```
+
+### Testimonials
+
+Share your experience to help others:
+
+```
+"I used my rotating pool payout as a down payment on a car.
+This wouldn't have been possible saving alone.
+The discipline of monthly contributions was key."
+- Maria, Round 9 recipient
+```
+
+### Start a New Cycle
+
+After completing one pool:
+
+```
+Option 1: Same pool, new cycle
+- Keep same members
+- Adjust contribution amount if needed
+- Random lottery for new order
+
+Option 2: New pool with friends
+- Invite new people
+- Different schedule or amount
+- Share your organizer experience
+
+Option 3: Join multiple pools
+- Diversify payout timing
+- Build savings faster
+- Requires careful budgeting
+```
+
+## Next Steps
+
+After receiving your payout:
+
+- [FAQ](/docs/products/rotating-pool/faq) - Common questions
+- [Creating a Pool](/docs/products/rotating-pool/creating-rosca) - Start your own
+- [Individual Savings](/docs/products/individual-savings) - Reinvest your payout
+
+---
+
+**Got your payout? Invest it wisely.** [Explore Individual Savings →](/docs/products/individual-savings)

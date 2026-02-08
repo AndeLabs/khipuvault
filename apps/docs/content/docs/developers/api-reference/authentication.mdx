@@ -1,0 +1,536 @@
+---
+title: Authentication (SIWE)
+description: Sign-In With Ethereum authentication implementation guide for KhipuVault API.
+---
+
+# Authentication with SIWE
+
+KhipuVault uses **SIWE** (Sign-In With Ethereum) for secure, wallet-based authentication. No passwords required - users authenticate by signing a message with their Ethereum wallet.
+
+## Why SIWE?
+
+- **Self-custodial**: Users control their own private keys
+- **No passwords**: No password storage or leaks
+- **Crypto-native**: Natural for Web3 users
+- **Secure**: Cryptographic signature verification
+- **Standardized**: Based on [EIP-4361](https://eips.ethereum.org/EIPS/eip-4361)
+
+## Authentication Flow
+
+```
+┌──────────┐                    ┌─────────┐                   ┌──────────┐
+│  Client  │                    │   API   │                   │  Wallet  │
+└────┬─────┘                    └────┬────┘                   └────┬─────┘
+     │                               │                             │
+     │ 1. Request nonce              │                             │
+     ├──────────────────────────────>│                             │
+     │                               │                             │
+     │ 2. Generate & return nonce    │                             │
+     │<──────────────────────────────┤                             │
+     │                               │                             │
+     │ 3. Create SIWE message        │                             │
+     │                               │                             │
+     │ 4. Request signature          │                             │
+     ├─────────────────────────────────────────────────────────────>│
+     │                               │                             │
+     │                               │     5. User approves        │
+     │                               │                             │
+     │ 6. Return signature           │                             │
+     │<─────────────────────────────────────────────────────────────┤
+     │                               │                             │
+     │ 7. Send message + signature   │                             │
+     ├──────────────────────────────>│                             │
+     │                               │                             │
+     │                               │ 8. Verify signature         │
+     │                               │ 9. Check nonce              │
+     │                               │ 10. Generate JWT            │
+     │                               │                             │
+     │ 11. Return JWT token          │                             │
+     │<──────────────────────────────┤                             │
+     │                               │                             │
+     │ 12. Use JWT for API calls     │                             │
+     ├──────────────────────────────>│                             │
+```
+
+## Frontend Implementation
+
+### 1. Request Nonce
+
+```typescript
+async function getNonce(address: string): Promise<string> {
+  const response = await fetch('https://api.khipuvault.com/auth/nonce', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ address })
+  })
+
+  const { data } = await response.json()
+  return data.nonce
+}
+```
+
+### 2. Create SIWE Message
+
+```typescript
+import { SiweMessage } from 'siwe'
+
+async function createSiweMessage(
+  address: string,
+  nonce: string
+): Promise<string> {
+  const message = new SiweMessage({
+    domain: window.location.host,
+    address,
+    statement: 'Sign in to KhipuVault',
+    uri: window.location.origin,
+    version: '1',
+    chainId: 31611, // Mezo Testnet
+    nonce,
+    issuedAt: new Date().toISOString()
+  })
+
+  return message.prepareMessage()
+}
+```
+
+### 3. Sign Message with Wallet
+
+Using Wagmi:
+
+```typescript
+import { useSignMessage } from 'wagmi'
+
+function SignInButton() {
+  const { address } = useAccount()
+  const { signMessageAsync } = useSignMessage()
+
+  const handleSignIn = async () => {
+    if (!address) return
+
+    // 1. Get nonce
+    const nonce = await getNonce(address)
+
+    // 2. Create SIWE message
+    const message = await createSiweMessage(address, nonce)
+
+    // 3. Sign message
+    const signature = await signMessageAsync({ message })
+
+    // 4. Verify and get token
+    const token = await verifySignature(message, signature)
+
+    // 5. Store token
+    localStorage.setItem('khipu_token', token)
+  }
+
+  return <button onClick={handleSignIn}>Sign In</button>
+}
+```
+
+Using ethers.js (alternative):
+
+```typescript
+import { BrowserProvider } from 'ethers'
+
+async function signMessage(message: string): Promise<string> {
+  const provider = new BrowserProvider(window.ethereum)
+  const signer = await provider.getSigner()
+  const signature = await signer.signMessage(message)
+  return signature
+}
+```
+
+### 4. Verify Signature & Get JWT
+
+```typescript
+async function verifySignature(
+  message: string,
+  signature: string
+): Promise<string> {
+  const response = await fetch('https://api.khipuvault.com/auth/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ message, signature })
+  })
+
+  if (!response.ok) {
+    throw new Error('Authentication failed')
+  }
+
+  const { data } = await response.json()
+  return data.token
+}
+```
+
+### 5. Use JWT for API Calls
+
+```typescript
+async function fetchUserPools(token: string) {
+  const response = await fetch('https://api.khipuvault.com/pools', {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  })
+
+  const { data } = await response.json()
+  return data
+}
+```
+
+## Complete React Example
+
+```typescript
+import { useState } from 'react'
+import { useAccount, useSignMessage } from 'wagmi'
+import { SiweMessage } from 'siwe'
+
+export function useAuth() {
+  const { address } = useAccount()
+  const { signMessageAsync } = useSignMessage()
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem('khipu_token')
+  )
+
+  const signIn = async () => {
+    if (!address) throw new Error('No wallet connected')
+
+    try {
+      // 1. Get nonce
+      const nonceRes = await fetch('/auth/nonce', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address })
+      })
+      const { data: { nonce } } = await nonceRes.json()
+
+      // 2. Create SIWE message
+      const message = new SiweMessage({
+        domain: window.location.host,
+        address,
+        statement: 'Sign in to KhipuVault',
+        uri: window.location.origin,
+        version: '1',
+        chainId: 31611,
+        nonce,
+        issuedAt: new Date().toISOString()
+      }).prepareMessage()
+
+      // 3. Sign message
+      const signature = await signMessageAsync({ message })
+
+      // 4. Verify and get token
+      const verifyRes = await fetch('/auth/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message, signature })
+      })
+      const { data: { token } } = await verifyRes.json()
+
+      // 5. Store token
+      localStorage.setItem('khipu_token', token)
+      setToken(token)
+
+      return token
+    } catch (error) {
+      console.error('Sign in failed:', error)
+      throw error
+    }
+  }
+
+  const signOut = () => {
+    localStorage.removeItem('khipu_token')
+    setToken(null)
+  }
+
+  return { token, signIn, signOut, isAuthenticated: !!token }
+}
+
+// Usage
+function App() {
+  const { token, signIn, signOut, isAuthenticated } = useAuth()
+
+  if (!isAuthenticated) {
+    return <button onClick={signIn}>Sign In with Wallet</button>
+  }
+
+  return (
+    <div>
+      <p>Authenticated!</p>
+      <button onClick={signOut}>Sign Out</button>
+    </div>
+  )
+}
+```
+
+## Backend Implementation
+
+### 1. Generate Nonce Endpoint
+
+```typescript
+import crypto from 'crypto'
+import { Router } from 'express'
+
+const router = Router()
+
+// In-memory store (use Redis in production)
+const nonces = new Map<string, number>()
+
+router.post('/nonce', (req, res) => {
+  const nonce = crypto.randomBytes(16).toString('hex')
+
+  // Store with 10-minute expiry
+  nonces.set(nonce, Date.now() + 10 * 60 * 1000)
+
+  res.json({
+    success: true,
+    data: { nonce }
+  })
+})
+```
+
+### 2. Verify Signature Endpoint
+
+```typescript
+import { SiweMessage } from 'siwe'
+import jwt from 'jsonwebtoken'
+import { prisma } from '@khipu/database'
+
+router.post('/verify', async (req, res) => {
+  try {
+    const { message, signature } = req.body
+
+    // 1. Parse SIWE message
+    const siweMessage = new SiweMessage(message)
+
+    // 2. Verify signature
+    const fields = await siweMessage.verify({ signature })
+
+    // 3. Check nonce hasn't been used
+    const nonceExpiry = nonces.get(siweMessage.nonce)
+    if (!nonceExpiry || Date.now() > nonceExpiry) {
+      return res.status(401).json({
+        success: false,
+        error: 'Invalid or expired nonce'
+      })
+    }
+
+    // 4. Delete nonce (prevent replay)
+    nonces.delete(siweMessage.nonce)
+
+    // 5. Get or create user
+    let user = await prisma.user.findUnique({
+      where: { address: siweMessage.address.toLowerCase() }
+    })
+
+    if (!user) {
+      user = await prisma.user.create({
+        data: { address: siweMessage.address.toLowerCase() }
+      })
+    }
+
+    // 6. Generate JWT
+    const token = jwt.sign(
+      {
+        userId: user.id,
+        address: user.address
+      },
+      process.env.JWT_SECRET!,
+      { expiresIn: '7d' }
+    )
+
+    res.json({
+      success: true,
+      data: { token, user }
+    })
+  } catch (error) {
+    console.error('Verification failed:', error)
+    res.status(401).json({
+      success: false,
+      error: 'Authentication failed'
+    })
+  }
+})
+```
+
+### 3. Auth Middleware
+
+```typescript
+import jwt from 'jsonwebtoken'
+
+export const authMiddleware = (req, res, next) => {
+  try {
+    const token = req.headers.authorization?.replace('Bearer ', '')
+
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        error: 'No token provided'
+      })
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET!)
+    req.user = decoded
+
+    next()
+  } catch (error) {
+    res.status(401).json({
+      success: false,
+      error: 'Invalid token'
+    })
+  }
+}
+
+// Usage
+app.get('/pools', authMiddleware, async (req, res) => {
+  const { userId } = req.user
+  // ... fetch pools for user
+})
+```
+
+## Security Best Practices
+
+### Nonce Management
+
+- Generate cryptographically secure nonces (crypto.randomBytes)
+- Store with short expiry (5-10 minutes)
+- Delete after use (prevent replay attacks)
+- Use Redis for production (in-memory doesn't scale)
+
+### JWT Tokens
+
+- Use strong secret (256+ bits)
+- Set reasonable expiry (7-30 days)
+- Include only necessary claims
+- Validate on every request
+
+### HTTPS Only
+
+```typescript
+// Enforce HTTPS in production
+if (process.env.NODE_ENV === 'production' && req.protocol !== 'https') {
+  return res.redirect('https://' + req.get('host') + req.url)
+}
+```
+
+### CORS Configuration
+
+```typescript
+import cors from 'cors'
+
+app.use(cors({
+  origin: process.env.FRONTEND_URL,
+  credentials: true
+}))
+```
+
+## Token Refresh (Optional)
+
+Implement refresh tokens for better UX:
+
+```typescript
+// Generate both access and refresh tokens
+const accessToken = jwt.sign({ userId }, SECRET, { expiresIn: '15m' })
+const refreshToken = jwt.sign({ userId }, REFRESH_SECRET, { expiresIn: '7d' })
+
+// Store refresh token in database
+await prisma.refreshToken.create({
+  data: { userId, token: refreshToken }
+})
+
+// Refresh endpoint
+router.post('/refresh', async (req, res) => {
+  const { refreshToken } = req.body
+
+  const decoded = jwt.verify(refreshToken, REFRESH_SECRET)
+  const stored = await prisma.refreshToken.findFirst({
+    where: { userId: decoded.userId, token: refreshToken }
+  })
+
+  if (!stored) {
+    return res.status(401).json({ error: 'Invalid refresh token' })
+  }
+
+  const accessToken = jwt.sign({ userId: decoded.userId }, SECRET, {
+    expiresIn: '15m'
+  })
+
+  res.json({ token: accessToken })
+})
+```
+
+## Testing
+
+```typescript
+import { SiweMessage } from 'siwe'
+import { Wallet } from 'ethers'
+
+describe('SIWE Authentication', () => {
+  it('should authenticate with valid signature', async () => {
+    // 1. Generate wallet
+    const wallet = Wallet.createRandom()
+
+    // 2. Get nonce
+    const { nonce } = await getNonce(wallet.address)
+
+    // 3. Create and sign message
+    const message = new SiweMessage({
+      domain: 'localhost',
+      address: wallet.address,
+      uri: 'http://localhost:3000',
+      version: '1',
+      chainId: 31611,
+      nonce
+    }).prepareMessage()
+
+    const signature = await wallet.signMessage(message)
+
+    // 4. Verify
+    const { token } = await verifySignature(message, signature)
+
+    expect(token).toBeDefined()
+  })
+})
+```
+
+## Common Issues
+
+### "Invalid signature"
+
+- Ensure message format matches exactly
+- Check chainId matches network
+- Verify domain and URI are correct
+
+### "Nonce expired"
+
+- Nonce has 10-minute TTL
+- Request new nonce if expired
+
+### "CORS error"
+
+- Add frontend URL to CORS whitelist
+- Include credentials: true
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="REST API Reference"
+    href="/docs/developers/api-reference/rest-api"
+    description="Complete API endpoints"
+  />
+  <Card
+    title="Rate Limits"
+    href="/docs/developers/api-reference/rate-limits"
+    description="API rate limiting"
+  />
+  <Card
+    title="Examples"
+    href="/docs/developers/examples"
+    description="Working code examples"
+  />
+</Cards>
+
+---
+
+**Auth Issues?** Email dev@khipuvault.com or [Discord](https://discord.gg/khipuvault) #api

@@ -1,0 +1,629 @@
+---
+title: Security Best Practices
+description: User security guide for wallet safety, phishing prevention, and protecting your Bitcoin on KhipuVault.
+---
+
+# Security Best Practices
+
+Your security is your responsibility. This guide covers essential best practices to protect your Bitcoin and stay safe while using KhipuVault.
+
+<Callout type="warning" title="Critical: You Control Your Keys">
+KhipuVault is non-custodial. We never have access to your private keys. If you lose your keys or get hacked, we cannot recover your funds.
+</Callout>
+
+## Wallet Security
+
+### Choose the Right Wallet
+
+**For Large Amounts ($1,000+)**
+
+🔐 **Hardware Wallets** (Most Secure)
+- ✅ **Ledger Nano X/S Plus**: Industry standard, proven security
+- ✅ **Trezor Model T/One**: Open-source hardware wallet
+- ✅ **GridPlus Lattice1**: Advanced features, card-based signing
+
+**Benefits:**
+- Private keys never leave the device
+- Protected against malware
+- Requires physical confirmation for transactions
+
+**Setup Guide:**
+1. Buy directly from manufacturer (never from third parties)
+2. Verify tamper-evident seals
+3. Generate new seed phrase (never use pre-generated)
+4. Store seed phrase securely offline
+5. Test recovery before depositing large amounts
+
+**For Small Amounts ($100-$1,000)**
+
+💻 **Software Wallets** (Convenient)
+- ✅ **MetaMask**: Most popular, well-audited
+- ✅ **Rainbow Wallet**: User-friendly, mobile-first
+- ✅ **Frame**: Privacy-focused desktop wallet
+
+**Security Tips:**
+- Use a dedicated browser profile for crypto
+- Enable password protection
+- Never use on public WiFi without VPN
+- Regularly update the wallet software
+
+**For Testing Only**
+
+🧪 **Testnet Wallets**
+- Use separate wallets for testnet
+- Never put real funds in testnet wallets
+- Clearly label test vs. production wallets
+
+### Seed Phrase Security
+
+Your seed phrase (12-24 words) is the master key to your funds.
+
+<Callout type="error" title="NEVER Share Your Seed Phrase">
+Anyone with your seed phrase can steal ALL your funds. No legitimate service will EVER ask for it.
+</Callout>
+
+#### ✅ DO:
+
+**Backup Securely**
+- ✅ Write on paper or steel (fireproof/waterproof)
+- ✅ Store in multiple secure locations (safe, safety deposit box)
+- ✅ Consider splitting across multiple locations
+- ✅ Use a passphrase (25th word) for additional security
+- ✅ Test your backup by restoring a small amount
+
+**Physical Security**
+- ✅ Store in fireproof/waterproof container
+- ✅ Use tamper-evident bags
+- ✅ Consider professional storage (bank vault)
+
+#### ❌ DON'T:
+
+**Digital Storage**
+- ❌ Take photos of your seed phrase
+- ❌ Store in cloud services (Google Drive, Dropbox, iCloud)
+- ❌ Save in password managers
+- ❌ Send via email, SMS, or messaging apps
+- ❌ Type on any device connected to internet
+
+**Sharing**
+- ❌ Share with anyone (family, friends, support)
+- ❌ Enter on any website
+- ❌ Read aloud in public or on video calls
+
+### Private Key Hygiene
+
+**Create Dedicated Wallets**
+
+Use separate wallets for different purposes:
+
+- 🏦 **Savings Wallet**: Large amounts, hardware wallet
+- 💰 **DeFi Wallet**: Active DeFi use, moderate amounts
+- 🧪 **Test Wallet**: Trying new protocols, small amounts
+- 🎮 **NFT Wallet**: NFTs and gaming, separate from funds
+
+**Never Reuse Wallets**
+
+Once a wallet is compromised or suspicious:
+- ✅ Create a new wallet immediately
+- ✅ Transfer funds to the new wallet
+- ✅ Never use the old wallet again
+- ✅ Revoke all approvals on old wallet
+
+**Manage Token Approvals**
+
+Check and revoke unnecessary approvals:
+
+1. Visit [Revoke.cash](https://revoke.cash) or [Etherscan Token Approvals](https://etherscan.io/tokenapprovalchecker)
+2. Connect your wallet
+3. Review all approvals
+4. Revoke any unlimited or suspicious approvals
+
+<Callout type="info">
+Token approvals allow contracts to spend your tokens. Unlimited approvals are a security risk if the contract is compromised.
+</Callout>
+
+## Phishing Prevention
+
+Phishing is the #1 way people lose crypto. Stay vigilant.
+
+### Verify URLs
+
+**Official KhipuVault Domains:**
+
+✅ `https://khipuvault.com` - Main website
+✅ `https://app.khipuvault.com` - Web app
+✅ `https://docs.khipuvault.com` - Documentation
+✅ `https://api.khipuvault.com` - API
+
+**Phishing Detection:**
+
+❌ `khipuva1t.com` - Number "1" instead of "l"
+❌ `khipuvault.co` - Different TLD
+❌ `khipu-vault.com` - Extra hyphen
+❌ `khipuvault-app.com` - Unofficial subdomain
+
+**Protection Steps:**
+
+1. **Bookmark the official site** and always use the bookmark
+2. **Check for HTTPS** and valid SSL certificate
+3. **Verify the exact domain** before connecting wallet
+4. **Use a password manager** that auto-fills only on correct domains
+
+### Recognize Phishing Attempts
+
+**Email Phishing**
+
+🚨 **Red Flags:**
+- Urgent action required ("Wallet will be locked!")
+- Requests for seed phrase or private keys
+- Links to "verify" or "validate" your wallet
+- Misspelled sender addresses
+- Poor grammar or formatting
+
+✅ **Verify Legitimately:**
+- Go directly to official website (don't click links)
+- Check our official social media for announcements
+- Contact support through official channels only
+
+**Social Media Phishing**
+
+🚨 **Red Flags:**
+- DMs offering "support" or "help"
+- Fake customer service accounts
+- Giveaways requiring you to "validate" wallet
+- Links to "claim rewards"
+- Impersonation of team members
+
+✅ **Protect Yourself:**
+- Never respond to unsolicited DMs
+- Verify official accounts (blue checkmarks)
+- Never share personal information via DM
+- Report suspicious accounts
+
+**Discord/Telegram Scams**
+
+🚨 **Common Scams:**
+- Fake admins offering "support" in DMs
+- "Exclusive investment opportunities"
+- "Whitelist" or "early access" requiring payment
+- Bots impersonating real users
+
+✅ **Stay Safe:**
+- Our admins will NEVER DM you first
+- All announcements are in public channels
+- Never click links from strangers
+- Enable 2FA on Discord/Telegram
+
+### Signature Safety
+
+When interacting with KhipuVault, you'll be asked to sign transactions.
+
+**Safe Signatures:**
+
+✅ **Transaction signatures** you initiated
+✅ **SIWE (Sign-In With Ethereum)** for authentication
+✅ **Token approvals** for specific amounts
+✅ **Contract interactions** on verified contracts
+
+**Dangerous Signatures:**
+
+❌ **Blank signatures** without clear purpose
+❌ **Off-chain signatures** from unknown sources
+❌ **Unlimited token approvals** to unverified contracts
+❌ **Permit signatures** on unofficial sites
+
+**Before Signing:**
+
+1. **Read the transaction details** carefully
+2. **Verify the contract address** matches official addresses
+3. **Check the amount** being approved or transferred
+4. **Confirm the recipient** is correct
+5. **Question anything suspicious** and cancel if unsure
+
+## Device Security
+
+Your device security directly affects wallet security.
+
+### Computer Security
+
+**Operating System**
+
+✅ Keep your OS updated (Windows, macOS, Linux)
+✅ Enable automatic security updates
+✅ Use antivirus software (Windows: Defender, Mac: built-in)
+✅ Enable firewall
+
+**Browser Security**
+
+✅ Use updated browsers (Chrome, Firefox, Brave)
+✅ Install only verified extensions from official stores
+✅ Review extension permissions regularly
+✅ Consider a dedicated browser profile for crypto
+
+**Malware Protection**
+
+✅ Install reputable antivirus software
+✅ Scan downloads before opening
+✅ Avoid pirated software
+✅ Don't click suspicious links or attachments
+
+### Mobile Security
+
+**For Mobile Wallets**
+
+✅ Enable device PIN/biometric lock
+✅ Keep OS and apps updated
+✅ Only install apps from official stores
+✅ Review app permissions
+✅ Enable remote wipe capability
+
+**Additional Protection**
+
+✅ Use VPN on public WiFi
+✅ Disable app auto-updates for wallet apps (review first)
+✅ Backup your device regularly
+✅ Don't jailbreak/root your device
+
+### Network Security
+
+**Public WiFi**
+
+❌ NEVER access wallets on public WiFi without VPN
+❌ NEVER sign transactions in public places
+❌ NEVER check wallet balances on untrusted networks
+
+**Home Network**
+
+✅ Change default router password
+✅ Use WPA3 encryption (or WPA2 minimum)
+✅ Update router firmware regularly
+✅ Create guest network for untrusted devices
+
+**VPN Usage**
+
+✅ Use VPN on public networks
+✅ Choose reputable VPN providers
+✅ Avoid free VPNs
+✅ Enable VPN kill switch
+
+## Smart Contract Interactions
+
+### Verify Before Interacting
+
+**Check Contract Addresses**
+
+Before interacting with KhipuVault contracts:
+
+1. **Verify on official docs**: [Contract Addresses](/docs/resources/contract-addresses)
+2. **Check block explorer**: Verify source code is verified
+3. **Compare addresses**: Match exactly (character by character)
+
+**Official Contract Addresses (Mezo Testnet):**
+
+```
+IndividualPool:  0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
+CooperativePool: 0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88
+MezoIntegration: 0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6
+YieldAggregator: 0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6
+MUSD:            0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503
+```
+
+### Approve Safely
+
+**Token Approvals**
+
+When approving tokens:
+
+✅ **Approve only the amount needed** (not unlimited)
+✅ **Revoke approvals** when done using the protocol
+✅ **Check existing approvals** before adding new ones
+✅ **Use exact amounts** instead of `type(uint256).max`
+
+**Example: Safe Approval**
+
+```
+Approve Amount: 1000 MUSD (exact amount)
+Spender: 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393 (verified contract)
+```
+
+**Example: Dangerous Approval**
+
+```
+Approve Amount: Unlimited
+Spender: 0x123abc... (unverified contract)
+```
+
+### Monitor Your Transactions
+
+**Use Block Explorers**
+
+Track all your transactions:
+
+- **Mezo Testnet**: [explorer.test.mezo.org](https://explorer.test.mezo.org)
+- Check transaction status
+- Verify amounts and recipients
+- Review contract interactions
+
+**Set Up Alerts**
+
+Enable wallet alerts for:
+- Large transactions
+- Token approvals
+- Failed transactions
+- Unusual activity
+
+## Account Security
+
+### Authentication
+
+**SIWE (Sign-In With Ethereum)**
+
+KhipuVault uses SIWE for authentication:
+
+✅ **Cryptographic signatures** prove wallet ownership
+✅ **No passwords** to remember or leak
+✅ **Session expiration** for added security
+✅ **One-time messages** prevent replay attacks
+
+**Best Practices:**
+
+✅ Sign out after each session (shared computers)
+✅ Don't stay logged in on public devices
+✅ Review the SIWE message before signing
+✅ Clear browser cache regularly
+
+### Session Management
+
+**Wallet Connection Sessions**
+
+- Sessions expire after 24 hours
+- Reconnect manually for added security
+- Disconnect wallet when not actively using
+
+**Disconnect Wallet After Use**
+
+1. Click wallet icon in top-right
+2. Select "Disconnect"
+3. Close browser tab
+4. Lock MetaMask
+
+## Privacy Protection
+
+### Data Minimization
+
+**What We Collect**
+
+KhipuVault collects minimal data:
+- ✅ Wallet address (public on blockchain)
+- ✅ Transaction history (public on blockchain)
+- ✅ Session tokens (temporary)
+
+**What We DON'T Collect**
+
+- ❌ Personal information (name, email, phone)
+- ❌ Private keys or seed phrases
+- ❌ IP addresses (beyond temporary logs)
+- ❌ Browsing history
+
+### On-Chain Privacy
+
+**Blockchain is Public**
+
+Remember:
+- All transactions are public and permanent
+- Wallet addresses can be linked to identity
+- Transaction patterns can reveal information
+
+**Privacy Best Practices**
+
+✅ Use different wallets for different purposes
+✅ Don't reuse deposit addresses
+✅ Be aware that on-chain data is permanent
+✅ Consider using privacy tools for sensitive transactions
+
+### Browser Privacy
+
+**Protect Your Activity**
+
+✅ Use privacy-focused browsers (Brave, Firefox)
+✅ Enable tracking protection
+✅ Use ad blockers
+✅ Clear cookies and cache regularly
+✅ Consider using Tor for maximum privacy (advanced)
+
+## Emergency Response
+
+### If Your Wallet is Compromised
+
+**Act Immediately:**
+
+1. **Stop using the wallet** - Don't make more transactions
+2. **Create a new wallet** on a secure device
+3. **Transfer remaining funds** to the new wallet
+4. **Revoke all approvals** on the compromised wallet
+5. **Report the incident** to support@khipuvault.com
+
+**What NOT to Do:**
+
+❌ Don't panic and make hasty decisions
+❌ Don't try to "negotiate" with attackers
+❌ Don't click links in ransom messages
+❌ Don't send funds to recover services (likely scams)
+
+### If You Suspect Phishing
+
+**If You Clicked a Phishing Link:**
+
+1. **Don't enter any information**
+2. **Close the tab immediately**
+3. **Run antivirus scan**
+4. **Check wallet for unauthorized transactions**
+5. **Revoke approvals** on Revoke.cash
+6. **Report the phishing site**
+
+**If You Signed a Malicious Transaction:**
+
+1. **Transfer funds immediately** to a new wallet
+2. **Revoke all approvals** on the compromised wallet
+3. **Monitor for unauthorized transactions**
+4. **Contact support** for guidance
+
+### Lost Access Recovery
+
+**If You Lost Your Device:**
+
+Hardware Wallet:
+1. ✅ Use your seed phrase to recover on new device
+2. ✅ Buy new hardware wallet from official source
+3. ✅ Restore using your seed phrase
+4. ✅ Transfer funds to verify recovery
+5. ✅ Optionally create new wallet for additional security
+
+Software Wallet:
+1. ✅ Install MetaMask on new device
+2. ✅ Select "Import using seed phrase"
+3. ✅ Enter your 12/24 word seed phrase
+4. ✅ Verify all accounts are recovered
+
+**If You Lost Your Seed Phrase:**
+
+❌ **Cannot Recover** - This is why backups are critical
+
+Options:
+- If you still have access to the wallet, transfer funds NOW to a new wallet
+- If you lost the device too, funds may be permanently lost
+- No one (including us) can recover funds without the seed phrase
+
+## Advanced Security
+
+### Multi-Signature Wallets
+
+For large amounts or shared funds:
+
+**Benefits:**
+- Requires multiple signatures to approve transactions
+- Reduces single point of failure
+- Ideal for DAOs, treasuries, or family savings
+
+**Popular Solutions:**
+- Gnosis Safe (multi-sig standard)
+- Safe Wallet (formerly Gnosis Safe)
+
+**Setup:**
+1. Create multi-sig wallet with 2-of-3 or 3-of-5 configuration
+2. Use different hardware wallets for each signer
+3. Store backups separately
+4. Test with small transactions first
+
+### Cold Storage
+
+For long-term savings:
+
+**What is Cold Storage?**
+- Hardware wallet never connected to internet
+- Maximum security for large holdings
+- Not convenient for frequent transactions
+
+**Setup:**
+1. Initialize hardware wallet offline
+2. Generate and backup seed phrase
+3. Transfer funds to cold wallet address
+4. Store hardware wallet and seed separately
+5. Only connect to verify balance (not transact)
+
+### Smart Contract Wallets
+
+Advanced wallet features:
+
+**Benefits:**
+- Social recovery options
+- Spending limits
+- Programmable security rules
+
+**Options:**
+- Argent Wallet
+- Safe Wallet
+- Gnosis Safe
+
+## Security Checklist
+
+### Daily Habits
+
+- [ ] Verify URLs before connecting wallet
+- [ ] Read transaction details before signing
+- [ ] Check contract addresses match official docs
+- [ ] Disconnect wallet after use
+- [ ] Ignore unsolicited DMs and emails
+
+### Weekly Maintenance
+
+- [ ] Review token approvals and revoke unnecessary ones
+- [ ] Check transaction history for anomalies
+- [ ] Update wallet software if available
+- [ ] Review connected dApps and disconnect unused ones
+- [ ] Backup new wallet data if applicable
+
+### Monthly Security Review
+
+- [ ] Update operating system and security software
+- [ ] Change passwords for related services
+- [ ] Review browser extensions and remove unused ones
+- [ ] Test seed phrase recovery process
+- [ ] Review security settings on Discord/Telegram
+- [ ] Check for KhipuVault security announcements
+
+### Before Large Transactions
+
+- [ ] Verify contract address multiple times
+- [ ] Test with small amount first
+- [ ] Ensure device is secure (antivirus, VPN)
+- [ ] Double-check recipient address
+- [ ] Review gas fees and transaction details
+- [ ] Confirm you have backups of everything
+
+## Resources
+
+### Security Tools
+
+**Wallet Security:**
+- [Revoke.cash](https://revoke.cash) - Manage token approvals
+- [Etherscan](https://etherscan.io) - Verify contracts and transactions
+- [Pocket Universe](https://pocketuniverse.app) - Transaction simulation
+
+**Phishing Protection:**
+- [MetaMask Phishing Detector](https://metamask.io) - Built-in protection
+- [Scam Sniffer](https://scamsniffer.io) - Phishing database
+- [Web3 Security Extension](https://chrome.google.com/webstore) - Additional protection
+
+**Device Security:**
+- [Malwarebytes](https://malwarebytes.com) - Antivirus
+- [1Password](https://1password.com) - Password manager
+- [ProtonVPN](https://protonvpn.com) - Privacy-focused VPN
+
+### Educational Resources
+
+**Beginner Guides:**
+- [MetaMask Security Best Practices](https://metamask.io/security)
+- [Ledger Security Guide](https://ledger.com/security)
+- [Coinbase Learn: Wallet Security](https://coinbase.com/learn)
+
+**Advanced Security:**
+- [Smart Contract Security Best Practices](https://consensys.github.io/smart-contract-best-practices/)
+- [DeFi Security Resources](https://defisafety.com)
+
+### Support
+
+**If You Have Questions:**
+- 📖 [Security FAQ](/docs/resources/faq#security)
+- 💬 [Discord #security](https://discord.gg/khipuvault)
+- 📧 support@khipuvault.com
+
+**If You Find a Vulnerability:**
+- 🔒 security@khipuvault.com
+- 💰 [Bug Bounty Program](/docs/security/bug-bounty)
+
+---
+
+Remember: **Security is a continuous practice, not a one-time setup.** Stay vigilant, keep learning, and never compromise on security.
+
+Your Bitcoin, your responsibility. 🛡️

@@ -32,6 +32,18 @@ export function Header() {
           <span className="hidden text-2xl font-bold sm:inline">KhipuVault</span>
         </Link>
 
+        {/* Navigation Links - Desktop */}
+        <nav className="hidden md:flex items-center gap-6">
+          <Link
+            href={process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.khipuvault.com"}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Docs
+          </Link>
+        </nav>
+
         <div className="flex items-center gap-3">
           {/* Connect Wallet Button */}
           {mounted && <SmartConnectButton />}
@@ -78,6 +90,11 @@ export function Header() {
                   <Link href="/dashboard">
                     <Button variant="secondary" size="lg" className="w-full">
                       Dashboard
+                    </Button>
+                  </Link>
+                  <Link href={process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.khipuvault.com"} target="_blank" rel="noopener noreferrer">
+                    <Button variant="outline" size="lg" className="w-full">
+                      📚 Documentation
                     </Button>
                   </Link>
                 </div>

@@ -1,0 +1,450 @@
+---
+title: Mezo Blockchain
+description: Deep dive into Mezo - the Bitcoin Layer-2 powering KhipuVault. Learn about Bitcoin security, EVM compatibility, and why Mezo is perfect for DeFi.
+---
+
+# Mezo Blockchain
+
+Mezo is a **Bitcoin Layer-2 blockchain** that brings smart contract functionality to Bitcoin while maintaining its security guarantees. It's the foundation that makes KhipuVault possible.
+
+## What is Mezo?
+
+**Simple explanation**: Mezo is like Bitcoin's "smart contract upgrade" - it lets Bitcoin do more than just send and receive, without changing Bitcoin itself.
+
+**Technical explanation**: Mezo is an EVM-compatible Layer-2 blockchain secured by Bitcoin's consensus, enabling complex financial applications while inheriting Bitcoin's security model.
+
+### The Analogy
+
+Think of Bitcoin as **gold bars**:
+- Extremely secure
+- Store of value
+- Hard to move/use for complex transactions
+
+Think of Mezo as **gold certificates**:
+- Backed by the gold (Bitcoin)
+- Easy to transact with
+- Can be used in complex financial systems
+- Still represent real gold
+
+## Why Layer-2?
+
+Layer-2 solutions solve blockchain limitations without changing the base layer.
+
+### Bitcoin's Limitations (Layer-1)
+
+Bitcoin was designed for:
+- ✅ Secure value transfer
+- ✅ Decentralization
+- ✅ Censorship resistance
+
+But it can't natively do:
+- ❌ Smart contracts (complex logic)
+- ❌ Fast transactions (10-minute blocks)
+- ❌ Low fees (congestion drives fees up)
+- ❌ DeFi applications
+
+### Mezo's Solution (Layer-2)
+
+Mezo adds capabilities while maintaining security:
+
+```
+┌─────────────────────────────────────────────────┐
+│           Mezo (Layer-2)                        │
+│  ✅ Smart Contracts                             │
+│  ✅ Fast Transactions (< 10 seconds)            │
+│  ✅ Low Fees                                    │
+│  ✅ EVM Compatible (Ethereum tools work)        │
+│           ↕ (secured by)                        │
+│  ┌───────────────────────────────────────────┐  │
+│  │      Bitcoin (Layer-1)                    │  │
+│  │  ✅ Consensus Security                    │  │
+│  │  ✅ Decentralization                      │  │
+│  │  ✅ 15+ Years of Proven Reliability       │  │
+│  └───────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────┘
+```
+
+<Callout type="success" title="Best of Both Worlds">
+**Mezo = Bitcoin's security + Ethereum's flexibility**
+
+You get smart contracts without sacrificing Bitcoin's proven security.
+</Callout>
+
+## How Mezo Works
+
+### The Architecture
+
+Mezo uses a **hybrid security model**:
+
+1. **Execution Layer** (Mezo)
+   - Processes transactions quickly
+   - Runs smart contracts
+   - EVM-compatible (Solidity works)
+
+2. **Security Layer** (Bitcoin)
+   - Validates Mezo state
+   - Provides consensus
+   - Ensures immutability
+
+### The Process (Simplified)
+
+```
+User Transaction on Mezo
+         ↓
+Smart Contract Execution (fast)
+         ↓
+Batch Transactions Together
+         ↓
+Submit Proof to Bitcoin (every X blocks)
+         ↓
+Bitcoin Validates & Secures
+         ↓
+Transaction Finalized (immutable)
+```
+
+**In practice**:
+- Your KhipuVault deposit happens in ~10 seconds on Mezo
+- Mezo batches thousands of transactions
+- Proof submitted to Bitcoin periodically
+- Bitcoin secures the entire batch
+
+This is like:
+- **Mezo**: A fast cashier processing many transactions
+- **Bitcoin**: A slow but secure vault that validates everything at end of day
+
+## Key Features
+
+### 1. Bitcoin Security
+
+Mezo inherits Bitcoin's security through:
+
+**Checkpoints**: Mezo state is regularly checkpointed to Bitcoin
+**Consensus**: Bitcoin miners validate Mezo proofs
+**Finality**: Once on Bitcoin, transactions are immutable
+
+| Security Aspect | Mezo | Standalone Chain |
+|-----------------|------|------------------|
+| Attack Cost | Attack Bitcoin (impossible) | Attack just this chain (easier) |
+| Decentralization | Bitcoin's 15,000+ nodes | Fewer nodes |
+| Proven Track Record | Bitcoin's 15 years | New chain |
+| Hash Power | Bitcoin's full network | Own network |
+
+<Callout type="info">
+**Why this matters**: To hack Mezo, you'd need to hack Bitcoin - which has never been done despite $800B+ incentive.
+</Callout>
+
+### 2. EVM Compatibility
+
+Mezo is **EVM-compatible**, meaning:
+
+- **Ethereum tools work** - MetaMask, Remix, Hardhat, Foundry
+- **Solidity contracts work** - KhipuVault uses standard Solidity
+- **Developers know it** - Huge Ethereum developer ecosystem
+- **Auditors know it** - Security experts understand the code
+
+**In simple terms**: Mezo speaks the same "language" as Ethereum, so developers can build quickly and safely.
+
+### 3. Fast & Cheap Transactions
+
+| Metric | Bitcoin | Ethereum | Mezo |
+|--------|---------|----------|------|
+| **Block Time** | ~10 minutes | ~12 seconds | ~2-5 seconds |
+| **Finality** | ~60 minutes (6 blocks) | ~15 minutes | ~10 seconds |
+| **Transaction Fee** | $1-$50+ (varies) | $1-$100+ (varies) | ~$0.01-$0.10 |
+
+**What this means for you**:
+- Deposits confirm in seconds, not minutes
+- Withdrawals are nearly instant
+- Fees won't eat your yields
+
+### 4. Bitcoin-Backed Assets
+
+Mezo uses **MUSD** (Mezo USD) - a stablecoin backed by Bitcoin liquidity:
+
+- **Stable value** - $1 per MUSD
+- **Bitcoin-secured** - Backed by BTC collateral
+- **No trust required** - Algorithmic peg
+- **Easy to use** - Works like USDC/USDT but on Bitcoin
+
+## Mezo Network Details
+
+### Testnet (Current)
+
+This is what you'll use to try KhipuVault:
+
+```
+Network Name: Mezo Testnet
+Chain ID: 31611
+RPC URL: https://rpc.test.mezo.org
+Block Explorer: https://explorer.test.mezo.org
+Native Token: tBTC (testnet Bitcoin)
+Faucet: https://faucet.test.mezo.org
+```
+
+[Add to MetaMask →](/docs/getting-started/add-mezo-network)
+
+### Mainnet (Future)
+
+When KhipuVault launches on mainnet, you'll use real Bitcoin.
+
+<Callout type="warn">
+**Testnet vs. Mainnet**
+
+- **Testnet**: Free tokens, testing only, no real value
+- **Mainnet**: Real Bitcoin, real yields, real risks
+
+Always test on testnet first!
+</Callout>
+
+## Why KhipuVault Chose Mezo
+
+We evaluated many blockchains and chose Mezo because:
+
+### 1. Bitcoin Alignment
+
+**Goal**: Build Bitcoin savings products
+
+**Why Mezo**: Native Bitcoin security means users trust their BTC isn't leaving the Bitcoin ecosystem.
+
+### 2. Cultural Fit
+
+KhipuVault serves Latin American communities. Bitcoin has **massive adoption** in LATAM:
+- El Salvador (legal tender)
+- Argentina (inflation hedge)
+- Mexico (remittances)
+
+Mezo's Bitcoin foundation resonates with these users.
+
+### 3. Technical Advantages
+
+| Requirement | Why Mezo Fits |
+|-------------|---------------|
+| Smart contracts | EVM-compatible |
+| Low fees | Layer-2 efficiency |
+| Fast finality | Quick deposits/withdrawals |
+| Security | Bitcoin-backed |
+| Developer tools | Ethereum-compatible |
+
+### 4. Decentralization
+
+Mezo is:
+- **Open-source** - anyone can verify code
+- **Permissionless** - anyone can build on it
+- **Censorship-resistant** - secured by Bitcoin
+
+This aligns with KhipuVault's decentralization values.
+
+[Learn more →](/docs/concepts/decentralization)
+
+## Mezo vs. Other Layer-2s
+
+### Bitcoin Layer-2 Comparison
+
+| Feature | Mezo | Lightning | Stacks | RSK |
+|---------|------|-----------|--------|-----|
+| **Smart Contracts** | ✅ Full EVM | ❌ Limited | ✅ Clarity lang | ✅ EVM |
+| **Speed** | ~5 seconds | Instant | ~10 minutes | ~30 seconds |
+| **Finality** | ~10 seconds | Instant | ~60 minutes | ~60 minutes |
+| **DeFi Ready** | ✅ Yes | ❌ No | ✅ Yes | ✅ Yes |
+| **Developer Tools** | Ethereum-compatible | Custom | Custom | Ethereum-compatible |
+| **Use Case** | DeFi, savings | Payments | NFTs, DeFi | DeFi |
+
+**For KhipuVault**: Mezo's EVM compatibility + speed + DeFi focus made it the clear choice.
+
+### Ethereum Layer-2 Comparison
+
+| Feature | Mezo | Arbitrum | Optimism | Polygon |
+|---------|------|----------|----------|---------|
+| **Base Layer** | Bitcoin | Ethereum | Ethereum | Ethereum |
+| **Security** | Bitcoin miners | Ethereum validators | Ethereum validators | Own validators |
+| **Decentralization** | Bitcoin-level | Ethereum-level | Ethereum-level | Lower |
+| **Trust Model** | Trust Bitcoin | Trust Ethereum | Trust Ethereum | Trust Polygon |
+
+**Key difference**: Mezo is backed by Bitcoin (most secure), others by Ethereum or standalone.
+
+## How to Use Mezo
+
+### For Users (Non-Technical)
+
+You don't need to understand Mezo deeply. Just:
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Add Mezo to MetaMask
+
+One-click setup in our guide.
+
+[Add Mezo Network →](/docs/getting-started/add-mezo-network)
+
+### Get MUSD Tokens
+
+Use the testnet faucet for free tokens.
+
+[Get MUSD →](/docs/getting-started/get-musd)
+
+### Use KhipuVault
+
+Deposit, earn yields, withdraw - that's it!
+
+[Your first deposit →](/docs/getting-started/your-first-deposit)
+
+</div>
+
+### For Developers
+
+Mezo is EVM-compatible, so:
+
+```solidity
+// Your Ethereum contracts work on Mezo
+pragma solidity ^0.8.20;
+
+contract Example {
+    // No changes needed - it just works!
+}
+```
+
+Deploy with:
+- **Foundry** (KhipuVault uses this)
+- **Hardhat**
+- **Remix**
+- **Truffle**
+
+[See developer docs →](https://docs.mezo.org)
+
+## Security Considerations
+
+### What Makes Mezo Secure?
+
+1. **Bitcoin Consensus**
+   - Mezo state is validated by Bitcoin miners
+   - Attacking Mezo = attacking Bitcoin (impossible)
+
+2. **Cryptographic Proofs**
+   - Zero-knowledge proofs verify correctness
+   - No trust required
+
+3. **Decentralized Validators**
+   - Multiple validators process transactions
+   - No single point of failure
+
+4. **Open Source**
+   - All code is public and auditable
+   - Community can verify security
+
+### Potential Risks
+
+Like any technology, Mezo has risks:
+
+**Bridge Risk**: Moving BTC to Mezo requires a bridge
+- **Mitigation**: Mezo uses audited, decentralized bridges
+
+**Layer-2 Risk**: Newer technology than Bitcoin L1
+- **Mitigation**: Regular audits, bug bounties
+
+**Smart Contract Risk**: Bugs in Mezo's contracts
+- **Mitigation**: Multiple audits, formal verification
+
+<Callout type="info">
+**KhipuVault's approach**: We build conservatively, using battle-tested patterns and multiple audits.
+
+[See our security practices →](/docs/concepts/security)
+</Callout>
+
+## The Future of Mezo
+
+Mezo is rapidly evolving:
+
+### Roadmap
+
+**Q1 2024**: Testnet launch ✅
+**Q2 2024**: DeFi protocols (KhipuVault!) ✅
+**Q3 2024**: Mainnet launch (planned)
+**Q4 2024**: Institutional adoption
+**2025+**: Bitcoin DeFi standard
+
+### Upcoming Features
+
+- **Enhanced bridges** for easier BTC → Mezo
+- **Native BTC support** (not just MUSD)
+- **Cross-chain interoperability**
+- **Institutional custody integration**
+- **Advanced DeFi primitives**
+
+<Callout type="success">
+**KhipuVault will evolve with Mezo**, bringing new features and products as the platform matures.
+</Callout>
+
+## Resources
+
+### Official Mezo Resources
+
+- 📖 [Mezo Documentation](https://docs.mezo.org)
+- 🌐 [Mezo Website](https://mezo.org)
+- 🔍 [Block Explorer](https://explorer.test.mezo.org)
+- 💧 [Testnet Faucet](https://faucet.test.mezo.org)
+
+### Community
+
+- 💬 [Mezo Discord](https://discord.gg/mezo)
+- 🐦 [Mezo Twitter](https://twitter.com/mezo)
+- 📺 [Mezo YouTube](https://youtube.com/mezo)
+
+## FAQ
+
+### Is Mezo a sidechain or rollup?
+
+Mezo is a **hybrid Layer-2** - it uses rollup-like proofs but is secured by Bitcoin consensus. Not quite a pure rollup (like Arbitrum) or pure sidechain (like Polygon).
+
+### Can I use regular Bitcoin on Mezo?
+
+On mainnet, you'll bridge Bitcoin to Mezo. On testnet, you use MUSD tokens from the faucet.
+
+### What if Mezo goes down?
+
+If Mezo validators stop, your funds are still secured on Bitcoin. You can withdraw via emergency fallback mechanisms.
+
+### How is Mezo different from Lightning Network?
+
+**Lightning**: Fast payments, no smart contracts
+**Mezo**: Smart contracts, DeFi, slower than Lightning but faster than Bitcoin L1
+
+They're complementary, not competing.
+
+### Is Mezo decentralized?
+
+Yes, Mezo is secured by Bitcoin's decentralized consensus. Validator set is decentralized, and code is open-source.
+
+### Can I build on Mezo?
+
+Yes! Mezo is permissionless. Any developer can deploy contracts.
+
+[Developer docs →](https://docs.mezo.org/developers)
+
+## Next Steps
+
+<Cards>
+  <Card
+    title="Add Mezo Network"
+    href="/docs/getting-started/add-mezo-network"
+    description="Set up Mezo in MetaMask"
+  />
+  <Card
+    title="Get MUSD"
+    href="/docs/getting-started/get-musd"
+    description="Get testnet tokens"
+  />
+  <Card
+    title="Smart Contracts"
+    href="/docs/concepts/smart-contracts"
+    description="Learn how smart contracts work"
+  />
+  <Card
+    title="Security"
+    href="/docs/concepts/security"
+    description="How your funds are protected"
+  />
+</Cards>
+
+---
+
+**Questions?** Join our [Discord](https://discord.gg/khipuvault) or check the [FAQ](/docs/resources/faq)

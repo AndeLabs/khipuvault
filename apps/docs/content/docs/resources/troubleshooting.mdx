@@ -1,0 +1,719 @@
+---
+title: Troubleshooting Guide
+description: Solutions to common issues with KhipuVault. Wallet connection, transaction failures, network problems, and more.
+---
+
+# Troubleshooting Guide
+
+Find solutions to common issues you might encounter while using KhipuVault. If your problem isn't covered here, check our [FAQ](/docs/resources/faq) or [contact support](/docs/resources/support).
+
+## Quick Diagnostics
+
+Before diving into specific issues, run this quick check:
+
+<div className="fd-steps [&_h3]:fd-step">
+
+### Check Network Status
+
+Visit [status.khipuvault.com](https://status.khipuvault.com) to see if there are any known outages.
+
+### Verify Wallet Connection
+
+Make sure MetaMask is unlocked and connected to Mezo Testnet.
+
+### Check Balance
+
+Verify you have enough MUSD and gas tokens in your wallet.
+
+### Clear Cache
+
+Try refreshing the page (Cmd/Ctrl+R) or clearing your browser cache.
+
+</div>
+
+---
+
+## Wallet Connection Issues
+
+### Cannot connect wallet
+
+**Symptoms:**
+- "Connect Wallet" button doesn't work
+- MetaMask doesn't pop up
+- Connection keeps failing
+
+**Solutions:**
+
+<Callout type="info" title="Step-by-step fix">
+1. **Check MetaMask is installed**
+   - Look for fox icon in browser toolbar
+   - If missing, install from [metamask.io](https://metamask.io)
+
+2. **Unlock MetaMask**
+   - Click the MetaMask icon
+   - Enter your password
+   - Make sure it's not locked
+
+3. **Disable conflicting extensions**
+   - Other wallet extensions (Coinbase Wallet, Trust Wallet) can conflict
+   - Disable all except MetaMask
+   - Refresh page
+
+4. **Try incognito/private mode**
+   - Opens Chrome in incognito: Cmd+Shift+N (Mac) or Ctrl+Shift+N (Windows)
+   - Only MetaMask extension should be enabled
+   - Try connecting again
+
+5. **Update MetaMask**
+   - Click MetaMask icon
+   - Settings → About
+   - Check for updates
+   - Restart browser after updating
+</Callout>
+
+### Wallet connects but shows wrong network
+
+**Symptoms:**
+- Connected but see "Wrong Network" warning
+- Transactions fail with network errors
+
+**Solution:**
+
+Switch to Mezo Testnet:
+
+1. Click network dropdown in MetaMask (top of extension)
+2. Select "Mezo Testnet"
+3. If not listed, [add it manually](/docs/getting-started/add-mezo-network)
+
+### "Unsupported Chain" error
+
+**Cause:** Your wallet is on the wrong network.
+
+**Solution:**
+
+Add Mezo Testnet to MetaMask:
+
+```
+Network Name: Mezo Testnet
+RPC URL: https://rpc.test.mezo.org
+Chain ID: 31611
+Currency Symbol: BTC
+Block Explorer: https://explorer.test.mezo.org
+```
+
+[Detailed instructions](/docs/getting-started/add-mezo-network)
+
+---
+
+## Transaction Failures
+
+### "Transaction Failed" in MetaMask
+
+**Common Causes:**
+
+#### 1. Insufficient Gas
+
+**Error Message:** "Out of Gas" or "Gas estimation failed"
+
+**Solution:**
+```
+1. Click "Edit" on gas settings
+2. Increase "Gas Limit" by 20-30%
+3. Keep "Gas Price" at recommended
+4. Try again
+```
+
+#### 2. Insufficient MUSD Balance
+
+**Error Message:** "Insufficient funds" or "Transfer amount exceeds balance"
+
+**Solution:**
+- Check your MUSD balance in MetaMask
+- Reduce deposit amount
+- Get more MUSD from [faucet](https://faucet.test.mezo.org)
+
+#### 3. MUSD Not Approved
+
+**Error Message:** "ERC20: transfer amount exceeds allowance"
+
+**Solution:**
+1. Click "Approve MUSD" before depositing
+2. Confirm approval transaction
+3. Wait for confirmation (~10 seconds)
+4. Then click "Deposit"
+
+#### 4. Slippage Too Low
+
+**Error Message:** "Price impact too high" or "Slippage tolerance exceeded"
+
+**Solution:**
+This shouldn't happen with KhipuVault (we don't use AMMs), but if it does:
+1. Refresh the page
+2. Try again
+3. Contact support if persists
+
+#### 5. Contract Paused
+
+**Error Message:** "Pausable: paused"
+
+**Solution:**
+- Contracts may be paused during maintenance
+- Check [status page](https://status.khipuvault.com)
+- Wait for announcement in Discord
+- Withdrawals usually still work even when paused
+
+### Transaction stuck on "Pending"
+
+**Symptoms:**
+- Transaction shows "Pending" for > 5 minutes
+- Nothing happening in blockchain explorer
+
+**Solutions:**
+
+<Callout type="warning" title="Option 1: Speed Up (Recommended)">
+1. Click the pending transaction in MetaMask
+2. Click "Speed Up"
+3. Increase gas price by 10-20%
+4. Confirm
+5. New transaction will replace old one
+</Callout>
+
+**Option 2: Cancel**
+1. Click the pending transaction
+2. Click "Cancel"
+3. Confirm cancellation (costs small gas fee)
+4. Start over
+
+**Option 3: Wait**
+- Mezo testnet is usually fast (< 30 seconds)
+- If > 10 minutes, likely an issue
+- Try speed up or cancel
+
+### "Nonce Too Low" error
+
+**Cause:** Transaction nonce conflicts with previous transaction.
+
+**Solution:**
+
+Reset MetaMask account:
+1. MetaMask → Settings → Advanced
+2. Scroll to "Reset Account"
+3. Click and confirm
+4. This clears transaction history (safe, doesn't lose funds)
+5. Try transaction again
+
+<Callout type="info">
+Resetting your account only clears local transaction data. Your funds remain safe on the blockchain.
+</Callout>
+
+### "Internal JSON-RPC error"
+
+**Cause:** Usually a temporary RPC node issue.
+
+**Solutions:**
+
+1. **Wait 30 seconds and retry**
+2. **Refresh page**
+3. **Check RPC endpoint:**
+   - MetaMask → Settings → Networks → Mezo Testnet
+   - RPC URL should be: `https://rpc.test.mezo.org`
+   - If different, update it
+
+---
+
+## Balance and Display Issues
+
+### Balance shows zero but I deposited
+
+**Troubleshooting:**
+
+1. **Check transaction status**
+   - Click transaction in MetaMask
+   - Click "View on block explorer"
+   - Verify it's confirmed (green checkmark)
+
+2. **Verify correct network**
+   - Make sure you're on Mezo Testnet
+   - Check MetaMask shows "Mezo Testnet" at top
+
+3. **Refresh the page**
+   - Hard refresh: Cmd+Shift+R (Mac) or Ctrl+Shift+R (Windows)
+   - This forces reload from server
+
+4. **Clear browser cache**
+   - Chrome: Settings → Privacy → Clear browsing data
+   - Select "Cached images and files"
+   - Click "Clear data"
+
+5. **Check on block explorer**
+   - Go to [explorer.test.mezo.org](https://explorer.test.mezo.org)
+   - Paste your wallet address
+   - Verify your deposits are there
+   - If yes, it's a UI issue (will resolve)
+   - If no, transaction may have failed
+
+### MUSD not showing in MetaMask
+
+**Solution:** Add MUSD token manually
+
+1. Open MetaMask
+2. Make sure you're on Mezo Testnet
+3. Scroll down to "Tokens"
+4. Click "Import tokens"
+5. Paste contract address: `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503`
+6. Symbol: `MUSD`
+7. Decimals: `18`
+8. Click "Add Custom Token"
+
+### Earnings not updating
+
+**Expected Behavior:**
+- Yields distributed weekly (Fridays ~12:00 UTC)
+- May take up to 24 hours to reflect in UI
+
+**If beyond 24 hours:**
+
+1. Check last distribution date on pool page
+2. Verify pool has yields to distribute
+3. Check [Discord #announcements](https://discord.gg/khipuvault) for issues
+4. Contact support if > 7 days delayed
+
+---
+
+## Performance Issues
+
+### Website loading slowly
+
+**Quick Fixes:**
+
+1. **Refresh the page**
+   - Cmd+R (Mac) or Ctrl+R (Windows)
+
+2. **Check internet speed**
+   - Visit [fast.com](https://fast.com)
+   - Need at least 5 Mbps for smooth experience
+
+3. **Try different browser**
+   - Chrome (recommended)
+   - Firefox
+   - Brave
+
+4. **Disable heavy extensions**
+   - Ad blockers can slow things down
+   - Try disabling temporarily
+
+5. **Check system resources**
+   - Close unused tabs
+   - Restart browser if using > 50 tabs
+
+### Transactions taking forever to confirm
+
+**Normal Times:**
+- Mezo testnet: 5-30 seconds
+- During high usage: 1-2 minutes
+
+**If > 5 minutes:**
+
+1. **Check network status**
+   - [explorer.test.mezo.org](https://explorer.test.mezo.org)
+   - Look for recent blocks
+   - If no new blocks, network issue
+
+2. **Increase gas price**
+   - Click "Speed Up" in MetaMask
+   - Increase by 20%
+
+3. **Wait for network to recover**
+   - Testnet sometimes has outages
+   - Check Discord for updates
+
+---
+
+## Smart Contract Interaction Issues
+
+### "Execution Reverted" error
+
+**Meaning:** Smart contract rejected your transaction.
+
+**Common Causes:**
+
+1. **Trying to withdraw more than deposited**
+   - Check your actual balance
+   - Try withdrawing less
+
+2. **Pool restrictions**
+   - Some pools have minimum balances
+   - Can't withdraw if it leaves you below minimum
+
+3. **ROSCA cycle not complete**
+   - Rotating pools lock funds until your turn
+   - Check rotation schedule
+
+4. **Contract paused**
+   - Emergency pause activated
+   - Check status page
+
+**Generic Solution:**
+1. Read error message carefully
+2. Verify transaction parameters
+3. Check pool rules/restrictions
+4. Ask in Discord with error details
+
+### "Gas Estimation Failed"
+
+**Cause:** Transaction will likely fail, MetaMask can't estimate gas.
+
+**Solutions:**
+
+1. **Check transaction will succeed**
+   - Sufficient balance?
+   - Correct parameters?
+   - Following pool rules?
+
+2. **Manually set gas limit**
+   - Click "Advanced" in MetaMask
+   - Set gas limit to 300,000 (usually enough)
+   - Proceed carefully (might still fail)
+
+3. **Contact support**
+   - If you believe transaction should work
+   - Provide transaction details
+   - We'll investigate
+
+---
+
+## Network and RPC Issues
+
+### "RPC Error" or "Network Error"
+
+**Quick Fix:**
+
+1. **Refresh page**
+2. **Check network connection**
+3. **Verify RPC endpoint:**
+   - MetaMask → Networks → Mezo Testnet
+   - RPC URL: `https://rpc.test.mezo.org`
+
+**If persists:**
+
+Try alternative RPC (if available):
+- Check [Mezo docs](https://docs.mezo.org) for backup RPCs
+- Add as custom network
+- Switch and try again
+
+### Cannot connect to Mezo network
+
+**Symptoms:**
+- "Network unavailable"
+- "RPC endpoint not responding"
+
+**Solutions:**
+
+1. **Check Mezo network status**
+   - [explorer.test.mezo.org](https://explorer.test.mezo.org)
+   - Should show recent blocks
+
+2. **Verify RPC configuration**
+   ```
+   RPC URL: https://rpc.test.mezo.org
+   Chain ID: 31611
+   ```
+
+3. **Try from different location**
+   - Use mobile data instead of WiFi
+   - Try VPN if behind firewall
+   - Some networks block crypto RPCs
+
+4. **Check for Mezo maintenance**
+   - [Twitter @MezoNetwork](https://twitter.com/mezonetwork)
+   - [Discord](https://discord.gg/mezo)
+
+---
+
+## UI/UX Issues
+
+### Buttons not clickable
+
+**Solutions:**
+
+1. **Wallet connected?**
+   - Check if wallet is connected
+   - Reconnect if needed
+
+2. **Correct network?**
+   - Must be on Mezo Testnet
+   - Switch networks in MetaMask
+
+3. **Page fully loaded?**
+   - Wait for spinning indicators to stop
+   - Refresh if stuck loading
+
+4. **Browser compatibility**
+   - Update to latest Chrome/Firefox
+   - Disable ad blockers
+   - Try incognito mode
+
+### "Connect Wallet" button stuck
+
+**Fix:**
+
+1. Refresh page
+2. Click MetaMask icon manually
+3. Click "Connected sites"
+4. Remove khipuvault.com
+5. Refresh and reconnect
+
+### Modal won't close
+
+**Solutions:**
+
+1. **Click outside modal** (usually closes)
+2. **Press ESC key**
+3. **Refresh page**
+4. **Try different browser**
+
+---
+
+## Mobile Issues
+
+### Mobile wallet not working
+
+**Supported:**
+- ✅ MetaMask Mobile app
+- ✅ Mobile browser with MetaMask extension
+
+**Not Supported:**
+- ❌ Trust Wallet
+- ❌ Coinbase Wallet
+- ❌ Exchange wallets
+
+**Solutions:**
+
+1. **Use MetaMask Mobile**
+   - Download from App Store or Google Play
+   - Import your wallet
+   - Open khipuvault.com in MetaMask browser
+
+2. **Or use desktop**
+   - Better experience on desktop
+   - More stable
+   - Easier troubleshooting
+
+### Responsive issues on mobile
+
+**Workarounds:**
+
+1. **Rotate to landscape**
+2. **Zoom out** (pinch gesture)
+3. **Use desktop mode** in browser settings
+4. **Switch to desktop** for complex transactions
+
+---
+
+## Data and Sync Issues
+
+### Pool data not syncing
+
+**Symptoms:**
+- Old balance showing
+- Stale yield data
+- Member list outdated
+
+**Solutions:**
+
+1. **Refresh page**
+2. **Clear browser cache**
+3. **Check indexer status**
+   - We run event indexers that sync blockchain data
+   - Sometimes they lag during high traffic
+   - Usually catches up within 5 minutes
+
+4. **Verify on-chain**
+   - Check block explorer for true state
+   - Contract is source of truth, not UI
+
+### Transaction history missing
+
+**Explanation:**
+- Transaction history is stored locally (browser)
+- Clearing cache removes it
+- But your funds are safe on blockchain
+
+**Solutions:**
+
+1. **Check block explorer**
+   - [explorer.test.mezo.org](https://explorer.test.mezo.org)
+   - Enter your wallet address
+   - View all historical transactions
+
+2. **Export from MetaMask**
+   - MetaMask → Settings → Advanced
+   - "Export State Logs"
+   - Contains transaction history
+
+---
+
+## Advanced Troubleshooting
+
+### Clear all data and start fresh
+
+**Nuclear option** (only if nothing else works):
+
+1. **Withdraw all funds first** (important!)
+2. **Disconnect wallet from site:**
+   - MetaMask → Connected sites
+   - Remove khipuvault.com
+3. **Clear browser data:**
+   - Chrome: Settings → Privacy → Clear browsing data
+   - Select all time, all data types
+   - Clear
+4. **Restart browser completely**
+5. **Reconnect wallet**
+
+<Callout type="warning">
+This doesn't affect your blockchain funds, only local browser data.
+</Callout>
+
+### MetaMask completely broken
+
+**Full reset:**
+
+1. **Export private key first!**
+   - MetaMask → Account details → Export private key
+   - Save securely
+
+2. **Uninstall MetaMask extension**
+3. **Reinstall from [metamask.io](https://metamask.io)**
+4. **Import wallet** with private key or seed phrase
+5. **Re-add Mezo network**
+
+### Still stuck?
+
+**Get help:**
+
+1. **Discord #support**
+   - Fastest response
+   - Community can help
+   - Mods available
+
+2. **Email support**
+   - support@khipuvault.com
+   - Include:
+     - Wallet address
+     - Transaction hash (if applicable)
+     - Screenshots
+     - Error messages
+     - What you tried
+
+3. **GitHub issue**
+   - [github.com/khipuvault/issues](https://github.com/khipuvault/issues)
+   - For reproducible bugs
+   - Include steps to reproduce
+
+---
+
+## Error Code Reference
+
+### Common Error Codes
+
+| Code | Meaning | Solution |
+|------|---------|----------|
+| 4001 | User rejected transaction | Approve in MetaMask |
+| -32603 | Internal JSON-RPC error | Retry in 30 seconds |
+| -32602 | Invalid params | Check transaction parameters |
+| 3 | Execution reverted | Read revert message, check pool rules |
+
+### Contract-Specific Errors
+
+**"INSUFFICIENT_BALANCE"**
+- You're trying to withdraw more than you have
+- Check actual balance on dashboard
+
+**"POOL_PAUSED"**
+- Pool is paused for maintenance
+- Wait for announcement
+
+**"MIN_DEPOSIT_NOT_MET"**
+- Your deposit is below pool minimum
+- Increase amount or choose different pool
+
+**"NOT_POOL_MEMBER"**
+- You're not a member of this pool
+- Join pool first before depositing
+
+**"ROTATION_NOT_COMPLETE"**
+- Trying to withdraw from ROSCA before your turn
+- Wait for your cycle
+
+---
+
+## Prevention Tips
+
+### Avoid common issues
+
+✅ **Always verify:**
+- Correct network (Mezo Testnet)
+- Sufficient balance
+- Approved MUSD before depositing
+
+✅ **Keep updated:**
+- Latest MetaMask version
+- Latest browser version
+- Follow announcements
+
+✅ **Best practices:**
+- Bookmark khipuvault.com (avoid phishing)
+- Test with small amounts first
+- Read pool rules before joining
+- Don't clear cache unless necessary
+
+### Monitor for issues
+
+🔔 **Stay informed:**
+- [Status page](https://status.khipuvault.com)
+- [Discord #announcements](https://discord.gg/khipuvault)
+- [Twitter @KhipuVault](https://twitter.com/khipuvault)
+
+---
+
+## Report a Bug
+
+Found a bug not listed here?
+
+**Report it:**
+
+1. **Check it's not already reported**
+   - [GitHub issues](https://github.com/khipuvault/issues)
+   - Discord #bugs channel
+
+2. **Gather details:**
+   - What were you trying to do?
+   - What happened instead?
+   - Error messages/screenshots
+   - Transaction hash (if applicable)
+   - Browser and OS version
+
+3. **Submit:**
+   - GitHub: [New Issue](https://github.com/khipuvault/issues/new)
+   - Discord: #bugs channel
+   - Email: bugs@khipuvault.com
+
+**Serious bugs?**
+- Check [Bug Bounty Program](/docs/security/bug-bounty)
+- Earn up to $10,000 for critical findings
+- Email: security@khipuvault.com
+
+---
+
+## Additional Resources
+
+- 📖 [FAQ](/docs/resources/faq) - Frequently asked questions
+- 🆘 [Support](/docs/resources/support) - Get help from team
+- 🔒 [Security](/docs/security) - Security best practices
+- 💬 [Community](/docs/resources/community) - Join Discord
+
+---
+
+**Last updated:** February 2026
+
+If you found this guide helpful, please let us know in Discord!

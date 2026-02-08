@@ -1,0 +1,276 @@
+---
+title: Setup Your Wallet
+description: Complete wallet setup from scratch, including MetaMask installation and Mezo testnet configuration
+---
+
+# Setup Your Wallet
+
+Learn how to install and configure MetaMask to connect with KhipuVault on the Mezo testnet.
+
+## Prerequisites
+
+- A computer with Chrome, Firefox, or Brave browser
+- Basic understanding of what cryptocurrency wallets are
+- 5-10 minutes of time
+
+## What You'll Learn
+
+By the end of this tutorial, you will:
+
+- Install MetaMask browser extension
+- Create a new wallet and secure your seed phrase
+- Add Mezo testnet network to MetaMask
+- Get testnet tokens for transaction fees
+- Connect your wallet to KhipuVault
+
+## Step 1: Install MetaMask
+
+### Download the Extension
+
+1. Visit [metamask.io](https://metamask.io)
+2. Click "Download" in the top right
+3. Select your browser (Chrome, Firefox, or Brave)
+4. Click "Install MetaMask for [Your Browser]"
+5. Click "Add to [Browser]" in the extension store
+
+<Callout type="warning">
+  **Security Alert**: Only download MetaMask from the official website (metamask.io). Never download from third-party sources.
+</Callout>
+
+### Verify Installation
+
+After installation, you should see:
+
+- MetaMask fox icon in your browser toolbar
+- A welcome screen from MetaMask
+
+## Step 2: Create Your Wallet
+
+### Setup Process
+
+1. Click the MetaMask icon in your browser toolbar
+2. Click "Get Started"
+3. Choose "Create a new wallet"
+4. Agree to the terms and conditions
+5. Create a strong password (at least 12 characters)
+6. Click "Create a new wallet"
+
+<Callout type="info">
+  **Password Tip**: Use a unique password you don't use elsewhere. Consider using a password manager like 1Password or Bitwarden.
+</Callout>
+
+### Secure Your Seed Phrase
+
+This is the most important step:
+
+1. MetaMask will show you a 12-word seed phrase
+2. Click "Reveal Secret Recovery Phrase"
+3. **Write down all 12 words in order on paper**
+4. Store this paper in a secure location (fireproof safe, safety deposit box)
+5. Click "Next"
+6. Confirm your seed phrase by selecting words in the correct order
+7. Click "Confirm"
+
+<Callout type="error">
+  **Critical**: Never share your seed phrase with anyone. KhipuVault will never ask for it. Anyone with your seed phrase can steal all your funds.
+</Callout>
+
+### Seed Phrase Best Practices
+
+- Write it on paper, not digitally
+- Make 2-3 copies and store in different secure locations
+- Never take photos of your seed phrase
+- Never store it in email, cloud storage, or messaging apps
+- Consider using a metal backup plate for fire/water resistance
+
+## Step 3: Add Mezo Testnet Network
+
+### Automatic Setup (Recommended)
+
+1. Visit [app.khipuvault.com](https://app.khipuvault.com)
+2. Click "Connect Wallet"
+3. Select MetaMask
+4. Approve the connection in MetaMask popup
+5. When prompted, click "Add Network" for Mezo testnet
+6. Click "Approve" to add the network
+7. Click "Switch Network" to use Mezo testnet
+
+### Manual Setup (Alternative)
+
+If automatic setup doesn't work:
+
+1. Open MetaMask
+2. Click the network dropdown (top center)
+3. Click "Add Network"
+4. Click "Add a network manually"
+5. Enter the following details:
+
+```
+Network Name: Mezo Testnet
+RPC URL: https://rpc.test.mezo.org
+Chain ID: 31611
+Currency Symbol: BTC
+Block Explorer URL: https://explorer.test.mezo.org
+```
+
+6. Click "Save"
+7. Switch to Mezo Testnet in the network dropdown
+
+<Callout type="info">
+  **Network Tip**: Always verify you're on Mezo Testnet before making transactions. The network name appears at the top of MetaMask.
+</Callout>
+
+## Step 4: Get Testnet Tokens
+
+You need testnet BTC for transaction fees (gas).
+
+### Using the Faucet
+
+1. Copy your wallet address from MetaMask (click the address at top to copy)
+2. Visit the [Mezo Testnet Faucet](https://faucet.test.mezo.org)
+3. Paste your wallet address
+4. Complete the CAPTCHA
+5. Click "Request Testnet BTC"
+6. Wait 1-2 minutes for tokens to arrive
+
+<Callout type="info">
+  **Faucet Limits**: Most faucets have daily limits. You typically receive 0.1-1 testnet BTC, which is plenty for testing.
+</Callout>
+
+### Verify Receipt
+
+1. Open MetaMask
+2. Check your balance (should show testnet BTC)
+3. If you don't see tokens after 5 minutes, try the faucet again
+
+### Alternative Faucets
+
+If the official faucet is down, try these alternatives:
+
+- [Alchemy Faucet](https://www.alchemy.com/faucets/mezo-testnet)
+- [QuickNode Faucet](https://faucet.quicknode.com/mezo/testnet)
+
+## Step 5: Connect to KhipuVault
+
+### First Connection
+
+1. Visit [app.khipuvault.com](https://app.khipuvault.com)
+2. Click "Connect Wallet" in the top right
+3. Select "MetaMask" from the wallet options
+4. Review the connection request in MetaMask
+5. Click "Connect"
+6. Approve the network switch to Mezo Testnet if prompted
+
+<Callout type="success">
+  **Success**: Your wallet address should now appear in the top right corner of KhipuVault.
+</Callout>
+
+### Understanding Permissions
+
+When connecting, you're giving KhipuVault permission to:
+
+- View your wallet address
+- Request transaction signatures
+- View your token balances
+
+KhipuVault CANNOT:
+
+- Move funds without your approval
+- Access your seed phrase or private keys
+- Make transactions without your signature
+
+## Troubleshooting
+
+### MetaMask Won't Install
+
+**Problem**: Extension won't add to browser
+
+**Solutions**:
+- Try a different browser (Chrome, Firefox, Brave)
+- Disable other wallet extensions temporarily
+- Clear browser cache and try again
+- Restart your browser
+
+### Can't See Mezo Testnet
+
+**Problem**: Network doesn't appear in MetaMask
+
+**Solutions**:
+- Try manual network setup (see Step 3)
+- Verify you entered the Chain ID correctly (31611)
+- Update MetaMask to the latest version
+- Clear MetaMask activity data: Settings → Advanced → Clear activity tab data
+
+### Faucet Tokens Not Arriving
+
+**Problem**: No testnet BTC after requesting from faucet
+
+**Solutions**:
+- Wait 5-10 minutes (blockchain can be slow)
+- Verify you're on Mezo Testnet network
+- Try an alternative faucet
+- Check you copied the correct wallet address
+
+### Connection to KhipuVault Fails
+
+**Problem**: Can't connect wallet to app
+
+**Solutions**:
+- Refresh the KhipuVault page
+- Disconnect wallet in MetaMask: Settings → Connected sites → Disconnect
+- Try connecting again
+- Clear browser cache
+- Disable ad blockers temporarily
+
+## Security Best Practices
+
+### Do's
+
+- Keep your seed phrase offline and secure
+- Use a hardware wallet for large amounts (Ledger, Trezor)
+- Enable password/biometric lock on your device
+- Keep MetaMask and your browser updated
+- Verify URLs before connecting (app.khipuvault.com)
+- Use different wallets for testing vs. mainnet
+
+### Don'ts
+
+- Never share your seed phrase or private key
+- Don't connect to unknown websites
+- Don't keep large amounts in hot wallets
+- Never enter your seed phrase on websites
+- Don't click suspicious links in emails or messages
+- Never share screenshots containing seed phrases
+
+## Next Steps
+
+Now that your wallet is set up, you're ready to start using KhipuVault:
+
+<Cards>
+  <Card
+    title="Make Your First Deposit"
+    href="/docs/tutorials/beginner/first-deposit"
+    description="Learn how to deposit Bitcoin and start earning yield"
+  />
+  <Card
+    title="Understand Wallet Security"
+    href="/docs/concepts/wallet-security"
+    description="Deep dive into keeping your crypto safe"
+  />
+  <Card
+    title="Connect Hardware Wallet"
+    href="/docs/guides/hardware-wallet"
+    description="For extra security with larger amounts"
+  />
+</Cards>
+
+## Additional Resources
+
+- [MetaMask Support](https://support.metamask.io)
+- [Mezo Network Documentation](https://docs.mezo.org)
+- [KhipuVault Security Guide](/docs/security)
+- [Video Tutorial: Wallet Setup](https://youtube.com/@khipuvault)
+
+<Callout type="success">
+  **Congratulations!** You've successfully set up your wallet and are ready to start using KhipuVault. Remember to keep your seed phrase safe!
+</Callout>

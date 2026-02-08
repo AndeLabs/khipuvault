@@ -1,0 +1,550 @@
+---
+title: Participating in a Rotating Pool
+description: How to join a ROSCA, make contributions, track payments, and fulfill your commitment on KhipuVault.
+---
+
+# Participating in a Rotating Pool
+
+Join a rotating pool and become part of a trusted savings circle. This guide covers joining, contributing, and staying in good standing.
+
+## Joining a Pool
+
+### Finding Pools
+
+**Option 1: Direct Invitation**
+Receive a pool link from the organizer:
+```
+https://app.khipuvault.com/pools/rotating/42
+```
+
+**Option 2: Browse Open Pools**
+Explore public pools on KhipuVault:
+1. Go to **Rotating Pools** section
+2. Click **Browse Pools**
+3. Filter by:
+   - Contribution amount
+   - Schedule (weekly/monthly)
+   - Members needed
+   - Collateral requirements
+
+**Option 3: Search by Address**
+If you have the pool contract address:
+```
+Enter address: 0x7a8E9F...3B4C
+```
+
+### Reviewing Pool Details
+
+Before joining, check all parameters:
+
+```
+Pool Information:
+├─ Name: Neighborhood Tanda - January 2026
+├─ Organizer: 0xAbcd...1234 (verified ✓)
+├─ Status: FORMING (8/10 members)
+├─ Contribution: 100 MUSD per month
+├─ Total Pot: 1,000 MUSD per round
+├─ Schedule: Monthly, starts Feb 1, 2026
+├─ Duration: 10 months
+├─ Collateral: 50% (500 MUSD)
+├─ Rotation Order: First-come, first-served
+├─ Grace Period: 3 days
+└─ Late Penalty: 5% per week
+```
+
+**Key questions to ask yourself:**
+
+1. **Can I afford the contribution?**
+   - 100 MUSD every month for 10 months = 1,000 MUSD total commitment
+
+2. **Do I have the collateral?**
+   - 500 MUSD locked upfront (returned when I receive payout)
+
+3. **Do I trust the organizer?**
+   - Check their reputation score
+   - See their past pool performance
+   - Verify their identity if possible
+
+4. **Does the schedule work for me?**
+   - Monthly on the 1st aligns with my payday?
+   - 10-month commitment fits my plans?
+
+5. **When might I receive payout?**
+   - Join order #9 → Receive in Round 9 (October 2026)
+   - Is this timing acceptable?
+
+### Joining Process
+
+<Steps>
+
+### Click "Join Pool"
+
+Review the membership agreement.
+
+### Approve MUSD Spending
+
+Allow the pool contract to pull your contributions automatically.
+
+**Recommended:**
+```
+Approve: Unlimited (one-time setup)
+```
+
+**Conservative:**
+```
+Approve: 1,000 MUSD (exact total needed)
+```
+
+<Callout type="info">
+Unlimited approval is safe because the contract can ONLY pull the exact contribution amount on schedule. It cannot pull more or pull early.
+</Callout>
+
+### Deposit Collateral
+
+If required, deposit your security collateral:
+
+```
+Collateral Amount: 500 MUSD
+Purpose: Protect against default after receiving payout
+Returned: When you receive your payout
+```
+
+Sign the transaction.
+
+### Confirm Membership
+
+```
+Member #9 confirmed ✓
+Your position: 9 of 10
+Your payout round: Round 9 (October 1, 2026)
+Next step: Wait for pool to fill and start
+```
+
+</Steps>
+
+You're now an official member.
+
+## Understanding Your Position
+
+### Rotation Order
+
+Your position determines when you receive the pot:
+
+```
+Rotation Order:
+1. 0xAbcd...1234 → Round 1 (Feb 2026)
+2. 0xEfgh...5678 → Round 2 (Mar 2026)
+3. 0xIjkl...9012 → Round 3 (Apr 2026)
+...
+9. YOU (0xMnop...3456) → Round 9 (Oct 2026)
+10. 0xQrst...7890 → Round 10 (Nov 2026)
+```
+
+**What this means:**
+- You contribute 100 MUSD every month for 10 months
+- You receive 1,000 MUSD in October 2026
+- Your collateral is returned with your payout
+
+### Timeline View
+
+```
+Feb 2026: Pay $100 ✓ (1/10 paid)
+Mar 2026: Pay $100 ✓ (2/10 paid)
+Apr 2026: Pay $100 ✓ (3/10 paid)
+May 2026: Pay $100 ✓ (4/10 paid)
+Jun 2026: Pay $100 ✓ (5/10 paid)
+Jul 2026: Pay $100 ✓ (6/10 paid)
+Aug 2026: Pay $100 ✓ (7/10 paid)
+Sep 2026: Pay $100 ✓ (8/10 paid)
+Oct 2026: Pay $100 + RECEIVE $1,000 + Get $500 collateral back
+Nov 2026: Pay $100 ✓ (10/10 paid) COMPLETE
+```
+
+**Net position:**
+- Total contributed: 1,000 MUSD
+- Total received: 1,000 MUSD + yields
+- Plus: Any yields earned on contributions
+- Minus: Platform fees (usually 10% of yields only)
+
+## Making Contributions
+
+### Automatic Payments
+
+Contributions are pulled automatically by the smart contract:
+
+```
+Due Date: 1st of every month, 12:00 PM UTC
+Process: Smart contract calls MUSD.transferFrom()
+Your action: Ensure MUSD balance > 100
+```
+
+**How it works:**
+1. Contract checks if you have sufficient MUSD
+2. Contract pulls exactly the contribution amount
+3. Contract adds to current round's pot
+4. You receive confirmation
+
+### Pre-Funding Strategies
+
+**Strategy 1: Keep Buffer Balance**
+```
+Maintain: 200 MUSD in wallet
+Covers: This month + next month
+Refill: Monthly from income
+```
+
+**Strategy 2: Auto-Transfer Setup**
+```
+Set calendar reminder: 28th of each month
+Transfer: 100 MUSD from savings to wallet
+Ensures: Funds ready by due date
+```
+
+**Strategy 3: One-Time Pre-Fund**
+```
+Deposit: 1,000 MUSD upfront
+Let contract pull: Automatically each month
+Advantage: No monthly management
+```
+
+### Payment Confirmations
+
+After each successful contribution:
+
+```
+✓ Payment Confirmed
+
+Round: 3
+Amount: 100 MUSD
+Timestamp: 2026-04-01 12:00:15 UTC
+Transaction: 0xabc123...
+Your Total Paid: 300 MUSD (3/10 rounds)
+Status: On-time ✓
+```
+
+### Tracking Your Contributions
+
+**Dashboard view:**
+
+```
+Your Payment History:
+
+Round 1 (Feb 2026): ✓ Paid on-time
+Round 2 (Mar 2026): ✓ Paid on-time
+Round 3 (Apr 2026): ✓ Paid on-time
+Round 4 (May 2026): ⏳ Due in 5 days
+
+Total Contributed: 300 MUSD
+Remaining Commitment: 700 MUSD (7 rounds)
+On-time Rate: 100%
+Reputation Score: 100/100
+```
+
+## Staying On-Time
+
+### Payment Reminders
+
+**Automatic notifications:**
+
+```
+7 days before: "Reminder: 100 MUSD due on May 1"
+3 days before: "Upcoming: 100 MUSD due in 3 days"
+1 day before: "Final reminder: 100 MUSD due tomorrow"
+On due date: "Payment being collected today"
+```
+
+**Enable notifications:**
+- Email alerts (recommended)
+- SMS alerts (for high-value pools)
+- Mobile app push notifications
+- Calendar integration (.ics file)
+
+### What If You're Late?
+
+**Grace Period Protection:**
+
+```
+Payment due: May 1, 12:00 PM UTC
+Grace period: 3 days
+Penalty-free until: May 4, 12:00 PM UTC
+```
+
+If you pay within grace period, no penalty.
+
+**After Grace Period:**
+
+```
+Payment due: May 1
+Grace ends: May 4
+You pay: May 6 (2 days late)
+
+Late penalty: 5% per week
+Calculation: $100 × 5% × (2/7 weeks) = $1.43
+Total due: $101.43
+```
+
+**Escalating penalties:**
+
+```
+Week 1 late: 5% penalty ($5)
+Week 2 late: 10% penalty ($10)
+Week 3 late: Default risk (collateral at stake)
+```
+
+## Handling Emergencies
+
+### Temporary Cash Flow Issues
+
+**Option 1: Request Grace Extension**
+```
+Contact organizer: "May 1 payment delayed 5 days due to [reason]"
+Organizer can: Grant one-time extension
+Condition: Must have good payment history
+```
+
+**Option 2: Borrow from Emergency Fund**
+If pool has emergency fund mechanism:
+```
+Request: Short-term advance from pool reserves
+Repay: With next contribution (pay double)
+Fee: Small interest (2-3%)
+```
+
+**Option 3: Ask Member for Swap**
+```
+You're scheduled: Round 9 (October)
+Member X scheduled: Round 4 (May)
+Agreement: Swap positions
+Both sign: On-chain position swap
+```
+
+### Emergency Withdrawal
+
+If you absolutely cannot continue:
+
+<Steps>
+
+### Submit Emergency Exit Request
+
+```
+Click: "Request Emergency Exit"
+Reason: [Required explanation]
+```
+
+### Pay Exit Penalty
+
+```
+Your equity: 300 MUSD contributed
+Penalty: 10% = 30 MUSD
+Refund: 270 MUSD + collateral (500)
+Total returned: 770 MUSD
+```
+
+### Organizer/Member Approval
+
+```
+Requires: Organizer approval OR 50% member vote
+Timeline: 3-5 days review period
+Decision: Approve or Deny
+```
+
+### Receive Refund
+
+If approved:
+```
+Refund: 770 MUSD transferred to your wallet
+Collateral: 500 MUSD returned
+Status: Removed from pool
+Impact: Negative on reputation score
+```
+
+</Steps>
+
+<Callout type="warning">
+**Emergency exits should be rare.**
+
+Only use if truly necessary. Repeated emergency exits will damage your reputation and make it hard to join future pools.
+</Callout>
+
+## Reputation System
+
+### How Reputation Works
+
+Your on-chain reputation score affects pool access:
+
+```
+Reputation Score: 95/100
+
+Factors:
++ On-time payments: 100% (10/10)
++ Pools completed: 2
++ Years active: 1.5
+- Late payments: 0
+- Defaults: 0
+- Emergency exits: 0
+```
+
+### Score Impact
+
+| Score | Status | Access |
+|-------|--------|--------|
+| 90-100 | Excellent | All pools, trusted member |
+| 75-89 | Good | Most pools, may need higher collateral |
+| 50-74 | Fair | Limited pools, high collateral required |
+| 25-49 | Poor | Very limited access |
+| 0-24 | Blocked | Cannot join new pools |
+
+### Improving Reputation
+
+**Build it up:**
+- Make on-time payments consistently
+- Complete full cycles without issues
+- Participate actively in pool governance
+- Help resolve disputes fairly
+
+**Protect it:**
+- Never default
+- Avoid late payments
+- Only emergency exit when absolutely necessary
+- Communicate proactively with organizer
+
+## Member Rights & Responsibilities
+
+### Your Rights
+
+✓ **Transparent Records**
+View all transactions, contributions, and payouts on-chain.
+
+✓ **Fair Treatment**
+Organizer cannot change rules mid-cycle.
+
+✓ **Vote on Changes**
+Major decisions require member approval.
+
+✓ **Emergency Exit**
+You can leave (with penalty) if needed.
+
+✓ **Dispute Resolution**
+Access to on-chain evidence and mediation.
+
+### Your Responsibilities
+
+✓ **Timely Payments**
+Contribute on schedule every round.
+
+✓ **Maintain Balance**
+Keep sufficient MUSD in wallet.
+
+✓ **Communication**
+Respond to organizer messages.
+
+✓ **Honor Commitment**
+Stay until cycle completes.
+
+✓ **Support Community**
+Help other members if they struggle.
+
+## Best Practices
+
+### Financial Management
+
+**1. Budget Properly**
+```
+Monthly income: $1,000
+Expenses: $700
+Savings: $200
+ROSCA contribution: $100 ← Must fit comfortably
+```
+
+**2. Automate Payments**
+- Set up auto-transfers from bank to crypto wallet
+- Keep MUSD topped up
+- Use calendar reminders
+
+**3. Plan for Your Payout**
+```
+You receive: October 2026
+Use for: Holiday shopping + emergency fund
+Don't spend: Before you receive it
+```
+
+### Community Participation
+
+**1. Stay Engaged**
+- Read pool updates
+- Respond to organizer messages
+- Attend virtual meetings if scheduled
+
+**2. Support Members**
+- If someone struggles, discuss solutions
+- Share ROSCA benefits with friends
+- Help new members understand process
+
+**3. Celebrate Milestones**
+```
+Round 5 completed ✓ Halfway there!
+Member received payout ✓ Congratulate them!
+Cycle completed ✓ Organize celebration!
+```
+
+## Troubleshooting
+
+### "Insufficient balance" Error
+
+**Problem:** Smart contract can't pull your contribution.
+
+**Solution:**
+```
+1. Check MUSD balance: Must be ≥ contribution amount
+2. Check approval: Must have approved spending
+3. Try manual payment: Dashboard → "Pay Now" button
+```
+
+### Missed the Due Date
+
+**Problem:** You forgot to pay on time.
+
+**Solution:**
+```
+1. Pay immediately: Minimize penalty
+2. Contact organizer: Explain situation
+3. Set up reminders: Prevent future misses
+```
+
+### Can't Afford Contribution
+
+**Problem:** Financial hardship making payment impossible.
+
+**Solution:**
+```
+1. Contact organizer ASAP: Before defaulting
+2. Explore options:
+   - Position swap with later member
+   - Emergency exit (with penalty)
+   - Temporary loan from pool emergency fund
+3. Don't ignore: Defaulting is worst option
+```
+
+### Dispute with Organizer
+
+**Problem:** Disagree on payment status or pool rules.
+
+**Solution:**
+```
+1. Check on-chain data: Blockchain is source of truth
+2. Screenshot evidence: Transaction hashes, timestamps
+3. Request review: Other members or KhipuVault support
+4. Escalate if needed: Multi-sig organizers vote
+```
+
+## Next Steps
+
+Now that you're participating:
+
+- [Receiving Payout](/docs/products/rotating-pool/receiving-payout) - When it's your turn
+- [FAQ](/docs/products/rotating-pool/faq) - Common questions
+- [Creating a Pool](/docs/products/rotating-pool/creating-rosca) - Start your own
+
+---
+
+**Need help?** [Visit support →](https://discord.gg/khipuvault)
