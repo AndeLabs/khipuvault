@@ -51,7 +51,7 @@
     "@microsoft/eslint-plugin-sdl": "^1.1.0",
     "@types/node": "^20.10.0",
     "@vitest/coverage-v8": "^4.0.14",
-    "autoprefixer": "^10.4.21",
+    "autoprefixer": "^10.4.24",
     "eslint-plugin-no-secrets": "^2.2.1",
     "eslint-plugin-security": "^3.0.1",
     "headless-web3-provider": "^0.3.2",
