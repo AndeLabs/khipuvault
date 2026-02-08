@@ -14,7 +14,7 @@
     "@khipu/database": "workspace:*",
     "@khipu/shared": "workspace:*",
     "ethers": "^6.13.0",
-    "dotenv": "^16.4.5"
+    "dotenv": "^17.2.4"
   },
   "devDependencies": {
     "@types/node": "^20.12.7",
