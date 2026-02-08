@@ -45,8 +45,5 @@
       "permanent": false
     }
   ],
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./",
-  "env": {
-    "NEXT_PUBLIC_NETWORK": "@next-public-network"
-  }
+  "ignoreCommand": "git diff --quiet HEAD^ HEAD ./"
 }
