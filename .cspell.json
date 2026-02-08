@@ -1,0 +1,137 @@
+{
+  "version": "0.2",
+  "language": "en",
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "build",
+    ".next",
+    ".turbo",
+    "coverage",
+    "out",
+    "lib",
+    "*.lock",
+    "pnpm-lock.yaml",
+    "package-lock.json",
+    "yarn.lock",
+    ".git",
+    ".cache",
+    ".env*",
+    "*.min.js",
+    "*.min.css",
+    "*.bundle.js",
+    "*.generated.*",
+    ".husky/_",
+    "apps/docs/.source",
+    "apps/docs/content",
+    "packages/contracts/out",
+    "packages/contracts/cache",
+    "packages/contracts/broadcast",
+    "packages/database/prisma/migrations",
+    "security/shannon/shannon-repo"
+  ],
+  "enableFiletypes": [
+    "typescript",
+    "javascript",
+    "typescriptreact",
+    "javascriptreact",
+    "markdown",
+    "json",
+    "jsonc",
+    "solidity"
+  ],
+  "files": ["**/*.ts", "**/*.tsx", "**/*.js", "**/*.jsx", "**/*.md", "**/*.sol", "**/*.json"],
+  "dictionaries": ["typescript", "node", "npm", "bash", "en-US", "khipuvault-custom"],
+  "dictionaryDefinitions": [
+    {
+      "name": "khipuvault-custom",
+      "path": "./.cspell-custom.txt",
+      "addWords": true
+    }
+  ],
+  "ignoreRegExpList": [
+    "/0x[a-fA-F0-9]+/",
+    "/\\b[A-Z0-9]{40,}\\b/",
+    "/\\b[a-f0-9]{64}\\b/",
+    "/require\\(['\"].*['\"]\\)/",
+    "/import.*from.*['\"].*['\"];?/",
+    "/\".*\"/",
+    "/'.*'/",
+    "/`.*`/",
+    "/https?:\\/\\/[^\\s]+/",
+    "/\\$\\{.*\\}/",
+    "/@\\w+\\/\\w+/",
+    "/\\bv\\d+\\.\\d+\\.\\d+\\b/",
+    "/\\b[0-9a-f]{7,40}\\b/",
+    "/\\b0x[0-9a-fA-F]+\\b/",
+    "/abi\\.[a-zA-Z]+/",
+    "/event\\s+\\w+\\s*\\(/",
+    "/function\\s+\\w+\\s*\\(/",
+    "/contract\\s+\\w+/",
+    "/pragma\\s+solidity/",
+    "/SPDX-License-Identifier/"
+  ],
+  "flagWords": [],
+  "words": [],
+  "ignoreWords": [
+    "typeof",
+    "readonly",
+    "keyof",
+    "infer",
+    "instanceof",
+    "async",
+    "await",
+    "const",
+    "ctor",
+    "desc",
+    "dest",
+    "eval",
+    "impl",
+    "impl",
+    "init",
+    "msg",
+    "params",
+    "prev",
+    "src",
+    "tmp",
+    "utils"
+  ],
+  "overrides": [
+    {
+      "filename": "**/*.sol",
+      "ignoreRegExpList": [
+        "/uint\\d+/",
+        "/int\\d+/",
+        "/bytes\\d+/",
+        "/0x[a-fA-F0-9]+/",
+        "/\\b[0-9]+e\\d+\\b/"
+      ]
+    },
+    {
+      "filename": "**/*.test.{ts,tsx,js,jsx}",
+      "ignoreWords": [
+        "vitest",
+        "beforeAll",
+        "afterAll",
+        "beforeEach",
+        "afterEach",
+        "describe",
+        "expect",
+        "toBe",
+        "toEqual",
+        "toHaveBeenCalled"
+      ]
+    },
+    {
+      "filename": "**/package.json",
+      "ignoreWords": ["turbo", "tsup", "vite", "vitest", "pnpm", "turborepo"]
+    },
+    {
+      "filename": "**/*.md",
+      "ignoreRegExpList": ["/```[\\s\\S]*?```/g", "/`[^`]+`/g"]
+    }
+  ],
+  "allowCompoundWords": true,
+  "caseSensitive": false,
+  "minWordLength": 3
+}

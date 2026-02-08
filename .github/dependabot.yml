@@ -1,7 +1,29 @@
+# ============================================================================
+# GitHub Dependabot Configuration for KhipuVault Monorepo
+# ============================================================================
+#
+# This configuration manages automatic dependency updates across the entire
+# monorepo, including pnpm workspaces, GitHub Actions, and Foundry contracts.
+#
+# Key Features:
+# - Security updates checked daily
+# - Production dependencies updated weekly
+# - Dev dependencies updated monthly
+# - Smart grouping to reduce PR noise
+# - Complements (not conflicts with) Renovate if used
+#
+# Note: This is GitHub's native solution - 100% FREE, no external setup needed
+# ============================================================================
+
 version: 2
 
 updates:
-  # Enable version updates for npm packages
+  # ============================================================================
+  # ROOT WORKSPACE - Main package.json and shared dependencies
+  # ============================================================================
+  # Manages monorepo-wide dev dependencies: turbo, typescript, prettier, etc.
+  # Schedule: Weekly for general deps, daily security checks via GitHub
+  # ============================================================================
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
@@ -10,22 +32,174 @@ updates:
       time: "09:00"
       timezone: "America/Lima"
 
-    # Allow up to 10 open pull requests for npm dependencies
     open-pull-requests-limit: 10
 
-    # Group all minor and patch updates together
+    # ========================================================================
+    # GROUPED UPDATES - Reduces PR noise by bundling related updates
+    # ========================================================================
     groups:
-      # Group all non-major development dependency updates
-      dev-dependencies:
+      # TypeScript ecosystem updates (compiler + eslint + types)
+      typescript-ecosystem:
+        patterns:
+          - "typescript"
+          - "@typescript-eslint/*"
+          - "@types/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Testing framework updates (vitest + coverage + playwright)
+      testing-framework:
+        patterns:
+          - "vitest"
+          - "@vitest/*"
+          - "playwright"
+          - "@playwright/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Build tooling (turbo, tsup, tsx)
+      build-tools:
+        patterns:
+          - "turbo"
+          - "tsup"
+          - "tsx"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Code quality tools (prettier, eslint, lint-staged, husky)
+      code-quality:
+        patterns:
+          - "prettier"
+          - "prettier-plugin-*"
+          - "eslint*"
+          - "lint-staged"
+          - "husky"
+          - "@commitlint/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Security scanning tools (snyk, semgrep, security plugins)
+      security-tools:
+        patterns:
+          - "snyk"
+          - "eslint-plugin-security"
+          - "eslint-plugin-no-secrets"
+          - "@microsoft/eslint-plugin-sdl"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # All other dev dependencies (monthly batch updates)
+      other-dev-dependencies:
         patterns:
           - "*"
         update-types:
           - "minor"
           - "patch"
         dependency-type: "development"
+        exclude-patterns:
+          - "typescript"
+          - "@typescript-eslint/*"
+          - "@types/*"
+          - "vitest"
+          - "@vitest/*"
+          - "playwright"
+          - "turbo"
+          - "tsup"
+          - "tsx"
+          - "prettier*"
+          - "eslint*"
+          - "lint-staged"
+          - "husky"
+          - "@commitlint/*"
+          - "snyk"
 
-      # Group all non-major production dependency updates
-      production-dependencies:
+    labels:
+      - "dependencies"
+      - "root-workspace"
+      - "automated"
+
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+
+    rebase-strategy: "auto"
+
+  # ============================================================================
+  # WEB APP - Next.js 15 frontend (apps/web)
+  # ============================================================================
+  # Core: Next.js, React, Wagmi, Viem, TanStack Query, Radix UI
+  # Schedule: Weekly for production deps, security updates via GitHub
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/apps/web"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "09:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 8
+
+    groups:
+      # Next.js ecosystem (next + react + react-dom)
+      nextjs-ecosystem:
+        patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+          - "@next/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Web3 core libraries (wagmi + viem + @wagmi/* packages)
+      # Keep these separate for careful review due to breaking changes
+      web3-core:
+        patterns:
+          - "wagmi"
+          - "viem"
+          - "@wagmi/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # TanStack Query ecosystem
+      tanstack-query:
+        patterns:
+          - "@tanstack/react-query"
+          - "@tanstack/query-*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Radix UI component updates
+      radix-ui:
+        patterns:
+          - "@radix-ui/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Styling and UI utilities (tailwind, clsx, etc.)
+      styling:
+        patterns:
+          - "tailwindcss"
+          - "tailwind-*"
+          - "clsx"
+          - "class-variance-authority"
+          - "tailwind-merge"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # All other production dependencies
+      web-production-dependencies:
         patterns:
           - "*"
         update-types:
@@ -33,49 +207,513 @@ updates:
           - "patch"
         dependency-type: "production"
         exclude-patterns:
+          - "next"
+          - "react"
+          - "react-dom"
           - "wagmi"
           - "viem"
           - "@wagmi/*"
+          - "@tanstack/*"
+          - "@radix-ui/*"
+          - "tailwindcss"
 
-    # Ignore specific major version updates that require manual review
+    # Critical: Don't auto-update major versions of these packages
     ignore:
-      # Ignore major updates for wagmi - requires careful migration
       - dependency-name: "wagmi"
         update-types: ["version-update:semver-major"]
-
-      # Ignore major updates for viem - requires careful migration
       - dependency-name: "viem"
         update-types: ["version-update:semver-major"]
-
-      # Ignore major updates for @wagmi/* packages
       - dependency-name: "@wagmi/*"
         update-types: ["version-update:semver-major"]
+      - dependency-name: "next"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "react"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@tanstack/react-query"
+        update-types: ["version-update:semver-major"]
 
-    # Add labels to PRs
     labels:
       - "dependencies"
+      - "web-app"
       - "automated"
 
-    # Set commit message prefix
     commit-message:
       prefix: "chore"
       prefix-development: "chore"
       include: "scope"
 
-    # Set PR title prefix
-    pull-request-branch-name:
-      separator: "/"
-
-    # Assignees and reviewers (optional - uncomment and customize)
-    # assignees:
-    #   - "your-username"
-    # reviewers:
-    #   - "your-username"
-
-    # Allow Dependabot to rebase automatically
     rebase-strategy: "auto"
 
-    # Enable version updates for GitHub Actions
+  # ============================================================================
+  # API SERVER - Express.js backend (apps/api)
+  # ============================================================================
+  # Core: Express, Prisma, SIWE, JWT, Pino, ethers.js
+  # Schedule: Weekly, with special attention to security updates
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/apps/api"
+    schedule:
+      interval: "weekly"
+      day: "tuesday"
+      time: "10:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 8
+
+    groups:
+      # Express ecosystem
+      express-ecosystem:
+        patterns:
+          - "express"
+          - "cors"
+          - "helmet"
+          - "express-rate-limit"
+          - "compression"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Authentication and security (SIWE, JWT, bcrypt)
+      auth-security:
+        patterns:
+          - "siwe"
+          - "jsonwebtoken"
+          - "bcrypt"
+          - "ethers"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Database layer (Prisma client - managed by database package)
+      database:
+        patterns:
+          - "@prisma/client"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Logging and monitoring (Pino)
+      logging:
+        patterns:
+          - "pino"
+          - "pino-*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Validation and utilities
+      validation:
+        patterns:
+          - "zod"
+          - "validator"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # All other API production dependencies
+      api-production-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+        dependency-type: "production"
+        exclude-patterns:
+          - "express"
+          - "cors"
+          - "helmet"
+          - "siwe"
+          - "jsonwebtoken"
+          - "@prisma/client"
+          - "pino*"
+          - "zod"
+
+    ignore:
+      - dependency-name: "express"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
+
+    labels:
+      - "dependencies"
+      - "api-server"
+      - "automated"
+
+    commit-message:
+      prefix: "chore"
+      prefix-development: "chore"
+      include: "scope"
+
+    rebase-strategy: "auto"
+
+  # ============================================================================
+  # DOCS APP - Documentation site (apps/docs)
+  # ============================================================================
+  # Next.js-based documentation with content management
+  # Schedule: Monthly (docs changes less frequently)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/apps/docs"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "09:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 5
+
+    groups:
+      # Next.js and React (docs site)
+      docs-nextjs:
+        patterns:
+          - "next"
+          - "react"
+          - "react-dom"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Content management and markdown
+      docs-content:
+        patterns:
+          - "contentlayer"
+          - "next-contentlayer"
+          - "rehype-*"
+          - "remark-*"
+          - "mdx-*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # All docs dependencies
+      docs-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    labels:
+      - "dependencies"
+      - "documentation"
+      - "automated"
+
+    commit-message:
+      prefix: "docs"
+      include: "scope"
+
+    rebase-strategy: "auto"
+
+  # ============================================================================
+  # DATABASE PACKAGE - Prisma ORM (packages/database)
+  # ============================================================================
+  # Prisma schema + migrations + seed scripts
+  # Schedule: Weekly (critical for data integrity)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/packages/database"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "09:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 5
+
+    groups:
+      # Prisma ecosystem (all prisma packages together)
+      prisma:
+        patterns:
+          - "prisma"
+          - "@prisma/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    ignore:
+      - dependency-name: "prisma"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@prisma/client"
+        update-types: ["version-update:semver-major"]
+
+    labels:
+      - "dependencies"
+      - "database"
+      - "critical"
+      - "automated"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+    rebase-strategy: "auto"
+
+  # ============================================================================
+  # BLOCKCHAIN PACKAGE - Event indexer (packages/blockchain)
+  # ============================================================================
+  # ethers.js event listener and database sync
+  # Schedule: Weekly
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/packages/blockchain"
+    schedule:
+      interval: "weekly"
+      day: "wednesday"
+      time: "10:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 5
+
+    groups:
+      # Web3 libraries
+      blockchain-web3:
+        patterns:
+          - "ethers"
+          - "viem"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Database client
+      blockchain-database:
+        patterns:
+          - "@prisma/client"
+        update-types:
+          - "minor"
+          - "patch"
+
+    ignore:
+      - dependency-name: "ethers"
+        update-types: ["version-update:semver-major"]
+
+    labels:
+      - "dependencies"
+      - "blockchain"
+      - "automated"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+    rebase-strategy: "auto"
+
+  # ============================================================================
+  # WEB3 PACKAGE - ABIs and hooks (packages/web3)
+  # ============================================================================
+  # Contract ABIs, wagmi hooks, type generation
+  # Schedule: Weekly
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/packages/web3"
+    schedule:
+      interval: "weekly"
+      day: "thursday"
+      time: "09:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 5
+
+    groups:
+      # Web3 core
+      web3-package-core:
+        patterns:
+          - "wagmi"
+          - "viem"
+          - "@wagmi/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    ignore:
+      - dependency-name: "wagmi"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "viem"
+        update-types: ["version-update:semver-major"]
+
+    labels:
+      - "dependencies"
+      - "web3"
+      - "automated"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+    rebase-strategy: "auto"
+
+  # ============================================================================
+  # UI PACKAGE - Component library (packages/ui)
+  # ============================================================================
+  # Radix UI + shadcn components + Tailwind
+  # Schedule: Monthly (UI components stable)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/packages/ui"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "10:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 5
+
+    groups:
+      # Radix UI primitives
+      ui-radix:
+        patterns:
+          - "@radix-ui/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Tailwind and utilities
+      ui-styling:
+        patterns:
+          - "tailwindcss"
+          - "tailwind-*"
+          - "clsx"
+          - "class-variance-authority"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # React dependencies
+      ui-react:
+        patterns:
+          - "react"
+          - "react-dom"
+        update-types:
+          - "minor"
+          - "patch"
+
+    labels:
+      - "dependencies"
+      - "ui-components"
+      - "automated"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+    rebase-strategy: "auto"
+
+  # ============================================================================
+  # SHARED PACKAGE - Types and utilities (packages/shared)
+  # ============================================================================
+  # Shared TypeScript types, constants, and utility functions
+  # Schedule: Monthly (shared utilities change infrequently)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/packages/shared"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "11:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 3
+
+    groups:
+      shared-dependencies:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    labels:
+      - "dependencies"
+      - "shared-utilities"
+      - "automated"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+    rebase-strategy: "auto"
+
+  # ============================================================================
+  # CONTRACTS PACKAGE - Solidity + Foundry (packages/contracts)
+  # ============================================================================
+  # Smart contracts built with Foundry
+  # Note: Foundry dependencies (forge-std, OpenZeppelin) are managed via git submodules
+  # This section handles npm packages if any (e.g., slither, mythril, gas reporters)
+  # Schedule: Monthly (contract tooling stable)
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/packages/contracts"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "12:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 3
+
+    groups:
+      # Solidity tooling (if any npm packages exist)
+      solidity-tools:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    labels:
+      - "dependencies"
+      - "smart-contracts"
+      - "automated"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+    rebase-strategy: "auto"
+
+  # ============================================================================
+  # ESLINT TOOLING - Shared ESLint config (tooling/eslint)
+  # ============================================================================
+  # Monorepo-wide ESLint configuration
+  # Schedule: Monthly
+  # ============================================================================
+  - package-ecosystem: "npm"
+    directory: "/tooling/eslint"
+    schedule:
+      interval: "monthly"
+      day: "monday"
+      time: "13:00"
+      timezone: "America/Lima"
+
+    open-pull-requests-limit: 3
+
+    groups:
+      # ESLint ecosystem
+      eslint-config:
+        patterns:
+          - "eslint"
+          - "eslint-*"
+          - "@typescript-eslint/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+    labels:
+      - "dependencies"
+      - "tooling"
+      - "automated"
+
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+    rebase-strategy: "auto"
+
+  # ============================================================================
+  # GITHUB ACTIONS - CI/CD workflows
+  # ============================================================================
+  # Updates for actions used in .github/workflows/
+  # Schedule: Weekly (security and features)
+  # ============================================================================
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
@@ -86,11 +724,74 @@ updates:
 
     open-pull-requests-limit: 5
 
+    groups:
+      # GitHub official actions
+      github-actions:
+        patterns:
+          - "actions/*"
+        update-types:
+          - "minor"
+          - "patch"
+
+      # Third-party CI actions
+      third-party-actions:
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+        exclude-patterns:
+          - "actions/*"
+
     labels:
       - "dependencies"
       - "github-actions"
+      - "ci-cd"
       - "automated"
 
     commit-message:
       prefix: "ci"
       include: "scope"
+
+    rebase-strategy: "auto"
+# ============================================================================
+# NOTES ON FOUNDRY/SOLIDITY DEPENDENCIES
+# ============================================================================
+#
+# Foundry dependencies are managed via git submodules in lib/:
+# - forge-std (Foundry standard library)
+# - openzeppelin-contracts (OpenZeppelin contracts)
+# - openzeppelin-contracts-upgradeable (OpenZeppelin upgradeable)
+# - chainlink-brownie-contracts (Chainlink price feeds)
+#
+# These are NOT managed by Dependabot automatically. To update:
+# 1. cd packages/contracts
+# 2. forge update <lib-name>
+# 3. Run tests: forge test
+# 4. Commit the updated submodule reference
+#
+# For security audits of Solidity dependencies, use:
+# - make slither (static analysis)
+# - make audit (security scan)
+# - GitHub security alerts (enabled by default)
+#
+# ============================================================================
+
+# ============================================================================
+# COORDINATION WITH RENOVATE (if used)
+# ============================================================================
+#
+# This Dependabot config is designed to complement (not conflict with) Renovate:
+# - Dependabot: Native GitHub, simpler, built-in security alerts
+# - Renovate: More powerful, complex configurations, better grouping
+#
+# If you use both:
+# 1. Use Dependabot for critical packages (Prisma, Express, security tools)
+# 2. Use Renovate for everything else with custom rules
+# 3. Configure Renovate to ignore packages Dependabot handles
+#
+# Or choose one based on your needs:
+# - Small teams / simple needs: Dependabot (this file)
+# - Large teams / complex rules: Renovate
+#
+# ============================================================================

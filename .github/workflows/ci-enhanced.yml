@@ -5,10 +5,20 @@ on:
     branches:
       - main
       - develop
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".vscode/**"
+      - ".github/workflows/deploy-*.yml"
+      - ".github/workflows/claude-review.yml"
   pull_request:
     branches:
       - main
       - develop
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - ".vscode/**"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -86,10 +96,29 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
 
+      - name: Restore cached dependencies
+        uses: actions/cache@v4
+        id: cache-deps
+        with:
+          path: |
+            node_modules
+            apps/*/node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-pnpm-${{ hashFiles('**/pnpm-lock.yaml') }}
+
       - name: Install dependencies
+        if: steps.cache-deps.outputs.cache-hit != 'true'
         run: pnpm install --frozen-lockfile
 
+      - name: Restore Prisma client cache
+        uses: actions/cache@v4
+        id: cache-prisma
+        with:
+          path: packages/database/node_modules/.prisma
+          key: ${{ runner.os }}-prisma-${{ hashFiles('packages/database/prisma/schema.prisma') }}
+
       - name: Generate Prisma client
+        if: steps.cache-prisma.outputs.cache-hit != 'true'
         run: pnpm db:generate
 
       - name: Run ESLint
@@ -101,6 +130,11 @@ jobs:
             echo "::error::Code is not formatted. Run 'pnpm format' locally."
             exit 1
           }
+
+      - name: Create annotations for lint issues
+        if: failure()
+        run: |
+          echo "::error::Linting failed. Run 'pnpm lint' locally to see detailed errors."
 
   typecheck:
     name: Type Check
@@ -168,9 +202,61 @@ jobs:
         env:
           NODE_ENV: test
 
-      - name: Upload coverage reports to Codecov
-        uses: codecov/codecov-action@v5
+      - name: Generate coverage summary (Free)
         if: always()
+        run: |
+          echo "## Test Coverage Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Function to parse and display coverage for a package
+          parse_coverage() {
+            local pkg_name=$1
+            local coverage_file=$2
+
+            if [ -f "$coverage_file" ]; then
+              echo "### $pkg_name" >> $GITHUB_STEP_SUMMARY
+
+              # Parse coverage-summary.json if it exists
+              local summary_file=$(dirname "$coverage_file")/coverage-summary.json
+              if [ -f "$summary_file" ]; then
+                local lines_pct=$(jq -r '.total.lines.pct // "N/A"' "$summary_file")
+                local statements_pct=$(jq -r '.total.statements.pct // "N/A"' "$summary_file")
+                local functions_pct=$(jq -r '.total.functions.pct // "N/A"' "$summary_file")
+                local branches_pct=$(jq -r '.total.branches.pct // "N/A"' "$summary_file")
+
+                echo "| Metric | Coverage |" >> $GITHUB_STEP_SUMMARY
+                echo "|--------|----------|" >> $GITHUB_STEP_SUMMARY
+                echo "| Lines | ${lines_pct}% |" >> $GITHUB_STEP_SUMMARY
+                echo "| Statements | ${statements_pct}% |" >> $GITHUB_STEP_SUMMARY
+                echo "| Functions | ${functions_pct}% |" >> $GITHUB_STEP_SUMMARY
+                echo "| Branches | ${branches_pct}% |" >> $GITHUB_STEP_SUMMARY
+                echo "" >> $GITHUB_STEP_SUMMARY
+
+                # Add warning if below 80% threshold
+                if (( $(echo "$lines_pct < 80" | bc -l) )); then
+                  echo "⚠️ Coverage below 80% threshold" >> $GITHUB_STEP_SUMMARY
+                  echo "" >> $GITHUB_STEP_SUMMARY
+                fi
+              fi
+            fi
+          }
+
+          # Check coverage for each package
+          parse_coverage "API" "./apps/api/coverage/coverage-final.json"
+          parse_coverage "Web" "./apps/web/coverage/coverage-final.json"
+
+          # Find and parse other package coverage
+          for coverage in ./packages/*/coverage/coverage-summary.json; do
+            if [ -f "$coverage" ]; then
+              pkg_name=$(basename $(dirname $(dirname "$coverage")))
+              parse_coverage "$pkg_name" "$coverage"
+            fi
+          done
+
+      - name: Upload coverage reports to Codecov (Optional)
+        if: always() && secrets.CODECOV_TOKEN != ''
+        uses: codecov/codecov-action@v5
+        continue-on-error: true
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           files: |
@@ -181,13 +267,30 @@ jobs:
           fail_ci_if_error: false
           verbose: true
 
+      - name: Notify if Codecov skipped
+        if: always() && secrets.CODECOV_TOKEN == ''
+        run: |
+          echo "::notice::Codecov upload skipped - CODECOV_TOKEN not configured (optional service)"
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "💡 **Optional**: Configure CODECOV_TOKEN secret for enhanced coverage tracking" >> $GITHUB_STEP_SUMMARY
+
+      - name: Archive coverage reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-reports-${{ matrix.node-version }}
+          path: |
+            **/coverage/
+          retention-days: 7
+
       - name: Archive test results
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: test-results-${{ matrix.node-version }}
           path: |
-            **/coverage/
             **/test-results/
           retention-days: 7
 
@@ -308,29 +411,328 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/khipu_test
           NODE_ENV: test
 
+  typescript-strict:
+    name: TypeScript Strict Mode Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    needs: setup
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Check strict mode in tsconfig files
+        run: |
+          echo "## TypeScript Strict Mode Verification" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Find all tsconfig files
+          find . -name "tsconfig.json" -not -path "*/node_modules/*" | while read tsconfig; do
+            echo "Checking: $tsconfig"
+
+            # Check if strict mode is enabled
+            STRICT=$(jq -r '.compilerOptions.strict // false' "$tsconfig")
+
+            if [ "$STRICT" = "true" ]; then
+              echo "✅ $tsconfig" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ $tsconfig - strict mode not enabled" >> $GITHUB_STEP_SUMMARY
+              echo "::warning file=$tsconfig::TypeScript strict mode is not enabled"
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All TypeScript configurations should have strict mode enabled for type safety." >> $GITHUB_STEP_SUMMARY
+
+  bundle-size:
+    name: Bundle Size Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: build
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Generate Prisma client
+        run: pnpm db:generate
+
+      - name: Build for production
+        run: pnpm build
+        env:
+          NODE_ENV: production
+
+      - name: Analyze bundle sizes
+        id: analyze
+        run: |
+          echo "## Bundle Size Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Analyze Next.js build
+          if [ -d "apps/web/.next" ]; then
+            echo "### Web App (Next.js)" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            # Get bundle sizes
+            find apps/web/.next/static/chunks -name "*.js" -type f -exec ls -lh {} \; | \
+              awk '{print $5 "\t" $9}' | \
+              sort -h -r | \
+              head -10 | \
+              while read size file; do
+                basename=$(basename "$file")
+                echo "- \`$basename\`: $size" >> $GITHUB_STEP_SUMMARY
+              done
+
+            # Calculate total size
+            TOTAL_SIZE=$(du -sh apps/web/.next/static | awk '{print $1}')
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Total static assets**: $TOTAL_SIZE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Analyze API build
+          if [ -d "apps/api/dist" ]; then
+            echo "### API Server" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            API_SIZE=$(du -sh apps/api/dist | awk '{print $1}')
+            echo "**Build size**: $API_SIZE" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          # Analyze smart contracts
+          if [ -d "packages/contracts/out" ]; then
+            echo "### Smart Contracts" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+
+            find packages/contracts/out -name "*.json" -type f | while read contract; do
+              if [ "$(basename $contract)" != "*.t.sol" ] && [ "$(basename $contract)" != "*.s.sol" ]; then
+                SIZE=$(jq '.deployedBytecode.object' "$contract" 2>/dev/null | wc -c)
+                if [ "$SIZE" -gt 100 ]; then
+                  SIZE_KB=$((SIZE / 2048))  # Convert hex chars to KB
+                  CONTRACT_NAME=$(basename $(dirname "$contract"))
+                  echo "- \`$CONTRACT_NAME\`: ~${SIZE_KB}KB" >> $GITHUB_STEP_SUMMARY
+
+                  # Warn if approaching 24KB limit
+                  if [ "$SIZE_KB" -gt 20 ]; then
+                    echo "::warning::Contract $CONTRACT_NAME is approaching the 24KB size limit"
+                  fi
+                fi
+              fi
+            done
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "💡 Monitor bundle sizes to prevent bloat and maintain performance." >> $GITHUB_STEP_SUMMARY
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+
+            // Read the summary file
+            const summary = fs.readFileSync(process.env.GITHUB_STEP_SUMMARY, 'utf8');
+
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(comment =>
+              comment.user.type === 'Bot' && comment.body.includes('Bundle Size Report')
+            );
+
+            const commentBody = `## 📦 Bundle Size Report\n\n${summary}\n\n---\n*Updated: ${new Date().toISOString()}*`;
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody,
+              });
+            }
+
+  markdown-lint:
+    name: Markdown & Docs Quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Lint markdown files
+        uses: DavidAnson/markdownlint-cli2-action@v20
+        with:
+          globs: |
+            **/*.md
+            !node_modules
+            !**/node_modules
+            !packages/contracts/lib
+
+      - name: Check broken links in markdown
+        run: |
+          echo "## Documentation Quality Report" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Find all markdown files
+          MD_FILES=$(find . -name "*.md" -not -path "*/node_modules/*" -not -path "*/lib/*")
+
+          echo "### Markdown Files Found: $(echo "$MD_FILES" | wc -l)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Check for common documentation issues
+          MISSING_HEADERS=0
+          for file in $MD_FILES; do
+            if ! head -1 "$file" | grep -q "^#"; then
+              echo "⚠️ \`$file\` - Missing top-level header" >> $GITHUB_STEP_SUMMARY
+              ((MISSING_HEADERS++))
+            fi
+          done
+
+          if [ $MISSING_HEADERS -eq 0 ]; then
+            echo "✅ All markdown files have proper headers" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "💡 Keep documentation up to date and well-formatted." >> $GITHUB_STEP_SUMMARY
+
+  dependency-graph:
+    name: Dependency Analysis
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Analyze dependencies
+        run: |
+          echo "## Dependency Analysis" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Count total dependencies
+          TOTAL_DEPS=$(pnpm list --depth=0 --json | jq '[.[].dependencies // {} | to_entries[]] | length')
+          DEV_DEPS=$(pnpm list --depth=0 --json --dev | jq '[.[].devDependencies // {} | to_entries[]] | length')
+
+          echo "### Dependency Count" >> $GITHUB_STEP_SUMMARY
+          echo "| Type | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Production | $TOTAL_DEPS |" >> $GITHUB_STEP_SUMMARY
+          echo "| Development | $DEV_DEPS |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Check for duplicate dependencies
+          echo "### Duplicate Check" >> $GITHUB_STEP_SUMMARY
+          pnpm list --depth=Infinity --json 2>/dev/null | \
+            jq -r '.[].dependencies // {} | to_entries[] | "\(.key)@\(.value.version)"' | \
+            sort | uniq -d > duplicates.txt || true
+
+          if [ -s duplicates.txt ]; then
+            echo "⚠️ **Duplicate dependencies found:**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            head -10 duplicates.txt | while read dup; do
+              echo "- $dup" >> $GITHUB_STEP_SUMMARY
+            done
+          else
+            echo "✅ No duplicate dependencies detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "💡 Keep dependencies lean and avoid duplication for optimal build times." >> $GITHUB_STEP_SUMMARY
+
   summary:
     name: CI Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    needs: [lint, typecheck, test, build]
+    needs: [lint, typecheck, test, typescript-strict, build]
     if: always()
 
     steps:
       - name: Check results
         run: |
-          echo "## CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "# 🚀 CI Pipeline Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Core Checks (Required)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| Job | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           echo "| Lint | ${{ needs.lint.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Type Check | ${{ needs.typecheck.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| TypeScript Strict | ${{ needs.typescript-strict.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Tests | ${{ needs.test.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
           echo "| Build | ${{ needs.build.result == 'success' && '✅ Passed' || '❌ Failed' }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "💡 **All checks run 100% FREE** - No external tokens or paid services required!" >> $GITHUB_STEP_SUMMARY
 
       - name: Fail if any job failed
         if: |
           needs.lint.result == 'failure' ||
           needs.typecheck.result == 'failure' ||
+          needs.typescript-strict.result == 'failure' ||
           needs.test.result == 'failure' ||
           needs.build.result == 'failure'
         run: exit 1
