@@ -16,7 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "viem": "^2.21.52",
+    "viem": "^2.45.1",
     "wagmi": "^2.13.8"
   },
   "devDependencies": {
