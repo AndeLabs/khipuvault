@@ -87,6 +87,9 @@ contract MezoIntegrationV3 is BaseMezoIntegration, IMezoIntegration {
         // Calculate MUSD to mint
         musdAmount = _calculateMusdAmount(btcAmount, currentPrice, targetLtv);
 
+        // CEI FIX: Update position tracking BEFORE external calls
+        _addToPosition(msg.sender, btcAmount, musdAmount);
+
         // Check if user has existing trove
         (, uint256 currentDebt) = TROVE_MANAGER.getTroveDebtAndColl(msg.sender);
 
@@ -95,9 +98,6 @@ contract MezoIntegrationV3 is BaseMezoIntegration, IMezoIntegration {
         } else {
             _adjustTrove(btcAmount, musdAmount, true, currentPrice);
         }
-
-        // Update position tracking
-        _addToPosition(msg.sender, btcAmount, musdAmount);
 
         // Transfer MUSD to user
         MUSD_TOKEN.safeTransfer(msg.sender, musdAmount);
