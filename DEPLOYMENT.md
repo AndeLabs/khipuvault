@@ -22,12 +22,14 @@ Repository Branches:
 ```
 
 **Pros:**
+
 - Single codebase, easy to sync changes
 - Shared components and utilities
 - Cost-effective (one project)
 - Easy to promote testnet → mainnet (merge PR)
 
 **Cons:**
+
 - Need to maintain two branches
 - Risk of accidentally merging testnet code to main
 
@@ -41,12 +43,14 @@ khipuvault-testnet   → testnet.khipuvault.com
 ```
 
 **Pros:**
+
 - Complete isolation
 - Independent deployments
 - No risk of cross-contamination
 - Different team access control
 
 **Cons:**
+
 - Code duplication (solved with git subtree/submodule)
 - More complex CI/CD
 - Higher cost (two projects)
@@ -60,6 +64,7 @@ Using **Option 1** during development, will migrate to **Option 2** before mainn
 ### 1. Environment Variables by Branch
 
 #### Main Branch (khipuvault.com - Mainnet)
+
 ```env
 NEXT_PUBLIC_NETWORK=mainnet
 NEXT_PUBLIC_APP_URL=https://khipuvault.com
@@ -69,6 +74,7 @@ NEXT_PUBLIC_RPC_URL=https://rpc.mezo.org
 ```
 
 #### Testnet Branch (testnet.khipuvault.com - Testnet)
+
 ```env
 NEXT_PUBLIC_NETWORK=testnet
 NEXT_PUBLIC_APP_URL=https://testnet.khipuvault.com
@@ -130,8 +136,8 @@ jobs:
       - uses: pnpm/action-setup@v2
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
       - run: pnpm install
       - run: pnpm lint
       - run: pnpm typecheck
@@ -160,6 +166,7 @@ jobs:
 ## Smart Contract Deployment
 
 ### Testnet Deployment
+
 ```bash
 cd packages/contracts
 make deploy-testnet
@@ -167,6 +174,7 @@ make deploy-testnet
 ```
 
 ### Mainnet Deployment
+
 ```bash
 cd packages/contracts
 make deploy-mainnet
@@ -177,11 +185,13 @@ make deploy-mainnet
 ## Database Strategy
 
 ### Development
+
 ```
 Local PostgreSQL → Docker
 ```
 
 ### Testnet
+
 ```
 Supabase/Neon Testnet Database
 - Separate from mainnet
@@ -190,6 +200,7 @@ Supabase/Neon Testnet Database
 ```
 
 ### Mainnet
+
 ```
 Supabase/Neon Production Database
 - Point-in-time recovery enabled
@@ -201,11 +212,13 @@ Supabase/Neon Production Database
 ## Monitoring & Alerts
 
 ### Testnet
+
 - Basic error logging (Sentry)
 - Manual health checks
 - No uptime SLA
 
 ### Mainnet
+
 - Full error tracking (Sentry)
 - Real-time performance monitoring (Vercel Analytics)
 - Uptime monitoring (99.9% SLA)
@@ -215,6 +228,7 @@ Supabase/Neon Production Database
 ## Deployment Checklist
 
 ### Before Testnet Deployment
+
 - [ ] All tests passing
 - [ ] Smart contracts deployed to testnet
 - [ ] Database seeded with test data
@@ -222,6 +236,7 @@ Supabase/Neon Production Database
 - [ ] Custom domain configured
 
 ### Before Mainnet Deployment
+
 - [ ] **Security audit completed and approved**
 - [ ] All tests passing (100% critical path coverage)
 - [ ] Smart contracts audited and deployed to mainnet
@@ -240,17 +255,20 @@ Supabase/Neon Production Database
 When ready to go live, the transition should be seamless:
 
 1. **Update environment variable:**
+
    ```bash
    # In Vercel project settings for main branch
    NEXT_PUBLIC_NETWORK=mainnet
    ```
 
 2. **Deploy smart contracts to mainnet:**
+
    ```bash
    cd packages/contracts && make deploy-mainnet
    ```
 
 3. **Update contract addresses:**
+
    ```typescript
    // packages/web3/src/addresses.ts
    export const ADDRESSES = {
@@ -265,6 +283,7 @@ When ready to go live, the transition should be seamless:
    ```
 
 4. **Database migration:**
+
    ```bash
    pnpm db:migrate # Run migrations on production DB
    ```
@@ -278,6 +297,7 @@ When ready to go live, the transition should be seamless:
 ## Best Practices
 
 ### Development Workflow
+
 ```
 1. Develop feature → Local environment
 2. Test feature → Deploy to testnet branch
@@ -286,6 +306,7 @@ When ready to go live, the transition should be seamless:
 ```
 
 ### Security Practices
+
 - Never commit private keys
 - Use multi-sig for contract ownership
 - Enable 2FA on all services
@@ -293,6 +314,7 @@ When ready to go live, the transition should be seamless:
 - Bug bounty program for mainnet
 
 ### Code Organization
+
 ```typescript
 // ✅ Good: Environment-based configuration
 const config = getNetworkConfig(); // Auto-detects from NEXT_PUBLIC_NETWORK
@@ -302,6 +324,7 @@ const rpcUrl = "https://rpc.test.mezo.org";
 ```
 
 ### Testing Strategy
+
 - Unit tests: All environments
 - Integration tests: Testnet only
 - E2E tests: Testnet before mainnet
@@ -321,6 +344,7 @@ Based on industry best practices:
 ## Support
 
 For deployment issues:
+
 1. Check Vercel deployment logs
 2. Check GitHub Actions logs
 3. Contact team lead

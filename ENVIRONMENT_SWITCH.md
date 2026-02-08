@@ -42,12 +42,14 @@ pnpm dev
 #### Project: khipuvault
 
 **Main Branch** (Production)
+
 - Domain: `khipuvault.com`
 - Vercel URL: `khipuvault.vercel.app`
 - Environment: `NEXT_PUBLIC_NETWORK=mainnet`
 - Shows: "Coming Soon" page
 
 **Testnet Branch** (Preview)
+
 - Domain: `testnet.khipuvault.com`
 - Environment: `NEXT_PUBLIC_NETWORK=testnet`
 - Shows: Full app with testnet banner
@@ -55,6 +57,7 @@ pnpm dev
 ### Configure Testnet Subdomain
 
 1. **Create testnet branch:**
+
    ```bash
    git checkout -b testnet
    git push origin testnet
@@ -99,6 +102,7 @@ pnpm dev
      ```
 
 2. **Deploy contracts to mainnet:**
+
    ```bash
    cd packages/contracts
    # First, get security audit approval
@@ -107,6 +111,7 @@ pnpm dev
    ```
 
 3. **Update contract addresses:**
+
    ```typescript
    // packages/web3/src/addresses.ts
    export const MEZO_MAINNET_ADDRESSES = {
@@ -125,6 +130,7 @@ pnpm dev
 ## What Users See
 
 ### Testnet (testnet.khipuvault.com)
+
 ```
 ✅ Full KhipuVault app
 ✅ Testnet warning banner (dismissible)
@@ -134,6 +140,7 @@ pnpm dev
 ```
 
 ### Mainnet (khipuvault.com)
+
 ```
 🚀 "Coming Soon" landing page
 📢 Link to testnet for testing
@@ -179,23 +186,23 @@ git push origin main
 
 ### Testnet
 
-| Variable | Value |
-|----------|-------|
-| NEXT_PUBLIC_NETWORK | testnet |
-| NEXT_PUBLIC_CHAIN_ID | 31611 |
-| NEXT_PUBLIC_RPC_URL | https://rpc.test.mezo.org |
-| NEXT_PUBLIC_APP_URL | https://testnet.khipuvault.com |
-| NEXT_PUBLIC_API_URL | https://api-testnet.khipuvault.com |
+| Variable             | Value                              |
+| -------------------- | ---------------------------------- |
+| NEXT_PUBLIC_NETWORK  | testnet                            |
+| NEXT_PUBLIC_CHAIN_ID | 31611                              |
+| NEXT_PUBLIC_RPC_URL  | https://rpc.test.mezo.org          |
+| NEXT_PUBLIC_APP_URL  | https://testnet.khipuvault.com     |
+| NEXT_PUBLIC_API_URL  | https://api-testnet.khipuvault.com |
 
 ### Mainnet
 
-| Variable | Value |
-|----------|-------|
-| NEXT_PUBLIC_NETWORK | mainnet |
-| NEXT_PUBLIC_CHAIN_ID | 60808 |
-| NEXT_PUBLIC_RPC_URL | https://rpc.mezo.org |
-| NEXT_PUBLIC_APP_URL | https://khipuvault.com |
-| NEXT_PUBLIC_API_URL | https://api.khipuvault.com |
+| Variable             | Value                      |
+| -------------------- | -------------------------- |
+| NEXT_PUBLIC_NETWORK  | mainnet                    |
+| NEXT_PUBLIC_CHAIN_ID | 60808                      |
+| NEXT_PUBLIC_RPC_URL  | https://rpc.mezo.org       |
+| NEXT_PUBLIC_APP_URL  | https://khipuvault.com     |
+| NEXT_PUBLIC_API_URL  | https://api.khipuvault.com |
 
 ## Pre-Launch Checklist
 
@@ -217,11 +224,13 @@ Before switching to mainnet:
 If issues occur on mainnet:
 
 1. **Immediate rollback:**
+
    ```bash
    vercel rollback --prod
    ```
 
 2. **Fix and redeploy:**
+
    ```bash
    git checkout main
    git revert <bad-commit>
@@ -237,17 +246,21 @@ If issues occur on mainnet:
 ## Troubleshooting
 
 ### Issue: Still showing testnet after switch
+
 **Solution:** Clear browser cache, check environment variables in Vercel
 
 ### Issue: Contract not found
+
 **Solution:** Verify contract addresses in packages/web3/src/addresses.ts
 
 ### Issue: Wrong network detected
+
 **Solution:** Check NEXT_PUBLIC_NETWORK value, restart dev server
 
 ---
 
 **Quick Links:**
+
 - [Vercel Dashboard](https://vercel.com/andeLabs/khipuvault)
 - [GitHub Repo](https://github.com/AndeLabs/khipuvault)
 - [Testnet App](https://testnet.khipuvault.com)

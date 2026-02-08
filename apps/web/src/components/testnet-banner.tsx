@@ -3,8 +3,9 @@
 import { AlertTriangle, X } from "lucide-react";
 import { useState } from "react";
 
-import { Button } from "@/components/ui/button";
 import { getCurrentNetwork } from "@khipu/shared";
+
+import { Button } from "@/components/ui/button";
 
 /**
  * Testnet Warning Banner
@@ -31,14 +32,11 @@ export function TestnetBanner() {
     <div className="sticky top-0 z-50 border-b border-warning/20 bg-warning/90 px-4 py-3 backdrop-blur-sm">
       <div className="container mx-auto flex items-center justify-between gap-4">
         <div className="flex items-center gap-3">
-          <AlertTriangle className="h-5 w-5 flex-shrink-0 text-warning-foreground" />
+          <AlertTriangle className="text-warning-foreground h-5 w-5 flex-shrink-0" />
           <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-            <p className="text-sm font-semibold text-warning-foreground">
-              Testnet Environment
-            </p>
-            <p className="text-xs text-warning-foreground/90">
-              You're using KhipuVault Testnet. Funds have no real value. Mainnet launching
-              soon!
+            <p className="text-warning-foreground text-sm font-semibold">Testnet Environment</p>
+            <p className="text-warning-foreground/90 text-xs">
+              You're using KhipuVault Testnet. Funds have no real value. Mainnet launching soon!
             </p>
           </div>
         </div>
@@ -50,7 +48,7 @@ export function TestnetBanner() {
           className="flex-shrink-0 hover:bg-warning/20"
           aria-label="Dismiss testnet warning"
         >
-          <X className="h-4 w-4 text-warning-foreground" />
+          <X className="text-warning-foreground h-4 w-4" />
         </Button>
       </div>
     </div>
