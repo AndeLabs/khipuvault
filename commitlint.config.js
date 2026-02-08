@@ -78,6 +78,7 @@ module.exports = {
         'deps',
         'docker',
         'env',
+        'test',
       ],
     ],
   },
