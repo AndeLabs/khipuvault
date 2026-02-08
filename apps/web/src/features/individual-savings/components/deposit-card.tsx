@@ -1,15 +1,14 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { TrendingUp, Gift } from "lucide-react";
+import { TrendingUp } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { formatUnits, isAddress } from "viem";
+import { formatUnits } from "viem";
 import * as z from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useTransactionExecute } from "@/features/transactions";
@@ -20,7 +19,6 @@ const depositSchema = z.object({
     .string()
     .min(1, "Amount is required")
     .refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Amount must be greater than 0"),
-  referralCode: z.string().optional(),
 });
 
 type DepositFormData = z.infer<typeof depositSchema>;
@@ -29,7 +27,7 @@ interface DepositCardProps {
   balance?: string;
   minDeposit?: string;
   apy?: number;
-  onDeposit: (amount: string, referralCode?: string) => Promise<any>;
+  onDeposit: (amount: string) => Promise<any>;
   isLoading?: boolean;
   className?: string;
 }
@@ -42,7 +40,6 @@ export function DepositCard({
   isLoading,
   className,
 }: DepositCardProps) {
-  const [showReferral, setShowReferral] = React.useState(false);
   const { execute } = useTransactionExecute({ type: "Deposit mUSD" });
 
   const {
@@ -56,15 +53,10 @@ export function DepositCard({
   });
 
   const amount = watch("amount");
-  const referralCode = watch("referralCode");
-
-  // Validate referral code is a valid address
-  const isValidReferral = referralCode ? isAddress(referralCode) : true;
-  const referralBonus = 0.5; // 0.5%
 
   const onSubmit = async (data: DepositFormData) => {
     await execute(async () => {
-      return await onDeposit(data.amount, data.referralCode);
+      return await onDeposit(data.amount);
     });
   };
 
@@ -160,46 +152,6 @@ export function DepositCard({
             )}
           </div>
 
-          {/* Referral Code (Optional) */}
-          <Collapsible open={showReferral} onOpenChange={setShowReferral}>
-            <CollapsibleTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="w-full justify-start gap-2 text-accent hover:bg-accent/10 hover:text-accent"
-              >
-                <Gift className="h-4 w-4" />
-                <span className="text-sm">
-                  {showReferral ? "Hide" : "Have a"} referral code? Get {referralBonus}% bonus!
-                </span>
-              </Button>
-            </CollapsibleTrigger>
-            <CollapsibleContent className="space-y-2 pt-2">
-              <Label htmlFor="referralCode" className="text-xs text-muted-foreground">
-                Referral Code (Wallet Address)
-              </Label>
-              <Input
-                id="referralCode"
-                placeholder="0x..."
-                {...register("referralCode")}
-                className={cn(
-                  "font-mono text-sm",
-                  referralCode && !isValidReferral && "border-error"
-                )}
-              />
-              {referralCode && !isValidReferral && (
-                <p className="text-xs text-error">Invalid wallet address</p>
-              )}
-              {referralCode && isValidReferral && (
-                <p className="flex items-center gap-1 text-xs text-success">
-                  <Gift className="h-3 w-3" />
-                  Referrer will earn {referralBonus}% of your deposit!
-                </p>
-              )}
-            </CollapsibleContent>
-          </Collapsible>
-
           {/* Quick Info */}
           <div className="bg-gradient-lavanda/10 flex items-center justify-between rounded-lg border border-lavanda/20 p-3">
             <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -233,7 +185,7 @@ export function DepositCard({
             className="w-full"
             size="lg"
             loading={isLoading}
-            disabled={!amount || Number(amount) <= 0 || Boolean(referralCode && !isValidReferral)}
+            disabled={!amount || Number(amount) <= 0}
           >
             {!amount || Number(amount) <= 0 ? "Enter amount" : `Deposit ${amount} mUSD`}
           </Button>

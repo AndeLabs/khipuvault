@@ -48,7 +48,7 @@ const formSchema = z.object({
   contributionAmount: z.string().min(1, "Required"),
   periodDuration: z.string().min(1, "Required"),
   periodUnit: z.enum(["days", "weeks", "months"]),
-  autoAdvance: z.boolean().default(true),
+  useNativeBtc: z.boolean().default(false), // false = WBTC (wrapped), true = Native BTC
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -70,7 +70,7 @@ export function CreateRoscaModal({ open, onOpenChange }: CreateRoscaModalProps) 
       contributionAmount: "0.01",
       periodDuration: "30",
       periodUnit: "days",
-      autoAdvance: true,
+      useNativeBtc: false, // Default to WBTC for compatibility
     },
   });
 
@@ -96,7 +96,8 @@ export function CreateRoscaModal({ open, onOpenChange }: CreateRoscaModalProps) 
         memberCount: BigInt(values.memberCount),
         contributionAmount: contributionWei,
         periodDuration: periodSeconds,
-        autoAdvance: values.autoAdvance,
+        useNativeBtc: values.useNativeBtc,
+        memberAddresses: [], // Empty array = open join (anyone can join)
       });
     } catch (err) {
       console.error("Error creating pool:", err);
@@ -253,13 +254,13 @@ export function CreateRoscaModal({ open, onOpenChange }: CreateRoscaModalProps) 
             {/* Auto Advance */}
             <FormField
               control={form.control}
-              name="autoAdvance"
+              name="useNativeBtc"
               render={({ field }) => (
                 <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                   <div className="space-y-0.5">
-                    <FormLabel className="text-base">Auto-advance Periods</FormLabel>
+                    <FormLabel className="text-base">Use Native BTC</FormLabel>
                     <FormDescription>
-                      Automatically move to the next period when time expires
+                      Use native BTC instead of wrapped WBTC (advanced feature)
                     </FormDescription>
                   </div>
                   <FormControl>

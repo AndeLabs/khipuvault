@@ -6,11 +6,12 @@ async function main() {
   console.log("🌱 Seeding database...");
 
   // Create example pool
+  // IMPORTANT: Always use lowercase for Ethereum addresses to match Prisma queries
   const pool = await prisma.pool.upsert({
-    where: { contractAddress: "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393" },
+    where: { contractAddress: "0xdfbed2d3efbd2071fd407bf169b5e5533ea90393" },
     update: {},
     create: {
-      contractAddress: "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
+      contractAddress: "0xdfbed2d3efbd2071fd407bf169b5e5533ea90393",
       poolType: "INDIVIDUAL",
       name: "Individual Savings Pool",
       description: "Personal savings with auto-yield optimization",

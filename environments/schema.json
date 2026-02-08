@@ -1,0 +1,222 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://khipuvault.com/schemas/environment-config.json",
+  "title": "KhipuVault Environment Configuration",
+  "description": "Configuration schema for KhipuVault deployment environments",
+  "type": "object",
+  "required": ["name", "network", "chainId", "rpcUrl", "blockExplorer", "contracts", "api", "features"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Human-readable environment name"
+    },
+    "network": {
+      "type": "string",
+      "enum": ["testnet", "mainnet"],
+      "description": "Network type"
+    },
+    "chainId": {
+      "type": "integer",
+      "description": "Blockchain chain ID",
+      "enum": [31611, 60808]
+    },
+    "rpcUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "RPC endpoint URL"
+    },
+    "blockExplorer": {
+      "type": "string",
+      "format": "uri",
+      "description": "Block explorer URL"
+    },
+    "description": {
+      "type": "string",
+      "description": "Environment description"
+    },
+    "contracts": {
+      "type": "object",
+      "description": "Deployed contract addresses",
+      "required": ["individualPoolV3", "cooperativePool", "yieldAggregator", "mezoIntegration", "musd"],
+      "properties": {
+        "individualPoolV3": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$",
+          "description": "Individual Savings Pool V3 contract address"
+        },
+        "cooperativePool": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$",
+          "description": "Cooperative Pool contract address"
+        },
+        "yieldAggregator": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$",
+          "description": "Yield Aggregator contract address"
+        },
+        "mezoIntegration": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$",
+          "description": "Mezo Integration contract address"
+        },
+        "musd": {
+          "type": "string",
+          "pattern": "^0x[a-fA-F0-9]{40}$",
+          "description": "mUSD token contract address"
+        }
+      }
+    },
+    "api": {
+      "type": "object",
+      "description": "API configuration",
+      "required": ["url", "timeout", "retries"],
+      "properties": {
+        "url": {
+          "type": "string",
+          "format": "uri",
+          "description": "API base URL"
+        },
+        "timeout": {
+          "type": "integer",
+          "minimum": 1000,
+          "maximum": 60000,
+          "description": "Request timeout in milliseconds"
+        },
+        "retries": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10,
+          "description": "Number of retries for failed requests"
+        }
+      }
+    },
+    "features": {
+      "type": "object",
+      "description": "Feature flags",
+      "required": [
+        "showIndividualSavings",
+        "showCommunityPools",
+        "showRotatingPool",
+        "showPrizePool",
+        "showReferralSystem",
+        "enableAutoCompound",
+        "enableYieldClaiming",
+        "enablePartialWithdrawals",
+        "enableMultiToken",
+        "enableAnalytics",
+        "enableNotifications",
+        "enablePortfolio",
+        "enableSocial",
+        "maintenanceMode",
+        "readOnlyMode",
+        "showTestnetBanner",
+        "enableDebugTools"
+      ],
+      "properties": {
+        "showIndividualSavings": {
+          "type": "boolean"
+        },
+        "showCommunityPools": {
+          "type": "boolean"
+        },
+        "showRotatingPool": {
+          "type": "boolean"
+        },
+        "showPrizePool": {
+          "type": "boolean"
+        },
+        "showReferralSystem": {
+          "type": "boolean"
+        },
+        "enableAutoCompound": {
+          "type": "boolean"
+        },
+        "enableYieldClaiming": {
+          "type": "boolean"
+        },
+        "enablePartialWithdrawals": {
+          "type": "boolean"
+        },
+        "enableMultiToken": {
+          "type": "boolean"
+        },
+        "enableAnalytics": {
+          "type": "boolean"
+        },
+        "enableNotifications": {
+          "type": "boolean"
+        },
+        "enablePortfolio": {
+          "type": "boolean"
+        },
+        "enableSocial": {
+          "type": "boolean"
+        },
+        "maintenanceMode": {
+          "type": "boolean"
+        },
+        "readOnlyMode": {
+          "type": "boolean"
+        },
+        "showTestnetBanner": {
+          "type": "boolean"
+        },
+        "enableDebugTools": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "monitoring": {
+      "type": "object",
+      "description": "Monitoring configuration",
+      "properties": {
+        "sentry": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            },
+            "sampleRate": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          }
+        },
+        "analytics": {
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "type": "boolean"
+            }
+          }
+        }
+      }
+    },
+    "limits": {
+      "type": "object",
+      "description": "Transaction limits",
+      "properties": {
+        "maxDepositAmount": {
+          "type": "string",
+          "description": "Maximum deposit amount in wei"
+        },
+        "minDepositAmount": {
+          "type": "string",
+          "description": "Minimum deposit amount in wei"
+        },
+        "maxWithdrawAmount": {
+          "type": "string",
+          "description": "Maximum withdrawal amount in wei"
+        }
+      }
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last update timestamp"
+    }
+  },
+  "additionalProperties": false
+}

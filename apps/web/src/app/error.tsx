@@ -13,7 +13,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { captureError, addBreadcrumb } from "@/lib/error-tracking";
+// Temporarily disabled Sentry integration until properly configured
+// import { captureError, addBreadcrumb } from "@/lib/error-tracking";
 
 interface ErrorProps {
   error: Error & { digest?: string };
@@ -46,26 +47,27 @@ export default function Error({ error, reset }: ErrorProps) {
     // eslint-disable-next-line no-console
     console.error("Page Error:", error);
 
+    // TODO: Re-enable Sentry integration after proper configuration
     // Report error to error tracking service (Sentry if configured)
-    void captureError(error, {
-      tags: {
-        errorBoundary: "page",
-        digest: error.digest ?? "unknown",
-      },
-      extra: {
-        pathname: typeof window !== "undefined" ? window.location.pathname : "unknown",
-        userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
-      },
-      level: "error",
-    });
+    // void captureError(error, {
+    //   tags: {
+    //     errorBoundary: "page",
+    //     digest: error.digest ?? "unknown",
+    //   },
+    //   extra: {
+    //     pathname: typeof window !== "undefined" ? window.location.pathname : "unknown",
+    //     userAgent: typeof navigator !== "undefined" ? navigator.userAgent : "unknown",
+    //   },
+    //   level: "error",
+    // });
 
     // Add breadcrumb for debugging
-    addBreadcrumb({
-      category: "error.boundary",
-      message: `Page error caught: ${error.message}`,
-      level: "error",
-      data: { digest: error.digest },
-    });
+    // addBreadcrumb({
+    //   category: "error.boundary",
+    //   message: `Page error caught: ${error.message}`,
+    //   level: "error",
+    //   data: { digest: error.digest },
+    // });
   }, [error]);
 
   return (

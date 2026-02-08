@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Wallet Detection Test</title>
+  <style>
+    body { font-family: monospace; padding: 20px; }
+    .result { margin: 10px 0; padding: 10px; background: #f0f0f0; }
+    button { margin: 5px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>Wallet Detection Test</h1>
+  
+  <button onclick="testWindowEthereum()">Test window.ethereum</button>
+  <button onclick="testProvidersArray()">Test window.ethereum.providers</button>
+  <button onclick="testEIP6963()">Test EIP-6963</button>
+  
+  <div id="results"></div>
+
+  <script>
+    function log(msg) {
+      const div = document.createElement('div');
+      div.className = 'result';
+      div.textContent = msg;
+      document.getElementById('results').appendChild(div);
+    }
+
+    function testWindowEthereum() {
+      log('=== Testing window.ethereum ===');
+      if (typeof window.ethereum !== 'undefined') {
+        log('✓ window.ethereum exists');
+        log(`  isMetaMask: ${window.ethereum.isMetaMask}`);
+        log(`  isOkxWallet: ${window.ethereum.isOkxWallet}`);
+        log(`  Object type: ${Object.prototype.toString.call(window.ethereum)}`);
+        log(`  Constructor: ${window.ethereum.constructor.name}`);
+        
+        // Check if it's read-only
+        const descriptor = Object.getOwnPropertyDescriptor(window, 'ethereum');
+        log(`  Writable: ${descriptor?.writable}`);
+        log(`  Configurable: ${descriptor?.configurable}`);
+        log(`  Has getter: ${!!descriptor?.get}`);
+        log(`  Has setter: ${!!descriptor?.set}`);
+      } else {
+        log('✗ window.ethereum does not exist');
+      }
+    }
+
+    function testProvidersArray() {
+      log('=== Testing window.ethereum.providers ===');
+      if (typeof window.ethereum !== 'undefined' && window.ethereum.providers) {
+        log(`✓ Found ${window.ethereum.providers.length} providers`);
+        window.ethereum.providers.forEach((provider, idx) => {
+          log(`  Provider ${idx}:`);
+          log(`    isMetaMask: ${provider.isMetaMask}`);
+          log(`    isOkxWallet: ${provider.isOkxWallet}`);
+        });
+      } else {
+        log('✗ window.ethereum.providers does not exist');
+      }
+    }
+
+    function testEIP6963() {
+      log('=== Testing EIP-6963 ===');
+      const providers = [];
+      
+      window.addEventListener('eip6963:announceProvider', (event) => {
+        log(`✓ EIP-6963 provider announced: ${event.detail.info.name}`);
+        log(`  UUID: ${event.detail.info.uuid}`);
+        log(`  RDNS: ${event.detail.info.rdns}`);
+        providers.push(event.detail);
+      });
+
+      // Request providers to announce themselves
+      window.dispatchEvent(new Event('eip6963:requestProvider'));
+      
+      setTimeout(() => {
+        if (providers.length === 0) {
+          log('✗ No EIP-6963 providers detected');
+        }
+      }, 1000);
+    }
+  </script>
+</body>
+</html>

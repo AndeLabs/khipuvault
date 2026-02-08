@@ -13,11 +13,11 @@ const products = [
     icon: Wallet,
     title: "Individual Savings",
     description:
-      "Deposit mUSD and earn yields automatically through Mezo's stability pool. Perfect for solo savers who want consistent, passive returns.",
+      "Earn passive yields on your mUSD deposits through Mezo's stability pool. Set it and forget it—your Bitcoin works while you sleep. Perfect for solo savers seeking consistent returns.",
     features: [
       "Auto-compounding yields",
       "No lockup periods",
-      "Referral rewards",
+      "Referral bonuses",
       "Withdraw anytime",
     ],
     href: "/dashboard/individual-savings",
@@ -29,12 +29,12 @@ const products = [
     icon: Users,
     title: "Community Pools",
     description:
-      "Save together with friends and family. Inspired by Pasanaku, Tandas, and Roscas - traditional Latin American savings circles.",
+      "Save together with friends and family in trusted circles. Inspired by Pasanaku, Tandas, and ROSCAs—Latin America's proven community savings tradition, now on Bitcoin.",
     features: [
       "Create or join pools",
       "Flexible contributions",
       "Proportional yield sharing",
-      "Community governance",
+      "Democratic governance",
     ],
     href: "/dashboard/cooperative-savings",
     color: "accent",
@@ -45,7 +45,7 @@ const products = [
     icon: Repeat,
     title: "Rotating Pool (ROSCA)",
     description:
-      "Turn-based savings circles where members contribute periodically and take turns receiving the full pot. Built with Native BTC support.",
+      "Turn-based savings circles where members contribute periodically and take turns receiving the full pot. Native BTC support with flash loan protection and transparent turn tracking.",
     features: [
       "Native BTC & WBTC support",
       "Flash loan protected",
@@ -61,12 +61,12 @@ const products = [
     icon: Trophy,
     title: "Prize Pool",
     description:
-      "No-loss lottery with 99% gas optimization. Capital always safe, yields distributed as prizes via secure commit-reveal randomness.",
+      "No-loss lottery where your capital is always safe. All yields become prizes distributed through provably fair randomness. Win big or earn yields—never lose your deposit.",
     features: [
       "99% gas optimized",
-      "Secure randomness",
-      "Fair minimum 2 players",
-      "Never lose capital",
+      "Provably fair randomness",
+      "Minimum 2 players required",
+      "Zero capital risk",
     ],
     href: "/dashboard/prize-pool",
     color: "success",
@@ -87,7 +87,8 @@ export function Products() {
             Choose Your <span className="text-gradient-brand">Savings Strategy</span>
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            From solo savings to rotating pools, find the perfect way to grow your Bitcoin.
+            Four proven strategies designed for different needs. All delivering real Bitcoin yields
+            with maximum security and efficiency.
           </p>
         </AnimateOnScroll>
 

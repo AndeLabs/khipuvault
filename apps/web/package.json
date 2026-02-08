@@ -23,8 +23,6 @@
     "@khipu/shared": "workspace:*",
     "@khipu/ui": "workspace:*",
     "@khipu/web3": "workspace:*",
-    "@privy-io/react-auth": "^3.9.0",
-    "@privy-io/wagmi": "^2.1.1",
     "@radix-ui/react-accordion": "^1.2.3",
     "@radix-ui/react-alert-dialog": "^1.1.6",
     "@radix-ui/react-avatar": "^1.1.3",

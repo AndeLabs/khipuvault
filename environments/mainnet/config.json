@@ -1,0 +1,61 @@
+{
+  "$schema": "../schema.json",
+  "name": "Mainnet",
+  "network": "mainnet",
+  "chainId": 60808,
+  "rpcUrl": "https://rpc.mezo.org",
+  "blockExplorer": "https://explorer.mezo.org",
+  "description": "Mezo mainnet production environment",
+
+  "contracts": {
+    "individualPoolV3": "0x0000000000000000000000000000000000000000",
+    "cooperativePool": "0x0000000000000000000000000000000000000000",
+    "yieldAggregator": "0x0000000000000000000000000000000000000000",
+    "mezoIntegration": "0x0000000000000000000000000000000000000000",
+    "musd": "0x0000000000000000000000000000000000000000"
+  },
+
+  "api": {
+    "url": "https://api.khipuvault.com",
+    "timeout": 30000,
+    "retries": 3
+  },
+
+  "features": {
+    "showIndividualSavings": true,
+    "showCommunityPools": false,
+    "showRotatingPool": false,
+    "showPrizePool": false,
+    "showReferralSystem": false,
+    "enableAutoCompound": true,
+    "enableYieldClaiming": true,
+    "enablePartialWithdrawals": true,
+    "enableMultiToken": false,
+    "enableAnalytics": true,
+    "enableNotifications": false,
+    "enablePortfolio": false,
+    "enableSocial": false,
+    "maintenanceMode": false,
+    "readOnlyMode": false,
+    "showTestnetBanner": false,
+    "enableDebugTools": false
+  },
+
+  "monitoring": {
+    "sentry": {
+      "enabled": true,
+      "sampleRate": 1.0
+    },
+    "analytics": {
+      "enabled": true
+    }
+  },
+
+  "limits": {
+    "maxDepositAmount": "1000000000000000000000000",
+    "minDepositAmount": "10000000000000000000",
+    "maxWithdrawAmount": "1000000000000000000000000"
+  },
+
+  "updatedAt": "2026-02-08T00:00:00Z"
+}

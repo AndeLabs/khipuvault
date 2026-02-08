@@ -1,0 +1,61 @@
+{
+  "$schema": "../schema.json",
+  "name": "Testnet",
+  "network": "testnet",
+  "chainId": 31611,
+  "rpcUrl": "https://rpc.test.mezo.org",
+  "blockExplorer": "https://explorer.test.mezo.org",
+  "description": "Mezo testnet environment for testing and QA",
+
+  "contracts": {
+    "individualPoolV3": "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
+    "cooperativePool": "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88",
+    "yieldAggregator": "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6",
+    "mezoIntegration": "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6",
+    "musd": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"
+  },
+
+  "api": {
+    "url": "https://api-testnet.khipuvault.com",
+    "timeout": 30000,
+    "retries": 3
+  },
+
+  "features": {
+    "showIndividualSavings": true,
+    "showCommunityPools": true,
+    "showRotatingPool": true,
+    "showPrizePool": true,
+    "showReferralSystem": false,
+    "enableAutoCompound": true,
+    "enableYieldClaiming": true,
+    "enablePartialWithdrawals": true,
+    "enableMultiToken": false,
+    "enableAnalytics": true,
+    "enableNotifications": false,
+    "enablePortfolio": true,
+    "enableSocial": false,
+    "maintenanceMode": false,
+    "readOnlyMode": false,
+    "showTestnetBanner": true,
+    "enableDebugTools": true
+  },
+
+  "monitoring": {
+    "sentry": {
+      "enabled": true,
+      "sampleRate": 0.1
+    },
+    "analytics": {
+      "enabled": true
+    }
+  },
+
+  "limits": {
+    "maxDepositAmount": "1000000000000000000000000",
+    "minDepositAmount": "10000000000000000000",
+    "maxWithdrawAmount": "1000000000000000000000000"
+  },
+
+  "updatedAt": "2026-02-08T00:00:00Z"
+}
