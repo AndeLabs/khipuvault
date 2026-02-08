@@ -3,8 +3,8 @@
  * @module __tests__/middleware/error-handler.test
  */
 
-import { describe, it, expect, vi } from "vitest";
 import { Prisma } from "@prisma/client";
+import { describe, it, expect } from "vitest";
 import { ZodError, z } from "zod";
 
 import { errorHandler, AppError, asyncHandler } from "../../middleware/error-handler";

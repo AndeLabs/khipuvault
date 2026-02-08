@@ -20,6 +20,12 @@ pnpm db:seed          # Seed test data
 pnpm contracts:build  # Compile (forge build)
 pnpm contracts:test   # Test (forge test)
 
+# Security
+pnpm security:semgrep         # Semgrep SAST (auto-detected rules)
+pnpm security:semgrep:custom  # Custom KhipuVault rules
+pnpm security:snyk:test       # Snyk dependency scan
+pnpm security:audit           # npm audit
+
 # Quality
 pnpm lint             # Lint all packages
 pnpm typecheck        # TypeScript check
@@ -238,6 +244,13 @@ Before committing, ALWAYS run:
 pnpm lint && pnpm typecheck && pnpm test
 ```
 
+For security scanning:
+
+```bash
+pnpm security:semgrep:custom  # Run KhipuVault custom rules
+pnpm security:audit           # Check dependency vulnerabilities
+```
+
 For smart contracts:
 
 ```bash
@@ -248,6 +261,7 @@ Before deploying:
 
 ```bash
 pnpm build
+pnpm security:semgrep  # Full security scan
 ```
 
 ## Model Selection Guide

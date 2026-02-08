@@ -1,0 +1,322 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    ":dependencyDashboard",
+    ":semanticCommits",
+    ":separateMajorReleases",
+    ":combinePatchMinorReleases",
+    ":ignoreModulesAndTests",
+    ":autodetectPinVersions",
+    ":prHourlyLimit2",
+    ":prConcurrentLimit10",
+    "group:monorepos",
+    "group:recommended",
+    "workarounds:all"
+  ],
+  "timezone": "UTC",
+  "schedule": ["after 10pm every weekday", "before 5am every weekday", "every weekend"],
+  "labels": ["dependencies"],
+  "assignees": [],
+  "reviewers": [],
+  "rangeStrategy": "bump",
+  "semanticCommits": "enabled",
+  "commitMessagePrefix": "chore(deps):",
+  "commitMessageAction": "update",
+  "commitMessageTopic": "{{depName}}",
+  "commitMessageExtra": "to {{#if isPinDigest}}{{{newDigestShort}}}{{else}}{{#if isMajor}}{{prettyNewMajor}}{{else}}{{#if isSingleVersion}}{{prettyNewVersion}}{{else}}{{#if newValue}}{{{newValue}}}{{else}}{{{newDigestShort}}}{{/if}}{{/if}}{{/if}}{{/if}}",
+  "prCreation": "immediate",
+  "prConcurrentLimit": 10,
+  "prHourlyLimit": 2,
+  "stabilityDays": 3,
+  "ignoreTests": true,
+  "ignorePaths": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/.next/**",
+    "**/coverage/**",
+    "**/out/**",
+    "**/cache/**",
+    "**/lib/**"
+  ],
+  "packageRules": [
+    {
+      "description": "Security updates - immediate with auto-merge",
+      "matchUpdateTypes": ["patch"],
+      "matchCurrentVersion": "!/^0/",
+      "matchDepTypes": ["dependencies"],
+      "matchDatasources": ["npm"],
+      "vulnerabilityAlerts": {
+        "enabled": true
+      },
+      "schedule": ["at any time"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "platformAutomerge": true,
+      "stabilityDays": 0,
+      "labels": ["dependencies", "security"]
+    },
+    {
+      "description": "Critical security vulnerabilities - immediate",
+      "matchUpdateTypes": ["minor", "major"],
+      "vulnerabilityAlerts": {
+        "enabled": true
+      },
+      "schedule": ["at any time"],
+      "stabilityDays": 0,
+      "labels": ["dependencies", "security", "high-priority"]
+    },
+    {
+      "description": "Production dependencies - weekly updates",
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "schedule": ["before 3am on Monday"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "platformAutomerge": true,
+      "labels": ["dependencies", "production"]
+    },
+    {
+      "description": "Production major updates - manual review required",
+      "matchDepTypes": ["dependencies"],
+      "matchUpdateTypes": ["major"],
+      "schedule": ["before 3am on Monday"],
+      "automerge": false,
+      "labels": ["dependencies", "production", "major-update"]
+    },
+    {
+      "description": "Dev dependencies - monthly updates",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "schedule": ["before 3am on the first day of the month"],
+      "automerge": true,
+      "automergeType": "pr",
+      "automergeStrategy": "squash",
+      "platformAutomerge": true,
+      "groupName": "dev dependencies",
+      "labels": ["dependencies", "dev"]
+    },
+    {
+      "description": "Dev major updates - monthly with manual review",
+      "matchDepTypes": ["devDependencies"],
+      "matchUpdateTypes": ["major"],
+      "schedule": ["before 3am on the first day of the month"],
+      "automerge": false,
+      "groupName": "dev dependencies (major)",
+      "labels": ["dependencies", "dev", "major-update"]
+    },
+    {
+      "description": "React ecosystem",
+      "groupName": "React ecosystem",
+      "matchPackageNames": ["react", "react-dom"],
+      "matchPackagePatterns": ["^@types/react", "^react-"],
+      "automerge": false,
+      "labels": ["dependencies", "react"]
+    },
+    {
+      "description": "Next.js and related packages",
+      "groupName": "Next.js",
+      "matchPackageNames": ["next"],
+      "matchPackagePatterns": ["^@next/", "^next-"],
+      "automerge": false,
+      "labels": ["dependencies", "nextjs"]
+    },
+    {
+      "description": "Wagmi and Viem Web3 libraries",
+      "groupName": "Web3 libraries (Wagmi/Viem)",
+      "matchPackageNames": ["wagmi", "viem"],
+      "matchPackagePatterns": ["^@wagmi/", "^@viem/"],
+      "automerge": false,
+      "labels": ["dependencies", "web3"]
+    },
+    {
+      "description": "OpenZeppelin contracts",
+      "groupName": "OpenZeppelin",
+      "matchPackagePatterns": ["^@openzeppelin/"],
+      "automerge": false,
+      "labels": ["dependencies", "smart-contracts", "security"]
+    },
+    {
+      "description": "Foundry and Solidity tooling",
+      "groupName": "Solidity tooling",
+      "matchPackagePatterns": ["^forge-std", "^solhint", "^@nomicfoundation/"],
+      "automerge": false,
+      "labels": ["dependencies", "smart-contracts"]
+    },
+    {
+      "description": "Prisma and database",
+      "groupName": "Prisma",
+      "matchPackageNames": ["prisma", "@prisma/client"],
+      "matchPackagePatterns": ["^@prisma/"],
+      "automerge": false,
+      "labels": ["dependencies", "database"]
+    },
+    {
+      "description": "Express and API dependencies",
+      "groupName": "Express ecosystem",
+      "matchPackageNames": ["express"],
+      "matchPackagePatterns": ["^@types/express", "^express-"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["dependencies", "api"]
+    },
+    {
+      "description": "Testing libraries",
+      "groupName": "Testing tools",
+      "matchPackageNames": [
+        "vitest",
+        "@vitest/ui",
+        "jest",
+        "@testing-library/react",
+        "@testing-library/jest-dom"
+      ],
+      "matchPackagePatterns": ["^@testing-library/", "^vitest"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["dependencies", "testing"]
+    },
+    {
+      "description": "Linting and formatting",
+      "groupName": "Linting and formatting",
+      "matchPackageNames": ["eslint", "prettier"],
+      "matchPackagePatterns": ["^eslint-", "^@eslint/", "^prettier-", "^@typescript-eslint/"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["dependencies", "tooling"]
+    },
+    {
+      "description": "TypeScript and types",
+      "groupName": "TypeScript",
+      "matchPackageNames": ["typescript"],
+      "matchPackagePatterns": ["^@types/"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["dependencies", "typescript"]
+    },
+    {
+      "description": "Tailwind CSS ecosystem",
+      "groupName": "Tailwind CSS",
+      "matchPackageNames": ["tailwindcss", "autoprefixer", "postcss"],
+      "matchPackagePatterns": ["^@tailwindcss/", "^tailwind-"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["dependencies", "styling"]
+    },
+    {
+      "description": "Radix UI components",
+      "groupName": "Radix UI",
+      "matchPackagePatterns": ["^@radix-ui/"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["dependencies", "ui"]
+    },
+    {
+      "description": "Logging and monitoring",
+      "groupName": "Logging",
+      "matchPackageNames": ["pino", "pino-pretty"],
+      "matchPackagePatterns": ["^pino-"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["dependencies", "logging"]
+    },
+    {
+      "description": "Authentication libraries",
+      "groupName": "Authentication",
+      "matchPackageNames": ["siwe", "jsonwebtoken"],
+      "matchPackagePatterns": ["^@noble/"],
+      "automerge": false,
+      "labels": ["dependencies", "security", "auth"]
+    },
+    {
+      "description": "Ethereum libraries",
+      "groupName": "Ethereum libraries",
+      "matchPackageNames": ["ethers", "web3"],
+      "matchPackagePatterns": ["^@ethereumjs/", "^ethereum-"],
+      "automerge": false,
+      "labels": ["dependencies", "web3"]
+    },
+    {
+      "description": "Zod validation",
+      "groupName": "Zod",
+      "matchPackageNames": ["zod"],
+      "matchPackagePatterns": ["^zod-"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["dependencies", "validation"]
+    },
+    {
+      "description": "React Query",
+      "groupName": "React Query",
+      "matchPackageNames": ["@tanstack/react-query"],
+      "matchPackagePatterns": ["^@tanstack/react-query"],
+      "automerge": false,
+      "labels": ["dependencies", "react"]
+    },
+    {
+      "description": "Zustand state management",
+      "groupName": "Zustand",
+      "matchPackageNames": ["zustand"],
+      "automerge": true,
+      "automergeType": "pr",
+      "matchUpdateTypes": ["patch", "minor"],
+      "labels": ["dependencies", "state-management"]
+    },
+    {
+      "description": "Pin unstable versions (0.x.x)",
+      "matchCurrentVersion": "/^0/",
+      "rangeStrategy": "pin",
+      "automerge": false,
+      "labels": ["dependencies", "unstable"]
+    },
+    {
+      "description": "Disable major Node.js updates",
+      "matchDepTypes": ["engines"],
+      "matchPackageNames": ["node"],
+      "enabled": false
+    },
+    {
+      "description": "Foundry/Forge - pin version",
+      "matchPackageNames": ["foundry", "forge-std"],
+      "rangeStrategy": "pin",
+      "automerge": false,
+      "labels": ["dependencies", "smart-contracts"]
+    }
+  ],
+  "vulnerabilityAlerts": {
+    "enabled": true,
+    "labels": ["security"],
+    "automerge": true,
+    "automergeType": "pr",
+    "schedule": ["at any time"],
+    "stabilityDays": 0
+  },
+  "lockFileMaintenance": {
+    "enabled": true,
+    "automerge": true,
+    "automergeType": "pr",
+    "schedule": ["before 3am on Monday"],
+    "commitMessageAction": "update",
+    "commitMessageTopic": "lock file dependencies"
+  },
+  "dependencyDashboard": true,
+  "dependencyDashboardTitle": "Dependency Dashboard",
+  "dependencyDashboardHeader": "This issue lists Renovate updates and detected dependencies. Read the [Dependency Dashboard](https://docs.renovatebot.com/key-concepts/dashboard/) docs to learn more.",
+  "dependencyDashboardApproval": false,
+  "dependencyDashboardAutoclose": true,
+  "pnpm": {
+    "enabled": true
+  },
+  "postUpdateOptions": ["pnpmDedupe"],
+  "osvVulnerabilityAlerts": true
+}

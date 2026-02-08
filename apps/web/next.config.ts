@@ -1,6 +1,9 @@
-import type { NextConfig } from "next";
 import path from "path";
+
+import withBundleAnalyzer from "@next/bundle-analyzer";
 import withPWAInit from "next-pwa";
+
+import type { NextConfig } from "next";
 
 // CRITICAL: Polyfill localStorage for SSR before any other imports
 // MetaMask SDK and some dependencies try to access localStorage during module initialization
@@ -228,4 +231,13 @@ const withPWA = withPWAInit({
   ],
 });
 
-export default withPWA(nextConfig);
+/**
+ * Bundle Analyzer Configuration
+ * Enables webpack bundle analysis when ANALYZE=true environment variable is set
+ * Usage: ANALYZE=true next build
+ */
+const analyzeBundles = withBundleAnalyzer({
+  enabled: process.env.ANALYZE === "true",
+});
+
+export default analyzeBundles(withPWA(nextConfig));

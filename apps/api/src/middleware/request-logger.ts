@@ -1,9 +1,10 @@
 import { randomBytes } from "node:crypto";
 
-import type { Request, Response } from "express";
 import pinoHttp, { type HttpLogger } from "pino-http";
 
 import { logger } from "../lib/logger";
+
+import type { Request, Response } from "express";
 
 /**
  * Generate a cryptographically secure request ID

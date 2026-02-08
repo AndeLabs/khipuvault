@@ -7,6 +7,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import {
   generateNonce,
   verifySiweMessage,
@@ -41,7 +42,7 @@ describe("Auth Route Handlers", () => {
 
   describe("verifySiweMessage", () => {
     it("should return invalid for malformed message", async () => {
-      const result = await verifySiweMessage("invalid message", "0x" + "a".repeat(130));
+      const result = await verifySiweMessage("invalid message", `0x${"a".repeat(130)}`);
 
       expect(result.valid).toBe(false);
       expect(result.error).toBeDefined();
@@ -114,7 +115,7 @@ describe("Auth Routes Integration", () => {
   });
 
   it("verify endpoint should reject invalid signatures", async () => {
-    const result = await verifySiweMessage("invalid siwe message format", "0x" + "f".repeat(130));
+    const result = await verifySiweMessage("invalid siwe message format", `0x${"f".repeat(130)}`);
 
     expect(result.valid).toBe(false);
     expect(result.error).toBeDefined();

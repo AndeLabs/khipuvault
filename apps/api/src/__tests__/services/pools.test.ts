@@ -4,6 +4,7 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import { prisma } from "@khipu/database";
 
 import { PoolsService } from "../../services/pools";

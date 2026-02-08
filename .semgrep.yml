@@ -1,0 +1,437 @@
+# Semgrep SAST Configuration for KhipuVault
+# Free static application security testing with community rulesets
+# https://semgrep.dev/docs/
+
+# This configuration file supplements the automatic ruleset discovery
+# Use 'pnpm security:semgrep' to run with auto-detected rules
+# Use 'pnpm security:semgrep:custom' to run with these custom rules
+
+rules:
+  # ===== JavaScript/TypeScript Security =====
+
+  # Dangerous eval usage
+  - id: dangerous-eval-usage
+    pattern-either:
+      - pattern: eval(...)
+      - pattern: Function($...ARGS, $BODY)
+      - pattern: setTimeout("...", ...)
+      - pattern: setInterval("...", ...)
+    message: |
+      Dangerous use of eval() or Function() constructor detected.
+      This can lead to code injection vulnerabilities (CWE-95).
+      Use safer alternatives or validate input thoroughly.
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-95: Improper Neutralization of Directives in Dynamically Evaluated Code"
+      owasp: "A03:2021 - Injection"
+      confidence: HIGH
+
+  # Hardcoded secrets and credentials
+  - id: hardcoded-secret-pattern
+    pattern-regex: |
+      (password|passwd|pwd|secret|api[_-]?key|apikey|token|auth[_-]?token|private[_-]?key)\s*=\s*['"]\w{8,}['"]
+    message: |
+      Possible hardcoded secret or credential detected.
+      Never commit secrets to version control (CWE-798).
+      Use environment variables or secret management systems.
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-798: Use of Hard-coded Credentials"
+      owasp: "A07:2021 - Identification and Authentication Failures"
+      confidence: MEDIUM
+
+  # SQL Injection risks
+  - id: sql-injection-concatenation
+    pattern-either:
+      - pattern: |
+          $DB.query($SQL + ...)
+      - pattern: |
+          $DB.execute($SQL + ...)
+      - pattern: |
+          $DB.raw($SQL + ...)
+      - pattern: |
+          $CONN.query(`${...}`)
+    message: |
+      Possible SQL injection vulnerability detected (CWE-89).
+      Use parameterized queries or prepared statements instead of string concatenation.
+      For Prisma, use type-safe query builders.
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-89: SQL Injection"
+      owasp: "A03:2021 - Injection"
+      confidence: HIGH
+
+  # XSS via dangerouslySetInnerHTML
+  - id: react-dangerous-innerhtml
+    pattern-either:
+      - pattern: |
+          dangerouslySetInnerHTML={{__html: $VAR}}
+      - pattern: |
+          dangerouslySetInnerHTML={{ __html: $VAR }}
+    message: |
+      Use of dangerouslySetInnerHTML without sanitization can lead to XSS (CWE-79).
+      Sanitize user input with DOMPurify or avoid this pattern entirely.
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-79: Cross-site Scripting"
+      owasp: "A03:2021 - Injection"
+      technology: react
+      confidence: HIGH
+
+  # Console.log in production
+  - id: console-log-in-production
+    pattern-either:
+      - pattern: console.log(...)
+      - pattern: console.debug(...)
+      - pattern: console.info(...)
+      - pattern: console.warn(...)
+    message: |
+      console.log/debug/info/warn should not be used in production code.
+      Use a proper logger (Pino) as specified in CLAUDE.md anti-patterns.
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
+    paths:
+      include:
+        - "apps/**"
+        - "packages/**"
+      exclude:
+        - "*.test.ts"
+        - "*.test.tsx"
+        - "*.spec.ts"
+        - "*.spec.tsx"
+    metadata:
+      category: best-practice
+      confidence: HIGH
+
+  # Weak cryptography
+  - id: weak-crypto-algorithms
+    pattern-either:
+      - pattern: crypto.createCipher(...)
+      - pattern: crypto.pseudoRandomBytes(...)
+      - pattern: crypto.createHash("md5")
+      - pattern: crypto.createHash("sha1")
+    message: |
+      Weak or deprecated cryptographic function detected (CWE-327).
+      Use crypto.createCipheriv() with AES-256-GCM for encryption.
+      Use crypto.randomBytes() instead of pseudoRandomBytes().
+      Use SHA-256 or SHA-3 instead of MD5/SHA-1.
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-327: Use of a Broken or Risky Cryptographic Algorithm"
+      confidence: HIGH
+
+  # Missing HTTPS
+  - id: http-without-tls
+    pattern-either:
+      - pattern: |
+          "http://"
+      - pattern: |
+          'http://'
+      - pattern: |
+          `http://`
+    message: |
+      HTTP URL detected. Use HTTPS for all external communications.
+      HTTP connections are not encrypted and vulnerable to MITM attacks.
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
+    paths:
+      exclude:
+        - "*.test.ts"
+        - "*.test.tsx"
+        - "localhost"
+    metadata:
+      category: security
+      cwe: "CWE-319: Cleartext Transmission of Sensitive Information"
+      confidence: MEDIUM
+
+  # ===== TypeScript Best Practices =====
+
+  # TypeScript any usage
+  - id: typescript-avoid-any
+    pattern-either:
+      - pattern: |
+          const $VAR: any = ...
+      - pattern: |
+          let $VAR: any = ...
+      - pattern: |
+          var $VAR: any = ...
+      - pattern: |
+          function $FUNC(...): any { ... }
+      - pattern: |
+          async function $FUNC(...): Promise<any> { ... }
+    message: |
+      Avoid using 'any' type as specified in CLAUDE.md anti-patterns.
+      Define proper types for better type safety and catch bugs at compile time.
+    languages:
+      - typescript
+    severity: WARNING
+    metadata:
+      category: best-practice
+      confidence: HIGH
+
+  # @ts-ignore usage
+  - id: typescript-ts-ignore
+    pattern-either:
+      - pattern-regex: "// @ts-ignore"
+      - pattern-regex: "// @ts-nocheck"
+    message: |
+      Never ignore TypeScript errors with @ts-ignore as per CLAUDE.md anti-patterns.
+      Fix the underlying type issue or use @ts-expect-error with explanation.
+    languages:
+      - typescript
+    severity: WARNING
+    metadata:
+      category: best-practice
+      confidence: HIGH
+
+  # ===== Web3/Blockchain Security =====
+
+  # BigInt to Number conversion (precision loss)
+  - id: web3-bigint-to-number
+    pattern-either:
+      - pattern: Number($BIGINT)
+      - pattern: parseInt($BIGINT)
+      - pattern: parseFloat($BIGINT)
+    message: |
+      Converting BigInt to Number can cause precision loss (CLAUDE.md anti-pattern).
+      This is especially dangerous for wei values in Web3 applications.
+      Keep values as BigInt throughout calculations.
+    languages:
+      - javascript
+      - typescript
+    severity: ERROR
+    metadata:
+      category: security
+      technology: web3
+      confidence: HIGH
+
+  # Missing error handling for async Web3 operations
+  - id: web3-unhandled-promise
+    pattern: |
+      await $CONTRACT.$METHOD(...)
+    message: |
+      Web3 contract calls should have error handling.
+      Wrap in try-catch or use .catch() to handle transaction failures.
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
+    metadata:
+      category: best-practice
+      technology: web3
+      confidence: MEDIUM
+
+  # ===== Express/API Security =====
+
+  # Missing input validation
+  - id: express-missing-validation
+    pattern-either:
+      - pattern: |
+          app.$METHOD($PATH, async (req, res) => {
+            ... req.body ...
+          })
+      - pattern: |
+          router.$METHOD($PATH, async (req, res) => {
+            ... req.body ...
+          })
+    message: |
+      Express route using req.body without visible validation.
+      Add Zod validation schema as per CLAUDE.md conventions.
+      All API endpoints must validate input.
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
+    paths:
+      include:
+        - "apps/api/**"
+    metadata:
+      category: security
+      confidence: MEDIUM
+
+  # Unvalidated redirect
+  - id: open-redirect-vulnerability
+    pattern-either:
+      - pattern: |
+          res.redirect(req.query.$PARAM)
+      - pattern: |
+          res.redirect(req.params.$PARAM)
+      - pattern: |
+          res.redirect(req.body.$PARAM)
+      - pattern: |
+          window.location = $USER_INPUT
+      - pattern: |
+          window.location.href = $USER_INPUT
+    message: |
+      Unvalidated redirect detected (CWE-601).
+      Validate and whitelist redirect URLs to prevent phishing attacks.
+    languages:
+      - javascript
+      - typescript
+    severity: WARNING
+    metadata:
+      category: security
+      cwe: "CWE-601: URL Redirection to Untrusted Site"
+      owasp: "A01:2021 - Broken Access Control"
+      confidence: HIGH
+
+  # Missing CORS configuration
+  - id: express-missing-cors
+    pattern: |
+      app.use(cors())
+    message: |
+      CORS enabled without configuration. Specify allowed origins.
+      Check CORS_ORIGIN environment variable as per CLAUDE.md.
+    languages:
+      - javascript
+      - typescript
+    severity: INFO
+    metadata:
+      category: security
+      confidence: MEDIUM
+
+  # ===== Environment Variable Security =====
+
+  # Environment variable exposure to client
+  - id: env-client-exposure
+    pattern-either:
+      - pattern: |
+          process.env.$VAR
+      - pattern: |
+          import.meta.env.$VAR
+    message: |
+      Be careful with environment variable usage.
+      Frontend: Only use NEXT_PUBLIC_* variables.
+      Backend: Never expose secrets to client-side code.
+    languages:
+      - javascript
+      - typescript
+    severity: INFO
+    paths:
+      include:
+        - "apps/web/**"
+    metadata:
+      category: security
+      confidence: LOW
+
+  # ===== Solidity Smart Contract Security =====
+
+  # tx.origin authentication (anti-pattern)
+  - id: solidity-tx-origin-auth
+    pattern-either:
+      - pattern: |
+          require(tx.origin == ...)
+      - pattern: |
+          if (tx.origin == ...)
+      - pattern: |
+          assert(tx.origin == ...)
+    message: |
+      Never use tx.origin for authorization (CLAUDE.md anti-pattern).
+      Use msg.sender instead. tx.origin is vulnerable to phishing attacks.
+    languages:
+      - solidity
+    severity: ERROR
+    metadata:
+      category: security
+      technology: solidity
+      cwe: "CWE-346: Origin Validation Error"
+      confidence: HIGH
+
+  # Reentrancy risk (state change after external call)
+  - id: solidity-reentrancy-pattern
+    pattern: |
+      $EXTERNAL_CALL;
+      ...
+      $STATE_VAR = ...;
+    message: |
+      Possible reentrancy vulnerability detected (CLAUDE.md anti-pattern).
+      Always update state before making external calls (checks-effects-interactions).
+      Consider using ReentrancyGuard from OpenZeppelin.
+    languages:
+      - solidity
+    severity: ERROR
+    metadata:
+      category: security
+      cwe: "CWE-841: Improper Enforcement of Behavioral Workflow"
+      confidence: MEDIUM
+
+  # Floating pragma version
+  - id: solidity-floating-pragma
+    pattern-regex: "pragma solidity \\^"
+    message: |
+      Floating pragma version detected (CLAUDE.md anti-pattern).
+      Lock pragma to specific version in production: pragma solidity 0.8.20;
+    languages:
+      - solidity
+    severity: WARNING
+    paths:
+      exclude:
+        - "test/**"
+        - "mock/**"
+    metadata:
+      category: best-practice
+      technology: solidity
+      confidence: HIGH
+
+  # Missing event emission
+  - id: solidity-missing-event
+    pattern: |
+      function $FUNC(...) external {
+        ...
+        $STATE = ...;
+        ...
+      }
+    message: |
+      State-changing function should emit an event (CLAUDE.md anti-pattern).
+      Events are crucial for off-chain monitoring and transparency.
+    languages:
+      - solidity
+    severity: WARNING
+    metadata:
+      category: best-practice
+      technology: solidity
+      confidence: LOW
+
+  # Unchecked external call return value
+  - id: solidity-unchecked-call
+    pattern-either:
+      - pattern: |
+          $ADDR.call(...)
+      - pattern: |
+          $ADDR.delegatecall(...)
+      - pattern: |
+          $ADDR.staticcall(...)
+    message: |
+      Low-level call without checking return value.
+      Always check success boolean: (bool success, ) = addr.call(...); require(success);
+    languages:
+      - solidity
+    severity: ERROR
+    metadata:
+      category: security
+      technology: solidity
+      confidence: HIGH

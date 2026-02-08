@@ -45,7 +45,9 @@ class InMemoryStore {
 
   async get(key: string): Promise<string | null> {
     const item = this.store.get(key);
-    if (!item) return null;
+    if (!item) {
+      return null;
+    }
 
     // Check expiration
     if (item.expiresAt && Date.now() > item.expiresAt) {
@@ -68,7 +70,9 @@ class InMemoryStore {
 
   async exists(key: string): Promise<number> {
     const item = this.store.get(key);
-    if (!item) return 0;
+    if (!item) {
+      return 0;
+    }
     if (item.expiresAt && Date.now() > item.expiresAt) {
       this.store.delete(key);
       return 0;
@@ -78,7 +82,9 @@ class InMemoryStore {
 
   async expire(key: string, seconds: number): Promise<number> {
     const item = this.store.get(key);
-    if (!item) return 0;
+    if (!item) {
+      return 0;
+    }
     item.expiresAt = Date.now() + seconds * 1000;
     return 1;
   }

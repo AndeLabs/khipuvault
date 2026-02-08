@@ -4,12 +4,13 @@
  */
 
 import { describe, it, expect, vi, beforeEach } from "vitest";
+
 import { prisma } from "@khipu/database";
 
+import healthRouter from "../../routes/health";
 import { createMockRequest, createMockResponse } from "../setup";
 
 // Import route handler after mocks
-import healthRouter from "../../routes/health";
 
 // Helper to get route handler with proper typing
 function getRouteHandler(

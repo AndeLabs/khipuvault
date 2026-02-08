@@ -18,7 +18,9 @@ function parseSize(size: string): number {
     gb: 1024 * 1024 * 1024,
   };
 
-  const match = size.toLowerCase().match(/^(\d+(?:\.\d+)?)\s*(b|kb|mb|gb)?$/);
+  // Safe regex: limit length and use simpler pattern to prevent ReDoS
+  const sanitized = size.toLowerCase().slice(0, 20);
+  const match = sanitized.match(/^(\d+\.?\d*)\s*(b|kb|mb|gb)?$/);
   if (!match) {
     // Default to 10MB if parsing fails
     return 10 * 1024 * 1024;
@@ -204,10 +206,10 @@ export function xssProtection(req: Request, res: Response, next: NextFunction) {
 
 /**
  * Request ID middleware for tracking and debugging
+ * Uses crypto.randomUUID() for secure random ID generation
  */
 export function requestId(req: Request, res: Response, next: NextFunction) {
-  const id =
-    req.headers["x-request-id"] || `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+  const id = req.headers["x-request-id"] || crypto.randomUUID();
 
   req.headers["x-request-id"] = id as string;
   res.setHeader("X-Request-ID", id);

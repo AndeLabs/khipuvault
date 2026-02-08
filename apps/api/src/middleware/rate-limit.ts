@@ -1,9 +1,10 @@
-import type { Options as RateLimitOptions } from "express-rate-limit";
 import rateLimit from "express-rate-limit";
 import slowDown from "express-slow-down";
 
 import { createChildLogger } from "../lib/logger";
 import { getRedisClient, isRedisEnabled } from "../lib/redis";
+
+import type { Options as RateLimitOptions } from "express-rate-limit";
 
 const logger = createChildLogger({ module: "rate-limit" });
 

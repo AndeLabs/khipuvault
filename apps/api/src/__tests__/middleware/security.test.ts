@@ -316,7 +316,9 @@ describe("Security Middleware", () => {
       expect(next).toHaveBeenCalled();
 
       // Restore
-      if (originalApiKey) process.env.API_KEY = originalApiKey;
+      if (originalApiKey) {
+        process.env.API_KEY = originalApiKey;
+      }
     });
 
     it("should reject missing API key when configured", () => {

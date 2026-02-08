@@ -203,3 +203,4 @@ secrets/
 packages/contracts/*_REPORT.md
 packages/contracts/slither-report.json
 security/shannon/
+semgrep-report.json

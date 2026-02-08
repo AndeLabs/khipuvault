@@ -75,7 +75,8 @@ export const MEZO_TESTNET_ADDRESSES = {
  */
 export function getContractAddress(key: keyof typeof MEZO_TESTNET_ADDRESSES): string {
   const address = MEZO_TESTNET_ADDRESSES[key];
-  if (address === "0x0000000000000000000000000000000000000000") {
+  // Type assertion needed because TypeScript knows none of the const addresses are zero address
+  if ((address as string) === "0x0000000000000000000000000000000000000000") {
     if (process.env.NODE_ENV === "development") {
       // eslint-disable-next-line no-console
       console.warn(`⚠️ Contract "${key}" not deployed yet on Mezo Testnet`);

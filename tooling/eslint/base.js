@@ -4,7 +4,7 @@ module.exports = {
     ecmaVersion: 2022,
     sourceType: 'module',
   },
-  plugins: ['@typescript-eslint', 'import', 'security'],
+  plugins: ['@typescript-eslint', 'import', 'security', 'no-secrets', '@microsoft/sdl'],
   extends: [
     'eslint:recommended',
     'plugin:@typescript-eslint/recommended',
@@ -87,11 +87,38 @@ module.exports = {
     'prefer-template': 'warn', // Use template literals instead of string concatenation
     'no-nested-ternary': 'warn', // Avoid complex ternaries
 
-    // Security Rules
+    // Security Rules - Core JavaScript
     'no-eval': 'error',
     'no-implied-eval': 'error',
     'no-new-func': 'error',
     'no-script-url': 'error',
+
+    // Security Plugin Rules
+    'security/detect-object-injection': 'warn', // Many false positives, downgrade to warn
+    'security/detect-non-literal-regexp': 'warn', // Common pattern, warn instead of error
+    'security/detect-unsafe-regex': 'error', // Keep as error - can cause DoS
+    'security/detect-buffer-noassert': 'error',
+    'security/detect-child-process': 'warn', // Backend needs this sometimes
+    'security/detect-disable-mustache-escape': 'error',
+    'security/detect-eval-with-expression': 'error',
+    'security/detect-no-csrf-before-method-override': 'error',
+    'security/detect-non-literal-fs-filename': 'warn', // Backend file operations
+    'security/detect-non-literal-require': 'warn', // Dynamic imports may be needed
+    'security/detect-possible-timing-attacks': 'warn', // Can have false positives
+    'security/detect-pseudoRandomBytes': 'error', // Always use crypto.randomBytes
+
+    // No Secrets Plugin Rules
+    'no-secrets/no-secrets': ['error', { tolerance: 4.5 }], // Detect hardcoded secrets
+
+    // Microsoft SDL Plugin Rules
+    '@microsoft/sdl/no-insecure-url': 'error', // Prevent http:// URLs
+    '@microsoft/sdl/no-html-method': 'error', // Prevent .html() jQuery methods
+    '@microsoft/sdl/no-inner-html': 'warn', // Warn about innerHTML (allow with sanitization)
+    '@microsoft/sdl/no-insecure-random': 'error', // Use crypto.randomBytes instead of Math.random
+    '@microsoft/sdl/no-cookies': 'warn', // Warn about document.cookie usage
+    '@microsoft/sdl/no-document-write': 'error', // Never use document.write
+    '@microsoft/sdl/no-msapp-exec-unsafe': 'error', // Windows app security
+    '@microsoft/sdl/no-postmessage-star-origin': 'error', // Require specific origin in postMessage
   },
   settings: {
     'import/resolver': {

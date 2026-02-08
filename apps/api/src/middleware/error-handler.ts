@@ -23,7 +23,7 @@ export class AppError extends Error {
  * - Custom application errors
  * - Unknown errors
  */
-export function errorHandler(err: Error, req: Request, res: Response, next: NextFunction) {
+export function errorHandler(err: Error, req: Request, res: Response, _next: NextFunction) {
   // Log error with context using structured logging
   const errorContext = {
     error: {
