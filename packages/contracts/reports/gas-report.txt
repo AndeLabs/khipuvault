@@ -1,0 +1,1435 @@
+Compiling 40 files with Solc 0.8.25
+Solc 0.8.25 finished in 65.71s
+Compiler run successful with warnings:
+Warning (9432): "prevrandao" is not supported by the VM version and will be treated as "difficulty".
+  --> src/libraries/SecureRandomness.sol:53:26:
+   |
+53 |         uint256 randao = block.prevrandao;
+   |                          ^^^^^^^^^^^^^^^^
+
+Warning (9432): "prevrandao" is not supported by the VM version and will be treated as "difficulty".
+   --> src/libraries/SecureRandomness.sol:111:51:
+    |
+111 |         return uint256(keccak256(abi.encodePacked(block.prevrandao, block.timestamp, seed)));
+    |                                                   ^^^^^^^^^^^^^^^^
+
+Warning (9432): "prevrandao" is not supported by the VM version and will be treated as "difficulty".
+   --> src/pools/v3/LotteryPoolV3.sol:714:21:
+    |
+714 |                     block.prevrandao, // EIP-4399: Use prevrandao for additional entropy
+    |                     ^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> src/pools/v3/RotatingPool.sol:874:54:
+    |
+874 |     function _depositNativeBtcToMezo(uint256 poolId, uint256 btcAmount) internal {
+    |                                                      ^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+   --> src/pools/v3/RotatingPool.sol:875:9:
+    |
+875 |         PoolInfo storage pool = pools[poolId];
+    |         ^^^^^^^^^^^^^^^^^^^^^
+
+Warning (5667): Unused function parameter. Remove or comment out the variable name to silence this warning.
+   --> test/mocks/MockYieldAggregator.sol:374:51:
+    |
+374 |     function getUserPositionInVault(address user, address vaultAddress)
+    |                                                   ^^^^^^^^^^^^^^^^^^^^
+
+Warning (2072): Unused local variable.
+  --> test/mocks/MockStabilityPool.sol:73:9:
+   |
+73 |         uint256 oldDeposit = depositorMUSDBalance[msg.sender];
+   |         ^^^^^^^^^^^^^^^^^^
+
+Warning (2018): Function state mutability can be restricted to view
+   --> src/integrations/base/BaseMezoIntegration.sol:511:5:
+    |
+511 |     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> src/pools/v3/BasePoolV3.sol:204:5:
+    |
+204 |     function _authorizeUpgrade(address newImplementation) internal override onlyOwner {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> src/pools/v3/RotatingPool.sol:874:5:
+    |
+874 |     function _depositNativeBtcToMezo(uint256 poolId, uint256 btcAmount) internal {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/MezoIntegrationV3.t.sol:425:5:
+    |
+425 |     function test_GetUserPosition() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/SecureRandomness.t.sol:28:5:
+   |
+28 |     function test_GenerateSecureRandom_BasicUsage() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/SecureRandomness.t.sol:37:5:
+   |
+37 |     function test_GenerateSecureRandom_DifferentSeeds() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/SecureRandomness.t.sol:46:5:
+   |
+46 |     function test_GenerateSecureRandom_SameSeedProducesSameNumber() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+  --> test/SecureRandomness.t.sol:89:5:
+   |
+89 |     function test_RandomInRange_BasicUsage() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+   --> test/SecureRandomness.t.sol:108:5:
+    |
+108 |     function test_RandomInRange_MaxOne() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/SecureRandomness.t.sol:115:5:
+    |
+115 |     function test_RandomInRange_Distribution() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/SecureRandomness.t.sol:215:5:
+    |
+215 |     function test_GenerateWithCommitReveal_EmptyArray() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/SecureRandomness.t.sol:224:5:
+    |
+224 |     function test_GenerateWithCommitReveal_SingleValue() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/SecureRandomness.t.sol:234:5:
+    |
+234 |     function test_GenerateWithCommitReveal_MultipleValues() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/SecureRandomness.t.sol:246:5:
+    |
+246 |     function test_GenerateWithCommitReveal_DifferentValuesDifferentResults() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/SecureRandomness.t.sol:267:5:
+    |
+267 |     function test_SimpleRandom_BasicUsage() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/SecureRandomness.t.sol:275:5:
+    |
+275 |     function test_SimpleRandom_DifferentSeeds() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+   --> test/SecureRandomness.t.sol:487:5:
+    |
+487 |     function test_EdgeCase_MaxUint256Seed() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to pure
+   --> test/SecureRandomness.t.sol:494:5:
+    |
+494 |     function test_EdgeCase_VeryLargeMax() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/StabilityPoolStrategy.t.sol:85:5:
+   |
+85 |     function test_deployment() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+  --> test/StabilityPoolStrategy.t.sol:93:5:
+   |
+93 |     function test_initialState() public {
+   |     ^ (Relevant source part starts here and spans across multiple lines).
+
+Warning (2018): Function state mutability can be restricted to view
+   --> test/StabilityPoolStrategy.t.sol:435:5:
+    |
+435 |     function test_zeroBalance() public {
+    |     ^ (Relevant source part starts here and spans across multiple lines).
+
+
+Ran 11 tests for test/CooperativePoolV3.t.sol:CooperativePoolV3Test
+[PASS] test_CreatePool() (gas: 171660)
+[PASS] test_JoinPool() (gas: 648504)
+proptest: Saving this and future failures in cache/fuzz/failures
+proptest: If this test was run on a CI system, you may wish to add the following line to your copy of the file. (You may need to create it.)
+cc 0d2930be86b2142309f20d5149bec2b243ef73a63645e75351a147b7ab6aee0d
+[PASS] test_LeavePool() (gas: 864208)
+[PASS] test_Version() (gas: 14927)
+[PASS] test_WithdrawPartial() (gas: 784363)
+[PASS] test_WithdrawPartial_BelowMinimum() (gas: 677779)
+[PASS] test_WithdrawPartial_FullAmount() (gas: 675314)
+[PASS] test_WithdrawPartial_Multiple() (gas: 933366)
+[PASS] test_WithdrawPartial_NotMember() (gas: 203146)
+[PASS] test_WithdrawPartial_ThenAddMore() (gas: 935076)
+[PASS] test_WithdrawPartial_ZeroAmount() (gas: 668929)
+Suite result: ok. 11 passed; 0 failed; 0 skipped; finished in 9.23ms (1.63ms CPU time)
+
+Ran 2 tests for test/Counter.t.sol:CounterTest
+[PASS] testFuzz_SetNumber(uint256) (runs: 256, μ: 51552, ~: 51654)
+[PASS] test_Increment() (gas: 51458)
+Suite result: ok. 2 passed; 0 failed; 0 skipped; finished in 9.53ms (6.83ms CPU time)
+
+Ran 5 tests for test/StabilityPoolStrategyLocal.t.sol:StabilityPoolStrategyLocalTest
+[PASS] test_Deployment() (gas: 19082)
+[PASS] test_DepositMUSD_FirstDeposit() (gas: 293773)
+[PASS] test_DepositMUSD_MultipleUsers() (gas: 464324)
+[PASS] test_RevertIf_DepositBelowMinimum() (gas: 91739)
+[PASS] test_WithdrawMUSD() (gas: 355990)
+Suite result: ok. 5 passed; 0 failed; 0 skipped; finished in 14.40ms (2.02ms CPU time)
+
+Ran 29 tests for test/SecureRandomness.t.sol:SecureRandomnessTest
+[PASS] testFuzz_CalculateCommitment(uint256,address) (runs: 256, μ: 867, ~: 867)
+[PASS] testFuzz_RandomInRange(uint256,uint256) (runs: 256, μ: 4291, ~: 4201)
+[PASS] testFuzz_VerifyReveal(uint256,address,uint256) (runs: 256, μ: 4241, ~: 4241)
+[PASS] test_CalculateCommitment() (gas: 920)
+[PASS] test_CalculateCommitment_DifferentUsersDifferentCommitments() (gas: 1213)
+[PASS] test_CalculateCommitment_DifferentValuesDifferentCommitments() (gas: 1389)
+[PASS] test_CalculateCommitment_SameInputsSameOutput() (gas: 970)
+[PASS] test_EdgeCase_MaxUint256Seed() (gas: 430)
+[PASS] test_EdgeCase_VeryLargeMax() (gas: 1002)
+[PASS] test_GenerateSecureRandom_BasicUsage() (gas: 1163)
+[PASS] test_GenerateSecureRandom_DifferentBlocks() (gas: 4801)
+[PASS] test_GenerateSecureRandom_DifferentSeeds() (gas: 1360)
+[PASS] test_GenerateSecureRandom_SameSeedProducesSameNumber() (gas: 2064)
+[PASS] test_GenerateWithCommitReveal_DifferentValuesDifferentResults() (gas: 3209)
+[PASS] test_GenerateWithCommitReveal_EmptyArray() (gas: 946)
+[PASS] test_GenerateWithCommitReveal_MultipleValues() (gas: 1761)
+[PASS] test_GenerateWithCommitReveal_SingleValue() (gas: 1673)
+[PASS] test_LotterySimulation_ChiSquareTest() (gas: 1537812)
+Logs:
+  
+=== Chi-Square Test Results ===
+  Chi-Square Statistic (x1000): 4260
+  Expected per bucket: 100
+
+[PASS] test_LotterySimulation_FairDistribution() (gas: 2284611)
+Logs:
+  Running 1000 lottery simulations...
+  
+=== Lottery Simulation Results ===
+  Total Rounds: 1000
+  Total Tickets per Round: 100
+  
+  Participant 0
+    Tickets: 10
+    Expected win rate: 10
+    Wins: 94
+    Actual win rate: 9
+  Participant 1
+    Tickets: 20
+    Expected win rate: 20
+    Wins: 172
+    Actual win rate: 17
+  Participant 2
+    Tickets: 30
+    Expected win rate: 30
+    Wins: 301
+    Actual win rate: 30
+  Participant 3
+    Tickets: 25
+    Expected win rate: 25
+    Wins: 255
+    Actual win rate: 25
+  Participant 4
+    Tickets: 15
+    Expected win rate: 15
+    Wins: 178
+    Actual win rate: 17
+  
+  [PASS] All distributions within tolerance: 20
+
+[PASS] test_LotterySimulation_ManyParticipantsEqualTickets() (gas: 1543448)
+Logs:
+  Running rounds with participants:
+    Rounds: 1000
+    Participants: 100
+  Expected wins per participant: 10
+  Participants out of range: 2
+  Total participants: 100
+
+[PASS] test_RandomInRange_BasicUsage() (gas: 1177)
+[PASS] test_RandomInRange_Distribution() (gas: 1300834)
+[PASS] test_RandomInRange_MaxOne() (gas: 584)
+[PASS] test_SimpleRandom_BasicUsage() (gas: 1356)
+[PASS] test_SimpleRandom_DifferentSeeds() (gas: 1100)
+[PASS] test_SimpleRandom_SameSeedDifferentBlocks() (gas: 4448)
+[PASS] test_VerifyReveal_InvalidUser() (gas: 1230)
+[PASS] test_VerifyReveal_InvalidValue() (gas: 764)
+[PASS] test_VerifyReveal_ValidReveal() (gas: 1458)
+Suite result: ok. 29 passed; 0 failed; 0 skipped; finished in 19.73ms (33.94ms CPU time)
+
+Ran 28 tests for test/StabilityPoolStrategy.t.sol:StabilityPoolStrategyTest
+[PASS] test_claimCollateralGains() (gas: 253340)
+[PASS] test_deployment() (gas: 21819)
+[PASS] test_depositExactMinimum() (gas: 246641)
+[PASS] test_depositMinimum() (gas: 40339)
+[PASS] test_depositWhenPaused() (gas: 89922)
+[PASS] test_depositWithdrawCycle() (gas: 489398)
+[PASS] test_depositWithoutApproval() (gas: 113690)
+[PASS] test_getUserPosition() (gas: 253450)
+[PASS] test_initialState() (gas: 15384)
+[PASS] test_largeDeposit() (gas: 309016)
+[PASS] test_manySmallDeposits() (gas: 22271001)
+[PASS] test_multipleUserDeposits() (gas: 373814)
+[PASS] test_multipleUsersShareGains() (gas: 385187)
+[PASS] test_noReentrancyOnDeposit() (gas: 244283)
+[PASS] test_partialWithdraw() (gas: 319474)
+[PASS] test_pause() (gas: 65990)
+[PASS] test_pauseNonOwner() (gas: 35050)
+[PASS] test_setPerformanceFee() (gas: 43903)
+[PASS] test_setPerformanceFeeExceedsMax() (gas: 35087)
+[PASS] test_singleUserDeposit() (gas: 262709)
+[PASS] test_singleUserWithdraw() (gas: 328125)
+[PASS] test_totalMusdDeposited() (gas: 367125)
+[PASS] test_totalShares() (gas: 366815)
+[PASS] test_transferOwnership() (gas: 46928)
+[PASS] test_unpause() (gas: 91044)
+[PASS] test_withdrawInsufficientShares() (gas: 279097)
+[PASS] test_withdrawWhenPaused() (gas: 298276)
+[PASS] test_zeroBalance() (gas: 17171)
+Suite result: ok. 28 passed; 0 failed; 0 skipped; finished in 21.90ms (17.48ms CPU time)
+
+Ran 28 tests for test/LotteryPoolV3.t.sol:LotteryPoolV3Test
+[PASS] testFuzz_BuyTickets(uint8) (runs: 256, μ: 506246, ~: 510581)
+[PASS] testFuzz_CreateRound_TicketPrice(uint256) (runs: 256, μ: 178798, ~: 178800)
+[PASS] test_BuyTickets() (gas: 534633)
+[PASS] test_BuyTickets_MultipleUsers() (gas: 992983)
+[PASS] test_BuyTickets_RoundNotOpen() (gas: 192062)
+[PASS] test_BuyTickets_TooMany() (gas: 193675)
+[PASS] test_C02Fix_NonContiguousTicketPurchases() (gas: 974391)
+[PASS] test_C02Fix_NonContiguousTicketWinnerSelection() (gas: 1211500)
+[PASS] test_CancelRound() (gas: 614368)
+[PASS] test_ClaimPrize_AlreadyClaimed() (gas: 1136102)
+[PASS] test_ClaimPrize_NonWinner() (gas: 1181271)
+[PASS] test_ClaimPrize_Winner() (gas: 1139772)
+[PASS] test_ClaimRefund_CancelledRound() (gas: 675040)
+[PASS] test_CommitReveal_FullFlow() (gas: 1105680)
+[PASS] test_CommitReveal_InvalidCommitment() (gas: 744108)
+[PASS] test_CommitReveal_InvalidReveal() (gas: 833207)
+[PASS] test_CreateRound() (gas: 184067)
+[PASS] test_CreateRound_InvalidDuration() (gas: 42617)
+[PASS] test_CreateRound_InvalidTicketPrice() (gas: 42664)
+[PASS] test_CreateRound_OnlyOwner() (gas: 40139)
+[PASS] test_ForceComplete() (gas: 1043498)
+[PASS] test_GetActiveRound() (gas: 217185)
+[PASS] test_GetWinProbability() (gas: 784654)
+[PASS] test_Initialization() (gas: 63076)
+[PASS] test_Initialization_ZeroAddress() (gas: 3984847)
+[PASS] test_MultipleRounds() (gas: 275527)
+[PASS] test_SetOperator() (gas: 56598)
+[PASS] test_SingleParticipant_100Probability() (gas: 506108)
+Suite result: ok. 28 passed; 0 failed; 0 skipped; finished in 29.61ms (38.17ms CPU time)
+
+Ran 54 tests for test/YieldAggregatorV3.t.sol:YieldAggregatorV3Test
+[PASS] testFuzz_Deposit(uint256) (runs: 256, μ: 350399, ~: 350532)
+[PASS] testFuzz_MultipleDeposits(uint8) (runs: 256, μ: 663742, ~: 624803)
+[PASS] testFuzz_VaultApr(uint256) (runs: 256, μ: 154910, ~: 154944)
+[PASS] test_AddVault() (gas: 155207)
+[PASS] test_AddVault_AlreadyExists() (gas: 171979)
+[PASS] test_AddVault_MaxVaultsLimit() (gas: 1140256)
+[PASS] test_AddVault_OnlyOwner() (gas: 43400)
+[PASS] test_AddVault_ZeroAddress() (gas: 41620)
+[PASS] test_CalculateExpectedYield() (gas: 152214)
+[PASS] test_ClaimYield() (gas: 442832)
+[PASS] test_ClaimYield_NoDeposit() (gas: 47026)
+[PASS] test_ClaimYield_NoYields() (gas: 391022)
+[PASS] test_CompoundYields() (gas: 432249)
+[PASS] test_CompoundYields_NoDeposit() (gas: 47467)
+[PASS] test_Deployment() (gas: 41666)
+[PASS] test_Deposit() (gas: 385703)
+[PASS] test_DepositToVault() (gas: 339118)
+[PASS] test_DepositToVault_InactiveVault() (gas: 242324)
+[PASS] test_Deposit_MinimumAmount() (gas: 178000)
+[PASS] test_Deposit_Multiple() (gas: 537371)
+[PASS] test_Deposit_NoVaults() (gas: 72515)
+[PASS] test_Deposit_WhenDepositsPaused() (gas: 211782)
+[PASS] test_Deposit_WhenPaused() (gas: 227868)
+[PASS] test_EdgeCase_ClaimMultipleTimes() (gas: 552971)
+[PASS] test_EdgeCase_WithdrawExactAmount() (gas: 400777)
+[PASS] test_EmergencyWithdrawFromVault() (gas: 191761)
+[PASS] test_FullLifecycle() (gas: 737287)
+[PASS] test_GetActiveVaults() (gas: 379164)
+[PASS] test_GetAverageApr() (gas: 645435)
+[PASS] test_GetBestVault() (gas: 396600)
+[PASS] test_GetPendingYield() (gas: 359470)
+[PASS] test_GetTotalValueLocked() (gas: 511047)
+[PASS] test_GetUserPosition() (gas: 362969)
+[PASS] test_InitialState() (gas: 31007)
+[PASS] test_Initialize_ZeroAddress() (gas: 3646660)
+[PASS] test_MultipleUsers() (gas: 756075)
+[PASS] test_Pause() (gas: 72263)
+[PASS] test_PauseDeposits() (gas: 52678)
+[PASS] test_ResumeDeposits() (gas: 88497)
+[PASS] test_SetAuthorizedCaller() (gas: 115595)
+[PASS] test_SetEmergencyMode() (gas: 112533)
+[PASS] test_SetEmergencyMode_OnlyOwner() (gas: 41169)
+[PASS] test_SetVaultActive() (gas: 193044)
+[PASS] test_Unpause() (gas: 96833)
+[PASS] test_UpdateVaultApr() (gas: 193714)
+[PASS] test_UpdateVaultApr_VaultNotFound() (gas: 45920)
+[PASS] test_UpgradeAuthorization_NotOwner() (gas: 3233814)
+[PASS] test_UpgradeAuthorization_OnlyOwner() (gas: 3260090)
+[PASS] test_Version() (gas: 15288)
+[PASS] test_Withdraw() (gas: 425594)
+[PASS] test_WithdrawFromVault() (gas: 405726)
+[PASS] test_Withdraw_ExceedsBalance() (gas: 373920)
+[PASS] test_Withdraw_NoDeposit() (gas: 48046)
+[PASS] test_Withdraw_Partial() (gas: 430435)
+Suite result: ok. 54 passed; 0 failed; 0 skipped; finished in 50.80ms (72.69ms CPU time)
+
+Ran 47 tests for test/IndividualPoolV3.t.sol:IndividualPoolV3Test
+[PASS] testFuzz_Deposit(uint256) (runs: 256, μ: 308822, ~: 308832)
+[PASS] testFuzz_MultipleDeposits(uint8) (runs: 257, μ: 635691, ~: 511833)
+[SKIP] testFuzz_WithdrawPartial(uint256,uint256) (runs: 0, μ: 0, ~: 0)
+[SKIP] test_AutoCompound_OnDeposit() (gas: 0)
+[PASS] test_ClaimReferralRewards() (gas: 503212)
+[PASS] test_ClaimReferralRewards_NoRewards() (gas: 44750)
+[PASS] test_ClaimYield() (gas: 455718)
+[PASS] test_ClaimYield_NoYields() (gas: 330250)
+[PASS] test_ClaimYield_WithFee() (gas: 476147)
+[PASS] test_Deployment() (gas: 79064)
+[PASS] test_Deposit() (gas: 334606)
+[PASS] test_Deposit_Incremental() (gas: 460435)
+[PASS] test_Deposit_MaximumAmount() (gas: 48839)
+[PASS] test_Deposit_MaximumIncremental() (gas: 308395)
+[PASS] test_Deposit_MinimumAmount() (gas: 46327)
+[PASS] test_Deposit_ReferralOnlyFirstTime() (gas: 560790)
+[PASS] test_Deposit_WhenPaused() (gas: 100373)
+[PASS] test_Deposit_WithReferral() (gas: 461597)
+[PASS] test_Deposit_ZeroAmount() (gas: 45793)
+[SKIP] test_EdgeCase_ClaimMultipleTimes() (gas: 0)
+[PASS] test_EdgeCase_DepositExactMax() (gas: 304413)
+[PASS] test_EdgeCase_WithdrawAll() (gas: 404620)
+[SKIP] test_FullLifecycle() (gas: 0)
+[PASS] test_GetReferralStats() (gas: 648759)
+[PASS] test_GetUserInfo() (gas: 355078)
+[PASS] test_GetUserTotalBalance() (gas: 320576)
+[PASS] test_InitialState() (gas: 30268)
+[PASS] test_MultipleUsers() (gas: 871918)
+[PASS] test_Pause() (gas: 72033)
+[PASS] test_SetAutoCompound() (gas: 341026)
+[PASS] test_SetAutoCompound_NoDeposit() (gas: 40926)
+[PASS] test_SetEmergencyMode() (gas: 112320)
+[PASS] test_SetEmergencyMode_OnlyOwner() (gas: 41004)
+[PASS] test_SetFeeCollector() (gas: 56842)
+[PASS] test_SetFeeCollector_ZeroAddress() (gas: 39887)
+[PASS] test_SetPerformanceFee() (gas: 53768)
+[PASS] test_SetPerformanceFee_MaxLimit() (gas: 40439)
+[PASS] test_SetReferralBonus() (gas: 54675)
+[PASS] test_SetReferralBonus_MaxLimit() (gas: 40270)
+[PASS] test_Unpause() (gas: 96539)
+[PASS] test_Version() (gas: 15118)
+[PASS] test_WithdrawFull() (gas: 427965)
+[PASS] test_WithdrawFull_NoActiveDeposit() (gas: 47907)
+[PASS] test_WithdrawPartial() (gas: 420820)
+[SKIP] test_WithdrawPartial_BelowMinimum() (gas: 0)
+[PASS] test_WithdrawPartial_ExceedsBalance() (gas: 310572)
+[PASS] test_WithdrawPartial_MinimumAmount() (gas: 307937)
+Suite result: ok. 42 passed; 0 failed; 5 skipped; finished in 63.05ms (74.58ms CPU time)
+
+Ran 37 tests for test/MezoIntegrationV3.t.sol:MezoIntegrationV3Test
+[PASS] testFuzz_DepositAndMintNative(uint256) (runs: 256, μ: 264119, ~: 264163)
+[PASS] testFuzz_SetTargetLtv(uint256) (runs: 256, μ: 57920, ~: 57983)
+[PASS] test_BurnAndWithdraw() (gas: 342514)
+[PASS] test_BurnAndWithdraw_CloseTrove() (gas: 349781)
+[PASS] test_BurnAndWithdraw_InsufficientBalance() (gas: 52677)
+[PASS] test_BurnAndWithdraw_InvalidAmount() (gas: 50114)
+[PASS] test_Deployment() (gas: 75427)
+[PASS] test_DepositAndMintNative() (gas: 299034)
+[PASS] test_DepositAndMintNative_MinimumAmount() (gas: 59252)
+[PASS] test_DepositAndMintNative_Multiple() (gas: 389780)
+[PASS] test_DepositAndMintNative_WhenPaused() (gas: 106286)
+[PASS] test_DepositAndMint_RevertsWithMessage() (gas: 16778)
+[PASS] test_EdgeCase_PriceFeedFailure() (gas: 92896)
+[PASS] test_EdgeCase_PriceFeedReverts() (gas: 92568)
+[PASS] test_EdgeCase_ReceiveNativeBTC() (gas: 43731)
+[PASS] test_FullLifecycle() (gas: 397176)
+[PASS] test_GetCollateralRatio() (gas: 298376)
+[PASS] test_GetCollateralRatio_NoDebt() (gas: 37287)
+[PASS] test_GetUserPosition() (gas: 16283)
+[PASS] test_InitialState() (gas: 46216)
+[PASS] test_Initialize_ZeroAddress() (gas: 3095216)
+[PASS] test_IsPositionHealthy() (gas: 299625)
+[PASS] test_MultipleUsers() (gas: 626554)
+[PASS] test_Pause() (gas: 71978)
+[PASS] test_SetEmergencyMode() (gas: 72507)
+[PASS] test_SetEmergencyMode_OnlyOwner() (gas: 40848)
+[PASS] test_SetMaxFeePercentage() (gas: 57387)
+[PASS] test_SetMaxFeePercentage_OnlyOwner() (gas: 40502)
+[PASS] test_SetMaxFeePercentage_TooHigh() (gas: 39899)
+[PASS] test_SetTargetLtv() (gas: 56483)
+[PASS] test_SetTargetLtv_OnlyOwner() (gas: 41050)
+[PASS] test_SetTargetLtv_TooHigh() (gas: 40592)
+[PASS] test_SetTargetLtv_ZeroInvalid() (gas: 39941)
+[PASS] test_Unpause() (gas: 96754)
+[PASS] test_UpgradeAuthorization_NotOwner() (gas: 2672855)
+[PASS] test_UpgradeAuthorization_OnlyOwner() (gas: 2699251)
+[PASS] test_Version() (gas: 15138)
+Suite result: ok. 37 passed; 0 failed; 0 skipped; finished in 63.06ms (28.36ms CPU time)
+
+Ran 40 tests for test/RotatingPool.t.sol:RotatingPoolTest
+[FAIL: PoolNotActive()] testRevert_ClaimRefund_PoolNotCancelled() (gas: 648260)
+Traces:
+  [648260] RotatingPoolTest::testRevert_ClaimRefund_PoolNotCancelled()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [595599] RotatingPool::createPool("Active Pool", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Active Pool", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33171] RotatingPool::makeContribution(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] PoolNotActive()
+
+[PASS] testRevert_ContributeWhenPaused() (gas: 691362)
+[PASS] testRevert_CreatePool_InvalidContribution() (gas: 65712)
+[PASS] testRevert_CreatePool_InvalidMemberCount() (gas: 65932)
+[PASS] testRevert_CreatePool_InvalidPeriodDuration() (gas: 66040)
+[FAIL: PoolNotActive()] testRevert_FlashLoan_SameBlockWithdrawal() (gas: 648296)
+Traces:
+  [648296] RotatingPoolTest::testRevert_FlashLoan_SameBlockWithdrawal()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [595587] RotatingPool::createPool("Flash Test", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Flash Test", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33171] RotatingPool::makeContribution(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] PoolNotActive()
+
+[FAIL: Error != expected error: PoolFull() != PoolNotForming()] testRevert_JoinPool_AlreadyActive() (gas: 654134)
+Traces:
+  [654134] RotatingPoolTest::testRevert_JoinPool_AlreadyActive()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [595515] RotatingPool::createPool("Test", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Test", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member4: [0xCbB27fd0bFbA64828063F11222AF8E8fe899D6CD])
+    │   └─ ← [Return]
+    ├─ [0] VM::expectRevert(custom error 0xc31eb0e0: 4eb0513e00000000000000000000000000000000000000000000000000000000)
+    │   └─ ← [Return]
+    ├─ [37309] RotatingPool::joinPool(1)
+    │   └─ ← [Revert] PoolFull()
+    └─ ← [Revert] Error != expected error: PoolFull() != PoolNotForming()
+
+[PASS] testRevert_JoinPool_AlreadyMember() (gas: 433173)
+[PASS] testRevert_JoinPool_InvalidPoolId() (gas: 42283)
+[PASS] testRevert_JoinPool_PoolFull() (gas: 754850)
+[FAIL: Error != expected error: PoolNotActive() != InvalidAmount()] testRevert_MakeContributionNative_WrongAmount() (gas: 674832)
+Traces:
+  [674832] RotatingPoolTest::testRevert_MakeContributionNative_WrongAmount()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [615571] RotatingPool::createPool("Native BTC ROSCA", 3, 10000000000000000 [1e16], 604800 [6.048e5], true, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Native BTC ROSCA", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [0] VM::expectRevert(custom error 0xc31eb0e0: 2c5211c600000000000000000000000000000000000000000000000000000000)
+    │   └─ ← [Return]
+    ├─ [33511] RotatingPool::makeContributionNative{value: 11000000000000000}(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] Error != expected error: PoolNotActive() != InvalidAmount()
+
+[FAIL: Error != expected error: PoolNotActive() != WrongContributionMode()] testRevert_MakeContributionNative_WrongMode() (gas: 656127)
+Traces:
+  [656127] RotatingPoolTest::testRevert_MakeContributionNative_WrongMode()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [595587] RotatingPool::createPool("WBTC ROSCA", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "WBTC ROSCA", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [0] VM::expectRevert(custom error 0xc31eb0e0: 8fdba5f400000000000000000000000000000000000000000000000000000000)
+    │   └─ ← [Return]
+    ├─ [33511] RotatingPool::makeContributionNative{value: 10000000000000000}(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] Error != expected error: PoolNotActive() != WrongContributionMode()
+
+[FAIL: Error != expected error: PoolNotActive() != WrongContributionMode()] testRevert_MakeContribution_WBTC_WrongMode() (gas: 667993)
+Traces:
+  [667993] RotatingPoolTest::testRevert_MakeContribution_WBTC_WrongMode()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [615571] RotatingPool::createPool("Native BTC ROSCA", 3, 10000000000000000 [1e16], 604800 [6.048e5], true, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Native BTC ROSCA", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [0] VM::expectRevert(custom error 0xc31eb0e0: 8fdba5f400000000000000000000000000000000000000000000000000000000)
+    │   └─ ← [Return]
+    ├─ [33171] RotatingPool::makeContribution(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] Error != expected error: PoolNotActive() != WrongContributionMode()
+
+[PASS] testRevert_SetPerformanceFee_TooHigh() (gas: 35422)
+[FAIL: PoolNotActive()] test_AdvancePeriod_Manual() (gas: 647641)
+Traces:
+  [647641] RotatingPoolTest::test_AdvancePeriod_Manual()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [595635] RotatingPool::createPool("Manual Advance", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Manual Advance", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33171] RotatingPool::makeContribution(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] PoolNotActive()
+
+[FAIL: PoolNotActive()] test_ClaimPayout_NativeBTC() (gas: 675400)
+Traces:
+  [675400] RotatingPoolTest::test_ClaimPayout_NativeBTC()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [615535] RotatingPool::createPool("Native Payout", 3, 10000000000000000 [1e16], 604800 [6.048e5], true, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Native Payout", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33511] RotatingPool::makeContributionNative{value: 10000000000000000}(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] PoolNotActive()
+
+[FAIL: PoolNotActive()] test_ClaimPayout_WBTC() (gas: 648565)
+Traces:
+  [648565] RotatingPoolTest::test_ClaimPayout_WBTC()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [595599] RotatingPool::createPool("WBTC Payout", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "WBTC Payout", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33171] RotatingPool::makeContribution(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] PoolNotActive()
+
+[FAIL: PoolNotActive()] test_ClaimRefund_AfterCancellation() (gas: 647283)
+Traces:
+  [647283] RotatingPoolTest::test_ClaimRefund_AfterCancellation()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [595599] RotatingPool::createPool("Refund Test", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Refund Test", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33171] RotatingPool::makeContribution(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] PoolNotActive()
+
+[PASS] test_CreatePool_NativeBTC_Mode() (gas: 286810)
+[PASS] test_CreatePool_WBTC_Mode() (gas: 280327)
+[PASS] test_CreatePool_WithPredefinedMembers() (gas: 879764)
+[PASS] test_Deployment() (gas: 39105)
+[PASS] test_DeploymentConstants() (gas: 12493)
+[PASS] test_GetPoolMemberOrder() (gas: 630598)
+[PASS] test_GetPoolMembers() (gas: 632408)
+[FAIL: Error != expected error: PoolNotActive() != WrongContributionMode()] test_H01_Fix_CannotHijackNativePool() (gas: 668159)
+Traces:
+  [668159] RotatingPoolTest::test_H01_Fix_CannotHijackNativePool()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [615451] RotatingPool::createPool("Native", 3, 10000000000000000 [1e16], 604800 [6.048e5], true, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Native", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [0] VM::expectRevert(custom error 0xc31eb0e0: 8fdba5f400000000000000000000000000000000000000000000000000000000)
+    │   └─ ← [Return]
+    ├─ [33171] RotatingPool::makeContribution(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] Error != expected error: PoolNotActive() != WrongContributionMode()
+
+[FAIL: Error != expected error: PoolNotActive() != WrongContributionMode()] test_H01_Fix_CannotHijackWBTCPool() (gas: 655908)
+Traces:
+  [655908] RotatingPoolTest::test_H01_Fix_CannotHijackWBTCPool()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [595515] RotatingPool::createPool("WBTC", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "WBTC", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [0] VM::expectRevert(custom error 0xc31eb0e0: 8fdba5f400000000000000000000000000000000000000000000000000000000)
+    │   └─ ← [Return]
+    ├─ [33511] RotatingPool::makeContributionNative{value: 10000000000000000}(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] Error != expected error: PoolNotActive() != WrongContributionMode()
+
+[PASS] test_H01_Fix_ModeSetAtCreation() (gas: 526834)
+[FAIL: PoolNotActive()] test_H02_Fix_BalanceCheckBeforePayout() (gas: 675473)
+Traces:
+  [675473] RotatingPoolTest::test_H02_Fix_BalanceCheckBeforePayout()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [615451] RotatingPool::createPool("Native", 3, 10000000000000000 [1e16], 604800 [6.048e5], true, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Native", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33511] RotatingPool::makeContributionNative{value: 10000000000000000}(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] PoolNotActive()
+
+[FAIL: PoolNotActive()] test_H02_Fix_BalanceCheckBeforeRefund() (gas: 675092)
+Traces:
+  [675092] RotatingPoolTest::test_H02_Fix_BalanceCheckBeforeRefund()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [615451] RotatingPool::createPool("Native", 3, 10000000000000000 [1e16], 604800 [6.048e5], true, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Native", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33511] RotatingPool::makeContributionNative{value: 10000000000000000}(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] PoolNotActive()
+
+[PASS] test_JoinPool() (gas: 411436)
+[FAIL: log != expected log] test_JoinPool_MultipleMembers_PoolStarts() (gas: 724077)
+Traces:
+  [724077] RotatingPoolTest::test_JoinPool_MultipleMembers_PoolStarts()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [223011] RotatingPool::createPool("Test", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Test", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [157707] RotatingPool::joinPool(1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   └─ ← [Stop]
+    ├─ [0] VM::prank(Member2: [0xbD405055317EF6089a771008453365060BB97aC1])
+    │   └─ ← [Return]
+    ├─ [160507] RotatingPool::joinPool(1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   └─ ← [Stop]
+    ├─ [0] VM::expectEmit(true, false, false, true)
+    │   └─ ← [Return]
+    ├─ emit PoolStarted(poolId: 1, startTime: 1)
+    ├─ [0] VM::prank(Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   └─ ← [Return]
+    ├─ [160507] RotatingPool::joinPool(1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Stop]
+    └─ ← [Revert] log != expected log
+
+[FAIL: log != expected log] test_MakeContributionNative() (gas: 677261)
+Traces:
+  [677261] RotatingPoolTest::test_MakeContributionNative()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [615571] RotatingPool::createPool("Native BTC ROSCA", 3, 10000000000000000 [1e16], 604800 [6.048e5], true, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Native BTC ROSCA", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::expectEmit(true, true, false, true)
+    │   └─ ← [Return]
+    ├─ emit ContributionMade(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], periodNumber: 0, amount: 10000000000000000 [1e16])
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33511] RotatingPool::makeContributionNative{value: 10000000000000000}(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] log != expected log
+
+[FAIL: log != expected log] test_MakeContribution_WBTC() (gas: 650779)
+Traces:
+  [650779] RotatingPoolTest::test_MakeContribution_WBTC()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [595587] RotatingPool::createPool("WBTC ROSCA", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "WBTC ROSCA", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::expectEmit(true, true, false, true)
+    │   └─ ← [Return]
+    ├─ emit ContributionMade(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], periodNumber: 0, amount: 10000000000000000 [1e16])
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33171] RotatingPool::makeContribution(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] log != expected log
+
+[PASS] test_Pause() (gas: 61947)
+[FAIL: PoolNotActive()] test_PeriodAutoCompletesAfterAllContributions() (gas: 648193)
+Traces:
+  [648193] RotatingPoolTest::test_PeriodAutoCompletesAfterAllContributions()
+    ├─ [0] VM::prank(owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266])
+    │   └─ ← [Return]
+    ├─ [595623] RotatingPool::createPool("Auto Complete", 3, 10000000000000000 [1e16], 604800 [6.048e5], false, [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa, 0xbD405055317EF6089a771008453365060BB97aC1, 0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd])
+    │   ├─ emit PoolCreated(poolId: 1, creator: owner: [0x7c8999dC9a822c1f0Df42023113EDB4FDd543266], name: "Auto Complete", minContribution: 3, maxMembers: 10000000000000000 [1e16], timestamp: 604800 [6.048e5])
+    │   ├─ emit MemberJoined(poolId: 1, member: Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa], memberIndex: 0)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member2: [0xbD405055317EF6089a771008453365060BB97aC1], memberIndex: 1)
+    │   ├─ emit MemberJoined(poolId: 1, member: Member3: [0xeb1b36D046AC9d13E7547cd936D135fd9e8542Cd], memberIndex: 2)
+    │   └─ ← [Return] 1
+    ├─ [0] VM::prank(Member1: [0x86fEa303737F5219d7b5E4f30Cb7268Bec1775Fa])
+    │   └─ ← [Return]
+    ├─ [33171] RotatingPool::makeContribution(1)
+    │   └─ ← [Revert] PoolNotActive()
+    └─ ← [Revert] PoolNotActive()
+
+[PASS] test_ReceiveNativeBTC() (gas: 34993)
+[PASS] test_SetFeeCollector() (gas: 47158)
+[PASS] test_SetPerformanceFee() (gas: 43736)
+[PASS] test_Unpause() (gas: 81696)
+Suite result: FAILED. 22 passed; 18 failed; 0 skipped; finished in 63.11ms (5.18ms CPU time)
+
+╭----------------------------------+-----------------+-------+--------+-------+---------╮
+| src/Counter.sol:Counter Contract |                 |       |        |       |         |
++=======================================================================================+
+| Deployment Cost                  | Deployment Size |       |        |       |         |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+| 134909                           | 406             |       |        |       |         |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+|                                  |                 |       |        |       |         |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                    | Min             | Avg   | Median | Max   | # Calls |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+| increment                        | 43376           | 43376 | 43376  | 43376 | 1       |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+| number                           | 2277            | 2277  | 2277   | 2277  | 257     |
+|----------------------------------+-----------------+-------+--------+-------+---------|
+| setNumber                        | 23539           | 43273 | 43523  | 43823 | 258     |
+╰----------------------------------+-----------------+-------+--------+-------+---------╯
+
+╭----------------------------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/integrations/v3/MezoIntegrationV3.sol:MezoIntegrationV3 Contract |                 |        |        |        |         |
++=============================================================================================================================+
+| Deployment Cost                                                      | Deployment Size |        |        |        |         |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 2593979                                                              | 11952           |        |        |        |         |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                                      |                 |        |        |        |         |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                                        | Min             | Avg    | Median | Max    | # Calls |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| BORROWER_OPERATIONS                                                  | 2995            | 2995   | 2995   | 2995   | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| HINT_HELPERS                                                         | 3172            | 3172   | 3172   | 3172   | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MUSD_TOKEN                                                           | 2442            | 2442   | 2442   | 2442   | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| PRICE_FEED                                                           | 2467            | 2467   | 2467   | 2467   | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| TROVE_MANAGER                                                        | 3038            | 3038   | 3038   | 3038   | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| burnAndWithdraw                                                      | 12294           | 64602  | 98739  | 98739  | 5       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| depositAndMint                                                       | 558             | 558    | 558    | 558    | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| depositAndMintNative                                                 | 7599            | 194728 | 198075 | 198075 | 271     |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| emergencyMode                                                        | 2286            | 2286   | 2286   | 2286   | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getCollateralRatio                                                   | 2673            | 9279   | 9279   | 15886  | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getUserPosition                                                      | 3000            | 3000   | 3000   | 3000   | 5       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| initialize                                                           | 23131           | 268766 | 275405 | 275405 | 38      |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| isPositionHealthy                                                    | 16701           | 16701  | 16701  | 16701  | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| maxFeePercentage                                                     | 3144            | 3144   | 3144   | 3144   | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| owner                                                                | 2951            | 2951   | 2951   | 2951   | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| pause                                                                | 26224           | 26224  | 26224  | 26224  | 3       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| paused                                                               | 2759            | 2759   | 2759   | 2759   | 3       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| proxiableUUID                                                        | 604             | 604    | 604    | 604    | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| receive                                                              | 83              | 83     | 83     | 83     | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setEmergencyMode                                                     | 3226            | 14785  | 14785  | 26344  | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setMaxFeePercentage                                                  | 3076            | 5184   | 3087   | 9389   | 3       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setTargetLtv                                                         | 3032            | 9301   | 9385   | 9385   | 260     |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| targetLtv                                                            | 3210            | 3210   | 3210   | 3210   | 258     |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| totalBtcDeposited                                                    | 2417            | 2417   | 2417   | 2417   | 259     |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| totalMusdMinted                                                      | 2791            | 2791   | 2791   | 2791   | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| unpause                                                              | 8658            | 8658   | 8658   | 8658   | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| upgradeToAndCall                                                     | 3304            | 7292   | 7292   | 11281  | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| version                                                              | 950             | 950    | 950    | 950    | 1       |
+╰----------------------------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭----------------------------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/integrations/v3/YieldAggregatorV3.sol:YieldAggregatorV3 Contract |                 |        |        |        |         |
++=============================================================================================================================+
+| Deployment Cost                                                      | Deployment Size |        |        |        |         |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 3154112                                                              | 14541           |        |        |        |         |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                                      |                 |        |        |        |         |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                                        | Min             | Avg    | Median | Max    | # Calls |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MUSD_TOKEN                                                           | 2475            | 2475   | 2475   | 2475   | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| addVault                                                             | 3397            | 96704  | 97450  | 97450  | 817     |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| authorizedCallers                                                    | 2806            | 2806   | 2806   | 2806   | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| calculateExpectedYield                                               | 7266            | 7266   | 7266   | 7266   | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| claimYield                                                           | 9825            | 40237  | 49107  | 49107  | 7       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| compoundYields                                                       | 10589           | 35391  | 47792  | 47792  | 3       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| deposit                                                              | 8227            | 109799 | 70294  | 176289 | 1414    |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| depositToVault                                                       | 34707           | 138690 | 168961 | 168961 | 5       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| depositsPaused                                                       | 2792            | 2792   | 2792   | 2792   | 3       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| emergencyMode                                                        | 2314            | 2314   | 2314   | 2314   | 3       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| emergencyWithdrawFromVault                                           | 12013           | 12013  | 12013  | 12013  | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getActiveVaults                                                      | 9491            | 9491   | 9491   | 9491   | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getAverageApr                                                        | 23601           | 23601  | 23601  | 23601  | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getBestVault                                                         | 30965           | 30965  | 30965  | 30965  | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getPendingYield                                                      | 16937           | 16937  | 16937  | 16937  | 4       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getTotalValueLocked                                                  | 3110            | 3110   | 3110   | 3110   | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getUserPosition                                                      | 19162           | 19162  | 19162  | 19162  | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getVaultInfo                                                         | 8497            | 8497   | 8497   | 8497   | 260     |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| initialize                                                           | 23605           | 94760  | 96078  | 96078  | 55      |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| owner                                                                | 2940            | 2940   | 2940   | 2940   | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| pause                                                                | 26213           | 26213  | 26213  | 26213  | 3       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| pauseDeposits                                                        | 7313            | 7313   | 7313   | 7313   | 3       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| paused                                                               | 2770            | 2770   | 2770   | 2770   | 3       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| proxiableUUID                                                        | 571             | 571    | 571    | 571    | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| resumeDeposits                                                       | 8011            | 8011   | 8011   | 8011   | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setAuthorizedCaller                                                  | 7833            | 16383  | 16383  | 24933  | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setEmergencyMode                                                     | 3281            | 25702  | 26408  | 26408  | 57      |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setVaultActive                                                       | 12031           | 12031  | 12031  | 12031  | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| totalValueLocked                                                     | 3331            | 3331   | 3331   | 3331   | 3       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| totalYieldGenerated                                                  | 2912            | 2912   | 2912   | 2912   | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| unpause                                                              | 8625            | 8625   | 8625   | 8625   | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| updateVaultApr                                                       | 5170            | 8561   | 8561   | 11953  | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| upgradeToAndCall                                                     | 3249            | 7152   | 7152   | 11055  | 2       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| userTotalDeposited                                                   | 3192            | 3192   | 3192   | 3192   | 523     |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| version                                                              | 961             | 961    | 961    | 961    | 1       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| withdraw                                                             | 9756            | 47826  | 62486  | 65279  | 7       |
+|----------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| withdrawFromVault                                                    | 60798           | 60798  | 60798  | 60798  | 1       |
+╰----------------------------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭-------------------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/pools/v3/IndividualPoolV3.sol:IndividualPoolV3 Contract |                 |        |        |        |         |
++====================================================================================================================+
+| Deployment Cost                                             | Deployment Size |        |        |        |         |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 3066131                                                     | 14146           |        |        |        |         |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                             |                 |        |        |        |         |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                               | Min             | Avg    | Median | Max    | # Calls |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MUSD                                                        | 2497            | 2497   | 2497   | 2497   | 1       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| YIELD_AGGREGATOR                                            | 2874            | 2874   | 2874   | 2874   | 1       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| claimReferralRewards                                        | 7407            | 21306  | 21306  | 35206  | 2       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| claimYield                                                  | 31619           | 140889 | 178681 | 212368 | 3       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| deposit                                                     | 8096            | 211115 | 142349 | 319121 | 1349    |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| depositWithReferral                                         | 127014          | 341960 | 433791 | 433791 | 7       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| emergencyMode                                               | 2308            | 2308   | 2308   | 2308   | 3       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| feeCollector                                                | 3094            | 3094   | 3094   | 3094   | 2       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getReferralStats                                            | 6889            | 6889   | 6889   | 6889   | 6       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getUserInfo                                                 | 8391            | 27496  | 27444  | 43621  | 524     |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getUserTotalBalance                                         | 43091           | 43091  | 43091  | 43091  | 1       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| initialize                                                  | 184797          | 184797 | 184797 | 184797 | 47      |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| owner                                                       | 2852            | 2852   | 2852   | 2852   | 1       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| pause                                                       | 26103           | 26103  | 26103  | 26103  | 3       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| paused                                                      | 2682            | 2682   | 2682   | 2682   | 3       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| performanceFee                                              | 2824            | 2824   | 2824   | 2824   | 2       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| referralBonus                                               | 3110            | 3110   | 3110   | 3110   | 2       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setAutoCompound                                             | 2944            | 5826   | 7267   | 7267   | 3       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setEmergencyMode                                            | 3171            | 25165  | 26289  | 26289  | 51      |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setFeeCollector                                             | 3072            | 6229   | 6229   | 9386   | 2       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setPerformanceFee                                           | 2790            | 5941   | 5941   | 9092   | 2       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setReferralBonus                                            | 2966            | 6117   | 6117   | 9268   | 2       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| totalMusdDeposited                                          | 2912            | 2912   | 2912   | 2912   | 3       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| totalReferralRewards                                        | 2956            | 2956   | 2956   | 2956   | 1       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| totalYieldsGenerated                                        | 2516            | 2516   | 2516   | 2516   | 1       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| unpause                                                     | 8559            | 8559   | 8559   | 8559   | 1       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| version                                                     | 873             | 873    | 873    | 873    | 1       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| withdraw                                                    | 9712            | 117175 | 170907 | 170907 | 3       |
+|-------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| withdrawPartial                                             | 9685            | 43030  | 11826  | 107581 | 3       |
+╰-------------------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭-------------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/pools/v3/LotteryPoolV3.sol:LotteryPoolV3 Contract |                 |        |        |        |         |
++==============================================================================================================+
+| Deployment Cost                                       | Deployment Size |        |        |        |         |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 3753731                                               | 17349           |        |        |        |         |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                       |                 |        |        |        |         |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                         | Min             | Avg    | Median | Max    | # Calls |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| FORCE_COMPLETE_DELAY                                  | 247             | 247    | 247    | 247    | 1       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MUSD                                                  | 2630            | 2630   | 2630   | 2630   | 1       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| buyTickets                                            | 14527           | 390908 | 404494 | 404494 | 287     |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| cancelRound                                           | 101716          | 101716 | 101716 | 101716 | 2       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| claimPrize                                            | 19314           | 52224  | 62846  | 63892  | 4       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| claimRefund                                           | 54766           | 54766  | 54766  | 54766  | 1       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| createRound                                           | 2549            | 109215 | 109840 | 109840 | 536     |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| currentRoundId                                        | 3020            | 3020   | 3020   | 3020   | 3       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| feeCollector                                          | 3224            | 3224   | 3224   | 3224   | 1       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| forceComplete                                         | 310328          | 310328 | 310328 | 310328 | 1       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getActiveRound                                        | 2368            | 15426  | 21954  | 21958  | 3       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getParticipant                                        | 5288            | 5288   | 5288   | 5288   | 259     |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getParticipants                                       | 10424           | 10424  | 10424  | 10424  | 1       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getRound                                              | 21115           | 21115  | 21115  | 21115  | 268     |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getWinProbability                                     | 24560           | 24560  | 24560  | 24560  | 5       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| initialize                                            | 24170           | 179553 | 185103 | 185103 | 29      |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| operator                                              | 2718            | 2718   | 2718   | 2718   | 2       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| owner                                                 | 2938            | 2938   | 2938   | 2938   | 1       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| paused                                                | 2768            | 2768   | 2768   | 2768   | 1       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| revealSeed                                            | 16617           | 239341 | 280980 | 295509 | 6       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setOperator                                           | 9760            | 9760   | 9760   | 9760   | 1       |
+|-------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| submitCommitment                                      | 12203           | 49502  | 55719  | 55719  | 7       |
+╰-------------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭-----------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/pools/v3/RotatingPool.sol:RotatingPool Contract |                 |        |        |        |         |
++============================================================================================================+
+| Deployment Cost                                     | Deployment Size |        |        |        |         |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 3535368                                             | 16480           |        |        |        |         |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                     |                 |        |        |        |         |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                       | Min             | Avg    | Median | Max    | # Calls |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MAX_CONTRIBUTION                                    | 749             | 749    | 749    | 749    | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MAX_MEMBERS                                         | 1101            | 1101   | 1101   | 1101   | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MAX_PERIOD_DURATION                                 | 617             | 617    | 617    | 617    | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MEZO_INTEGRATION                                    | 1148            | 1148   | 1148   | 1148   | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MIN_CONTRIBUTION                                    | 375             | 375    | 375    | 375    | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MIN_MEMBERS                                         | 1035            | 1035   | 1035   | 1035   | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MIN_PERIOD_DURATION                                 | 150             | 150    | 150    | 150    | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MUSD                                                | 403             | 403    | 403    | 403    | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| WBTC                                                | 425             | 425    | 425    | 425    | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| YIELD_AGGREGATOR                                    | 777             | 777    | 777    | 777    | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| createPool                                          | 25961           | 417435 | 595587 | 615571 | 35      |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| feeCollector                                        | 3078            | 3078   | 3078   | 3078   | 2       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getPoolMembers                                      | 10234           | 10234  | 10234  | 10234  | 2       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| joinPool                                            | 30874           | 118159 | 157707 | 160507 | 12      |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| makeContribution                                    | 28690           | 32722  | 33171  | 33171  | 10      |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| makeContributionNative                              | 33511           | 33511  | 33511  | 33511  | 7       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| owner                                               | 2836            | 2836   | 2836   | 2836   | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| pause                                               | 47151           | 47151  | 47151  | 47151  | 3       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| paused                                              | 2578            | 2578   | 2578   | 2578   | 3       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| performanceFee                                      | 2786            | 2786   | 2786   | 2786   | 2       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| poolCounter                                         | 2896            | 2896   | 2896   | 2896   | 2       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| poolMemberOrder                                     | 2633            | 2633   | 2633   | 2633   | 3       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| poolMembers                                         | 15600           | 15600  | 15600  | 15600  | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| pools                                               | 31497           | 31497  | 31497  | 31497  | 6       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| receive                                             | 22479           | 22479  | 22479  | 22479  | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setFeeCollector                                     | 31024           | 31024  | 31024  | 31024  | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setPerformanceFee                                   | 23925           | 27066  | 27066  | 30207  | 2       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| startPool                                           | 175951          | 175951 | 175951 | 175951 | 1       |
+|-----------------------------------------------------+-----------------+--------+--------+--------+---------|
+| unpause                                             | 24794           | 24794  | 24794  | 24794  | 1       |
+╰-----------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭--------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/proxy/UUPSProxy.sol:UUPSProxy Contract |                 |        |        |        |         |
++===================================================================================================+
+| Deployment Cost                            | Deployment Size |        |        |        |         |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| 367565                                     | 1788            |        |        |        |         |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                            |                 |        |        |        |         |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                              | Min             | Avg    | Median | Max    | # Calls |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| fallback                                   | 5186            | 115537 | 122449 | 504983 | 7795    |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| initialize                                 | 50759           | 50759  | 50759  | 50759  | 1       |
+|--------------------------------------------+-----------------+--------+--------+--------+---------|
+| receive                                    | 25921           | 25921  | 25921  | 25921  | 1       |
+╰--------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| src/strategies/StabilityPoolStrategy.sol:StabilityPoolStrategy Contract |                 |        |        |        |         |
++================================================================================================================================+
+| Deployment Cost                                                         | Deployment Size |        |        |        |         |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 1732860                                                                 | 7961            |        |        |        |         |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                                         |                 |        |        |        |         |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                                           | Min             | Avg    | Median | Max    | # Calls |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| MUSD_TOKEN                                                              | 206             | 206    | 206    | 206    | 2       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| STABILITY_POOL                                                          | 228             | 228    | 228    | 228    | 2       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| depositMUSD                                                             | 29096           | 170239 | 157414 | 275985 | 128     |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| feeCollector                                                            | 2862            | 2862   | 2862   | 2862   | 1       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getTVL                                                                  | 2770            | 2770   | 2770   | 2770   | 1       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| owner                                                                   | 2705            | 2705   | 2705   | 2705   | 2       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| pause                                                                   | 23785           | 42390  | 47042  | 47042  | 5       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| paused                                                                  | 2538            | 2538   | 2538   | 2538   | 6       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| performanceFee                                                          | 2680            | 2680   | 2680   | 2680   | 3       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| positions                                                               | 8941            | 8941   | 8941   | 8941   | 5       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| setPerformanceFee                                                       | 23863           | 27008  | 27008  | 30153  | 2       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| totalMusdDeposited                                                      | 2792            | 2792   | 2792   | 2792   | 2       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| totalShares                                                             | 2372            | 2372   | 2372   | 2372   | 9       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| transferOwnership                                                       | 29002           | 29002  | 29002  | 29002  | 1       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| unpause                                                                 | 24762           | 24762  | 24762  | 24762  | 1       |
+|-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| withdrawMUSD                                                            | 33760           | 76255  | 93152  | 93739  | 5       |
+╰-------------------------------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭------------------------------------------------------------------+-----------------+------+--------+------+---------╮
+| test/StabilityPoolStrategyLocal.t.sol:MockStabilityPool Contract |                 |      |        |      |         |
++=====================================================================================================================+
+| Deployment Cost                                                  | Deployment Size |      |        |      |         |
+|------------------------------------------------------------------+-----------------+------+--------+------+---------|
+| 320366                                                           | 1264            |      |        |      |         |
+|------------------------------------------------------------------+-----------------+------+--------+------+---------|
+|                                                                  |                 |      |        |      |         |
+|------------------------------------------------------------------+-----------------+------+--------+------+---------|
+| Function Name                                                    | Min             | Avg  | Median | Max  | # Calls |
+|------------------------------------------------------------------+-----------------+------+--------+------+---------|
+| getDepositorCollateralGain                                       | 2516            | 2516 | 2516   | 2516 | 5       |
+╰------------------------------------------------------------------+-----------------+------+--------+------+---------╯
+
+╭---------------------------------------------------------------------+-----------------+--------+--------+--------+---------╮
+| test/mocks/MockCooperativePoolV3.sol:MockCooperativePoolV3 Contract |                 |        |        |        |         |
++============================================================================================================================+
+| Deployment Cost                                                     | Deployment Size |        |        |        |         |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| 3711803                                                             | 17141           |        |        |        |         |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+|                                                                     |                 |        |        |        |         |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| Function Name                                                       | Min             | Avg    | Median | Max    | # Calls |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| createPool                                                          | 125530          | 125530 | 125530 | 125530 | 10      |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| getMemberInfo                                                       | 7201            | 7201   | 7201   | 7201   | 7       |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| initialize                                                          | 184919          | 184919 | 184919 | 184919 | 11      |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| joinPool                                                            | 185157          | 484075 | 521440 | 521440 | 9       |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| leavePool                                                           | 330389          | 330389 | 330389 | 330389 | 1       |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| poolCounter                                                         | 2874            | 2874   | 2874   | 2874   | 1       |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| receive                                                             | 67              | 67     | 67     | 67     | 5       |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| version                                                             | 836             | 836    | 836    | 836    | 1       |
+|---------------------------------------------------------------------+-----------------+--------+--------+--------+---------|
+| withdrawPartial                                                     | 5674            | 100551 | 102469 | 190461 | 8       |
+╰---------------------------------------------------------------------+-----------------+--------+--------+--------+---------╯
+
+╭---------------------------------------------+-----------------+-------+--------+-------+---------╮
+| test/mocks/MockERC20.sol:MockERC20 Contract |                 |       |        |       |         |
++==================================================================================================+
+| Deployment Cost                             | Deployment Size |       |        |       |         |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| 752265                                      | 4022            |       |        |       |         |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                             |                 |       |        |       |         |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                               | Min             | Avg   | Median | Max   | # Calls |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| approve                                     | 45969           | 45971 | 45969  | 45981 | 5       |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| balanceOf                                   | 2536            | 2536  | 2536   | 2536  | 2       |
+|---------------------------------------------+-----------------+-------+--------+-------+---------|
+| mint                                        | 51048           | 59598 | 59598  | 68148 | 10      |
+╰---------------------------------------------+-----------------+-------+--------+-------+---------╯
+
+╭-------------------------------------------+-----------------+-------+--------+-------+---------╮
+| test/mocks/MockMUSD.sol:MockMUSD Contract |                 |       |        |       |         |
++================================================================================================+
+| Deployment Cost                           | Deployment Size |       |        |       |         |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+| 859183                                    | 4263            |       |        |       |         |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                           |                 |       |        |       |         |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                             | Min             | Avg   | Median | Max   | # Calls |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+| approve                                   | 28863           | 46196 | 46263  | 46263 | 730     |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+| balanceOf                                 | 2533            | 2533  | 2533   | 2533  | 36      |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+| mint                                      | 36084           | 58107 | 53196  | 70296 | 848     |
+╰-------------------------------------------+-----------------+-------+--------+-------+---------╯
+
+╭-------------------------------------------------------------+-----------------+------+--------+------+---------╮
+| test/mocks/MockStabilityPool.sol:MockStabilityPool Contract |                 |      |        |      |         |
++================================================================================================================+
+| Deployment Cost                                             | Deployment Size |      |        |      |         |
+|-------------------------------------------------------------+-----------------+------+--------+------+---------|
+| 1046669                                                     | 4269            |      |        |      |         |
+|-------------------------------------------------------------+-----------------+------+--------+------+---------|
+|                                                             |                 |      |        |      |         |
+|-------------------------------------------------------------+-----------------+------+--------+------+---------|
+| Function Name                                               | Min             | Avg  | Median | Max  | # Calls |
+|-------------------------------------------------------------+-----------------+------+--------+------+---------|
+| getDepositorCollateralGain                                  | 2632            | 2632 | 2632   | 2632 | 124     |
+|-------------------------------------------------------------+-----------------+------+--------+------+---------|
+| getDepositorMUSDBalance                                     | 2456            | 2456 | 2456   | 2456 | 2       |
+╰-------------------------------------------------------------+-----------------+------+--------+------+---------╯
+
+╭-------------------------------------------+-----------------+-------+--------+-------+---------╮
+| test/mocks/MockWBTC.sol:MockWBTC Contract |                 |       |        |       |         |
++================================================================================================+
+| Deployment Cost                           | Deployment Size |       |        |       |         |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+| 859307                                    | 4270            |       |        |       |         |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                           |                 |       |        |       |         |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                             | Min             | Avg   | Median | Max   | # Calls |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+| approve                                   | 46263           | 46263 | 46263  | 46263 | 160     |
+|-------------------------------------------+-----------------+-------+--------+-------+---------|
+| mint                                      | 53172           | 57447 | 53172  | 70272 | 160     |
+╰-------------------------------------------+-----------------+-------+--------+-------+---------╯
+
+╭-----------------------------------------------------------------+-----------------+-------+--------+-------+---------╮
+| test/mocks/MockYieldAggregator.sol:MockYieldAggregator Contract |                 |       |        |       |         |
++======================================================================================================================+
+| Deployment Cost                                                 | Deployment Size |       |        |       |         |
+|-----------------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| 2186302                                                         | 9833            |       |        |       |         |
+|-----------------------------------------------------------------+-----------------+-------+--------+-------+---------|
+|                                                                 |                 |       |        |       |         |
+|-----------------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| Function Name                                                   | Min             | Avg   | Median | Max   | # Calls |
+|-----------------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| getPendingYield                                                 | 1604            | 6941  | 3604   | 27597 | 1359    |
+|-----------------------------------------------------------------+-----------------+-------+--------+-------+---------|
+| getUserPosition                                                 | 4830            | 11523 | 13197  | 13197 | 5       |
+╰-----------------------------------------------------------------+-----------------+-------+--------+-------+---------╯
+
+
+Ran 10 test suites in 419.27ms (344.43ms CPU time): 258 tests passed, 18 failed, 5 skipped (281 total tests)
+
+Failing tests:
+Encountered 18 failing tests in test/RotatingPool.t.sol:RotatingPoolTest
+[FAIL: PoolNotActive()] testRevert_ClaimRefund_PoolNotCancelled() (gas: 648260)
+[FAIL: PoolNotActive()] testRevert_FlashLoan_SameBlockWithdrawal() (gas: 648296)
+[FAIL: Error != expected error: PoolFull() != PoolNotForming()] testRevert_JoinPool_AlreadyActive() (gas: 654134)
+[FAIL: Error != expected error: PoolNotActive() != InvalidAmount()] testRevert_MakeContributionNative_WrongAmount() (gas: 674832)
+[FAIL: Error != expected error: PoolNotActive() != WrongContributionMode()] testRevert_MakeContributionNative_WrongMode() (gas: 656127)
+[FAIL: Error != expected error: PoolNotActive() != WrongContributionMode()] testRevert_MakeContribution_WBTC_WrongMode() (gas: 667993)
+[FAIL: PoolNotActive()] test_AdvancePeriod_Manual() (gas: 647641)
+[FAIL: PoolNotActive()] test_ClaimPayout_NativeBTC() (gas: 675400)
+[FAIL: PoolNotActive()] test_ClaimPayout_WBTC() (gas: 648565)
+[FAIL: PoolNotActive()] test_ClaimRefund_AfterCancellation() (gas: 647283)
+[FAIL: Error != expected error: PoolNotActive() != WrongContributionMode()] test_H01_Fix_CannotHijackNativePool() (gas: 668159)
+[FAIL: Error != expected error: PoolNotActive() != WrongContributionMode()] test_H01_Fix_CannotHijackWBTCPool() (gas: 655908)
+[FAIL: PoolNotActive()] test_H02_Fix_BalanceCheckBeforePayout() (gas: 675473)
+[FAIL: PoolNotActive()] test_H02_Fix_BalanceCheckBeforeRefund() (gas: 675092)
+[FAIL: log != expected log] test_JoinPool_MultipleMembers_PoolStarts() (gas: 724077)
+[FAIL: log != expected log] test_MakeContributionNative() (gas: 677261)
+[FAIL: log != expected log] test_MakeContribution_WBTC() (gas: 650779)
+[FAIL: PoolNotActive()] test_PeriodAutoCompletesAfterAllContributions() (gas: 648193)
+
+Encountered a total of 18 failing tests, 258 tests succeeded

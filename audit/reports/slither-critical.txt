@@ -1,0 +1,701 @@
+'forge clean' running (wd: /Users/munay/dev/KhipuVault/packages/contracts)
+'forge config --json' running
+'forge build --build-info --skip */test/** */script/** --force' running (wd: /Users/munay/dev/KhipuVault/packages/contracts)
+INFO:Detectors:
+StabilityPoolStrategy._harvestCollateralGains() (src/strategies/StabilityPoolStrategy.sol#479-511) sends eth to arbitrary user
+	Dangerous calls:
+	- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#functions-that-send-ether-to-arbitrary-destinations
+INFO:Detectors:
+Reentrancy in StabilityPoolStrategy._claimCollateralGains(address) (src/strategies/StabilityPoolStrategy.sol#519-551):
+	External calls:
+	- _harvestCollateralGains() (src/strategies/StabilityPoolStrategy.sol#524)
+		- STABILITY_POOL.withdrawFromSP(0) (src/strategies/StabilityPoolStrategy.sol#489-494)
+		- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+	External calls sending eth:
+	- _harvestCollateralGains() (src/strategies/StabilityPoolStrategy.sol#524)
+		- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+	State variables written after the call(s):
+	- totalPendingCollateral -= collateralGains (src/strategies/StabilityPoolStrategy.sol#544)
+	StabilityPoolStrategy.totalPendingCollateral (src/strategies/StabilityPoolStrategy.sol#83) can be used in cross function reentrancies:
+	- StabilityPoolStrategy.getEstimatedAPY() (src/strategies/StabilityPoolStrategy.sol#409-417)
+	- StabilityPoolStrategy.getUserPendingGains(address) (src/strategies/StabilityPoolStrategy.sol#366-379)
+	- StabilityPoolStrategy.totalPendingCollateral (src/strategies/StabilityPoolStrategy.sol#83)
+Reentrancy in CooperativePoolV3._depositToMezo(uint256,uint256) (src/pools/v3/CooperativePoolV3.sol#562-578):
+	External calls:
+	- musdAmount = MEZO_INTEGRATION.depositAndMintNative{value: btcAmount}() (src/pools/v3/CooperativePoolV3.sol#565)
+	- MUSD.forceApprove(address(YIELD_AGGREGATOR),musdAmount) (src/pools/v3/CooperativePoolV3.sol#567)
+	- (None,shares) = YIELD_AGGREGATOR.deposit(musdAmount) (src/pools/v3/CooperativePoolV3.sol#569)
+	External calls sending eth:
+	- musdAmount = MEZO_INTEGRATION.depositAndMintNative{value: btcAmount}() (src/pools/v3/CooperativePoolV3.sol#565)
+	State variables written after the call(s):
+	- pool.totalMusdMinted += musdAmount (src/pools/v3/CooperativePoolV3.sol#572)
+	CooperativePoolV3.pools (src/pools/v3/CooperativePoolV3.sol#74) can be used in cross function reentrancies:
+	- CooperativePoolV3._calculateMemberYield(uint256,address) (src/pools/v3/CooperativePoolV3.sol#580-605)
+	- CooperativePoolV3.closePool(uint256) (src/pools/v3/CooperativePoolV3.sol#625-634)
+	- CooperativePoolV3.createPool(string,uint256,uint256,uint256) (src/pools/v3/CooperativePoolV3.sol#228-260)
+	- CooperativePoolV3.getPoolInfo(uint256) (src/pools/v3/CooperativePoolV3.sol#521-523)
+	- CooperativePoolV3.getPoolStats(uint256) (src/pools/v3/CooperativePoolV3.sol#541-556)
+	- CooperativePoolV3.pools (src/pools/v3/CooperativePoolV3.sol#74)
+	- pool.status = PoolStatus.ACTIVE (src/pools/v3/CooperativePoolV3.sol#575)
+	CooperativePoolV3.pools (src/pools/v3/CooperativePoolV3.sol#74) can be used in cross function reentrancies:
+	- CooperativePoolV3._calculateMemberYield(uint256,address) (src/pools/v3/CooperativePoolV3.sol#580-605)
+	- CooperativePoolV3.closePool(uint256) (src/pools/v3/CooperativePoolV3.sol#625-634)
+	- CooperativePoolV3.createPool(string,uint256,uint256,uint256) (src/pools/v3/CooperativePoolV3.sol#228-260)
+	- CooperativePoolV3.getPoolInfo(uint256) (src/pools/v3/CooperativePoolV3.sol#521-523)
+	- CooperativePoolV3.getPoolStats(uint256) (src/pools/v3/CooperativePoolV3.sol#541-556)
+	- CooperativePoolV3.pools (src/pools/v3/CooperativePoolV3.sol#74)
+Reentrancy in MezoIntegrationV3.depositAndMintNative() (src/integrations/v3/MezoIntegrationV3.sol#69-109):
+	External calls:
+	- currentPrice = _getCurrentPrice() (src/integrations/v3/MezoIntegrationV3.sol#85)
+		- _price = PRICE_FEED.fetchPrice() (src/integrations/base/BaseMezoIntegration.sol#251-256)
+	- _openTrove(btcAmount,musdAmount,currentPrice) (src/integrations/v3/MezoIntegrationV3.sol#94)
+		- BORROWER_OPERATIONS.openTrove{value: btcAmount}(maxFeePercentage,musdAmount,upperHint,lowerHint) (src/integrations/v3/MezoIntegrationV3.sol#212-217)
+	- _adjustTrove(btcAmount,musdAmount,true,currentPrice) (src/integrations/v3/MezoIntegrationV3.sol#96)
+		- BORROWER_OPERATIONS.adjustTrove{value: btcAmount}(0,musdAmount,isDebtIncrease,upperHint,lowerHint) (src/integrations/v3/MezoIntegrationV3.sol#241-247)
+	External calls sending eth:
+	- _openTrove(btcAmount,musdAmount,currentPrice) (src/integrations/v3/MezoIntegrationV3.sol#94)
+		- BORROWER_OPERATIONS.openTrove{value: btcAmount}(maxFeePercentage,musdAmount,upperHint,lowerHint) (src/integrations/v3/MezoIntegrationV3.sol#212-217)
+	- _adjustTrove(btcAmount,musdAmount,true,currentPrice) (src/integrations/v3/MezoIntegrationV3.sol#96)
+		- BORROWER_OPERATIONS.adjustTrove{value: btcAmount}(0,musdAmount,isDebtIncrease,upperHint,lowerHint) (src/integrations/v3/MezoIntegrationV3.sol#241-247)
+	State variables written after the call(s):
+	- _addToPosition(msg.sender,btcAmount,musdAmount) (src/integrations/v3/MezoIntegrationV3.sol#100)
+		- position.btcCollateral = (uint256(position.btcCollateral) + btcAmount).toUint128() (src/integrations/base/BaseMezoIntegration.sol#298)
+		- position.musdDebt = (uint256(position.musdDebt) + musdAmount).toUint128() (src/integrations/base/BaseMezoIntegration.sol#299)
+	BaseMezoIntegration.userPositions (src/integrations/base/BaseMezoIntegration.sol#74) can be used in cross function reentrancies:
+	- MezoIntegrationV3.getCollateralRatio(address) (src/integrations/v3/MezoIntegrationV3.sol#270-282)
+	- MezoIntegrationV3.getUserPosition(address) (src/integrations/v3/MezoIntegrationV3.sol#288-296)
+	- BaseMezoIntegration.userPositions (src/integrations/base/BaseMezoIntegration.sol#74)
+Reentrancy in StabilityPoolStrategy.depositMUSD(uint256) (src/strategies/StabilityPoolStrategy.sol#200-242):
+	External calls:
+	- _harvestCollateralGains() (src/strategies/StabilityPoolStrategy.sol#210)
+		- STABILITY_POOL.withdrawFromSP(0) (src/strategies/StabilityPoolStrategy.sol#489-494)
+		- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+	- MUSD_TOKEN.safeTransferFrom(msg.sender,address(this),_amount) (src/strategies/StabilityPoolStrategy.sol#216)
+	- MUSD_TOKEN.forceApprove(address(STABILITY_POOL),_amount) (src/strategies/StabilityPoolStrategy.sol#219)
+	- STABILITY_POOL.provideToSP(_amount,address(0)) (src/strategies/StabilityPoolStrategy.sol#221-227)
+	External calls sending eth:
+	- _harvestCollateralGains() (src/strategies/StabilityPoolStrategy.sol#210)
+		- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+	State variables written after the call(s):
+	- totalMusdDeposited += _amount (src/strategies/StabilityPoolStrategy.sol#239)
+	StabilityPoolStrategy.totalMusdDeposited (src/strategies/StabilityPoolStrategy.sol#77) can be used in cross function reentrancies:
+	- StabilityPoolStrategy.getEstimatedAPY() (src/strategies/StabilityPoolStrategy.sol#409-417)
+	- StabilityPoolStrategy.getTVL() (src/strategies/StabilityPoolStrategy.sol#399-401)
+	- StabilityPoolStrategy.getUserMusdValue(address) (src/strategies/StabilityPoolStrategy.sol#350-359)
+	- StabilityPoolStrategy.totalMusdDeposited (src/strategies/StabilityPoolStrategy.sol#77)
+	- totalShares += shares (src/strategies/StabilityPoolStrategy.sol#238)
+	StabilityPoolStrategy.totalShares (src/strategies/StabilityPoolStrategy.sol#74) can be used in cross function reentrancies:
+	- StabilityPoolStrategy.getUserMusdValue(address) (src/strategies/StabilityPoolStrategy.sol#350-359)
+	- StabilityPoolStrategy.getUserPendingGains(address) (src/strategies/StabilityPoolStrategy.sol#366-379)
+	- StabilityPoolStrategy.getUserSharePercentage(address) (src/strategies/StabilityPoolStrategy.sol#386-393)
+	- StabilityPoolStrategy.totalShares (src/strategies/StabilityPoolStrategy.sol#74)
+Reentrancy in RotatingPool.makeContribution(uint256) (src/pools/v3/RotatingPool.sol#426-469):
+	External calls:
+	- WBTC.safeTransferFrom(msg.sender,address(this),amount) (src/pools/v3/RotatingPool.sol#460)
+	- _depositToMezo(poolId,amount) (src/pools/v3/RotatingPool.sol#463)
+		- returndata = address(token).functionCall(data) (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#96)
+		- (success,returndata) = address(token).call(data) (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#115)
+		- MUSD.forceApprove(address(YIELD_AGGREGATOR),musdEquivalent) (src/pools/v3/RotatingPool.sol#851)
+		- (success,returndata) = target.call{value: value}(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#87)
+		- YIELD_AGGREGATOR.deposit(musdEquivalent) (src/pools/v3/RotatingPool.sol#853-858)
+	External calls sending eth:
+	- _depositToMezo(poolId,amount) (src/pools/v3/RotatingPool.sol#463)
+		- (success,returndata) = target.call{value: value}(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#87)
+	State variables written after the call(s):
+	- _checkAndCompletePeriod(poolId) (src/pools/v3/RotatingPool.sol#468)
+		- pool.currentPeriod = newPeriod (src/pools/v3/RotatingPool.sol#1001)
+		- pool.totalYieldGenerated += yieldForPeriod (src/pools/v3/RotatingPool.sol#977)
+		- pool.yieldDistributed += yieldForPeriod (src/pools/v3/RotatingPool.sol#978)
+		- pool.status = PoolStatus.COMPLETED (src/pools/v3/RotatingPool.sol#987)
+	RotatingPool.pools (src/pools/v3/RotatingPool.sol#124) can be used in cross function reentrancies:
+	- RotatingPool.cancelPool(uint256,string) (src/pools/v3/RotatingPool.sol#1038-1048)
+	- RotatingPool.createPool(string,uint256,uint256,uint256,bool,address[]) (src/pools/v3/RotatingPool.sol#336-396)
+	- RotatingPool.getPoolInfo(uint256) (src/pools/v3/RotatingPool.sol#713-719)
+	- RotatingPool.getPoolStats(uint256) (src/pools/v3/RotatingPool.sol#780-799)
+	- RotatingPool.pools (src/pools/v3/RotatingPool.sol#124)
+Reentrancy in StabilityPoolStrategy.withdrawMUSD(uint256) (src/strategies/StabilityPoolStrategy.sol#251-288):
+	External calls:
+	- _claimCollateralGains(msg.sender) (src/strategies/StabilityPoolStrategy.sol#266)
+		- STABILITY_POOL.withdrawFromSP(0) (src/strategies/StabilityPoolStrategy.sol#489-494)
+		- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+		- (success,None) = _user.call{value: collateralGains}() (src/strategies/StabilityPoolStrategy.sol#549)
+	- STABILITY_POOL.withdrawFromSP(_amount) (src/strategies/StabilityPoolStrategy.sol#269-275)
+	- MUSD_TOKEN.safeTransfer(msg.sender,_amount) (src/strategies/StabilityPoolStrategy.sol#278)
+	External calls sending eth:
+	- _claimCollateralGains(msg.sender) (src/strategies/StabilityPoolStrategy.sol#266)
+		- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+		- (success,None) = _user.call{value: collateralGains}() (src/strategies/StabilityPoolStrategy.sol#549)
+	State variables written after the call(s):
+	- position.shares -= sharesBurned (src/strategies/StabilityPoolStrategy.sol#281)
+	StabilityPoolStrategy.positions (src/strategies/StabilityPoolStrategy.sol#86) can be used in cross function reentrancies:
+	- StabilityPoolStrategy.getUserMusdValue(address) (src/strategies/StabilityPoolStrategy.sol#350-359)
+	- StabilityPoolStrategy.getUserPendingGains(address) (src/strategies/StabilityPoolStrategy.sol#366-379)
+	- StabilityPoolStrategy.getUserPosition(address) (src/strategies/StabilityPoolStrategy.sol#424-430)
+	- StabilityPoolStrategy.getUserSharePercentage(address) (src/strategies/StabilityPoolStrategy.sol#386-393)
+	- StabilityPoolStrategy.positions (src/strategies/StabilityPoolStrategy.sol#86)
+	- totalMusdDeposited -= _amount (src/strategies/StabilityPoolStrategy.sol#285)
+	StabilityPoolStrategy.totalMusdDeposited (src/strategies/StabilityPoolStrategy.sol#77) can be used in cross function reentrancies:
+	- StabilityPoolStrategy.getEstimatedAPY() (src/strategies/StabilityPoolStrategy.sol#409-417)
+	- StabilityPoolStrategy.getTVL() (src/strategies/StabilityPoolStrategy.sol#399-401)
+	- StabilityPoolStrategy.getUserMusdValue(address) (src/strategies/StabilityPoolStrategy.sol#350-359)
+	- StabilityPoolStrategy.totalMusdDeposited (src/strategies/StabilityPoolStrategy.sol#77)
+	- totalShares -= sharesBurned (src/strategies/StabilityPoolStrategy.sol#284)
+	StabilityPoolStrategy.totalShares (src/strategies/StabilityPoolStrategy.sol#74) can be used in cross function reentrancies:
+	- StabilityPoolStrategy.getUserMusdValue(address) (src/strategies/StabilityPoolStrategy.sol#350-359)
+	- StabilityPoolStrategy.getUserPendingGains(address) (src/strategies/StabilityPoolStrategy.sol#366-379)
+	- StabilityPoolStrategy.getUserSharePercentage(address) (src/strategies/StabilityPoolStrategy.sol#386-393)
+	- StabilityPoolStrategy.totalShares (src/strategies/StabilityPoolStrategy.sol#74)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities
+INFO:Detectors:
+BaseMezoIntegration.noFlashLoan() (src/integrations/base/BaseMezoIntegration.sol#142-149) uses a dangerous strict equality:
+	- depositBlock[msg.sender] == block.number (src/integrations/base/BaseMezoIntegration.sol#144)
+YieldAggregatorV3.noFlashLoan() (src/integrations/v3/YieldAggregatorV3.sol#145-153) uses a dangerous strict equality:
+	- depositBlock[msg.sender] == block.number (src/integrations/v3/YieldAggregatorV3.sol#148)
+CooperativePoolV3._calculateMemberYield(uint256,address) (src/pools/v3/CooperativePoolV3.sol#580-605) uses a dangerous strict equality:
+	- pool.totalMusdMinted == 0 (src/pools/v3/CooperativePoolV3.sol#589)
+CooperativePoolV3.claimYield(uint256) (src/pools/v3/CooperativePoolV3.sol#474-515) uses a dangerous strict equality:
+	- memberYield == 0 (src/pools/v3/CooperativePoolV3.sol#486)
+BasePoolV3.noFlashLoan() (src/pools/v3/BasePoolV3.sol#77-85) uses a dangerous strict equality:
+	- depositBlock[msg.sender] == block.number (src/pools/v3/BasePoolV3.sol#80)
+CooperativePoolV3.noPoolFlashLoan(uint256) (src/pools/v3/CooperativePoolV3.sol#215-222) uses a dangerous strict equality:
+	- memberJoinBlock[poolId][msg.sender] == block.number (src/pools/v3/CooperativePoolV3.sol#217)
+IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601) uses a dangerous strict equality:
+	- ! userDeposit.active || totalMusdDeposited == 0 (src/pools/v3/IndividualPoolV3.sol#591)
+LotteryPoolV3.getActiveRound() (src/pools/v3/LotteryPoolV3.sol#509-517) uses a dangerous strict equality:
+	- round.status == RoundStatus.OPEN && block.timestamp < round.endTime (src/pools/v3/LotteryPoolV3.sol#513)
+LotteryPoolV3.getWinProbability(uint256,address) (src/pools/v3/LotteryPoolV3.sol#498-504) uses a dangerous strict equality:
+	- round.totalTicketsSold == 0 (src/pools/v3/LotteryPoolV3.sol#500)
+RotatingPool.noFlashLoan() (src/pools/v3/RotatingPool.sol#283-288) uses a dangerous strict equality:
+	- depositBlock[msg.sender] == block.number (src/pools/v3/RotatingPool.sol#284)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#dangerous-strict-equalities
+INFO:Detectors:
+Reentrancy in RotatingPool._depositToMezo(uint256,uint256) (src/pools/v3/RotatingPool.sol#836-866):
+	External calls:
+	- MUSD.forceApprove(address(YIELD_AGGREGATOR),musdEquivalent) (src/pools/v3/RotatingPool.sol#851)
+	- YIELD_AGGREGATOR.deposit(musdEquivalent) (src/pools/v3/RotatingPool.sol#853-858)
+	State variables written after the call(s):
+	- pool.totalMusdMinted += musdEquivalent (src/pools/v3/RotatingPool.sol#854)
+	RotatingPool.pools (src/pools/v3/RotatingPool.sol#124) can be used in cross function reentrancies:
+	- RotatingPool.cancelPool(uint256,string) (src/pools/v3/RotatingPool.sol#1038-1048)
+	- RotatingPool.createPool(string,uint256,uint256,uint256,bool,address[]) (src/pools/v3/RotatingPool.sol#336-396)
+	- RotatingPool.getPoolInfo(uint256) (src/pools/v3/RotatingPool.sol#713-719)
+	- RotatingPool.getPoolStats(uint256) (src/pools/v3/RotatingPool.sol#780-799)
+	- RotatingPool.pools (src/pools/v3/RotatingPool.sol#124)
+Reentrancy in IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299):
+	External calls:
+	- MUSD.safeTransferFrom(msg.sender,address(this),musdAmount) (src/pools/v3/IndividualPoolV3.sol#240)
+	- MUSD.forceApprove(address(YIELD_AGGREGATOR),netDeposit) (src/pools/v3/IndividualPoolV3.sol#268)
+	- YIELD_AGGREGATOR.deposit(netDeposit) (src/pools/v3/IndividualPoolV3.sol#269)
+	State variables written after the call(s):
+	- userDeposit.musdAmount = uint128(netDeposit) (src/pools/v3/IndividualPoolV3.sol#273)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.yieldAccrued = 0 (src/pools/v3/IndividualPoolV3.sol#274)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.depositTimestamp = uint64(block.timestamp) (src/pools/v3/IndividualPoolV3.sol#275)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.lastYieldUpdate = uint64(block.timestamp) (src/pools/v3/IndividualPoolV3.sol#276)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.active = true (src/pools/v3/IndividualPoolV3.sol#277)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.autoCompound = false (src/pools/v3/IndividualPoolV3.sol#278)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.yieldAccrued = uint128(uint256(userDeposit.yieldAccrued) + pendingYield) (src/pools/v3/IndividualPoolV3.sol#283)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- _maybeAutoCompound(msg.sender) (src/pools/v3/IndividualPoolV3.sol#287)
+		- userDeposit.musdAmount = uint128(uint256(userDeposit.musdAmount) + yieldToCompound) (src/pools/v3/IndividualPoolV3.sol#472)
+		- userDeposit.yieldAccrued = 0 (src/pools/v3/IndividualPoolV3.sol#473)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.musdAmount = uint128(uint256(userDeposit.musdAmount) + netDeposit) (src/pools/v3/IndividualPoolV3.sol#291)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.lastYieldUpdate = uint64(block.timestamp) (src/pools/v3/IndividualPoolV3.sol#292)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+Reentrancy in LotteryPoolV3._selectWinnerAndComplete(uint256,uint256) (src/pools/v3/LotteryPoolV3.sol#534-576):
+	External calls:
+	- totalYield = _withdrawAndCalculateYield(roundId) (src/pools/v3/LotteryPoolV3.sol#558)
+		- withdrawn = YIELD_AGGREGATOR.withdraw(totalToWithdraw) (src/pools/v3/LotteryPoolV3.sol#615-627)
+		- YIELD_AGGREGATOR.withdraw(round.totalMusd) (src/pools/v3/LotteryPoolV3.sol#621-626)
+	State variables written after the call(s):
+	- round.totalYield = totalYield (src/pools/v3/LotteryPoolV3.sol#559)
+	LotteryPoolV3.rounds (src/pools/v3/LotteryPoolV3.sol#104) can be used in cross function reentrancies:
+	- LotteryPoolV3.cancelRound(uint256,string) (src/pools/v3/LotteryPoolV3.sol#640-656)
+	- LotteryPoolV3.createRound(uint256,uint256,uint256) (src/pools/v3/LotteryPoolV3.sol#255-295)
+	- LotteryPoolV3.getActiveRound() (src/pools/v3/LotteryPoolV3.sol#509-517)
+	- LotteryPoolV3.getRound(uint256) (src/pools/v3/LotteryPoolV3.sol#477-479)
+	- LotteryPoolV3.getWinProbability(uint256,address) (src/pools/v3/LotteryPoolV3.sol#498-504)
+	- LotteryPoolV3.rounds (src/pools/v3/LotteryPoolV3.sol#104)
+	- LotteryPoolV3.submitCommitment(uint256,bytes32) (src/pools/v3/LotteryPoolV3.sol#367-383)
+	- round.winnerPrize = uint256(winnerParticipant.musdContributed) + winnerYield (src/pools/v3/LotteryPoolV3.sol#566)
+	LotteryPoolV3.rounds (src/pools/v3/LotteryPoolV3.sol#104) can be used in cross function reentrancies:
+	- LotteryPoolV3.cancelRound(uint256,string) (src/pools/v3/LotteryPoolV3.sol#640-656)
+	- LotteryPoolV3.createRound(uint256,uint256,uint256) (src/pools/v3/LotteryPoolV3.sol#255-295)
+	- LotteryPoolV3.getActiveRound() (src/pools/v3/LotteryPoolV3.sol#509-517)
+	- LotteryPoolV3.getRound(uint256) (src/pools/v3/LotteryPoolV3.sol#477-479)
+	- LotteryPoolV3.getWinProbability(uint256,address) (src/pools/v3/LotteryPoolV3.sol#498-504)
+	- LotteryPoolV3.rounds (src/pools/v3/LotteryPoolV3.sol#104)
+	- LotteryPoolV3.submitCommitment(uint256,bytes32) (src/pools/v3/LotteryPoolV3.sol#367-383)
+	- round.status = RoundStatus.COMPLETED (src/pools/v3/LotteryPoolV3.sol#568)
+	LotteryPoolV3.rounds (src/pools/v3/LotteryPoolV3.sol#104) can be used in cross function reentrancies:
+	- LotteryPoolV3.cancelRound(uint256,string) (src/pools/v3/LotteryPoolV3.sol#640-656)
+	- LotteryPoolV3.createRound(uint256,uint256,uint256) (src/pools/v3/LotteryPoolV3.sol#255-295)
+	- LotteryPoolV3.getActiveRound() (src/pools/v3/LotteryPoolV3.sol#509-517)
+	- LotteryPoolV3.getRound(uint256) (src/pools/v3/LotteryPoolV3.sol#477-479)
+	- LotteryPoolV3.getWinProbability(uint256,address) (src/pools/v3/LotteryPoolV3.sol#498-504)
+	- LotteryPoolV3.rounds (src/pools/v3/LotteryPoolV3.sol#104)
+	- LotteryPoolV3.submitCommitment(uint256,bytes32) (src/pools/v3/LotteryPoolV3.sol#367-383)
+Reentrancy in MezoIntegrationV3.burnAndWithdraw(uint256) (src/integrations/v3/MezoIntegrationV3.sol#128-192):
+	External calls:
+	- MUSD_TOKEN.safeTransferFrom(msg.sender,address(this),musdAmount) (src/integrations/v3/MezoIntegrationV3.sol#142)
+	- currentPrice = _getCurrentPrice() (src/integrations/v3/MezoIntegrationV3.sol#149)
+		- _price = PRICE_FEED.fetchPrice() (src/integrations/base/BaseMezoIntegration.sol#251-256)
+	- MUSD_TOKEN.forceApprove(address(BORROWER_OPERATIONS),musdAmount) (src/integrations/v3/MezoIntegrationV3.sol#152)
+	State variables written after the call(s):
+	- _clearPosition(msg.sender) (src/integrations/v3/MezoIntegrationV3.sol#158)
+		- position.btcCollateral = 0 (src/integrations/base/BaseMezoIntegration.sol#326)
+		- position.musdDebt = 0 (src/integrations/base/BaseMezoIntegration.sol#327)
+	BaseMezoIntegration.userPositions (src/integrations/base/BaseMezoIntegration.sol#74) can be used in cross function reentrancies:
+	- MezoIntegrationV3.getCollateralRatio(address) (src/integrations/v3/MezoIntegrationV3.sol#270-282)
+	- MezoIntegrationV3.getUserPosition(address) (src/integrations/v3/MezoIntegrationV3.sol#288-296)
+	- BaseMezoIntegration.userPositions (src/integrations/base/BaseMezoIntegration.sol#74)
+	- _subtractFromPosition(msg.sender,btcAmount,musdAmount) (src/integrations/v3/MezoIntegrationV3.sol#168)
+		- position.btcCollateral = (uint256(position.btcCollateral) - btcAmount).toUint128() (src/integrations/base/BaseMezoIntegration.sol#310)
+		- position.musdDebt = (uint256(position.musdDebt) - musdAmount).toUint128() (src/integrations/base/BaseMezoIntegration.sol#311)
+	BaseMezoIntegration.userPositions (src/integrations/base/BaseMezoIntegration.sol#74) can be used in cross function reentrancies:
+	- MezoIntegrationV3.getCollateralRatio(address) (src/integrations/v3/MezoIntegrationV3.sol#270-282)
+	- MezoIntegrationV3.getUserPosition(address) (src/integrations/v3/MezoIntegrationV3.sol#288-296)
+	- BaseMezoIntegration.userPositions (src/integrations/base/BaseMezoIntegration.sol#74)
+Reentrancy in LotteryPoolV3.cancelRound(uint256,string) (src/pools/v3/LotteryPoolV3.sol#640-656):
+	External calls:
+	- YIELD_AGGREGATOR.withdraw(round.totalMusd) (src/pools/v3/LotteryPoolV3.sol#650)
+	State variables written after the call(s):
+	- round.status = RoundStatus.CANCELLED (src/pools/v3/LotteryPoolV3.sol#653)
+	LotteryPoolV3.rounds (src/pools/v3/LotteryPoolV3.sol#104) can be used in cross function reentrancies:
+	- LotteryPoolV3.cancelRound(uint256,string) (src/pools/v3/LotteryPoolV3.sol#640-656)
+	- LotteryPoolV3.createRound(uint256,uint256,uint256) (src/pools/v3/LotteryPoolV3.sol#255-295)
+	- LotteryPoolV3.getActiveRound() (src/pools/v3/LotteryPoolV3.sol#509-517)
+	- LotteryPoolV3.getRound(uint256) (src/pools/v3/LotteryPoolV3.sol#477-479)
+	- LotteryPoolV3.getWinProbability(uint256,address) (src/pools/v3/LotteryPoolV3.sol#498-504)
+	- LotteryPoolV3.rounds (src/pools/v3/LotteryPoolV3.sol#104)
+	- LotteryPoolV3.submitCommitment(uint256,bytes32) (src/pools/v3/LotteryPoolV3.sol#367-383)
+Reentrancy in RotatingPool.claimPayout(uint256) (src/pools/v3/RotatingPool.sol#528-609):
+	External calls:
+	- YIELD_AGGREGATOR.claimYield() (src/pools/v3/RotatingPool.sol#556-570)
+	State variables written after the call(s):
+	- member.hasReceivedPayout = true (src/pools/v3/RotatingPool.sol#575)
+	RotatingPool.poolMembers (src/pools/v3/RotatingPool.sol#127) can be used in cross function reentrancies:
+	- RotatingPool._addMember(uint256,address,uint256) (src/pools/v3/RotatingPool.sol#808-824)
+	- RotatingPool.getMemberInfo(uint256,address) (src/pools/v3/RotatingPool.sol#724-730)
+	- RotatingPool.poolMembers (src/pools/v3/RotatingPool.sol#127)
+	- member.payoutReceived = payoutAmount (src/pools/v3/RotatingPool.sol#576)
+	RotatingPool.poolMembers (src/pools/v3/RotatingPool.sol#127) can be used in cross function reentrancies:
+	- RotatingPool._addMember(uint256,address,uint256) (src/pools/v3/RotatingPool.sol#808-824)
+	- RotatingPool.getMemberInfo(uint256,address) (src/pools/v3/RotatingPool.sol#724-730)
+	- RotatingPool.poolMembers (src/pools/v3/RotatingPool.sol#127)
+	- member.yieldReceived = netYield (src/pools/v3/RotatingPool.sol#577)
+	RotatingPool.poolMembers (src/pools/v3/RotatingPool.sol#127) can be used in cross function reentrancies:
+	- RotatingPool._addMember(uint256,address,uint256) (src/pools/v3/RotatingPool.sol#808-824)
+	- RotatingPool.getMemberInfo(uint256,address) (src/pools/v3/RotatingPool.sol#724-730)
+	- RotatingPool.poolMembers (src/pools/v3/RotatingPool.sol#127)
+	- period.paid = true (src/pools/v3/RotatingPool.sol#578)
+	RotatingPool.poolPeriods (src/pools/v3/RotatingPool.sol#133) can be used in cross function reentrancies:
+	- RotatingPool.getPeriodInfo(uint256,uint256) (src/pools/v3/RotatingPool.sol#735-741)
+	- RotatingPool.poolPeriods (src/pools/v3/RotatingPool.sol#133)
+Reentrancy in IndividualPoolV3.claimYield() (src/pools/v3/IndividualPoolV3.sol#356-397):
+	External calls:
+	- YIELD_AGGREGATOR.claimYield() (src/pools/v3/IndividualPoolV3.sol#383)
+	State variables written after the call(s):
+	- userDeposit.yieldAccrued = 0 (src/pools/v3/IndividualPoolV3.sol#386)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+Reentrancy in IndividualPoolV3.withdrawPartial(uint256) (src/pools/v3/IndividualPoolV3.sol#305-351):
+	External calls:
+	- actualWithdrawn = YIELD_AGGREGATOR.withdraw(musdAmount) (src/pools/v3/IndividualPoolV3.sol#328)
+	State variables written after the call(s):
+	- totalMusdDeposited -= musdAmount (src/pools/v3/IndividualPoolV3.sol#334)
+	IndividualPoolV3.totalMusdDeposited (src/pools/v3/IndividualPoolV3.sol#60) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3.totalMusdDeposited (src/pools/v3/IndividualPoolV3.sol#60)
+	- totalMusdDeposited -= remaining (src/pools/v3/IndividualPoolV3.sol#341)
+	IndividualPoolV3.totalMusdDeposited (src/pools/v3/IndividualPoolV3.sol#60) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3.totalMusdDeposited (src/pools/v3/IndividualPoolV3.sol#60)
+	- userDeposit.musdAmount = uint128(uint256(userDeposit.musdAmount) - musdAmount) (src/pools/v3/IndividualPoolV3.sol#332)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.lastYieldUpdate = uint64(block.timestamp) (src/pools/v3/IndividualPoolV3.sol#333)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.musdAmount = 0 (src/pools/v3/IndividualPoolV3.sol#339)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+	- userDeposit.active = false (src/pools/v3/IndividualPoolV3.sol#340)
+	IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53) can be used in cross function reentrancies:
+	- IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601)
+	- IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299)
+	- IndividualPoolV3._maybeAutoCompound(address) (src/pools/v3/IndividualPoolV3.sol#467-477)
+	- IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554)
+	- IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562)
+	- IndividualPoolV3.setAutoCompound(bool) (src/pools/v3/IndividualPoolV3.sol#456-462)
+	- IndividualPoolV3.userDeposits (src/pools/v3/IndividualPoolV3.sol#53)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-1
+INFO:Detectors:
+LotteryPoolV3.forceComplete(uint256).fallbackSeed (src/pools/v3/LotteryPoolV3.sol#697) is a local variable never initialized
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#uninitialized-local-variables
+INFO:Detectors:
+BaseMezoIntegration._getCurrentPrice() (src/integrations/base/BaseMezoIntegration.sol#232-268) ignores return value by (answer,updatedAt) = PRICE_FEED.latestRoundData() (src/integrations/base/BaseMezoIntegration.sol#234-248)
+BaseMezoIntegration._getCurrentPrice() (src/integrations/base/BaseMezoIntegration.sol#232-268) ignores return value by PriceValidator.validateDeviation(price,lastKnownPrice,_getMaxDeviation()) (src/integrations/base/BaseMezoIntegration.sol#263)
+BaseMezoIntegration._getInsertHints(uint256,uint256,uint256) (src/integrations/base/BaseMezoIntegration.sol#337-351) ignores return value by (hint) = HINT_HELPERS.getApproxHint(nicr,HINT_TRIALS,hintRandomSeed) (src/integrations/base/BaseMezoIntegration.sol#344-350)
+MezoIntegrationV3.depositAndMintNative() (src/integrations/v3/MezoIntegrationV3.sol#69-109) ignores return value by (None,currentDebt) = TROVE_MANAGER.getTroveDebtAndColl(msg.sender) (src/integrations/v3/MezoIntegrationV3.sol#91)
+CooperativePoolV3.leavePool(uint256) (src/pools/v3/CooperativePoolV3.sol#313-407) ignores return value by YIELD_AGGREGATOR.withdraw(safeWithdraw) (src/pools/v3/CooperativePoolV3.sol#374-386)
+CooperativePoolV3.withdrawPartial(uint256,uint256) (src/pools/v3/CooperativePoolV3.sol#409-472) ignores return value by YIELD_AGGREGATOR.withdraw(safeWithdraw) (src/pools/v3/CooperativePoolV3.sol#457-459)
+CooperativePoolV3.claimYield(uint256) (src/pools/v3/CooperativePoolV3.sol#474-515) ignores return value by YIELD_AGGREGATOR.claimYield() (src/pools/v3/CooperativePoolV3.sol#497-506)
+CooperativePoolV3._depositToMezo(uint256,uint256) (src/pools/v3/CooperativePoolV3.sol#562-578) ignores return value by (None,shares) = YIELD_AGGREGATOR.deposit(musdAmount) (src/pools/v3/CooperativePoolV3.sol#569)
+IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299) ignores return value by YIELD_AGGREGATOR.deposit(netDeposit) (src/pools/v3/IndividualPoolV3.sol#269)
+IndividualPoolV3.claimYield() (src/pools/v3/IndividualPoolV3.sol#356-397) ignores return value by YIELD_AGGREGATOR.claimYield() (src/pools/v3/IndividualPoolV3.sol#383)
+IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554) ignores return value by (None,netYields) = YieldCalculations.calculatePerformanceFee(yields,performanceFee) (src/pools/v3/IndividualPoolV3.sol#540)
+IndividualPoolV3.getUserTotalBalance(address) (src/pools/v3/IndividualPoolV3.sol#556-562) ignores return value by (None,netYield) = YieldCalculations.calculatePerformanceFee(yields,performanceFee) (src/pools/v3/IndividualPoolV3.sol#560)
+LotteryPoolV3._depositToYieldAggregator(uint256) (src/pools/v3/LotteryPoolV3.sol#526-529) ignores return value by YIELD_AGGREGATOR.deposit(amount) (src/pools/v3/LotteryPoolV3.sol#528)
+LotteryPoolV3._withdrawAndCalculateYield(uint256) (src/pools/v3/LotteryPoolV3.sol#606-628) ignores return value by YIELD_AGGREGATOR.withdraw(round.totalMusd) (src/pools/v3/LotteryPoolV3.sol#621-626)
+LotteryPoolV3.cancelRound(uint256,string) (src/pools/v3/LotteryPoolV3.sol#640-656) ignores return value by YIELD_AGGREGATOR.withdraw(round.totalMusd) (src/pools/v3/LotteryPoolV3.sol#650)
+RotatingPool.claimPayout(uint256) (src/pools/v3/RotatingPool.sol#528-609) ignores return value by YIELD_AGGREGATOR.claimYield() (src/pools/v3/RotatingPool.sol#556-570)
+RotatingPool._depositToMezo(uint256,uint256) (src/pools/v3/RotatingPool.sol#836-866) ignores return value by YIELD_AGGREGATOR.deposit(musdEquivalent) (src/pools/v3/RotatingPool.sol#853-858)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#unused-return
+INFO:Detectors:
+IMezoStabilityPool.isActive().isActive (src/interfaces/IMezoStabilityPool.sol#61) shadows:
+	- IMezoStabilityPool.isActive() (src/interfaces/IMezoStabilityPool.sol#61) (function)
+IMezoStabilityPool.scale().scale (src/interfaces/IMezoStabilityPool.sol#73) shadows:
+	- IMezoStabilityPool.scale() (src/interfaces/IMezoStabilityPool.sol#73) (function)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#local-variable-shadowing
+INFO:Detectors:
+LotteryPoolV3.initialize(address,address,address,address) (src/pools/v3/LotteryPoolV3.sol#231-242) should emit an event for: 
+	- operator = _operator (src/pools/v3/LotteryPoolV3.sol#241) 
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-events-access-control
+INFO:Detectors:
+UUPSProxy.constructor(address,bytes)._implementation (src/proxy/UUPSProxy.sol#44) lacks a zero-check on :
+		- (success,None) = _implementation.delegatecall(_data) (src/proxy/UUPSProxy.sol#49)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#missing-zero-address-validation
+INFO:Detectors:
+Reentrancy in BaseMezoIntegration.__BaseMezoIntegration_init(address,address,address,address,address) (src/integrations/base/BaseMezoIntegration.sol#168-221):
+	External calls:
+	- initialPrice = PRICE_FEED.fetchPrice() (src/integrations/base/BaseMezoIntegration.sol#213-219)
+	State variables written after the call(s):
+	- lastKnownPrice = initialPrice (src/integrations/base/BaseMezoIntegration.sol#215)
+Reentrancy in StabilityPoolStrategy._claimCollateralGains(address) (src/strategies/StabilityPoolStrategy.sol#519-551):
+	External calls:
+	- _harvestCollateralGains() (src/strategies/StabilityPoolStrategy.sol#524)
+		- STABILITY_POOL.withdrawFromSP(0) (src/strategies/StabilityPoolStrategy.sol#489-494)
+		- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+	External calls sending eth:
+	- _harvestCollateralGains() (src/strategies/StabilityPoolStrategy.sol#524)
+		- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+	State variables written after the call(s):
+	- position.pendingCollateralGains = 0 (src/strategies/StabilityPoolStrategy.sol#540)
+	- position.lastCollateralSnapshot = totalPendingCollateral (src/strategies/StabilityPoolStrategy.sol#541)
+Reentrancy in YieldAggregatorV3._depositToVault(address,address,uint256) (src/integrations/v3/YieldAggregatorV3.sol#420-443):
+	External calls:
+	- MUSD_TOKEN.safeTransferFrom(user,address(this),amount) (src/integrations/v3/YieldAggregatorV3.sol#421)
+	State variables written after the call(s):
+	- totalValueLocked += amount (src/integrations/v3/YieldAggregatorV3.sol#442)
+	- userTotalDeposited[user] += amount (src/integrations/v3/YieldAggregatorV3.sol#441)
+	- position.yieldAccrued = (uint256(position.yieldAccrued) + pendingYield).toUint64() (src/integrations/v3/YieldAggregatorV3.sol#431)
+	- position.principal = (uint256(position.principal) + amount).toUint128() (src/integrations/v3/YieldAggregatorV3.sol#434)
+	- position.shares = (uint256(position.shares) + shares).toUint128() (src/integrations/v3/YieldAggregatorV3.sol#435)
+	- position.lastUpdateTime = block.timestamp.toUint64() (src/integrations/v3/YieldAggregatorV3.sol#436)
+	- vault.totalDeposited = (uint256(vault.totalDeposited) + amount).toUint128() (src/integrations/v3/YieldAggregatorV3.sol#439)
+Reentrancy in IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299):
+	External calls:
+	- MUSD.safeTransferFrom(msg.sender,address(this),musdAmount) (src/pools/v3/IndividualPoolV3.sol#240)
+	State variables written after the call(s):
+	- referralCount[referrer] ++ (src/pools/v3/IndividualPoolV3.sol#251)
+	- referralRewards[referrer] += bonus (src/pools/v3/IndividualPoolV3.sol#257)
+	- referralRewardsReserve += bonus (src/pools/v3/IndividualPoolV3.sol#259)
+	- referrers[msg.sender] = referrer (src/pools/v3/IndividualPoolV3.sol#250)
+	- totalReferralRewards += bonus (src/pools/v3/IndividualPoolV3.sol#258)
+Reentrancy in IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299):
+	External calls:
+	- MUSD.safeTransferFrom(msg.sender,address(this),musdAmount) (src/pools/v3/IndividualPoolV3.sol#240)
+	- MUSD.forceApprove(address(YIELD_AGGREGATOR),netDeposit) (src/pools/v3/IndividualPoolV3.sol#268)
+	- YIELD_AGGREGATOR.deposit(netDeposit) (src/pools/v3/IndividualPoolV3.sol#269)
+	State variables written after the call(s):
+	- totalMusdDeposited += netDeposit (src/pools/v3/IndividualPoolV3.sol#296)
+	- totalYieldsGenerated += pendingYield (src/pools/v3/IndividualPoolV3.sol#284)
+Reentrancy in BaseMezoIntegration._getCurrentPrice() (src/integrations/base/BaseMezoIntegration.sol#232-268):
+	External calls:
+	- _price = PRICE_FEED.fetchPrice() (src/integrations/base/BaseMezoIntegration.sol#251-256)
+	State variables written after the call(s):
+	- lastKnownPrice = price (src/integrations/base/BaseMezoIntegration.sol#267)
+Reentrancy in StabilityPoolStrategy._harvestCollateralGains() (src/strategies/StabilityPoolStrategy.sol#479-511):
+	External calls:
+	- STABILITY_POOL.withdrawFromSP(0) (src/strategies/StabilityPoolStrategy.sol#489-494)
+	State variables written after the call(s):
+	- totalCollateralClaimed += totalGains (src/strategies/StabilityPoolStrategy.sol#502)
+	- totalPendingCollateral += totalGains (src/strategies/StabilityPoolStrategy.sol#501)
+Reentrancy in MezoIntegrationV3.burnAndWithdraw(uint256) (src/integrations/v3/MezoIntegrationV3.sol#128-192):
+	External calls:
+	- MUSD_TOKEN.safeTransferFrom(msg.sender,address(this),musdAmount) (src/integrations/v3/MezoIntegrationV3.sol#142)
+	- currentPrice = _getCurrentPrice() (src/integrations/v3/MezoIntegrationV3.sol#149)
+		- _price = PRICE_FEED.fetchPrice() (src/integrations/base/BaseMezoIntegration.sol#251-256)
+	- MUSD_TOKEN.forceApprove(address(BORROWER_OPERATIONS),musdAmount) (src/integrations/v3/MezoIntegrationV3.sol#152)
+	State variables written after the call(s):
+	- _clearPosition(msg.sender) (src/integrations/v3/MezoIntegrationV3.sol#158)
+		- totalBtcDeposited -= position.btcCollateral (src/integrations/base/BaseMezoIntegration.sol#323)
+	- _subtractFromPosition(msg.sender,btcAmount,musdAmount) (src/integrations/v3/MezoIntegrationV3.sol#168)
+		- totalBtcDeposited -= btcAmount (src/integrations/base/BaseMezoIntegration.sol#313)
+	- _clearPosition(msg.sender) (src/integrations/v3/MezoIntegrationV3.sol#158)
+		- totalMusdMinted -= position.musdDebt (src/integrations/base/BaseMezoIntegration.sol#324)
+	- _subtractFromPosition(msg.sender,btcAmount,musdAmount) (src/integrations/v3/MezoIntegrationV3.sol#168)
+		- totalMusdMinted -= musdAmount (src/integrations/base/BaseMezoIntegration.sol#314)
+Reentrancy in RotatingPool.claimPayout(uint256) (src/pools/v3/RotatingPool.sol#528-609):
+	External calls:
+	- YIELD_AGGREGATOR.claimYield() (src/pools/v3/RotatingPool.sol#556-570)
+	State variables written after the call(s):
+	- membersWithPayoutCount[poolId] ++ (src/pools/v3/RotatingPool.sol#581)
+Reentrancy in MezoIntegrationV3.depositAndMintNative() (src/integrations/v3/MezoIntegrationV3.sol#69-109):
+	External calls:
+	- currentPrice = _getCurrentPrice() (src/integrations/v3/MezoIntegrationV3.sol#85)
+		- _price = PRICE_FEED.fetchPrice() (src/integrations/base/BaseMezoIntegration.sol#251-256)
+	- _openTrove(btcAmount,musdAmount,currentPrice) (src/integrations/v3/MezoIntegrationV3.sol#94)
+		- BORROWER_OPERATIONS.openTrove{value: btcAmount}(maxFeePercentage,musdAmount,upperHint,lowerHint) (src/integrations/v3/MezoIntegrationV3.sol#212-217)
+	- _adjustTrove(btcAmount,musdAmount,true,currentPrice) (src/integrations/v3/MezoIntegrationV3.sol#96)
+		- BORROWER_OPERATIONS.adjustTrove{value: btcAmount}(0,musdAmount,isDebtIncrease,upperHint,lowerHint) (src/integrations/v3/MezoIntegrationV3.sol#241-247)
+	External calls sending eth:
+	- _openTrove(btcAmount,musdAmount,currentPrice) (src/integrations/v3/MezoIntegrationV3.sol#94)
+		- BORROWER_OPERATIONS.openTrove{value: btcAmount}(maxFeePercentage,musdAmount,upperHint,lowerHint) (src/integrations/v3/MezoIntegrationV3.sol#212-217)
+	- _adjustTrove(btcAmount,musdAmount,true,currentPrice) (src/integrations/v3/MezoIntegrationV3.sol#96)
+		- BORROWER_OPERATIONS.adjustTrove{value: btcAmount}(0,musdAmount,isDebtIncrease,upperHint,lowerHint) (src/integrations/v3/MezoIntegrationV3.sol#241-247)
+	State variables written after the call(s):
+	- _addToPosition(msg.sender,btcAmount,musdAmount) (src/integrations/v3/MezoIntegrationV3.sol#100)
+		- totalBtcDeposited += btcAmount (src/integrations/base/BaseMezoIntegration.sol#301)
+	- _addToPosition(msg.sender,btcAmount,musdAmount) (src/integrations/v3/MezoIntegrationV3.sol#100)
+		- totalMusdMinted += musdAmount (src/integrations/base/BaseMezoIntegration.sol#302)
+Reentrancy in StabilityPoolStrategy.depositMUSD(uint256) (src/strategies/StabilityPoolStrategy.sol#200-242):
+	External calls:
+	- _harvestCollateralGains() (src/strategies/StabilityPoolStrategy.sol#210)
+		- STABILITY_POOL.withdrawFromSP(0) (src/strategies/StabilityPoolStrategy.sol#489-494)
+		- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+	- MUSD_TOKEN.safeTransferFrom(msg.sender,address(this),_amount) (src/strategies/StabilityPoolStrategy.sol#216)
+	- MUSD_TOKEN.forceApprove(address(STABILITY_POOL),_amount) (src/strategies/StabilityPoolStrategy.sol#219)
+	- STABILITY_POOL.provideToSP(_amount,address(0)) (src/strategies/StabilityPoolStrategy.sol#221-227)
+	External calls sending eth:
+	- _harvestCollateralGains() (src/strategies/StabilityPoolStrategy.sol#210)
+		- (success,None) = feeCollector.call{value: feeAmount}() (src/strategies/StabilityPoolStrategy.sol#508)
+	State variables written after the call(s):
+	- position.depositTimestamp = block.timestamp (src/strategies/StabilityPoolStrategy.sol#232)
+	- position.shares += shares (src/strategies/StabilityPoolStrategy.sol#234)
+	- position.lastCollateralSnapshot = totalPendingCollateral (src/strategies/StabilityPoolStrategy.sol#235)
+Reentrancy in RotatingPool.makeContribution(uint256) (src/pools/v3/RotatingPool.sol#426-469):
+	External calls:
+	- WBTC.safeTransferFrom(msg.sender,address(this),amount) (src/pools/v3/RotatingPool.sol#460)
+	- _depositToMezo(poolId,amount) (src/pools/v3/RotatingPool.sol#463)
+		- returndata = address(token).functionCall(data) (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#96)
+		- (success,returndata) = address(token).call(data) (lib/openzeppelin-contracts/contracts/token/ERC20/utils/SafeERC20.sol#115)
+		- MUSD.forceApprove(address(YIELD_AGGREGATOR),musdEquivalent) (src/pools/v3/RotatingPool.sol#851)
+		- (success,returndata) = target.call{value: value}(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#87)
+		- YIELD_AGGREGATOR.deposit(musdEquivalent) (src/pools/v3/RotatingPool.sol#853-858)
+	External calls sending eth:
+	- _depositToMezo(poolId,amount) (src/pools/v3/RotatingPool.sol#463)
+		- (success,returndata) = target.call{value: value}(data) (lib/openzeppelin-contracts/contracts/utils/Address.sol#87)
+	State variables written after the call(s):
+	- _checkAndCompletePeriod(poolId) (src/pools/v3/RotatingPool.sol#468)
+		- poolPeriods[poolId][periodNumber] = PeriodInfo({periodNumber:periodNumber,startTime:block.timestamp,endTime:block.timestamp + pool.periodDuration,recipient:recipient,payoutAmount:0,yieldAmount:0,completed:false,paid:false}) (src/pools/v3/RotatingPool.sol#902-911)
+		- period.payoutAmount = payoutAmount (src/pools/v3/RotatingPool.sol#972)
+		- period.yieldAmount = yieldForPeriod (src/pools/v3/RotatingPool.sol#973)
+		- period.completed = true (src/pools/v3/RotatingPool.sol#974)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-2
+INFO:Detectors:
+Reentrancy in LotteryPoolV3.cancelRound(uint256,string) (src/pools/v3/LotteryPoolV3.sol#640-656):
+	External calls:
+	- YIELD_AGGREGATOR.withdraw(round.totalMusd) (src/pools/v3/LotteryPoolV3.sol#650)
+	Event emitted after the call(s):
+	- RoundCancelled(roundId,reason) (src/pools/v3/LotteryPoolV3.sol#655)
+Reentrancy in SimpleProxy.withdrawEther(address,uint256) (src/proxy/SimpleProxy.sol#59-65):
+	External calls:
+	- (success,None) = _to.call{value: amount}() (src/proxy/SimpleProxy.sol#62)
+	Event emitted after the call(s):
+	- EtherWithdrawn(_to,amount) (src/proxy/SimpleProxy.sol#64)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#reentrancy-vulnerabilities-3
+INFO:Detectors:
+PriceValidator.validateFreshness(uint256,uint256) (src/integrations/base/PriceValidator.sol#84-91) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp - updatedAt > stalenessThreshold (src/integrations/base/PriceValidator.sol#88)
+YieldAggregatorV3.claimYield() (src/integrations/v3/YieldAggregatorV3.sol#265-288) uses timestamp for comparisons
+	Dangerous comparisons:
+	- pendingYield > 0 (src/integrations/v3/YieldAggregatorV3.sol#275)
+	- yieldAmount == 0 (src/integrations/v3/YieldAggregatorV3.sol#283)
+YieldAggregatorV3.compoundYields() (src/integrations/v3/YieldAggregatorV3.sol#290-313) uses timestamp for comparisons
+	Dangerous comparisons:
+	- totalYield <= MIN_YIELD_THRESHOLD (src/integrations/v3/YieldAggregatorV3.sol#298)
+YieldAggregatorV3.getAverageApr() (src/integrations/v3/YieldAggregatorV3.sol#400-414) uses timestamp for comparisons
+	Dangerous comparisons:
+	- totalValueLocked <= MIN_TVL_THRESHOLD (src/integrations/v3/YieldAggregatorV3.sol#402)
+YieldAggregatorV3._calculatePendingYield(address,address) (src/integrations/v3/YieldAggregatorV3.sol#468-481) uses timestamp for comparisons
+	Dangerous comparisons:
+	- position.principal <= MIN_PRINCIPAL_THRESHOLD (src/integrations/v3/YieldAggregatorV3.sol#471)
+CooperativePoolV3.leavePool(uint256) (src/pools/v3/CooperativePoolV3.sol#313-407) uses timestamp for comparisons
+	Dangerous comparisons:
+	- memberYield > 0 (src/pools/v3/CooperativePoolV3.sol#350)
+	- poolMusdBalance < totalNeeded && memberYield > 0 (src/pools/v3/CooperativePoolV3.sol#364)
+	- safeWithdraw > 0 (src/pools/v3/CooperativePoolV3.sol#373)
+	- netYield > 0 (src/pools/v3/CooperativePoolV3.sol#399)
+	- feeAmount > 0 (src/pools/v3/CooperativePoolV3.sol#402)
+	- availableForYield < memberYield (src/pools/v3/CooperativePoolV3.sol#379)
+CooperativePoolV3.claimYield(uint256) (src/pools/v3/CooperativePoolV3.sol#474-515) uses timestamp for comparisons
+	Dangerous comparisons:
+	- memberYield == 0 (src/pools/v3/CooperativePoolV3.sol#486)
+	- poolMusdBalance < totalNeeded (src/pools/v3/CooperativePoolV3.sol#496)
+	- feeAmount > 0 (src/pools/v3/CooperativePoolV3.sol#510)
+CooperativePoolV3._calculateMemberYield(uint256,address) (src/pools/v3/CooperativePoolV3.sol#580-605) uses timestamp for comparisons
+	Dangerous comparisons:
+	- pool.totalMusdMinted == 0 (src/pools/v3/CooperativePoolV3.sol#589)
+	- yield > memberInfo.yieldClaimed (src/pools/v3/CooperativePoolV3.sol#600)
+IndividualPoolV3._depositWithReferral(uint256,address) (src/pools/v3/IndividualPoolV3.sol#223-299) uses timestamp for comparisons
+	Dangerous comparisons:
+	- pendingYield > 0 (src/pools/v3/IndividualPoolV3.sol#282)
+IndividualPoolV3.withdrawPartial(uint256) (src/pools/v3/IndividualPoolV3.sol#305-351) uses timestamp for comparisons
+	Dangerous comparisons:
+	- musdAmount == 0 (src/pools/v3/IndividualPoolV3.sol#313)
+	- musdAmount < MIN_WITHDRAWAL (src/pools/v3/IndividualPoolV3.sol#314)
+	- musdAmount > userDeposit.musdAmount (src/pools/v3/IndividualPoolV3.sol#315)
+	- pendingYield > 0 (src/pools/v3/IndividualPoolV3.sol#319)
+	- require(bool,string)(actualWithdrawn >= musdAmount,Insufficient withdrawn) (src/pools/v3/IndividualPoolV3.sol#329)
+	- userDeposit.musdAmount < uint128(MIN_DEPOSIT) && userDeposit.musdAmount > 0 (src/pools/v3/IndividualPoolV3.sol#337)
+IndividualPoolV3.claimYield() (src/pools/v3/IndividualPoolV3.sol#356-397) uses timestamp for comparisons
+	Dangerous comparisons:
+	- pendingYield > 0 (src/pools/v3/IndividualPoolV3.sol#367)
+IndividualPoolV3.withdraw() (src/pools/v3/IndividualPoolV3.sol#402-447) uses timestamp for comparisons
+	Dangerous comparisons:
+	- pendingYield > 0 (src/pools/v3/IndividualPoolV3.sol#415)
+IndividualPoolV3.getUserInfo(address) (src/pools/v3/IndividualPoolV3.sol#522-554) uses timestamp for comparisons
+	Dangerous comparisons:
+	- userDeposit.depositTimestamp > 0 (src/pools/v3/IndividualPoolV3.sol#542)
+	- durationSeconds > 0 && userDeposit_ > 0 (src/pools/v3/IndividualPoolV3.sol#547)
+IndividualPoolV3._calculateUserYieldView(address) (src/pools/v3/IndividualPoolV3.sol#589-601) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ! userDeposit.active || totalMusdDeposited == 0 (src/pools/v3/IndividualPoolV3.sol#591)
+LotteryPoolV3.buyTickets(uint256,uint256) (src/pools/v3/LotteryPoolV3.sol#306-356) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp >= round.endTime (src/pools/v3/LotteryPoolV3.sol#311)
+LotteryPoolV3.submitCommitment(uint256,bytes32) (src/pools/v3/LotteryPoolV3.sol#367-383) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp < round.endTime (src/pools/v3/LotteryPoolV3.sol#372)
+	- block.timestamp > round.commitDeadline (src/pools/v3/LotteryPoolV3.sol#373)
+LotteryPoolV3.revealSeed(uint256,uint256,bytes32) (src/pools/v3/LotteryPoolV3.sol#391-409) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp > round.revealDeadline (src/pools/v3/LotteryPoolV3.sol#396)
+LotteryPoolV3.getWinProbability(uint256,address) (src/pools/v3/LotteryPoolV3.sol#498-504) uses timestamp for comparisons
+	Dangerous comparisons:
+	- round.totalTicketsSold == 0 (src/pools/v3/LotteryPoolV3.sol#500)
+LotteryPoolV3.getActiveRound() (src/pools/v3/LotteryPoolV3.sol#509-517) uses timestamp for comparisons
+	Dangerous comparisons:
+	- round.status == RoundStatus.OPEN && block.timestamp < round.endTime (src/pools/v3/LotteryPoolV3.sol#513)
+LotteryPoolV3._findTicketOwner(uint256,uint256) (src/pools/v3/LotteryPoolV3.sol#585-601) uses timestamp for comparisons
+	Dangerous comparisons:
+	- ticketIndex >= range.startTicket && ticketIndex <= range.endTicket (src/pools/v3/LotteryPoolV3.sol#591)
+LotteryPoolV3._withdrawAndCalculateYield(uint256) (src/pools/v3/LotteryPoolV3.sol#606-628) uses timestamp for comparisons
+	Dangerous comparisons:
+	- withdrawn > round.totalMusd (src/pools/v3/LotteryPoolV3.sol#616)
+LotteryPoolV3.forceComplete(uint256) (src/pools/v3/LotteryPoolV3.sol#680-728) uses timestamp for comparisons
+	Dangerous comparisons:
+	- block.timestamp <= round.revealDeadline + FORCE_COMPLETE_DELAY (src/pools/v3/LotteryPoolV3.sol#691)
+RotatingPool.advancePeriod(uint256) (src/pools/v3/RotatingPool.sol#663-683) uses timestamp for comparisons
+	Dangerous comparisons:
+	- periodElapsed = block.timestamp >= currentPeriod.startTime + pool.periodDuration (src/pools/v3/RotatingPool.sol#675)
+	- ! isPoolMember && ! periodElapsed && ! isOwner (src/pools/v3/RotatingPool.sol#678)
+Reference: https://github.com/crytic/slither/wiki/Detector-Documentation#block-timestamp
+INFO:Slither:. analyzed (45 contracts with 75 detectors), 84 result(s) found
