@@ -169,6 +169,12 @@ export class KhipuApiClient {
     return this.fetch(`/pools/${poolId}/analytics`);
   }
 
+  async getPoolStats(
+    poolAddress: string
+  ): Promise<{ activeDepositors: number; change24h: number }> {
+    return this.fetch(`/pools/address/${poolAddress}/stats`);
+  }
+
   // Analytics endpoints
   async getGlobalAnalytics() {
     return this.fetch("/analytics/global");

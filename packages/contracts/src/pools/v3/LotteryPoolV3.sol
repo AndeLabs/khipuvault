@@ -80,6 +80,16 @@ contract LotteryPoolV3 is BasePoolV3 {
         bool claimed; // Has claimed prize/refund
     }
 
+    /**
+     * @notice M-02 FIX: Ticket range for gas-efficient ownership tracking
+     * @dev Stores contiguous ranges instead of individual tickets
+     */
+    struct TicketRange {
+        address owner;        // Owner of this ticket range
+        uint64 startTicket;   // First ticket in range (inclusive)
+        uint64 endTicket;     // Last ticket in range (inclusive)
+    }
+
     /*//////////////////////////////////////////////////////////////
                           STATE VARIABLES
     //////////////////////////////////////////////////////////////*/
@@ -101,7 +111,12 @@ contract LotteryPoolV3 is BasePoolV3 {
 
     /// @notice C-02 FIX: Direct ticket ownership mapping for non-contiguous ticket support
     /// @dev Maps roundId => ticketIndex => owner address
+    /// @dev DEPRECATED in M-02 FIX: Replaced by ticketRanges for gas efficiency
     mapping(uint256 => mapping(uint256 => address)) public ticketOwners;
+
+    /// @notice M-02 FIX: Gas-optimized ticket ownership using ranges
+    /// @dev Maps roundId => array of ticket ranges (saves ~20k gas per ticket)
+    mapping(uint256 => TicketRange[]) public ticketRanges;
 
     /// @notice Operator address (can commit/reveal)
     address public operator;
@@ -120,6 +135,7 @@ contract LotteryPoolV3 is BasePoolV3 {
     uint256 public constant BASIS_POINTS = 10000;
     uint256 public constant FORCE_COMPLETE_DELAY = 1 hours; // C-01 FIX: Delay after reveal deadline
     uint256 public constant MULTI_BLOCK_ENTROPY_RANGE = 5; // C-01 FIX: Use multiple block hashes
+    uint256 public constant MIN_PARTICIPANTS = 2; // M-05 FIX: Minimum participants for fair lottery
 
     /*//////////////////////////////////////////////////////////////
                             STORAGE GAP
@@ -127,10 +143,11 @@ contract LotteryPoolV3 is BasePoolV3 {
 
     /**
      * @dev Storage gap for future upgrades
-     * Size: 50 slots - base pool (5) - lottery pool (8) = 37 slots
+     * Size: 50 slots - base pool (5) - lottery pool (8) - ticketOwners (1) - ticketRanges (1) = 36 slots
      * Note: Reduced by 1 for ticketOwners mapping added in C-02 FIX
+     * Note: Reduced by 1 for ticketRanges mapping added in M-02 FIX
      */
-    uint256[37] private __gap;
+    uint256[36] private __gap;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
@@ -183,6 +200,8 @@ contract LotteryPoolV3 is BasePoolV3 {
     error OnlyOperator();
     error RoundStillActive();
     error NoParticipants();
+    error EmergencyModeNotActive(); // M-01 FIX: New error for emergencyWithdraw
+    error InsufficientParticipants(); // M-05 FIX: Need minimum participants for fair lottery
 
     /*//////////////////////////////////////////////////////////////
                               MODIFIERS
@@ -312,11 +331,11 @@ contract LotteryPoolV3 is BasePoolV3 {
             participantList[roundId].push(msg.sender);
         }
 
-        // C-02 FIX: Register ownership for each ticket in this batch
-        // This handles non-contiguous ticket purchases correctly
-        for (uint64 i = firstTicket; i <= lastTicket; i++) {
-            ticketOwners[roundId][i] = msg.sender;
-        }
+        // M-02 FIX: Store ticket range instead of individual tickets (saves ~20k gas per ticket)
+        // One SSTORE for the range vs N SSTOREs for individual tickets
+        ticketRanges[roundId].push(
+            TicketRange({owner: msg.sender, startTicket: firstTicket, endTicket: lastTicket})
+        );
 
         // Update state (CEI pattern)
         participant.ticketCount += uint128(ticketCount);
@@ -353,6 +372,8 @@ contract LotteryPoolV3 is BasePoolV3 {
         if (block.timestamp < round.endTime) revert CommitPhaseNotStarted();
         if (block.timestamp > round.commitDeadline) revert CommitPhaseEnded();
         if (round.totalTicketsSold == 0) revert NoParticipants();
+        // M-05 FIX: Require minimum participants for fair lottery
+        if (participantList[roundId].length < MIN_PARTICIPANTS) revert InsufficientParticipants();
         if (commitment == bytes32(0)) revert InvalidCommitment();
 
         round.status = RoundStatus.COMMIT;
@@ -556,11 +577,27 @@ contract LotteryPoolV3 is BasePoolV3 {
 
     /**
      * @notice Find owner of a specific ticket
-     * @dev C-02 FIX: Now uses direct mapping lookup (O(1)) instead of iteration
-     *      This correctly handles non-contiguous ticket purchases
+     * @dev M-02 FIX: Uses range-based lookup (O(n) where n = number of purchases)
+     *      This is acceptable since winner selection happens once per round
+     *      but saves massive gas on ticket purchases (which happen many times)
+     *      Gas saved: ~20k per ticket on purchase, small cost increase on winner selection
      */
     function _findTicketOwner(uint256 roundId, uint256 ticketIndex) internal view returns (address) {
-        return ticketOwners[roundId][ticketIndex];
+        TicketRange[] storage ranges = ticketRanges[roundId];
+        uint256 rangesLength = ranges.length;
+
+        for (uint256 i = 0; i < rangesLength;) {
+            TicketRange storage range = ranges[i];
+            if (ticketIndex >= range.startTicket && ticketIndex <= range.endTicket) {
+                return range.owner;
+            }
+            unchecked {
+                ++i;
+            }
+        }
+
+        // Should never reach here if ticket index is valid
+        revert InvalidTicketCount();
     }
 
     /**
@@ -595,15 +632,18 @@ contract LotteryPoolV3 is BasePoolV3 {
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Cancel a round (only if not completed)
+     * @notice Cancel a round (only if not completed or already cancelled)
      * @param roundId The round ID
      * @param reason Cancellation reason
+     * @dev M-03 FIX: Added check to prevent re-cancellation
      */
     function cancelRound(uint256 roundId, string calldata reason) external onlyOwner {
         Round storage round = rounds[roundId];
 
         if (round.startTime == 0) revert InvalidRoundId();
         if (round.status == RoundStatus.COMPLETED) revert DrawNotCompleted();
+        // M-03 FIX: Prevent cancelling an already cancelled round
+        if (round.status == RoundStatus.CANCELLED) revert RoundNotCancelled();
 
         // Withdraw from yield aggregator
         if (round.totalMusd > 0) {
@@ -643,6 +683,8 @@ contract LotteryPoolV3 is BasePoolV3 {
         if (round.startTime == 0) revert InvalidRoundId();
         if (round.status == RoundStatus.COMPLETED) revert DrawNotCompleted();
         if (round.totalTicketsSold == 0) revert NoParticipants();
+        // M-05 FIX: Require minimum participants for fair lottery
+        if (participantList[roundId].length < MIN_PARTICIPANTS) revert InsufficientParticipants();
 
         // C-01 FIX: Add delay requirement after reveal deadline
         // This prevents timing attacks by giving more blocks for entropy
@@ -687,9 +729,10 @@ contract LotteryPoolV3 is BasePoolV3 {
 
     /**
      * @notice Emergency withdraw all funds (emergency mode only)
+     * @dev M-01 FIX: Corrected logic - now requires emergencyMode to be active
      */
     function emergencyWithdraw() external onlyOwner {
-        if (!emergencyMode) revert EmergencyModeActive();
+        if (!emergencyMode) revert EmergencyModeNotActive();
 
         uint256 balance = MUSD.balanceOf(address(this));
         if (balance > 0) {

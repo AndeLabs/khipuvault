@@ -17,6 +17,7 @@
 ## 📖 Documentation Structure
 
 ### 1. 🚀 Getting Started (6 pages)
+
 **Target Audience**: New users (non-technical)
 
 ```
@@ -34,9 +35,11 @@ getting-started/
 ---
 
 ### 2. 🏦 Products (28 pages total)
+
 **Target Audience**: Users wanting to understand each product
 
 #### 2.1 Individual Savings (7 pages)
+
 ```
 products/individual-savings/
 ├── index.mdx              # Overview + Quick Start
@@ -49,6 +52,7 @@ products/individual-savings/
 ```
 
 #### 2.2 Community Pools (7 pages)
+
 ```
 products/community-pools/
 ├── index.mdx              # Overview + Quick Start
@@ -61,6 +65,7 @@ products/community-pools/
 ```
 
 #### 2.3 Rotating Pool / ROSCA (7 pages)
+
 ```
 products/rotating-pool/
 ├── index.mdx              # Overview + Quick Start
@@ -73,6 +78,7 @@ products/rotating-pool/
 ```
 
 #### 2.4 Prize Pool / Lottery (7 pages)
+
 ```
 products/prize-pool/
 ├── index.mdx              # Overview + Quick Start
@@ -87,6 +93,7 @@ products/prize-pool/
 ---
 
 ### 3. 🧠 Concepts (8 pages)
+
 **Target Audience**: Users wanting deeper understanding
 
 ```
@@ -104,6 +111,7 @@ concepts/
 ---
 
 ### 4. 📖 Tutorials (12 pages)
+
 **Target Audience**: Hands-on learners
 
 ```
@@ -126,6 +134,7 @@ tutorials/
 ---
 
 ### 5. 👨‍💻 Developers (15 pages)
+
 **Target Audience**: Developers integrating with KhipuVault
 
 ```
@@ -156,6 +165,7 @@ developers/
 ---
 
 ### 6. 🔒 Security (6 pages)
+
 **Target Audience**: Security-conscious users & auditors
 
 ```
@@ -171,6 +181,7 @@ security/
 ---
 
 ### 7. 📚 Resources (7 pages)
+
 **Target Audience**: Everyone
 
 ```
@@ -189,15 +200,18 @@ resources/
 ## 🌍 Bilingual Strategy
 
 ### English (Primary)
+
 - Write all pages in English first
 - Complete structure in `content/docs/`
 
 ### Spanish (Secondary)
+
 - Translate progressively
 - Mirror structure in `content/docs/es/`
 - Use same file names for consistency
 
 **Translation Priority:**
+
 1. Getting Started (critical for Latam users)
 2. Products Overview
 3. ROSCA/Pasanaku content (culturally relevant)
@@ -208,6 +222,7 @@ resources/
 ## 🎨 Content Guidelines
 
 ### For Users (Non-Technical)
+
 - ✅ Clear, simple language
 - ✅ Screenshots and visual guides
 - ✅ Step-by-step instructions
@@ -215,6 +230,7 @@ resources/
 - ❌ No technical jargon
 
 ### For Developers (Technical)
+
 - ✅ Code examples
 - ✅ API references
 - ✅ Architecture diagrams
@@ -222,6 +238,7 @@ resources/
 - ✅ TypeScript/Solidity snippets
 
 ### Visual Elements
+
 - 📸 Screenshots for UI guides
 - 📊 Diagrams for concepts
 - 💻 Code blocks with syntax highlighting
@@ -248,9 +265,7 @@ Brief introduction paragraph.
 
 Content with examples...
 
-<Callout type="info">
-Important tip or note
-</Callout>
+<Callout type="info">Important tip or note</Callout>
 
 ## Section 2
 
@@ -271,22 +286,26 @@ More content...
 ## 🚀 Implementation Plan
 
 ### Phase 1: Core Structure (Today)
+
 1. Create all directory structure
 2. Create index pages for each section
 3. Write Getting Started (6 pages)
 4. Write Products overview pages (4 pages)
 
 ### Phase 2: Deep Dives (Tomorrow)
+
 5. Complete all Products pages (24 pages)
 6. Write Concepts section (8 pages)
 7. Write Tutorials (12 pages)
 
 ### Phase 3: Developer Docs (Day 3)
+
 8. Write Developer guides (15 pages)
 9. API reference documentation
 10. Code examples and integration guides
 
 ### Phase 4: Polish & Launch (Day 4)
+
 11. Security & Resources sections (13 pages)
 12. Spanish translation (priority pages)
 13. Final review and testing

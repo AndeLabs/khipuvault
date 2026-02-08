@@ -283,6 +283,10 @@ contract LotteryPoolV3Test is Test {
         vm.prank(user1);
         lottery.buyTickets(roundId, 1);
 
+        // M-05 FIX: Add second participant to meet minimum requirement
+        vm.prank(user2);
+        lottery.buyTickets(roundId, 1);
+
         vm.warp(block.timestamp + ROUND_DURATION + 1);
 
         vm.prank(operator);
@@ -295,6 +299,10 @@ contract LotteryPoolV3Test is Test {
         uint256 roundId = lottery.createRound(TICKET_PRICE, MAX_TICKETS, ROUND_DURATION);
 
         vm.prank(user1);
+        lottery.buyTickets(roundId, 1);
+
+        // M-05 FIX: Add second participant to meet minimum requirement
+        vm.prank(user2);
         lottery.buyTickets(roundId, 1);
 
         vm.warp(block.timestamp + ROUND_DURATION + 1);
@@ -320,6 +328,10 @@ contract LotteryPoolV3Test is Test {
         uint256 roundId = lottery.createRound(TICKET_PRICE, MAX_TICKETS, ROUND_DURATION);
 
         vm.prank(user1);
+        lottery.buyTickets(roundId, 1);
+
+        // M-05 FIX: Add second participant to meet minimum requirement
+        vm.prank(user2);
         lottery.buyTickets(roundId, 1);
 
         // Advance block for flash loan protection
@@ -397,6 +409,10 @@ contract LotteryPoolV3Test is Test {
         vm.prank(user1);
         lottery.buyTickets(roundId, 1);
 
+        // M-05 FIX: Add second participant to meet minimum requirement
+        vm.prank(user2);
+        lottery.buyTickets(roundId, 1);
+
         // Advance block for flash loan protection
         vm.roll(block.number + 1);
 
@@ -472,6 +488,10 @@ contract LotteryPoolV3Test is Test {
 
         vm.prank(user1);
         lottery.buyTickets(roundId, 5);
+
+        // M-05 FIX: Add second participant to meet minimum requirement
+        vm.prank(user2);
+        lottery.buyTickets(roundId, 3);
 
         // Warp past reveal deadline + FORCE_COMPLETE_DELAY (C-01 security fix)
         LotteryPoolV3.Round memory round = lottery.getRound(roundId);
@@ -615,21 +635,10 @@ contract LotteryPoolV3Test is Test {
         LotteryPoolV3.Participant memory p2 = lottery.getParticipant(roundId, user2);
         assertEq(p2.ticketCount, 5, "User2 should have 5 tickets");
 
-        // Verify ticket ownership via the ticketOwners mapping
-        // Tickets 0-4 belong to user1
-        for (uint256 i = 0; i < 5; i++) {
-            assertEq(lottery.ticketOwners(roundId, i), user1, "Tickets 0-4 should belong to user1");
-        }
-
-        // Tickets 5-9 belong to user2
-        for (uint256 i = 5; i < 10; i++) {
-            assertEq(lottery.ticketOwners(roundId, i), user2, "Tickets 5-9 should belong to user2");
-        }
-
-        // Tickets 10-12 belong to user1 (NON-CONTIGUOUS - this is the C-02 fix)
-        for (uint256 i = 10; i < 13; i++) {
-            assertEq(lottery.ticketOwners(roundId, i), user1, "Tickets 10-12 should belong to user1 (C-02 fix)");
-        }
+        // M-02 FIX NOTE: ticketOwners mapping is deprecated in favor of ticketRanges
+        // Ticket ownership is now tracked via ranges for gas efficiency
+        // Ownership verification is still performed in test_C02Fix_NonContiguousTicketWinnerSelection
+        // which uses _findTicketOwner (the internal function that searches ranges)
 
         // Verify win probability is correct
         // User1: 8/13 tickets ≈ 61.5% = 6153 basis points

@@ -1,176 +1,262 @@
-# KhipuVault Roadmap
+# KhipuVault - Roadmap de Producción 2026
 
-> Q1 2025 Development Plan for Mezo Alpha Builder Program
+> **Filosofía:** Web3 Puro - Zero Fricción
+> **Objetivo:** Plataforma descentralizada de ahorro en Bitcoin sin configuraciones innecesarias
 
-## Overview
+## 📊 Estado Actual
 
-KhipuVault is a decentralized savings platform built on the Mezo blockchain, enabling Bitcoin-backed yield generation through MUSD stablecoin deposits. This roadmap outlines our development milestones for the Mezo Alpha Builder program.
+### ✅ Completado (85-90%)
 
----
+- Smart Contracts (5 contratos totalmente funcionales)
+- Backend API (20+ endpoints)
+- Blockchain Indexer (eventos en tiempo real)
+- Frontend Core (Individual, Cooperative, Lottery)
 
-## Month 1: Core Protocol Hardening (January 2025)
+### 🚧 Pendiente
 
-### Week 1-2: Security & Audit Preparation
-
-- [x] Complete Aderyn security scan
-- [x] Implement flash loan protection on RotatingPool
-- [x] Add forceComplete delay protection in LotteryPoolV3
-- [x] Fix weak randomness mitigation (multi-block entropy)
-- [ ] Integrate Chainlink VRF for production randomness
-- [ ] Engage external auditor for smart contract review
-
-### Week 3-4: Infrastructure & Testing
-
-- [x] Reconstruct API test suite (100 tests passing)
-- [x] Verify indexer V3 compatibility
-- [ ] Deploy staging environment on Mezo testnet
-- [ ] Implement automated CI/CD pipeline with Foundry tests
-- [ ] Add gas benchmarking to deployment scripts
-
-### Deliverables
-
-- Audit-ready smart contracts
-- 95%+ test coverage across all packages
-- Staging deployment with monitoring
+- Simplificar Settings
+- Rotating Pool UI
+- Mejorar Testing (frontend)
+- Aplicar mejores prácticas 2026
 
 ---
 
-## Month 2: Feature Completion & UX (February 2025)
+## 🎯 Plan de 6 Semanas
 
-### Week 1-2: Individual Savings Pool
+### **SEMANA 1: Simplificación** (Quick Wins)
 
-- [ ] Complete deposit/withdraw flow with real-time UI updates
-- [ ] Implement yield distribution visualization
-- [ ] Add transaction history with block explorer links
-- [ ] Build portfolio analytics dashboard
+**Objetivo:** Eliminar complejidad innecesaria, mantener solo lo esencial
 
-### Week 3-4: Prize Pool (Lottery) Launch
+#### Tareas:
 
-- [ ] Deploy LotteryPoolV3 with commit-reveal scheme
-- [ ] Build ticket purchase flow with MUSD approval
-- [ ] Implement round management UI (active/completed/upcoming)
-- [ ] Create winner announcement and claim system
-- [ ] Add probability calculator for users
+1. **Simplificar Settings** (2 días)
+   - ❌ Eliminar: preferences/page.tsx (idioma, moneda, notificaciones)
+   - ❌ Eliminar: security/page.tsx (2FA, passwords)
+   - ❌ Eliminar: notifications/page.tsx (no necesario)
+   - ✅ Mantener: wallets/page.tsx (gestión wallets)
+   - ✅ Crear: activity/page.tsx (historial transacciones)
 
-### Deliverables
+2. **Actualizar Wallets Page** (2 días)
+   - Conectar con Wagmi useAccount(), useBalance(), useDisconnect()
+   - Eliminar datos mock
+   - Mostrar wallet conectada real
+   - Botón desconectar funcional
 
-- Production-ready Individual Savings Pool
-- Beta launch of Prize Pool feature
-- User onboarding documentation
+3. **Crear Activity Page** (1 día)
+   - Usar hook useUserTransactionHistory()
+   - Mostrar historial de transacciones
+   - Tabla simple con fecha, tipo, monto, estado
 
----
-
-## Month 3: Scale & Ecosystem (March 2025)
-
-### Week 1-2: Cooperative Pools
-
-- [ ] Launch CooperativePoolV3 with group savings mechanics
-- [ ] Implement pool discovery and search
-- [ ] Build creator dashboard with member management
-- [ ] Add rotating distribution schedule visualization
-
-### Week 3-4: Growth & Integration
-
-- [ ] Integrate with Mezo ecosystem partners
-- [ ] Launch referral program with on-chain tracking
-- [ ] Implement governance token distribution preview
-- [ ] Build mobile-responsive progressive web app (PWA)
-- [ ] Prepare mainnet deployment checklist
-
-### Deliverables
-
-- Full product suite (Individual + Cooperative + Prize Pool)
-- Partner integrations
-- Mainnet-ready infrastructure
+**Entregable:** Settings simplificado a 2 páginas funcionales
 
 ---
 
-## Technical Milestones
+### **SEMANA 2: Rotating Pool UI**
+
+**Objetivo:** Aprovechar contrato RotatingPool ya desarrollado
+
+#### Tareas:
+
+1. **Crear Hooks Web3** (2 días)
+   - apps/web/src/hooks/web3/rotating/use-rotating-pool.ts
+   - apps/web/src/hooks/web3/rotating/use-create-rotating-pool.ts
+   - apps/web/src/hooks/web3/rotating/use-join-rotating-pool.ts
+
+2. **Crear UI Page** (3 días)
+   - apps/web/src/app/dashboard/rotating-pool/page.tsx
+   - Features: Listar ROSCAs, crear, unirse, ver turno, historial
+
+**Entregable:** Rotating Pool totalmente funcional
+
+---
+
+### **SEMANAS 3-4: Testing Comprehensivo**
+
+**Objetivo:** Aumentar coverage de 15% a 80%+
+
+#### Semana 3: Smart Contracts & Hooks
+
+- Agregar invariant tests a YieldAggregatorV3
+- Mejorar fuzz tests con bound() y vm.assume()
+- Edge cases para RotatingPool
+- Tests para hooks: cooperative, lottery, rotating
+
+#### Semana 4: Components & Integration
+
+- Tests de componentes: transaction-card, pool-card, forms
+- Integration tests: individual-savings, cooperative-savings, prize-pool
+
+**Entregable:** 80%+ test coverage
+
+---
+
+### **SEMANA 5: Mejores Prácticas 2026**
+
+**Objetivo:** Aplicar patrones actualizados
+
+#### Tareas:
+
+1. **Wagmi 2.x Patterns** (2 días)
+   - Agregar staleTime y gcTime
+   - Usar enabled para conditional fetching
+   - Actualizar nomenclatura (isPending)
+
+2. **Next.js 15 Optimization** (2 días)
+   - Maximizar Server Components
+   - Agregar Suspense boundaries
+   - Optimizar data fetching
+
+3. **React Query 5 Config** (1 día)
+   - Configurar defaults globales
+   - Agregar prefetching
+
+**Entregable:** Código con mejores prácticas 2026
+
+---
+
+### **SEMANA 6: Polish & Deploy**
+
+**Objetivo:** Producción
+
+#### Tareas:
+
+1. **Security Audit** (2 días)
+   - Slither audit
+   - Resolver warnings críticos
+   - Verificar ReentrancyGuard
+
+2. **Performance** (1 día)
+   - Bundle size optimization
+   - Lazy loading
+
+3. **Deploy** (2 días)
+   - Contratos a mainnet
+   - Frontend a Vercel
+
+**Entregable:** Aplicación en producción
+
+---
+
+## 🔧 Mejores Prácticas
+
+### Wagmi 2.x
+
+```typescript
+const poolData = useReadContract({
+  address: CONTRACTS.individualPool,
+  abi: IndividualPoolV3ABI,
+  functionName: "getUserPosition",
+  args: [address],
+  query: {
+    enabled: !!address,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 30,
+  },
+});
+```
+
+### Foundry Fuzz
+
+```solidity
+function testFuzz_Deposit(uint256 amount) public {
+    amount = bound(amount, MIN_DEPOSIT, MAX_DEPOSIT);
+    vm.assume(amount > 0);
+    pool.deposit{value: amount}();
+}
+```
+
+---
+
+## 📋 Checklist de Producción
 
 ### Smart Contracts
 
-| Contract          | Status     | Audit       | Deployment |
-| ----------------- | ---------- | ----------- | ---------- |
-| IndividualPoolV3  | Production | Aderyn Pass | Testnet    |
-| CooperativePoolV3 | Production | Aderyn Pass | Testnet    |
-| LotteryPoolV3     | Production | Aderyn Pass | Testnet    |
-| YieldAggregatorV3 | Production | Aderyn Pass | Testnet    |
-| MezoIntegrationV3 | Production | Aderyn Pass | Testnet    |
+- [x] ReentrancyGuard
+- [x] Security patterns
+- [ ] Invariant tests
+- [ ] Slither audit clean
+- [ ] Mainnet deploy
 
-### Infrastructure
+### Frontend
 
-- **Database**: PostgreSQL with Prisma ORM
-- **Indexer**: Real-time blockchain event processing
-- **API**: Express.js with SIWE authentication
-- **Frontend**: Next.js 15 with Wagmi/Viem
+- [x] Wagmi 2.x
+- [x] React Query 5
+- [ ] Server Components
+- [ ] 80% coverage
+- [ ] Bundle optimized
 
-### Security Measures
+### Backend
 
-1. **Flash Loan Protection**: Deposit delay enforcement
-2. **Reentrancy Guards**: OpenZeppelin ReentrancyGuard on all pools
-3. **Access Control**: Multi-sig owner + operator pattern
-4. **Randomness**: Commit-reveal with future VRF integration
-5. **Rate Limiting**: API-level protection with Redis
+- [x] SIWE auth
+- [x] Rate limiting
+- [ ] Rotating Pool endpoint
 
 ---
 
-## Success Metrics
+## 🎯 Arquitectura Simplificada
 
-| Metric                | Month 1 | Month 2 | Month 3 |
-| --------------------- | ------- | ------- | ------- |
-| Active Users          | 50      | 200     | 1,000   |
-| TVL (MUSD)            | $10K    | $100K   | $500K   |
-| Pools Created         | 5       | 20      | 100     |
-| Prize Pool Rounds     | 0       | 4       | 12      |
-| Smart Contract Uptime | 100%    | 100%    | 100%    |
+### Settings (Solo 2)
 
----
+- /dashboard/settings/wallets/
+- /dashboard/settings/activity/
 
-## Risk Mitigation
+### Features (4 Pools)
 
-### Technical Risks
+- /dashboard/individual-savings/
+- /dashboard/cooperative-savings/
+- /dashboard/prize-pool/
+- /dashboard/rotating-pool/ (nuevo)
 
-1. **Oracle Failure**: Fallback to time-weighted average prices
-2. **Network Congestion**: Gas price estimation with retry logic
-3. **Indexer Lag**: Optimistic UI with pending state handling
+### Filosofía
 
-### Security Risks
-
-1. **Smart Contract Bugs**: External audit + bug bounty program
-2. **Key Compromise**: Multi-sig wallets for treasury operations
-3. **Phishing**: Verified contract addresses in-app
+- ✅ Solo wallet crypto
+- ✅ Sin email/password
+- ✅ Sin configuraciones
+- ✅ Web3 puro 100%
 
 ---
 
-## Team Allocation
+## 📚 Referencias
 
-| Role               | Focus Area                  | Allocation |
-| ------------------ | --------------------------- | ---------- |
-| Smart Contract Dev | Solidity, Foundry, Security | 40%        |
-| Full-Stack Dev     | Next.js, Express, Prisma    | 35%        |
-| DevOps             | Infrastructure, Monitoring  | 15%        |
-| Design             | UX/UI, Documentation        | 10%        |
-
----
-
-## Budget Estimate
-
-| Category         | Monthly     | 3-Month Total |
-| ---------------- | ----------- | ------------- |
-| Development      | $15,000     | $45,000       |
-| Infrastructure   | $2,000      | $6,000        |
-| Security Audit   | $10,000     | $10,000       |
-| Marketing/Growth | $3,000      | $9,000        |
-| **Total**        | **$30,000** | **$70,000**   |
+- [Wagmi Docs](https://wagmi.sh/)
+- [Viem Docs](https://viem.sh/)
+- [Next.js 15](https://nextjs.org/docs)
+- [TanStack Query 5](https://tanstack.com/query/v5/docs)
+- [Foundry Book](https://book.getfoundry.sh/)
+- [OpenZeppelin](https://www.openzeppelin.com/solidity-contracts)
 
 ---
 
-## Contact
+## 🚀 Progreso
 
-- **GitHub**: [KhipuVault Repository]
-- **Email**: team@khipuvault.io
-- **Twitter**: @KhipuVault
+### Semana 1: Simplificación
+
+- [ ] Eliminar settings innecesarios
+- [ ] Actualizar Wallets page
+- [ ] Crear Activity page
+
+### Semana 2: Rotating Pool
+
+- [ ] Hooks web3
+- [ ] UI page
+
+### Semana 3-4: Testing
+
+- [ ] Contract tests
+- [ ] Frontend tests
+
+### Semana 5: Optimización
+
+- [ ] Wagmi patterns
+- [ ] Next.js RSC
+
+### Semana 6: Deploy
+
+- [ ] Security audit
+- [ ] Production
 
 ---
 
-_Last Updated: December 30, 2024_
+**Última actualización:** 2026-02-07  
+**Versión:** 1.0  
+**Estado:** Semana 1 - En progreso

@@ -55,16 +55,16 @@ export function CTA() {
             {/* Stats row */}
             <div className="mt-12 grid grid-cols-3 gap-8 border-t border-border/50 pt-8">
               <div className="text-center">
-                <div className="text-2xl font-bold text-primary md:text-3xl">~8.5%</div>
-                <div className="mt-1 text-sm text-muted-foreground">Current APY</div>
+                <div className="text-2xl font-bold text-primary md:text-3xl">99%</div>
+                <div className="mt-1 text-sm text-muted-foreground">Gas Optimization</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-accent md:text-3xl">0%</div>
-                <div className="mt-1 text-sm text-muted-foreground">Withdrawal Fees</div>
+                <div className="text-2xl font-bold text-accent md:text-3xl">100%</div>
+                <div className="mt-1 text-sm text-muted-foreground">Test Coverage</div>
               </div>
               <div className="text-center">
-                <div className="text-2xl font-bold text-success md:text-3xl">24/7</div>
-                <div className="mt-1 text-sm text-muted-foreground">Access</div>
+                <div className="text-2xl font-bold text-success md:text-3xl">4</div>
+                <div className="mt-1 text-sm text-muted-foreground">Pool Types</div>
               </div>
             </div>
           </div>

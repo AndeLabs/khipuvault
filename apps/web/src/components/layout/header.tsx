@@ -33,7 +33,7 @@ export function Header() {
         </Link>
 
         {/* Navigation Links - Desktop */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav className="hidden items-center gap-6 md:flex">
           <Link
             href={process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.khipuvault.com"}
             target="_blank"
@@ -92,7 +92,11 @@ export function Header() {
                       Dashboard
                     </Button>
                   </Link>
-                  <Link href={process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.khipuvault.com"} target="_blank" rel="noopener noreferrer">
+                  <Link
+                    href={process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.khipuvault.com"}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     <Button variant="outline" size="lg" className="w-full">
                       📚 Documentation
                     </Button>

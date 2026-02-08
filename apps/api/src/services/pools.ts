@@ -333,7 +333,7 @@ export class PoolsService {
       update: {
         tvl: pool.tvl,
         apr: pool.apr,
-        apy: pool.apy || pool.apr,
+        apy: pool.apy || pool.apy,
         totalDeposits: pool.totalDeposits,
         totalWithdrawals: pool.totalWithdrawals,
         totalUsers: pool.totalUsers,
@@ -345,5 +345,91 @@ export class PoolsService {
     });
 
     return pool;
+  }
+
+  /**
+   * Get real-time pool statistics
+   * - activeDepositors: Count of unique users with balance > 0
+   * - change24h: Percentage change in TVL over last 24 hours
+   * OPTIMIZED: Uses database aggregation for performance
+   */
+  async getPoolStats(poolAddress: string) {
+    const normalizedAddress = poolAddress.toLowerCase();
+
+    // Find the pool to get pool ID
+    const pool = await prisma.pool.findUnique({
+      where: { contractAddress: normalizedAddress },
+      select: { id: true, tvl: true, contractAddress: true },
+    });
+
+    if (!pool) {
+      throw new AppError(404, "Pool not found");
+    }
+
+    // 1. Calculate active depositors (users with balance > 0)
+    // Use raw SQL for performance with large datasets
+    const activeDepositorsResult = await prisma.$queryRaw<Array<{ count: bigint }>>`
+      WITH user_balances AS (
+        SELECT
+          "userAddress",
+          SUM(CASE WHEN type = 'DEPOSIT' THEN CAST(amount AS DECIMAL(78,0)) ELSE 0 END) -
+          SUM(CASE WHEN type = 'WITHDRAW' THEN CAST(amount AS DECIMAL(78,0)) ELSE 0 END) as balance
+        FROM "Deposit"
+        WHERE "poolAddress" = ${normalizedAddress}
+          AND status = 'CONFIRMED'
+        GROUP BY "userAddress"
+      )
+      SELECT COUNT(*)::bigint as count
+      FROM user_balances
+      WHERE balance > 0
+    `;
+
+    const activeDepositors = Number(activeDepositorsResult[0]?.count || 0);
+
+    // 2. Calculate 24h change in TVL using PoolAnalytics
+    const now = new Date();
+    const yesterday = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    // Get the most recent analytics snapshot from 24 hours ago
+    const historicalSnapshot = await prisma.poolAnalytics.findFirst({
+      where: {
+        poolId: pool.id,
+        timestamp: {
+          gte: yesterday,
+          lt: now,
+        },
+      },
+      orderBy: {
+        timestamp: "asc", // Get the oldest one in the last 24h (closest to 24h ago)
+      },
+      select: {
+        tvl: true,
+        timestamp: true,
+      },
+    });
+
+    let change24h = 0;
+
+    if (historicalSnapshot) {
+      const currentTvl = BigInt(pool.tvl);
+      const previousTvl = BigInt(historicalSnapshot.tvl);
+
+      // Calculate percentage change: ((current - previous) / previous) * 100
+      // Avoid division by zero
+      if (previousTvl > 0) {
+        // Use Number for percentage calculation (safe for percentages)
+        const change = Number(currentTvl - previousTvl);
+        const base = Number(previousTvl);
+        change24h = (change / base) * 100;
+      } else if (currentTvl > 0) {
+        // If previous was 0 but current is positive, it's 100% increase
+        change24h = 100;
+      }
+    }
+
+    return {
+      activeDepositors,
+      change24h: Number(change24h.toFixed(2)), // Round to 2 decimal places
+    };
   }
 }

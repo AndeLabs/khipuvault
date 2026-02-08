@@ -70,6 +70,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         uint256 yieldDistributed;       // Yields already distributed
         PoolStatus status;              // Current status
         bool autoAdvance;               // Auto-advance to next period
+        bool useNativeBtc;              // True if pool uses native BTC, false if WBTC
     }
 
     /**
@@ -143,6 +144,17 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     /// @notice H-02 FIX: Block-based flash loan protection
     mapping(address => uint256) public depositBlock;
 
+    /// @notice H-01 FIX: Track refunds for cancelled pools
+    mapping(uint256 => mapping(address => bool)) public hasClaimedRefund;
+
+    /// @notice M-04 FIX: Gas optimization - track contributions per period
+    /// @dev Pool ID => Period Number => Contribution count
+    mapping(uint256 => mapping(uint256 => uint256)) public periodContributions;
+
+    /// @notice M-04 FIX: Gas optimization - track members with payouts
+    /// @dev Pool ID => Number of members who received payout
+    mapping(uint256 => uint256) public membersWithPayoutCount;
+
     /// @notice Minimum members per pool
     uint256 public constant MIN_MEMBERS = 3;
 
@@ -210,6 +222,27 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         string reason
     );
 
+    event RefundClaimed(
+        uint256 indexed poolId,
+        address indexed member,
+        uint256 amount
+    );
+
+    event PerformanceFeeUpdated(
+        uint256 oldFee,
+        uint256 newFee
+    );
+
+    event FeeCollectorUpdated(
+        address indexed oldCollector,
+        address indexed newCollector
+    );
+
+    event NativeBtcReceived(
+        address indexed sender,
+        uint256 amount
+    );
+
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
     //////////////////////////////////////////////////////////////*/
@@ -232,6 +265,12 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     error PoolNotCompleted();
     error InvalidFee();
     error SameBlockWithdrawal();
+    error PoolNotCancelled();
+    error RefundAlreadyClaimed();
+    error NoRefundAvailable();
+    error InvalidAmount();
+    error WrongContributionMode(); // Pool mode doesn't match contribution type
+    error InsufficientNativeBtcBalance(); // Contract lacks native BTC for transfer
 
     /*//////////////////////////////////////////////////////////////
                               MODIFIERS
@@ -299,10 +338,11 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         uint256 memberCount,
         uint256 contributionAmount,
         uint256 periodDuration,
+        bool useNativeBtc,
         address[] memory memberAddresses
-    ) 
-        external 
-        whenNotPaused 
+    )
+        external
+        whenNotPaused
         returns (uint256 poolId) 
     {
         if (memberCount < MIN_MEMBERS || memberCount > MAX_MEMBERS) {
@@ -332,7 +372,8 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
             totalYieldGenerated: 0,
             yieldDistributed: 0,
             status: PoolStatus.FORMING,
-            autoAdvance: false
+            autoAdvance: false,
+            useNativeBtc: useNativeBtc // Set at creation - immutable
         });
 
         emit PoolCreated(
@@ -378,7 +419,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     }
 
     /**
-     * @notice Make contribution for current period
+     * @notice Make contribution for current period using WBTC
      * @param poolId Pool ID
      * @dev CEI PATTERN: State updates BEFORE external calls where possible
      */
@@ -395,6 +436,9 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         if (!member.active) revert NotMember();
         if (member.contributionsMade >= pool.totalPeriods) revert ContributionAlreadyMade();
 
+        // H-01 FIX: Validate pool mode matches contribution type
+        if (pool.useNativeBtc) revert WrongContributionMode();
+
         uint256 amount = pool.contributionAmount;
 
         // H-02 FIX: Record deposit block for flash loan protection
@@ -405,6 +449,9 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         member.totalContributed += amount;
         pool.totalBtcCollected += amount;
 
+        // M-04 FIX: Increment period contribution counter
+        periodContributions[poolId][pool.currentPeriod]++;
+
         // Cache current period for event before potential state changes
         uint256 currentPeriodCache = pool.currentPeriod;
 
@@ -414,6 +461,57 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
 
         // Deposit to Mezo and generate yields
         _depositToMezo(poolId, amount);
+
+        emit ContributionMade(poolId, msg.sender, currentPeriodCache, amount);
+
+        // Check if period can be completed
+        _checkAndCompletePeriod(poolId);
+    }
+
+    /**
+     * @notice Make contribution for current period using native BTC
+     * @param poolId Pool ID
+     * @dev UX IMPROVEMENT: Accepts native BTC for better user experience
+     *      No approval needed - just send BTC with the transaction
+     */
+    function makeContributionNative(uint256 poolId)
+        external
+        payable
+        nonReentrant
+        whenNotPaused
+    {
+        PoolInfo storage pool = pools[poolId];
+        MemberInfo storage member = poolMembers[poolId][msg.sender];
+
+        if (pool.poolId == 0) revert InvalidPoolId();
+        if (pool.status != PoolStatus.ACTIVE) revert PoolNotActive();
+        if (!member.active) revert NotMember();
+        if (member.contributionsMade >= pool.totalPeriods) revert ContributionAlreadyMade();
+
+        // H-01 FIX: Validate pool mode matches contribution type
+        if (!pool.useNativeBtc) revert WrongContributionMode();
+
+        uint256 amount = pool.contributionAmount;
+
+        // Validate native BTC amount
+        if (msg.value != amount) revert InvalidAmount();
+
+        // H-02 FIX: Record deposit block for flash loan protection
+        depositBlock[msg.sender] = block.number;
+
+        // CEI FIX: Update member and pool state BEFORE external calls
+        member.contributionsMade++;
+        member.totalContributed += amount;
+        pool.totalBtcCollected += amount;
+
+        // M-04 FIX: Increment period contribution counter
+        periodContributions[poolId][pool.currentPeriod]++;
+
+        // Cache current period for event before potential state changes
+        uint256 currentPeriodCache = pool.currentPeriod;
+
+        // Deposit native BTC to Mezo and generate yields
+        _depositNativeBtcToMezo(poolId, amount);
 
         emit ContributionMade(poolId, msg.sender, currentPeriodCache, amount);
 
@@ -479,13 +577,27 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         member.yieldReceived = netYield;
         period.paid = true;
 
+        // M-04 FIX: Increment payout counter
+        membersWithPayoutCount[poolId]++;
+
         // Cache member index for event
         uint256 memberIndex = member.memberIndex;
 
         emit PayoutDistributed(poolId, memberIndex, msg.sender, payoutAmount, netYield);
 
         // External transfers AFTER all state updates
-        WBTC.safeTransfer(msg.sender, payoutAmount);
+        // UX IMPROVEMENT: Support both native BTC and WBTC payouts
+        if (pool.useNativeBtc) {
+            // H-02 FIX: Verify sufficient native BTC balance before transfer
+            if (address(this).balance < payoutAmount) revert InsufficientNativeBtcBalance();
+
+            // Pay out in native BTC for native BTC pools
+            (bool success, ) = msg.sender.call{value: payoutAmount}("");
+            require(success, "Native BTC transfer failed");
+        } else {
+            // Pay out in WBTC for WBTC pools
+            WBTC.safeTransfer(msg.sender, payoutAmount);
+        }
 
         if (netYield > 0) {
             MUSD.safeTransfer(msg.sender, netYield);
@@ -496,6 +608,49 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         }
     }
 
+    /**
+     * @notice Claim refund for cancelled pool
+     * @param poolId Pool ID
+     * @dev FIX H-01: Allows members to claim refunds when pool is cancelled
+     *      Uses CEI pattern: state updates BEFORE external transfers
+     */
+    function claimRefund(uint256 poolId)
+        external
+        nonReentrant
+        whenNotPaused
+    {
+        PoolInfo storage pool = pools[poolId];
+        MemberInfo storage member = poolMembers[poolId][msg.sender];
+
+        // Validations
+        if (pool.poolId == 0) revert InvalidPoolId();
+        if (pool.status != PoolStatus.CANCELLED) revert PoolNotCancelled();
+        if (!member.active) revert NotMember();
+        if (hasClaimedRefund[poolId][msg.sender]) revert RefundAlreadyClaimed();
+        if (member.totalContributed == 0) revert NoRefundAvailable();
+
+        uint256 refundAmount = member.totalContributed;
+
+        // CEI: Update state BEFORE external transfer
+        hasClaimedRefund[poolId][msg.sender] = true;
+
+        emit RefundClaimed(poolId, msg.sender, refundAmount);
+
+        // External transfer AFTER state update
+        // UX IMPROVEMENT: Support both native BTC and WBTC refunds
+        if (pool.useNativeBtc) {
+            // H-02 FIX: Verify sufficient native BTC balance before transfer
+            if (address(this).balance < refundAmount) revert InsufficientNativeBtcBalance();
+
+            // Refund in native BTC for native BTC pools
+            (bool success, ) = msg.sender.call{value: refundAmount}("");
+            require(success, "Native BTC refund failed");
+        } else {
+            // Refund in WBTC for WBTC pools
+            WBTC.safeTransfer(msg.sender, refundAmount);
+        }
+    }
+
     /*//////////////////////////////////////////////////////////////
                         PERIOD MANAGEMENT
     //////////////////////////////////////////////////////////////*/
@@ -503,14 +658,26 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     /**
      * @notice Advance to next period
      * @param poolId Pool ID
+     * @dev FIX H-03: Added access control - only pool members or after period elapsed
      */
-    function advancePeriod(uint256 poolId) 
-        external 
-        nonReentrant 
+    function advancePeriod(uint256 poolId)
+        external
+        nonReentrant
     {
         PoolInfo storage pool = pools[poolId];
         if (pool.poolId == 0) revert InvalidPoolId();
         if (pool.status != PoolStatus.ACTIVE) revert PoolNotActive();
+
+        // FIX H-03: Validate caller has permission or period has elapsed
+        PeriodInfo storage currentPeriod = poolPeriods[poolId][pool.currentPeriod];
+
+        bool isPoolMember = poolMembers[poolId][msg.sender].active;
+        bool periodElapsed = block.timestamp >= currentPeriod.startTime + pool.periodDuration;
+        bool isOwner = msg.sender == owner();
+
+        if (!isPoolMember && !periodElapsed && !isOwner) {
+            revert InvalidAddress();
+        }
 
         _advancePeriod(poolId);
     }
@@ -627,13 +794,8 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         totalYield = pool.totalYieldGenerated;
         periodsCompleted = pool.currentPeriod;
 
-        // Count members who received payout
-        address[] memory members = poolMembersList[poolId];
-        for (uint256 i = 0; i < members.length; i++) {
-            if (poolMembers[poolId][members[i]].hasReceivedPayout) {
-                membersWithPayout++;
-            }
-        }
+        // M-04 FIX: Use counter instead of O(n) loop
+        membersWithPayout = membersWithPayoutCount[poolId];
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -704,6 +866,33 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     }
 
     /**
+     * @notice Deposit native BTC to Mezo and generate yields
+     * @dev UX IMPROVEMENT: Accepts native BTC and holds it in contract
+     *      Native BTC is held safely until payout claims
+     *      Future: Integrate with Mezo when MezoIntegration is deployed
+     */
+    function _depositNativeBtcToMezo(uint256 poolId, uint256 btcAmount) internal {
+        PoolInfo storage pool = pools[poolId];
+
+        // Native BTC is already in contract via msg.value
+        // We hold it safely until members claim their payouts
+
+        // Note: For testnet without MezoIntegration deployed
+        // BTC remains in contract as backing until claim
+        // This is safe because:
+        // 1. BTC is not sent externally until claimPayout
+        // 2. Pool tracks totalBtcCollected for proper accounting
+        // 3. Members can claim their proportional share in native BTC
+
+        // Future enhancement: When MezoIntegration is deployed, uncomment:
+        // uint256 musdAmount = MEZO_INTEGRATION.depositAndMintNative{value: btcAmount}();
+        // MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
+        // (, uint256 shares) = YIELD_AGGREGATOR.deposit(musdAmount);
+        // require(shares > 0, "Deposit failed");
+        // pool.totalMusdMinted += musdAmount;
+    }
+
+    /**
      * @notice Initialize a period
      */
     function _initializePeriod(uint256 poolId, uint256 periodNumber) internal {
@@ -729,15 +918,8 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         PoolInfo storage pool = pools[poolId];
         uint256 currentPeriod = pool.currentPeriod;
 
-        // Check if all members have contributed for this period
-        uint256 contributionsThisPeriod = 0;
-        address[] memory members = poolMembersList[poolId];
-        
-        for (uint256 i = 0; i < members.length; i++) {
-            if (poolMembers[poolId][members[i]].contributionsMade > currentPeriod) {
-                contributionsThisPeriod++;
-            }
-        }
+        // M-04 FIX: Use counter instead of O(n) loop
+        uint256 contributionsThisPeriod = periodContributions[poolId][currentPeriod];
 
         // If all contributed, complete period
         if (contributionsThisPeriod == pool.memberCount) {
@@ -762,13 +944,26 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         
         // Calcular yield proporcional para este período
         // Cada período debería recibir yields proporcionales a su aporte
-        uint256 periodContribution = pool.contributionAmount * pool.memberCount;
         uint256 totalPoolContribution = pool.contributionAmount * pool.memberCount * pool.totalPeriods;
         uint256 yieldForPeriod;
         
         if (totalPoolContribution > 0 && pendingYield > pool.yieldDistributed) {
             uint256 remainingYield = pendingYield - pool.yieldDistributed;
-            yieldForPeriod = (remainingYield * periodContribution) / (totalPoolContribution - (periodNumber * periodContribution));
+
+            // FIX C-01: Handle last period separately to avoid division issues
+            // and ensure all remaining yield is distributed
+            if (periodNumber == pool.totalPeriods - 1) {
+                // Last period gets all remaining yield
+                yieldForPeriod = remainingYield;
+            } else {
+                // Distribute yield equally among remaining periods
+                uint256 remainingPeriods = pool.totalPeriods - periodNumber;
+                if (remainingPeriods > 0) {
+                    yieldForPeriod = remainingYield / remainingPeriods;
+                } else {
+                    yieldForPeriod = 0;
+                }
+            }
         } else {
             yieldForPeriod = 0;
         }
@@ -818,7 +1013,11 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      */
     function setPerformanceFee(uint256 newFee) external onlyOwner {
         if (newFee > 1000) revert InvalidFee(); // Max 10%
+
+        uint256 oldFee = performanceFee;
         performanceFee = newFee;
+
+        emit PerformanceFeeUpdated(oldFee, newFee);
     }
 
     /**
@@ -826,7 +1025,11 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      */
     function setFeeCollector(address newCollector) external onlyOwner {
         if (newCollector == address(0)) revert InvalidAddress();
+
+        address oldCollector = feeCollector;
         feeCollector = newCollector;
+
+        emit FeeCollectorUpdated(oldCollector, newCollector);
     }
 
     /**
@@ -856,5 +1059,14 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      */
     function unpause() external onlyOwner {
         _unpause();
+    }
+
+    /**
+     * @notice Receive function to accept native BTC
+     * @dev Required for native BTC contributions and payouts
+     *      Emits event for tracking unexpected incoming BTC
+     */
+    receive() external payable {
+        emit NativeBtcReceived(msg.sender, msg.value);
     }
 }

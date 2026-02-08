@@ -6,9 +6,9 @@ export default function HomePage() {
     <main className="relative w-full overflow-hidden">
       {/* Background gradient effects */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute left-1/4 top-0 h-96 w-96 animate-pulse rounded-full bg-primary/20 blur-3xl" />
-        <div className="absolute bottom-0 right-1/4 h-80 w-80 animate-pulse rounded-full bg-accent/20 blur-3xl delay-1000" />
-        <div className="absolute left-1/2 top-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r from-primary/5 to-transparent" />
+        <div className="bg-primary/20 absolute top-0 left-1/4 h-96 w-96 animate-pulse rounded-full blur-3xl" />
+        <div className="bg-accent/20 absolute right-1/4 bottom-0 h-80 w-80 animate-pulse rounded-full blur-3xl delay-1000" />
+        <div className="from-primary/5 absolute top-1/2 left-1/2 h-[600px] w-[600px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-gradient-to-r to-transparent" />
       </div>
 
       {/* Hero Section */}
@@ -20,24 +20,22 @@ export default function HomePage() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-green-400" />
             </span>
-            <span className="text-sm font-medium text-purple-300">
-              Comprehensive Documentation
-            </span>
+            <span className="text-sm font-medium text-purple-300">Comprehensive Documentation</span>
           </div>
 
           {/* Headline */}
           <h1 className="text-4xl font-extrabold tracking-tight text-white sm:text-5xl md:text-6xl lg:text-7xl">
             KhipuVault
             <br />
-            <span className="animate-gradient bg-gradient-to-r from-primary via-accent to-primary bg-[length:200%_auto] bg-clip-text text-transparent">
+            <span className="animate-gradient from-primary via-accent to-primary bg-gradient-to-r bg-[length:200%_auto] bg-clip-text text-transparent">
               Documentation Hub
             </span>
           </h1>
 
           {/* Subheadline */}
           <p className="mx-auto mt-6 max-w-2xl text-lg text-gray-300 md:text-xl">
-            Everything you need to know about Bitcoin savings on Mezo blockchain.
-            From beginner guides to developer APIs.
+            Everything you need to know about Bitcoin savings on Mezo blockchain. From beginner
+            guides to developer APIs.
           </p>
 
           {/* CTA Buttons */}
@@ -46,7 +44,7 @@ export default function HomePage() {
               href="/docs/getting-started"
               className="group inline-flex h-12 items-center justify-center rounded-md px-8 text-base font-semibold text-gray-900 shadow-lg transition-all hover:shadow-xl"
               style={{
-                background: 'linear-gradient(to right, rgb(191, 164, 255), rgb(255, 199, 125))'
+                background: "linear-gradient(to right, rgb(191, 164, 255), rgb(255, 199, 125))",
               }}
             >
               Get Started
@@ -54,7 +52,7 @@ export default function HomePage() {
             </Link>
             <Link
               href="/docs"
-              className="inline-flex h-12 items-center justify-center rounded-md border border-gray-700 bg-gray-800/50 px-8 text-base font-medium text-white transition-all hover:border-primary hover:bg-gray-800"
+              className="hover:border-primary inline-flex h-12 items-center justify-center rounded-md border border-gray-700 bg-gray-800/50 px-8 text-base font-medium text-white transition-all hover:bg-gray-800"
             >
               Browse All Docs
             </Link>
@@ -107,9 +105,7 @@ export default function HomePage() {
               <span className="text-2xl">👥</span>
             </div>
             <h3 className="mb-2 text-lg font-semibold text-white">Community Pools</h3>
-            <p className="text-sm text-gray-400">
-              Save together with groups and share yields
-            </p>
+            <p className="text-sm text-gray-400">Save together with groups and share yields</p>
             <div className="mt-4 flex items-center text-sm font-medium text-purple-300">
               Learn more
               <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -124,9 +120,7 @@ export default function HomePage() {
               <span className="text-2xl">🔄</span>
             </div>
             <h3 className="mb-2 text-lg font-semibold text-white">Rotating Pool</h3>
-            <p className="text-sm text-gray-400">
-              Traditional ROSCA/Pasanaku on blockchain
-            </p>
+            <p className="text-sm text-gray-400">Traditional ROSCA/Pasanaku on blockchain</p>
             <div className="mt-4 flex items-center text-sm font-medium text-purple-300">
               Learn more
               <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -141,9 +135,7 @@ export default function HomePage() {
               <span className="text-2xl">🎰</span>
             </div>
             <h3 className="mb-2 text-lg font-semibold text-white">Prize Pool</h3>
-            <p className="text-sm text-gray-400">
-              No-loss lottery powered by yields
-            </p>
+            <p className="text-sm text-gray-400">No-loss lottery powered by yields</p>
             <div className="mt-4 flex items-center text-sm font-medium text-purple-300">
               Learn more
               <ArrowRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
@@ -224,7 +216,7 @@ export default function HomePage() {
               rel="noopener noreferrer"
               className="inline-flex h-12 items-center justify-center rounded-md px-8 text-base font-semibold text-gray-900 shadow-lg transition-all hover:shadow-xl"
               style={{
-                background: 'linear-gradient(to right, rgb(191, 164, 255), rgb(255, 199, 125))'
+                background: "linear-gradient(to right, rgb(191, 164, 255), rgb(255, 199, 125))",
               }}
             >
               Launch App

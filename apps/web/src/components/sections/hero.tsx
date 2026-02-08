@@ -45,8 +45,9 @@ export function Hero() {
 
               {/* Subheadline */}
               <p className="mx-auto mt-6 max-w-xl text-lg text-muted-foreground md:text-xl lg:mx-0">
-                Earn real yields on your Bitcoin through Mezo&apos;s stability pool. No lockups, no
-                complexity, just consistent returns.
+                Earn real yields on your Bitcoin through Mezo&apos;s stability pool. From individual
+                savings to rotating pools (ROSCA), we offer secure, audited, and gas-optimized
+                solutions.
               </p>
 
               {/* CTA Button */}

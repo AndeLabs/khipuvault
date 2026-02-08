@@ -55,7 +55,7 @@ export const MEZO_TESTNET_ADDRESSES = {
   individualPool: "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
   cooperativePool: "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88",
   lotteryPool: "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4",
-  rotatingPool: "0x0000000000000000000000000000000000000000",
+  rotatingPool: "0x0Bac59e87Af0D2e95711846BaDb124164382aafC", // V2 with native BTC support
 
   // Core Integration V3 - PRODUCTION
   mezoIntegration: "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6",

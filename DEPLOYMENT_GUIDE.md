@@ -81,6 +81,7 @@ Repetir proceso para web app:
    - **Install Command:** `pnpm install`
 
 4. Environment Variables:
+
    ```
    NEXT_PUBLIC_DOCS_URL=https://docs.khipuvault.com
    NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=<tu-project-id>
@@ -120,6 +121,7 @@ Una vez que tengas los proyectos en Vercel, configura el DNS:
 ### 2.1 Obtener Records de Vercel
 
 En cada proyecto de Vercel:
+
 1. Settings → Domains
 2. Add Domain
 3. Vercel te dará los DNS records necesarios
@@ -186,15 +188,17 @@ TTL: Auto
 **Archivo:** `apps/web/src/components/layout/header.tsx`
 
 **Cambiar:**
+
 ```typescript
 // Línea 38
-href="http://localhost:3002"
+href = "http://localhost:3002";
 
 // POR:
-href="https://docs.khipuvault.com"
+href = "https://docs.khipuvault.com";
 ```
 
 **O mejor, usar variable de entorno:**
+
 ```typescript
 const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL || 'http://localhost:3002';
 
@@ -204,11 +208,13 @@ const DOCS_URL = process.env.NEXT_PUBLIC_DOCS_URL || 'http://localhost:3002';
 ### 4.2 Environment Variables
 
 **Archivo:** `apps/web/.env.local`
+
 ```bash
 NEXT_PUBLIC_DOCS_URL=https://docs.khipuvault.com
 ```
 
 **Vercel Dashboard:**
+
 - Settings → Environment Variables
 - Add: `NEXT_PUBLIC_DOCS_URL` = `https://docs.khipuvault.com`
 - Para: Production, Preview, Development
@@ -218,6 +224,7 @@ NEXT_PUBLIC_DOCS_URL=https://docs.khipuvault.com
 **Archivo:** `apps/docs/lib/layout.shared.tsx`
 
 **Línea 13:**
+
 ```typescript
 { text: "Main App", url: "https://khipuvault.com", external: true },
 ```
@@ -332,12 +339,14 @@ ipconfig /flushdns
 **Error común:** `pnpm: command not found`
 
 **Solución:**
+
 - Vercel Settings → General → Build & Development Settings
 - Package Manager: `pnpm`
 
 **Error:** `Module not found: Can't resolve '@khipu/...'`
 
 **Solución:**
+
 - Asegurar que el build command incluya workspace root:
   ```bash
   cd ../.. && pnpm build --filter=@khipu/web
@@ -364,10 +373,12 @@ ipconfig /flushdns
 ### Uptime Monitoring
 
 Servicios gratuitos:
+
 - https://uptimerobot.com (50 monitores gratis)
 - https://www.freshping.io (50 checks gratis)
 
 Configurar:
+
 - Monitor: `https://khipuvault.com`
 - Monitor: `https://docs.khipuvault.com`
 - Interval: 5 minutos
@@ -422,6 +433,7 @@ vercel dev --listen 3000
 ### Headers de Seguridad
 
 Vercel los configura automáticamente:
+
 - ✅ HTTPS/TLS 1.3
 - ✅ HSTS
 - ✅ X-Frame-Options

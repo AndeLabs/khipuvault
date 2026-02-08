@@ -14,8 +14,8 @@ import { useReadContract, useAccount } from "wagmi";
 
 import RotatingPoolABI from "@/contracts/abis/RotatingPool.json";
 
-// Contract address - Update with deployed address
-const ROTATING_POOL_ADDRESS = "0x0000000000000000000000000000000000000000" as Address;
+// Contract address - Deployed on Mezo Testnet (v2 with native BTC support)
+const ROTATING_POOL_ADDRESS = "0x0Bac59e87Af0D2e95711846BaDb124164382aafC" as Address;
 
 /**
  * Pool status enum matching Solidity
