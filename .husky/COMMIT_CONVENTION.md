@@ -61,6 +61,7 @@ KhipuVault uses [Conventional Commits](https://www.conventionalcommits.org/) to 
 - `docker` - Docker setup
 - `env` - Environment
 - `test` - Testing infrastructure
+- `setup` - Project setup/installation
 
 ## Rules
 

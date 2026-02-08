@@ -79,6 +79,7 @@ module.exports = {
         'docker',
         'env',
         'test',
+        'setup',
       ],
     ],
   },
