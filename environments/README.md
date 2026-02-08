@@ -5,6 +5,7 @@
 ## Overview
 
 This directory contains environment-specific configuration files that control:
+
 - Contract addresses
 - Feature flags
 - API endpoints
@@ -27,6 +28,7 @@ environments/
 ### testnet/config.json
 
 Configuration for testnet.khipuvault.com:
+
 - All features enabled for testing
 - Testnet contract addresses
 - Debug tools enabled
@@ -35,6 +37,7 @@ Configuration for testnet.khipuvault.com:
 ### mainnet/config.json
 
 Configuration for khipuvault.com:
+
 - Only stable, audited features enabled
 - Mainnet contract addresses (update before launch)
 - Debug tools disabled
@@ -100,40 +103,40 @@ gh workflow run deploy-mainnet.yml \
 
 ### Product Features
 
-| Flag | Description | Testnet | Mainnet |
-|------|-------------|---------|---------|
-| `showIndividualSavings` | Individual Savings Pool | ✅ | ✅ |
-| `showCommunityPools` | Cooperative Pools | ✅ | ❌ |
-| `showRotatingPool` | ROSCA/Pasanaku | ✅ | ❌ |
-| `showPrizePool` | No-loss lottery | ✅ | ❌ |
-| `showReferralSystem` | Referral rewards | ❌ | ❌ |
+| Flag                    | Description             | Testnet | Mainnet |
+| ----------------------- | ----------------------- | ------- | ------- |
+| `showIndividualSavings` | Individual Savings Pool | ✅      | ✅      |
+| `showCommunityPools`    | Cooperative Pools       | ✅      | ❌      |
+| `showRotatingPool`      | ROSCA/Pasanaku          | ✅      | ❌      |
+| `showPrizePool`         | No-loss lottery         | ✅      | ❌      |
+| `showReferralSystem`    | Referral rewards        | ❌      | ❌      |
 
 ### Core Functionality
 
-| Flag | Description | Testnet | Mainnet |
-|------|-------------|---------|---------|
-| `enableAutoCompound` | Auto-compound yields | ✅ | ✅ |
-| `enableYieldClaiming` | Manual claiming | ✅ | ✅ |
-| `enablePartialWithdrawals` | Partial withdrawals | ✅ | ✅ |
-| `enableMultiToken` | Multi-token support | ❌ | ❌ |
+| Flag                       | Description          | Testnet | Mainnet |
+| -------------------------- | -------------------- | ------- | ------- |
+| `enableAutoCompound`       | Auto-compound yields | ✅      | ✅      |
+| `enableYieldClaiming`      | Manual claiming      | ✅      | ✅      |
+| `enablePartialWithdrawals` | Partial withdrawals  | ✅      | ✅      |
+| `enableMultiToken`         | Multi-token support  | ❌      | ❌      |
 
 ### Advanced Features
 
-| Flag | Description | Testnet | Mainnet |
-|------|-------------|---------|---------|
-| `enableAnalytics` | Analytics dashboard | ✅ | ✅ |
-| `enableNotifications` | Push notifications | ❌ | ❌ |
-| `enablePortfolio` | Portfolio tracking | ✅ | ❌ |
-| `enableSocial` | Social features | ❌ | ❌ |
+| Flag                  | Description         | Testnet | Mainnet |
+| --------------------- | ------------------- | ------- | ------- |
+| `enableAnalytics`     | Analytics dashboard | ✅      | ✅      |
+| `enableNotifications` | Push notifications  | ❌      | ❌      |
+| `enablePortfolio`     | Portfolio tracking  | ✅      | ❌      |
+| `enableSocial`        | Social features     | ❌      | ❌      |
 
 ### System Controls
 
-| Flag | Description | Testnet | Mainnet |
-|------|-------------|---------|---------|
-| `maintenanceMode` | Show maintenance page | ❌ | ❌ |
-| `readOnlyMode` | Disable all writes | ❌ | ❌ |
-| `showTestnetBanner` | Testnet warning | ✅ | ❌ |
-| `enableDebugTools` | Debug tools | ✅ | ❌ |
+| Flag                | Description           | Testnet | Mainnet |
+| ------------------- | --------------------- | ------- | ------- |
+| `maintenanceMode`   | Show maintenance page | ❌      | ❌      |
+| `readOnlyMode`      | Disable all writes    | ❌      | ❌      |
+| `showTestnetBanner` | Testnet warning       | ✅      | ❌      |
+| `enableDebugTools`  | Debug tools           | ✅      | ❌      |
 
 ## Contract Addresses
 
@@ -252,5 +255,6 @@ vercel rollback --prod
 ## Questions?
 
 See parent directory documentation:
+
 - [PROMOTION_STRATEGY.md](../PROMOTION_STRATEGY.md) - Full promotion workflow
 - [ENVIRONMENT_SWITCH.md](../ENVIRONMENT_SWITCH.md) - Environment switching guide

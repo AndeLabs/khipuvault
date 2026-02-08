@@ -86,16 +86,19 @@ vercel env pull .env.local
 2. Click "Add Domain"
 
 #### Main Domain (Production - main branch)
+
 - Domain: `khipuvault.com`
 - Git Branch: `main`
 - Click "Add"
 
 #### WWW Redirect
+
 - Domain: `www.khipuvault.com`
 - Redirect to: `khipuvault.com`
 - Click "Add"
 
 #### Testnet Subdomain (Preview - testnet branch)
+
 - Domain: `testnet.khipuvault.com`
 - Git Branch: `testnet`
 - Click "Add"
@@ -145,22 +148,24 @@ Go to Project Settings → Git
 Configure in GitHub Settings → Branches:
 
 #### Main Branch
+
 ```yaml
 Branch protection rules for "main":
-- Require pull request reviews (2 approvers)
-- Require status checks to pass
-- Require branches to be up to date
-- Require conversation resolution
-- Restrict who can push
-- Do not allow force pushes
+  - Require pull request reviews (2 approvers)
+  - Require status checks to pass
+  - Require branches to be up to date
+  - Require conversation resolution
+  - Restrict who can push
+  - Do not allow force pushes
 ```
 
 #### Testnet Branch
+
 ```yaml
 Branch protection rules for "testnet":
-- Require pull request reviews (1 approver)
-- Require status checks to pass
-- Allow force pushes (for testing)
+  - Require pull request reviews (1 approver)
+  - Require status checks to pass
+  - Allow force pushes (for testing)
 ```
 
 ## Step 5: Configure Build Settings
@@ -207,10 +212,12 @@ git diff --quiet HEAD^ HEAD -- apps/web packages/web3 packages/ui packages/share
 ### Deployment Protection
 
 For production (main branch):
+
 - Enable Vercel Authentication: ❌ (Public app)
 - Enable Password Protection: ❌ (Public app)
 
 For preview (testnet branch):
+
 - Enable Vercel Authentication: ✅ (Optional - for internal testing)
 - Enable Password Protection: ✅ (Optional - for internal testing)
 
@@ -246,6 +253,7 @@ vercel logs <deployment-url>
 ### Enable Vercel Analytics
 
 Project Settings → Analytics
+
 - Enable Web Analytics: ✅
 - Enable Audience: ✅
 - Enable Speed Insights: ✅
@@ -273,18 +281,23 @@ export default function RootLayout({ children }) {
 ## Troubleshooting
 
 ### Issue: Domain not resolving
+
 **Solution:** Check DNS propagation with `dig khipuvault.com` or use https://dnschecker.org
 
 ### Issue: Wrong environment variables
+
 **Solution:** Verify branch-specific env vars in Vercel dashboard, redeploy
 
 ### Issue: Build failing
+
 **Solution:** Check build logs in Vercel, ensure monorepo build works locally
 
 ### Issue: 404 on custom domain
+
 **Solution:** Ensure domain is verified in Vercel, check DNS CNAME records
 
 ### Issue: SSL certificate errors
+
 **Solution:** Vercel auto-generates SSL certs, wait up to 24h or contact Vercel support
 
 ## Useful Commands
@@ -343,7 +356,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod'
+          vercel-args: "--prod"
 ```
 
 ## Security Checklist
