@@ -97,7 +97,7 @@ jobs:
           version: nightly
 
       - name: Run Slither Security Scan
-        uses: crytic/slither-action@v0.4.0
+        uses: crytic/slither-action@v0.4.2
         continue-on-error: false
         with:
           target: packages/contracts/
