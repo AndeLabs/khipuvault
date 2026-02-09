@@ -13,20 +13,20 @@ import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
  * @title RotatingPool
  * @notice ROSCA (Rotating Savings and Credit Association) implementation with DeFi yields
  * @dev Turn-based distribution system where members take turns receiving pool funds
- * 
+ *
  * How it works:
  * - Fixed number of members commit to regular contributions
  * - Each period (month), one member receives the total pool
  * - Order is predetermined at pool creation
  * - Meanwhile, funds generate DeFi yields
  * - Extra yields are distributed at the end
- * 
+ *
  * Benefits:
  * - Traditional ROSCA + DeFi yields
  * - Predictable payout schedule
  * - Community trust + smart contract security
  * - Last members benefit from accumulated yields
- * 
+ *
  * Example:
  * - 12 members, 0.01 BTC/month contribution
  * - Month 1: Member 1 receives 0.12 BTC
@@ -45,10 +45,11 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @notice Pool status
      */
     enum PoolStatus {
-        FORMING,        // Accepting members
-        ACTIVE,         // Pool is running
-        COMPLETED,      // All payouts done
-        CANCELLED       // Pool cancelled
+        FORMING, // Accepting members
+        ACTIVE, // Pool is running
+        COMPLETED, // All payouts done
+        CANCELLED // Pool cancelled
+
     }
 
     /**
@@ -58,19 +59,19 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         uint256 poolId;
         string name;
         address creator;
-        uint256 memberCount;            // Total members
-        uint256 contributionAmount;     // Contribution per member per period
-        uint256 periodDuration;         // Duration of each period (in seconds)
-        uint256 currentPeriod;          // Current payout period (0-indexed)
-        uint256 totalPeriods;           // Total periods (equals member count)
-        uint256 startTime;              // Pool start time
-        uint256 totalBtcCollected;      // Total BTC collected
-        uint256 totalMusdMinted;        // Total MUSD minted
-        uint256 totalYieldGenerated;    // Total yields generated
-        uint256 yieldDistributed;       // Yields already distributed
-        PoolStatus status;              // Current status
-        bool autoAdvance;               // Auto-advance to next period
-        bool useNativeBtc;              // True if pool uses native BTC, false if WBTC
+        uint256 memberCount; // Total members
+        uint256 contributionAmount; // Contribution per member per period
+        uint256 periodDuration; // Duration of each period (in seconds)
+        uint256 currentPeriod; // Current payout period (0-indexed)
+        uint256 totalPeriods; // Total periods (equals member count)
+        uint256 startTime; // Pool start time
+        uint256 totalBtcCollected; // Total BTC collected
+        uint256 totalMusdMinted; // Total MUSD minted
+        uint256 totalYieldGenerated; // Total yields generated
+        uint256 yieldDistributed; // Yields already distributed
+        PoolStatus status; // Current status
+        bool autoAdvance; // Auto-advance to next period
+        bool useNativeBtc; // True if pool uses native BTC, false if WBTC
     }
 
     /**
@@ -78,13 +79,13 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      */
     struct MemberInfo {
         address memberAddress;
-        uint256 memberIndex;            // Position in payout order (0-indexed)
-        uint256 contributionsMade;      // Number of contributions made
-        uint256 totalContributed;       // Total BTC contributed
-        uint256 payoutReceived;         // Amount received in their turn
-        uint256 yieldReceived;          // Extra yield received
-        bool hasReceivedPayout;         // Whether received main payout
-        bool active;                    // Member is active
+        uint256 memberIndex; // Position in payout order (0-indexed)
+        uint256 contributionsMade; // Number of contributions made
+        uint256 totalContributed; // Total BTC contributed
+        uint256 payoutReceived; // Amount received in their turn
+        uint256 yieldReceived; // Extra yield received
+        bool hasReceivedPayout; // Whether received main payout
+        bool active; // Member is active
     }
 
     /**
@@ -186,18 +187,11 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         uint256 periodDuration
     );
 
-    event MemberJoined(
-        uint256 indexed poolId,
-        address indexed member,
-        uint256 memberIndex
-    );
+    event PoolStarted(uint256 indexed poolId, uint256 startTime);
 
-    event ContributionMade(
-        uint256 indexed poolId,
-        address indexed member,
-        uint256 periodNumber,
-        uint256 amount
-    );
+    event MemberJoined(uint256 indexed poolId, address indexed member, uint256 memberIndex);
+
+    event ContributionMade(uint256 indexed poolId, address indexed member, uint256 periodNumber, uint256 amount);
 
     event PayoutDistributed(
         uint256 indexed poolId,
@@ -207,41 +201,21 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         uint256 yieldAmount
     );
 
-    event PeriodAdvanced(
-        uint256 indexed poolId,
-        uint256 newPeriod
-    );
+    event PeriodAdvanced(uint256 indexed poolId, uint256 newPeriod);
 
-    event PoolCompleted(
-        uint256 indexed poolId,
-        uint256 totalYieldDistributed
-    );
+    event PeriodCompleted(uint256 indexed poolId, uint256 period, uint256 totalContributions, uint256 yieldGenerated);
 
-    event PoolCancelled(
-        uint256 indexed poolId,
-        string reason
-    );
+    event PoolCompleted(uint256 indexed poolId, uint256 totalYieldDistributed);
 
-    event RefundClaimed(
-        uint256 indexed poolId,
-        address indexed member,
-        uint256 amount
-    );
+    event PoolCancelled(uint256 indexed poolId, string reason);
 
-    event PerformanceFeeUpdated(
-        uint256 oldFee,
-        uint256 newFee
-    );
+    event RefundClaimed(uint256 indexed poolId, address indexed member, uint256 amount);
 
-    event FeeCollectorUpdated(
-        address indexed oldCollector,
-        address indexed newCollector
-    );
+    event PerformanceFeeUpdated(uint256 oldFee, uint256 newFee);
 
-    event NativeBtcReceived(
-        address indexed sender,
-        uint256 amount
-    );
+    event FeeCollectorUpdated(address indexed oldCollector, address indexed newCollector);
+
+    event NativeBtcReceived(address indexed sender, uint256 amount);
 
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -299,18 +273,12 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @param _musd MUSD token address
      * @param _feeCollector Fee collector address
      */
-    constructor(
-        address _mezoIntegration,
-        address _yieldAggregator,
-        address _wbtc,
-        address _musd,
-        address _feeCollector
-    ) Ownable(msg.sender) {
-        if (_mezoIntegration == address(0) ||
-            _yieldAggregator == address(0) ||
-            _wbtc == address(0) ||
-            _musd == address(0) ||
-            _feeCollector == address(0)
+    constructor(address _mezoIntegration, address _yieldAggregator, address _wbtc, address _musd, address _feeCollector)
+        Ownable(msg.sender)
+    {
+        if (
+            _mezoIntegration == address(0) || _yieldAggregator == address(0) || _wbtc == address(0)
+                || _musd == address(0) || _feeCollector == address(0)
         ) revert InvalidAddress();
 
         MEZO_INTEGRATION = IMezoIntegration(_mezoIntegration);
@@ -340,11 +308,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         uint256 periodDuration,
         bool useNativeBtc,
         address[] memory memberAddresses
-    )
-        external
-        whenNotPaused
-        returns (uint256 poolId) 
-    {
+    ) external whenNotPaused returns (uint256 poolId) {
         if (memberCount < MIN_MEMBERS || memberCount > MAX_MEMBERS) {
             revert InvalidMemberCount();
         }
@@ -376,14 +340,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
             useNativeBtc: useNativeBtc // Set at creation - immutable
         });
 
-        emit PoolCreated(
-            poolId,
-            msg.sender,
-            name,
-            memberCount,
-            contributionAmount,
-            periodDuration
-        );
+        emit PoolCreated(poolId, msg.sender, name, memberCount, contributionAmount, periodDuration);
 
         // If member addresses provided, add them automatically
         if (memberAddresses.length > 0) {
@@ -392,6 +349,19 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
                     _addMember(poolId, memberAddresses[i], i);
                 }
             }
+        }
+
+        // AUTO-START FIX: If all members were provided at creation, automatically start the pool
+        // This improves UX by eliminating the need for an extra transaction
+        // Pool creator can still create pools without members and start them manually later
+        if (poolMembersList[poolId].length == memberCount) {
+            pools[poolId].status = PoolStatus.ACTIVE;
+            pools[poolId].startTime = block.timestamp;
+
+            // Initialize first period
+            _initializePeriod(poolId, 0);
+
+            emit PoolStarted(poolId, block.timestamp);
         }
     }
 
@@ -403,11 +373,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @notice Join a rotating pool
      * @param poolId Pool ID
      */
-    function joinPool(uint256 poolId) 
-        external 
-        nonReentrant 
-        whenNotPaused 
-    {
+    function joinPool(uint256 poolId) external nonReentrant whenNotPaused {
         PoolInfo storage pool = pools[poolId];
         if (pool.poolId == 0) revert InvalidPoolId();
         if (pool.status != PoolStatus.FORMING) revert PoolNotForming();
@@ -416,6 +382,18 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
 
         uint256 memberIndex = poolMembersList[poolId].length;
         _addMember(poolId, msg.sender, memberIndex);
+
+        // AUTO-START FIX: If this was the last member needed, automatically start the pool
+        // This improves UX by eliminating the need for an extra transaction
+        if (poolMembersList[poolId].length == pool.memberCount) {
+            pool.status = PoolStatus.ACTIVE;
+            pool.startTime = block.timestamp;
+
+            // Initialize first period
+            _initializePeriod(poolId, 0);
+
+            emit PoolStarted(poolId, block.timestamp);
+        }
     }
 
     /**
@@ -423,11 +401,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @param poolId Pool ID
      * @dev CEI PATTERN: State updates BEFORE external calls where possible
      */
-    function makeContribution(uint256 poolId)
-        external
-        nonReentrant
-        whenNotPaused
-    {
+    function makeContribution(uint256 poolId) external nonReentrant whenNotPaused {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
 
@@ -474,12 +448,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @dev UX IMPROVEMENT: Accepts native BTC for better user experience
      *      No approval needed - just send BTC with the transaction
      */
-    function makeContributionNative(uint256 poolId)
-        external
-        payable
-        nonReentrant
-        whenNotPaused
-    {
+    function makeContributionNative(uint256 poolId) external payable nonReentrant whenNotPaused {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
 
@@ -525,11 +494,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @dev CEI PATTERN: State updates BEFORE external transfers
      *      H-02 FIX: noFlashLoan prevents same-block deposit+claim
      */
-    function claimPayout(uint256 poolId)
-        external
-        nonReentrant
-        noFlashLoan
-    {
+    function claimPayout(uint256 poolId) external nonReentrant noFlashLoan {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
 
@@ -592,7 +557,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
             if (address(this).balance < payoutAmount) revert InsufficientNativeBtcBalance();
 
             // Pay out in native BTC for native BTC pools
-            (bool success, ) = msg.sender.call{value: payoutAmount}("");
+            (bool success,) = msg.sender.call{value: payoutAmount}("");
             require(success, "Native BTC transfer failed");
         } else {
             // Pay out in WBTC for WBTC pools
@@ -614,11 +579,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @dev FIX H-01: Allows members to claim refunds when pool is cancelled
      *      Uses CEI pattern: state updates BEFORE external transfers
      */
-    function claimRefund(uint256 poolId)
-        external
-        nonReentrant
-        whenNotPaused
-    {
+    function claimRefund(uint256 poolId) external nonReentrant whenNotPaused {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
 
@@ -643,7 +604,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
             if (address(this).balance < refundAmount) revert InsufficientNativeBtcBalance();
 
             // Refund in native BTC for native BTC pools
-            (bool success, ) = msg.sender.call{value: refundAmount}("");
+            (bool success,) = msg.sender.call{value: refundAmount}("");
             require(success, "Native BTC refund failed");
         } else {
             // Refund in WBTC for WBTC pools
@@ -660,10 +621,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @param poolId Pool ID
      * @dev FIX H-03: Added access control - only pool members or after period elapsed
      */
-    function advancePeriod(uint256 poolId)
-        external
-        nonReentrant
-    {
+    function advancePeriod(uint256 poolId) external nonReentrant {
         PoolInfo storage pool = pools[poolId];
         if (pool.poolId == 0) revert InvalidPoolId();
         if (pool.status != PoolStatus.ACTIVE) revert PoolNotActive();
@@ -686,10 +644,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @notice Start the pool (only creator)
      * @param poolId Pool ID
      */
-    function startPool(uint256 poolId) 
-        external 
-        nonReentrant 
-    {
+    function startPool(uint256 poolId) external nonReentrant {
         PoolInfo storage pool = pools[poolId];
         if (pool.poolId == 0) revert InvalidPoolId();
         if (pool.status != PoolStatus.FORMING) revert PoolNotForming();
@@ -710,55 +665,35 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     /**
      * @notice Get pool information
      */
-    function getPoolInfo(uint256 poolId) 
-        external 
-        view 
-        returns (PoolInfo memory) 
-    {
+    function getPoolInfo(uint256 poolId) external view returns (PoolInfo memory) {
         return pools[poolId];
     }
 
     /**
      * @notice Get member information
      */
-    function getMemberInfo(uint256 poolId, address member) 
-        external 
-        view 
-        returns (MemberInfo memory) 
-    {
+    function getMemberInfo(uint256 poolId, address member) external view returns (MemberInfo memory) {
         return poolMembers[poolId][member];
     }
 
     /**
      * @notice Get period information
      */
-    function getPeriodInfo(uint256 poolId, uint256 periodNumber) 
-        external 
-        view 
-        returns (PeriodInfo memory) 
-    {
+    function getPeriodInfo(uint256 poolId, uint256 periodNumber) external view returns (PeriodInfo memory) {
         return poolPeriods[poolId][periodNumber];
     }
 
     /**
      * @notice Get all members of a pool
      */
-    function getPoolMembers(uint256 poolId) 
-        external 
-        view 
-        returns (address[] memory) 
-    {
+    function getPoolMembers(uint256 poolId) external view returns (address[] memory) {
         return poolMembersList[poolId];
     }
 
     /**
      * @notice Get member at specific index in payout order
      */
-    function getMemberAtIndex(uint256 poolId, uint256 index) 
-        external 
-        view 
-        returns (address) 
-    {
+    function getMemberAtIndex(uint256 poolId, uint256 index) external view returns (address) {
         return poolMemberOrder[poolId][index];
     }
 
@@ -766,27 +701,23 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      * @notice Calculate pending yield for pool
      * @dev poolId is reserved for future per-pool yield tracking
      */
-    function getPendingYield(uint256 /* poolId */)
-        external
-        view
-        returns (uint256)
-    {
+    function getPendingYield(uint256 /* poolId */ ) external view returns (uint256) {
         return YIELD_AGGREGATOR.getPendingYield(address(this));
     }
 
     /**
      * @notice Get pool statistics
      */
-    function getPoolStats(uint256 poolId) 
-        external 
-        view 
+    function getPoolStats(uint256 poolId)
+        external
+        view
         returns (
             uint256 totalBtc,
             uint256 totalMusd,
             uint256 totalYield,
             uint256 periodsCompleted,
             uint256 membersWithPayout
-        ) 
+        )
     {
         PoolInfo memory pool = pools[poolId];
         totalBtc = pool.totalBtcCollected;
@@ -905,7 +836,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
             endTime: block.timestamp + pool.periodDuration,
             recipient: recipient,
             payoutAmount: 0, // Will be set when period completes
-            yieldAmount: 0,  // Will be set when period completes
+            yieldAmount: 0, // Will be set when period completes
             completed: false,
             paid: false
         });
@@ -941,12 +872,12 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
 
         // Calculate yield generated - use proportional calculation
         uint256 pendingYield = YIELD_AGGREGATOR.getPendingYield(address(this));
-        
+
         // Calcular yield proporcional para este período
         // Cada período debería recibir yields proporcionales a su aporte
         uint256 totalPoolContribution = pool.contributionAmount * pool.memberCount * pool.totalPeriods;
         uint256 yieldForPeriod;
-        
+
         if (totalPoolContribution > 0 && pendingYield > pool.yieldDistributed) {
             uint256 remainingYield = pendingYield - pool.yieldDistributed;
 
@@ -977,13 +908,16 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
         pool.totalYieldGenerated += yieldForPeriod;
         pool.yieldDistributed += yieldForPeriod;
 
-        // Advance to next period if not last
+        // Emit period completed event
+        emit PeriodCompleted(poolId, periodNumber, payoutAmount, yieldForPeriod);
+
+        // AUTO-ADVANCE FIX: Always advance to next period when all members contribute
+        // This is better UX - the pool naturally progresses when everyone does their part
+        // The autoAdvance flag is kept for potential manual/time-based advancement
         if (pool.currentPeriod < pool.totalPeriods - 1) {
-            if (pool.autoAdvance) {
-                _advancePeriod(poolId);
-            }
+            _advancePeriod(poolId);
         } else {
-            // Pool completed
+            // Pool completed - all periods done
             pool.status = PoolStatus.COMPLETED;
             emit PoolCompleted(poolId, pool.totalYieldGenerated);
         }
@@ -994,7 +928,7 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
      */
     function _advancePeriod(uint256 poolId) internal {
         PoolInfo storage pool = pools[poolId];
-        
+
         uint256 newPeriod = pool.currentPeriod + 1;
         if (newPeriod >= pool.totalPeriods) revert InvalidPeriod();
 
@@ -1035,15 +969,12 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     /**
      * @notice Cancel a pool (emergency only)
      */
-    function cancelPool(uint256 poolId, string memory reason) 
-        external 
-        onlyOwner 
-    {
+    function cancelPool(uint256 poolId, string memory reason) external onlyOwner {
         PoolInfo storage pool = pools[poolId];
         if (pool.poolId == 0) revert InvalidPoolId();
-        
+
         pool.status = PoolStatus.CANCELLED;
-        
+
         emit PoolCancelled(poolId, reason);
     }
 
