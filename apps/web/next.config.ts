@@ -77,7 +77,7 @@ const nextConfig: NextConfig = {
             value: [
               "default-src 'self'",
               // Scripts: self, inline (needed for Next.js), and eval (needed for wagmi/viem)
-              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.metamask.io https://*.privy.io",
+              "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.metamask.io https://*.privy.io https://vercel.live https://*.vercel.live",
               // Styles: self and inline (needed for Tailwind)
               "style-src 'self' 'unsafe-inline'",
               // Images: self, data URIs, and common image hosts
