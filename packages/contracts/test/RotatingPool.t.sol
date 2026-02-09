@@ -67,49 +67,21 @@ contract RotatingPoolTest is Test {
         uint256 periodDuration
     );
 
-    event MemberJoined(
-        uint256 indexed poolId,
-        address indexed member,
-        uint256 memberIndex
-    );
+    event MemberJoined(uint256 indexed poolId, address indexed member, uint256 memberIndex);
 
-    event PoolStarted(
-        uint256 indexed poolId,
-        uint256 startTime
-    );
+    event PoolStarted(uint256 indexed poolId, uint256 startTime);
 
-    event ContributionMade(
-        uint256 indexed poolId,
-        address indexed member,
-        uint256 period,
-        uint256 amount
-    );
+    event ContributionMade(uint256 indexed poolId, address indexed member, uint256 period, uint256 amount);
 
-    event PeriodCompleted(
-        uint256 indexed poolId,
-        uint256 period,
-        uint256 totalContributions,
-        uint256 yieldGenerated
-    );
+    event PeriodCompleted(uint256 indexed poolId, uint256 period, uint256 totalContributions, uint256 yieldGenerated);
 
     event PayoutDistributed(
-        uint256 indexed poolId,
-        uint256 memberIndex,
-        address indexed member,
-        uint256 amount,
-        uint256 yield
+        uint256 indexed poolId, uint256 memberIndex, address indexed member, uint256 amount, uint256 yield
     );
 
-    event RefundClaimed(
-        uint256 indexed poolId,
-        address indexed member,
-        uint256 amount
-    );
+    event RefundClaimed(uint256 indexed poolId, address indexed member, uint256 amount);
 
-    event PoolCancelled(
-        uint256 indexed poolId,
-        string reason
-    );
+    event PoolCancelled(uint256 indexed poolId, string reason);
 
     /*//////////////////////////////////////////////////////////////
                             SETUP
@@ -128,11 +100,7 @@ contract RotatingPoolTest is Test {
         // Deploy RotatingPool
         vm.prank(owner);
         pool = new RotatingPool(
-            address(mezoIntegration),
-            address(yieldAggregator),
-            address(wbtc),
-            address(musd),
-            feeCollector
+            address(mezoIntegration), address(yieldAggregator), address(wbtc), address(musd), feeCollector
         );
 
         // Mint WBTC to test members
@@ -278,7 +246,11 @@ contract RotatingPoolTest is Test {
             uint256 periodDuration,
             uint256 currentPeriod,
             uint256 totalPeriods,
-            ,,,,,
+            ,
+            ,
+            ,
+            ,
+            ,
             RotatingPool.PoolStatus status,
             ,
             bool useNativeBtc
@@ -321,14 +293,7 @@ contract RotatingPoolTest is Test {
         members[2] = member3;
 
         vm.prank(owner);
-        uint256 poolId = pool.createPool(
-            "Predefined ROSCA",
-            3,
-            CONTRIBUTION,
-            PERIOD_DURATION,
-            false,
-            members
-        );
+        uint256 poolId = pool.createPool("Predefined ROSCA", 3, CONTRIBUTION, PERIOD_DURATION, false, members);
 
         // Check members were added
         address[] memory poolMembers = pool.getPoolMembers(poolId);
@@ -337,17 +302,13 @@ contract RotatingPoolTest is Test {
         assertEq(poolMembers[1], member2);
         assertEq(poolMembers[2], member3);
 
-        // Pool should still be FORMING (not auto-started)
-        (,,,,,,,,,,,,,RotatingPool.PoolStatus status,,) = pool.pools(poolId);
-        assertTrue(status == RotatingPool.PoolStatus.FORMING);
+        // Pool should be AUTO-STARTED when all members are provided at creation
+        (,,,,,,,,,,,,, RotatingPool.PoolStatus status,,) = pool.pools(poolId);
+        assertTrue(status == RotatingPool.PoolStatus.ACTIVE, "Pool should be ACTIVE after creation with all members");
 
-        // Creator must manually start the pool
-        vm.prank(owner);
-        pool.startPool(poolId);
-
-        // Now it should be ACTIVE
-        (,,,,,,,,,,,,,RotatingPool.PoolStatus statusAfter,,) = pool.pools(poolId);
-        assertTrue(statusAfter == RotatingPool.PoolStatus.ACTIVE);
+        // Verify pool start time is set
+        (,,,,,,,, uint256 startTime,,,,,,,) = pool.pools(poolId);
+        assertGt(startTime, 0, "Start time should be set");
     }
 
     function testRevert_CreatePool_InvalidMemberCount() public {
@@ -450,7 +411,7 @@ contract RotatingPoolTest is Test {
         pool.joinPool(poolId);
 
         // Check pool status
-        (,,,,,,,,,,,,,RotatingPool.PoolStatus status,,) = pool.pools(poolId);
+        (,,,,,,,,,,,,, RotatingPool.PoolStatus status,,) = pool.pools(poolId);
         assertTrue(status == RotatingPool.PoolStatus.ACTIVE);
     }
 
@@ -504,9 +465,11 @@ contract RotatingPoolTest is Test {
         vm.prank(member3);
         pool.joinPool(poolId);
 
-        // Pool is full, try to join
+        // AUTO-START FIX: Pool automatically started when member3 joined (last member)
+        // So member4 trying to join will get PoolNotForming (not PoolFull)
+        // because the pool is now ACTIVE
         vm.prank(member4);
-        vm.expectRevert(RotatingPool.PoolFull.selector);
+        vm.expectRevert(RotatingPool.PoolNotForming.selector);
         pool.joinPool(poolId);
     }
 
@@ -532,12 +495,12 @@ contract RotatingPoolTest is Test {
         pool.makeContribution(poolId);
 
         // Check member info
-        (,, uint256 contributionsMade, uint256 totalContributed,,,, ) = pool.poolMembers(poolId, member1);
+        (,, uint256 contributionsMade, uint256 totalContributed,,,,) = pool.poolMembers(poolId, member1);
         assertEq(contributionsMade, 1);
         assertEq(totalContributed, CONTRIBUTION);
 
         // Check pool collected
-        (,,,,,,,,,uint256 totalBtcCollected,,,,,,) = pool.pools(poolId);
+        (,,,,,,,,, uint256 totalBtcCollected,,,,,,) = pool.pools(poolId);
         assertEq(totalBtcCollected, CONTRIBUTION);
     }
 
@@ -579,7 +542,7 @@ contract RotatingPoolTest is Test {
         pool.makeContributionNative{value: CONTRIBUTION}(poolId);
 
         // Check member info
-        (,, uint256 contributionsMade, uint256 totalContributed,,,, ) = pool.poolMembers(poolId, member1);
+        (,, uint256 contributionsMade, uint256 totalContributed,,,,) = pool.poolMembers(poolId, member1);
         assertEq(contributionsMade, 1);
         assertEq(totalContributed, CONTRIBUTION);
 
@@ -725,6 +688,9 @@ contract RotatingPoolTest is Test {
         vm.prank(address(pool));
         payable(owner).transfer(contractBalance);
 
+        // FLASH LOAN PROTECTION: Move to next block to avoid SameBlockWithdrawal error
+        vm.roll(block.number + 1);
+
         // Member tries to claim payout - should revert with clear error
         vm.prank(member1);
         vm.expectRevert(RotatingPool.InsufficientNativeBtcBalance.selector);
@@ -786,6 +752,10 @@ contract RotatingPoolTest is Test {
         assertEq(currentPeriodBefore, 0);
 
         // Member 3 contributes - should auto-complete period
+        // Note: We expect both ContributionMade and PeriodCompleted events
+        vm.expectEmit(true, true, false, true);
+        emit ContributionMade(poolId, member3, 0, CONTRIBUTION);
+
         vm.expectEmit(true, false, false, false);
         emit PeriodCompleted(poolId, 0, CONTRIBUTION * 3, 0);
 
@@ -848,6 +818,9 @@ contract RotatingPoolTest is Test {
         vm.prank(member3);
         pool.makeContribution(poolId);
 
+        // FLASH LOAN PROTECTION: Move to next block to avoid SameBlockWithdrawal error
+        vm.roll(block.number + 1);
+
         // Period auto-completes, member 1 can claim
         uint256 balanceBefore = wbtc.balanceOf(member1);
 
@@ -878,6 +851,9 @@ contract RotatingPoolTest is Test {
 
         vm.prank(member3);
         pool.makeContributionNative{value: CONTRIBUTION}(poolId);
+
+        // FLASH LOAN PROTECTION: Move to next block to avoid SameBlockWithdrawal error
+        vm.roll(block.number + 1);
 
         // Period auto-completes, member 1 can claim
         uint256 balanceBefore = member1.balance;
@@ -1083,7 +1059,7 @@ contract RotatingPoolTest is Test {
         uint256 balanceBefore = address(pool).balance;
 
         // Send BTC to contract
-        (bool success, ) = address(pool).call{value: 1 ether}("");
+        (bool success,) = address(pool).call{value: 1 ether}("");
         assertTrue(success);
 
         uint256 balanceAfter = address(pool).balance;

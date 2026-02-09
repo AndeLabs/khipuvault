@@ -138,11 +138,11 @@ export const CONTRACT_ADDRESSES = {
   /**
    * Cooperative Savings Pool (V3)
    * Community pooled savings with native BTC deposits
-   * Proxy: 0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65
+   * Proxy: 0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88
    */
   COOPERATIVE_POOL: getEnvAddress(
     ENV_KEYS.COOPERATIVE_POOL,
-    "0x9629B9Cddc4234850FE4CEfa3232aD000f5D7E65"
+    "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88"
   ),
 
   /**
