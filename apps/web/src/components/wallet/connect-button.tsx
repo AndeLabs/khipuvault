@@ -78,7 +78,9 @@ export function ConnectButton() {
       // Fix stale connection state: if we have address or connector but isConnected is false
       if (!isConnected && (address || connector)) {
         // eslint-disable-next-line no-console
-        console.log("⚠️ Detected stale connection (address/connector present but isConnected=false). Disconnecting...");
+        console.log(
+          "⚠️ Detected stale connection (address/connector present but isConnected=false). Disconnecting..."
+        );
         disconnect();
       }
     }

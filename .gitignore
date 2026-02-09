@@ -209,3 +209,4 @@ semgrep-report.json
 license-report.json
 license-report.csv
 license-report.md
+.env*.local

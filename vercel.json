@@ -1,9 +1,9 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "pnpm build",
-  "devCommand": "pnpm dev",
-  "installCommand": "pnpm install",
-  "framework": "nextjs",
+  "buildCommand": "pnpm turbo build --filter=@khipu/web...",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": "apps/web/.next",
+  "framework": null,
   "regions": ["iad1"],
   "headers": [
     {

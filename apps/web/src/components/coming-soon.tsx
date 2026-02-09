@@ -103,7 +103,7 @@ export function ComingSoon() {
         {/* Network Badge */}
         <div className="mt-12">
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm text-muted-foreground">
-            <div className="h-2 w-2 rounded-full bg-warning animate-pulse" />
+            <div className="h-2 w-2 animate-pulse rounded-full bg-warning" />
             <span>Currently in Testnet • Mainnet Coming Soon</span>
           </div>
         </div>

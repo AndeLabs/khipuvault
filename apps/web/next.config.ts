@@ -23,6 +23,8 @@ if (typeof globalThis.localStorage === "undefined") {
 }
 
 const nextConfig: NextConfig = {
+  // CRITICAL: Set output file tracing root to monorepo root for proper dependency resolution
+  outputFileTracingRoot: path.join(__dirname, "../../"),
   typescript: {
     // Enable type checking during builds for production safety
     ignoreBuildErrors: process.env.NODE_ENV !== "production",
@@ -103,8 +105,14 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-  // Transpile Mezo Passport and dependencies for Next.js 15
+  // Transpile internal workspace packages and Mezo dependencies for Next.js 15
+  // This ensures packages are compiled from source during build, even in CI/CD environments
   transpilePackages: [
+    // Internal workspace packages (required for Vercel builds)
+    "@khipu/shared",
+    "@khipu/web3",
+    "@khipu/ui",
+    // Mezo Passport and dependencies
     "@mezo-org/passport",
     "@mezo-org/orangekit",
     "@mezo-org/orangekit-smart-account",

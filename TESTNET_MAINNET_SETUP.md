@@ -47,19 +47,19 @@ Go to [Vercel Dashboard](https://vercel.com/andelabs/khipuvault) → Settings �
 
 #### For Production (main branch)
 
-| Variable | Value | Environment |
-|----------|-------|-------------|
-| NEXT_PUBLIC_NETWORK | `mainnet` | Production |
-| NEXT_PUBLIC_APP_URL | `https://khipuvault.com` | Production |
-| NEXT_PUBLIC_API_URL | `https://api.khipuvault.com` | Production |
+| Variable            | Value                        | Environment |
+| ------------------- | ---------------------------- | ----------- |
+| NEXT_PUBLIC_NETWORK | `mainnet`                    | Production  |
+| NEXT_PUBLIC_APP_URL | `https://khipuvault.com`     | Production  |
+| NEXT_PUBLIC_API_URL | `https://api.khipuvault.com` | Production  |
 
 #### For Preview (testnet branch)
 
-| Variable | Value | Environment |
-|----------|-------|-------------|
-| NEXT_PUBLIC_NETWORK | `testnet` | Preview |
-| NEXT_PUBLIC_APP_URL | `https://testnet.khipuvault.com` | Preview |
-| NEXT_PUBLIC_API_URL | `https://api-testnet.khipuvault.com` | Preview |
+| Variable            | Value                                | Environment |
+| ------------------- | ------------------------------------ | ----------- |
+| NEXT_PUBLIC_NETWORK | `testnet`                            | Preview     |
+| NEXT_PUBLIC_APP_URL | `https://testnet.khipuvault.com`     | Preview     |
+| NEXT_PUBLIC_API_URL | `https://api-testnet.khipuvault.com` | Preview     |
 
 ### Step 3: Add Custom Domains
 
@@ -135,6 +135,7 @@ pnpm dev
 ```
 
 Visit http://localhost:9002 - You'll see:
+
 - ✅ Full app
 - ✅ Testnet warning banner at top
 
@@ -146,6 +147,7 @@ pnpm dev
 ```
 
 Visit http://localhost:9002 - You'll see:
+
 - 🚀 "Coming Soon" landing page
 - 📢 Link to testnet
 - 🔗 Social media links
@@ -261,6 +263,7 @@ git push origin main
 ## Troubleshooting
 
 ### "Still showing testnet after switch"
+
 ```bash
 # Clear Vercel build cache
 vercel env pull .env.local
@@ -268,6 +271,7 @@ vercel --force
 ```
 
 ### "Domain not resolving"
+
 ```bash
 # Check DNS propagation
 dig testnet.khipuvault.com
@@ -278,6 +282,7 @@ open https://dnschecker.org/#CNAME/testnet.khipuvault.com
 ```
 
 ### "Environment variable not updating"
+
 1. Go to Vercel Dashboard
 2. Settings → Environment Variables
 3. Delete old variable
@@ -286,16 +291,16 @@ open https://dnschecker.org/#CNAME/testnet.khipuvault.com
 
 ## Files Created
 
-| File | Purpose |
-|------|---------|
-| `apps/web/src/components/network-gate.tsx` | Routes to ComingSoon or App |
-| `apps/web/src/components/coming-soon.tsx` | Mainnet landing page |
-| `apps/web/src/components/testnet-banner.tsx` | Testnet warning banner |
-| `scripts/switch-network.sh` | Local env switcher |
-| `DEPLOYMENT.md` | Complete deployment guide |
-| `VERCEL_SETUP.md` | Vercel configuration guide |
-| `ENVIRONMENT_SWITCH.md` | Environment switching guide |
-| `vercel.json` | Vercel project config |
+| File                                         | Purpose                     |
+| -------------------------------------------- | --------------------------- |
+| `apps/web/src/components/network-gate.tsx`   | Routes to ComingSoon or App |
+| `apps/web/src/components/coming-soon.tsx`    | Mainnet landing page        |
+| `apps/web/src/components/testnet-banner.tsx` | Testnet warning banner      |
+| `scripts/switch-network.sh`                  | Local env switcher          |
+| `DEPLOYMENT.md`                              | Complete deployment guide   |
+| `VERCEL_SETUP.md`                            | Vercel configuration guide  |
+| `ENVIRONMENT_SWITCH.md`                      | Environment switching guide |
+| `vercel.json`                                | Vercel project config       |
 
 ## Resources
 

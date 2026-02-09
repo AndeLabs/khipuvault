@@ -4,7 +4,16 @@
   "title": "KhipuVault Environment Configuration",
   "description": "Configuration schema for KhipuVault deployment environments",
   "type": "object",
-  "required": ["name", "network", "chainId", "rpcUrl", "blockExplorer", "contracts", "api", "features"],
+  "required": [
+    "name",
+    "network",
+    "chainId",
+    "rpcUrl",
+    "blockExplorer",
+    "contracts",
+    "api",
+    "features"
+  ],
   "properties": {
     "name": {
       "type": "string",
@@ -37,7 +46,13 @@
     "contracts": {
       "type": "object",
       "description": "Deployed contract addresses",
-      "required": ["individualPoolV3", "cooperativePool", "yieldAggregator", "mezoIntegration", "musd"],
+      "required": [
+        "individualPoolV3",
+        "cooperativePool",
+        "yieldAggregator",
+        "mezoIntegration",
+        "musd"
+      ],
       "properties": {
         "individualPoolV3": {
           "type": "string",

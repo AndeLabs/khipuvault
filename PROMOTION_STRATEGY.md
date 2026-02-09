@@ -145,11 +145,11 @@ export const FEATURE_FLAGS: Record<string, FeatureFlags> = {
   // Mainnet - only stable, audited features
   mainnet: {
     showReferralSystem: false,
-    showPrizePool: false,        // Launch later
-    showRotatingPool: false,     // Launch later
-    showCommunityPools: false,   // Launch later
-    enableAutoCompound: true,    // Core feature
-    enableYieldClaiming: true,   // Core feature
+    showPrizePool: false, // Launch later
+    showRotatingPool: false, // Launch later
+    showCommunityPools: false, // Launch later
+    enableAutoCompound: true, // Core feature
+    enableYieldClaiming: true, // Core feature
     enablePartialWithdrawals: true, // Core feature
     enableAnalytics: true,
     enableNotifications: false,
@@ -194,6 +194,7 @@ export default function DashboardPage() {
 ### Option 1: Directory-Based (Recommended)
 
 **Advantages:**
+
 - ✅ Single source of truth (main branch)
 - ✅ Easy to compare testnet vs mainnet config
 - ✅ No merge conflicts
@@ -281,8 +282,8 @@ jobs:
       - uses: pnpm/action-setup@v2
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
-          cache: 'pnpm'
+          node-version: "20"
+          cache: "pnpm"
 
       - name: Install dependencies
         run: pnpm install
@@ -325,9 +326,9 @@ on:
   push:
     branches: [main]
     paths:
-      - 'apps/web/**'
-      - 'packages/**'
-      - 'environments/testnet/**'
+      - "apps/web/**"
+      - "packages/**"
+      - "environments/testnet/**"
 
 jobs:
   deploy:
@@ -343,7 +344,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod --env NEXT_PUBLIC_NETWORK=testnet'
+          vercel-args: "--prod --env NEXT_PUBLIC_NETWORK=testnet"
           alias-domains: testnet.khipuvault.com
 ```
 
@@ -354,10 +355,10 @@ jobs:
 name: Deploy to Mainnet
 
 on:
-  workflow_dispatch:  # Manual trigger only
+  workflow_dispatch: # Manual trigger only
     inputs:
       version:
-        description: 'Version to deploy (e.g., v1.2.0)'
+        description: "Version to deploy (e.g., v1.2.0)"
         required: true
       confirm:
         description: 'Type "DEPLOY" to confirm'
@@ -395,7 +396,7 @@ jobs:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          vercel-args: '--prod --env NEXT_PUBLIC_NETWORK=mainnet'
+          vercel-args: "--prod --env NEXT_PUBLIC_NETWORK=mainnet"
           alias-domains: khipuvault.com
 
       - name: Create GitHub Release
