@@ -96,8 +96,10 @@
       "body-parser": ">=2.2.2",
       "lodash": ">=4.17.23",
       "@sentry/webpack-plugin": ">=4.9.0",
-      "@types/react": "18.3.27",
-      "@types/react-dom": "18.3.7",
+      "@types/react": "^19.0.0",
+      "@types/react-dom": "^19.0.0",
+      "react": "^19.2.0",
+      "react-dom": "^19.2.0",
       "next": "15.5.12"
     }
   }
