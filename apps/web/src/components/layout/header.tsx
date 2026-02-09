@@ -35,6 +35,12 @@ export function Header() {
         {/* Navigation Links - Desktop */}
         <nav className="hidden items-center gap-6 md:flex">
           <Link
+            href="https://testnet.khipuvault.com"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-primary"
+          >
+            Testnet
+          </Link>
+          <Link
             href={process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.khipuvault.com"}
             target="_blank"
             rel="noopener noreferrer"
@@ -90,13 +96,18 @@ export function Header() {
                       Dashboard
                     </Button>
                   </Link>
+                  <Link href="https://testnet.khipuvault.com">
+                    <Button variant="outline" size="lg" className="w-full">
+                      Probar Testnet
+                    </Button>
+                  </Link>
                   <Link
                     href={process.env.NEXT_PUBLIC_DOCS_URL || "https://docs.khipuvault.com"}
                     target="_blank"
                     rel="noopener noreferrer"
                   >
                     <Button variant="outline" size="lg" className="w-full">
-                      📚 Documentation
+                      Documentacion
                     </Button>
                   </Link>
                 </div>

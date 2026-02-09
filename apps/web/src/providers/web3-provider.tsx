@@ -154,22 +154,21 @@ export function Web3Provider({
     console.log("🔌 Web3Provider Initialized | Network: Mezo | EIP-6963: ✓");
   }, []);
 
-  // Show wallet conflict warning instead of crashing
-  if (mounted && walletConflict) {
-    return (
-      <WalletConflictWarning onRetry={() => window.location.reload()}>
-        {children}
-      </WalletConflictWarning>
-    );
-  }
-
   // Render providers with config and initialState for SSR hydration
   // QueryErrorResetBoundary enables proper error recovery for React Query errors
+  // Show wallet conflict warning banner if detected, but keep providers working
   return (
     <WagmiProvider config={config} initialState={initialState}>
       <QueryClientProvider client={finalQueryClient}>
         <QueryErrorResetBoundary>
-          {({ reset }) => <QueryErrorHandler onReset={reset}>{children}</QueryErrorHandler>}
+          {({ reset }) => (
+            <QueryErrorHandler onReset={reset}>
+              {mounted && walletConflict && (
+                <WalletConflictWarning onRetry={() => window.location.reload()} />
+              )}
+              {children}
+            </QueryErrorHandler>
+          )}
         </QueryErrorResetBoundary>
       </QueryClientProvider>
     </WagmiProvider>
@@ -212,79 +211,71 @@ export function useQueryErrorReset() {
 /**
  * WalletConflictWarning Component
  *
- * Shows a non-blocking warning when wallet conflicts are detected
- * Allows the app to render in read-only mode
+ * Shows a non-blocking warning banner when wallet conflicts are detected
+ * App continues to work, just wallet connection may not work
  */
-function WalletConflictWarning({
-  children,
-  onRetry,
-}: {
-  children: ReactNode;
-  onRetry: () => void;
-}) {
+function WalletConflictWarning({ onRetry }: { onRetry: () => void }) {
   const [dismissed, setDismissed] = useState(false);
 
+  if (dismissed) {
+    return null;
+  }
+
   return (
-    <>
-      {!dismissed && (
-        <div
+    <div
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
+        padding: "0.75rem 1rem",
+        backgroundColor: "rgba(234, 179, 8, 0.95)",
+        color: "#1a1a1a",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        gap: "1rem",
+        flexWrap: "wrap",
+        fontSize: "0.875rem",
+      }}
+    >
+      <span>
+        <strong>Conflicto de Wallets:</strong> Desactiva otras wallets excepto MetaMask.
+      </span>
+      <div style={{ display: "flex", gap: "0.5rem" }}>
+        <button
+          onClick={onRetry}
           style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 9999,
-            padding: "0.75rem 1rem",
-            backgroundColor: "rgba(234, 179, 8, 0.95)",
-            color: "#1a1a1a",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "1rem",
-            flexWrap: "wrap",
-            fontSize: "0.875rem",
+            padding: "0.375rem 0.75rem",
+            borderRadius: "0.25rem",
+            backgroundColor: "#1a1a1a",
+            color: "#fff",
+            border: "none",
+            cursor: "pointer",
+            fontSize: "0.75rem",
+            fontWeight: 500,
           }}
         >
-          <span>
-            <strong>Conflicto de Wallets:</strong> Detectamos múltiples extensiones de wallet.
-            Desactiva otras wallets excepto MetaMask para conectar.
-          </span>
-          <div style={{ display: "flex", gap: "0.5rem" }}>
-            <button
-              onClick={onRetry}
-              style={{
-                padding: "0.375rem 0.75rem",
-                borderRadius: "0.25rem",
-                backgroundColor: "#1a1a1a",
-                color: "#fff",
-                border: "none",
-                cursor: "pointer",
-                fontSize: "0.75rem",
-                fontWeight: 500,
-              }}
-            >
-              Recargar
-            </button>
-            <button
-              onClick={() => setDismissed(true)}
-              style={{
-                padding: "0.375rem 0.75rem",
-                borderRadius: "0.25rem",
-                backgroundColor: "transparent",
-                color: "#1a1a1a",
-                border: "1px solid #1a1a1a",
-                cursor: "pointer",
-                fontSize: "0.75rem",
-                fontWeight: 500,
-              }}
-            >
-              Continuar sin wallet
-            </button>
-          </div>
-        </div>
-      )}
-      <div style={{ marginTop: dismissed ? 0 : "3rem" }}>{children}</div>
-    </>
+          Recargar
+        </button>
+        <button
+          onClick={() => setDismissed(true)}
+          style={{
+            padding: "0.375rem 0.75rem",
+            borderRadius: "0.25rem",
+            backgroundColor: "transparent",
+            color: "#1a1a1a",
+            border: "1px solid #1a1a1a",
+            cursor: "pointer",
+            fontSize: "0.75rem",
+            fontWeight: 500,
+          }}
+        >
+          Cerrar
+        </button>
+      </div>
+    </div>
   );
 }
 
