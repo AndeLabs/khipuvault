@@ -236,10 +236,32 @@ export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, E
       const isWagmiError =
         errorMessage.includes("WagmiProvider") || errorMessage.includes("useConfig");
 
+      // Multi-wallet conflicts from browser extensions - these are NOT app errors
+      // We should NOT show a full-page error for these, just log and recover
       const isMultiWalletConflict =
         errorMessage.includes("Cannot redefine property: ethereum") ||
-        errorMessage.includes("Cannot set property ethereum") ||
-        errorMessage.toLowerCase().includes("allowance is not defined");
+        errorMessage.includes("Cannot set property ethereum");
+
+      // For multi-wallet conflicts, try to recover gracefully instead of showing error
+      // EIP-6963 should work even when window.ethereum has conflicts
+      if (isMultiWalletConflict) {
+        // Log the error but render children - the app should still work with EIP-6963
+        if (process.env.NODE_ENV === "development") {
+          // eslint-disable-next-line no-console
+          console.warn(
+            "⚠️ Multi-wallet conflict detected (window.ethereum). " +
+              "App will use EIP-6963 for wallet detection. " +
+              "This error comes from browser extensions, not the app."
+          );
+        }
+        // Reset error state asynchronously to allow React to continue
+        // This prevents showing the error UI for recoverable wallet conflicts
+        setTimeout(() => {
+          this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+        }, 0);
+        // Render children - the app should still work with EIP-6963
+        return this.props.children;
+      }
 
       return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
@@ -252,35 +274,7 @@ export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, E
               <div className="flex-1">
                 <h2 className="mb-2 text-xl font-bold text-destructive">Error en Web3</h2>
 
-                <p className="mb-4 text-foreground/80">
-                  {getErrorMessage(isMultiWalletConflict, isWagmiError)}
-                </p>
-
-                {isMultiWalletConflict && (
-                  <div className="mb-4 rounded-lg border border-yellow-500/30 bg-yellow-500/10 p-4">
-                    <p className="mb-2 text-sm font-semibold text-yellow-500">
-                      🔧 Solución Recomendada:
-                    </p>
-                    <ol className="list-inside list-decimal space-y-2 text-sm text-foreground/80">
-                      <li>
-                        <strong>Desactiva todas las wallets excepto una</strong> en las extensiones
-                        de tu navegador
-                      </li>
-                      <li>
-                        Recomendamos usar <strong>solo MetaMask</strong> o{" "}
-                        <strong>solo OKX Wallet</strong>
-                      </li>
-                      <li>
-                        Ve a{" "}
-                        <code className="rounded bg-background/50 px-2 py-1 text-xs">
-                          chrome://extensions/
-                        </code>
-                      </li>
-                      <li>Desactiva las wallets que no uses (Yoroi, Phantom, etc.)</li>
-                      <li>Recarga esta página</li>
-                    </ol>
-                  </div>
-                )}
+                <p className="mb-4 text-foreground/80">{getErrorMessage(isWagmiError)}</p>
 
                 <div className="mb-4 flex gap-3">
                   <button
@@ -344,17 +338,7 @@ export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, E
   }
 }
 
-function getErrorMessage(isMultiWalletConflict: boolean, isWagmiError: boolean): React.ReactNode {
-  if (isMultiWalletConflict) {
-    return (
-      <>
-        <strong className="text-destructive">Conflicto de múltiples wallets detectado.</strong>
-        <br />
-        Tienes varias extensiones de wallet activas (MetaMask, OKX, Yoroi, etc.) que están
-        compitiendo por el control de la conexión Web3.
-      </>
-    );
-  }
+function getErrorMessage(isWagmiError: boolean): React.ReactNode {
   if (isWagmiError) {
     return (
       <>
@@ -365,8 +349,8 @@ function getErrorMessage(isMultiWalletConflict: boolean, isWagmiError: boolean):
   }
   return (
     <>
-      Ocurrió un error en la conexión de wallet. Por favor recarga la página para intentar
-      nuevamente.
+      Ocurrió un error inesperado. Por favor recarga la página para intentar nuevamente. Si el
+      problema persiste, contacta a soporte.
     </>
   );
 }
