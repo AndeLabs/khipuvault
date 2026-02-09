@@ -16,7 +16,7 @@
     "@khipu/blockchain": "workspace:*",
     "@khipu/database": "workspace:*",
     "@khipu/shared": "workspace:*",
-    "@prisma/client": "^5.22.0",
+    "@prisma/client": "^7.3.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
