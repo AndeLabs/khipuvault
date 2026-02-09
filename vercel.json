@@ -3,7 +3,7 @@
   "buildCommand": "pnpm turbo build --filter=@khipu/web...",
   "installCommand": "pnpm install --frozen-lockfile",
   "outputDirectory": "apps/web/.next",
-  "framework": null,
+  "framework": "nextjs",
   "regions": ["iad1"],
   "headers": [
     {
