@@ -8,6 +8,8 @@ import { NetworkGate } from "@/components/network-gate";
 import { OnboardingModal } from "@/components/onboarding";
 import { TestnetBanner } from "@/components/testnet-banner";
 
+import type { State } from "wagmi";
+
 // Dynamically import ClientProviders with ssr: false to avoid MetaMask SDK localStorage issues
 const ClientProviders = dynamic(
   () =>
@@ -30,7 +32,7 @@ const ClientProviders = dynamic(
 interface ClientLayoutProps {
   children: ReactNode;
   /** Initial Wagmi state from cookies for SSR hydration */
-  initialState?: unknown;
+  initialState?: State;
 }
 
 /**
