@@ -1,4 +1,5 @@
 "use client";
+// Force rebuild - cache invalidation
 
 import { Footer } from "@/components/layout/footer";
 import { Header } from "@/components/layout/header";
