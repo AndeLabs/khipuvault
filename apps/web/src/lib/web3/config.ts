@@ -26,7 +26,7 @@ import { createPublicClient } from "viem";
 import { createConfig, http, createStorage } from "wagmi";
 import { metaMask } from "wagmi/connectors";
 
-import { mezoTestnet } from "./chains";
+import { mezoTestnet, mezoMainnet, getActiveChain } from "./chains";
 
 // Type for the config instance
 type WagmiConfigInstance = ReturnType<typeof createConfig>;
@@ -131,33 +131,46 @@ export function getWagmiConfig(): WagmiConfigInstance {
    * - https://wagmi.sh/react/api/connectors/metaMask
    * - https://docs.metamask.io/wallet/how-to/connect/
    */
+
+  // Get active chain based on NEXT_PUBLIC_NETWORK env var
+  const activeChain = getActiveChain();
+  const isMainnet = activeChain.id === mezoMainnet.id;
+  const chainConfig = isMainnet ? mezoMainnet : mezoTestnet;
+  const defaultUrl = isMainnet ? "https://khipuvault.com" : "https://testnet.khipuvault.com";
+
   const connectors = [
     metaMask({
       dappMetadata: {
         name: "KhipuVault",
-        url:
-          typeof window !== "undefined" ? window.location.origin : "https://khipuvault.vercel.app",
+        url: typeof window !== "undefined" ? window.location.origin : defaultUrl,
         iconUrl:
           typeof window !== "undefined"
             ? `${window.location.origin}/logos/khipu-logo.png`
-            : "https://khipuvault.vercel.app/logos/khipu-logo.png",
+            : `${defaultUrl}/logos/khipu-logo.png`,
       },
     }),
   ];
 
+  // HTTP transport configuration for both networks
+  const httpConfig = {
+    batch: {
+      wait: 100, // ms to wait before sending batch
+    },
+    retryCount: 5, // number of retries
+    retryDelay: isMainnet ? 2000 : 1000, // longer retry for mainnet
+    timeout: 10_000, // 10 second timeout
+  };
+
   // Create config with SSR-safe settings and EIP-6963 enabled
+  // Dynamically uses testnet or mainnet based on environment
   wagmiConfigInstance = createConfig({
-    chains: [mezoTestnet],
+    chains: [chainConfig],
     connectors,
     transports: {
-      [mezoTestnet.id]: http("https://rpc.test.mezo.org", {
-        batch: {
-          wait: 100, // ms to wait before sending batch
-        },
-        retryCount: 5, // number of retries
-        retryDelay: 1000, // ms between retries
-        timeout: 10_000, // 10 second timeout
-      }),
+      // Define transports for both chains to satisfy TypeScript
+      // Only the active chain will be used at runtime
+      [mezoTestnet.id]: http(mezoTestnet.rpcUrls.default.http[0], httpConfig),
+      [mezoMainnet.id]: http(mezoMainnet.rpcUrls.default.http[0], httpConfig),
     },
     // Enable SSR support
     ssr: true,
@@ -184,9 +197,11 @@ let _publicClient: ReturnType<typeof createPublicClient> | null = null;
 
 export function getPublicClient() {
   if (!_publicClient) {
+    const activeChain = getActiveChain();
+    const chainConfig = activeChain.id === mezoMainnet.id ? mezoMainnet : mezoTestnet;
     _publicClient = createPublicClient({
-      chain: mezoTestnet,
-      transport: http("https://rpc.test.mezo.org", {
+      chain: chainConfig,
+      transport: http(chainConfig.rpcUrls.default.http[0], {
         batch: {
           wait: 100,
         },
@@ -209,16 +224,37 @@ export function getPublicClient() {
 export const publicClient: ReturnType<typeof createPublicClient> | null = null;
 
 /**
- * App metadata for wallet connection
+ * Get app metadata for wallet connection
+ * Dynamic based on environment
+ */
+export function getAppMetadata() {
+  const activeChain = getActiveChain();
+  const isMainnet = activeChain.id === mezoMainnet.id;
+  const defaultUrl = isMainnet ? "https://khipuvault.com" : "https://testnet.khipuvault.com";
+
+  return {
+    name: "KhipuVault",
+    description: "Ahorro Bitcoin para Latinoamérica con MUSD de Mezo",
+    url: typeof window !== "undefined" ? window.location.origin : defaultUrl,
+    icons: [
+      typeof window !== "undefined"
+        ? `${window.location.origin}/logos/khipu-logo.png`
+        : `${defaultUrl}/logos/khipu-logo.png`,
+    ],
+  } as const;
+}
+
+/**
+ * @deprecated Use getAppMetadata() instead for dynamic config
  */
 export const appMetadata = {
   name: "KhipuVault",
   description: "Ahorro Bitcoin para Latinoamérica con MUSD de Mezo",
-  url: typeof window !== "undefined" ? window.location.origin : "https://khipuvault.vercel.app",
+  url: typeof window !== "undefined" ? window.location.origin : "https://khipuvault.com",
   icons: [
     typeof window !== "undefined"
       ? `${window.location.origin}/logos/khipu-logo.png`
-      : "https://khipuvault.vercel.app/logos/khipu-logo.png",
+      : "https://khipuvault.com/logos/khipu-logo.png",
   ],
 } as const;
 
