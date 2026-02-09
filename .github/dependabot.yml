@@ -1,12 +1,12 @@
-# Simplified Dependabot - Less noise, more control
+# Simplified Dependabot - Quarterly updates only
 version: 2
 
 updates:
-  # Root workspace - monthly
+  # Root workspace - quarterly (first Monday of Jan, Apr, Jul, Oct)
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "quarterly"
     open-pull-requests-limit: 5
     groups:
       all-dependencies:
@@ -20,11 +20,11 @@ updates:
     commit-message:
       prefix: "chore(deps)"
 
-  # GitHub Actions - monthly
+  # GitHub Actions - quarterly
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "monthly"
+      interval: "quarterly"
     open-pull-requests-limit: 3
     labels: ["dependencies", "ci"]
     commit-message:
