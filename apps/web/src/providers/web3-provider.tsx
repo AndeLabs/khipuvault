@@ -278,68 +278,144 @@ export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, E
       const isDev = process.env.NODE_ENV === "development";
       const errorMessage = this.state.error?.message ?? "Error desconocido";
 
-      // Check error types
-      const isWagmiError =
-        errorMessage.includes("WagmiProvider") || errorMessage.includes("useConfig");
-
       const isWalletConflict =
         errorMessage.includes("React.Children.only") ||
         errorMessage.includes("ethereum") ||
         errorMessage.includes("Cannot redefine property") ||
         errorMessage.includes("Cannot set property");
 
+      // Use inline styles to avoid any component-related issues
       return (
-        <div className="flex min-h-screen items-center justify-center bg-background p-4">
-          <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg">
-            <div className="text-center">
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
-                <span className="text-3xl">🔌</span>
-              </div>
-
-              <h2 className="mb-2 text-xl font-bold">
-                {isWalletConflict ? "Conflicto de Wallets" : "Error de Conexión"}
-              </h2>
-
-              <p className="mb-6 text-sm text-muted-foreground">
-                {getErrorMessage(isWagmiError, isWalletConflict)}
-              </p>
-
-              <div className="flex flex-col gap-3">
-                <button
-                  onClick={this.handleReload}
-                  className="w-full rounded-md bg-primary px-4 py-3 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-                >
-                  Recargar Página
-                </button>
-
-                <button
-                  onClick={this.handleReset}
-                  className="w-full rounded-md bg-muted px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted/80"
-                >
-                  Intentar Nuevamente
-                </button>
-              </div>
-
-              {isWalletConflict && (
-                <p className="mt-4 text-xs text-muted-foreground">
-                  Tip: Si el problema persiste, intenta desactivar temporalmente otras extensiones
-                  de wallet excepto MetaMask.
-                </p>
-              )}
-
-              {isDev && (
-                <details className="mt-6 text-left text-sm">
-                  <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
-                    Detalles técnicos
-                  </summary>
-                  <div className="mt-2 overflow-auto rounded border border-border bg-background/50 p-3">
-                    <pre className="whitespace-pre-wrap text-xs text-muted-foreground">
-                      {errorMessage}
-                    </pre>
-                  </div>
-                </details>
-              )}
+        <div
+          style={{
+            minHeight: "100vh",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "1rem",
+            backgroundColor: "var(--background, #0a0a0f)",
+            color: "var(--foreground, #ffffff)",
+          }}
+        >
+          <div
+            style={{
+              maxWidth: "28rem",
+              width: "100%",
+              padding: "2rem",
+              borderRadius: "0.75rem",
+              backgroundColor: "var(--card, #131320)",
+              border: "1px solid var(--border, #2a2a3c)",
+              textAlign: "center",
+            }}
+          >
+            <div
+              style={{
+                width: "4rem",
+                height: "4rem",
+                margin: "0 auto 1.5rem",
+                borderRadius: "50%",
+                backgroundColor: "rgba(139, 92, 246, 0.1)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                fontSize: "2rem",
+              }}
+            >
+              🔌
             </div>
+
+            <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "0.5rem" }}>
+              {isWalletConflict ? "Conflicto de Wallets" : "Error de Conexión"}
+            </h2>
+
+            <p
+              style={{
+                color: "var(--muted-foreground, #a1a1aa)",
+                marginBottom: "1.5rem",
+                fontSize: "0.875rem",
+                lineHeight: "1.5",
+              }}
+            >
+              {isWalletConflict
+                ? "Detectamos un conflicto entre extensiones de wallet. Esto es común con múltiples wallets instaladas."
+                : "Ocurrió un error inesperado. Recarga la página."}
+            </p>
+
+            <div style={{ display: "flex", gap: "0.75rem", flexDirection: "column" }}>
+              <button
+                onClick={this.handleReload}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "0.5rem",
+                  backgroundColor: "var(--primary, #8b5cf6)",
+                  color: "white",
+                  border: "none",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  fontSize: "0.875rem",
+                }}
+              >
+                Recargar Página
+              </button>
+
+              <button
+                onClick={this.handleReset}
+                style={{
+                  width: "100%",
+                  padding: "0.75rem 1rem",
+                  borderRadius: "0.5rem",
+                  backgroundColor: "transparent",
+                  color: "var(--foreground, #ffffff)",
+                  border: "1px solid var(--border, #2a2a3c)",
+                  cursor: "pointer",
+                  fontWeight: "500",
+                  fontSize: "0.875rem",
+                }}
+              >
+                Intentar Nuevamente
+              </button>
+            </div>
+
+            {isWalletConflict && (
+              <p
+                style={{
+                  marginTop: "1rem",
+                  fontSize: "0.75rem",
+                  color: "var(--muted-foreground, #a1a1aa)",
+                }}
+              >
+                Tip: Desactiva temporalmente otras extensiones de wallet excepto MetaMask.
+              </p>
+            )}
+
+            {isDev && (
+              <details style={{ marginTop: "1.5rem", textAlign: "left" }}>
+                <summary
+                  style={{
+                    cursor: "pointer",
+                    fontSize: "0.75rem",
+                    color: "var(--muted-foreground, #a1a1aa)",
+                  }}
+                >
+                  Detalles técnicos
+                </summary>
+                <pre
+                  style={{
+                    marginTop: "0.5rem",
+                    padding: "0.75rem",
+                    borderRadius: "0.375rem",
+                    backgroundColor: "rgba(0,0,0,0.3)",
+                    fontSize: "0.625rem",
+                    overflow: "auto",
+                    whiteSpace: "pre-wrap",
+                    color: "var(--muted-foreground, #a1a1aa)",
+                  }}
+                >
+                  {errorMessage}
+                </pre>
+              </details>
+            )}
           </div>
         </div>
       );
@@ -347,19 +423,4 @@ export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, E
 
     return this.props.children;
   }
-}
-
-function getErrorMessage(isWagmiError: boolean, isWalletConflict: boolean): React.ReactNode {
-  if (isWagmiError) {
-    return "Error de configuración de wallet. Recarga la página para continuar.";
-  }
-  if (isWalletConflict) {
-    return (
-      <>
-        Detectamos un conflicto entre extensiones de wallet en tu navegador. Esto es común cuando
-        tienes múltiples wallets instaladas (MetaMask, Rabby, Core, etc.).
-      </>
-    );
-  }
-  return "Ocurrió un error inesperado. Recarga la página para intentar nuevamente.";
 }
