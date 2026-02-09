@@ -100,13 +100,45 @@ interface Web3ProviderProps {
  * </Web3Provider>
  * ```
  */
+/**
+ * Detect if there's a wallet extension conflict
+ * Some wallets define window.ethereum as a getter-only property
+ */
+function detectWalletConflict(): boolean {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  try {
+    // Check if ethereum is defined as getter-only (causes MetaMask SDK to fail)
+    const descriptor = Object.getOwnPropertyDescriptor(window, "ethereum");
+    if (descriptor?.get && !descriptor.set && !descriptor.writable) {
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+
 export function Web3Provider({
   children,
   customQueryClient,
   theme: _theme,
   initialState,
 }: Web3ProviderProps) {
-  // Get wagmi config
+  const [mounted, setMounted] = useState(false);
+  const [walletConflict, setWalletConflict] = useState(false);
+
+  // Check for wallet conflicts on mount
+  useEffect(() => {
+    setMounted(true);
+    if (detectWalletConflict()) {
+      setWalletConflict(true);
+    }
+  }, []);
+
+  // Get wagmi config - only after checking for conflicts
   const [config] = useState(() => getWagmiConfig());
 
   // Create QueryClient inside component for proper SSR/lifecycle management
@@ -119,8 +151,17 @@ export function Web3Provider({
       return;
     }
     // eslint-disable-next-line no-console
-    console.log("🔌 Web3Provider Initialized | Network: Mezo Testnet (31611) | EIP-6963: ✓");
+    console.log("🔌 Web3Provider Initialized | Network: Mezo | EIP-6963: ✓");
   }, []);
+
+  // Show wallet conflict warning instead of crashing
+  if (mounted && walletConflict) {
+    return (
+      <WalletConflictWarning onRetry={() => window.location.reload()}>
+        {children}
+      </WalletConflictWarning>
+    );
+  }
 
   // Render providers with config and initialState for SSR hydration
   // QueryErrorResetBoundary enables proper error recovery for React Query errors
@@ -166,6 +207,85 @@ const QueryErrorResetContext = React.createContext<(() => void) | null>(null);
  */
 export function useQueryErrorReset() {
   return React.useContext(QueryErrorResetContext);
+}
+
+/**
+ * WalletConflictWarning Component
+ *
+ * Shows a non-blocking warning when wallet conflicts are detected
+ * Allows the app to render in read-only mode
+ */
+function WalletConflictWarning({
+  children,
+  onRetry,
+}: {
+  children: ReactNode;
+  onRetry: () => void;
+}) {
+  const [dismissed, setDismissed] = useState(false);
+
+  return (
+    <>
+      {!dismissed && (
+        <div
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+            padding: "0.75rem 1rem",
+            backgroundColor: "rgba(234, 179, 8, 0.95)",
+            color: "#1a1a1a",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "1rem",
+            flexWrap: "wrap",
+            fontSize: "0.875rem",
+          }}
+        >
+          <span>
+            <strong>Conflicto de Wallets:</strong> Detectamos múltiples extensiones de wallet.
+            Desactiva otras wallets excepto MetaMask para conectar.
+          </span>
+          <div style={{ display: "flex", gap: "0.5rem" }}>
+            <button
+              onClick={onRetry}
+              style={{
+                padding: "0.375rem 0.75rem",
+                borderRadius: "0.25rem",
+                backgroundColor: "#1a1a1a",
+                color: "#fff",
+                border: "none",
+                cursor: "pointer",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+              }}
+            >
+              Recargar
+            </button>
+            <button
+              onClick={() => setDismissed(true)}
+              style={{
+                padding: "0.375rem 0.75rem",
+                borderRadius: "0.25rem",
+                backgroundColor: "transparent",
+                color: "#1a1a1a",
+                border: "1px solid #1a1a1a",
+                cursor: "pointer",
+                fontSize: "0.75rem",
+                fontWeight: 500,
+              }}
+            >
+              Continuar sin wallet
+            </button>
+          </div>
+        </div>
+      )}
+      <div style={{ marginTop: dismissed ? 0 : "3rem" }}>{children}</div>
+    </>
+  );
 }
 
 /**
