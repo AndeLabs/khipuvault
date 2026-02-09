@@ -163,7 +163,7 @@ jobs:
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload gas report
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: gas-report
           path: packages/contracts/gas-report.txt
@@ -233,7 +233,7 @@ jobs:
           fi
 
       - name: Upload gas snapshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: gas-snapshots
           path: packages/contracts/.gas-snapshot-*
@@ -344,7 +344,7 @@ jobs:
 
       - name: Upload Slither report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: slither-report
           path: |
