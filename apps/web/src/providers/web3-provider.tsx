@@ -232,35 +232,22 @@ export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, E
       const isDev = process.env.NODE_ENV === "development";
       const errorMessage = this.state.error?.message ?? "Error desconocido";
 
-      // Check error types
+      // Check if it's a Wagmi configuration error
       const isWagmiError =
         errorMessage.includes("WagmiProvider") || errorMessage.includes("useConfig");
 
-      // Multi-wallet conflicts from browser extensions - these are NOT app errors
-      // We should NOT show a full-page error for these, just log and recover
-      const isMultiWalletConflict =
-        errorMessage.includes("Cannot redefine property: ethereum") ||
-        errorMessage.includes("Cannot set property ethereum");
+      // Log wallet conflicts in development (these come from browser extensions)
+      const isWalletConflict =
+        errorMessage.includes("ethereum") ||
+        errorMessage.includes("Cannot redefine property") ||
+        errorMessage.includes("Cannot set property");
 
-      // For multi-wallet conflicts, try to recover gracefully instead of showing error
-      // EIP-6963 should work even when window.ethereum has conflicts
-      if (isMultiWalletConflict) {
-        // Log the error but render children - the app should still work with EIP-6963
-        if (process.env.NODE_ENV === "development") {
-          // eslint-disable-next-line no-console
-          console.warn(
-            "⚠️ Multi-wallet conflict detected (window.ethereum). " +
-              "App will use EIP-6963 for wallet detection. " +
-              "This error comes from browser extensions, not the app."
-          );
-        }
-        // Reset error state asynchronously to allow React to continue
-        // This prevents showing the error UI for recoverable wallet conflicts
-        setTimeout(() => {
-          this.setState({ hasError: false, error: undefined, errorInfo: undefined });
-        }, 0);
-        // Render children - the app should still work with EIP-6963
-        return this.props.children;
+      if (isDev && isWalletConflict) {
+        // eslint-disable-next-line no-console
+        console.info(
+          "ℹ️ This error may be related to wallet extension conflicts. " +
+            "The app uses EIP-6963 for wallet detection which should work regardless."
+        );
       }
 
       return (

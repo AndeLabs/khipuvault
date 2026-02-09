@@ -87,8 +87,8 @@ const nextConfig: NextConfig = {
               // Connect: Allow RPC, API, and wallet connections (MetaMask SDK and analytics)
               // In development: also allow localhost:3001 for backend API
               `connect-src 'self' ${process.env.NODE_ENV === "development" ? "http://localhost:3001 http://127.0.0.1:3001" : ""} https://rpc.test.mezo.org https://rpc.mezo.org wss://rpc.test.mezo.org wss://rpc.mezo.org https://explorer.test.mezo.org https://api.coingecko.com https://*.metamask.io https://*.cx.metamask.io https://mm-sdk-analytics.api.cx.metamask.io https://mm-sdk.metamask.io`,
-              // Frame: Allow wallet popups and iframes
-              "frame-src 'self' https://*.walletconnect.com https://*.walletconnect.org https://*.metamask.io https://*.coinbase.com https://verify.walletconnect.com https://verify.walletconnect.org https://*.privy.io https://*.rainbow.me",
+              // Frame: Allow wallet popups, iframes, and Vercel Live
+              "frame-src 'self' https://*.walletconnect.com https://*.walletconnect.org https://*.metamask.io https://*.coinbase.com https://verify.walletconnect.com https://verify.walletconnect.org https://*.privy.io https://*.rainbow.me https://vercel.live https://*.vercel.live",
               // Object: Disallow plugins
               "object-src 'none'",
               // Base: self
