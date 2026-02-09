@@ -186,6 +186,10 @@ interface ErrorBoundaryState {
 }
 
 export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, ErrorBoundaryState> {
+  private retryCount = 0;
+  private maxRetries = 2;
+  private hasAttemptedReload = false;
+
   constructor(props: Web3ErrorBoundaryProps) {
     super(props);
     this.state = { hasError: false };
@@ -196,15 +200,57 @@ export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, E
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+    const errorMessage = error.message || "";
+
+    // Check if this is a recoverable wallet-related error
+    const isWalletConflictError =
+      errorMessage.includes("React.Children.only") ||
+      errorMessage.includes("Cannot redefine property") ||
+      errorMessage.includes("Cannot set property") ||
+      errorMessage.includes("ethereum");
+
     // Log errors in development only
     if (process.env.NODE_ENV === "development") {
       // eslint-disable-next-line no-console
       console.error("❌ Web3 Error Caught by Boundary:", {
-        error: error.message,
+        error: errorMessage,
+        isWalletConflict: isWalletConflictError,
+        retryCount: this.retryCount,
         stack: error.stack,
         componentStack: errorInfo.componentStack,
         timestamp: new Date().toISOString(),
       });
+    }
+
+    // For wallet conflict errors, attempt auto-recovery
+    if (isWalletConflictError && this.retryCount < this.maxRetries) {
+      this.retryCount++;
+      // eslint-disable-next-line no-console
+      console.log(`🔄 Attempting auto-recovery (${this.retryCount}/${this.maxRetries})...`);
+
+      // Small delay then retry
+      setTimeout(() => {
+        this.setState({ hasError: false, error: undefined, errorInfo: undefined });
+      }, 500 * this.retryCount);
+      return;
+    }
+
+    // If we've exhausted retries and it's a wallet conflict, auto-reload once
+    if (isWalletConflictError && !this.hasAttemptedReload && typeof window !== "undefined") {
+      this.hasAttemptedReload = true;
+      const hasReloadedKey = "khipu_wallet_error_reload";
+      const hasReloaded = sessionStorage.getItem(hasReloadedKey);
+
+      if (!hasReloaded) {
+        // eslint-disable-next-line no-console
+        console.log("🔄 Auto-reloading to recover from wallet conflict...");
+        sessionStorage.setItem(hasReloadedKey, "true");
+        setTimeout(() => window.location.reload(), 100);
+        return;
+      } else {
+        // Clear the flag for next session
+        sessionStorage.removeItem(hasReloadedKey);
+      }
     }
 
     // Capture error for monitoring (Sentry when enabled)
@@ -232,89 +278,67 @@ export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, E
       const isDev = process.env.NODE_ENV === "development";
       const errorMessage = this.state.error?.message ?? "Error desconocido";
 
-      // Check if it's a Wagmi configuration error
+      // Check error types
       const isWagmiError =
         errorMessage.includes("WagmiProvider") || errorMessage.includes("useConfig");
 
-      // Log wallet conflicts in development (these come from browser extensions)
       const isWalletConflict =
+        errorMessage.includes("React.Children.only") ||
         errorMessage.includes("ethereum") ||
         errorMessage.includes("Cannot redefine property") ||
         errorMessage.includes("Cannot set property");
 
-      if (isDev && isWalletConflict) {
-        // eslint-disable-next-line no-console
-        console.info(
-          "ℹ️ This error may be related to wallet extension conflicts. " +
-            "The app uses EIP-6963 for wallet detection which should work regardless."
-        );
-      }
-
       return (
         <div className="flex min-h-screen items-center justify-center bg-background p-4">
-          <div className="w-full max-w-2xl rounded-lg border border-destructive/20 bg-destructive/10 p-6">
-            <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-destructive/20">
-                <span className="text-2xl">⚠️</span>
+          <div className="w-full max-w-md rounded-lg border border-border bg-card p-6 shadow-lg">
+            <div className="text-center">
+              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <span className="text-3xl">🔌</span>
               </div>
 
-              <div className="flex-1">
-                <h2 className="mb-2 text-xl font-bold text-destructive">Error en Web3</h2>
+              <h2 className="mb-2 text-xl font-bold">
+                {isWalletConflict ? "Conflicto de Wallets" : "Error de Conexión"}
+              </h2>
 
-                <p className="mb-4 text-foreground/80">{getErrorMessage(isWagmiError)}</p>
+              <p className="mb-6 text-sm text-muted-foreground">
+                {getErrorMessage(isWagmiError, isWalletConflict)}
+              </p>
 
-                <div className="mb-4 flex gap-3">
-                  <button
-                    onClick={this.handleReload}
-                    className="rounded-md bg-primary px-4 py-2 text-primary-foreground transition-colors hover:bg-primary/90"
-                  >
-                    Recargar Página
-                  </button>
+              <div className="flex flex-col gap-3">
+                <button
+                  onClick={this.handleReload}
+                  className="w-full rounded-md bg-primary px-4 py-3 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+                >
+                  Recargar Página
+                </button>
 
-                  {isDev && (
-                    <button
-                      onClick={this.handleReset}
-                      className="rounded-md bg-muted px-4 py-2 text-foreground transition-colors hover:bg-muted/80"
-                    >
-                      Intentar Recuperar
-                    </button>
-                  )}
-                </div>
-
-                {isDev && (
-                  <details className="mt-4 text-sm">
-                    <summary className="mb-2 cursor-pointer text-muted-foreground hover:text-foreground">
-                      Detalles técnicos (solo en desarrollo)
-                    </summary>
-                    <div className="overflow-auto rounded border border-border bg-background/50 p-4">
-                      <div className="mb-3">
-                        <strong className="text-destructive">Error:</strong>
-                        <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs">
-                          {errorMessage}
-                        </pre>
-                      </div>
-
-                      {this.state.error?.stack && (
-                        <div className="mb-3">
-                          <strong className="text-destructive">Stack:</strong>
-                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs">
-                            {this.state.error.stack}
-                          </pre>
-                        </div>
-                      )}
-
-                      {this.state.errorInfo?.componentStack && (
-                        <div>
-                          <strong className="text-destructive">Component Stack:</strong>
-                          <pre className="mt-1 overflow-x-auto whitespace-pre-wrap text-xs">
-                            {this.state.errorInfo.componentStack}
-                          </pre>
-                        </div>
-                      )}
-                    </div>
-                  </details>
-                )}
+                <button
+                  onClick={this.handleReset}
+                  className="w-full rounded-md bg-muted px-4 py-3 font-medium text-foreground transition-colors hover:bg-muted/80"
+                >
+                  Intentar Nuevamente
+                </button>
               </div>
+
+              {isWalletConflict && (
+                <p className="mt-4 text-xs text-muted-foreground">
+                  Tip: Si el problema persiste, intenta desactivar temporalmente otras extensiones
+                  de wallet excepto MetaMask.
+                </p>
+              )}
+
+              {isDev && (
+                <details className="mt-6 text-left text-sm">
+                  <summary className="cursor-pointer text-muted-foreground hover:text-foreground">
+                    Detalles técnicos
+                  </summary>
+                  <div className="mt-2 overflow-auto rounded border border-border bg-background/50 p-3">
+                    <pre className="whitespace-pre-wrap text-xs text-muted-foreground">
+                      {errorMessage}
+                    </pre>
+                  </div>
+                </details>
+              )}
             </div>
           </div>
         </div>
@@ -325,19 +349,17 @@ export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, E
   }
 }
 
-function getErrorMessage(isWagmiError: boolean): React.ReactNode {
+function getErrorMessage(isWagmiError: boolean, isWalletConflict: boolean): React.ReactNode {
   if (isWagmiError) {
+    return "Error de configuración de wallet. Recarga la página para continuar.";
+  }
+  if (isWalletConflict) {
     return (
       <>
-        Ocurrió un error en la configuración de wallet. El componente está intentando usar hooks de
-        Wagmi fuera del contexto del provider.
+        Detectamos un conflicto entre extensiones de wallet en tu navegador. Esto es común cuando
+        tienes múltiples wallets instaladas (MetaMask, Rabby, Core, etc.).
       </>
     );
   }
-  return (
-    <>
-      Ocurrió un error inesperado. Por favor recarga la página para intentar nuevamente. Si el
-      problema persiste, contacta a soporte.
-    </>
-  );
+  return "Ocurrió un error inesperado. Recarga la página para intentar nuevamente.";
 }
