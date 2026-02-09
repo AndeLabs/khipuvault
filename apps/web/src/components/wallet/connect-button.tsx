@@ -106,14 +106,12 @@ export function ConnectButton() {
 
         {/* Connected Wallet Dropdown */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="gap-2">
-              <Wallet className="h-4 w-4" />
-              <span className="hidden sm:inline">
-                {address.slice(0, 6)}...{address.slice(-4)}
-              </span>
-              <ChevronDown className="h-4 w-4" />
-            </Button>
+          <DropdownMenuTrigger className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md border border-input bg-background px-4 py-2 text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2">
+            <Wallet className="h-4 w-4" />
+            <span className="hidden sm:inline">
+              {address.slice(0, 6)}...{address.slice(-4)}
+            </span>
+            <ChevronDown className="h-4 w-4" />
           </DropdownMenuTrigger>
 
           <DropdownMenuContent align="end" className="w-56">
@@ -137,15 +135,17 @@ export function ConnectButton() {
               Copy Address
             </DropdownMenuItem>
 
-            <DropdownMenuItem asChild>
-              <a
-                href={`https://explorer.testnet.mezo.org/address/${address}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <ExternalLink className="mr-2 h-4 w-4" />
-                View in Explorer
-              </a>
+            <DropdownMenuItem
+              onClick={() =>
+                window.open(
+                  `https://explorer.testnet.mezo.org/address/${address}`,
+                  "_blank",
+                  "noopener,noreferrer"
+                )
+              }
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              View in Explorer
             </DropdownMenuItem>
 
             <DropdownMenuSeparator />

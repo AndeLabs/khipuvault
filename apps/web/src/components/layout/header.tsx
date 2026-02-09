@@ -57,11 +57,9 @@ export function Header() {
           </div>
 
           <Sheet>
-            <SheetTrigger asChild className="md:hidden">
-              <Button variant="ghost" size="icon" aria-label="Open navigation menu">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Open menu</span>
-              </Button>
+            <SheetTrigger className="inline-flex h-10 w-10 items-center justify-center rounded-md text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 md:hidden">
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Open menu</span>
             </SheetTrigger>
             <SheetContent side="right" className="border-l-primary/20 bg-background">
               <VisuallyHidden.Root>
