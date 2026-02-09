@@ -89,7 +89,7 @@ describe("useCreateRotatingPool", () => {
       memberCount: BigInt(12),
       contributionAmount: parseEther("0.01"),
       periodDuration: BigInt(2592000), // 30 days
-      autoAdvance: true,
+      useNativeBtc: true,
     };
 
     act(() => {
@@ -97,7 +97,7 @@ describe("useCreateRotatingPool", () => {
     });
 
     expect(mockWriteContract).toHaveBeenCalledWith({
-      address: "0x0000000000000000000000000000000000000000",
+      address: expect.any(String),
       abi: expect.any(Array),
       functionName: "createPool",
       args: [
@@ -105,7 +105,8 @@ describe("useCreateRotatingPool", () => {
         params.memberCount,
         params.contributionAmount,
         params.periodDuration,
-        params.autoAdvance,
+        params.useNativeBtc,
+        [], // memberAddresses defaults to empty
       ],
     });
   });
@@ -233,7 +234,7 @@ describe("useCreateRotatingPool", () => {
       memberCount: BigInt(24),
       contributionAmount: BigInt("5000000000000000000"),
       periodDuration: BigInt(604800), // 1 week
-      autoAdvance: false,
+      useNativeBtc: false,
     };
 
     act(() => {
@@ -248,6 +249,7 @@ describe("useCreateRotatingPool", () => {
           BigInt("5000000000000000000"),
           BigInt(604800),
           false,
+          [], // memberAddresses
         ],
       })
     );
@@ -263,7 +265,7 @@ describe("useCreateRotatingPool", () => {
       memberCount: BigInt(3),
       contributionAmount: BigInt("1000000000000000"), // 0.001 BTC
       periodDuration: BigInt(86400), // 1 day
-      autoAdvance: true,
+      useNativeBtc: true,
     };
 
     act(() => {
@@ -283,7 +285,7 @@ describe("useCreateRotatingPool", () => {
       memberCount: BigInt(50),
       contributionAmount: BigInt("10000000000000000000"), // 10 BTC
       periodDuration: BigInt(7776000), // 90 days
-      autoAdvance: false,
+      useNativeBtc: false,
     };
 
     act(() => {

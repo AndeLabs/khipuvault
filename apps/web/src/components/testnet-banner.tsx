@@ -1,23 +1,21 @@
 "use client";
 
-import { AlertTriangle, X } from "lucide-react";
+import { X } from "lucide-react";
 import { useState } from "react";
 
 import { getCurrentNetwork } from "@khipu/shared";
 
-import { Button } from "@/components/ui/button";
-
 /**
- * Testnet Warning Banner
+ * Testnet Environment Indicator
  *
- * Displays a prominent warning banner when the app is running on testnet.
- * Users can dismiss it, but it will reappear on page reload.
+ * Displays a minimal, non-intrusive indicator when running on testnet.
+ * Designed to match the dark theme while remaining visible.
  *
  * Features:
  * - Only shows on testnet (based on NEXT_PUBLIC_NETWORK env var)
  * - Dismissible with X button
- * - Bright warning colors for visibility
- * - Sticky positioning at top of page
+ * - Subtle dark design that matches the site aesthetic
+ * - Slim, minimal presence
  */
 export function TestnetBanner() {
   const [isDismissed, setIsDismissed] = useState(false);
@@ -29,27 +27,23 @@ export function TestnetBanner() {
   }
 
   return (
-    <div className="sticky top-0 z-50 border-b border-warning/20 bg-warning/90 px-4 py-3 backdrop-blur-sm">
-      <div className="container mx-auto flex items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <AlertTriangle className="text-warning-foreground h-5 w-5 flex-shrink-0" />
-          <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-            <p className="text-warning-foreground text-sm font-semibold">Testnet Environment</p>
-            <p className="text-warning-foreground/90 text-xs">
-              You're using KhipuVault Testnet. Funds have no real value. Mainnet launching soon!
-            </p>
-          </div>
+    <div className="sticky top-0 z-50 border-b border-border/50 bg-surface/95 backdrop-blur-sm">
+      <div className="container mx-auto flex h-8 items-center justify-center gap-3 px-4">
+        <div className="flex items-center gap-2">
+          <span className="inline-flex h-2 w-2 animate-pulse rounded-full bg-accent" />
+          <span className="text-xs font-medium tracking-wide text-muted-foreground">TESTNET</span>
+          <span className="hidden text-xs text-muted-foreground/60 sm:inline">
+            — Test environment • No real value
+          </span>
         </div>
 
-        <Button
-          variant="ghost"
-          size="sm"
+        <button
           onClick={() => setIsDismissed(true)}
-          className="flex-shrink-0 hover:bg-warning/20"
-          aria-label="Dismiss testnet warning"
+          className="ml-2 text-muted-foreground/60 transition-colors hover:text-foreground"
+          aria-label="Dismiss testnet indicator"
         >
-          <X className="text-warning-foreground h-4 w-4" />
-        </Button>
+          <X className="h-3.5 w-3.5" />
+        </button>
       </div>
     </div>
   );

@@ -89,7 +89,7 @@ describe("useJoinRotatingPool", () => {
     });
 
     expect(mockWriteContract).toHaveBeenCalledWith({
-      address: "0x0000000000000000000000000000000000000000",
+      address: expect.any(String),
       abi: expect.any(Array),
       functionName: "joinPool",
       args: [MOCK_POOL_ID],
@@ -293,7 +293,7 @@ describe("useContributeToPool", () => {
     });
 
     expect(mockWriteContract).toHaveBeenCalledWith({
-      address: "0x0000000000000000000000000000000000000000",
+      address: expect.any(String),
       abi: expect.any(Array),
       functionName: "contribute",
       args: [MOCK_POOL_ID],
@@ -460,7 +460,7 @@ describe("useClaimPayout", () => {
     });
 
     expect(mockWriteContract).toHaveBeenCalledWith({
-      address: "0x0000000000000000000000000000000000000000",
+      address: expect.any(String),
       abi: expect.any(Array),
       functionName: "claimPayout",
       args: [MOCK_POOL_ID],

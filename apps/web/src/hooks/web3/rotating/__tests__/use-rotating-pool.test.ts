@@ -100,6 +100,7 @@ describe("usePoolInfo", () => {
       BigInt("2000000000000000"), // yieldDistributed
       PoolStatus.ACTIVE, // status
       true, // autoAdvance
+      true, // useNativeBtc
     ];
 
     mockUseReadContract.mockReturnValue({
