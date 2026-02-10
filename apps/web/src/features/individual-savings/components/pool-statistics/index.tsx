@@ -18,7 +18,8 @@ export interface PoolStatisticsProps {
   totalYields?: bigint;
   totalReferralRewards?: bigint;
   poolAPR?: number;
-  performanceFee?: number;
+  /** Performance fee in basis points. Accepts bigint from contract or number. */
+  performanceFee?: bigint | number;
   activeDepositors?: number;
   emergencyMode?: boolean;
   isLoading?: boolean;
@@ -30,12 +31,15 @@ export function PoolStatistics({
   totalYields = BigInt(0),
   totalReferralRewards = BigInt(0),
   poolAPR = 6.2,
-  performanceFee = 100, // basis points
+  performanceFee = BigInt(100), // basis points
   activeDepositors = 0,
   emergencyMode = false,
   isLoading,
   className,
 }: PoolStatisticsProps) {
+  // Convert performanceFee to number safely (basis points are always small values)
+  const performanceFeeNumber =
+    typeof performanceFee === "bigint" ? Number(performanceFee) : performanceFee;
   // Format values
   const formatValue = (value: bigint) => {
     try {
@@ -141,7 +145,7 @@ export function PoolStatistics({
 
           <PerformanceMetrics
             poolAPR={poolAPR}
-            performanceFee={performanceFee}
+            performanceFee={performanceFeeNumber}
             activeDepositors={activeDepositors}
           />
         </div>

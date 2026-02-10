@@ -100,6 +100,9 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
     /// @notice Emergency withdrawal enabled (owner only, for migrations)
     bool public emergencyMode;
 
+    /// @notice C-02 FIX: Flash loan protection - tracks deposit block per user
+    mapping(address => uint256) public depositBlock;
+
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
@@ -154,6 +157,17 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
     error NoCollateralToHarvest();
     error TransferFailed();
     error StabilityPoolError(string reason);
+    error SameBlockWithdrawal();
+
+    /*//////////////////////////////////////////////////////////////
+                              MODIFIERS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice C-02 FIX: Prevents flash loan attacks by blocking same-block withdrawals
+    modifier noFlashLoan() {
+        if (depositBlock[msg.sender] == block.number) revert SameBlockWithdrawal();
+        _;
+    }
 
     /*//////////////////////////////////////////////////////////////
                             CONSTRUCTOR
@@ -226,6 +240,9 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
             revert StabilityPoolError("Unknown error depositing to Stability Pool");
         }
 
+        // C-02 FIX: Record deposit block for flash loan protection
+        depositBlock[msg.sender] = block.number;
+
         // Update user position
         UserPosition storage position = positions[msg.sender];
         if (position.depositTimestamp == 0) {
@@ -251,6 +268,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
     function withdrawMUSD(uint256 _amount)
         external
         nonReentrant
+        noFlashLoan
         returns (uint256 sharesBurned)
     {
         if (_amount == 0) revert InvalidAmount();
@@ -296,6 +314,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
     function claimCollateralGains()
         external
         nonReentrant
+        noFlashLoan
         returns (uint256 collateralGains)
     {
         collateralGains = _claimCollateralGains(msg.sender);

@@ -243,13 +243,26 @@ export function securityHeaders(req: Request, res: Response, next: NextFunction)
 /**
  * API key validation middleware (for internal services)
  * Uses timing-safe comparison to prevent timing attacks
+ * SECURITY FIX: Fail-secure in production if API_KEY not configured
  */
 export function validateApiKey(req: Request, res: Response, next: NextFunction) {
   const apiKey = req.headers["x-api-key"] as string;
   const expectedApiKey = process.env.API_KEY;
 
-  // If no API key is configured, skip validation
+  // SECURITY FIX: Fail-secure in production
   if (!expectedApiKey) {
+    if (process.env.NODE_ENV === "production") {
+      logger.error(
+        { security: { type: "missing_api_key_config", path: req.path } },
+        "CRITICAL: API_KEY not configured in production"
+      );
+      return res.status(500).json({
+        error: "Internal Server Error",
+        message: "Service misconfiguration",
+      });
+    }
+    // In development, warn but allow
+    logger.warn("API_KEY not configured - skipping validation in development");
     return next();
   }
 

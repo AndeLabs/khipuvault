@@ -1,3 +1,5 @@
+import crypto from "crypto";
+
 export interface RetryOptions {
   maxRetries?: number;
   initialDelay?: number;
@@ -65,8 +67,11 @@ export async function retryWithBackoff<T>(
       let delay = Math.min(initDelay * Math.pow(factor, attempt), maxDelay);
 
       // Add jitter to prevent thundering herd
+      // SECURITY FIX: Use crypto.randomBytes() instead of Math.random()
       if (jitter) {
-        delay = delay * (0.5 + Math.random() * 0.5);
+        const randomBuffer = crypto.randomBytes(4);
+        const secureRandom = randomBuffer.readUInt32BE(0) / 0xffffffff;
+        delay = delay * (0.5 + secureRandom * 0.5);
       }
 
       // Call retry callback if provided

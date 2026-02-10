@@ -10,6 +10,8 @@ import { z } from "zod";
 
 import { asyncHandler, sendSuccess } from "../lib/route-handler";
 import { validate } from "../middleware/validate";
+import { requireAuth } from "../middleware/auth";
+import { AppError } from "../middleware/error-handler";
 import { LotteryService } from "../services/lottery";
 
 const router: ExpressRouter = Router();
@@ -137,27 +139,38 @@ router.get(
 );
 
 // ============================================================================
-// USER-SPECIFIC ROUTES (require auth)
+// USER-SPECIFIC ROUTES (require auth + ownership verification)
 // ============================================================================
 
+// Helper to verify user owns the requested address
+function verifyOwnership(userAddress: string, requestedAddress: string): void {
+  if (userAddress.toLowerCase() !== requestedAddress.toLowerCase()) {
+    throw new AppError(403, "You can only access your own lottery data");
+  }
+}
+
 // GET /api/lottery/user/:address/stats
-// Get user's lottery statistics
+// Get user's lottery statistics (authenticated + ownership)
 router.get(
   "/user/:address/stats",
+  requireAuth,
   validate(addressParamSchema),
   asyncHandler(async (req, res) => {
+    verifyOwnership(req.user!.address, req.params.address);
     const stats = await lotteryService.getUserStats(req.params.address);
     sendSuccess(res, stats);
   })
 );
 
 // GET /api/lottery/user/:address/history
-// Get user's lottery participation history
+// Get user's lottery participation history (authenticated + ownership)
 router.get(
   "/user/:address/history",
+  requireAuth,
   validate(addressParamSchema),
   validate(paginationSchema),
   asyncHandler(async (req, res) => {
+    verifyOwnership(req.user!.address, req.params.address);
     const { limit = 20, offset = 0 } = req.query as {
       limit?: number;
       offset?: number;
@@ -168,11 +181,13 @@ router.get(
 );
 
 // GET /api/lottery/user/:address/rounds/:roundId
-// Get user's tickets for a specific round
+// Get user's tickets for a specific round (authenticated + ownership)
 router.get(
   "/user/:address/rounds/:roundId",
+  requireAuth,
   validate(userRoundSchema),
   asyncHandler(async (req, res) => {
+    verifyOwnership(req.user!.address, req.params.address);
     const roundId = parseInt(req.params.roundId, 10);
     const ticket = await lotteryService.getUserTickets(req.params.address, roundId);
     sendSuccess(res, ticket);

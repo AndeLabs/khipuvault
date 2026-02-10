@@ -87,16 +87,21 @@ contract StabilityPoolStrategyLocalTest is Test {
 
     function test_WithdrawMUSD() public {
         uint256 depositAmount = 1000e18;
-        
+
         vm.startPrank(alice);
         musd.approve(address(strategy), depositAmount);
         strategy.depositMUSD(depositAmount);
-        
+        vm.stopPrank();
+
+        // Advance block for flash loan protection
+        vm.roll(block.number + 1);
+
+        vm.startPrank(alice);
         uint256 balanceBefore = musd.balanceOf(alice);
         strategy.withdrawMUSD(depositAmount);
         uint256 balanceAfter = musd.balanceOf(alice);
         vm.stopPrank();
-        
+
         assertEq(balanceAfter - balanceBefore, depositAmount);
     }
 

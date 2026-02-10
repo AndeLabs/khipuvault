@@ -291,9 +291,9 @@ export function useIndividualPoolV3() {
     walletBalances,
 
     // Contract Config
+    // SECURITY FIX: Keep as BigInt to avoid precision loss
     performanceFee:
-      Number((performanceFee as unknown as bigint) || 0n) ||
-      V3_FEATURES.individualPool.performanceFee,
+      (performanceFee as unknown as bigint) || BigInt(V3_FEATURES.individualPool.performanceFee),
     emergencyMode: poolStats.emergencyMode,
 
     // UI Helpers

@@ -176,6 +176,9 @@ contract StabilityPoolStrategyTest is Test {
         vm.prank(user1);
         uint256 shares = strategy.depositMUSD(depositAmount);
 
+        // Advance block for flash loan protection
+        vm.roll(block.number + 1);
+
         // Withdraw
         vm.prank(user1);
         uint256 withdrawn = strategy.withdrawMUSD(shares);
@@ -190,6 +193,9 @@ contract StabilityPoolStrategyTest is Test {
 
         vm.prank(user1);
         strategy.depositMUSD(depositAmount);
+
+        // Advance block for flash loan protection
+        vm.roll(block.number + 1);
 
         // Withdraw half
         vm.prank(user1);
@@ -421,6 +427,9 @@ contract StabilityPoolStrategyTest is Test {
         vm.prank(user1);
         uint256 shares = strategy.depositMUSD(amount);
 
+        // Advance block for flash loan protection
+        vm.roll(block.number + 1);
+
         // Withdraw
         vm.prank(user1);
         uint256 withdrawn = strategy.withdrawMUSD(shares);
@@ -428,6 +437,9 @@ contract StabilityPoolStrategyTest is Test {
         // Deposit again
         vm.prank(user1);
         uint256 shares2 = strategy.depositMUSD(withdrawn);
+
+        // Advance block for flash loan protection
+        vm.roll(block.number + 1);
 
         assertEq(shares2, amount);
     }
@@ -437,6 +449,55 @@ contract StabilityPoolStrategyTest is Test {
 
         assertEq(shares, 0);
         assertEq(gains, 0);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                    FLASH LOAN PROTECTION TESTS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice C-02 FIX: Verify flash loan protection blocks same-block withdrawals
+    function test_flashLoanProtection_SameBlockWithdrawal() public {
+        uint256 amount = 1000 ether;
+
+        // Deposit
+        vm.prank(user1);
+        uint256 shares = strategy.depositMUSD(amount);
+
+        // Try to withdraw in same block - should revert
+        vm.prank(user1);
+        vm.expectRevert(StabilityPoolStrategy.SameBlockWithdrawal.selector);
+        strategy.withdrawMUSD(shares);
+    }
+
+    /// @notice C-02 FIX: Verify flash loan protection allows next-block withdrawals
+    function test_flashLoanProtection_NextBlockWithdrawal() public {
+        uint256 amount = 1000 ether;
+
+        // Deposit
+        vm.prank(user1);
+        uint256 shares = strategy.depositMUSD(amount);
+
+        // Advance to next block
+        vm.roll(block.number + 1);
+
+        // Withdraw should succeed in next block
+        vm.prank(user1);
+        uint256 withdrawn = strategy.withdrawMUSD(shares);
+        assertEq(withdrawn, amount);
+    }
+
+    /// @notice C-02 FIX: Verify claim collateral also has flash loan protection
+    function test_flashLoanProtection_SameBlockClaim() public {
+        uint256 amount = 1000 ether;
+
+        // Deposit
+        vm.prank(user1);
+        strategy.depositMUSD(amount);
+
+        // Try to claim in same block - should revert
+        vm.prank(user1);
+        vm.expectRevert(StabilityPoolStrategy.SameBlockWithdrawal.selector);
+        strategy.claimCollateralGains();
     }
 
 }
