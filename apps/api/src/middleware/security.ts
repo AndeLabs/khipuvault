@@ -248,9 +248,16 @@ export function validateApiKey(req: Request, res: Response, next: NextFunction) 
   const apiKey = req.headers["x-api-key"] as string;
   const expectedApiKey = process.env.API_KEY;
 
-  // If no API key is configured, skip validation
+  // If no API key is configured
   if (!expectedApiKey) {
-    return next();
+    const isProduction = process.env.NODE_ENV === "production";
+    if (isProduction) {
+      logger.error("API_KEY not configured in production. Blocking request.");
+      return res.status(500).json({ error: "Server Configuration Error" });
+    } else {
+      logger.warn("API_KEY not configured. Skipping validation (unsafe for production).");
+      return next();
+    }
   }
 
   // Use timing-safe comparison to prevent timing attacks

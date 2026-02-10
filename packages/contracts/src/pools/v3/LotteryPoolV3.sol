@@ -694,7 +694,9 @@ contract LotteryPoolV3 is BasePoolV3 {
 
         // C-01 FIX: Multi-block entropy - combine multiple block hashes
         // This makes it harder for miners to predict the outcome
-        uint256 fallbackSeed;
+        // Initialize with basic entropy to prevent uninitialized variable warning and improve randomness
+        uint256 fallbackSeed = uint256(keccak256(abi.encodePacked(block.timestamp, roundId)));
+
         unchecked {
             for (uint256 i = 1; i <= MULTI_BLOCK_ENTROPY_RANGE; i++) {
                 // Only use blocks that exist (within 256 block range)
