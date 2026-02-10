@@ -3,6 +3,7 @@ pragma solidity 0.8.25;
 
 import {Test, console2} from "forge-std/Test.sol";
 import {RotatingPool} from "../src/pools/v3/RotatingPool.sol";
+import {UUPSProxy} from "../src/proxy/UUPSProxy.sol";
 import {MockYieldAggregator} from "./mocks/MockYieldAggregator.sol";
 import {MockMUSD} from "./mocks/MockMUSD.sol";
 import {MockWBTC} from "./mocks/MockWBTC.sol";
@@ -97,11 +98,20 @@ contract RotatingPoolTest is Test {
         // Fund yield aggregator for yields
         musd.mint(address(yieldAggregator), 10_000_000 ether);
 
-        // Deploy RotatingPool
-        vm.prank(owner);
-        pool = new RotatingPool(
-            address(mezoIntegration), address(yieldAggregator), address(wbtc), address(musd), feeCollector
+        // Deploy RotatingPool with UUPS proxy pattern
+        vm.startPrank(owner);
+        RotatingPool impl = new RotatingPool();
+        bytes memory initData = abi.encodeWithSelector(
+            RotatingPool.initialize.selector,
+            address(mezoIntegration),
+            address(yieldAggregator),
+            address(wbtc),
+            address(musd),
+            feeCollector
         );
+        UUPSProxy proxy = new UUPSProxy(address(impl), initData);
+        pool = RotatingPool(payable(address(proxy)));
+        vm.stopPrank();
 
         // Mint WBTC to test members
         wbtc.mint(member1, INITIAL_BTC);

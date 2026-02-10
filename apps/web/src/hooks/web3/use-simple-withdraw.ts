@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { parseEther, type Address } from "viem";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
+import { getErrorMessage, logWeb3Error } from "@/lib/errors";
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address;
@@ -91,18 +92,9 @@ export function useSimpleWithdraw() {
   // Handle errors
   useEffect(() => {
     if (withdrawError) {
+      logWeb3Error(withdrawError, "withdraw");
       setState("error");
-
-      const msg = withdrawError.message ?? "";
-      if (msg.includes("User rejected") || msg.includes("user rejected")) {
-        setError("Rechazaste la transacción en tu wallet");
-      } else if (msg.includes("insufficient funds")) {
-        setError("No tienes suficiente BTC para pagar el gas");
-      } else if (msg.includes("NoActiveDeposit")) {
-        setError("No tienes depósitos activos para retirar");
-      } else {
-        setError("Error al retirar. Intenta nuevamente.");
-      }
+      setError(getErrorMessage(withdrawError));
     }
   }, [withdrawError]);
 

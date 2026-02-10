@@ -13,7 +13,8 @@
     "deploy:testnet": "forge script script/Deploy.s.sol --rpc-url $MEZO_TESTNET_RPC --broadcast",
     "deploy:mainnet": "forge script script/Deploy.s.sol --rpc-url $MEZO_MAINNET_RPC --broadcast --verify",
     "verify": "forge verify-contract",
-    "generate:abis": "node scripts/generate-abis.js"
+    "generate:abis": "node scripts/generate-abis.js",
+    "sync:abis": "node scripts/sync-abis.js"
   },
   "keywords": [
     "solidity",

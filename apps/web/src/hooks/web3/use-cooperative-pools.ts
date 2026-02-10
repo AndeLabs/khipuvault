@@ -17,6 +17,7 @@ import {
   useWaitForTransactionReceipt,
 } from "wagmi";
 
+import { QUERY_PRESETS } from "@/lib/query-config";
 import {
   fetchCooperativePools,
   fetchPoolInfo,
@@ -66,10 +67,7 @@ export function useCooperativePools() {
       return fetchCooperativePools(publicClient, Number(poolCounter ?? 0));
     },
     enabled: !!publicClient && !!poolCounter && Number(poolCounter) > 0,
-    staleTime: 30000, // 30 seconds
-    gcTime: 5 * 60 * 1000, // 5 minutes
-    retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+    ...QUERY_PRESETS.BLOCKCHAIN_READ,
   });
 
   return {
@@ -102,8 +100,7 @@ export function usePoolInfo(poolId: number) {
       return fetchPoolInfo(publicClient, poolId);
     },
     enabled: !!publicClient && poolId > 0,
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
+    ...QUERY_PRESETS.BLOCKCHAIN_READ,
   });
 
   return {
@@ -136,8 +133,7 @@ export function useMemberInfo(poolId: number, memberAddress?: `0x${string}`) {
       return fetchMemberInfo(publicClient, poolId, memberAddress);
     },
     enabled: !!publicClient && poolId > 0 && !!memberAddress,
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
+    ...QUERY_PRESETS.BLOCKCHAIN_READ,
   });
 
   return {
@@ -169,8 +165,7 @@ export function usePoolMembers(poolId: number) {
       return fetchPoolMembers(publicClient, poolId);
     },
     enabled: !!publicClient && poolId > 0,
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
+    ...QUERY_PRESETS.BLOCKCHAIN_READ,
   });
 
   return {
@@ -203,8 +198,7 @@ export function useMemberYield(poolId: number, memberAddress?: `0x${string}`) {
       return fetchMemberYield(publicClient, poolId, memberAddress);
     },
     enabled: !!publicClient && poolId > 0 && !!memberAddress,
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
+    ...QUERY_PRESETS.BLOCKCHAIN_READ,
   });
 
   return {
@@ -455,9 +449,8 @@ export function useUserCooperativeTotal(userAddress?: `0x${string}`) {
       return { totalContribution, poolsParticipated, memberInfos };
     },
     enabled: !!publicClient && !!userAddress && !!poolCounter && Number(poolCounter) > 0,
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
-    retry: 1,
+    ...QUERY_PRESETS.BLOCKCHAIN_READ,
+    ...QUERY_PRESETS.NORMAL,
   });
 
   return {

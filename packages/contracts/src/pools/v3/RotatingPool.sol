@@ -1,9 +1,11 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.25;
 
-import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
-import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
-import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
+import {Initializable} from "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
+import {UUPSUpgradeable} from "@openzeppelin/contracts-upgradeable/proxy/utils/UUPSUpgradeable.sol";
+import {OwnableUpgradeable} from "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
+import {ReentrancyGuardUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/ReentrancyGuardUpgradeable.sol";
+import {PausableUpgradeable} from "@openzeppelin/contracts-upgradeable/utils/PausableUpgradeable.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IMezoIntegration} from "../../interfaces/IMezoIntegration.sol";
@@ -34,7 +36,13 @@ import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
  * - ...plus accumulated yields
  * - Month 12: Member 12 receives 0.12 BTC + all accumulated yields
  */
-contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
+contract RotatingPool is
+    Initializable,
+    UUPSUpgradeable,
+    OwnableUpgradeable,
+    ReentrancyGuardUpgradeable,
+    PausableUpgradeable
+{
     using SafeERC20 for IERC20;
 
     /*//////////////////////////////////////////////////////////////
@@ -107,16 +115,16 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     //////////////////////////////////////////////////////////////*/
 
     /// @notice Mezo integration
-    IMezoIntegration public immutable MEZO_INTEGRATION;
+    IMezoIntegration public MEZO_INTEGRATION;
 
     /// @notice Yield aggregator
-    IYieldAggregator public immutable YIELD_AGGREGATOR;
+    IYieldAggregator public YIELD_AGGREGATOR;
 
     /// @notice WBTC token
-    IERC20 public immutable WBTC;
+    IERC20 public WBTC;
 
     /// @notice MUSD token
-    IERC20 public immutable MUSD;
+    IERC20 public MUSD;
 
     /// @notice Pool counter
     uint256 public poolCounter;
@@ -262,31 +270,70 @@ contract RotatingPool is Ownable, ReentrancyGuard, Pausable {
     }
 
     /*//////////////////////////////////////////////////////////////
-                            CONSTRUCTOR
+                            STORAGE GAP
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Constructor
+     * @dev Storage gap for future upgrades
+     * Size: 50 slots - current state variables (approximately 15) = 35 slots reserved
+     */
+    uint256[35] private __gap;
+
+    /*//////////////////////////////////////////////////////////////
+                            CONSTRUCTOR
+    //////////////////////////////////////////////////////////////*/
+
+    /// @custom:oz-upgrades-unsafe-allow constructor
+    constructor() {
+        _disableInitializers();
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                           INITIALIZATION
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Initialize the contract (replaces constructor for UUPS proxy)
      * @param _mezoIntegration Mezo integration address
      * @param _yieldAggregator Yield aggregator address
      * @param _wbtc WBTC token address
      * @param _musd MUSD token address
      * @param _feeCollector Fee collector address
      */
-    constructor(address _mezoIntegration, address _yieldAggregator, address _wbtc, address _musd, address _feeCollector)
-        Ownable(msg.sender)
-    {
+    function initialize(
+        address _mezoIntegration,
+        address _yieldAggregator,
+        address _wbtc,
+        address _musd,
+        address _feeCollector
+    ) external initializer {
         if (
             _mezoIntegration == address(0) || _yieldAggregator == address(0) || _wbtc == address(0)
                 || _musd == address(0) || _feeCollector == address(0)
         ) revert InvalidAddress();
+
+        __Ownable_init(msg.sender);
+        __ReentrancyGuard_init();
+        __Pausable_init();
+        __UUPSUpgradeable_init();
 
         MEZO_INTEGRATION = IMezoIntegration(_mezoIntegration);
         YIELD_AGGREGATOR = IYieldAggregator(_yieldAggregator);
         WBTC = IERC20(_wbtc);
         MUSD = IERC20(_musd);
         feeCollector = _feeCollector;
+        performanceFee = 100; // 1% default
     }
+
+    /*//////////////////////////////////////////////////////////////
+                           UUPS UPGRADE
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Authorize upgrade (only owner)
+     * @param newImplementation Address of new implementation
+     */
+    function _authorizeUpgrade(address newImplementation) internal override onlyOwner {}
 
     /*//////////////////////////////////////////////////////////////
                         POOL CREATION

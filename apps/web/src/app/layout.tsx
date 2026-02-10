@@ -3,7 +3,6 @@ import type { Metadata } from "next";
 import { Inter, Roboto_Mono } from "next/font/google";
 
 import "./globals.css";
-import { ClientLayout } from "@/components/layout/client-layout";
 
 // Optimized font loading with next/font (auto font-display: swap, self-hosting)
 const inter = Inter({
@@ -50,7 +49,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "KhipuVault | Ahorro Bitcoin con Rendimientos Reales",
     description: "Digitalizamos Pasanaku, Tandas y Roscas en blockchain con MUSD de Mezo.",
-    url: "https://khipuvault.vercel.app",
+    url: "https://khipuvault.com",
     siteName: "KhipuVault",
     images: [
       {
@@ -71,15 +70,19 @@ export const metadata: Metadata = {
   },
 };
 
+/**
+ * Root Layout - Minimal wrapper
+ *
+ * This layout only provides the basic HTML structure.
+ * Web3Provider is added in route-specific layouts:
+ * - (landing) routes: No Web3Provider (static landing pages)
+ * - dashboard routes: With Web3Provider (app functionality)
+ */
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Note: We removed SSR hydration here because it was causing issues
-  // The config with cookieStorage will handle persistence automatically
-  // No need to pass initialState - cookieStorage works without it
-
   return (
     <html lang="es" className={`dark ${inter.variable} ${robotoMono.variable}`}>
       <body className="font-body antialiased">
@@ -90,7 +93,7 @@ export default function RootLayout({
         >
           Ir al contenido principal
         </a>
-        <ClientLayout>{children}</ClientLayout>
+        {children}
       </body>
     </html>
   );

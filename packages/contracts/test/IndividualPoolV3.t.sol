@@ -121,13 +121,16 @@ contract IndividualPoolV3Test is Test {
         // Wrap proxy as IndividualPoolV3
         pool = IndividualPoolV3(address(proxy));
 
-        // Initialize (new signature: _musd, _yieldAggregator, _feeCollector, _performanceFee)
+        // Initialize (signature: _musd, _yieldAggregator, _feeCollector, _performanceFee, _minDeposit, _maxDeposit, _minWithdrawal)
         vm.prank(owner);
         pool.initialize(
             address(musd),
             address(yieldAggregator),
             feeCollector,
-            100 // 1% performance fee
+            100, // 1% performance fee
+            MIN_DEPOSIT,
+            MAX_DEPOSIT,
+            MIN_WITHDRAWAL
         );
 
         // Enable emergency mode to bypass flash loan protection in tests

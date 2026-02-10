@@ -14,9 +14,7 @@ import { Address, parseEther } from "viem";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 import RotatingPoolABI from "@/contracts/abis/RotatingPool.json";
-
-// Contract address - Deployed on Mezo Testnet
-const ROTATING_POOL_ADDRESS = "0x0Bac59e87Af0D2e95711846BaDb124164382aafC" as Address;
+import { ROTATING_POOL_ADDRESS } from "./use-rotating-pool";
 
 export interface CreatePoolParams {
   name: string;

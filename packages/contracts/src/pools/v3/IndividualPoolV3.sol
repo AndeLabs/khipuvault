@@ -64,10 +64,10 @@ contract IndividualPoolV3 is BasePoolV3 {
     // C-01 FIX: Track actual reserved funds for referral rewards
     uint256 public referralRewardsReserve;
 
-    // Constants - Individual pool specific
-    uint256 public constant MIN_DEPOSIT = 10 ether;
-    uint256 public constant MAX_DEPOSIT = 100_000 ether;
-    uint256 public constant MIN_WITHDRAWAL = 1 ether;
+    // Configurable limits - Individual pool specific
+    uint256 public minDeposit;
+    uint256 public maxDeposit;
+    uint256 public minWithdrawal;
     uint256 public constant AUTO_COMPOUND_THRESHOLD = 1 ether; // Auto-compound if yield > 1 MUSD
 
     // Configurable parameters - Individual pool specific
@@ -76,9 +76,10 @@ contract IndividualPoolV3 is BasePoolV3 {
     /**
      * @dev Storage gap for future upgrades
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
-     * Size: 50 slots - base pool slots (5) - individual pool slots (8) = 37 slots reserved
+     * Size: 50 slots - base pool slots (5) - individual pool slots (11) = 34 slots reserved
+     * Note: Added 3 configurable limit variables (minDeposit, maxDeposit, minWithdrawal)
      */
-    uint256[37] private __gap;
+    uint256[34] private __gap;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
@@ -139,6 +140,8 @@ contract IndividualPoolV3 is BasePoolV3 {
 
     event ReferralBonusUpdated(uint256 oldBonus, uint256 newBonus);
 
+    event PoolLimitsUpdated(uint256 minDeposit, uint256 maxDeposit, uint256 minWithdrawal);
+
     // Note: EmergencyModeUpdated, PerformanceFeeUpdated, FeeCollectorUpdated inherited from BasePoolV3
 
     /*//////////////////////////////////////////////////////////////
@@ -174,14 +177,22 @@ contract IndividualPoolV3 is BasePoolV3 {
      * @param _yieldAggregator Address of yield aggregator
      * @param _feeCollector Address to receive fees
      * @param _performanceFee Initial performance fee in basis points
+     * @param _minDeposit Minimum deposit amount
+     * @param _maxDeposit Maximum deposit amount
+     * @param _minWithdrawal Minimum withdrawal amount
      */
     function initialize(
         address _musd,
         address _yieldAggregator,
         address _feeCollector,
-        uint256 _performanceFee
+        uint256 _performanceFee,
+        uint256 _minDeposit,
+        uint256 _maxDeposit,
+        uint256 _minWithdrawal
     ) public initializer {
         if (_yieldAggregator == address(0)) revert ZeroAddress();
+        if (_minDeposit == 0 || _maxDeposit == 0 || _minWithdrawal == 0) revert InvalidAmount();
+        if (_minDeposit > _maxDeposit) revert InvalidAmount();
 
         // Initialize base pool
         __BasePool_init(_musd, _feeCollector, _performanceFee);
@@ -189,6 +200,11 @@ contract IndividualPoolV3 is BasePoolV3 {
         // Initialize individual pool specific state
         YIELD_AGGREGATOR = IYieldAggregator(_yieldAggregator);
         referralBonus = 50;   // 0.5%
+
+        // Initialize configurable limits
+        minDeposit = _minDeposit;
+        maxDeposit = _maxDeposit;
+        minWithdrawal = _minWithdrawal;
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -226,12 +242,12 @@ contract IndividualPoolV3 is BasePoolV3 {
         whenNotPaused
     {
         if (musdAmount == 0) revert InvalidAmount();
-        if (musdAmount < MIN_DEPOSIT) revert MinimumDepositNotMet();
+        if (musdAmount < minDeposit) revert MinimumDepositNotMet();
 
         UserDeposit storage userDeposit = userDeposits[msg.sender];
 
         uint256 newTotalDeposit = uint256(userDeposit.musdAmount) + musdAmount;
-        if (newTotalDeposit > MAX_DEPOSIT) revert MaximumDepositExceeded();
+        if (newTotalDeposit > maxDeposit) revert MaximumDepositExceeded();
 
         // H-01 FIX: Record deposit block for flash loan protection (from BasePoolV3)
         _recordDeposit();
@@ -311,7 +327,7 @@ contract IndividualPoolV3 is BasePoolV3 {
         UserDeposit storage userDeposit = userDeposits[msg.sender];
         if (!userDeposit.active) revert NoActiveDeposit();
         if (musdAmount == 0) revert InvalidAmount();
-        if (musdAmount < MIN_WITHDRAWAL) revert MinimumWithdrawalNotMet();
+        if (musdAmount < minWithdrawal) revert MinimumWithdrawalNotMet();
         if (musdAmount > userDeposit.musdAmount) revert WithdrawalExceedsBalance();
 
         // Update pending yields
@@ -333,8 +349,8 @@ contract IndividualPoolV3 is BasePoolV3 {
         userDeposit.lastYieldUpdate = uint64(block.timestamp);
         totalMusdDeposited -= musdAmount;
 
-        // If remaining deposit is less than MIN_DEPOSIT, close position
-        if (userDeposit.musdAmount < uint128(MIN_DEPOSIT) && userDeposit.musdAmount > 0) {
+        // If remaining deposit is less than minDeposit, close position
+        if (userDeposit.musdAmount < uint128(minDeposit) && userDeposit.musdAmount > 0) {
             uint256 remaining = userDeposit.musdAmount;
             userDeposit.musdAmount = 0;
             userDeposit.active = false;
@@ -577,6 +593,27 @@ contract IndividualPoolV3 is BasePoolV3 {
         uint256 oldBonus = referralBonus;
         referralBonus = newBonus;
         emit ReferralBonusUpdated(oldBonus, newBonus);
+    }
+
+    /**
+     * @notice Set pool limits (admin only)
+     * @param _minDeposit New minimum deposit
+     * @param _maxDeposit New maximum deposit
+     * @param _minWithdrawal New minimum withdrawal
+     */
+    function setPoolLimits(
+        uint256 _minDeposit,
+        uint256 _maxDeposit,
+        uint256 _minWithdrawal
+    ) external onlyOwner {
+        if (_minDeposit == 0 || _maxDeposit == 0 || _minWithdrawal == 0) revert InvalidAmount();
+        if (_minDeposit > _maxDeposit) revert InvalidAmount();
+
+        minDeposit = _minDeposit;
+        maxDeposit = _maxDeposit;
+        minWithdrawal = _minWithdrawal;
+
+        emit PoolLimitsUpdated(_minDeposit, _maxDeposit, _minWithdrawal);
     }
 
     /*//////////////////////////////////////////////////////////////

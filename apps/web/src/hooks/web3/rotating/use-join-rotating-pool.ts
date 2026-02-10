@@ -9,13 +9,10 @@
  */
 
 import { useQueryClient } from "@tanstack/react-query";
-import { Address } from "viem";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 import RotatingPoolABI from "@/contracts/abis/RotatingPool.json";
-
-// Contract address - Deployed on Mezo Testnet
-const ROTATING_POOL_ADDRESS = "0x0Bac59e87Af0D2e95711846BaDb124164382aafC" as Address;
+import { ROTATING_POOL_ADDRESS } from "./use-rotating-pool";
 
 /**
  * Hook to join a rotating pool
@@ -77,9 +74,11 @@ export function useJoinRotatingPool(poolId: bigint | undefined) {
 }
 
 /**
- * Hook to make a contribution to the pool
+ * Hook to make a native BTC contribution to the pool
+ * @param poolId - Pool ID
+ * @param contributionAmount - Amount to contribute (from pool info)
  */
-export function useContributeToPool(poolId: bigint | undefined) {
+export function useContributeNative(poolId: bigint | undefined, contributionAmount?: bigint) {
   const queryClient = useQueryClient();
 
   const {
@@ -98,9 +97,70 @@ export function useContributeToPool(poolId: bigint | undefined) {
   });
 
   /**
-   * Contribute to pool
+   * Contribute native BTC to pool
    */
-  const contribute = (amount: bigint) => {
+  const contribute = () => {
+    if (poolId === undefined) {
+      throw new Error("Pool ID is required");
+    }
+    if (!contributionAmount) {
+      throw new Error("Contribution amount is required");
+    }
+
+    writeContract({
+      address: ROTATING_POOL_ADDRESS,
+      abi: RotatingPoolABI.abi,
+      functionName: "makeContributionNative",
+      args: [poolId],
+      value: contributionAmount, // Send BTC with transaction
+    });
+  };
+
+  // Invalidate on success
+  if (isConfirmed && poolId !== undefined) {
+    void queryClient.invalidateQueries({ queryKey: ["rotating-pool", poolId] });
+    void queryClient.invalidateQueries({ queryKey: ["rotating-pool-member", poolId] });
+    void queryClient.invalidateQueries({ queryKey: ["rotating-pool-period", poolId] });
+  }
+
+  return {
+    contribute,
+    hash,
+    isPending: isWritePending || isConfirming,
+    isWritePending,
+    isConfirming,
+    isConfirmed,
+    isSuccess: isConfirmed,
+    error: writeError ?? confirmError,
+  };
+}
+
+/**
+ * Hook to make a WBTC contribution to the pool (for WBTC pools)
+ * @param poolId - Pool ID
+ */
+export function useContributeWBTC(poolId: bigint | undefined) {
+  const queryClient = useQueryClient();
+
+  const {
+    data: hash,
+    isPending: isWritePending,
+    writeContract,
+    error: writeError,
+  } = useWriteContract();
+
+  const {
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    error: confirmError,
+  } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  /**
+   * Contribute WBTC to pool (requires prior approval)
+   */
+  const contribute = () => {
     if (poolId === undefined) {
       throw new Error("Pool ID is required");
     }
@@ -108,9 +168,8 @@ export function useContributeToPool(poolId: bigint | undefined) {
     writeContract({
       address: ROTATING_POOL_ADDRESS,
       abi: RotatingPoolABI.abi,
-      functionName: "contribute",
+      functionName: "makeContribution",
       args: [poolId],
-      value: amount, // Send BTC with transaction
     });
   };
 
@@ -179,6 +238,61 @@ export function useClaimPayout(poolId: bigint | undefined) {
 
   return {
     claimPayout,
+    hash,
+    isPending: isWritePending || isConfirming,
+    isWritePending,
+    isConfirming,
+    isConfirmed,
+    isSuccess: isConfirmed,
+    error: writeError ?? confirmError,
+  };
+}
+
+/**
+ * Hook to claim refund for cancelled pools
+ */
+export function useClaimRefund(poolId: bigint | undefined) {
+  const queryClient = useQueryClient();
+
+  const {
+    data: hash,
+    isPending: isWritePending,
+    writeContract,
+    error: writeError,
+  } = useWriteContract();
+
+  const {
+    isLoading: isConfirming,
+    isSuccess: isConfirmed,
+    error: confirmError,
+  } = useWaitForTransactionReceipt({
+    hash,
+  });
+
+  /**
+   * Claim refund for cancelled pool
+   */
+  const claimRefund = () => {
+    if (poolId === undefined) {
+      throw new Error("Pool ID is required");
+    }
+
+    writeContract({
+      address: ROTATING_POOL_ADDRESS,
+      abi: RotatingPoolABI.abi,
+      functionName: "claimRefund",
+      args: [poolId],
+    });
+  };
+
+  // Invalidate on success
+  if (isConfirmed && poolId !== undefined) {
+    void queryClient.invalidateQueries({ queryKey: ["rotating-pool", poolId] });
+    void queryClient.invalidateQueries({ queryKey: ["rotating-pool-member", poolId] });
+  }
+
+  return {
+    claimRefund,
     hash,
     isPending: isWritePending || isConfirming,
     isWritePending,

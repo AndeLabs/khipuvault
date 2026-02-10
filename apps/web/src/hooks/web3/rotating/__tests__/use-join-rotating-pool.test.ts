@@ -5,7 +5,7 @@ import { createWrapper } from "@/test/test-providers";
 
 import {
   useJoinRotatingPool,
-  useContributeToPool,
+  useContributeNative,
   useClaimPayout,
 } from "../use-join-rotating-pool";
 
@@ -242,7 +242,7 @@ describe("useJoinRotatingPool", () => {
   });
 });
 
-describe("useContributeToPool", () => {
+describe("useContributeNative", () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
@@ -262,9 +262,12 @@ describe("useContributeToPool", () => {
   });
 
   it("should return initial state", () => {
-    const { result } = renderHook(() => useContributeToPool(MOCK_POOL_ID), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useContributeNative(MOCK_POOL_ID, MOCK_CONTRIBUTION_AMOUNT),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.hash).toBeUndefined();
     expect(result.current.isPending).toBe(false);
@@ -276,66 +279,47 @@ describe("useContributeToPool", () => {
   });
 
   it("should have contribute function", () => {
-    const { result } = renderHook(() => useContributeToPool(MOCK_POOL_ID), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useContributeNative(MOCK_POOL_ID, MOCK_CONTRIBUTION_AMOUNT),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(typeof result.current.contribute).toBe("function");
   });
 
   it("should call writeContract with correct parameters including value", () => {
-    const { result } = renderHook(() => useContributeToPool(MOCK_POOL_ID), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useContributeNative(MOCK_POOL_ID, MOCK_CONTRIBUTION_AMOUNT),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     act(() => {
-      result.current.contribute(MOCK_CONTRIBUTION_AMOUNT);
+      result.current.contribute();
     });
 
     expect(mockWriteContract).toHaveBeenCalledWith({
       address: expect.any(String),
       abi: expect.any(Array),
-      functionName: "contribute",
+      functionName: "makeContributionNative",
       args: [MOCK_POOL_ID],
       value: MOCK_CONTRIBUTION_AMOUNT,
     });
   });
 
   it("should throw error if poolId is undefined", () => {
-    const { result } = renderHook(() => useContributeToPool(undefined), {
+    const { result } = renderHook(() => useContributeNative(undefined, MOCK_CONTRIBUTION_AMOUNT), {
       wrapper: createWrapper(),
     });
 
     expect(() => {
       act(() => {
-        result.current.contribute(MOCK_CONTRIBUTION_AMOUNT);
+        result.current.contribute();
       });
     }).toThrow("Pool ID is required");
-  });
-
-  it("should accept different contribution amounts", () => {
-    const { result } = renderHook(() => useContributeToPool(MOCK_POOL_ID), {
-      wrapper: createWrapper(),
-    });
-
-    const amounts = [
-      BigInt("1000000000000000"), // 0.001 BTC
-      BigInt("10000000000000000"), // 0.01 BTC
-      BigInt("100000000000000000"), // 0.1 BTC
-      BigInt("1000000000000000000"), // 1 BTC
-    ];
-
-    amounts.forEach((amount) => {
-      act(() => {
-        result.current.contribute(amount);
-      });
-
-      expect(mockWriteContract).toHaveBeenCalledWith(
-        expect.objectContaining({
-          value: amount,
-        })
-      );
-    });
   });
 
   it("should handle write pending state", () => {
@@ -346,9 +330,12 @@ describe("useContributeToPool", () => {
       error: null,
     });
 
-    const { result } = renderHook(() => useContributeToPool(MOCK_POOL_ID), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useContributeNative(MOCK_POOL_ID, MOCK_CONTRIBUTION_AMOUNT),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.isPending).toBe(true);
     expect(result.current.isWritePending).toBe(true);
@@ -361,9 +348,12 @@ describe("useContributeToPool", () => {
       error: null,
     });
 
-    const { result } = renderHook(() => useContributeToPool(MOCK_POOL_ID), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useContributeNative(MOCK_POOL_ID, MOCK_CONTRIBUTION_AMOUNT),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.isConfirmed).toBe(true);
     expect(result.current.isSuccess).toBe(true);
@@ -376,7 +366,7 @@ describe("useContributeToPool", () => {
       error: null,
     });
 
-    renderHook(() => useContributeToPool(MOCK_POOL_ID), {
+    renderHook(() => useContributeNative(MOCK_POOL_ID, MOCK_CONTRIBUTION_AMOUNT), {
       wrapper: createWrapper(),
     });
 
@@ -401,9 +391,12 @@ describe("useContributeToPool", () => {
       error: mockError,
     });
 
-    const { result } = renderHook(() => useContributeToPool(MOCK_POOL_ID), {
-      wrapper: createWrapper(),
-    });
+    const { result } = renderHook(
+      () => useContributeNative(MOCK_POOL_ID, MOCK_CONTRIBUTION_AMOUNT),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     expect(result.current.error).toBe(mockError);
   });
@@ -648,18 +641,21 @@ describe("All hooks integration", () => {
       })
     );
 
-    // 2. Contribute to pool
-    const { result: contributeResult } = renderHook(() => useContributeToPool(MOCK_POOL_ID), {
-      wrapper: createWrapper(),
-    });
+    // 2. Contribute to pool (native BTC)
+    const { result: contributeResult } = renderHook(
+      () => useContributeNative(MOCK_POOL_ID, MOCK_CONTRIBUTION_AMOUNT),
+      {
+        wrapper: createWrapper(),
+      }
+    );
 
     act(() => {
-      contributeResult.current.contribute(MOCK_CONTRIBUTION_AMOUNT);
+      contributeResult.current.contribute();
     });
 
     expect(mockWriteContract).toHaveBeenCalledWith(
       expect.objectContaining({
-        functionName: "contribute",
+        functionName: "makeContributionNative",
         value: MOCK_CONTRIBUTION_AMOUNT,
       })
     );
@@ -684,9 +680,12 @@ describe("All hooks integration", () => {
     const joinHook = renderHook(() => useJoinRotatingPool(MOCK_POOL_ID), {
       wrapper: createWrapper(),
     });
-    const contributeHook = renderHook(() => useContributeToPool(MOCK_POOL_ID), {
-      wrapper: createWrapper(),
-    });
+    const contributeHook = renderHook(
+      () => useContributeNative(MOCK_POOL_ID, MOCK_CONTRIBUTION_AMOUNT),
+      {
+        wrapper: createWrapper(),
+      }
+    );
     const claimHook = renderHook(() => useClaimPayout(MOCK_POOL_ID), {
       wrapper: createWrapper(),
     });

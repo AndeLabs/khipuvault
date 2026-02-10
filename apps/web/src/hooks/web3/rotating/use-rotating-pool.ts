@@ -12,10 +12,12 @@
 import { Address } from "viem";
 import { useReadContract, useAccount } from "wagmi";
 
+import { QUERY_PRESETS } from "@/lib/query-config";
 import RotatingPoolABI from "@/contracts/abis/RotatingPool.json";
+import { CONTRACT_ADDRESSES } from "@/contracts/addresses";
 
-// Contract address - Deployed on Mezo Testnet (v2 with native BTC support)
-const ROTATING_POOL_ADDRESS = "0x0Bac59e87Af0D2e95711846BaDb124164382aafC" as Address;
+// Contract address - Deployed on Mezo Testnet (V3 with UUPS proxy)
+const ROTATING_POOL_ADDRESS = CONTRACT_ADDRESSES.ROTATING_POOL as Address;
 
 /**
  * Pool status enum matching Solidity
@@ -46,6 +48,7 @@ export interface PoolInfo {
   yieldDistributed: bigint;
   status: PoolStatus;
   autoAdvance: boolean;
+  useNativeBtc: boolean;
 }
 
 /**
@@ -88,9 +91,7 @@ export function usePoolInfo(poolId: bigint | undefined) {
     args: poolId !== undefined ? [poolId] : undefined,
     query: {
       enabled: poolId !== undefined,
-      staleTime: 1000 * 60 * 5, // 5 min
-      gcTime: 1000 * 60 * 30, // 30 min
-      retry: 3,
+      ...QUERY_PRESETS.SLOW,
     },
   });
 }
@@ -111,9 +112,7 @@ export function useMemberInfo(poolId: bigint | undefined, memberAddress?: Addres
     args: poolId !== undefined && member ? [poolId, member] : undefined,
     query: {
       enabled: poolId !== undefined && !!member,
-      staleTime: 1000 * 60 * 2, // 2 min (member data changes more frequently)
-      gcTime: 1000 * 60 * 15, // 15 min
-      retry: 3,
+      ...QUERY_PRESETS.NORMAL,
     },
   });
 }
@@ -131,9 +130,7 @@ export function usePeriodInfo(poolId: bigint | undefined, periodNumber: bigint |
     args: poolId !== undefined && periodNumber !== undefined ? [poolId, periodNumber] : undefined,
     query: {
       enabled: poolId !== undefined && periodNumber !== undefined,
-      staleTime: 1000 * 60 * 3, // 3 min
-      gcTime: 1000 * 60 * 20, // 20 min
-      retry: 3,
+      ...QUERY_PRESETS.NORMAL,
     },
   });
 }
@@ -151,9 +148,7 @@ export function usePoolMemberOrder(poolId: bigint | undefined, memberIndex: bigi
     args: poolId !== undefined && memberIndex !== undefined ? [poolId, memberIndex] : undefined,
     query: {
       enabled: poolId !== undefined && memberIndex !== undefined,
-      staleTime: 1000 * 60 * 10, // 10 min (order doesn't change)
-      gcTime: 1000 * 60 * 60, // 1 hour
-      retry: 3,
+      ...QUERY_PRESETS.SLOW,
     },
   });
 }
@@ -167,9 +162,7 @@ export function usePoolCounter() {
     abi: RotatingPoolABI.abi,
     functionName: "poolCounter",
     query: {
-      staleTime: 1000 * 30, // 30 sec (changes frequently)
-      gcTime: 1000 * 60 * 5, // 5 min
-      retry: 3,
+      ...QUERY_PRESETS.BLOCKCHAIN_READ,
     },
   });
 }
@@ -203,42 +196,42 @@ export function useRotatingPoolConstants() {
     address: ROTATING_POOL_ADDRESS,
     abi: RotatingPoolABI.abi,
     functionName: "MIN_MEMBERS",
-    query: { staleTime: Infinity }, // Constants never change
+    query: { ...QUERY_PRESETS.STATIC }, // Constants never change
   });
 
   const maxMembers = useReadContract({
     address: ROTATING_POOL_ADDRESS,
     abi: RotatingPoolABI.abi,
     functionName: "MAX_MEMBERS",
-    query: { staleTime: Infinity },
+    query: { ...QUERY_PRESETS.STATIC },
   });
 
   const minContribution = useReadContract({
     address: ROTATING_POOL_ADDRESS,
     abi: RotatingPoolABI.abi,
     functionName: "MIN_CONTRIBUTION",
-    query: { staleTime: Infinity },
+    query: { ...QUERY_PRESETS.STATIC },
   });
 
   const maxContribution = useReadContract({
     address: ROTATING_POOL_ADDRESS,
     abi: RotatingPoolABI.abi,
     functionName: "MAX_CONTRIBUTION",
-    query: { staleTime: Infinity },
+    query: { ...QUERY_PRESETS.STATIC },
   });
 
   const minPeriodDuration = useReadContract({
     address: ROTATING_POOL_ADDRESS,
     abi: RotatingPoolABI.abi,
     functionName: "MIN_PERIOD_DURATION",
-    query: { staleTime: Infinity },
+    query: { ...QUERY_PRESETS.STATIC },
   });
 
   const maxPeriodDuration = useReadContract({
     address: ROTATING_POOL_ADDRESS,
     abi: RotatingPoolABI.abi,
     functionName: "MAX_PERIOD_DURATION",
-    query: { staleTime: Infinity },
+    query: { ...QUERY_PRESETS.STATIC },
   });
 
   return {
@@ -257,3 +250,61 @@ export function useRotatingPoolConstants() {
       maxPeriodDuration.isPending,
   };
 }
+
+/**
+ * Get all members of a pool
+ * @param poolId - Pool ID
+ */
+export function usePoolMembers(poolId: bigint | undefined) {
+  return useReadContract({
+    address: ROTATING_POOL_ADDRESS,
+    abi: RotatingPoolABI.abi,
+    functionName: "getPoolMembers",
+    args: poolId !== undefined ? [poolId] : undefined,
+    query: {
+      enabled: poolId !== undefined,
+      ...QUERY_PRESETS.NORMAL,
+    },
+  });
+}
+
+/**
+ * Get pool statistics
+ * @param poolId - Pool ID
+ */
+export function usePoolStats(poolId: bigint | undefined) {
+  return useReadContract({
+    address: ROTATING_POOL_ADDRESS,
+    abi: RotatingPoolABI.abi,
+    functionName: "getPoolStats",
+    args: poolId !== undefined ? [poolId] : undefined,
+    query: {
+      enabled: poolId !== undefined,
+      ...QUERY_PRESETS.NORMAL,
+    },
+  });
+}
+
+/**
+ * Check if user can claim refund (for cancelled pools)
+ * @param poolId - Pool ID
+ * @param memberAddress - Member address
+ */
+export function useHasClaimedRefund(poolId: bigint | undefined, memberAddress?: Address) {
+  const { address } = useAccount();
+  const member = memberAddress ?? address;
+
+  return useReadContract({
+    address: ROTATING_POOL_ADDRESS,
+    abi: RotatingPoolABI.abi,
+    functionName: "hasClaimedRefund",
+    args: poolId !== undefined && member ? [poolId, member] : undefined,
+    query: {
+      enabled: poolId !== undefined && !!member,
+      ...QUERY_PRESETS.NORMAL,
+    },
+  });
+}
+
+// Export contract address for use in mutation hooks
+export { ROTATING_POOL_ADDRESS };

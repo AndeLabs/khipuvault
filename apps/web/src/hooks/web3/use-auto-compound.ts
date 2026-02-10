@@ -14,6 +14,7 @@ import { useState, useEffect } from "react";
 import { type Address } from "viem";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
+import { getErrorMessage, logWeb3Error } from "@/lib/errors";
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address;
@@ -75,20 +76,9 @@ export function useAutoCompound() {
   // Handle errors
   useEffect(() => {
     if (txError) {
-      if (process.env.NODE_ENV === "development") {
-        // eslint-disable-next-line no-console
-        console.error("❌ Auto-compound error:", txError);
-      }
+      logWeb3Error(txError, "setAutoCompound");
       setState("error");
-
-      const msg = txError.message ?? "";
-      if (msg.includes("User rejected") || msg.includes("user rejected")) {
-        setError("Rechazaste la transacción en tu wallet");
-      } else if (msg.includes("NoActiveDeposit")) {
-        setError("No tienes un depósito activo");
-      } else {
-        setError("Error al cambiar configuración");
-      }
+      setError(getErrorMessage(txError));
     }
   }, [txError]);
 

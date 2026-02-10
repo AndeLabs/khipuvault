@@ -1,4 +1,4 @@
-import { Home, Settings, Handshake, Lightbulb, Trophy } from "lucide-react";
+import { Home, Settings, Handshake, Lightbulb, Trophy, RefreshCw } from "lucide-react";
 import Link from "next/link";
 
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -14,6 +14,11 @@ export const navItems = [
     href: "/dashboard/cooperative-savings",
     icon: Handshake,
     label: "Cooperative Savings",
+  },
+  {
+    href: "/dashboard/rotating-pool",
+    icon: RefreshCw,
+    label: "ROSCA Pool",
   },
   { href: "/dashboard/prize-pool", icon: Trophy, label: "Prize Pool" },
 ];

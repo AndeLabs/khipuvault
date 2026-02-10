@@ -45,6 +45,19 @@
   },
   {
     "type": "function",
+    "name": "FORCE_COMPLETE_DELAY",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "MAX_PERFORMANCE_FEE",
     "inputs": [],
     "outputs": [
@@ -84,6 +97,19 @@
   },
   {
     "type": "function",
+    "name": "MIN_PARTICIPANTS",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "MIN_ROUND_DURATION",
     "inputs": [],
     "outputs": [
@@ -98,6 +124,19 @@
   {
     "type": "function",
     "name": "MIN_TICKET_PRICE",
+    "inputs": [],
+    "outputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "MULTI_BLOCK_ENTROPY_RANGE",
     "inputs": [],
     "outputs": [
       {
@@ -884,6 +923,64 @@
   },
   {
     "type": "function",
+    "name": "ticketOwners",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "",
+        "type": "address",
+        "internalType": "address"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "ticketRanges",
+    "inputs": [
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      },
+      {
+        "name": "",
+        "type": "uint256",
+        "internalType": "uint256"
+      }
+    ],
+    "outputs": [
+      {
+        "name": "owner",
+        "type": "address",
+        "internalType": "address"
+      },
+      {
+        "name": "startTicket",
+        "type": "uint64",
+        "internalType": "uint64"
+      },
+      {
+        "name": "endTicket",
+        "type": "uint64",
+        "internalType": "uint64"
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
     "name": "transferOwnership",
     "inputs": [
       {
@@ -1338,6 +1435,11 @@
   },
   {
     "type": "error",
+    "name": "EmergencyModeNotActive",
+    "inputs": []
+  },
+  {
+    "type": "error",
     "name": "EnforcedPause",
     "inputs": []
   },
@@ -1354,6 +1456,11 @@
   {
     "type": "error",
     "name": "InsufficientBalance",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InsufficientParticipants",
     "inputs": []
   },
   {

@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useAccount, useConfig } from "wagmi";
 import { readContract } from "wagmi/actions";
 
+import { queryKeys } from "@/lib/query-keys";
 import {
   MEZO_TESTNET_ADDRESSES,
   INDIVIDUAL_POOL_ABI,
@@ -36,7 +37,7 @@ export function useIndividualPoolV3() {
   // ========================================================================
 
   const { data: totalMusdDeposited } = useQuery({
-    queryKey: ["individual-pool-v3", "total-musd"],
+    queryKey: queryKeys.individualPool.stats(),
     queryFn: async () => {
       return await readContract(config, {
         address: poolAddress,
@@ -50,7 +51,7 @@ export function useIndividualPoolV3() {
   });
 
   const { data: totalYieldsGenerated } = useQuery({
-    queryKey: ["individual-pool-v3", "total-yields"],
+    queryKey: [...queryKeys.individualPool.stats(), "total-yields"],
     queryFn: async () => {
       return await readContract(config, {
         address: poolAddress,
@@ -64,7 +65,7 @@ export function useIndividualPoolV3() {
   });
 
   const { data: totalReferralRewards } = useQuery({
-    queryKey: ["individual-pool-v3", "total-referral-rewards"],
+    queryKey: [...queryKeys.individualPool.stats(), "total-referral-rewards"],
     queryFn: async () => {
       return await readContract(config, {
         address: poolAddress,
@@ -87,7 +88,9 @@ export function useIndividualPoolV3() {
     isLoading: loadingUserInfo,
     refetch: refetchUserInfo,
   } = useQuery({
-    queryKey: ["individual-pool-v3", "user-info", address],
+    queryKey: address
+      ? queryKeys.individualPool.userInfo(address)
+      : ["individual-pool", "user-info", "none"],
     queryFn: async () => {
       if (!address) {
         return null;
@@ -126,7 +129,9 @@ export function useIndividualPoolV3() {
 
   // Get user total balance (principal + net yields)
   const { data: userTotalBalance } = useQuery({
-    queryKey: ["individual-pool-v3", "user-total-balance", address],
+    queryKey: address
+      ? [...queryKeys.individualPool.userInfo(address), "total-balance"]
+      : ["individual-pool", "user-info", "none", "total-balance"],
     queryFn: async () => {
       if (!address) {
         return null;
@@ -140,6 +145,7 @@ export function useIndividualPoolV3() {
     },
     enabled: isConnected && !!address,
     staleTime: 5_000,
+    refetchInterval: 10_000,
   });
 
   // ========================================================================
@@ -147,7 +153,9 @@ export function useIndividualPoolV3() {
   // ========================================================================
 
   const { data: referralStatsRaw } = useQuery({
-    queryKey: ["individual-pool-v3", "referral-stats", address],
+    queryKey: address
+      ? [...queryKeys.individualPool.userInfo(address), "referral-stats"]
+      : ["individual-pool", "user-info", "none", "referral-stats"],
     queryFn: async () => {
       if (!address) {
         return null;
@@ -161,7 +169,7 @@ export function useIndividualPoolV3() {
       return result as unknown as [bigint, bigint, string];
     },
     enabled: isConnected && !!address,
-    staleTime: 30_000,
+    staleTime: 10_000,
   });
 
   const referralStats: ReferralStats | null = referralStatsRaw
@@ -177,7 +185,7 @@ export function useIndividualPoolV3() {
   // ========================================================================
 
   const { data: musdBalance } = useQuery({
-    queryKey: ["individual-pool-v3", "musd-balance", address],
+    queryKey: address ? queryKeys.tokens.musdBalance(address) : ["tokens", "musd-balance", "none"],
     queryFn: async () => {
       if (!address) {
         return null;
@@ -190,7 +198,8 @@ export function useIndividualPoolV3() {
       });
     },
     enabled: isConnected && !!address,
-    staleTime: 10_000,
+    staleTime: 5_000,
+    refetchInterval: 10_000,
   });
 
   // ========================================================================
@@ -198,7 +207,7 @@ export function useIndividualPoolV3() {
   // ========================================================================
 
   const { data: performanceFee } = useQuery({
-    queryKey: ["individual-pool-v3", "performance-fee"],
+    queryKey: [...queryKeys.individualPool.stats(), "performance-fee"],
     queryFn: async () => {
       return await readContract(config, {
         address: poolAddress,
@@ -212,7 +221,7 @@ export function useIndividualPoolV3() {
   });
 
   const { data: emergencyMode } = useQuery({
-    queryKey: ["individual-pool-v3", "emergency-mode"],
+    queryKey: [...queryKeys.individualPool.stats(), "emergency-mode"],
     queryFn: async () => {
       return await readContract(config, {
         address: poolAddress,
@@ -222,7 +231,7 @@ export function useIndividualPoolV3() {
       });
     },
     enabled: isConnected,
-    staleTime: 30_000,
+    staleTime: 10_000,
   });
 
   // ========================================================================
@@ -256,11 +265,11 @@ export function useIndividualPoolV3() {
   // ========================================================================
 
   const refetchAll = () => {
-    return queryClient.refetchQueries({ queryKey: ["individual-pool-v3"] });
+    return queryClient.refetchQueries({ queryKey: queryKeys.individualPool.all });
   };
 
   const invalidateAll = () => {
-    return queryClient.invalidateQueries({ queryKey: ["individual-pool-v3"] });
+    return queryClient.invalidateQueries({ queryKey: queryKeys.individualPool.all });
   };
 
   return {

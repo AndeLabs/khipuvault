@@ -1,30 +1,45 @@
 "use client";
 
-import { ArrowLeft, Users, Calendar, Coins, TrendingUp, Clock } from "lucide-react";
+import { ArrowLeft, Users, Calendar, Coins, TrendingUp, Clock, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+import { useState } from "react";
 import { formatEther } from "viem";
+import { useAccount } from "wagmi";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { usePoolInfo, PoolStatus } from "@/hooks/web3/rotating";
+import { ClaimPayoutCard } from "@/features/rotating-pool/components/claim-payout-card";
+import { ContributeModal } from "@/features/rotating-pool/components/contribute-modal";
+import { MembersList } from "@/features/rotating-pool/components/members-list";
+import { usePoolInfo, useMemberInfo, useJoinRotatingPool, PoolStatus } from "@/hooks/web3/rotating";
 
 export default function RoscaDetailsPage() {
   const params = useParams();
   const poolId = BigInt(params.id as string);
+  const { address, isConnected } = useAccount();
   const { data: poolData, isPending, error } = usePoolInfo(poolId);
+  const { data: memberData } = useMemberInfo(poolId);
+  const { joinPool, isPending: isJoinPending } = useJoinRotatingPool(poolId);
+
+  const [contributeModalOpen, setContributeModalOpen] = useState(false);
 
   if (isPending) {
     return (
       <div className="container mx-auto max-w-7xl space-y-8 px-4 py-8">
         <Skeleton className="h-10 w-64" />
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
           <Skeleton className="h-32" />
           <Skeleton className="h-32" />
           <Skeleton className="h-32" />
+          <Skeleton className="h-32" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2">
+          <Skeleton className="h-64" />
+          <Skeleton className="h-64" />
         </div>
       </div>
     );
@@ -37,7 +52,7 @@ export default function RoscaDetailsPage() {
           <CardHeader>
             <CardTitle className="text-destructive">Error Loading ROSCA</CardTitle>
             <CardDescription>
-              {error?.message || "Could not load ROSCA details. Please try again."}
+              {error?.message ?? "Could not load ROSCA details. Please try again."}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -57,32 +72,41 @@ export default function RoscaDetailsPage() {
   const [
     _id,
     rawName,
-    _creator,
+    rawCreator,
     rawMemberCount,
     rawContributionAmount,
     rawPeriodDuration,
     rawCurrentPeriod,
     rawTotalPeriods,
-    _startTime,
+    rawStartTime,
     _totalBtcCollected,
     _totalMusdMinted,
     rawTotalYieldGenerated,
     _yieldDistributed,
     rawStatus,
     _autoAdvance,
+    rawUseNativeBtc,
   ] = poolData as unknown[];
 
   const name = rawName as string;
+  const creator = rawCreator as string;
   const memberCount = rawMemberCount as bigint;
   const contributionAmount = rawContributionAmount as bigint;
   const periodDuration = rawPeriodDuration as bigint;
   const currentPeriod = rawCurrentPeriod as bigint;
   const totalPeriods = rawTotalPeriods as bigint;
+  const startTime = rawStartTime as bigint;
   const totalYieldGenerated = rawTotalYieldGenerated as bigint;
   const status = rawStatus as PoolStatus;
+  const useNativeBtc = rawUseNativeBtc as boolean;
 
   const periodInDays = Number(periodDuration) / (24 * 60 * 60);
-  const progressPercentage = (Number(currentPeriod) / Number(totalPeriods)) * 100;
+  const progressPercentage =
+    status === PoolStatus.ACTIVE ? ((Number(currentPeriod) + 1) / Number(totalPeriods)) * 100 : 0;
+
+  // Member status
+  const isMember = memberData ? ((memberData as unknown[])[7] as boolean) : false;
+  const isCreator = address && creator.toLowerCase() === address.toLowerCase();
 
   const getStatusBadge = (status: PoolStatus) => {
     switch (status) {
@@ -97,6 +121,10 @@ export default function RoscaDetailsPage() {
       default:
         return <Badge>Unknown</Badge>;
     }
+  };
+
+  const handleJoinPool = () => {
+    joinPool();
   };
 
   return (
@@ -114,6 +142,19 @@ export default function RoscaDetailsPage() {
           <div className="flex items-center gap-3">
             <h1 className="text-3xl font-bold">{name}</h1>
             {getStatusBadge(status)}
+            <Badge variant="outline" className="text-xs">
+              {useNativeBtc ? "Native BTC" : "WBTC"}
+            </Badge>
+            {isCreator && (
+              <Badge variant="outline" className="gap-1">
+                Creator
+              </Badge>
+            )}
+            {isMember && (
+              <Badge variant="outline" className="gap-1 border-success/50 text-success">
+                Member
+              </Badge>
+            )}
           </div>
         </div>
       </div>
@@ -194,80 +235,119 @@ export default function RoscaDetailsPage() {
         </Card>
       )}
 
-      {/* Actions */}
+      {/* Actions & Payout */}
       <div className="grid gap-6 md:grid-cols-2">
+        {/* Actions Card */}
         <Card>
           <CardHeader>
             <CardTitle>Actions</CardTitle>
             <CardDescription>Participate in this ROSCA</CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
-            {status === PoolStatus.FORMING && (
-              <Button className="w-full" size="lg">
-                Join Pool
+            {!isConnected ? (
+              <p className="text-sm text-muted-foreground">Connect your wallet to participate</p>
+            ) : status === PoolStatus.FORMING && !isMember ? (
+              <Button
+                className="w-full"
+                size="lg"
+                onClick={handleJoinPool}
+                disabled={isJoinPending}
+              >
+                {isJoinPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Joining...
+                  </>
+                ) : (
+                  "Join Pool"
+                )}
               </Button>
-            )}
-            {status === PoolStatus.ACTIVE && (
+            ) : status === PoolStatus.ACTIVE && isMember ? (
               <>
-                <Button className="w-full" size="lg">
+                <Button className="w-full" size="lg" onClick={() => setContributeModalOpen(true)}>
+                  <Coins className="mr-2 h-4 w-4" />
                   Make Contribution
                 </Button>
-                <Button className="w-full" variant="outline" size="lg">
-                  Claim Payout
-                </Button>
               </>
-            )}
-            {status === PoolStatus.COMPLETED && (
+            ) : status === PoolStatus.COMPLETED ? (
               <Button className="w-full" variant="secondary" size="lg" disabled>
                 Pool Completed
               </Button>
+            ) : status === PoolStatus.FORMING && isMember ? (
+              <p className="text-sm text-muted-foreground">Waiting for all members to join...</p>
+            ) : (
+              <p className="text-sm text-muted-foreground">Pool is not accepting new members</p>
             )}
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Pool Information</CardTitle>
-            <CardDescription>Key details and requirements</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex justify-between border-b pb-2">
-              <span className="text-sm text-muted-foreground">Pool ID</span>
-              <span className="font-code text-sm font-medium">#{poolId.toString()}</span>
-            </div>
-            <div className="flex justify-between border-b pb-2">
-              <span className="text-sm text-muted-foreground">Status</span>
-              <span className="text-sm font-medium">{getStatusBadge(status)}</span>
-            </div>
-            <div className="flex justify-between border-b pb-2">
-              <span className="text-sm text-muted-foreground">Current Period</span>
-              <span className="text-sm font-medium">
-                {status === PoolStatus.ACTIVE
-                  ? `${(Number(currentPeriod) + 1).toString()} / ${totalPeriods.toString()}`
-                  : "N/A"}
-              </span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-sm text-muted-foreground">Member Capacity</span>
-              <span className="text-sm font-medium">{memberCount.toString()} members</span>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Payout Card - Only show for active members */}
+        {isMember && status === PoolStatus.ACTIVE ? (
+          <ClaimPayoutCard
+            poolId={poolId}
+            currentPeriod={currentPeriod}
+            memberCount={memberCount}
+            contributionAmount={contributionAmount}
+            status={status}
+          />
+        ) : (
+          <Card>
+            <CardHeader>
+              <CardTitle>Pool Information</CardTitle>
+              <CardDescription>Key details and requirements</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-sm text-muted-foreground">Pool ID</span>
+                <span className="font-code text-sm font-medium">#{poolId.toString()}</span>
+              </div>
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-sm text-muted-foreground">Status</span>
+                <span className="text-sm font-medium">{getStatusBadge(status)}</span>
+              </div>
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-sm text-muted-foreground">Current Period</span>
+                <span className="text-sm font-medium">
+                  {status === PoolStatus.ACTIVE
+                    ? `${(Number(currentPeriod) + 1).toString()} / ${totalPeriods.toString()}`
+                    : "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between border-b pb-2">
+                <span className="text-sm text-muted-foreground">Start Time</span>
+                <span className="text-sm font-medium">
+                  {Number(startTime) > 0
+                    ? new Date(Number(startTime) * 1000).toLocaleDateString()
+                    : "Not started"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-sm text-muted-foreground">Total Payout</span>
+                <span className="font-code text-sm font-medium">
+                  {parseFloat(formatEther(contributionAmount * memberCount)).toFixed(4)} BTC
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
-      {/* Member List Placeholder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Members</CardTitle>
-          <CardDescription>Participants in this ROSCA (feature coming soon)</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-center py-12 text-muted-foreground">
-            <Users className="mr-2 h-5 w-5" />
-            <span>Member list will be displayed here</span>
-          </div>
-        </CardContent>
-      </Card>
+      {/* Member List */}
+      <MembersList
+        poolId={poolId}
+        memberCount={memberCount}
+        currentPeriod={currentPeriod}
+        status={status}
+      />
+
+      {/* Contribute Modal */}
+      <ContributeModal
+        open={contributeModalOpen}
+        onOpenChange={setContributeModalOpen}
+        poolId={poolId}
+        contributionAmount={contributionAmount}
+        useNativeBtc={useNativeBtc}
+      />
     </div>
   );
 }

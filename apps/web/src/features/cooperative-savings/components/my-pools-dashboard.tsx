@@ -1,5 +1,5 @@
 /**
- * @fileoverview My Pools Dashboard - V3
+ * @fileoverview My Pools Dashboard - V3 (Refactored)
  *
  * Features:
  * - User's active memberships
@@ -10,44 +10,19 @@
 
 "use client";
 
-import { Users, Bitcoin, TrendingUp, Crown, ArrowRight, Coins, Info } from "lucide-react";
-import * as React from "react";
+import { Users, Bitcoin, TrendingUp, Crown } from "lucide-react";
 
-import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Separator } from "@/components/ui/separator";
-import { SkeletonCard } from "@/components/ui/skeleton";
+import { Card, CardContent } from "@/components/ui/card";
+import { formatBTCCompact, formatMUSD } from "@/hooks/web3/use-cooperative-pool";
+
 import {
+  CreatedPoolCard,
+  MembershipCard,
+  PoolsEmptyState,
+  PoolsLoadingSkeleton,
   useUserPools,
-  useCreatedPools,
-  type PoolWithMembership,
-} from "@/hooks/web3/use-all-cooperative-pools";
-import {
-  formatBTCCompact,
-  formatMUSD,
-  getPoolStatusBadge,
-  formatDate,
-  formatPercentage,
-  type PoolInfo,
-} from "@/hooks/web3/use-cooperative-pool";
-import { usePoolMembers } from "@/hooks/web3/use-cooperative-pool";
-
-// Type definitions for sub-components
-interface CreatedPoolCardProps {
-  pool: PoolInfo & { poolId: number };
-  onViewDetails?: (poolId: number) => void;
-  onManagePool?: (poolId: number) => void;
-}
-
-interface MembershipCardProps {
-  pool: PoolWithMembership;
-  onViewDetails?: (poolId: number) => void;
-  onClaimYield?: (poolId: number) => void;
-  onLeavePool?: (poolId: number) => void;
-}
+} from "./my-pools";
 
 interface MyPoolsDashboardProps {
   onViewDetails?: (poolId: number) => void;
@@ -62,54 +37,14 @@ export function MyPoolsDashboard({
   onLeavePool,
   onManagePool,
 }: MyPoolsDashboardProps) {
-  const { pools: userPools, isLoading: loadingUserPools } = useUserPools();
-  const { pools: createdPools, isLoading: loadingCreatedPools } = useCreatedPools();
-
-  const isLoading = loadingUserPools || loadingCreatedPools;
-
-  // Calculate total statistics
-  const totalContribution = userPools.reduce((sum, p) => sum + p.userContribution, BigInt(0));
-  const totalPendingYield = userPools.reduce((sum, p) => sum + p.userPendingYield, BigInt(0));
-  const totalPools = userPools.length;
+  const { userPools, createdPools, statistics, isLoading } = useUserPools();
 
   if (isLoading) {
-    return (
-      <div className="animate-fade-in space-y-6">
-        {/* Stats Skeleton */}
-        <div className="grid gap-4 md:grid-cols-3">
-          {[...Array(3)].map((_, i) => (
-            <div
-              key={`stat-skeleton-${i}`}
-              className="h-24 animate-shimmer rounded-lg bg-surface-elevated"
-            />
-          ))}
-        </div>
-
-        {/* Cards Skeleton */}
-        <div className="grid gap-6">
-          {[...Array(3)].map((_, i) => (
-            <SkeletonCard key={`card-skeleton-${i}`} />
-          ))}
-        </div>
-      </div>
-    );
+    return <PoolsLoadingSkeleton />;
   }
 
-  if (totalPools === 0 && createdPools.length === 0) {
-    return (
-      <div className="animate-fade-in space-y-4 py-12 text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-muted">
-          <Users className="h-8 w-8 text-muted-foreground" />
-        </div>
-        <div className="space-y-2">
-          <h3 className="font-heading text-xl font-semibold">No Pools Yet</h3>
-          <p className="mx-auto max-w-md text-muted-foreground">
-            You haven't joined or created any cooperative pools yet. Start by browsing available
-            pools or creating your own.
-          </p>
-        </div>
-      </div>
-    );
+  if (statistics.totalPools === 0 && createdPools.length === 0) {
+    return <PoolsEmptyState />;
   }
 
   return (
@@ -122,7 +57,7 @@ export function MyPoolsDashboard({
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Total Contribution</p>
                 <p className="font-heading font-mono text-2xl font-bold">
-                  {formatBTCCompact(totalContribution)} BTC
+                  {formatBTCCompact(statistics.totalContribution)} BTC
                 </p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-orange-500/10">
@@ -138,7 +73,7 @@ export function MyPoolsDashboard({
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Pending Yields</p>
                 <p className="font-heading font-mono text-2xl font-bold text-success">
-                  {formatMUSD(totalPendingYield)}
+                  {formatMUSD(statistics.totalPendingYield)}
                 </p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-success/10">
@@ -153,7 +88,7 @@ export function MyPoolsDashboard({
             <div className="flex items-center justify-between">
               <div className="space-y-1">
                 <p className="text-xs text-muted-foreground">Active Pools</p>
-                <p className="font-heading text-2xl font-bold">{totalPools}</p>
+                <p className="font-heading text-2xl font-bold">{statistics.totalPools}</p>
               </div>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/10">
                 <Users className="h-5 w-5 text-accent" />
@@ -210,192 +145,3 @@ export function MyPoolsDashboard({
     </div>
   );
 }
-
-// ============================================================================
-// SUB-COMPONENTS (Memoized for performance)
-// ============================================================================
-
-const CreatedPoolCard = React.memo(function CreatedPoolCard({
-  pool,
-  onViewDetails,
-  onManagePool,
-}: CreatedPoolCardProps) {
-  const statusBadge = getPoolStatusBadge(pool.status);
-  const memberProgress = (pool.currentMembers / pool.maxMembers) * 100;
-
-  return (
-    <Card className="transition-shadow hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <div className="mb-1 flex items-center gap-2">
-              <Crown className="h-4 w-4 shrink-0 text-accent" />
-              <h4 className="truncate font-heading font-semibold">{pool.name}</h4>
-              <Badge variant={statusBadge.variant} className="shrink-0">
-                {statusBadge.label}
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground">Pool #{pool.poolId}</p>
-          </div>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* Member Progress */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-muted-foreground">Members</span>
-            <span className="font-medium">
-              {pool.currentMembers} / {pool.maxMembers}
-            </span>
-          </div>
-          <Progress value={memberProgress} className="h-1.5" />
-        </div>
-
-        {/* Pool Stats */}
-        <div className="grid grid-cols-3 gap-3 text-sm">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">BTC Locked</p>
-            <p className="font-mono font-semibold">{formatBTCCompact(pool.totalBtcDeposited)}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">MUSD Minted</p>
-            <p className="font-mono font-semibold">{formatMUSD(pool.totalMusdMinted)}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Yields</p>
-            <p className="font-mono font-semibold text-success">
-              {formatMUSD(pool.totalYieldGenerated)}
-            </p>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Actions */}
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            className="flex-1"
-            onClick={() => onViewDetails?.(pool.poolId)}
-          >
-            <Info className="mr-1.5 h-4 w-4" />
-            Details
-          </Button>
-          <Button
-            variant="accent"
-            size="sm"
-            className="flex-1"
-            onClick={() => onManagePool?.(pool.poolId)}
-          >
-            Manage Pool
-            <ArrowRight className="ml-1.5 h-4 w-4" />
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-});
-
-const MembershipCard = React.memo(function MembershipCard({
-  pool,
-  onViewDetails,
-  onClaimYield,
-  onLeavePool,
-}: MembershipCardProps) {
-  const { members } = usePoolMembers(pool.poolId);
-  const totalShares = members.reduce((sum, m) => sum + m.shares, BigInt(0));
-  const sharePercentage = formatPercentage(pool.userShares, totalShares);
-  const hasYield = pool.userPendingYield > BigInt(0);
-
-  return (
-    <Card className="transition-shadow hover:shadow-md">
-      <CardHeader className="pb-3">
-        <div className="flex items-start justify-between gap-4">
-          <div className="min-w-0 flex-1">
-            <h4 className="truncate font-heading font-semibold">{pool.name}</h4>
-            <p className="text-xs text-muted-foreground">Pool #{pool.poolId}</p>
-          </div>
-          <Badge variant="outline" className="shrink-0">
-            {sharePercentage} Share
-          </Badge>
-        </div>
-      </CardHeader>
-
-      <CardContent className="space-y-4">
-        {/* User Position */}
-        <div className="space-y-3 rounded-lg bg-accent/5 p-3">
-          <p className="text-xs font-medium text-accent">Your Position</p>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Bitcoin className="h-3 w-3" />
-                Contributed
-              </p>
-              <p className="font-mono font-semibold">
-                {formatBTCCompact(pool.userContribution)} BTC
-              </p>
-            </div>
-            <div className="space-y-1">
-              <p className="flex items-center gap-1 text-xs text-muted-foreground">
-                <Coins className="h-3 w-3" />
-                Shares
-              </p>
-              <p className="font-mono font-semibold">{pool.userShares.toString()}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Pending Yield */}
-        {hasYield && (
-          <Alert className="border-success/20 bg-success/5">
-            <TrendingUp className="h-4 w-4 text-success" />
-            <AlertDescription className="text-sm">
-              <span className="text-muted-foreground">Pending Yield: </span>
-              <span className="font-mono font-semibold text-success">
-                {formatMUSD(pool.userPendingYield)} MUSD
-              </span>
-            </AlertDescription>
-          </Alert>
-        )}
-
-        {/* Pool Info */}
-        <div className="grid grid-cols-3 gap-3 text-sm">
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Members</p>
-            <p className="font-medium">
-              {pool.currentMembers}/{pool.maxMembers}
-            </p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Total BTC</p>
-            <p className="font-mono font-semibold">{formatBTCCompact(pool.totalBtcDeposited)}</p>
-          </div>
-          <div className="space-y-1">
-            <p className="text-xs text-muted-foreground">Joined</p>
-            <p className="text-xs">{formatDate(pool.createdAt)}</p>
-          </div>
-        </div>
-
-        <Separator />
-
-        {/* Actions */}
-        <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={() => onViewDetails?.(pool.poolId)}>
-            Details
-          </Button>
-          {hasYield && (
-            <Button variant="success" size="sm" onClick={() => onClaimYield?.(pool.poolId)}>
-              <TrendingUp className="mr-1.5 h-4 w-4" />
-              Claim Yield
-            </Button>
-          )}
-          <Button variant="destructive" size="sm" onClick={() => onLeavePool?.(pool.poolId)}>
-            Leave Pool
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
-  );
-});

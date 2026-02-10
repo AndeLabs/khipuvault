@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { type Address } from "viem";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
+import { getErrorMessage, logWeb3Error } from "@/lib/errors";
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address;
@@ -66,18 +67,9 @@ export function useClaimYields() {
   // Handle errors
   useEffect(() => {
     if (txError) {
+      logWeb3Error(txError, "claimYield");
       setState("error");
-
-      const msg = txError.message ?? "";
-      if (msg.includes("User rejected") || msg.includes("user rejected")) {
-        setError("Rechazaste la transacción en tu wallet");
-      } else if (msg.includes("NoActiveDeposit")) {
-        setError("No tienes un depósito activo");
-      } else if (msg.includes("InvalidAmount")) {
-        setError("No tienes yields para reclamar");
-      } else {
-        setError("Error al reclamar yields");
-      }
+      setError(getErrorMessage(txError));
     }
   }, [txError]);
 

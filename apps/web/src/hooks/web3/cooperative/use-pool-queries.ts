@@ -12,6 +12,7 @@ import { readContract } from "@wagmi/core";
 import { type Address } from "viem";
 import { useAccount, useConfig } from "wagmi";
 
+import { queryKeys } from "@/lib/query-keys";
 import {
   MEZO_TESTNET_ADDRESSES,
   COOPERATIVE_POOL_V3_ABI as POOL_ABI,
@@ -22,7 +23,6 @@ import {
   MemberInfo,
   MemberWithAddress,
   PoolStatus,
-  QUERY_KEYS,
   STALE_TIMES,
   REFETCH_INTERVALS,
 } from "./constants";
@@ -41,7 +41,7 @@ export function usePoolCounter() {
   const config = useConfig();
 
   return useQuery({
-    queryKey: QUERY_KEYS.POOL_COUNTER,
+    queryKey: [...queryKeys.cooperativePool.all, "pool-counter"],
     queryFn: async () => {
       const result = await readContract(config, {
         address: poolAddress,
@@ -64,7 +64,7 @@ export function usePerformanceFee() {
   const config = useConfig();
 
   return useQuery({
-    queryKey: QUERY_KEYS.PERFORMANCE_FEE,
+    queryKey: [...queryKeys.cooperativePool.all, "performance-fee"],
     queryFn: async () => {
       const result = await readContract(config, {
         address: poolAddress,
@@ -87,7 +87,7 @@ export function useEmergencyMode() {
   const config = useConfig();
 
   return useQuery({
-    queryKey: QUERY_KEYS.EMERGENCY_MODE,
+    queryKey: [...queryKeys.cooperativePool.all, "emergency-mode"],
     queryFn: async () => {
       const result = await readContract(config, {
         address: poolAddress,
@@ -114,7 +114,7 @@ export function usePoolInfo(poolId: number) {
   const config = useConfig();
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: QUERY_KEYS.POOL_INFO(poolId),
+    queryKey: queryKeys.cooperativePool.pool(poolId),
     queryFn: async () => {
       if (poolId <= 0) {
         return null;
@@ -173,7 +173,9 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
   const userAddress = memberAddress ?? address;
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: QUERY_KEYS.MEMBER_INFO(poolId, userAddress as Address),
+    queryKey: userAddress
+      ? queryKeys.cooperativePool.memberInfo(poolId, userAddress)
+      : [...queryKeys.cooperativePool.all, "member-info", poolId, "none"],
     queryFn: async () => {
       if (poolId <= 0 || !userAddress) {
         return null;
@@ -222,7 +224,7 @@ export function usePoolMembers(poolId: number) {
   const config = useConfig();
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: QUERY_KEYS.POOL_MEMBERS(poolId),
+    queryKey: queryKeys.cooperativePool.members(poolId),
     queryFn: async () => {
       if (poolId <= 0) {
         return [];
@@ -301,7 +303,9 @@ export function useMemberYield(poolId: number, memberAddress?: Address) {
   const userAddress = memberAddress ?? address;
 
   const { data, isLoading, error, refetch } = useQuery({
-    queryKey: QUERY_KEYS.MEMBER_YIELD(poolId, userAddress as Address),
+    queryKey: userAddress
+      ? queryKeys.cooperativePool.memberYield(poolId, userAddress)
+      : [...queryKeys.cooperativePool.all, "member-yield", poolId, "none"],
     queryFn: async () => {
       if (poolId <= 0 || !userAddress) {
         return BigInt(0);

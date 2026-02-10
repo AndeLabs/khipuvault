@@ -11,12 +11,14 @@ This folder contains production-ready deployment and maintenance scripts.
 Deploys all KhipuVault V3 contracts in the correct order with proper initialization.
 
 **Features:**
+
 - Network-aware configuration (testnet vs mainnet limits)
 - Automatic pool authorization in YieldAggregator
 - UUPS proxy deployment for all upgradeable contracts
 - Comprehensive deployment summary
 
 **Usage:**
+
 ```bash
 # Dry run (no transaction)
 forge script script/Deploy.s.sol --rpc-url $RPC_URL -vvvv
@@ -36,6 +38,7 @@ forge script script/Deploy.s.sol \
 ```
 
 **Deployment Order:**
+
 1. YieldAggregatorV3
 2. MezoIntegrationV3
 3. IndividualPoolV3
@@ -51,12 +54,14 @@ forge script script/Deploy.s.sol \
 Verifies all contracts are correctly deployed and configured.
 
 **Checks:**
+
 - Contract owners (not 0x0)
 - YieldAggregator authorizations
 - Contract states (paused, versions)
 - MUSD integration
 
 **Usage:**
+
 ```bash
 forge script script/PostDeployVerify.s.sol --rpc-url $RPC_URL -vvvv
 ```
@@ -70,11 +75,13 @@ forge script script/PostDeployVerify.s.sol --rpc-url $RPC_URL -vvvv
 Fixes missing pool authorizations in YieldAggregator for existing deployments.
 
 **When to use:**
+
 - If PostDeployVerify shows unauthorized pools
 - After upgrading contracts
 - If buyTickets/deposit fails with revert
 
 **Usage:**
+
 ```bash
 forge script script/FixAuthorizations.s.sol \
   --rpc-url $RPC_URL \
@@ -88,15 +95,16 @@ forge script script/FixAuthorizations.s.sol \
 
 These are integration test scripts for testnet validation:
 
-| Script | Purpose |
-|--------|---------|
-| MultiUserTest.s.sol | Multi-user deposit/withdraw testing |
-| FullFlowTest.s.sol | Complete user flow testing |
-| IndividualPoolFlowTest.s.sol | Individual pool operations |
-| CooperativePoolFlowTest.s.sol | Cooperative pool operations |
-| ProductionTestRotatingPool.s.sol | ROSCA pool testing |
+| Script                           | Purpose                             |
+| -------------------------------- | ----------------------------------- |
+| MultiUserTest.s.sol              | Multi-user deposit/withdraw testing |
+| FullFlowTest.s.sol               | Complete user flow testing          |
+| IndividualPoolFlowTest.s.sol     | Individual pool operations          |
+| CooperativePoolFlowTest.s.sol    | Cooperative pool operations         |
+| ProductionTestRotatingPool.s.sol | ROSCA pool testing                  |
 
 **Usage:**
+
 ```bash
 forge script script/tests/MultiUserTest.s.sol \
   --rpc-url https://rpc.test.mezo.org \
@@ -110,10 +118,10 @@ forge script script/tests/MultiUserTest.s.sol \
 
 Scripts use `NetworkConfig.s.sol` for network-aware settings:
 
-| Parameter | Testnet | Mainnet |
-|-----------|---------|---------|
-| Chain ID | 31611 | 31612 |
-| Min Deposit | 10 MUSD | 1,800 MUSD |
+| Parameter   | Testnet      | Mainnet      |
+| ----------- | ------------ | ------------ |
+| Chain ID    | 31611        | 31612        |
+| Min Deposit | 10 MUSD      | 1,800 MUSD   |
 | Max Deposit | 100,000 MUSD | 100,000 MUSD |
 
 ---
@@ -121,18 +129,21 @@ Scripts use `NetworkConfig.s.sol` for network-aware settings:
 ## Mainnet Deployment Checklist
 
 ### Pre-Deployment
+
 - [ ] All tests pass: `forge test`
 - [ ] Security audit complete
 - [ ] Multi-sig wallet ready
 - [ ] Sufficient deployer balance
 
 ### Deployment
+
 1. [ ] Run `Deploy.s.sol` with `--broadcast`
 2. [ ] Run `PostDeployVerify.s.sol` to verify
 3. [ ] Verify contracts on block explorer
 4. [ ] Update frontend addresses
 
 ### Post-Deployment
+
 - [ ] Transfer ownership to multi-sig
 - [ ] Update documentation
 - [ ] Notify team of new addresses
@@ -142,11 +153,13 @@ Scripts use `NetworkConfig.s.sol` for network-aware settings:
 ## Environment Variables
 
 Required in `.env`:
+
 ```
 DEPLOYER_PRIVATE_KEY=0x...
 ```
 
 Optional:
+
 ```
 ETHERSCAN_API_KEY=...  # For verification
 ```
@@ -156,10 +169,13 @@ ETHERSCAN_API_KEY=...  # For verification
 ## Troubleshooting
 
 ### "Unauthorized" errors
+
 Run `FixAuthorizations.s.sol` to authorize pools in YieldAggregator.
 
 ### "Owner is 0x0"
+
 Contract was initialized with wrong parameters. Redeploy using `Deploy.s.sol`.
 
 ### Gas estimation fails
+
 Check contract state and input parameters. Run `PostDeployVerify.s.sol` for diagnostics.

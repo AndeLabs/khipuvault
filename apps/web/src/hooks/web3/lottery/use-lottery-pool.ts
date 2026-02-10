@@ -13,6 +13,7 @@ import { useQuery } from "@tanstack/react-query";
 import { formatEther, type Address } from "viem";
 import { useAccount, usePublicClient, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
+import { queryKeys } from "@/lib/query-keys";
 import {
   fetchCurrentRoundId,
   fetchRoundCounter,
@@ -47,11 +48,11 @@ export function useCurrentRound() {
 
   // Get current round ID (minimal fetch)
   const { data: currentRoundId, isLoading: isLoadingId } = useQuery({
-    queryKey: ["lottery-pool", "current-round-id"],
+    queryKey: queryKeys.lotteryPool.currentRound(),
     queryFn: () => fetchCurrentRoundId(publicClient!),
     enabled: !!publicClient,
-    staleTime: 10000, // 10 seconds for current round
-    gcTime: 2 * 60 * 1000, // 2 minutes
+    staleTime: 10000,
+    gcTime: 2 * 60 * 1000,
   });
 
   // Get round info based on current round ID
@@ -60,7 +61,9 @@ export function useCurrentRound() {
     isLoading: isLoadingInfo,
     error,
   } = useQuery({
-    queryKey: ["lottery-pool", "round-info", normalizeBigInt(currentRoundId)],
+    queryKey: currentRoundId
+      ? queryKeys.lotteryPool.roundInfo(Number(currentRoundId))
+      : [...queryKeys.lotteryPool.all, "round-info", "none"],
     queryFn: () => {
       if (!publicClient || !currentRoundId) {
         return Promise.resolve(null);
@@ -96,11 +99,12 @@ export function useAllRounds() {
 
   // Get round counter first
   const { data: roundCounter = 0, isLoading: isLoadingCounter } = useQuery({
-    queryKey: ["lottery-pool", "round-counter"],
+    queryKey: [...queryKeys.lotteryPool.all, "round-counter"],
     queryFn: () => fetchRoundCounter(publicClient!),
     enabled: !!publicClient,
-    staleTime: 30000, // 30 seconds
-    gcTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30000,
+    gcTime: 5 * 60 * 1000,
+    retry: 2,
   });
 
   // Fetch all rounds based on counter
@@ -109,7 +113,7 @@ export function useAllRounds() {
     isLoading: isLoadingRounds,
     error,
   } = useQuery({
-    queryKey: ["lottery-pool", "all-rounds", normalizeBigInt(roundCounter)],
+    queryKey: queryKeys.lotteryPool.history(),
     queryFn: () => {
       if (!publicClient) {
         return Promise.resolve([]);
@@ -120,7 +124,6 @@ export function useAllRounds() {
     staleTime: 30000,
     gcTime: 5 * 60 * 1000,
     retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 
   return {
@@ -149,7 +152,15 @@ export function useUserTickets(roundId?: number, userAddress?: `0x${string}`) {
     error,
     refetch,
   } = useQuery({
-    queryKey: ["lottery-pool", "user-tickets", roundId, targetAddress ?? "none"],
+    queryKey:
+      roundId && targetAddress
+        ? queryKeys.lotteryPool.userTickets(roundId, targetAddress)
+        : [
+            ...queryKeys.lotteryPool.all,
+            "user-tickets",
+            roundId ?? "none",
+            targetAddress ?? "none",
+          ],
     queryFn: () => {
       if (!publicClient || !roundId || !targetAddress) {
         return Promise.resolve(null);
@@ -157,7 +168,7 @@ export function useUserTickets(roundId?: number, userAddress?: `0x${string}`) {
       return fetchUserTickets(publicClient, roundId, targetAddress);
     },
     enabled: !!publicClient && !!roundId && !!targetAddress,
-    staleTime: 20000, // 20 seconds
+    staleTime: 20000,
     gcTime: 5 * 60 * 1000,
   });
 
@@ -190,7 +201,10 @@ export function useUserInvestment(roundId?: number) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["lottery-pool", "user-investment", roundId, address ?? "none"],
+    queryKey:
+      roundId && address
+        ? [...queryKeys.lotteryPool.userTickets(roundId, address), "investment"]
+        : [...queryKeys.lotteryPool.all, "user-investment", roundId ?? "none", address ?? "none"],
     queryFn: () => {
       if (!publicClient || !roundId || !address) {
         return Promise.resolve(null);
@@ -224,7 +238,10 @@ export function useUserProbability(roundId?: number) {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ["lottery-pool", "user-probability", roundId, address ?? "none"],
+    queryKey:
+      roundId && address
+        ? [...queryKeys.lotteryPool.userTickets(roundId, address), "probability"]
+        : [...queryKeys.lotteryPool.all, "user-probability", roundId ?? "none", address ?? "none"],
     queryFn: () => {
       if (!publicClient || !roundId || !address) {
         return Promise.resolve(null);
@@ -258,7 +275,7 @@ export function useUserLotteryStats(userAddress?: `0x${string}`) {
 
   // Get round counter first
   const { data: roundCounter = 0, isLoading: isLoadingCounter } = useQuery({
-    queryKey: ["lottery-pool", "round-counter"],
+    queryKey: [...queryKeys.lotteryPool.all, "round-counter"],
     queryFn: () => fetchRoundCounter(publicClient!),
     enabled: !!publicClient,
     staleTime: 30000,
@@ -276,12 +293,9 @@ export function useUserLotteryStats(userAddress?: `0x${string}`) {
     isLoading: isLoadingStats,
     error,
   } = useQuery({
-    queryKey: [
-      "lottery-pool",
-      "user-stats",
-      targetAddress ?? "none",
-      normalizeBigInt(roundCounter),
-    ],
+    queryKey: targetAddress
+      ? [...queryKeys.lotteryPool.all, "user-stats", targetAddress]
+      : [...queryKeys.lotteryPool.all, "user-stats", "none"],
     queryFn: () => {
       if (!publicClient || !targetAddress) {
         return Promise.resolve({
@@ -297,7 +311,6 @@ export function useUserLotteryStats(userAddress?: `0x${string}`) {
     staleTime: 30000,
     gcTime: 5 * 60 * 1000,
     retry: 2,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
   });
 
   return {
@@ -409,7 +422,7 @@ export function useLotteryPoolOwner() {
   const publicClient = usePublicClient();
 
   const { data: owner, isLoading } = useQuery({
-    queryKey: ["lottery-pool", "owner"],
+    queryKey: [...queryKeys.lotteryPool.all, "owner"],
     queryFn: async () => {
       if (!publicClient) {
         return null;
@@ -427,7 +440,7 @@ export function useLotteryPoolOwner() {
       }
     },
     enabled: !!publicClient,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 5 * 60 * 1000,
   });
 
   const isOwner = address && owner ? address.toLowerCase() === owner.toLowerCase() : false;

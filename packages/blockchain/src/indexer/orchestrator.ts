@@ -1,16 +1,15 @@
 import { prisma } from "@khipu/database";
-import { IndividualPoolListener } from "../listeners/individual-pool";
-import { CooperativePoolListener } from "../listeners/cooperative-pool";
+import { BaseEventListener } from "../listeners/base";
 import { getCurrentBlock } from "../provider";
 
 export class IndexerOrchestrator {
-  private listeners: Map<string, any> = new Map();
+  private listeners: Map<string, BaseEventListener> = new Map();
   private isRunning: boolean = false;
 
   /**
    * Add a listener for a contract
    */
-  addListener(name: string, listener: IndividualPoolListener | CooperativePoolListener): void {
+  addListener(name: string, listener: BaseEventListener): void {
     this.listeners.set(name, listener);
   }
 

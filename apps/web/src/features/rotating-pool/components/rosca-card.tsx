@@ -51,6 +51,7 @@ export function RoscaCard({ poolId }: RoscaCardProps) {
     _yieldDistributed,
     rawStatus,
     _autoAdvance,
+    rawUseNativeBtc,
   ] = poolData as unknown[];
 
   // Type assertions for contract return values
@@ -62,6 +63,7 @@ export function RoscaCard({ poolId }: RoscaCardProps) {
   const totalPeriods = rawTotalPeriods as bigint;
   const totalYieldGenerated = rawTotalYieldGenerated as bigint;
   const status = rawStatus as PoolStatus;
+  const useNativeBtc = rawUseNativeBtc as boolean;
 
   const getStatusBadge = (status: PoolStatus) => {
     switch (status) {
@@ -101,7 +103,12 @@ export function RoscaCard({ poolId }: RoscaCardProps) {
     >
       <CardHeader>
         <div className="flex items-start justify-between">
-          <CardTitle className="text-lg">{name}</CardTitle>
+          <div className="space-y-1">
+            <CardTitle className="text-lg">{name}</CardTitle>
+            <Badge variant="outline" className="text-xs">
+              {useNativeBtc ? "Native BTC" : "WBTC"}
+            </Badge>
+          </div>
           {getStatusBadge(status)}
         </div>
       </CardHeader>

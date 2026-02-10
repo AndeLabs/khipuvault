@@ -96,11 +96,11 @@ export const CONTRACT_ADDRESSES = {
   /**
    * Mezo Integration Contract (V3)
    * Manages BTC deposits and MUSD minting
-   * Proxy: 0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6
+   * Proxy: 0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD
    */
   MEZO_INTEGRATION: getEnvAddress(
     ENV_KEYS.MEZO_INTEGRATION,
-    "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6"
+    "0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD"
   ),
 
   /**
@@ -117,17 +117,16 @@ export const CONTRACT_ADDRESSES = {
    * Stability Pool Strategy
    * Strategy contract for Mezo Stability Pool
    * Generates 6% APR through BTC lending
-   * Deployed: 0xe6e0608abEf8f31847C1c9367465DbF68A040Edc
    */
   STABILITY_POOL_STRATEGY: getEnvAddress(
     ENV_KEYS.STABILITY_POOL_STRATEGY,
-    "0xe6e0608abEf8f31847C1c9367465DbF68A040Edc"
+    "0x0000000000000000000000000000000000000000"
   ),
 
   /**
    * Individual Savings Pool (V3)
    * Personal savings with auto-yield optimization
-   * ✅ Proxy (USE THIS): 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
+   * Proxy: 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
    * Features: Auto-compound, Referrals, Incremental deposits
    */
   INDIVIDUAL_POOL: getEnvAddress(
@@ -138,28 +137,28 @@ export const CONTRACT_ADDRESSES = {
   /**
    * Cooperative Savings Pool (V3)
    * Community pooled savings with native BTC deposits
-   * Proxy: 0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88
+   * Proxy: 0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F
    */
   COOPERATIVE_POOL: getEnvAddress(
     ENV_KEYS.COOPERATIVE_POOL,
-    "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88"
+    "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F"
   ),
 
   /**
    * Lottery Pool (Prize Savings)
-   * No-loss lottery with Chainlink VRF
-   * ⚠️ Not deployed yet
+   * No-loss lottery with secure randomness
+   * Proxy: 0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4
    */
-  LOTTERY_POOL: getEnvAddress(ENV_KEYS.LOTTERY_POOL, "0x0000000000000000000000000000000000000000"),
+  LOTTERY_POOL: getEnvAddress(ENV_KEYS.LOTTERY_POOL, "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4"),
 
   /**
    * Rotating Pool (ROSCA/Pasanaku)
-   * Turn-based distribution system
-   * ⚠️ Not deployed yet
+   * Turn-based distribution system with DeFi yields
+   * Proxy: 0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04
    */
   ROTATING_POOL: getEnvAddress(
     ENV_KEYS.ROTATING_POOL,
-    "0x0000000000000000000000000000000000000000"
+    "0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04"
   ),
 } as const;
 
