@@ -52,13 +52,14 @@ export const MEZO_STABILITY_POOL_ABI = Array.isArray(StabilityPoolABI)
 
 export const MEZO_TESTNET_ADDRESSES = {
   // KhipuVault V3 Pools (UUPS Upgradeable) - PRODUCTION
+  // Updated: Feb 10, 2026
   individualPool: "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
-  cooperativePool: "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88",
+  cooperativePool: "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F", // Redeployed Feb 10
   lotteryPool: "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4",
-  rotatingPool: "0x0Bac59e87Af0D2e95711846BaDb124164382aafC", // V2 with native BTC support
+  rotatingPool: "0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04", // UUPS with native BTC
 
   // Core Integration V3 - PRODUCTION
-  mezoIntegration: "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6",
+  mezoIntegration: "0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD",
   yieldAggregator: "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6",
 
   // Mezo Protocol - Official Mezo Testnet Addresses

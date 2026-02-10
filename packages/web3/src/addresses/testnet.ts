@@ -1,16 +1,17 @@
 /**
  * Mezo Testnet Contract Addresses
  * Chain ID: 31611
- * Last Updated: V3 Production Deployment
+ * Last Updated: 2026-02-10 - V3 Fresh Deployment with configurable limits
  */
 
 export const TESTNET_ADDRESSES = {
-  // V3 Production Contracts
+  // V3 Deployment - Working contracts with deployer ownership
   INDIVIDUAL_POOL: "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393" as const,
-  COOPERATIVE_POOL: "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88" as const,
+  COOPERATIVE_POOL: "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F" as const,
   YIELD_AGGREGATOR: "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6" as const,
-  MEZO_INTEGRATION: "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6" as const,
-  LOTTERY_POOL: "0x04D0172067e490C5845F8925A50282C7a1348377" as const,
+  MEZO_INTEGRATION: "0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD" as const,
+  LOTTERY_POOL: "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4" as const,
+  ROTATING_POOL: "0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04" as const,
 
   // Official Mezo Contracts
   MUSD: "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503" as const,

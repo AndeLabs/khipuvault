@@ -63,13 +63,19 @@ packages/
 
 ## Smart Contracts (Mezo Testnet - Chain ID 31611)
 
-| Contract        | Address                                      |
-| --------------- | -------------------------------------------- |
-| IndividualPool  | `0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393` |
-| CooperativePool | `0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88` |
-| MezoIntegration | `0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6` |
-| YieldAggregator | `0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6` |
-| MUSD            | `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503` |
+**Last Updated: 2026-02-10**
+
+| Contract        | Address                                      | Status      |
+| --------------- | -------------------------------------------- | ----------- |
+| IndividualPool  | `0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393` | Deployed    |
+| CooperativePool | `0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F` | Deployed    |
+| YieldAggregator | `0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6` | Deployed    |
+| MezoIntegration | `0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD` | Deployed    |
+| LotteryPool     | `0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4` | Deployed    |
+| RotatingPool    | `0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04` | Deployed    |
+| MUSD            | `0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503` | Mezo Native |
+
+**Deployer Wallet:** `0x8e7E7BA2BD22e6f194821Ea2cEf903eaD949F257`
 
 RPC: `https://rpc.test.mezo.org`
 
@@ -309,3 +315,105 @@ Examples:
 - "use context7 for wagmi hooks"
 - "use context7 for prisma patterns"
 - "use context7 for solidity gas optimization"
+
+## Auto-Applied Knowledge
+
+Claude automatically applies specialized knowledge based on task context. No manual invocation needed.
+
+**Knowledge Base Location**: `.claude/knowledge/AUTO_KNOWLEDGE.md`
+
+### When Knowledge is Applied
+
+| Task Type                  | Auto-Applied Knowledge                          |
+| -------------------------- | ----------------------------------------------- |
+| Frontend Web3 components   | Wagmi hooks, Viem utilities, React Query        |
+| Smart contract development | Foundry testing, OpenZeppelin, Gas optimization |
+| API endpoint creation      | Express patterns, Zod validation, SIWE auth     |
+| Database operations        | Prisma patterns, transactions, pagination       |
+| Blockchain interactions    | Mezo config, contract addresses, ethers.js      |
+
+### Available Skills (Manual Invocation)
+
+For detailed documentation, invoke these skills explicitly:
+
+```
+/foundry          # Forge testing, deployment scripts
+/wagmi-viem       # Wagmi 2.x hooks, Viem utilities
+/prisma-patterns  # Database schema, queries, transactions
+/openzeppelin     # Security patterns, access control
+/solidity-gas     # Gas optimization techniques
+/express-api      # API routes, middleware, auth
+/mezo-blockchain  # Mezo network config, RPC
+/react-query      # Server state, query keys, mutations
+/zod-validation   # Schema validation, type inference
+```
+
+### Security Checklist (Auto-Applied)
+
+Claude automatically validates against these patterns:
+
+**Smart Contracts:**
+
+- `nonReentrant` on functions with transfers
+- CEI pattern (Checks-Effects-Interactions)
+- `SafeERC20` for token operations
+- Events for all state changes
+
+**Backend:**
+
+- Zod validation on all inputs
+- Proper error handling middleware
+- Rate limiting on sensitive endpoints
+
+**Frontend:**
+
+- Loading/error states on async operations
+- Transaction receipt waiting
+- Query invalidation after mutations
+
+## Auto-Applied Workflow Skills
+
+Claude MUST follow these workflows automatically. See `.claude/SKILLS_AUTO_APPLY.md` for full details.
+
+### Mandatory Workflow Order
+
+```
+Brainstorm → Plan → Test First → Implement → Verify → Complete
+```
+
+### Trigger-Based Skills
+
+| When...           | Auto-Apply                       | Key Rule                                         |
+| ----------------- | -------------------------------- | ------------------------------------------------ |
+| Creating features | `brainstorming`                  | Ask questions ONE at a time, propose 2-3 options |
+| Fixing bugs       | `systematic-debugging`           | NO fixes without root cause investigation        |
+| Writing code      | `test-driven-development`        | NO production code without failing test first    |
+| Building UI       | `frontend-design`                | BOLD aesthetics, NO generic AI slop              |
+| React/Next.js     | `vercel-react-best-practices`    | Performance patterns (waterfalls, bundles)       |
+| Multi-step tasks  | `writing-plans`                  | Save to `docs/plans/YYYY-MM-DD-<feature>.md`     |
+| Claiming done     | `verification-before-completion` | Run commands BEFORE success claims               |
+
+### Iron Laws (NEVER violate)
+
+1. **Debugging**: `NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST`
+2. **Testing**: `NO PRODUCTION CODE WITHOUT A FAILING TEST FIRST`
+3. **Completion**: `NO COMPLETION CLAIMS WITHOUT FRESH VERIFICATION EVIDENCE`
+
+### Verification Before Completion
+
+**ALWAYS run before claiming success:**
+
+```bash
+pnpm lint && pnpm typecheck && pnpm test
+```
+
+**NEVER say** "should work", "looks correct", or express satisfaction without running verification commands.
+
+### Installed Skills Location
+
+```
+.agents/skills/           # 35 skills from skills.sh
+.claude/skills/           # 10 KhipuVault-specific skills
+.claude/knowledge/        # Auto-applied knowledge base
+.claude/SKILLS_AUTO_APPLY.md  # Workflow rules
+```

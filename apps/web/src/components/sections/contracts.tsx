@@ -17,25 +17,25 @@ const contracts = [
   {
     name: "Cooperative Pool",
     description: "Community pools for collective Bitcoin savings",
-    address: "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88",
+    address: "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F",
     icon: Code2,
   },
   {
     name: "Rotating Pool (ROSCA)",
     description: "Turn-based savings circles with Native BTC & WBTC support",
-    address: "0x0Bac59e87Af0D2e95711846BaDb124164382aafC",
+    address: "0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04",
     icon: Code2,
   },
   {
     name: "Prize Pool (Lottery)",
     description: "No-loss lottery with 99% gas optimization and secure randomness",
-    address: "0x04D0172067e490C5845F8925A50282C7a1348377",
+    address: "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4",
     icon: Code2,
   },
   {
     name: "Mezo Integration",
     description: "Bridge contract for Mezo Protocol staking",
-    address: "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6",
+    address: "0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD",
     icon: FileCode,
   },
   {

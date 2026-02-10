@@ -193,8 +193,10 @@ pnpm spell:check      # Spell check code & docs
 | Contract            | Address                                                                                                  | Description               |
 | ------------------- | -------------------------------------------------------------------------------------------------------- | ------------------------- |
 | **IndividualPool**  | [`0xdfBEd...0393`](https://explorer.test.mezo.org/address/0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393)    | Personal savings accounts |
-| **CooperativePool** | [`0x323Fc...1655F88`](https://explorer.test.mezo.org/address/0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88) | Community pooled savings  |
-| **MezoIntegration** | [`0x043de...CE1c6`](https://explorer.test.mezo.org/address/0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6)   | BTC ↔ MUSD bridge        |
+| **CooperativePool** | [`0xA39EE...Cd1F`](https://explorer.test.mezo.org/address/0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F)    | Community pooled savings  |
+| **LotteryPool**     | [`0x8c9cc...24b4`](https://explorer.test.mezo.org/address/0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4)    | No-loss lottery pool      |
+| **RotatingPool**    | [`0x1b7AB...7B04`](https://explorer.test.mezo.org/address/0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04)    | ROSCA savings circles     |
+| **MezoIntegration** | [`0xab91e...77fD`](https://explorer.test.mezo.org/address/0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD)    | BTC ↔ MUSD bridge         |
 | **YieldAggregator** | [`0x3D28A...E6`](https://explorer.test.mezo.org/address/0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6)      | Yield strategy router     |
 | **MUSD Token**      | [`0x11891...503`](https://explorer.test.mezo.org/address/0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503)     | Mezo stablecoin           |
 
@@ -330,7 +332,9 @@ NEXT_PUBLIC_API_URL=http://localhost:3001/api
 NEXT_PUBLIC_CHAIN_ID=31611
 NEXT_PUBLIC_RPC_URL=https://rpc.test.mezo.org
 NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS=0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
-NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS=0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88
+NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS=0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F
+NEXT_PUBLIC_LOTTERY_POOL_ADDRESS=0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4
+NEXT_PUBLIC_ROTATING_POOL_ADDRESS=0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04
 NEXT_PUBLIC_PRIVY_APP_ID=your_privy_app_id
 ```
 

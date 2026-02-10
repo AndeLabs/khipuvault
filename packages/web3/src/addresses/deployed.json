@@ -3,25 +3,26 @@
   "chainId": 31611,
   "rpcUrl": "https://rpc.test.mezo.org",
   "explorer": "https://explorer.test.mezo.org",
-  "deployedAt": "2025-11-02",
+  "deployedAt": "2026-02-10",
   "deployer": "0x8e7E7BA2BD22e6f194821Ea2cEf903eaD949F257",
 
   "khipuVault": {
     "mezoIntegrationV3": {
-      "proxy": "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6",
-      "implementation": "0xe6e0608abef8f31847c1c9367465dbf68a040edc",
-      "description": "V3 UUPS - Wrapper for Mezo MUSD protocol with native BTC support",
+      "proxy": "0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD",
+      "implementation": "0x3040Fc7B5fAc0e49E8b123f4eD13C55F5a41b08F",
+      "description": "V3 UUPS - Wrapper for Mezo MUSD protocol",
       "status": "deployed",
-      "explorerUrl": "https://explorer.test.mezo.org/address/0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6"
+      "explorerUrl": "https://explorer.test.mezo.org/address/0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD"
     },
     "yieldAggregatorV3": {
-      "address": "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6",
+      "proxy": "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6",
+      "implementation": "0xe6e0608abef8f31847c1c9367465dbf68a040edc",
       "description": "V3 UUPS - Yield aggregation with multi-vault support",
       "status": "deployed",
       "vaults": [
         {
-          "name": "StabilityPoolStrategy",
-          "address": "0xe6e0608abEf8f31847C1c9367465DbF68A040Edc",
+          "name": "MUSD Vault",
+          "address": "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
           "apr": 600,
           "status": "active"
         }
@@ -36,18 +37,18 @@
       "explorerUrl": "https://explorer.test.mezo.org/address/0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393"
     },
     "cooperativePoolV3": {
-      "proxy": "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88",
-      "implementation": "0xde2649bda9a0db84079cac3b15d93f1de5ceb7f7",
+      "proxy": "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F",
+      "implementation": "0xf9d56fd99F77f1BF34c10beb954cC439CA846CFf",
       "description": "V3 UUPS - Cooperative savings pool for group deposits",
       "status": "deployed",
-      "explorerUrl": "https://explorer.test.mezo.org/address/0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88"
+      "explorerUrl": "https://explorer.test.mezo.org/address/0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F"
     },
-    "stabilityPoolStrategy": {
-      "address": "0xe6e0608abEf8f31847C1c9367465DbF68A040Edc",
-      "description": "Mezo Stability Pool strategy for MUSD yield generation",
+    "rotatingPoolV3": {
+      "proxy": "0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04",
+      "implementation": "0x2dD9dF3324f5eE1A88f70023d59db1BE30B7C8E1",
+      "description": "V3 UUPS - Rotating savings pool (ROSCA) with native BTC",
       "status": "deployed",
-      "performanceFee": 100,
-      "explorerUrl": "https://explorer.test.mezo.org/address/0xe6e0608abEf8f31847C1c9367465DbF68A040Edc"
+      "explorerUrl": "https://explorer.test.mezo.org/address/0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04"
     },
     "lotteryPoolV3": {
       "proxy": "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4",

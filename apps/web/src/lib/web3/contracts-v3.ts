@@ -108,7 +108,7 @@ export const MEZO_V3_ADDRESSES = {
   ),
   cooperativePoolV3: getAddress(
     "NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS",
-    "0x323FcA9b377fe29B8fc95dDbD9Fe54cea1655F88",
+    "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F",
     "CooperativePoolV3"
   ),
 
@@ -122,7 +122,7 @@ export const MEZO_V3_ADDRESSES = {
   // Mezo Integration V3 (Upgradeable Proxy)
   mezoIntegrationV3: getAddress(
     "NEXT_PUBLIC_MEZO_INTEGRATION_ADDRESS",
-    "0x043def502e4A1b867Fd58Df0Ead080B8062cE1c6",
+    "0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD",
     "MezoIntegrationV3"
   ),
 
