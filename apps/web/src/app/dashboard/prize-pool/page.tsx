@@ -4,7 +4,7 @@
  *
  * Production-ready lottery feature where users never lose their capital
  * Comprehensive UI/UX with all features from smart contract tests:
- * - Buy tickets with BTC
+ * - Buy tickets with mUSD (ERC20 stablecoin)
  * - Real-time countdown timers
  * - Probability calculator
  * - Draw history
@@ -78,8 +78,8 @@ import { useLotteryPoolEvents } from "@/hooks/web3/lottery/use-lottery-pool-even
  *
  * Features:
  * ✅ Real blockchain data (no hardcoded values)
- * ✅ Connected to actual SimpleLotteryPool contract
- * ✅ Buy tickets with native BTC
+ * ✅ Connected to actual LotteryPoolV3 contract
+ * ✅ Buy tickets with mUSD (ERC20)
  * ✅ Real-time countdown timers
  * ✅ Win probability calculator
  * ✅ Draw history with winners
@@ -426,15 +426,15 @@ export default function PrizePoolPage() {
                 </div>
                 <div className="rounded-lg border border-border bg-surface-elevated p-3 text-center md:p-4">
                   <div className="text-xl font-bold text-success md:text-2xl">
-                    {isLoadingStats ? "-" : `${Number(stats.totalInvested) / 1e18}`}
+                    {isLoadingStats ? "-" : `${(Number(stats.totalInvested) / 1e18).toFixed(2)}`}
                   </div>
-                  <div className="mt-1 text-xs text-muted-foreground">Invested (BTC)</div>
+                  <div className="mt-1 text-xs text-muted-foreground">Invested (mUSD)</div>
                 </div>
                 <div className="rounded-lg border border-border bg-surface-elevated p-3 text-center md:p-4">
                   <div className="text-xl font-bold text-warning md:text-2xl">
-                    {isLoadingStats ? "-" : `${Number(stats.totalWinnings) / 1e18}`}
+                    {isLoadingStats ? "-" : `${(Number(stats.totalWinnings) / 1e18).toFixed(2)}`}
                   </div>
-                  <div className="mt-1 text-xs text-muted-foreground">Won (BTC)</div>
+                  <div className="mt-1 text-xs text-muted-foreground">Won (mUSD)</div>
                 </div>
               </div>
             )}
