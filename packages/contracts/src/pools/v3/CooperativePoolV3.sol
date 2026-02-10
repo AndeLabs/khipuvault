@@ -564,12 +564,13 @@ contract CooperativePoolV3 is BasePoolV3 {
 
         uint256 musdAmount = MEZO_INTEGRATION.depositAndMintNative{value: btcAmount}();
 
+        // CEI Pattern: Update state BEFORE interacting with YieldAggregator
+        pool.totalMusdMinted += musdAmount;
+
         MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
         // H-8 FIX: Capture return value to verify deposit succeeded
         (, uint256 shares) = YIELD_AGGREGATOR.deposit(musdAmount);
         require(shares > 0, "Deposit failed");
-
-        pool.totalMusdMinted += musdAmount;
 
         if (pool.status == PoolStatus.ACCEPTING) {
             pool.status = PoolStatus.ACTIVE;
