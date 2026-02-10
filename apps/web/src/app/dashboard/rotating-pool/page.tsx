@@ -96,7 +96,7 @@ export default function RotatingPoolPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0.000 BTC</div>
+            <div className="text-2xl font-bold">0.000 MUSD</div>
             <p className="text-xs text-muted-foreground">Earned from DeFi integration</p>
           </CardContent>
         </Card>
