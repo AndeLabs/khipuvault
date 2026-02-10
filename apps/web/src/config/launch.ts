@@ -4,42 +4,22 @@
  * Controls whether the app is in pre-launch (landing) or live (full app) mode.
  *
  * Environment Variables:
- * - NEXT_PUBLIC_LAUNCH_MODE: "pre-launch" | "live"
- * - NEXT_PUBLIC_NETWORK: "testnet" | "mainnet" (managed by @khipu/shared)
+ * - LAUNCH_MODE: "pre-launch" | "live"
+ * - NETWORK: "testnet" | "mainnet" (managed by shared package)
  *
- * Deployment Configuration:
+ * Deployment Configuration (see .env.example for details):
  *
  * PRE-LAUNCH (Current State):
- * ┌─────────────────────────────────────────────────────────┐
- * │ khipuvault.com                                          │
- * │   NEXT_PUBLIC_LAUNCH_MODE=pre-launch                    │
- * │   NEXT_PUBLIC_NETWORK=mainnet                           │
- * │   → Shows landing page, invites to testnet              │
- * ├─────────────────────────────────────────────────────────┤
- * │ testnet.khipuvault.com                                  │
- * │   NEXT_PUBLIC_LAUNCH_MODE=live                          │
- * │   NEXT_PUBLIC_NETWORK=testnet                           │
- * │   → Shows full app connected to testnet                 │
- * └─────────────────────────────────────────────────────────┘
+ * - khipuvault.com: Shows landing page, invites to testnet
+ * - testnet.khipuvault.com: Shows full app connected to testnet
  *
  * MAINNET LAUNCH (Future):
- * ┌─────────────────────────────────────────────────────────┐
- * │ khipuvault.com                                          │
- * │   NEXT_PUBLIC_LAUNCH_MODE=live                          │
- * │   NEXT_PUBLIC_NETWORK=mainnet                           │
- * │   → Shows full app connected to mainnet                 │
- * ├─────────────────────────────────────────────────────────┤
- * │ testnet.khipuvault.com                                  │
- * │   NEXT_PUBLIC_LAUNCH_MODE=live                          │
- * │   NEXT_PUBLIC_NETWORK=testnet                           │
- * │   → Shows full app connected to testnet (unchanged)     │
- * └─────────────────────────────────────────────────────────┘
+ * - Both sites show full app (mainnet and testnet respectively)
  *
  * TO LAUNCH MAINNET:
  * 1. In Vercel, go to khipuvault.com project settings
- * 2. Change NEXT_PUBLIC_LAUNCH_MODE from "pre-launch" to "live"
+ * 2. Change LAUNCH_MODE from "pre-launch" to "live"
  * 3. Redeploy
- * 4. Done! Main site now shows full app
  */
 
 // Re-export network functions from shared (single source of truth)
@@ -100,11 +80,9 @@ export function shouldShowApp(): boolean {
  * Get configuration summary for debugging
  */
 export function getConfigSummary() {
-  // Import dynamically to avoid circular dependency
-  const { getCurrentNetwork: getNetwork } = require("@khipu/shared");
   return {
     launchMode: getLaunchMode(),
-    network: getNetwork(),
+    network: process.env.NEXT_PUBLIC_NETWORK ?? "testnet",
     showLanding: shouldShowLanding(),
     showApp: shouldShowApp(),
   };

@@ -15,10 +15,16 @@
 // Import the V3 ABI from the contracts package
 import LotteryPoolV3ABI from "@/contracts/abis/LotteryPoolV3.json";
 
+// Type for JSON module that may have default/abi wrapper
+type AbiModule = readonly unknown[] | { default?: readonly unknown[]; abi?: readonly unknown[] };
+
 // Ensure ABI is an array (handle bundler wrapping)
-export const LOTTERY_POOL_ABI = Array.isArray(LotteryPoolV3ABI)
-  ? LotteryPoolV3ABI
-  : (LotteryPoolV3ABI as any).default || (LotteryPoolV3ABI as any).abi || LotteryPoolV3ABI;
+const abiData = LotteryPoolV3ABI as AbiModule;
+export const LOTTERY_POOL_ABI = Array.isArray(abiData)
+  ? abiData
+  : ((abiData as { default?: readonly unknown[]; abi?: readonly unknown[] }).default ??
+    (abiData as { default?: readonly unknown[]; abi?: readonly unknown[] }).abi ??
+    LotteryPoolV3ABI);
 
 // V3 Round Status enum values
 export const LotteryRoundStatus = {
