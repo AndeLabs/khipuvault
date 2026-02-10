@@ -10,7 +10,6 @@ on:
       - "docs/**"
       - ".vscode/**"
       - ".github/workflows/deploy-*.yml"
-      - ".github/workflows/claude-review.yml"
   pull_request:
     branches:
       - main

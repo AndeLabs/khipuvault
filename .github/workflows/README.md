@@ -123,19 +123,13 @@ Comprehensive CI/CD automation for KhipuVault using GitHub Actions.
 
 **Note**: This workflow is kept as the primary CI pipeline. The new enhanced workflows provide additional capabilities and can run in parallel.
 
-### 5. Claude Review (`claude-review.yml`)
-
-**Status**: ✅ Active
-
-**Purpose**: AI-powered code review using Claude.
-
-### 6. Deploy Preview (`deploy-preview.yml`)
+### 5. Deploy Preview (`deploy-preview.yml`)
 
 **Status**: ✅ Active
 
 **Purpose**: Deploy preview environments for pull requests.
 
-### 7. Deploy Production (`deploy-production.yml`)
+### 6. Deploy Production (`deploy-production.yml`)
 
 **Status**: ✅ Active
 

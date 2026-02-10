@@ -252,4 +252,4 @@ cast send <yieldAggregator> "setAuthorizedCaller(address,bool)" <contract> true 
 ---
 
 _Report generated: 2026-02-10_
-_Tester: Claude Code (Automated Testing)_
+_Tester: KhipuVault QA Team_

@@ -399,7 +399,7 @@ Expected performance (based on similar projects):
 
 - [Workflow README](.github/workflows/README.md)
 - [Architecture Guide](.github/workflows/ARCHITECTURE.md)
-- [Project CLAUDE.md](../CLAUDE.md)
+- [Development Guide](../DEVELOPMENT.md)
 
 ### External Resources
 
