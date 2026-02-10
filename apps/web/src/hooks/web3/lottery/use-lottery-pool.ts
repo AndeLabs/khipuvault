@@ -13,7 +13,6 @@ import { useQuery } from "@tanstack/react-query";
 import { formatEther, type Address } from "viem";
 import { useAccount, usePublicClient, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
-import { queryKeys } from "@/lib/query-keys";
 import {
   fetchCurrentRoundId,
   fetchRoundCounter,
@@ -26,6 +25,7 @@ import {
   type LotteryRound,
   type UserLotteryStats,
 } from "@/lib/blockchain/fetch-lottery-pools";
+import { queryKeys } from "@/lib/query-keys";
 import { normalizeBigInt } from "@/lib/query-utils";
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
 import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
@@ -321,7 +321,8 @@ export function useUserLotteryStats(userAddress?: `0x${string}`) {
 }
 
 /**
- * Hook to buy tickets
+ * Hook to buy tickets using mUSD
+ * LotteryPoolV3 uses mUSD (ERC20) not native BTC
  *
  * @returns Object with buyTickets function and transaction states
  */
@@ -331,15 +332,15 @@ export function useBuyTickets() {
     hash,
   });
 
-  const buyTickets = async (roundId: number, ticketCount: number, ticketPrice: bigint) => {
-    const totalCost = ticketPrice * BigInt(ticketCount);
-
+  const buyTickets = async (roundId: number, ticketCount: number, _ticketPrice: bigint) => {
+    // LotteryPoolV3 uses mUSD - the contract handles the transfer internally
+    // User must have approved the lottery pool to spend their mUSD first
     writeContract({
       address: LOTTERY_POOL_ADDRESS,
       abi: LOTTERY_POOL_ABI,
       functionName: "buyTickets",
       args: [BigInt(roundId), BigInt(ticketCount)],
-      value: totalCost, // BTC is native on Mezo
+      // No value - mUSD is ERC20, not native token
     });
   };
 

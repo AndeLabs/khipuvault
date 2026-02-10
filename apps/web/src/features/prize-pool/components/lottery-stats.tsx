@@ -9,11 +9,11 @@
 
 import { Trophy, Ticket, Clock, DollarSign } from "lucide-react";
 import * as React from "react";
-import { formatEther } from "viem";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTimeRemaining } from "@/hooks/web3/lottery/use-lottery-pool";
+import { formatMusd } from "@/hooks/web3/use-musd-balance";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
@@ -68,8 +68,8 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
   const stats = [
     {
       title: "Total Prize Pool",
-      value: `${formatEther(roundInfo.totalPrize)} BTC`,
-      subtitle: `≈ $${(Number(formatEther(roundInfo.totalPrize)) * 95000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      value: `${formatMusd(roundInfo.totalPrize)} mUSD`,
+      subtitle: "mUSD is pegged 1:1 to USD",
       icon: Trophy,
       color: "text-lavanda",
       bgColor: "bg-lavanda/10",
@@ -84,8 +84,8 @@ export function LotteryStats({ roundInfo, isLoading }: LotteryStatsProps) {
     },
     {
       title: "Ticket Price",
-      value: `${formatEther(roundInfo.ticketPrice)} BTC`,
-      subtitle: `≈ $${(Number(formatEther(roundInfo.ticketPrice)) * 95000).toFixed(2)}`,
+      value: `${formatMusd(roundInfo.ticketPrice)} mUSD`,
+      subtitle: "per ticket",
       icon: DollarSign,
       color: "text-success",
       bgColor: "bg-success/10",

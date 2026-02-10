@@ -20,7 +20,6 @@ import {
   Loader2,
 } from "lucide-react";
 import * as React from "react";
-import { formatEther } from "viem";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -28,6 +27,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTimeRemaining, getRoundStatus } from "@/hooks/web3/lottery/use-lottery-pool";
+import { formatMusd } from "@/hooks/web3/use-musd-balance";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
@@ -164,16 +164,9 @@ export function ActiveLotteryHero({
         <div className="rounded-lg border border-lavanda/20 bg-gradient-to-br from-lavanda/20 to-lavanda/10 p-6 text-center">
           <div className="mb-2 text-sm text-muted-foreground">Total Prize Pool</div>
           <div className="mb-1 text-5xl font-bold text-lavanda">
-            {formatEther(roundInfo.totalPrize)} BTC
+            {formatMusd(roundInfo.totalPrize)} mUSD
           </div>
-          <div className="text-sm text-muted-foreground">
-            ≈ $
-            {(Number(formatEther(roundInfo.totalPrize)) * 95000).toLocaleString("en-US", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}{" "}
-            USD
-          </div>
+          <div className="text-sm text-muted-foreground">mUSD is pegged 1:1 to USD</div>
         </div>
 
         {/* Stats Grid */}
@@ -192,8 +185,8 @@ export function ActiveLotteryHero({
 
           <div className="rounded-lg border border-border bg-surface-elevated p-4 text-center">
             <TrendingUp className="mx-auto mb-2 h-5 w-5 text-success" />
-            <div className="text-2xl font-bold">{formatEther(roundInfo.ticketPrice)}</div>
-            <div className="text-xs text-muted-foreground">BTC per Ticket</div>
+            <div className="text-2xl font-bold">{formatMusd(roundInfo.ticketPrice)}</div>
+            <div className="text-xs text-muted-foreground">mUSD per Ticket</div>
           </div>
         </div>
 
@@ -299,7 +292,7 @@ export function ActiveLotteryHero({
                   {roundInfo.winner.slice(-4)}
                 </p>
                 <p className="text-success-foreground/80 mt-1 text-xs">
-                  Prize: {formatEther(roundInfo.totalPrize)} BTC
+                  Prize: {formatMusd(roundInfo.totalPrize)} mUSD
                 </p>
               </div>
               {isAdmin && onCreateNewRound && (

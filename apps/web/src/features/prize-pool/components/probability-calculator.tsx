@@ -9,13 +9,13 @@
 
 import { Calculator, TrendingUp, DollarSign, Percent } from "lucide-react";
 import * as React from "react";
-import { formatEther } from "viem";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
+import { formatMusd } from "@/hooks/web3/use-musd-balance";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
@@ -48,8 +48,8 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
 
   // Expected value calculation (simplified)
   const expectedWinnings = totalPrize;
-  const expectedValue = (probability / 100) * Number(formatEther(expectedWinnings));
-  const costInEther = Number(formatEther(totalCost));
+  const expectedValue = (probability / 100) * Number(formatMusd(expectedWinnings));
+  const costInEther = Number(formatMusd(totalCost));
   const netExpectedValue = expectedValue - costInEther;
   const roi = costInEther > 0 ? (netExpectedValue / costInEther) * 100 : 0;
 
@@ -128,7 +128,7 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
                 </div>
                 <div>
                   <div className="mb-1 text-xs text-muted-foreground">Total Cost</div>
-                  <div className="text-xl font-bold">{formatEther(totalCost)} BTC</div>
+                  <div className="text-xl font-bold">{formatMusd(totalCost)} mUSD</div>
                 </div>
               </div>
             </div>
@@ -147,7 +147,7 @@ export function ProbabilityCalculator({ roundInfo }: ProbabilityCalculatorProps)
                     className={`text-xl font-bold ${netExpectedValue >= 0 ? "text-success" : "text-destructive"}`}
                   >
                     {netExpectedValue >= 0 ? "+" : ""}
-                    {netExpectedValue.toFixed(4)} BTC
+                    {netExpectedValue.toFixed(4)} mUSD
                   </div>
                 </div>
               </div>

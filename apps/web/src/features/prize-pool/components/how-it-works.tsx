@@ -40,9 +40,9 @@ export function HowItWorks() {
                 <Ticket className="h-5 w-5 text-lavanda" />
               </div>
               <div>
-                <div className="mb-1 font-medium">1. Buy Tickets with BTC</div>
+                <div className="mb-1 font-medium">1. Buy Tickets with mUSD</div>
                 <p className="text-sm text-muted-foreground">
-                  Purchase lottery tickets using native BTC. Each ticket is your entry into the
+                  Purchase lottery tickets using native mUSD. Each ticket is your entry into the
                   prize pool.
                 </p>
               </div>
@@ -54,10 +54,10 @@ export function HowItWorks() {
                 <Zap className="h-5 w-5 text-lavanda" />
               </div>
               <div>
-                <div className="mb-1 font-medium">2. Your BTC Generates Yields</div>
+                <div className="mb-1 font-medium">2. Your mUSD Generates Yields</div>
                 <p className="text-sm text-muted-foreground">
-                  Your BTC is deposited into Mezo protocol and mints MUSD, which generates yields in
-                  DeFi.
+                  Your mUSD is deposited into Mezo protocol and mints MUSD, which generates yields
+                  in DeFi.
                 </p>
               </div>
             </div>
@@ -83,7 +83,7 @@ export function HowItWorks() {
               <div>
                 <div className="mb-1 font-medium">4. Claim Your Rewards</div>
                 <p className="text-sm text-muted-foreground">
-                  Winner gets their principal + most yields. Non-winners get their full BTC back.
+                  Winner gets their principal + most yields. Non-winners get their full mUSD back.
                 </p>
               </div>
             </div>
@@ -97,7 +97,7 @@ export function HowItWorks() {
             <div className="text-success-foreground font-medium">No-Loss Guarantee</div>
           </div>
           <p className="text-success-foreground/80 text-sm">
-            You NEVER lose your capital! If you don't win, you get 100% of your BTC back. Only the
+            You NEVER lose your capital! If you don't win, you get 100% of your mUSD back. Only the
             yields go to the winner.
           </p>
         </div>
@@ -110,8 +110,8 @@ export function HowItWorks() {
             <AccordionItem value="item-1">
               <AccordionTrigger className="text-sm">What happens if I don't win?</AccordionTrigger>
               <AccordionContent className="text-sm text-muted-foreground">
-                You get 100% of your BTC back! This is a no-loss lottery - only the yields generated
-                during the period go to the winner. Your principal is always safe.
+                You get 100% of your mUSD back! This is a no-loss lottery - only the yields
+                generated during the period go to the winner. Your principal is always safe.
               </AccordionContent>
             </AccordionItem>
 
@@ -126,7 +126,7 @@ export function HowItWorks() {
             <AccordionItem value="item-3">
               <AccordionTrigger className="text-sm">How are yields generated?</AccordionTrigger>
               <AccordionContent className="text-sm text-muted-foreground">
-                Your BTC is deposited into Mezo protocol to mint MUSD. The MUSD is then deposited
+                Your mUSD is deposited into Mezo protocol to mint MUSD. The MUSD is then deposited
                 into Mezo's Stability Pool, which generates yields through liquidation rewards.
               </AccordionContent>
             </AccordionItem>
@@ -166,7 +166,7 @@ export function HowItWorks() {
         <div className="rounded-lg border border-border bg-muted/50 p-3">
           <p className="text-xs text-muted-foreground">
             <strong>Important:</strong> This is a testnet deployment. Do not use real funds. The
-            lottery uses native BTC on Mezo Testnet. Smart contracts are not audited and provided
+            lottery uses native mUSD on Mezo Testnet. Smart contracts are not audited and provided
             as-is for testing purposes.
           </p>
         </div>

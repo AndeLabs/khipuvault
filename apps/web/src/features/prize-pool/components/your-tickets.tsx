@@ -9,12 +9,12 @@
 
 import { Ticket, TrendingUp, Trophy, Wallet } from "lucide-react";
 import * as React from "react";
-import { formatEther } from "viem";
 
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatProbability } from "@/hooks/web3/lottery/use-lottery-pool";
+import { formatMusd } from "@/hooks/web3/use-musd-balance";
 
 interface YourTicketsProps {
   ticketCount?: bigint;
@@ -103,7 +103,7 @@ export function YourTickets({
                     <Wallet className="h-5 w-5 text-accent" />
                   </div>
                   <div>
-                    <div className="text-xl font-bold">{formatEther(investment)} BTC</div>
+                    <div className="text-xl font-bold">{formatMusd(investment)} mUSD</div>
                     <div className="text-xs text-muted-foreground">Total Invested</div>
                   </div>
                 </div>
@@ -131,7 +131,7 @@ export function YourTickets({
             <div className="rounded-lg border border-info/20 bg-info/10 p-3">
               <p className="text-info-foreground text-xs">
                 <strong>Remember:</strong> You never lose your capital! If you don't win, you get
-                your BTC back.
+                your mUSD back.
               </p>
             </div>
           </div>

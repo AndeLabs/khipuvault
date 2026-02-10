@@ -2,7 +2,7 @@
  * @fileoverview Buy Tickets Modal Component
  * @module features/prize-pool/components/buy-tickets-modal
  *
- * Modal for purchasing lottery tickets with BTC
+ * Modal for purchasing lottery tickets with mUSD
  */
 
 "use client";
@@ -10,8 +10,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { Ticket, AlertCircle, Wallet, Calculator, CheckCircle2, Loader2 } from "lucide-react";
 import * as React from "react";
-import { formatEther } from "viem";
-import { useAccount, useBalance } from "wagmi";
+import { formatUnits } from "viem";
+import { useAccount } from "wagmi";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Badge } from "@/components/ui/badge";
@@ -28,6 +28,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useBuyTickets, formatProbability } from "@/hooks/web3/lottery/use-lottery-pool";
+import { useMusdBalance, formatMusd } from "@/hooks/web3/use-musd-balance";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
@@ -47,7 +48,7 @@ export function BuyTicketsModal({
   maxTicketsPerUser = BigInt(10),
 }: BuyTicketsModalProps) {
   const { address } = useAccount();
-  const { data: balance } = useBalance({ address });
+  const { balance: musdBalance, formatted: musdFormatted } = useMusdBalance();
   const { buyTickets, isPending, isSuccess, hash, error } = useBuyTickets();
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -68,9 +69,9 @@ export function BuyTicketsModal({
     estimatedTotalTickets > 0 ? (ticketCountNum / estimatedTotalTickets) * 10000 : 0;
 
   // Validation
-  const hasEnoughBalance = balance ? balance.value >= totalCost : false;
+  const hasEnoughBalance = musdBalance >= totalCost;
   const isValidCount = ticketCountNum > 0 && ticketCountNum <= remainingTickets;
-  const canPurchase = hasEnoughBalance && isValidCount && !isPending;
+  const canPurchase = hasEnoughBalance && isValidCount && !isPending && !!address;
 
   // Quick select buttons
   const quickSelectOptions = [1, 5, 10].filter((n) => n <= remainingTickets);
@@ -142,7 +143,7 @@ export function BuyTicketsModal({
             <div className="rounded-lg border border-border bg-surface-elevated p-4">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Ticket Price</span>
-                <Badge variant="secondary">{formatEther(roundInfo.ticketPrice)} BTC</Badge>
+                <Badge variant="secondary">{formatMusd(roundInfo.ticketPrice)} mUSD</Badge>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-muted-foreground">Your Tickets</span>
@@ -200,13 +201,13 @@ export function BuyTicketsModal({
 
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Total Cost</span>
-                <span className="font-bold">{formatEther(totalCost)} BTC</span>
+                <span className="font-bold">{formatMusd(totalCost)} mUSD</span>
               </div>
 
               <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Your Wallet</span>
+                <span className="text-muted-foreground">Your Balance</span>
                 <span className={hasEnoughBalance ? "text-success" : "text-destructive"}>
-                  {balance ? formatEther(balance.value) : "0"} BTC
+                  {musdFormatted} mUSD
                 </span>
               </div>
 
@@ -222,7 +223,7 @@ export function BuyTicketsModal({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Potential Prize</span>
                 <span className="font-bold text-success">
-                  {formatEther(roundInfo.totalPrize + totalCost)} BTC
+                  {formatMusd(roundInfo.totalPrize + totalCost)} mUSD
                 </span>
               </div>
             </div>
@@ -232,7 +233,7 @@ export function BuyTicketsModal({
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  Insufficient BTC balance. You need {formatEther(totalCost)} BTC.
+                  Insufficient mUSD balance. You need {formatMusd(totalCost)} mUSD.
                 </AlertDescription>
               </Alert>
             )}

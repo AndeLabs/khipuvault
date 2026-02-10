@@ -9,7 +9,6 @@
 
 import { Trophy, ExternalLink, Copy, CheckCircle2, Calendar } from "lucide-react";
 import * as React from "react";
-import { formatEther } from "viem";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -24,6 +23,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
+import { formatMusd } from "@/hooks/web3/use-musd-balance";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
@@ -184,7 +184,7 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
 
                     <TableCell>
                       <div className="font-bold text-success">
-                        {formatEther(round.totalPrize)} BTC
+                        {formatMusd(round.totalPrize)} mUSD
                       </div>
                     </TableCell>
 
@@ -214,7 +214,7 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
 
           <div className="rounded-lg border border-border bg-surface-elevated p-3 text-center">
             <div className="text-2xl font-bold text-success">
-              {formatEther(completedRounds.reduce((sum, r) => sum + r.totalPrize, BigInt(0)))} BTC
+              {formatMusd(completedRounds.reduce((sum, r) => sum + r.totalPrize, BigInt(0)))} mUSD
             </div>
             <div className="text-xs text-muted-foreground">Total Prizes</div>
           </div>
