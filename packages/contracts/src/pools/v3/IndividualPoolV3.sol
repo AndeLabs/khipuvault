@@ -489,6 +489,9 @@ contract IndividualPoolV3 is BasePoolV3 {
             userDeposit.musdAmount = uint128(uint256(userDeposit.musdAmount) + yieldToCompound);
             userDeposit.yieldAccrued = 0;
             
+            // FIX: Ensure global accounting stays in sync
+            totalMusdDeposited += yieldToCompound;
+
             emit AutoCompounded(user, yieldToCompound, userDeposit.musdAmount, block.timestamp);
         }
     }
