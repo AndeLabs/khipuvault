@@ -2,8 +2,19 @@
 
 export const dynamic = "force-dynamic";
 
+/**
+ * @fileoverview Dashboard Page
+ * @module app/dashboard/page
+ *
+ * Main dashboard showing:
+ * - Portfolio overview with real blockchain data
+ * - Recent activity from contract events
+ * - Quick access cards to features
+ *
+ * All data is fetched from smart contracts - no mocks.
+ */
+
 import { Wallet, Users, Trophy, ArrowRight, Coins, ExternalLink, Sparkles } from "lucide-react";
-import nextDynamic from "next/dynamic";
 import Link from "next/link";
 import * as React from "react";
 import { formatUnits } from "viem";
@@ -13,36 +24,18 @@ import { PageHeader } from "@/components/layout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
 import { PortfolioOverview, RecentActivity } from "@/features/portfolio";
-
-// Lazy load chart component to reduce initial bundle size (recharts is ~300KB)
-const AllocationChart = nextDynamic(
-  () =>
-    import("@/features/portfolio/components/allocation-chart").then((mod) => mod.AllocationChart),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="rounded-lg border border-border bg-card p-6">
-        <Skeleton className="mb-2 h-6 w-40" />
-        <Skeleton className="mb-4 h-4 w-60" />
-        <Skeleton className="h-[200px] w-full rounded-lg" />
-      </div>
-    ),
-  }
-);
 import { usePortfolioAnalytics } from "@/hooks/use-portfolio-analytics";
 import { useCooperativePools, useUserCooperativeTotal } from "@/hooks/web3/use-cooperative-pools";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 
 /**
- * Dashboard Page - V4 Redesign
+ * Dashboard Page
  *
  * Features:
- * - Portfolio overview with total value
- * - Asset allocation chart
- * - Recent activity feed
- * - Quick access to features
+ * - Portfolio overview with real blockchain data
+ * - Recent activity from contract events
+ * - Quick access to savings features
  */
 export default function DashboardPage() {
   const { isConnected, address } = useAccount();
@@ -168,19 +161,8 @@ export default function DashboardPage() {
         change7d={portfolioData.change7d}
       />
 
-      {/* Charts & Activity */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {/* Allocation Chart - REAL DATA */}
-        <AllocationChart
-          individualSavings={Number(portfolioData.individualSavings)}
-          cooperativeSavings={Number(portfolioData.cooperativeSavings)}
-        />
-
-        {/* Recent Activity */}
-        <div className="md:col-span-1 lg:col-span-2">
-          <RecentActivity activities={portfolioData.recentActivities} />
-        </div>
-      </div>
+      {/* Recent Activity - Real blockchain events */}
+      <RecentActivity activities={portfolioData.recentActivities} />
 
       {/* Quick Access Cards */}
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">

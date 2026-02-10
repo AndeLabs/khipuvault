@@ -18,15 +18,21 @@
       "types": "./dist/config/network.d.ts",
       "import": "./dist/config/network.mjs",
       "require": "./dist/config/network.js"
+    },
+    "./addresses": {
+      "types": "./dist/addresses/index.d.ts",
+      "import": "./dist/addresses/index.mjs",
+      "require": "./dist/addresses/index.js"
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/constants/chains.ts src/config/network.ts --format esm,cjs --dts",
-    "dev": "tsup src/index.ts src/constants/chains.ts src/config/network.ts --format esm,cjs --dts --watch",
+    "build": "tsup src/index.ts src/constants/chains.ts src/config/network.ts src/addresses/index.ts --format esm,cjs --dts",
+    "dev": "tsup src/index.ts src/constants/chains.ts src/config/network.ts src/addresses/index.ts --format esm,cjs --dts --watch",
     "clean": "rm -rf dist",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "viem": "^2.21.58",
     "zod": "^3.24.1"
   },
   "devDependencies": {

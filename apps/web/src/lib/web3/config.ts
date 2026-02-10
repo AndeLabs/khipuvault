@@ -10,6 +10,7 @@
  * ✅ No wallet conflicts - MetaMask SDK handles detection
  * ✅ Mezo Testnet configured
  * ✅ SSR-compatible
+ * ✅ Pure Web3 - No email, no social login
  *
  * Why MetaMask Connector vs injected():
  * - metaMask() uses MetaMask SDK which has proper EIP-6963 handling internally
@@ -24,7 +25,7 @@
 
 import { createPublicClient } from "viem";
 import { createConfig, http, createStorage } from "wagmi";
-import { injected } from "wagmi/connectors";
+import { metaMask } from "wagmi/connectors";
 
 import { mezoTestnet, mezoMainnet, getActiveChain } from "./chains";
 
@@ -114,21 +115,21 @@ export function getWagmiConfig(): WagmiConfigInstance {
   }
 
   /**
-   * EIP-6963 Wallet Detection (Modern Standard)
+   * MetaMask-Only Configuration
    *
-   * Uses injected() connector with EIP-6963 which:
-   * 1. Detects wallets via events (no window.ethereum conflicts)
-   * 2. Works with MetaMask, Rabby, Coinbase, etc.
-   * 3. No conflicts even with Yoroi or other non-EVM wallets
-   * 4. Each wallet announces itself independently
+   * Uses the official metaMask() connector which:
+   * 1. Only connects to MetaMask wallet
+   * 2. Ignores other wallet extensions completely
+   * 3. Uses MetaMask SDK for reliable detection
+   * 4. Pure Web3 - no email, no social login
    *
-   * EIP-6963 solves the "wallet wars" problem where extensions
-   * fight to control window.ethereum. Now each wallet announces
-   * itself via custom events and the dapp can list all available.
+   * This is intentionally restrictive to ensure:
+   * - Users use MetaMask (most widely supported)
+   * - No wallet conflicts or confusion
+   * - Consistent UX across all users
    *
    * References:
-   * - https://eips.ethereum.org/EIPS/eip-6963
-   * - https://wagmi.sh/react/api/connectors/injected
+   * - https://wagmi.sh/react/api/connectors/metaMask
    */
 
   // Get active chain based on NEXT_PUBLIC_NETWORK env var
@@ -136,11 +137,17 @@ export function getWagmiConfig(): WagmiConfigInstance {
   const isMainnet = activeChain.id === mezoMainnet.id;
   const chainConfig = isMainnet ? mezoMainnet : mezoTestnet;
 
-  // Use injected() which supports EIP-6963 wallet detection
-  // This avoids MetaMask SDK conflicts with other wallets
+  // Use metaMask() connector ONLY - pure Web3, no other options
   const connectors = [
-    injected({
-      shimDisconnect: true,
+    metaMask({
+      dappMetadata: {
+        name: "KhipuVault",
+        url: typeof window !== "undefined" ? window.location.origin : "https://khipuvault.com",
+        iconUrl:
+          typeof window !== "undefined"
+            ? `${window.location.origin}/logos/khipu-logo.png`
+            : "https://khipuvault.com/logos/khipu-logo.png",
+      },
     }),
   ];
 
@@ -154,7 +161,7 @@ export function getWagmiConfig(): WagmiConfigInstance {
     timeout: 10_000, // 10 second timeout
   };
 
-  // Create config with SSR-safe settings and EIP-6963 enabled
+  // Create config with SSR-safe settings - MetaMask ONLY
   // Dynamically uses testnet or mainnet based on environment
   wagmiConfigInstance = createConfig({
     chains: [chainConfig],
@@ -170,9 +177,9 @@ export function getWagmiConfig(): WagmiConfigInstance {
     // Use SSR-safe storage that returns no-op on server
     storage: createClientStorage(),
     pollingInterval: 4_000, // poll every 4 seconds
-    // Enable EIP-6963 for multi-wallet support without conflicts
-    // Each wallet announces itself via events, no window.ethereum fights
-    multiInjectedProviderDiscovery: true,
+    // DISABLE multi-wallet discovery - we only want MetaMask
+    // This prevents other wallets from appearing in the connector list
+    multiInjectedProviderDiscovery: false,
   });
 
   return wagmiConfigInstance;

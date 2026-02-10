@@ -9,15 +9,15 @@
  * - Conditional fetching with enabled
  */
 
+import { getAddress } from "@khipu/shared";
 import { Address } from "viem";
 import { useReadContract, useAccount } from "wagmi";
 
 import { QUERY_PRESETS } from "@/lib/query-config";
 import RotatingPoolABI from "@/contracts/abis/RotatingPool.json";
-import { CONTRACT_ADDRESSES } from "@/contracts/addresses";
 
 // Contract address - Deployed on Mezo Testnet (V3 with UUPS proxy)
-const ROTATING_POOL_ADDRESS = CONTRACT_ADDRESSES.ROTATING_POOL as Address;
+const ROTATING_POOL_ADDRESS = getAddress("ROTATING_POOL") as Address;
 
 /**
  * Pool status enum matching Solidity

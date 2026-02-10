@@ -2,164 +2,43 @@
  * @fileoverview Smart Contract Address Configuration
  * @module contracts/addresses
  *
- * Centralized contract addresses for all deployed KhipuVault contracts
- * Type-safe configuration with runtime validation
+ * Re-exports addresses from @khipu/shared (single source of truth).
+ * This file provides backwards compatibility for existing imports.
  *
- * Production-ready with:
- * - Environment variable validation
- * - Type safety for addresses
- * - Helper functions for address operations
- * - Support for multiple environments
+ * @deprecated Import from "@khipu/shared" instead
  */
 
-import { Address } from "viem";
+import type { Address } from "viem";
+import {
+  getAddresses,
+  getAddress as sharedGetAddress,
+  isAddressConfigured,
+  ZERO_ADDRESS,
+  formatAddress,
+  addressesEqual,
+  isValidAddress,
+  type ContractName as SharedContractName,
+} from "@khipu/shared";
 
-/**
- * Contract address type with validation
- */
-type ContractAddress = Address | `0x${string}`;
-
-/**
- * Environment variable keys for contract addresses
- */
-const ENV_KEYS = {
-  WBTC: "NEXT_PUBLIC_WBTC_ADDRESS",
-  MUSD: "NEXT_PUBLIC_MUSD_ADDRESS",
-  MEZO_INTEGRATION: "NEXT_PUBLIC_MEZO_INTEGRATION_ADDRESS",
-  YIELD_AGGREGATOR: "NEXT_PUBLIC_YIELD_AGGREGATOR_ADDRESS",
-  STABILITY_POOL_STRATEGY: "NEXT_PUBLIC_STABILITY_POOL_STRATEGY_ADDRESS",
-  INDIVIDUAL_POOL: "NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS",
-  COOPERATIVE_POOL: "NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS",
-  LOTTERY_POOL: "NEXT_PUBLIC_LOTTERY_POOL_ADDRESS",
-  ROTATING_POOL: "NEXT_PUBLIC_ROTATING_POOL_ADDRESS",
-} as const;
-
-/**
- * Get environment variable with optional fallback
- * @param key - Environment variable key
- * @param fallback - Optional fallback value
- * @returns Environment variable value or fallback
- */
-function getEnvAddress(key: string, fallback?: string): ContractAddress {
-  const value = process.env[key];
-  if (!value) {
-    if (fallback) {
-      return fallback as ContractAddress;
-    }
-    throw new Error(
-      `Contract address not configured: ${key}. ` + `Please set it in your .env.local file.`
-    );
-  }
-  return value as ContractAddress;
-}
-
-/**
- * Validate Ethereum address format
- * @param address - Address to validate
- * @returns True if valid Ethereum address
- */
-export function isValidAddress(address: string | undefined): address is Address {
-  if (!address) {
-    return false;
-  }
-  return /^0x[a-fA-F0-9]{40}$/.test(address);
-}
+// Get addresses from shared package
+const addresses = getAddresses();
 
 /**
  * Contract addresses for all deployed contracts (V3 - Production-Ready)
  *
- * V3 Features:
- * - UUPS Upgradeable Pattern
- * - Storage Packing (~40-60k gas saved)
- * - Flash Loan Protection
- * - Emergency Mode
- * - Auto-Compound (Individual Pool)
- * - Referral System (Individual Pool)
- *
- * These addresses are loaded from environment variables and validated at runtime
- * Set them in .env.local for local development or in Vercel for production
+ * Uses UPPER_CASE keys for backwards compatibility with existing code.
+ * New code should import from "@khipu/shared" directly.
  */
 export const CONTRACT_ADDRESSES = {
-  /**
-   * WBTC Token (Wrapped Bitcoin)
-   * ERC20 token used as collateral
-   * NOTE: On Mezo testnet, BTC is native, not WBTC
-   */
-  WBTC: getEnvAddress(ENV_KEYS.WBTC, "0x0000000000000000000000000000000000000000"),
-
-  /**
-   * MUSD Token (Mezo USD Stablecoin)
-   * Bitcoin-backed stablecoin from Mezo
-   */
-  MUSD: getEnvAddress(ENV_KEYS.MUSD, "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503"),
-
-  /**
-   * Mezo Integration Contract (V3)
-   * Manages BTC deposits and MUSD minting
-   * Proxy: 0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD
-   */
-  MEZO_INTEGRATION: getEnvAddress(
-    ENV_KEYS.MEZO_INTEGRATION,
-    "0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD"
-  ),
-
-  /**
-   * Yield Aggregator Contract (V3)
-   * Routes deposits to yield strategies
-   * Proxy: 0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6
-   */
-  YIELD_AGGREGATOR: getEnvAddress(
-    ENV_KEYS.YIELD_AGGREGATOR,
-    "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6"
-  ),
-
-  /**
-   * Stability Pool Strategy
-   * Strategy contract for Mezo Stability Pool
-   * Generates 6% APR through BTC lending
-   */
-  STABILITY_POOL_STRATEGY: getEnvAddress(
-    ENV_KEYS.STABILITY_POOL_STRATEGY,
-    "0x0000000000000000000000000000000000000000"
-  ),
-
-  /**
-   * Individual Savings Pool (V3)
-   * Personal savings with auto-yield optimization
-   * Proxy: 0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393
-   * Features: Auto-compound, Referrals, Incremental deposits
-   */
-  INDIVIDUAL_POOL: getEnvAddress(
-    ENV_KEYS.INDIVIDUAL_POOL,
-    "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393"
-  ),
-
-  /**
-   * Cooperative Savings Pool (V3)
-   * Community pooled savings with native BTC deposits
-   * Proxy: 0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F
-   */
-  COOPERATIVE_POOL: getEnvAddress(
-    ENV_KEYS.COOPERATIVE_POOL,
-    "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F"
-  ),
-
-  /**
-   * Lottery Pool (Prize Savings)
-   * No-loss lottery with secure randomness
-   * Proxy: 0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4
-   */
-  LOTTERY_POOL: getEnvAddress(ENV_KEYS.LOTTERY_POOL, "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4"),
-
-  /**
-   * Rotating Pool (ROSCA/Pasanaku)
-   * Turn-based distribution system with DeFi yields
-   * Proxy: 0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04
-   */
-  ROTATING_POOL: getEnvAddress(
-    ENV_KEYS.ROTATING_POOL,
-    "0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04"
-  ),
+  WBTC: ZERO_ADDRESS as Address, // Not used on Mezo (BTC is native)
+  MUSD: addresses.MUSD as Address,
+  MEZO_INTEGRATION: addresses.MEZO_INTEGRATION as Address,
+  YIELD_AGGREGATOR: addresses.YIELD_AGGREGATOR as Address,
+  STABILITY_POOL_STRATEGY: ZERO_ADDRESS as Address, // Not deployed yet
+  INDIVIDUAL_POOL: addresses.INDIVIDUAL_POOL as Address,
+  COOPERATIVE_POOL: addresses.COOPERATIVE_POOL as Address,
+  LOTTERY_POOL: addresses.LOTTERY_POOL as Address,
+  ROTATING_POOL: addresses.ROTATING_POOL as Address,
 } as const;
 
 /**
@@ -173,25 +52,23 @@ export type ContractName = keyof typeof CONTRACT_ADDRESSES;
 export type ContractAddresses = typeof CONTRACT_ADDRESSES;
 
 /**
- * Zero address constant
+ * Zero address constant (re-exported from shared)
  */
-export const ZERO_ADDRESS: Address = "0x0000000000000000000000000000000000000000";
+export { ZERO_ADDRESS };
 
 /**
  * Check if address is zero address
  * @param address - Address to check
- * @returns True if zero address
  */
 export function isZeroAddress(address: string): boolean {
-  return address.toLowerCase() === ZERO_ADDRESS.toLowerCase();
+  return address.toLowerCase() === (ZERO_ADDRESS as string).toLowerCase();
 }
 
 /**
  * Get contract address by name
  * @param contractName - Name of the contract
- * @returns Contract address
  */
-export function getContractAddress(contractName: ContractName): ContractAddress {
+export function getContractAddress(contractName: ContractName): Address {
   const address = CONTRACT_ADDRESSES[contractName];
   if (!address || isZeroAddress(address)) {
     throw new Error(
@@ -204,7 +81,6 @@ export function getContractAddress(contractName: ContractName): ContractAddress 
 
 /**
  * Validate all contract addresses are configured
- * @returns Object with validation results
  */
 export function validateContractAddresses(): {
   valid: boolean;
@@ -231,9 +107,8 @@ export function validateContractAddresses(): {
 
 /**
  * Get all pool addresses
- * @returns Array of pool contract addresses
  */
-export function getPoolAddresses(): ContractAddress[] {
+export function getPoolAddresses(): Address[] {
   return [
     CONTRACT_ADDRESSES.INDIVIDUAL_POOL,
     CONTRACT_ADDRESSES.COOPERATIVE_POOL,
@@ -244,17 +119,15 @@ export function getPoolAddresses(): ContractAddress[] {
 
 /**
  * Get all token addresses
- * @returns Array of token contract addresses
  */
-export function getTokenAddresses(): ContractAddress[] {
+export function getTokenAddresses(): Address[] {
   return [CONTRACT_ADDRESSES.WBTC, CONTRACT_ADDRESSES.MUSD];
 }
 
 /**
  * Get all integration addresses
- * @returns Array of integration contract addresses
  */
-export function getIntegrationAddresses(): ContractAddress[] {
+export function getIntegrationAddresses(): Address[] {
   return [
     CONTRACT_ADDRESSES.MEZO_INTEGRATION,
     CONTRACT_ADDRESSES.YIELD_AGGREGATOR,
@@ -263,48 +136,20 @@ export function getIntegrationAddresses(): ContractAddress[] {
 }
 
 /**
- * Format address for display (shortened)
- * @param address - Address to format
- * @param chars - Number of characters to show on each side
- * @returns Formatted address (e.g., "0x1234...5678")
+ * Re-export utilities from shared
  */
-export function formatAddress(address: string, chars: number = 4): string {
-  if (!isValidAddress(address)) {
-    return address;
-  }
-  return `${address.slice(0, chars + 2)}...${address.slice(-chars)}`;
-}
-
-/**
- * Compare two addresses (case-insensitive)
- * @param address1 - First address
- * @param address2 - Second address
- * @returns True if addresses are equal
- */
-export function addressesEqual(
-  address1: string | undefined,
-  address2: string | undefined
-): boolean {
-  if (!address1 || !address2) {
-    return false;
-  }
-  return address1.toLowerCase() === address2.toLowerCase();
-}
+export { formatAddress, addressesEqual, isValidAddress };
 
 /**
  * Development mode helper
- * Returns true if running in development and addresses are not configured
  */
 export function isDevelopmentMode(): boolean {
-  if (typeof process === "undefined") {
-    return false;
-  }
+  if (typeof process === "undefined") return false;
   return process.env.NODE_ENV === "development";
 }
 
 /**
  * Get contract addresses summary for debugging
- * @returns Formatted string with all addresses
  */
 export function getAddressesSummary(): string {
   const validation = validateContractAddresses();
@@ -312,12 +157,12 @@ export function getAddressesSummary(): string {
   let summary = "=== Contract Addresses ===\n\n";
 
   Object.entries(CONTRACT_ADDRESSES).forEach(([name, address]) => {
-    const status = isZeroAddress(address) ? "❌ NOT SET" : "✅";
+    const status = isZeroAddress(address) ? "[NOT SET]" : "[OK]";
     summary += `${status} ${name}: ${address}\n`;
   });
 
   summary += "\n=== Validation ===\n";
-  summary += `Valid: ${validation.valid ? "✅" : "❌"}\n`;
+  summary += `Valid: ${validation.valid ? "[OK]" : "[FAIL]"}\n`;
 
   if (validation.missing.length > 0) {
     summary += `\nMissing: ${validation.missing.join(", ")}\n`;
@@ -336,15 +181,10 @@ export function getAddressesSummary(): string {
 export function logContractAddresses(): void {
   if (isDevelopmentMode()) {
     // eslint-disable-next-line no-console
-    console.group("🏗️ KhipuVault Contract Addresses");
+    console.group("KhipuVault Contract Addresses");
     // eslint-disable-next-line no-console
     console.log(getAddressesSummary());
     // eslint-disable-next-line no-console
     console.groupEnd();
   }
-}
-
-// Auto-log addresses in development mode
-if (typeof window !== "undefined" && isDevelopmentMode()) {
-  logContractAddresses();
 }

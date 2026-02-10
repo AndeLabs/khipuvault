@@ -1,87 +1,101 @@
 /**
- * @fileoverview Contract Address Management
+ * @fileoverview Contract Address Management (Re-export from @khipu/shared)
  * @module web3/addresses
  *
- * Dynamically exports contract addresses based on NEXT_PUBLIC_NETWORK
- * environment variable (testnet | mainnet)
+ * This module re-exports addresses from @khipu/shared for backwards compatibility.
+ * All new code should import directly from @khipu/shared.
+ *
+ * @deprecated Import from "@khipu/shared" instead
  */
 
-import { TESTNET_ADDRESSES } from "./testnet";
-import { MAINNET_ADDRESSES } from "./mainnet";
+// Re-export everything from the single source of truth
+export {
+  // Address maps
+  TESTNET_ADDRESSES,
+  MAINNET_ADDRESSES,
+  TESTNET_POOLS,
+  TESTNET_INFRASTRUCTURE,
+  TESTNET_MEZO_PROTOCOL,
+  MAINNET_POOLS,
+  MAINNET_INFRASTRUCTURE,
+  MAINNET_MEZO_PROTOCOL,
+  // Types
+  type ContractName,
+  type TestnetContractName,
+  type MainnetContractName,
+  // Functions
+  getAddresses,
+  getAddress,
+  getAddressOrUndefined,
+  isAddressConfigured,
+  isZeroAddress,
+  addressesEqual,
+  getPoolAddresses,
+  getConfiguredAddresses,
+  getMissingAddresses,
+  validateRequiredAddresses,
+  getAddressesSummary,
+  logAddresses,
+  ZERO_ADDRESS,
+} from "@khipu/shared";
 
-export { TESTNET_ADDRESSES, MAINNET_ADDRESSES };
+// Re-export network utilities from shared
+export { getCurrentNetwork, type Network } from "@khipu/shared";
 
-export type Network = "testnet" | "mainnet";
-export type ContractName = keyof typeof TESTNET_ADDRESSES;
+// Re-export address utilities from shared/utils
+export { formatAddress, isValidAddress } from "@khipu/shared";
+
+// Legacy aliases for backwards compatibility
+import { getAddresses, isAddressConfigured, getAddress } from "@khipu/shared";
+import type { ContractName, Network } from "@khipu/shared";
 
 /**
- * Get current network from environment
- * Defaults to testnet for safety
- */
-function getCurrentNetwork(): Network {
-  const envNetwork =
-    typeof process !== "undefined"
-      ? process.env.NEXT_PUBLIC_NETWORK || process.env.NETWORK
-      : undefined;
-
-  if (envNetwork === "mainnet") {
-    return "mainnet";
-  }
-
-  return "testnet";
-}
-
-/**
- * Get contract address for specific network
+ * @deprecated Use getAddress() from @khipu/shared instead
  */
 export function getContractAddress(network: Network, contractName: ContractName): string {
-  const addresses = network === "testnet" ? TESTNET_ADDRESSES : MAINNET_ADDRESSES;
-  return addresses[contractName];
+  return getAddress(contractName, network);
 }
 
 /**
- * Get contract address for current active network (from env)
+ * @deprecated Use getAddress() from @khipu/shared instead
  */
 export function getActiveContractAddress(contractName: ContractName): string {
-  const network = getCurrentNetwork();
-  return getContractAddress(network, contractName);
+  return getAddress(contractName);
 }
 
 /**
- * Get all addresses for a specific network
+ * @deprecated Use getAddresses() from @khipu/shared instead
  */
 export function getNetworkAddresses(network: Network) {
-  return network === "testnet" ? TESTNET_ADDRESSES : MAINNET_ADDRESSES;
+  return getAddresses(network);
 }
 
 /**
- * Get all addresses for current active network (from env)
+ * @deprecated Use getAddresses() from @khipu/shared instead
  */
 export function getActiveAddresses() {
-  const network = getCurrentNetwork();
-  return getNetworkAddresses(network);
+  return getAddresses();
 }
 
 /**
- * Check if address is deployed (not zero address or empty)
+ * @deprecated Use isAddressConfigured() from @khipu/shared instead
  */
 export function isDeployed(address: string): boolean {
   return address !== "" && address !== "0x0000000000000000000000000000000000000000";
 }
 
 /**
- * Check if contract is deployed on current network
+ * @deprecated Use isAddressConfigured() from @khipu/shared instead
  */
 export function isContractDeployed(contractName: ContractName): boolean {
-  const address = getActiveContractAddress(contractName);
-  return isDeployed(address);
+  return isAddressConfigured(contractName);
 }
 
 /**
- * Get deployed addresses only for current network
+ * @deprecated Use getConfiguredAddresses() from @khipu/shared instead
  */
 export function getDeployedAddresses(): Record<string, string> {
-  const addresses = getActiveAddresses();
+  const addresses = getAddresses();
   const deployed: Record<string, string> = {};
 
   for (const [key, address] of Object.entries(addresses)) {

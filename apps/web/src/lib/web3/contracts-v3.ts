@@ -3,18 +3,33 @@
  * @module lib/web3/contracts-v3
  *
  * V3 Features:
- * ✅ UUPS Upgradeable Pattern
- * ✅ Storage Packing (~40-60k gas saved)
- * ✅ Flash Loan Protection
- * ✅ Emergency Mode
- * ✅ Auto-Compound (IndividualPool)
- * ✅ Referral System (IndividualPool)
- * ✅ Incremental Deposits
- * ✅ Partial Withdrawals
+ * - UUPS Upgradeable Pattern
+ * - Storage Packing (~40-60k gas saved)
+ * - Flash Loan Protection
+ * - Emergency Mode
+ * - Auto-Compound (IndividualPool)
+ * - Referral System (IndividualPool)
+ * - Incremental Deposits
+ * - Partial Withdrawals
  *
  * Network: Mezo Testnet (Chain ID: 31611)
- * Deployed: November 2, 2025
+ *
+ * This module re-exports addresses from @khipu/shared (single source of truth)
  */
+
+// ============================================================================
+// CONTRACT ADDRESSES (from @khipu/shared - Single Source of Truth)
+// ============================================================================
+
+import {
+  getAddresses,
+  getAddress,
+  TESTNET_ADDRESSES,
+  ZERO_ADDRESS,
+  getCurrentNetwork,
+} from "@khipu/shared";
+
+import type { Address } from "viem";
 
 // ============================================================================
 // V3 CONTRACT ABIS
@@ -25,12 +40,11 @@ import IndividualPoolV3ABI from "@/contracts/abis/IndividualPoolV3.json";
 import YieldAggregatorV3ABI from "@/contracts/abis/YieldAggregatorV3.json";
 import MUSDABI from "@/contracts/mezo-abis/MUSD.json";
 
-import type { Address } from "viem";
+// Type for ABI module that may have default/abi wrapper
+type AbiModule = readonly unknown[] | { default?: readonly unknown[]; abi?: readonly unknown[] };
 
 // Extract ABIs safely - Foundry exports as {"abi": [...], "bytecode": {...}}
-// CRITICAL: Throws error instead of returning empty array to fail fast on invalid ABIs
 function extractABI(abiModule: unknown): readonly unknown[] {
-  // If it's already an array, return it
   if (Array.isArray(abiModule)) {
     if (abiModule.length === 0) {
       throw new Error("ABI module is an empty array - contract ABI may not be generated");
@@ -38,7 +52,6 @@ function extractABI(abiModule: unknown): readonly unknown[] {
     return abiModule;
   }
 
-  // If it has an 'abi' property, extract it
   if (abiModule && typeof abiModule === "object" && "abi" in abiModule) {
     const abi = (abiModule as { abi: unknown }).abi;
     if (Array.isArray(abi)) {
@@ -50,7 +63,6 @@ function extractABI(abiModule: unknown): readonly unknown[] {
     throw new Error("ABI property is not an array");
   }
 
-  // Check for .default (webpack/vite bundling)
   if (abiModule && typeof abiModule === "object" && "default" in abiModule) {
     return extractABI((abiModule as { default: unknown }).default);
   }
@@ -66,71 +78,29 @@ export const COOPERATIVE_POOL_V3_ABI = extractABI(CooperativePoolV3ABI);
 export const ERC20_ABI = extractABI(MUSDABI);
 
 // ============================================================================
-// V3 CONTRACT ADDRESSES (MEZO TESTNET)
+// V3 CONTRACT ADDRESSES (from @khipu/shared)
 // ============================================================================
 
-// Ethereum address validation regex (used at module load time for env vars)
-const ETH_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
-
-/**
- * Validates and returns an address, throwing if invalid
- * This ensures we fail fast at module load time if env vars are misconfigured
- */
-function validateAddress(address: string, name: string): Address {
-  if (!ETH_ADDRESS_REGEX.test(address)) {
-    throw new Error(
-      `Invalid ${name} address: ${address}. Must be a valid Ethereum address (0x + 40 hex chars)`
-    );
-  }
-  return address as Address;
-}
-
-/**
- * Gets address from env var with validation, falling back to default
- */
-function getAddress(envKey: string, defaultAddress: string, name: string): Address {
-  // eslint-disable-next-line security/detect-object-injection -- safe: envKey is hardcoded string
-  const address = process.env[envKey] ?? defaultAddress;
-  return validateAddress(address, name);
-}
+// Get addresses from shared package
+const addresses = getAddresses();
 
 export const MEZO_V3_ADDRESSES = {
-  // V3 Pools (Upgradeable Proxies) ⭐ USE THESE ⭐
-  individualPoolV3: getAddress(
-    "NEXT_PUBLIC_INDIVIDUAL_POOL_ADDRESS",
-    "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
-    "IndividualPoolV3"
-  ),
-  yieldAggregatorV3: getAddress(
-    "NEXT_PUBLIC_YIELD_AGGREGATOR_ADDRESS",
-    "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6",
-    "YieldAggregatorV3"
-  ),
-  cooperativePoolV3: getAddress(
-    "NEXT_PUBLIC_COOPERATIVE_POOL_ADDRESS",
-    "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F",
-    "CooperativePoolV3"
-  ),
+  // V3 Pools (Upgradeable Proxies)
+  individualPoolV3: addresses.INDIVIDUAL_POOL as Address,
+  yieldAggregatorV3: addresses.YIELD_AGGREGATOR as Address,
+  cooperativePoolV3: addresses.COOPERATIVE_POOL as Address,
 
   // Tokens
-  musd: getAddress(
-    "NEXT_PUBLIC_MUSD_ADDRESS",
-    "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
-    "MUSD"
-  ),
+  musd: addresses.MUSD as Address,
 
-  // Mezo Integration V3 (Upgradeable Proxy)
-  mezoIntegrationV3: getAddress(
-    "NEXT_PUBLIC_MEZO_INTEGRATION_ADDRESS",
-    "0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD",
-    "MezoIntegrationV3"
-  ),
+  // Mezo Integration V3
+  mezoIntegrationV3: addresses.MEZO_INTEGRATION as Address,
 
-  // Mezo Protocol (External) - These are hardcoded as they don't change
-  borrowerOperations: "0xCdF7028ceAB81fA0C6971208e83fa7872994beE5" as Address,
-  troveManager: "0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0" as Address,
-  priceFeed: "0x86bCF0841622a5dAC14A313a15f96A95421b9366" as Address,
-  hintHelpers: "0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6" as Address,
+  // Mezo Protocol (External)
+  borrowerOperations: addresses.BORROWER_OPERATIONS as Address,
+  troveManager: addresses.TROVE_MANAGER as Address,
+  priceFeed: addresses.PRICE_FEED as Address,
+  hintHelpers: addresses.HINT_HELPERS as Address,
 } as const;
 
 // ============================================================================
@@ -192,7 +162,9 @@ export type ReferralStats = {
  * Check if address is V3 contract
  */
 export function isV3Contract(address: string): boolean {
-  return Object.values(MEZO_V3_ADDRESSES).includes(address.toLowerCase() as any);
+  return Object.values(MEZO_V3_ADDRESSES).some(
+    (v3Addr) => v3Addr.toLowerCase() === address.toLowerCase()
+  );
 }
 
 /**
@@ -202,7 +174,6 @@ export function getContractVersion(address: string): "v1" | "v3" | "unknown" {
   if (isV3Contract(address)) {
     return "v3";
   }
-  // Add V1 check here if needed
   return "unknown";
 }
 
@@ -229,7 +200,7 @@ export function shouldAutoCompound(yieldAmount: bigint, threshold: string): bool
 }
 
 // ============================================================================
-// EXPORTS
+// EXPORTS (Legacy aliases for backward compatibility)
 // ============================================================================
 
 export {

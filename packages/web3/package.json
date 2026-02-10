@@ -16,6 +16,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@khipu/shared": "workspace:*",
     "viem": "^2.21.52",
     "wagmi": "^2.13.8"
   },

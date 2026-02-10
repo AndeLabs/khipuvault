@@ -1,5 +1,5 @@
 /**
- * @fileoverview Smart contract addresses and ABIs for KhipuVault on Mezo Testnet
+ * @fileoverview Smart contract addresses and ABIs for KhipuVault on Mezo
  * @module lib/web3/contracts
  *
  * IMPORTANT: On Mezo, BTC is NATIVE (like ETH on Ethereum)
@@ -7,14 +7,58 @@
  * - BTC is sent via msg.value (payable functions)
  * - BTC has 18 decimals on Mezo
  *
- * UPDATED: Oct 26, 2024 - Importing ABIs from @mezo-org/musd-contracts
- * This ensures automatic compatibility when Mezo updates their contracts
+ * This module re-exports addresses from @khipu/shared (single source of truth)
+ * and provides ABIs for contract interactions.
  */
+
+// ============================================================================
+// CONTRACT ADDRESSES (from @khipu/shared - Single Source of Truth)
+// ============================================================================
+
+import {
+  getAddresses,
+  getAddress,
+  isAddressConfigured,
+  TESTNET_ADDRESSES,
+  ZERO_ADDRESS,
+  type ContractName,
+} from "@khipu/shared";
+
+// Re-export for backwards compatibility
+export {
+  getAddresses,
+  getAddress,
+  isAddressConfigured,
+  TESTNET_ADDRESSES,
+  ZERO_ADDRESS,
+  type ContractName,
+};
+
+// Mapped format for legacy code that uses camelCase keys
+const addresses = getAddresses();
+export const MEZO_TESTNET_ADDRESSES = {
+  // KhipuVault V3 Pools
+  individualPool: addresses.INDIVIDUAL_POOL,
+  cooperativePool: addresses.COOPERATIVE_POOL,
+  lotteryPool: addresses.LOTTERY_POOL,
+  rotatingPool: addresses.ROTATING_POOL,
+
+  // Infrastructure
+  mezoIntegration: addresses.MEZO_INTEGRATION,
+  yieldAggregator: addresses.YIELD_AGGREGATOR,
+
+  // Mezo Protocol
+  musd: addresses.MUSD,
+  mezoBorrowerOperations: addresses.BORROWER_OPERATIONS,
+  mezoTroveManager: addresses.TROVE_MANAGER,
+  mezoHintHelpers: addresses.HINT_HELPERS,
+  mezoPriceFeed: addresses.PRICE_FEED,
+  mezoSortedTroves: addresses.SORTED_TROVES,
+} as const;
 
 // ============================================================================
 // MEZO OFFICIAL ABIS (Local ABIs generated from Forge interfaces)
 // ============================================================================
-// These ABIs are generated from the Mezo protocol interfaces in contracts/src/interfaces
 
 import IndividualPoolV3ABI from "@/contracts/abis/IndividualPoolV3.json";
 import BorrowerOperationsABI from "@/contracts/mezo-abis/BorrowerOperations.json";
@@ -25,94 +69,56 @@ import SortedTrovesABI from "@/contracts/mezo-abis/SortedTroves.json";
 import StabilityPoolABI from "@/contracts/mezo-abis/StabilityPool.json";
 import TroveManagerABI from "@/contracts/mezo-abis/TroveManager.json";
 
-// Ensure ABIs are arrays (some bundlers might wrap them in {default: ...})
-export const MEZO_BORROWER_OPERATIONS_ABI = Array.isArray(BorrowerOperationsABI)
-  ? BorrowerOperationsABI
-  : (BorrowerOperationsABI as any).default || BorrowerOperationsABI;
-export const MEZO_TROVE_MANAGER_ABI = Array.isArray(TroveManagerABI)
-  ? TroveManagerABI
-  : (TroveManagerABI as any).default || TroveManagerABI;
-export const MEZO_PRICE_FEED_ABI = Array.isArray(PriceFeedABI)
-  ? PriceFeedABI
-  : (PriceFeedABI as any).default || PriceFeedABI;
-export const MEZO_HINT_HELPERS_ABI = Array.isArray(HintHelpersABI)
-  ? HintHelpersABI
-  : (HintHelpersABI as any).default || HintHelpersABI;
-export const MEZO_SORTED_TROVES_ABI = Array.isArray(SortedTrovesABI)
-  ? SortedTrovesABI
-  : (SortedTrovesABI as any).default || SortedTrovesABI;
-export const MEZO_MUSD_ABI = Array.isArray(MUSDABI) ? MUSDABI : (MUSDABI as any).default || MUSDABI;
-export const MEZO_STABILITY_POOL_ABI = Array.isArray(StabilityPoolABI)
-  ? StabilityPoolABI
-  : (StabilityPoolABI as any).default || StabilityPoolABI;
+// Type for ABI module that may have default/abi wrapper
+type AbiModule = readonly unknown[] | { default?: readonly unknown[]; abi?: readonly unknown[] };
 
-// ============================================================================
-// MEZO TESTNET CONTRACT ADDRESSES
-// ============================================================================
-
-export const MEZO_TESTNET_ADDRESSES = {
-  // KhipuVault V3 Pools (UUPS Upgradeable) - PRODUCTION
-  // Updated: Feb 10, 2026
-  individualPool: "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
-  cooperativePool: "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F", // Redeployed Feb 10
-  lotteryPool: "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4",
-  rotatingPool: "0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04", // UUPS with native BTC
-
-  // Core Integration V3 - PRODUCTION
-  mezoIntegration: "0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD",
-  yieldAggregator: "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6",
-
-  // Mezo Protocol - Official Mezo Testnet Addresses
-  musd: "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
-  mezoBorrowerOperations: "0xCdF7028ceAB81fA0C6971208e83fa7872994beE5",
-  mezoTroveManager: "0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0",
-  mezoHintHelpers: "0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6",
-  mezoPriceFeed: "0x86bCF0841622a5dAC14A313a15f96A95421b9366",
-  mezoSortedTroves: "0x722E4D24FD6Ff8b0AC679450F3D91294607268fA",
-} as const;
-
-/**
- * Get contract address for a given key
- */
-export function getContractAddress(key: keyof typeof MEZO_TESTNET_ADDRESSES): string {
-  const address = MEZO_TESTNET_ADDRESSES[key];
-  // Type assertion needed because TypeScript knows none of the const addresses are zero address
-  if ((address as string) === "0x0000000000000000000000000000000000000000") {
-    if (process.env.NODE_ENV === "development") {
-      // eslint-disable-next-line no-console
-      console.warn(`⚠️ Contract "${key}" not deployed yet on Mezo Testnet`);
-    }
+// Helper to safely extract ABI
+function extractAbi(abiModule: AbiModule): readonly unknown[] {
+  if (Array.isArray(abiModule)) return abiModule;
+  if (abiModule && typeof abiModule === "object") {
+    if ("abi" in abiModule && Array.isArray(abiModule.abi)) return abiModule.abi;
+    if ("default" in abiModule && Array.isArray(abiModule.default)) return abiModule.default;
   }
-  return address;
+  throw new Error("Invalid ABI module format");
 }
+
+export const MEZO_BORROWER_OPERATIONS_ABI = extractAbi(BorrowerOperationsABI as AbiModule);
+export const MEZO_TROVE_MANAGER_ABI = extractAbi(TroveManagerABI as AbiModule);
+export const MEZO_PRICE_FEED_ABI = extractAbi(PriceFeedABI as AbiModule);
+export const MEZO_HINT_HELPERS_ABI = extractAbi(HintHelpersABI as AbiModule);
+export const MEZO_SORTED_TROVES_ABI = extractAbi(SortedTrovesABI as AbiModule);
+export const MEZO_MUSD_ABI = extractAbi(MUSDABI as AbiModule);
+export const MEZO_STABILITY_POOL_ABI = extractAbi(StabilityPoolABI as AbiModule);
 
 // ============================================================================
 // ERC20 ABI (Standard Token Interface - using MEZO_MUSD_ABI)
 // ============================================================================
-// MUSD is the standard ERC20 token on Mezo testnet
-// Using the official ABI from @mezo-org/musd-contracts ensures compatibility
 
 export const ERC20_ABI = MEZO_MUSD_ABI;
-
-// For backwards compatibility and explicit reference
 export const MUSD_ABI = MEZO_MUSD_ABI;
 
 // ============================================================================
 // INDIVIDUAL POOL ABI - V3 (UUPS Upgradeable)
 // ============================================================================
-// Updated: Nov 2, 2025 - V3 with auto-compound, referrals, flash loan protection
 
-export const INDIVIDUAL_POOL_ABI = (IndividualPoolV3ABI as any).abi;
+export const INDIVIDUAL_POOL_ABI = extractAbi(IndividualPoolV3ABI as AbiModule);
 
 // ============================================================================
 // HELPER FUNCTIONS
 // ============================================================================
 
 /**
+ * Get contract address for a given key (legacy camelCase API)
+ */
+export function getContractAddress(key: keyof typeof MEZO_TESTNET_ADDRESSES): string {
+  return MEZO_TESTNET_ADDRESSES[key];
+}
+
+/**
  * Validate if contract address is configured
  */
 export function isContractConfigured(address: string): boolean {
-  return address !== "0x0000000000000000000000000000000000000000";
+  return address !== ZERO_ADDRESS;
 }
 
 /**
@@ -120,9 +126,8 @@ export function isContractConfigured(address: string): boolean {
  */
 export function getMissingAddresses(): string[] {
   const missing: string[] = [];
-  const addresses = MEZO_TESTNET_ADDRESSES;
 
-  for (const [key, value] of Object.entries(addresses)) {
+  for (const [key, value] of Object.entries(MEZO_TESTNET_ADDRESSES)) {
     if (!isContractConfigured(value as string)) {
       missing.push(key);
     }
@@ -133,29 +138,18 @@ export function getMissingAddresses(): string[] {
 
 /**
  * Check if all critical contracts are configured
- * NOTE: BTC is native, so no WBTC check needed
  */
 export function areAllContractsConfigured(): boolean {
-  const criticalContracts = [
-    "individualPool",
-    "musd", // Only MUSD needed (BTC is native)
-  ];
-
-  for (const contract of criticalContracts) {
-    const key = contract as keyof typeof MEZO_TESTNET_ADDRESSES;
-    if (!isContractConfigured(MEZO_TESTNET_ADDRESSES[key])) {
-      return false;
-    }
-  }
-
-  return true;
+  return (
+    isContractConfigured(MEZO_TESTNET_ADDRESSES.individualPool) &&
+    isContractConfigured(MEZO_TESTNET_ADDRESSES.musd)
+  );
 }
 
 /**
  * Format BTC amount (18 decimals on Mezo)
  */
 export function formatBTC(amount: bigint): string {
-  // BTC has 18 decimals on Mezo (not 8 like real BTC)
   const btc = Number(amount) / 1e18;
   return btc.toFixed(6);
 }
