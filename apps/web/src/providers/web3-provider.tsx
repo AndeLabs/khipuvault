@@ -365,7 +365,7 @@ export class Web3ErrorBoundary extends React.Component<Web3ErrorBoundaryProps, E
     }
 
     // Capture error for monitoring (Sentry when enabled)
-    captureError(error, {
+    void captureError(error, {
       tags: { boundary: "web3", component: "Web3ErrorBoundary" },
       extra: { componentStack: errorInfo.componentStack },
     });
