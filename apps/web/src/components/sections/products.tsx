@@ -1,12 +1,13 @@
 "use client";
 
 import { Wallet, Users, Trophy, ArrowRight, Repeat } from "lucide-react";
-import Link from "next/link";
 
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+const TESTNET_URL = "https://testnet.khipuvault.com";
 
 const products = [
   {
@@ -20,7 +21,7 @@ const products = [
       "Referral bonuses",
       "Withdraw anytime",
     ],
-    href: "/dashboard/individual-savings",
+    href: `${TESTNET_URL}/dashboard/individual-savings`,
     color: "primary",
     badge: "Live",
     highlight: "Yield",
@@ -36,7 +37,7 @@ const products = [
       "Proportional yield sharing",
       "Democratic governance",
     ],
-    href: "/dashboard/cooperative-savings",
+    href: `${TESTNET_URL}/dashboard/cooperative-savings`,
     color: "accent",
     badge: "Live",
     highlight: "Yield",
@@ -52,7 +53,7 @@ const products = [
       "Transparent turn system",
       "Gas optimized (~1M saved)",
     ],
-    href: "/dashboard/rotating-pool",
+    href: `${TESTNET_URL}/dashboard/rotating-pool`,
     color: "accent",
     badge: "Live",
     highlight: "Turns",
@@ -68,7 +69,7 @@ const products = [
       "Minimum 2 players required",
       "Zero capital risk",
     ],
-    href: "/dashboard/prize-pool",
+    href: `${TESTNET_URL}/dashboard/prize-pool`,
     color: "success",
     badge: "Live",
     highlight: "Prizes",
@@ -190,8 +191,10 @@ export function Products() {
                 </ul>
 
                 {/* CTA */}
-                <Link
+                <a
                   href={product.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={cn(
                     buttonVariants({ variant: "outline", size: "lg" }),
                     "group/btn w-full justify-center",
@@ -205,7 +208,7 @@ export function Products() {
                 >
                   {product.badge === "Beta" ? "Try Beta" : "Start Now"}
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                </Link>
+                </a>
               </div>
             </AnimateOnScroll>
           ))}

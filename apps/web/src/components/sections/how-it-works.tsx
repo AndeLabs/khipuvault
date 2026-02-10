@@ -1,11 +1,12 @@
 "use client";
 
 import { Wallet, ArrowDownToLine, TrendingUp, ArrowRight } from "lucide-react";
-import Link from "next/link";
 
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+const TESTNET_URL = "https://testnet.khipuvault.com";
 
 const steps = [
   {
@@ -112,8 +113,10 @@ export function HowItWorks() {
 
         {/* CTA */}
         <AnimateOnScroll delay="300ms" className="mt-16 text-center">
-          <Link
-            href="/dashboard"
+          <a
+            href={`${TESTNET_URL}/dashboard`}
+            target="_blank"
+            rel="noopener noreferrer"
             className={cn(
               buttonVariants({ size: "lg" }),
               "group bg-gradient-to-r from-primary to-accent px-8 font-semibold text-white hover:opacity-90"
@@ -121,7 +124,7 @@ export function HowItWorks() {
           >
             Get Started Now
             <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-          </Link>
+          </a>
         </AnimateOnScroll>
       </div>
     </section>

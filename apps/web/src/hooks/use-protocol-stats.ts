@@ -3,14 +3,17 @@
  * @module hooks/use-protocol-stats
  *
  * Aggregates TVL and APY from all pools (Individual, Cooperative, Lottery)
+ *
+ * SSR-Safe: Works both with and without WagmiProvider context.
+ * Falls back to standalone publicClient when no Wagmi context.
  */
 
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
 import { formatUnits } from "viem";
-import { usePublicClient } from "wagmi";
 
+import { getPublicClient } from "@/lib/web3/config";
 import {
   COOPERATIVE_POOL_ABI,
   INDIVIDUAL_POOL_V3_ABI,
@@ -55,17 +58,19 @@ function formatTVL(value: bigint): string {
 
 /**
  * Hook to fetch protocol-wide statistics
+ *
+ * Works both with and without WagmiProvider context:
+ * - Uses standalone publicClient from config (no Wagmi required)
+ * - Safe for landing pages without Web3 context
  */
 export function useProtocolStats(): ProtocolStats {
-  const publicClient = usePublicClient();
+  // Use standalone client - no Wagmi context required
+  const publicClient = getPublicClient();
 
   // Fetch Individual Pool TVL
   const { data: individualTVL, isLoading: isLoadingIndividual } = useQuery({
     queryKey: ["protocol-stats", "individual-tvl"],
     queryFn: async () => {
-      if (!publicClient) {
-        return 0n;
-      }
       try {
         const result = await publicClient.readContract({
           address: INDIVIDUAL_POOL_ADDRESS,
@@ -78,7 +83,6 @@ export function useProtocolStats(): ProtocolStats {
         return 0n;
       }
     },
-    enabled: !!publicClient,
     staleTime: 30_000, // 30 seconds
     refetchInterval: 60_000, // 1 minute
   });
@@ -87,9 +91,6 @@ export function useProtocolStats(): ProtocolStats {
   const { data: cooperativeTVL, isLoading: isLoadingCooperative } = useQuery({
     queryKey: ["protocol-stats", "cooperative-tvl"],
     queryFn: async () => {
-      if (!publicClient) {
-        return 0n;
-      }
       try {
         // Get pool counter
         const poolCounter = await publicClient.readContract({
@@ -126,7 +127,6 @@ export function useProtocolStats(): ProtocolStats {
         return 0n;
       }
     },
-    enabled: !!publicClient,
     staleTime: 30_000,
     refetchInterval: 60_000,
   });

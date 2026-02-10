@@ -1,7 +1,6 @@
 "use client";
 
 import { ArrowRight, TrendingUp, Users, Wallet } from "lucide-react";
-import Link from "next/link";
 
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { buttonVariants } from "@/components/ui/button";
@@ -25,13 +24,15 @@ export function Hero() {
           <div className="grid items-center gap-12 lg:grid-cols-2">
             {/* Left: Content */}
             <AnimateOnScroll className="text-center lg:text-left">
-              {/* Badge */}
-              <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-success/30 bg-success/10 px-4 py-2">
+              {/* Badge - Testnet Live + Mainnet Coming Soon */}
+              <div className="mb-6 inline-flex items-center gap-3 rounded-full border border-success/30 bg-success/10 px-4 py-2">
                 <span className="relative flex h-2 w-2">
                   <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-success opacity-75" />
                   <span className="relative inline-flex h-2 w-2 rounded-full bg-success" />
                 </span>
-                <span className="text-sm font-medium text-success">✓ All Systems Live on Mezo</span>
+                <span className="text-sm font-medium text-success">Testnet Live</span>
+                <span className="text-muted-foreground">•</span>
+                <span className="text-sm text-muted-foreground">Mainnet Coming Soon</span>
               </div>
 
               {/* Headline */}
@@ -50,10 +51,12 @@ export function Hero() {
                 gas-optimized, and non-custodial.
               </p>
 
-              {/* CTA Button */}
-              <div className="mt-8 flex items-center justify-center gap-4 lg:justify-start">
-                <Link
-                  href="/dashboard"
+              {/* CTA Buttons */}
+              <div className="mt-8 flex flex-col items-center justify-center gap-4 sm:flex-row lg:justify-start">
+                <a
+                  href="https://testnet.khipuvault.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={cn(
                     buttonVariants({ size: "lg" }),
                     "group bg-gradient-to-r from-primary to-accent px-8 font-semibold text-white hover:opacity-90"
@@ -61,7 +64,18 @@ export function Hero() {
                 >
                   Start Earning Now
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
-                </Link>
+                </a>
+                <a
+                  href="https://testnet.khipuvault.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={cn(
+                    buttonVariants({ size: "lg", variant: "outline" }),
+                    "border-primary/30 hover:border-primary/50 hover:bg-primary/10"
+                  )}
+                >
+                  Try Testnet
+                </a>
               </div>
 
               {/* Trust badges */}

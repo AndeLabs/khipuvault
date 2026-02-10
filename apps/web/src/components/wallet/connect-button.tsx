@@ -10,13 +10,15 @@
  * - No complex UI filtering needed
  * - Shows BTC balance when connected
  * - SSR-safe with proper hydration
+ * - Works without WagmiProvider (shows Launch App button)
  *
  * @see https://wagmi.sh/react/api/connectors/metaMask
  */
 
 "use client";
 
-import { Wallet, Copy, ExternalLink, ChevronDown } from "lucide-react";
+import { Wallet, Copy, ExternalLink, ChevronDown, ArrowRight } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useAccount, useConnect, useDisconnect, useBalance } from "wagmi";
 
@@ -31,12 +33,10 @@ import {
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 
 /**
- * MetaMask Connect Button
- *
- * Simple and reliable MetaMask connection.
- * The Wagmi config uses metaMask() connector, so connectors[0] is always MetaMask.
+ * Inner component that uses Wagmi hooks
+ * Only rendered when inside WagmiProvider (dashboard routes)
  */
-export function ConnectButton() {
+function ConnectButtonWithWagmi() {
   const [mounted, setMounted] = useState(false);
   const { address, isConnected } = useAccount();
   const { connect, connectors, isPending, error } = useConnect();
@@ -258,8 +258,47 @@ export function ConnectButton() {
 }
 
 /**
+ * MetaMask Connect Button
+ *
+ * Works in two modes:
+ * 1. On dashboard routes: Full wallet connection functionality
+ * 2. On landing page: Shows "Launch App" button (no wallet connection)
+ */
+export function ConnectButton() {
+  const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Prevent hydration errors
+  if (!mounted) {
+    return <div className="h-10 w-40 animate-pulse rounded-lg bg-muted" />;
+  }
+
+  // Landing page (/) - show Try Testnet button, no wallet connection
+  const isLandingPage = pathname === "/" || pathname === "";
+
+  if (isLandingPage) {
+    return (
+      <a href="https://testnet.khipuvault.com" target="_blank" rel="noopener noreferrer">
+        <Button className="gap-2">
+          Try Testnet
+          <ArrowRight className="h-4 w-4" />
+        </Button>
+      </a>
+    );
+  }
+
+  // Dashboard routes - render full wallet connection
+  return <ConnectButtonWithWagmi />;
+}
+
+/**
  * Wallet Info Display Component
  * Shows connected wallet details and balances
+ * Only works inside WagmiProvider (dashboard routes)
  */
 export function WalletInfo() {
   const { address, isConnected } = useAccount();
@@ -311,6 +350,7 @@ export function WalletInfo() {
 /**
  * Wallet Status Badge
  * Shows connection status and chain info
+ * Only works inside WagmiProvider (dashboard routes)
  */
 export function WalletStatus() {
   const { isConnected } = useAccount();
