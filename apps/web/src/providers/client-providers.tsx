@@ -3,7 +3,6 @@
 import { ReactNode } from "react";
 
 import { Toaster } from "@/components/ui/toaster";
-import { NetworkSwitcher } from "@/components/web3/network-switcher";
 
 import { Web3Provider, Web3ErrorBoundary } from "./web3-provider";
 
@@ -20,12 +19,14 @@ interface ClientProvidersProps {
  *
  * Uses metaMask() connector which handles wallet detection properly.
  * No delays needed - MetaMask SDK handles EIP-6963 internally.
+ *
+ * Network switching is handled automatically within transaction hooks
+ * using useSwitchChain - no intrusive banners needed.
  */
 export function ClientProviders({ children, initialState }: ClientProvidersProps) {
   return (
     <Web3ErrorBoundary>
       <Web3Provider theme="dark" initialState={initialState}>
-        <NetworkSwitcher />
         {children}
         <Toaster />
       </Web3Provider>

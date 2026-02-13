@@ -1,9 +1,11 @@
 /**
- * @fileoverview Deposit Hook with Auto Approve
+ * @fileoverview Deposit Hook with Auto Approve and Network Switching
  * @module hooks/web3/use-deposit-with-approve
  *
- * Handles deposit with automatic MUSD approval
- * Uses atomic state management to prevent race conditions
+ * Handles deposit with:
+ * - Automatic network switching (no intrusive banners)
+ * - Automatic MUSD approval
+ * - Atomic state management to prevent race conditions
  */
 
 "use client";
@@ -11,9 +13,16 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback, useState, useRef } from "react";
 import { parseEther, maxUint256 } from "viem";
-import { useWriteContract, useWaitForTransactionReceipt, useAccount, useConfig } from "wagmi";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useAccount,
+  useConfig,
+  useSwitchChain,
+} from "wagmi";
 import { readContract } from "wagmi/actions";
 
+import { mezoTestnet } from "@/lib/web3/chains";
 import { MEZO_TESTNET_ADDRESSES, INDIVIDUAL_POOL_ABI } from "@/lib/web3/contracts";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`;
@@ -44,6 +53,7 @@ const ERC20_ABI = [
 
 type DepositStep =
   | "idle"
+  | "switching-network"
   | "checking"
   | "approving"
   | "awaiting-approval"
@@ -60,9 +70,10 @@ interface DepositState {
 }
 
 export function useDepositWithApprove() {
-  const { address } = useAccount();
+  const { address, chain } = useAccount();
   const config = useConfig();
   const queryClient = useQueryClient();
+  const { switchChainAsync } = useSwitchChain();
 
   // Use ref for operation mutex to prevent concurrent deposits
   const operationLockRef = useRef(false);
@@ -219,6 +230,31 @@ export function useDepositWithApprove() {
         const amountWei = typeof amount === "string" ? parseEther(amount) : amount;
         setPendingAmount(amountWei);
 
+        // Check if we need to switch networks (automatic, no banner needed)
+        if (chain?.id !== mezoTestnet.id) {
+          setLocalState({
+            step: "switching-network",
+            isProcessing: true,
+            depositHash: null,
+            approveHash: null,
+            error: null,
+            operationId,
+          });
+
+          try {
+            await switchChainAsync({ chainId: mezoTestnet.id });
+          } catch (switchError) {
+            operationLockRef.current = false;
+            setLocalState((prev) => ({
+              ...prev,
+              step: "idle",
+              isProcessing: false,
+              error: "Please switch to Mezo Testnet to continue",
+            }));
+            throw new Error("Network switch required");
+          }
+        }
+
         setLocalState({
           step: "checking",
           isProcessing: true,
@@ -305,7 +341,16 @@ export function useDepositWithApprove() {
         throw error;
       }
     },
-    [address, config, writeApprove, writeDeposit, resetApprove, resetDeposit]
+    [
+      address,
+      chain,
+      config,
+      switchChainAsync,
+      writeApprove,
+      writeDeposit,
+      resetApprove,
+      resetDeposit,
+    ]
   );
 
   // Reset function to clear state and release lock
