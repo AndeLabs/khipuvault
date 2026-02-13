@@ -162,13 +162,12 @@ export function getWagmiConfig(): WagmiConfigInstance {
   };
 
   // Create config with SSR-safe settings - MetaMask ONLY
-  // Dynamically uses testnet or mainnet based on environment
+  // Include BOTH chains so wagmi can recognize either network
+  // This ensures proper network detection and switching UX
   wagmiConfigInstance = createConfig({
-    chains: [chainConfig],
+    chains: [mezoTestnet, mezoMainnet],
     connectors,
     transports: {
-      // Define transports for both chains to satisfy TypeScript
-      // Only the active chain will be used at runtime
       [mezoTestnet.id]: http(mezoTestnet.rpcUrls.default.http[0], httpConfig),
       [mezoMainnet.id]: http(mezoMainnet.rpcUrls.default.http[0], httpConfig),
     },
