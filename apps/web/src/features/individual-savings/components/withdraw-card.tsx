@@ -1,10 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { AlertCircle, AlertTriangle } from "lucide-react";
+import { AlertCircle, AlertTriangle, RefreshCw } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
 import { formatUnits } from "viem";
+import { useSwitchChain } from "wagmi";
 import * as z from "zod";
 
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -20,6 +21,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
+import { useNetworkStatus } from "@/components/web3/network-switcher";
 import { useTransactionExecute } from "@/features/transactions";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +48,8 @@ export function WithdrawCard({
   className,
 }: WithdrawCardProps) {
   const { execute } = useTransactionExecute({ type: "Withdraw mUSD" });
+  const { isWrongNetwork, currentChain, expectedChain } = useNetworkStatus();
+  const { switchChain, isPending: isSwitchingNetwork } = useSwitchChain();
   const [showFullWithdrawConfirm, setShowFullWithdrawConfirm] = React.useState(false);
   const [pendingWithdrawAmount, setPendingWithdrawAmount] = React.useState<string | null>(null);
 
@@ -221,25 +225,65 @@ export function WithdrawCard({
               </div>
             )}
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              variant="accent"
-              className="w-full"
-              size="lg"
-              loading={isLoading}
-              disabled={!amount || Number(amount) <= 0 || Number(amount) > Number(formattedBalance)}
-            >
-              {(() => {
-                if (!amount || Number(amount) <= 0) {
-                  return "Enter amount";
+            {/* Submit Button or Network Switch */}
+            {isWrongNetwork ? (
+              <div className="space-y-3">
+                {/* Wrong Network Warning */}
+                <div className="flex items-center gap-2 rounded-lg border border-warning/50 bg-warning/10 p-3">
+                  <AlertTriangle className="h-5 w-5 shrink-0 text-warning" />
+                  <div className="text-sm">
+                    <p className="font-medium text-warning">Wrong Network</p>
+                    <p className="text-muted-foreground">
+                      You&apos;re on <strong>{currentChain?.name || "Unknown"}</strong>. Switch to{" "}
+                      <strong>{expectedChain.name}</strong> to withdraw.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Switch Network Button */}
+                <Button
+                  type="button"
+                  variant="accent"
+                  className="w-full"
+                  size="lg"
+                  onClick={() => switchChain?.({ chainId: expectedChain.id })}
+                  disabled={isSwitchingNetwork}
+                >
+                  {isSwitchingNetwork ? (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                      Switching...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="mr-2 h-4 w-4" />
+                      Switch to {expectedChain.name}
+                    </>
+                  )}
+                </Button>
+              </div>
+            ) : (
+              <Button
+                type="submit"
+                variant="accent"
+                className="w-full"
+                size="lg"
+                loading={isLoading}
+                disabled={
+                  !amount || Number(amount) <= 0 || Number(amount) > Number(formattedBalance)
                 }
-                if (Number(amount) > Number(formattedBalance)) {
-                  return "Insufficient balance";
-                }
-                return `Withdraw ${amount} mUSD`;
-              })()}
-            </Button>
+              >
+                {(() => {
+                  if (!amount || Number(amount) <= 0) {
+                    return "Enter amount";
+                  }
+                  if (Number(amount) > Number(formattedBalance)) {
+                    return "Insufficient balance";
+                  }
+                  return `Withdraw ${amount} mUSD`;
+                })()}
+              </Button>
+            )}
 
             {/* Help Text */}
             <p className="text-center text-xs text-muted-foreground">
