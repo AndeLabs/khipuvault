@@ -24,7 +24,7 @@ import { PageHeader } from "@/components/layout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { PortfolioOverview, RecentActivity } from "@/features/portfolio";
+import { PortfolioOverview, RecentActivity, PlatformStats } from "@/features/portfolio";
 import { usePortfolioAnalytics } from "@/hooks/use-portfolio-analytics";
 import { useCooperativePools, useUserCooperativeTotal } from "@/hooks/web3/use-cooperative-pools";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
@@ -41,7 +41,7 @@ export default function DashboardPage() {
   const { isConnected, address } = useAccount();
 
   // Fetch REAL blockchain data
-  const { userInfo, isLoading: isLoadingIndividual } = useIndividualPoolV3();
+  const { userInfo, poolStats, isLoading: isLoadingIndividual } = useIndividualPoolV3();
   const { isLoading: isLoadingPools } = useCooperativePools();
   const { totalContribution: cooperativeContribution, isLoading: isLoadingCoopTotal } =
     useUserCooperativeTotal(address as `0x${string}` | undefined);
@@ -159,6 +159,14 @@ export default function DashboardPage() {
         totalYields={portfolioData.totalYields}
         change24h={portfolioData.change24h}
         change7d={portfolioData.change7d}
+      />
+
+      {/* Platform Stats - Global metrics */}
+      <PlatformStats
+        totalValueLocked={poolStats?.totalMusdDeposited}
+        totalYieldsGenerated={poolStats?.totalYields}
+        activeUsers={0}
+        isLoading={isLoadingIndividual}
       />
 
       {/* Recent Activity - Real blockchain events */}

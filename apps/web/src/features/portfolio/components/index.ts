@@ -8,3 +8,4 @@
 
 export { PortfolioOverview } from "./portfolio-overview";
 export { RecentActivity } from "./recent-activity";
+export { PlatformStats } from "./platform-stats";
