@@ -41,6 +41,10 @@ export function useUserTransactionHistory() {
         const fromBlock = latestBlock > BigInt(9000) ? latestBlock - BigInt(9000) : BigInt(0);
 
         // Get contract events for this user
+        // Event signatures must match exactly with IndividualPoolV3.sol:
+        // - Deposited(address indexed user, uint256 musdAmount, uint256 totalDeposit, address indexed referrer, uint256 timestamp)
+        // - PartialWithdrawn(address indexed user, uint256 musdAmount, uint256 remainingDeposit, uint256 timestamp)
+        // - YieldClaimed(address indexed user, uint256 grossYield, uint256 feeAmount, uint256 netYield, uint256 timestamp)
         const [depositEvents, withdrawEvents, claimEvents] = await Promise.all([
           // Deposit events
           publicClient.getLogs({
@@ -50,8 +54,10 @@ export function useUserTransactionHistory() {
               name: "Deposited",
               inputs: [
                 { type: "address", indexed: true, name: "user" },
-                { type: "uint256", indexed: false, name: "amount" },
+                { type: "uint256", indexed: false, name: "musdAmount" },
+                { type: "uint256", indexed: false, name: "totalDeposit" },
                 { type: "address", indexed: true, name: "referrer" },
+                { type: "uint256", indexed: false, name: "timestamp" },
               ],
             },
             args: {
@@ -61,15 +67,17 @@ export function useUserTransactionHistory() {
             toBlock: "latest",
           }),
 
-          // Withdraw events
+          // Withdraw events (PartialWithdrawn in V3)
           publicClient.getLogs({
             address: MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`,
             event: {
               type: "event",
-              name: "Withdrawn",
+              name: "PartialWithdrawn",
               inputs: [
                 { type: "address", indexed: true, name: "user" },
-                { type: "uint256", indexed: false, name: "amount" },
+                { type: "uint256", indexed: false, name: "musdAmount" },
+                { type: "uint256", indexed: false, name: "remainingDeposit" },
+                { type: "uint256", indexed: false, name: "timestamp" },
               ],
             },
             args: {
@@ -87,8 +95,10 @@ export function useUserTransactionHistory() {
               name: "YieldClaimed",
               inputs: [
                 { type: "address", indexed: true, name: "user" },
-                { type: "uint256", indexed: false, name: "amount" },
-                { type: "uint256", indexed: false, name: "fee" },
+                { type: "uint256", indexed: false, name: "grossYield" },
+                { type: "uint256", indexed: false, name: "feeAmount" },
+                { type: "uint256", indexed: false, name: "netYield" },
+                { type: "uint256", indexed: false, name: "timestamp" },
               ],
             },
             args: {
@@ -104,29 +114,48 @@ export function useUserTransactionHistory() {
 
         // Process deposit events
         for (const event of depositEvents) {
-          const block = await publicClient.getBlock({
-            blockNumber: event.blockNumber,
-          });
+          // Use timestamp from event if available, otherwise fetch from block
+          const eventTimestamp = event.args.timestamp as bigint | undefined;
+          let timestamp: number;
+
+          if (eventTimestamp) {
+            timestamp = Number(eventTimestamp);
+          } else {
+            const block = await publicClient.getBlock({
+              blockNumber: event.blockNumber,
+            });
+            timestamp = Number(block.timestamp);
+          }
+
           transactions.push({
             hash: event.transactionHash,
             type: "deposit",
-            amount: event.args.amount as bigint,
-            timestamp: Number(block.timestamp),
+            amount: event.args.musdAmount as bigint,
+            timestamp,
             status: "success",
             blockNumber: event.blockNumber,
           });
         }
 
-        // Process withdraw events
+        // Process withdraw events (PartialWithdrawn)
         for (const event of withdrawEvents) {
-          const block = await publicClient.getBlock({
-            blockNumber: event.blockNumber,
-          });
+          const eventTimestamp = event.args.timestamp as bigint | undefined;
+          let timestamp: number;
+
+          if (eventTimestamp) {
+            timestamp = Number(eventTimestamp);
+          } else {
+            const block = await publicClient.getBlock({
+              blockNumber: event.blockNumber,
+            });
+            timestamp = Number(block.timestamp);
+          }
+
           transactions.push({
             hash: event.transactionHash,
             type: "withdraw",
-            amount: event.args.amount as bigint,
-            timestamp: Number(block.timestamp),
+            amount: event.args.musdAmount as bigint,
+            timestamp,
             status: "success",
             blockNumber: event.blockNumber,
           });
@@ -134,14 +163,23 @@ export function useUserTransactionHistory() {
 
         // Process claim events
         for (const event of claimEvents) {
-          const block = await publicClient.getBlock({
-            blockNumber: event.blockNumber,
-          });
+          const eventTimestamp = event.args.timestamp as bigint | undefined;
+          let timestamp: number;
+
+          if (eventTimestamp) {
+            timestamp = Number(eventTimestamp);
+          } else {
+            const block = await publicClient.getBlock({
+              blockNumber: event.blockNumber,
+            });
+            timestamp = Number(block.timestamp);
+          }
+
           transactions.push({
             hash: event.transactionHash,
             type: "claim",
-            amount: event.args.amount as bigint,
-            timestamp: Number(block.timestamp),
+            amount: event.args.netYield as bigint, // Use net yield (after fees)
+            timestamp,
             status: "success",
             blockNumber: event.blockNumber,
           });
