@@ -27,7 +27,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { useBuyTickets, formatProbability } from "@/hooks/web3/lottery/use-lottery-pool";
+import { useBuyTicketsWithApprove } from "@/hooks/web3/lottery/use-buy-tickets-with-approve";
+import { formatProbability } from "@/hooks/web3/lottery/use-lottery-pool";
 import { useMusdBalance, formatMusd } from "@/hooks/web3/use-musd-balance";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
@@ -49,12 +50,19 @@ export function BuyTicketsModal({
 }: BuyTicketsModalProps) {
   const { address } = useAccount();
   const { balance: musdBalance, formatted: musdFormatted } = useMusdBalance();
-  const { buyTickets, isPending, isSuccess, hash, error } = useBuyTickets();
+  const {
+    buyTickets,
+    isProcessing: isPending,
+    isSuccess,
+    buyHash: hash,
+    error,
+    step: txStep,
+  } = useBuyTicketsWithApprove();
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
   const [ticketCount, setTicketCount] = React.useState("1");
-  const [step, setStep] = React.useState<"input" | "confirming" | "success">("input");
+  const [modalStep, setModalStep] = React.useState<"input" | "confirming" | "success">("input");
 
   // Calculate values
   const ticketCountNum = parseInt(ticketCount) || 0;
@@ -83,11 +91,11 @@ export function BuyTicketsModal({
     }
 
     try {
-      setStep("confirming");
+      setModalStep("confirming");
       await buyTickets(Number(roundInfo.roundId), ticketCountNum, roundInfo.ticketPrice);
     } catch (err) {
       console.error("Purchase error:", err);
-      setStep("input");
+      setModalStep("input");
       toast({
         title: "Purchase Failed",
         description: err instanceof Error ? err.message : "Failed to purchase tickets",
@@ -99,7 +107,7 @@ export function BuyTicketsModal({
   // Watch for transaction success
   React.useEffect(() => {
     if (isSuccess && hash) {
-      setStep("success");
+      setModalStep("success");
 
       // Refetch lottery data after successful purchase
       setTimeout(() => {
@@ -116,7 +124,7 @@ export function BuyTicketsModal({
   // Reset on close
   const handleClose = () => {
     setTicketCount("1");
-    setStep("input");
+    setModalStep("input");
     onOpenChange(false);
   };
 
@@ -137,7 +145,7 @@ export function BuyTicketsModal({
           </DialogDescription>
         </DialogHeader>
 
-        {step === "input" && (
+        {modalStep === "input" && (
           <div className="space-y-6">
             {/* Ticket Price Info */}
             <div className="rounded-lg border border-border bg-surface-elevated p-4">
@@ -251,26 +259,47 @@ export function BuyTicketsModal({
               <Alert variant="destructive">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>
-                  {error.message || "Transaction failed. Please try again."}
+                  {typeof error === "string" ? error : "Transaction failed. Please try again."}
                 </AlertDescription>
               </Alert>
             )}
           </div>
         )}
 
-        {step === "confirming" && (
+        {modalStep === "confirming" && (
           <div className="space-y-4 py-8 text-center">
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-lavanda" />
             <div>
-              <p className="mb-1 font-medium">Confirming Transaction...</p>
+              <p className="mb-1 font-medium">
+                {(() => {
+                  switch (txStep) {
+                    case "switching-network":
+                      return "Switching Network...";
+                    case "checking":
+                      return "Checking Allowance...";
+                    case "approving":
+                      return "Approving mUSD...";
+                    case "awaiting-approval":
+                      return "Waiting for Approval...";
+                    case "verifying-allowance":
+                      return "Verifying...";
+                    case "buying":
+                      return "Buying Tickets...";
+                    default:
+                      return "Processing...";
+                  }
+                })()}
+              </p>
               <p className="text-sm text-muted-foreground">
-                Please confirm the transaction in your wallet
+                {txStep === "approving" || txStep === "buying"
+                  ? "Please confirm the transaction in your wallet"
+                  : "Please wait..."}
               </p>
             </div>
           </div>
         )}
 
-        {step === "success" && (
+        {modalStep === "success" && (
           <div className="space-y-4 py-8 text-center">
             <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-success/10">
               <CheckCircle2 className="h-8 w-8 text-success" />
@@ -288,7 +317,7 @@ export function BuyTicketsModal({
         )}
 
         <DialogFooter className="sm:justify-between">
-          {step === "input" && (
+          {modalStep === "input" && (
             <>
               <Button variant="ghost" onClick={handleClose}>
                 Cancel
@@ -304,13 +333,13 @@ export function BuyTicketsModal({
             </>
           )}
 
-          {step === "confirming" && (
+          {modalStep === "confirming" && (
             <Button variant="ghost" disabled className="w-full">
               Processing...
             </Button>
           )}
 
-          {step === "success" && (
+          {modalStep === "success" && (
             <Button onClick={handleClose} className="w-full">
               Close
             </Button>

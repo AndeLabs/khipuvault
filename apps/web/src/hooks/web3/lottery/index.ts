@@ -11,3 +11,4 @@
 export * from "./use-lottery-pool";
 export * from "./use-lottery-pool-events";
 export * from "./use-lottery-claim-status";
+export * from "./use-buy-tickets-with-approve";
