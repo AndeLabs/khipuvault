@@ -5,9 +5,8 @@ import { Wallet, Users, Trophy, ArrowRight, Repeat } from "lucide-react";
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { KHIPU_URLS } from "@/lib/config/urls";
 import { cn } from "@/lib/utils";
-
-const TESTNET_URL = "https://testnet.khipuvault.com";
 
 const products = [
   {
@@ -21,7 +20,7 @@ const products = [
       "Referral bonuses",
       "Withdraw anytime",
     ],
-    href: `${TESTNET_URL}/dashboard/individual-savings`,
+    href: `${KHIPU_URLS.TESTNET}/dashboard/individual-savings`,
     color: "primary",
     badge: "Live",
     highlight: "Yield",
@@ -37,7 +36,7 @@ const products = [
       "Proportional yield sharing",
       "Democratic governance",
     ],
-    href: `${TESTNET_URL}/dashboard/cooperative-savings`,
+    href: `${KHIPU_URLS.TESTNET}/dashboard/cooperative-savings`,
     color: "accent",
     badge: "Live",
     highlight: "Yield",
@@ -53,7 +52,7 @@ const products = [
       "Transparent turn system",
       "Gas optimized (~1M saved)",
     ],
-    href: `${TESTNET_URL}/dashboard/rotating-pool`,
+    href: `${KHIPU_URLS.TESTNET}/dashboard/rotating-pool`,
     color: "accent",
     badge: "Live",
     highlight: "Turns",
@@ -69,7 +68,7 @@ const products = [
       "Minimum 2 players required",
       "Zero capital risk",
     ],
-    href: `${TESTNET_URL}/dashboard/prize-pool`,
+    href: `${KHIPU_URLS.TESTNET}/dashboard/prize-pool`,
     color: "success",
     badge: "Live",
     highlight: "Prizes",

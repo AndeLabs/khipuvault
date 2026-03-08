@@ -4,9 +4,8 @@ import { Wallet, ArrowDownToLine, TrendingUp, ArrowRight } from "lucide-react";
 
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { buttonVariants } from "@/components/ui/button";
+import { KHIPU_URLS } from "@/lib/config/urls";
 import { cn } from "@/lib/utils";
-
-const TESTNET_URL = "https://testnet.khipuvault.com";
 
 const steps = [
   {
@@ -114,7 +113,7 @@ export function HowItWorks() {
         {/* CTA */}
         <AnimateOnScroll delay="300ms" className="mt-16 text-center">
           <a
-            href={`${TESTNET_URL}/dashboard`}
+            href={`${KHIPU_URLS.TESTNET}/dashboard`}
             target="_blank"
             rel="noopener noreferrer"
             className={cn(

@@ -25,9 +25,11 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { PortfolioOverview, RecentActivity, PlatformStats } from "@/features/portfolio";
+import { usePoolStats } from "@/hooks/use-pool-stats";
 import { usePortfolioAnalytics } from "@/hooks/use-portfolio-analytics";
-import { useCooperativePools, useUserCooperativeTotal } from "@/hooks/web3/use-cooperative-pools";
+import { useAllCooperativePools, useUserCooperativeTotal } from "@/hooks/web3/cooperative/queries";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
+import { MEZO_V3_ADDRESSES } from "@/lib/web3/contracts-v3";
 
 /**
  * Dashboard Page
@@ -42,7 +44,12 @@ export default function DashboardPage() {
 
   // Fetch REAL blockchain data
   const { userInfo, poolStats, isLoading: isLoadingIndividual } = useIndividualPoolV3();
-  const { isLoading: isLoadingPools } = useCooperativePools();
+
+  // Fetch platform-wide stats (active users from backend API)
+  const { activeDepositors, isLoading: isLoadingPoolStats } = usePoolStats(
+    MEZO_V3_ADDRESSES.individualPoolV3
+  );
+  const { isLoading: isLoadingPools } = useAllCooperativePools();
   const { totalContribution: cooperativeContribution, isLoading: isLoadingCoopTotal } =
     useUserCooperativeTotal(address as `0x${string}` | undefined);
 
@@ -165,8 +172,8 @@ export default function DashboardPage() {
       <PlatformStats
         totalValueLocked={poolStats?.totalMusdDeposited}
         totalYieldsGenerated={poolStats?.totalYields}
-        activeUsers={0}
-        isLoading={isLoadingIndividual}
+        activeUsers={activeDepositors}
+        isLoading={isLoadingIndividual || isLoadingPoolStats}
       />
 
       {/* Recent Activity - Real blockchain events */}

@@ -16,10 +16,8 @@ import {
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { KHIPU_URLS } from "@/lib/config/urls";
 import { cn } from "@/lib/utils";
-
-// Testnet URL for dashboard links
-const TESTNET_URL = "https://testnet.khipuvault.com";
 
 const mezoFeatures = [
   {
@@ -140,7 +138,7 @@ const howToGetStarted = [
     title: "Start Using KhipuVault",
     description:
       "Once you have mUSD, use it on KhipuVault to earn yields through Individual Savings, Community Pools, Rotating Pools, or Prize Pool!",
-    links: [{ label: "Go to Dashboard", url: `${TESTNET_URL}/dashboard` }],
+    links: [{ label: "Go to Dashboard", url: `${KHIPU_URLS.TESTNET}/dashboard` }],
   },
 ];
 
@@ -417,7 +415,7 @@ export function MezoInfo() {
                 <ExternalLink className="h-4 w-4" />
               </a>
               <a
-                href={`${TESTNET_URL}/dashboard`}
+                href={`${KHIPU_URLS.TESTNET}/dashboard`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className={cn(buttonVariants({ size: "lg", variant: "outline" }), "gap-2")}

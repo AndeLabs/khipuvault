@@ -2,7 +2,7 @@
 
 export const dynamic = "force-dynamic";
 
-import { Clock, Plus, TrendingUp, Users } from "lucide-react";
+import { Clock, Plus, TrendingUp, Users, CheckCircle2 } from "lucide-react";
 import nextDynamic from "next/dynamic";
 import { useState } from "react";
 import { useAccount } from "wagmi";
@@ -13,7 +13,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { RoscaCard } from "@/features/rotating-pool/components/rosca-card";
-import { usePoolCounter } from "@/hooks/web3/rotating";
+import {
+  usePoolCounter,
+  PoolStatus,
+  useUserRotatingPools,
+  usePoolsByStatus,
+} from "@/hooks/web3/rotating";
 
 // Lazy load modal to reduce initial bundle size
 const CreateRoscaModal = nextDynamic(
@@ -31,6 +36,14 @@ export default function RotatingPoolPage() {
   const { isConnected } = useAccount();
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const { data: poolCounter, isPending: isCounterPending } = usePoolCounter();
+
+  // User's pools data
+  const { data: userPoolsData, isLoading: isUserPoolsLoading } = useUserRotatingPools();
+
+  // Completed pools
+  const { data: completedPoolIds, isLoading: isCompletedLoading } = usePoolsByStatus(
+    PoolStatus.COMPLETED
+  );
 
   if (!isConnected) {
     return (
@@ -85,7 +98,9 @@ export default function RotatingPoolPage() {
             <Clock className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
+            <div className="text-2xl font-bold">
+              {isUserPoolsLoading ? "..." : (userPoolsData?.totalPools ?? 0)}
+            </div>
             <p className="text-xs text-muted-foreground">Pools you&apos;re participating in</p>
           </CardContent>
         </Card>
@@ -96,7 +111,11 @@ export default function RotatingPoolPage() {
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0.000 MUSD</div>
+            <div className="text-2xl font-bold">
+              {isUserPoolsLoading
+                ? "..."
+                : `${userPoolsData?.totalYieldsFormatted ?? "0.000"} MUSD`}
+            </div>
             <p className="text-xs text-muted-foreground">Earned from DeFi integration</p>
           </CardContent>
         </Card>
@@ -153,16 +172,28 @@ export default function RotatingPoolPage() {
               <CardDescription>Pools you&apos;re currently participating in</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="py-12 text-center">
-                <Clock className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
-                <p className="mb-4 text-muted-foreground">
-                  You&apos;re not participating in any ROSCAs yet.
-                </p>
-                <Button onClick={() => setCreateModalOpen(true)}>
-                  <Plus className="mr-2 h-4 w-4" />
-                  Join or Create ROSCA
-                </Button>
-              </div>
+              {isUserPoolsLoading ? (
+                <div className="py-12 text-center">
+                  <p className="text-muted-foreground">Loading your pools...</p>
+                </div>
+              ) : userPoolsData && userPoolsData.pools.length > 0 ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {userPoolsData.pools.map((pool) => (
+                    <RoscaCard key={pool.poolId.toString()} poolId={pool.poolId} />
+                  ))}
+                </div>
+              ) : (
+                <div className="py-12 text-center">
+                  <Clock className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                  <p className="mb-4 text-muted-foreground">
+                    You&apos;re not participating in any ROSCAs yet.
+                  </p>
+                  <Button onClick={() => setCreateModalOpen(true)}>
+                    <Plus className="mr-2 h-4 w-4" />
+                    Join or Create ROSCA
+                  </Button>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
@@ -174,9 +205,22 @@ export default function RotatingPoolPage() {
               <CardDescription>ROSCAs that have finished all payouts</CardDescription>
             </CardHeader>
             <CardContent>
-              <div className="py-12 text-center">
-                <p className="text-muted-foreground">No completed pools yet.</p>
-              </div>
+              {isCompletedLoading ? (
+                <div className="py-12 text-center">
+                  <p className="text-muted-foreground">Loading completed pools...</p>
+                </div>
+              ) : completedPoolIds && completedPoolIds.length > 0 ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {completedPoolIds.map((poolId) => (
+                    <RoscaCard key={poolId.toString()} poolId={poolId} />
+                  ))}
+                </div>
+              ) : (
+                <div className="py-12 text-center">
+                  <CheckCircle2 className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+                  <p className="text-muted-foreground">No completed pools yet.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

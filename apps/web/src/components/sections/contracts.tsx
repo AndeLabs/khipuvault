@@ -4,50 +4,46 @@ import { ExternalLink, Shield, Code2, FileCode } from "lucide-react";
 
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { Button } from "@/components/ui/button";
+import { getExplorerUrl, SOCIAL_URLS } from "@/lib/config/urls";
+import { getAddress } from "@/lib/web3/contracts-v3";
 
-const EXPLORER_BASE_URL = "https://explorer.test.mezo.org/address";
+const EXPLORER_BASE_URL = `${getExplorerUrl()}/address`;
 
 const contracts = [
   {
     name: "Individual Pool",
     description: "Personal savings vault with automated yield generation",
-    address: "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393",
+    address: getAddress("INDIVIDUAL_POOL"),
     icon: Shield,
   },
   {
     name: "Cooperative Pool",
     description: "Community pools for collective Bitcoin savings",
-    address: "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F",
+    address: getAddress("COOPERATIVE_POOL"),
     icon: Code2,
   },
   {
     name: "Rotating Pool (ROSCA)",
     description: "Turn-based savings circles with Native BTC & WBTC support",
-    address: "0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04",
+    address: getAddress("ROTATING_POOL"),
     icon: Code2,
   },
   {
     name: "Prize Pool (Lottery)",
     description: "No-loss lottery with 99% gas optimization and secure randomness",
-    address: "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4",
+    address: getAddress("LOTTERY_POOL"),
     icon: Code2,
-  },
-  {
-    name: "Mezo Integration",
-    description: "Bridge contract for Mezo Protocol staking",
-    address: "0xab91e387F8faF1FEBF7FF7E019e2968F19c177fD",
-    icon: FileCode,
   },
   {
     name: "Yield Aggregator",
     description: "Optimizes yield across multiple strategies",
-    address: "0x3D28A5eF59Cf3ab8E2E11c0A8031373D46370BE6",
+    address: getAddress("YIELD_AGGREGATOR"),
     icon: FileCode,
   },
   {
     name: "mUSD Token",
     description: "Mezo USD stablecoin used for deposits",
-    address: "0x118917a40FAF1CD7a13dB0Ef56C86De7973Ac503",
+    address: getAddress("MUSD"),
     icon: Shield,
   },
 ];
@@ -111,7 +107,7 @@ export function Contracts() {
             Network: Mezo Testnet (Chain ID: 31611)
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <a href="https://github.com/khipuvault" target="_blank" rel="noopener noreferrer">
+            <a href={SOCIAL_URLS.GITHUB} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="gap-2">
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
                   <path
@@ -123,7 +119,7 @@ export function Contracts() {
                 View Source Code
               </Button>
             </a>
-            <a href="https://explorer.test.mezo.org" target="_blank" rel="noopener noreferrer">
+            <a href={getExplorerUrl()} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="gap-2">
                 <ExternalLink className="h-4 w-4" />
                 Mezo Explorer

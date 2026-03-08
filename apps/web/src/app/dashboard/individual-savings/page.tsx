@@ -22,8 +22,8 @@ import {
 import { usePoolStats } from "@/hooks/use-pool-stats";
 import { usePoolEvents } from "@/hooks/web3/common/use-pool-events";
 import { useAutoCompound } from "@/hooks/web3/use-auto-compound";
-import { useClaimYields } from "@/hooks/web3/use-claim-yields";
 import { useDepositWithApprove } from "@/hooks/web3/use-deposit-with-approve";
+import { useClaimYield } from "@/hooks/web3/individual/use-yield-hooks";
 import { useIndividualPoolV3 } from "@/hooks/web3/use-individual-pool-v3";
 import { useSimpleWithdraw } from "@/hooks/web3/use-simple-withdraw";
 import { useUserTransactionHistory } from "@/hooks/web3/use-user-transaction-history";
@@ -82,7 +82,7 @@ export default function IndividualSavingsPage() {
   // Real contract interaction hooks
   const { deposit, isProcessing: isDepositing, step: depositStep } = useDepositWithApprove();
   const { withdraw, isProcessing: isWithdrawing } = useSimpleWithdraw();
-  const { claimYields, isProcessing: isClaiming } = useClaimYields();
+  const { claimYield, isClaiming } = useClaimYield();
   const { setAutoCompound, isProcessing: isTogglingAutoCompound } = useAutoCompound();
 
   // Real transaction history from blockchain events
@@ -96,7 +96,7 @@ export default function IndividualSavingsPage() {
       // and by the deposit hook's onSuccess callback - no setTimeout needed
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("❌ Deposit error:", error);
+      console.error("[IndividualSavings] Deposit error:", error);
       throw error;
     }
   };
@@ -108,7 +108,7 @@ export default function IndividualSavingsPage() {
       // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("❌ Withdraw error:", error);
+      console.error("[IndividualSavings] Withdraw error:", error);
       throw error;
     }
   };
@@ -116,11 +116,11 @@ export default function IndividualSavingsPage() {
   // Real claim yields handler - connected to blockchain
   const handleClaimYields = async () => {
     try {
-      await claimYields();
+      await claimYield();
       // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("❌ Claim error:", error);
+      console.error("[IndividualSavings] Claim error:", error);
       throw error;
     }
   };
@@ -133,7 +133,7 @@ export default function IndividualSavingsPage() {
       // Note: Data refetch is handled by usePoolEvents hook listening to blockchain events
     } catch (error) {
       // eslint-disable-next-line no-console
-      console.error("❌ Auto-compound toggle error:", error);
+      console.error("[IndividualSavings] Auto-compound toggle error:", error);
       throw error;
     }
   };
@@ -228,7 +228,7 @@ export default function IndividualSavingsPage() {
                     <p className="text-sm text-muted-foreground">
                       {depositStep === "checking" && "Checking allowance..."}
                       {depositStep === "approving" && "Approving mUSD..."}
-                      {depositStep === "depositing" && "Depositing to pool..."}
+                      {depositStep === "executing" && "Depositing to pool..."}
                     </p>
                   </div>
                 )}

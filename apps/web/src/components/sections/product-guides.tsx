@@ -19,10 +19,8 @@ import {
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
+import { KHIPU_URLS } from "@/lib/config/urls";
 import { cn } from "@/lib/utils";
-
-// Testnet base URL for all product links
-const TESTNET_URL = "https://testnet.khipuvault.com";
 
 type ProductGuide = {
   id: string;
@@ -69,7 +67,7 @@ const productGuides: ProductGuide[] = [
       "Deposit mUSD and earn yields automatically through Mezo's stability pool. Perfect for solo savers who want consistent, passive returns without complexity.",
     color: "primary",
     badge: "Live",
-    href: `${TESTNET_URL}/dashboard/individual-savings`,
+    href: `${KHIPU_URLS.TESTNET}/dashboard/individual-savings`,
 
     requirements: [
       {
@@ -145,7 +143,7 @@ const productGuides: ProductGuide[] = [
       "Save together with friends, family, or community members. Inspired by traditional Latin American savings circles (Pasanaku, Tandas, Roscas), now powered by blockchain.",
     color: "accent",
     badge: "Live",
-    href: `${TESTNET_URL}/dashboard/cooperative-savings`,
+    href: `${KHIPU_URLS.TESTNET}/dashboard/cooperative-savings`,
 
     requirements: [
       {
@@ -221,7 +219,7 @@ const productGuides: ProductGuide[] = [
       "Traditional savings circles meet blockchain. Members contribute periodically and take turns receiving the full pot. Built with Native BTC & WBTC support, flash loan protection, and optimized gas costs.",
     color: "accent",
     badge: "Live",
-    href: `${TESTNET_URL}/dashboard/rotating-pool`,
+    href: `${KHIPU_URLS.TESTNET}/dashboard/rotating-pool`,
 
     requirements: [
       {
@@ -301,7 +299,7 @@ const productGuides: ProductGuide[] = [
       "The only lottery where you can't lose! Your capital is always safe and generates yields. Only the yields are distributed as prizes. 99% gas optimized with secure commit-reveal randomness.",
     color: "success",
     badge: "Live",
-    href: `${TESTNET_URL}/dashboard/prize-pool`,
+    href: `${KHIPU_URLS.TESTNET}/dashboard/prize-pool`,
 
     requirements: [
       {

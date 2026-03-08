@@ -1,12 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { ReactNode } from "react";
+import { ReactNode, useEffect } from "react";
 
 import { ErrorBoundary } from "@/components/error-boundary";
 import { NetworkGate } from "@/components/network-gate";
 import { OnboardingModal } from "@/components/onboarding";
 import { TestnetBanner } from "@/components/testnet-banner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { Announcer } from "@/lib/accessibility/announcer";
+import { captureError } from "@/lib/error-tracking";
+import { analytics } from "@/lib/monitoring";
 
 import type { State } from "wagmi";
 
@@ -40,25 +44,37 @@ interface ClientLayoutProps {
  * Uses dynamic import with ssr:false to completely avoid SSR for Web3 providers
  * This prevents MetaMask SDK from trying to access localStorage during SSR
  *
- * Includes ErrorBoundary to catch and display errors gracefully
+ * Includes:
+ * - ErrorBoundary for graceful error handling
+ * - Announcer for screen reader accessibility
+ * - Analytics initialization
  */
 export function ClientLayout({ children, initialState }: ClientLayoutProps) {
+  // Initialize analytics on mount
+  useEffect(() => {
+    analytics.init();
+  }, []);
+
   return (
     <ErrorBoundary
       onError={(error, errorInfo) => {
-        // Log to error reporting service in production
-        if (process.env.NODE_ENV === "production") {
-          // eslint-disable-next-line no-console
-          console.error("Application Error:", error, errorInfo);
-        }
+        // Capture error for tracking
+        void captureError(error, {
+          tags: { source: "error-boundary" },
+          extra: { componentStack: errorInfo?.componentStack },
+        });
       }}
     >
       <ClientProviders initialState={initialState}>
-        <NetworkGate>
-          <TestnetBanner />
-          {children}
-          <OnboardingModal />
-        </NetworkGate>
+        <Announcer>
+          <TooltipProvider delayDuration={300}>
+            <NetworkGate>
+              <TestnetBanner />
+              {children}
+              <OnboardingModal />
+            </NetworkGate>
+          </TooltipProvider>
+        </Announcer>
       </ClientProviders>
     </ErrorBoundary>
   );

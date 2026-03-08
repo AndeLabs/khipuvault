@@ -31,26 +31,45 @@ import nextDynamic from "next/dynamic";
 import * as React from "react";
 import { useAccount } from "wagmi";
 
+import { ErrorBoundary } from "@/components/error-boundary";
 import { PageHeader, PageSection } from "@/components/layout";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  ActiveLotteryHero,
-  YourTickets,
-  ProbabilityCalculator,
-  DrawHistory,
-  HowItWorks,
-  LotteryStats,
-} from "@/features/prize-pool";
+// Core components loaded immediately
+import { ActiveLotteryHero, YourTickets, LotteryStats } from "@/features/prize-pool";
 
-// Lazy load modal to reduce initial bundle size
+// Lazy load tab content and modal to reduce initial bundle size
 const BuyTicketsModal = nextDynamic(
   () => import("@/features/prize-pool").then((mod) => ({ default: mod.BuyTicketsModal })),
   {
     ssr: false,
     loading: () => <Skeleton className="h-[500px] w-full" />,
+  }
+);
+
+const ProbabilityCalculator = nextDynamic(
+  () => import("@/features/prize-pool").then((mod) => ({ default: mod.ProbabilityCalculator })),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[300px] w-full rounded-lg" />,
+  }
+);
+
+const DrawHistory = nextDynamic(
+  () => import("@/features/prize-pool").then((mod) => ({ default: mod.DrawHistory })),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[400px] w-full rounded-lg" />,
+  }
+);
+
+const HowItWorks = nextDynamic(
+  () => import("@/features/prize-pool").then((mod) => ({ default: mod.HowItWorks })),
+  {
+    ssr: false,
+    loading: () => <Skeleton className="h-[300px] w-full rounded-lg" />,
   }
 );
 import { useToast } from "@/hooks/use-toast";
@@ -70,6 +89,7 @@ import {
   useCreateRound,
 } from "@/hooks/web3/lottery/use-lottery-pool";
 import { useLotteryPoolEvents } from "@/hooks/web3/lottery/use-lottery-pool-events";
+import { V3_FEATURES } from "@/lib/web3/contracts-v3";
 
 // Components
 
@@ -232,12 +252,13 @@ export default function PrizePoolPage() {
     }
   };
 
-  // Quick create round with defaults (7 days, 0.001 BTC/ticket, 1000 max)
+  // Quick create round with defaults from V3_FEATURES config
   const handleQuickCreateRound = async () => {
     try {
-      const ticketPrice = BigInt("1000000000000000"); // 0.001 BTC per ticket
-      const maxTickets = 1000;
-      const duration = 7 * 24 * 60 * 60; // 7 days
+      const { defaultTicketPrice, defaultMaxTickets, defaultDuration } = V3_FEATURES.lotteryPool;
+      const ticketPrice = BigInt(defaultTicketPrice);
+      const maxTickets = defaultMaxTickets;
+      const duration = defaultDuration;
 
       await createRound(ticketPrice, maxTickets, duration);
       toast({
@@ -467,13 +488,25 @@ export default function PrizePoolPage() {
         </Tabs>
       </PageSection>
 
-      {/* Buy Tickets Modal */}
-      <BuyTicketsModal
-        open={isBuyModalOpen}
-        onOpenChange={setIsBuyModalOpen}
-        roundInfo={currentRound ?? null}
-        currentUserTickets={ticketCount ?? undefined}
-      />
+      {/* Buy Tickets Modal - Wrapped with Error Boundary */}
+      <ErrorBoundary
+        onReset={() => setIsBuyModalOpen(false)}
+        onError={(error) => {
+          console.error("BuyTicketsModal error:", error);
+          toast({
+            title: "Error",
+            description: "Something went wrong. Please try again.",
+            variant: "destructive",
+          });
+        }}
+      >
+        <BuyTicketsModal
+          open={isBuyModalOpen}
+          onOpenChange={setIsBuyModalOpen}
+          roundInfo={currentRound ?? null}
+          currentUserTickets={ticketCount ?? undefined}
+        />
+      </ErrorBoundary>
     </div>
   );
 }

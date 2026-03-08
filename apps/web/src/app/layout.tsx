@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 
 import { Inter, Roboto_Mono } from "next/font/google";
 
+import { OrganizationJsonLd, WebApplicationJsonLd } from "@/lib/seo";
+
 import "./globals.css";
 
 // Optimized font loading with next/font (auto font-display: swap, self-hosting)
@@ -85,6 +87,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es" className={`dark ${inter.variable} ${robotoMono.variable}`}>
+      <head>
+        {/* JSON-LD Structured Data for SEO */}
+        <OrganizationJsonLd />
+        <WebApplicationJsonLd />
+      </head>
       <body className="font-body antialiased">
         {/* Skip navigation link for accessibility */}
         <a

@@ -15,7 +15,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { ClaimPayoutCard } from "@/features/rotating-pool/components/claim-payout-card";
 import { ContributeModal } from "@/features/rotating-pool/components/contribute-modal";
 import { MembersList } from "@/features/rotating-pool/components/members-list";
-import { usePoolInfo, useMemberInfo, useJoinRotatingPool, PoolStatus } from "@/hooks/web3/rotating";
+import {
+  usePoolInfo,
+  useMemberInfo,
+  useJoinRotatingPool,
+  PoolStatus,
+  parseMemberInfo,
+} from "@/hooks/web3/rotating";
 
 export default function RoscaDetailsPage() {
   const params = useParams();
@@ -104,8 +110,9 @@ export default function RoscaDetailsPage() {
   const progressPercentage =
     status === PoolStatus.ACTIVE ? ((Number(currentPeriod) + 1) / Number(totalPeriods)) * 100 : 0;
 
-  // Member status
-  const isMember = memberData ? ((memberData as unknown[])[7] as boolean) : false;
+  // Member status - parse raw contract data into typed structure
+  const parsedMember = parseMemberInfo(memberData);
+  const isMember = parsedMember?.active ?? false;
   const isCreator = address && creator.toLowerCase() === address.toLowerCase();
 
   const getStatusBadge = (status: PoolStatus) => {
