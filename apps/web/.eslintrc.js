@@ -15,6 +15,9 @@ module.exports = {
     '*.config.mjs',
     'next.config.js',
     'polyfill.js',
+    'e2e/',
+    'playwright.config.ts',
+    'src/test/mocks/',
   ],
   rules: {
     // Temporarily disable strict promise handling - TODO: fix properly

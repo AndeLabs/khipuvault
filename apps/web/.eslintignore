@@ -1,0 +1,14 @@
+# E2E tests (separate tsconfig)
+e2e/
+playwright.config.ts
+
+# Build outputs
+.next/
+out/
+dist/
+
+# Test utilities (allow less strict rules)
+src/test/mocks/
+
+# Generated files
+*.tsbuildinfo
