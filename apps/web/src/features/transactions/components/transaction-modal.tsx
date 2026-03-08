@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { getTxExplorerUrl } from "@/lib/config/urls";
 import { cn } from "@/lib/utils";
 
 import { useTransaction } from "../context/transaction-context";
@@ -118,8 +119,14 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
             {(activeTransaction.status === "success" ||
               activeTransaction.status === "error" ||
               activeTransaction.status === "rejected") && (
-              <Button variant="ghost" size="icon" className="h-6 w-6" onClick={handleClose}>
-                <X className="h-4 w-4" />
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6"
+                onClick={handleClose}
+                aria-label="Close transaction dialog"
+              >
+                <X className="h-4 w-4" aria-hidden="true" />
               </Button>
             )}
           </DialogTitle>
@@ -134,26 +141,43 @@ export function TransactionModal({ open, onClose }: TransactionModalProps) {
         </DialogHeader>
 
         <div className="space-y-6 py-4">
-          {/* Transaction Status */}
-          <TransactionStatus
-            status={activeTransaction.status}
-            message={activeTransaction.message}
-            txHash={activeTransaction.txHash}
-            variant="detailed"
-          />
+          {/* Accessibility: Live region for status announcements */}
+          <div aria-live="polite" aria-atomic="true" className="sr-only">
+            {activeTransaction.status === "signing" &&
+              "Please confirm the transaction in your wallet"}
+            {activeTransaction.status === "confirming" &&
+              "Transaction submitted, waiting for blockchain confirmation"}
+            {activeTransaction.status === "success" && "Transaction completed successfully"}
+            {activeTransaction.status === "error" &&
+              `Transaction failed: ${activeTransaction.message}`}
+            {activeTransaction.status === "rejected" && "Transaction was rejected"}
+          </div>
 
-          {/* Transaction Steps */}
-          <TransactionSteps steps={steps} />
+          {/* Transaction Status */}
+          <div role="status" aria-label="Transaction status">
+            <TransactionStatus
+              status={activeTransaction.status}
+              message={activeTransaction.message}
+              txHash={activeTransaction.txHash}
+              variant="detailed"
+            />
+          </div>
+
+          {/* Transaction Steps - with semantic list */}
+          <nav aria-label="Transaction progress">
+            <TransactionSteps steps={steps} />
+          </nav>
 
           {/* Actions */}
           {activeTransaction.status === "success" && (
             <div className="flex gap-2">
               {activeTransaction.txHash && (
                 <a
-                  href={`https://explorer.mezo.org/tx/${activeTransaction.txHash}`}
+                  href={getTxExplorerUrl(activeTransaction.txHash)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className={cn(buttonVariants({ variant: "outline" }), "flex-1")}
+                  aria-label="View transaction on blockchain explorer"
                 >
                   View on Explorer
                 </a>

@@ -39,6 +39,7 @@ const createMockPoolData = (overrides: Record<number, any> = {}) => {
     BigInt("2000000000000000"), // 12: yieldDistributed
     PoolStatus.ACTIVE, // 13: status
     true, // 14: autoAdvance
+    true, // 15: useNativeBtc
   ];
 
   // Apply overrides by index

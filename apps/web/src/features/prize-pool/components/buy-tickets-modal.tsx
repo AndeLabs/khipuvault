@@ -29,7 +29,10 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { useBuyTicketsWithApprove } from "@/hooks/web3/lottery/use-buy-tickets-with-approve";
 import { formatProbability } from "@/hooks/web3/lottery/use-lottery-pool";
-import { useMusdBalance, formatMusd } from "@/hooks/web3/use-musd-balance";
+import { useMusdBalance } from "@/hooks/web3/use-musd-balance";
+import { formatMusd } from "@/lib/format";
+import { BLOCKCHAIN_TIMING } from "@/lib/config/timing";
+import { getStepMessage, isWalletInteractionStep } from "@/lib/config/transaction-messages";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
@@ -109,10 +112,10 @@ export function BuyTicketsModal({
     if (isSuccess && hash) {
       setModalStep("success");
 
-      // Refetch lottery data after successful purchase
+      // Refetch lottery data after successful purchase (with delay for blockchain confirmation)
       setTimeout(() => {
         void queryClient.refetchQueries({ type: "active" });
-      }, 3000);
+      }, BLOCKCHAIN_TIMING.CONFIRMATION_DELAY);
 
       toast({
         title: "Tickets Purchased!",
@@ -271,27 +274,17 @@ export function BuyTicketsModal({
             <Loader2 className="mx-auto h-12 w-12 animate-spin text-lavanda" />
             <div>
               <p className="mb-1 font-medium">
-                {(() => {
-                  switch (txStep) {
-                    case "switching-network":
-                      return "Switching Network...";
-                    case "checking":
-                      return "Checking Allowance...";
-                    case "approving":
-                      return "Approving mUSD...";
-                    case "awaiting-approval":
-                      return "Waiting for Approval...";
-                    case "verifying-allowance":
-                      return "Verifying...";
-                    case "buying":
-                      return "Buying Tickets...";
-                    default:
-                      return "Processing...";
-                  }
-                })()}
+                {
+                  getStepMessage(txStep, {
+                    executing: {
+                      title: "Buying Tickets...",
+                      description: "Please confirm in your wallet",
+                    },
+                  }).title
+                }
               </p>
               <p className="text-sm text-muted-foreground">
-                {txStep === "approving" || txStep === "buying"
+                {isWalletInteractionStep(txStep)
                   ? "Please confirm the transaction in your wallet"
                   : "Please wait..."}
               </p>

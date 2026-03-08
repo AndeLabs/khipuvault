@@ -29,8 +29,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { useToast } from "@/hooks/use-toast";
+import { toastSuccess, toastError } from "@/hooks/use-toast";
 import { useCooperativePool } from "@/hooks/web3/use-cooperative-pool";
+import { V3_FEATURES } from "@/lib/web3/contracts-v3";
 
 interface CreatePoolModalV3Props {
   open: boolean;
@@ -39,13 +40,19 @@ interface CreatePoolModalV3Props {
 }
 
 export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV3Props) {
-  const { toast } = useToast();
   const { createPool, state, error, reset } = useCooperativePool();
 
+  // Use centralized defaults from V3_FEATURES
+  const poolDefaults = V3_FEATURES.cooperativePool;
+
   const [poolName, setPoolName] = React.useState("");
-  const [minContribution, setMinContribution] = React.useState("0.001");
-  const [maxContribution, setMaxContribution] = React.useState("0.1");
-  const [maxMembers, setMaxMembers] = React.useState([10]);
+  const [minContribution, setMinContribution] = React.useState<string>(
+    poolDefaults.minContributionBtc
+  );
+  const [maxContribution, setMaxContribution] = React.useState<string>(
+    poolDefaults.defaultMaxContributionBtc
+  );
+  const [maxMembers, setMaxMembers] = React.useState<number[]>([poolDefaults.defaultMaxMembers]);
 
   const [validationError, setValidationError] = React.useState("");
 
@@ -69,8 +76,11 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
       return false;
     }
 
-    if (min < 0.001) {
-      setValidationError("Minimum contribution must be at least 0.001 BTC");
+    const minAllowed = parseFloat(poolDefaults.minContributionBtc);
+    if (min < minAllowed) {
+      setValidationError(
+        `Minimum contribution must be at least ${poolDefaults.minContributionBtc} BTC`
+      );
       return false;
     }
 
@@ -79,8 +89,8 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
       return false;
     }
 
-    if (maxMembers[0] < 2) {
-      setValidationError("Pool must allow at least 2 members");
+    if (maxMembers[0] < poolDefaults.minMembers) {
+      setValidationError(`Pool must allow at least ${poolDefaults.minMembers} members`);
       return false;
     }
 
@@ -97,23 +107,14 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
     try {
       await createPool(poolName.trim(), minContribution, maxContribution, maxMembers[0]);
     } catch (err) {
-      console.error("Create pool error:", err);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description:
-          err instanceof Error ? err.message : "Failed to create pool. Please try again.",
-      });
+      toastError(err, "Failed to create pool. Please try again.");
     }
   };
 
   // Handle success
   React.useEffect(() => {
     if (state === "success") {
-      toast({
-        title: "Pool Created!",
-        description: "Your cooperative pool has been created successfully.",
-      });
+      toastSuccess("Pool Created!", "Your cooperative pool has been created successfully.");
       onSuccess?.();
       handleClose();
     }
@@ -122,9 +123,9 @@ export function CreatePoolModalV3({ open, onClose, onSuccess }: CreatePoolModalV
   // Handle close
   const handleClose = () => {
     setPoolName("");
-    setMinContribution("0.001");
-    setMaxContribution("0.1");
-    setMaxMembers([10]);
+    setMinContribution(poolDefaults.minContributionBtc);
+    setMaxContribution(poolDefaults.defaultMaxContributionBtc);
+    setMaxMembers([poolDefaults.defaultMaxMembers]);
     setValidationError("");
     reset();
     onClose();

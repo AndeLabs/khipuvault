@@ -6,9 +6,8 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { MEZO_URLS } from "@/lib/config/urls";
 import { cn } from "@/lib/utils";
-
-const MEZO_FAUCET_URL = "https://faucet.mezo.org";
 
 interface GetMusdGuideProps {
   walletBalance?: string;
@@ -62,7 +61,7 @@ export function GetMusdGuide({ walletBalance = "0", className }: GetMusdGuidePro
                   <p className="mb-2 text-sm text-muted-foreground">
                     Get free testnet BTC and mUSD tokens to start testing.
                   </p>
-                  <a href={MEZO_FAUCET_URL} target="_blank" rel="noopener noreferrer">
+                  <a href={MEZO_URLS.FAUCET} target="_blank" rel="noopener noreferrer">
                     <Button variant="secondary" size="sm" className="gap-2">
                       <Coins className="h-4 w-4" />
                       Open Mezo Faucet

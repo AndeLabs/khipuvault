@@ -26,8 +26,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Skeleton } from "@/components/ui/skeleton";
-import { getTimeRemaining, getRoundStatus } from "@/hooks/web3/lottery/use-lottery-pool";
-import { formatMusd } from "@/hooks/web3/use-musd-balance";
+import { useLotteryCountdown } from "@/hooks/web3/lottery/use-lottery-countdown";
+import { getRoundStatus } from "@/hooks/web3/lottery/use-lottery-pool";
+import { formatMusd } from "@/lib/format";
+import { ZERO_ADDRESS } from "@/lib/web3/contracts-v3";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
@@ -53,24 +55,11 @@ export function ActiveLotteryHero({
   onCreateNewRound,
   isDrawing = false,
 }: ActiveLotteryHeroProps) {
-  const [timeRemaining, setTimeRemaining] = React.useState(
-    roundInfo
-      ? getTimeRemaining(roundInfo.endTime)
-      : { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 }
-  );
-
-  // Update countdown every second
-  React.useEffect(() => {
-    if (!roundInfo) {
-      return;
-    }
-
-    const interval = setInterval(() => {
-      setTimeRemaining(getTimeRemaining(roundInfo.endTime));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [roundInfo]);
+  // Use the extracted countdown hook
+  const { timeRemaining, isExpired, formattedTime } = useLotteryCountdown({
+    endTime: roundInfo?.endTime,
+    enabled: !!roundInfo,
+  });
 
   if (isLoading) {
     return (
@@ -106,7 +95,6 @@ export function ActiveLotteryHero({
       ? (Number(roundInfo.totalTicketsSold) / Number(roundInfo.maxTickets)) * 100
       : 0;
 
-  const isExpired = timeRemaining.total <= 0;
   const statusText = getRoundStatus(roundInfo.status);
 
   return (
@@ -144,16 +132,9 @@ export function ActiveLotteryHero({
             </div>
             <div className="flex items-center gap-2 text-2xl font-bold">
               <Clock className="h-5 w-5 text-lavanda" />
-              {isExpired ? (
-                <span className="text-muted-foreground">00:00:00</span>
-              ) : (
-                <span>
-                  {timeRemaining.days > 0 && `${timeRemaining.days}d `}
-                  {String(timeRemaining.hours).padStart(2, "0")}:
-                  {String(timeRemaining.minutes).padStart(2, "0")}:
-                  {String(timeRemaining.seconds).padStart(2, "0")}
-                </span>
-              )}
+              <span className={isExpired ? "text-muted-foreground" : undefined}>
+                {formattedTime}
+              </span>
             </div>
           </div>
         </div>
@@ -282,27 +263,26 @@ export function ActiveLotteryHero({
         )}
 
         {/* Completed - show winner */}
-        {roundInfo.status === 2 &&
-          roundInfo.winner !== "0x0000000000000000000000000000000000000000" && (
-            <div className="space-y-4">
-              <div className="rounded-lg border border-success/20 bg-success/10 p-4 text-center">
-                <Trophy className="mx-auto mb-2 h-6 w-6 text-success" />
-                <p className="text-success-foreground text-sm font-medium">
-                  Winner: {roundInfo.winner.slice(0, 6)}...
-                  {roundInfo.winner.slice(-4)}
-                </p>
-                <p className="text-success-foreground/80 mt-1 text-xs">
-                  Prize: {formatMusd(roundInfo.totalPrize)} mUSD
-                </p>
-              </div>
-              {isAdmin && onCreateNewRound && (
-                <Button onClick={onCreateNewRound} variant="outline" className="h-12 w-full">
-                  <PlusCircle className="mr-2 h-5 w-5" />
-                  Start Next Round
-                </Button>
-              )}
+        {roundInfo.status === 2 && roundInfo.winner !== ZERO_ADDRESS && (
+          <div className="space-y-4">
+            <div className="rounded-lg border border-success/20 bg-success/10 p-4 text-center">
+              <Trophy className="mx-auto mb-2 h-6 w-6 text-success" />
+              <p className="text-success-foreground text-sm font-medium">
+                Winner: {roundInfo.winner.slice(0, 6)}...
+                {roundInfo.winner.slice(-4)}
+              </p>
+              <p className="text-success-foreground/80 mt-1 text-xs">
+                Prize: {formatMusd(roundInfo.totalPrize)} mUSD
+              </p>
             </div>
-          )}
+            {isAdmin && onCreateNewRound && (
+              <Button onClick={onCreateNewRound} variant="outline" className="h-12 w-full">
+                <PlusCircle className="mr-2 h-5 w-5" />
+                Start Next Round
+              </Button>
+            )}
+          </div>
+        )}
 
         {/* Cancelled */}
         {roundInfo.status === 3 && (

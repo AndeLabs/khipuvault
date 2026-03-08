@@ -86,7 +86,7 @@ describe("CreateRoscaModal", () => {
       expect(screen.getByLabelText("Contribution Amount (BTC)")).toBeInTheDocument();
       expect(screen.getByLabelText("Period Duration")).toBeInTheDocument();
       expect(screen.getByLabelText("Unit")).toBeInTheDocument();
-      expect(screen.getByLabelText("Auto-advance Periods")).toBeInTheDocument();
+      expect(screen.getByLabelText("Use Native BTC")).toBeInTheDocument();
     });
 
     it("should have default values", () => {
@@ -188,7 +188,7 @@ describe("CreateRoscaModal", () => {
           expect.objectContaining({
             name: "Test ROSCA",
             memberCount: BigInt(10),
-            autoAdvance: true,
+            useNativeBtc: false,
           })
         );
       });
@@ -317,18 +317,18 @@ describe("CreateRoscaModal", () => {
   });
 
   describe("Auto-advance Toggle", () => {
-    it("should have auto-advance enabled by default", () => {
+    it("should have useNativeBtc disabled by default", () => {
       render(
         <TestProviders>
           <CreateRoscaModal open onOpenChange={mockOnOpenChange} />
         </TestProviders>
       );
 
-      const autoAdvanceSwitch = screen.getByRole("switch");
-      expect(autoAdvanceSwitch).toHaveAttribute("data-state", "checked");
+      const useNativeBtcSwitch = screen.getByRole("switch");
+      expect(useNativeBtcSwitch).toHaveAttribute("data-state", "unchecked");
     });
 
-    it("should toggle auto-advance", async () => {
+    it("should toggle useNativeBtc", async () => {
       const user = userEvent.setup();
 
       render(
@@ -337,10 +337,10 @@ describe("CreateRoscaModal", () => {
         </TestProviders>
       );
 
-      const autoAdvanceSwitch = screen.getByRole("switch");
-      await user.click(autoAdvanceSwitch);
+      const useNativeBtcSwitch = screen.getByRole("switch");
+      await user.click(useNativeBtcSwitch);
 
-      expect(autoAdvanceSwitch).toHaveAttribute("data-state", "unchecked");
+      expect(useNativeBtcSwitch).toHaveAttribute("data-state", "checked");
     });
   });
 
@@ -450,7 +450,7 @@ describe("CreateRoscaModal", () => {
       expect(screen.getByText("A descriptive name for your ROSCA")).toBeInTheDocument();
       expect(screen.getByText("Amount each member contributes per period")).toBeInTheDocument();
       expect(
-        screen.getByText("Automatically move to the next period when time expires")
+        screen.getByText("Use native BTC instead of wrapped WBTC (advanced feature)")
       ).toBeInTheDocument();
     });
   });

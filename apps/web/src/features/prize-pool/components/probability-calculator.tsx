@@ -15,7 +15,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { formatMusd } from "@/hooks/web3/use-musd-balance";
+import { formatMusd } from "@/lib/format";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 

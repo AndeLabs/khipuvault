@@ -23,7 +23,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useToast } from "@/hooks/use-toast";
-import { formatMusd } from "@/hooks/web3/use-musd-balance";
+import { formatMusd } from "@/lib/format";
+import { getAddressExplorerUrl } from "@/lib/config/urls";
+import { ZERO_ADDRESS } from "@/lib/web3/contracts-v3";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 
@@ -38,9 +40,10 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
   const [copiedAddress, setCopiedAddress] = React.useState<string | null>(null);
 
   // Filter completed rounds and reverse to show newest first
+  // Status: OPEN=0, COMMIT=1, REVEAL=2, COMPLETED=3, CANCELLED=4
   const completedRounds = rounds
-    .filter((r) => r.status === 1) // COMPLETED status
-    .filter((r) => r.winner !== "0x0000000000000000000000000000000000000000")
+    .filter((r) => r.status === 3) // COMPLETED status
+    .filter((r) => r.winner !== ZERO_ADDRESS)
     .reverse();
 
   const formatAddress = (address: string) => {
@@ -70,7 +73,7 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
   };
 
   const openExplorer = (address: string) => {
-    window.open(`https://explorer.test.mezo.org/address/${address}`, "_blank");
+    window.open(getAddressExplorerUrl(address), "_blank");
   };
 
   if (isLoading) {
@@ -172,11 +175,16 @@ export function DrawHistory({ rounds, isLoading, userAddress }: DrawHistoryProps
                           size="icon"
                           className="h-6 w-6"
                           onClick={() => copyAddress(round.winner)}
+                          aria-label={
+                            copiedAddress === round.winner
+                              ? "Address copied"
+                              : "Copy winner address"
+                          }
                         >
                           {copiedAddress === round.winner ? (
-                            <CheckCircle2 className="h-3 w-3 text-success" />
+                            <CheckCircle2 className="h-3 w-3 text-success" aria-hidden="true" />
                           ) : (
-                            <Copy className="h-3 w-3" />
+                            <Copy className="h-3 w-3" aria-hidden="true" />
                           )}
                         </Button>
                       </div>

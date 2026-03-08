@@ -17,6 +17,9 @@ import type { TransactionState } from "@/components/common/transaction-status";
  * - Optimistic updates
  */
 
+/** Transaction metadata - varies by transaction type */
+export type TransactionData = Record<string, unknown>;
+
 interface Transaction {
   id: string;
   type: string;
@@ -24,13 +27,13 @@ interface Transaction {
   message?: string;
   txHash?: string;
   timestamp: number;
-  data?: any;
+  data?: TransactionData;
 }
 
 interface TransactionContextValue {
   transactions: Transaction[];
   activeTransaction: Transaction | null;
-  startTransaction: (type: string, data?: any) => string;
+  startTransaction: (type: string, data?: TransactionData) => string;
   updateTransaction: (id: string, update: Partial<Omit<Transaction, "id" | "timestamp">>) => void;
   completeTransaction: (id: string, txHash?: string) => void;
   failTransaction: (id: string, error: string) => void;
@@ -59,7 +62,7 @@ export function TransactionProvider({ children, maxHistory = 50 }: TransactionPr
   );
 
   const startTransaction = React.useCallback(
-    (type: string, data?: any) => {
+    (type: string, data?: TransactionData) => {
       // Use crypto.randomUUID() for secure ID generation
       // Falls back to timestamp-based ID if crypto is unavailable
       const randomPart =
@@ -178,7 +181,7 @@ export function useTransaction() {
 /**
  * Hook for executing a transaction with automatic state management
  */
-interface UseTransactionExecuteOptions<T = any> {
+interface UseTransactionExecuteOptions<T = unknown> {
   type: string;
   onSign?: () => void | Promise<void>;
   onConfirm?: () => void | Promise<void>;
@@ -186,7 +189,7 @@ interface UseTransactionExecuteOptions<T = any> {
   onError?: (error: Error) => void;
 }
 
-export function useTransactionExecute<T = any>(options: UseTransactionExecuteOptions<T>) {
+export function useTransactionExecute<T = unknown>(options: UseTransactionExecuteOptions<T>) {
   const {
     startTransaction,
     updateTransaction,
@@ -224,28 +227,35 @@ export function useTransactionExecute<T = any>(options: UseTransactionExecuteOpt
         }
 
         // Step 4: Success
-        completeTransaction(txId, (result as any)?.hash);
+        const resultHash =
+          result && typeof result === "object" && "hash" in result
+            ? (result as { hash?: string }).hash
+            : undefined;
+        completeTransaction(txId, resultHash);
 
         if (options.onSuccess) {
           options.onSuccess(result);
         }
 
         return result;
-      } catch (error: any) {
+      } catch (error: unknown) {
+        // Type guard for error with code/message properties
+        const errorObj = error as { code?: number | string; message?: string } | undefined;
+
         // Check if user rejected
         if (
-          error?.code === 4001 ||
-          error?.code === "ACTION_REJECTED" ||
-          error?.message?.includes("rejected") ||
-          error?.message?.includes("denied")
+          errorObj?.code === 4001 ||
+          errorObj?.code === "ACTION_REJECTED" ||
+          errorObj?.message?.includes("rejected") ||
+          errorObj?.message?.includes("denied")
         ) {
           rejectTransaction(txId);
         } else {
           // Transaction failed
-          failTransaction(txId, error?.message || "Transaction failed. Please try again.");
+          failTransaction(txId, errorObj?.message || "Transaction failed. Please try again.");
 
           if (options.onError) {
-            options.onError(error);
+            options.onError(error instanceof Error ? error : new Error(String(error)));
           }
         }
 

@@ -13,7 +13,7 @@ import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTimeRemaining } from "@/hooks/web3/lottery/use-lottery-pool";
-import { formatMusd } from "@/hooks/web3/use-musd-balance";
+import { formatMusd } from "@/lib/format";
 
 import type { LotteryRound } from "@/lib/blockchain/fetch-lottery-pools";
 

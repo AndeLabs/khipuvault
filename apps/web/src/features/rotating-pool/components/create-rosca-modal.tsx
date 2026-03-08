@@ -41,6 +41,7 @@ import {
   monthsToSeconds,
   useRotatingPoolConstants,
 } from "@/hooks/web3/rotating";
+import { UI_TIMING } from "@/lib/config/timing";
 
 const formSchema = z.object({
   name: z.string().min(3, "Name must be at least 3 characters").max(50),
@@ -109,7 +110,7 @@ export function CreateRoscaModal({ open, onOpenChange }: CreateRoscaModalProps) 
     setTimeout(() => {
       onOpenChange(false);
       form.reset();
-    }, 2000);
+    }, UI_TIMING.MODAL_AUTO_CLOSE);
   }
 
   return (

@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { usePoolInfo, PoolStatus } from "@/hooks/web3/rotating";
+import { getRotatingPoolStatus } from "@/lib/config/status-config";
 
 interface RoscaCardProps {
   poolId: bigint;
@@ -65,41 +66,13 @@ export function RoscaCard({ poolId }: RoscaCardProps) {
   const status = rawStatus as PoolStatus;
   const useNativeBtc = rawUseNativeBtc as boolean;
 
-  const getStatusBadge = (status: PoolStatus) => {
-    switch (status) {
-      case PoolStatus.FORMING:
-        return <Badge variant="warning">Forming</Badge>;
-      case PoolStatus.ACTIVE:
-        return <Badge variant="success">Active</Badge>;
-      case PoolStatus.COMPLETED:
-        return <Badge variant="secondary">Completed</Badge>;
-      case PoolStatus.CANCELLED:
-        return <Badge variant="error">Cancelled</Badge>;
-      default:
-        return <Badge>Unknown</Badge>;
-    }
-  };
-
-  const getStatusColor = (status: PoolStatus) => {
-    switch (status) {
-      case PoolStatus.FORMING:
-        return "border-warning/50";
-      case PoolStatus.ACTIVE:
-        return "border-success/50";
-      case PoolStatus.COMPLETED:
-        return "border-secondary/50";
-      case PoolStatus.CANCELLED:
-        return "border-error/50";
-      default:
-        return "border-primary/20";
-    }
-  };
+  const statusConfig = getRotatingPoolStatus(status);
 
   const periodInDays = Number(periodDuration) / (24 * 60 * 60);
 
   return (
     <Card
-      className={`shadow-custom hover:shadow-glow bg-card transition-all ${getStatusColor(status)}`}
+      className={`shadow-custom hover:shadow-glow bg-card transition-all ${statusConfig.borderColor}`}
     >
       <CardHeader>
         <div className="flex items-start justify-between">
@@ -109,7 +82,7 @@ export function RoscaCard({ poolId }: RoscaCardProps) {
               {useNativeBtc ? "Native BTC" : "WBTC"}
             </Badge>
           </div>
-          {getStatusBadge(status)}
+          <Badge variant={statusConfig.variant}>{statusConfig.label}</Badge>
         </div>
       </CardHeader>
 

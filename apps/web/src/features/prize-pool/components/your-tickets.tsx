@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { formatProbability } from "@/hooks/web3/lottery/use-lottery-pool";
-import { formatMusd } from "@/hooks/web3/use-musd-balance";
+import { formatMusd } from "@/lib/format";
 
 interface YourTicketsProps {
   ticketCount?: bigint;

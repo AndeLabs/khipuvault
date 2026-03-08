@@ -4,28 +4,22 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { TrendingUp } from "lucide-react";
 import * as React from "react";
 import { useForm } from "react-hook-form";
-import { formatUnits } from "viem";
-import * as z from "zod";
 
+import { TokenAmountInput } from "@/components/forms";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
 import { useTransactionExecute } from "@/features/transactions";
-import { cn } from "@/lib/utils";
-
-const depositSchema = z.object({
-  amount: z
-    .string()
-    .min(1, "Amount is required")
-    .refine((val) => !isNaN(Number(val)) && Number(val) > 0, "Amount must be greater than 0"),
-});
-
-type DepositFormData = z.infer<typeof depositSchema>;
+import { formatBalance } from "@/lib/format";
+import { depositFormSchema, type DepositFormData } from "@/lib/validation";
+import type { TransactionCallback } from "@/types";
 
 interface DepositCardProps {
   balance?: string;
   minDeposit?: string;
   apy?: number;
-  onDeposit: (amount: string) => Promise<any>;
+  /** Estimated gas fee in USD (Mezo has very low fees) */
+  estimatedGasFee?: string;
+  onDeposit: TransactionCallback;
   isLoading?: boolean;
   className?: string;
 }
@@ -34,6 +28,7 @@ export function DepositCard({
   balance = "0",
   minDeposit = "10",
   apy = 12.5,
+  estimatedGasFee = "<$0.01",
   onDeposit,
   isLoading,
   className,
@@ -47,7 +42,7 @@ export function DepositCard({
     watch,
     formState: { errors },
   } = useForm<DepositFormData>({
-    resolver: zodResolver(depositSchema),
+    resolver: zodResolver(depositFormSchema),
   });
 
   const amount = watch("amount");
@@ -59,18 +54,7 @@ export function DepositCard({
   };
 
   // Format balance for display
-  const formattedBalance = React.useMemo(() => {
-    try {
-      if (!balance || balance === "0") {
-        return "0.00";
-      }
-      const balanceBigInt = typeof balance === "bigint" ? balance : BigInt(balance);
-      return Number(formatUnits(balanceBigInt, 18)).toFixed(2);
-    } catch (error) {
-      console.error("Error formatting balance:", error);
-      return "0.00";
-    }
-  }, [balance]);
+  const formattedBalance = React.useMemo(() => formatBalance(balance), [balance]);
 
   const setMaxAmount = () => {
     setValue("amount", formattedBalance);
@@ -85,70 +69,18 @@ export function DepositCard({
 
       <CardContent>
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-          {/* Amount Input - Modern DeFi Style */}
-          <div className="space-y-2">
-            {/* Balance Row */}
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-muted-foreground">Wallet balance: {formattedBalance} mUSD</span>
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={setMaxAmount}
-                className="h-6 px-2 text-xs font-semibold text-lavanda hover:bg-lavanda/10 hover:text-lavanda"
-              >
-                MAX
-              </Button>
-            </div>
-
-            {/* Large Input Container - Aave/Uniswap Style */}
-            <div
-              className={cn(
-                "relative rounded-xl border-2 p-4 transition-all",
-                "bg-surface-elevated hover:border-lavanda/50",
-                errors.amount
-                  ? "border-error focus-within:border-error"
-                  : "border-border focus-within:border-lavanda"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                {/* Token Badge */}
-                <div className="flex items-center gap-2 rounded-lg border border-border bg-surface px-3 py-1.5">
-                  <div className="bg-gradient-lavanda flex h-6 w-6 items-center justify-center rounded-full">
-                    <span className="text-xs font-bold">m</span>
-                  </div>
-                  <span className="font-semibold">mUSD</span>
-                </div>
-
-                {/* Amount Input */}
-                <input
-                  id="amount"
-                  type="number"
-                  step="0.01"
-                  placeholder="0.00"
-                  {...register("amount")}
-                  className={cn(
-                    "flex-1 border-0 bg-transparent outline-none",
-                    "text-3xl font-bold tabular-nums placeholder:text-muted-foreground/50",
-                    "focus:outline-none focus:ring-0"
-                  )}
-                />
-              </div>
-
-              {/* USD Value (optional - can show conversion) */}
-              {amount && Number(amount) > 0 && (
-                <div className="mt-2 text-sm text-muted-foreground">
-                  ≈ ${(Number(amount) * 1.0).toFixed(2)} USD
-                </div>
-              )}
-            </div>
-
-            {errors.amount && (
-              <p className="flex items-center gap-1 text-sm text-error">
-                <span className="text-xs">⚠</span> {errors.amount.message}
-              </p>
-            )}
-          </div>
+          {/* Amount Input - Using shared component */}
+          <TokenAmountInput
+            register={register("amount")}
+            amount={amount}
+            balance={formattedBalance}
+            balanceLabel="Wallet balance"
+            error={errors.amount?.message}
+            accentClass="lavanda"
+            badgeGradient="bg-gradient-lavanda"
+            onMaxClick={setMaxAmount}
+            id="deposit-amount"
+          />
 
           {/* Quick Info */}
           <div className="bg-gradient-lavanda/10 flex items-center justify-between rounded-lg border border-lavanda/20 p-3">
@@ -168,7 +100,7 @@ export function DepositCard({
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Network fee</span>
-                <span className="font-semibold">~$0.50</span>
+                <span className="font-semibold">{estimatedGasFee}</span>
               </div>
               <div className="flex justify-between border-t border-border pt-2">
                 <span className="text-muted-foreground">Min. deposit</span>

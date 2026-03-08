@@ -1,11 +1,12 @@
 "use client";
 
 import { Percent, Shield, Info } from "lucide-react";
+import * as React from "react";
 import { formatUnits } from "viem";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { V3_FEATURES } from "@/lib/web3/contracts-v3";
 
 import { HealthScoreCard } from "./health-score-card";
@@ -23,10 +24,10 @@ export interface PoolStatisticsProps {
   className?: string;
 }
 
-export function PoolStatistics({
+export const PoolStatistics = React.memo(function PoolStatistics({
   totalDeposits = BigInt(0),
   poolAPR = 0,
-  performanceFee = BigInt(100),
+  performanceFee = BigInt(V3_FEATURES.individualPool.performanceFee),
   activeDepositors = 0,
   emergencyMode = false,
   isLoading,
@@ -82,16 +83,14 @@ export function PoolStatistics({
             <div className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Percent className="h-3 w-3" />
               <span>Current APR</span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-3 w-3" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="max-w-xs text-xs">Annual Percentage Rate you earn on deposits</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-3 w-3" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-xs">Annual Percentage Rate you earn on deposits</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <p className="text-lg font-bold text-success">
               {poolAPR > 0 ? `${poolAPR.toFixed(1)}%` : "—"}
@@ -102,18 +101,14 @@ export function PoolStatistics({
             <div className="mb-1 flex items-center gap-1.5 text-xs text-muted-foreground">
               <Shield className="h-3 w-3" />
               <span>Fee</span>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <Info className="h-3 w-3" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="max-w-xs text-xs">
-                      Performance fee on yields only (not principal)
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <Info className="h-3 w-3" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-xs">Performance fee on yields only (not principal)</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <p className="text-lg font-bold">{(performanceFeeNumber / 100).toFixed(1)}%</p>
           </div>
@@ -136,4 +131,4 @@ export function PoolStatistics({
       </CardContent>
     </Card>
   );
-}
+});

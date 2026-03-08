@@ -15,7 +15,7 @@ import {
   StatLabel,
 } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
 interface PositionCardProps {
@@ -118,21 +118,19 @@ export function PositionCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <StatLabel>Total Deposited</StatLabel>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
-                      <Info className="h-3 w-3" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="max-w-xs text-sm">
-                      The total amount of mUSD you've deposited into the Individual Savings Pool,
-                      excluding yields and auto-compounded returns.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <Info className="h-3 w-3" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-sm">
+                    The total amount of mUSD you've deposited into the Individual Savings Pool,
+                    excluding yields and auto-compounded returns.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <StatValue trend="neutral">
               <AmountDisplay amount={formattedDeposited} symbol="mUSD" size="lg" />
@@ -143,21 +141,19 @@ export function PositionCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <StatLabel>Current Value</StatLabel>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
-                      <Info className="h-3 w-3" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="max-w-xs text-sm">
-                      Your total position value = deposits + accumulated yields. This is the amount
-                      you can withdraw at any time without penalties.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <Info className="h-3 w-3" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-sm">
+                    Your total position value = deposits + accumulated yields. This is the amount
+                    you can withdraw at any time without penalties.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <StatValue
               trend={Number(formattedValue) > Number(formattedDeposited) ? "up" : "neutral"}
@@ -176,21 +172,19 @@ export function PositionCard({
           <div className="space-y-1">
             <div className="flex items-center gap-1.5">
               <StatLabel>Total Yields</StatLabel>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
-                      <Info className="h-3 w-3" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="max-w-xs text-sm">
-                      Total profits earned from Mezo's Stability Pool since you started saving. You
-                      can claim these or enable auto-compound to reinvest them automatically.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <Info className="h-3 w-3" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-sm">
+                    Total profits earned from Mezo's Stability Pool since you started saving. You
+                    can claim these or enable auto-compound to reinvest them automatically.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <StatValue trend={Number(formattedYields) > 0 ? "up" : "neutral"}>
               <AmountDisplay amount={formattedYields} symbol="mUSD" size="lg" />
@@ -207,28 +201,26 @@ export function PositionCard({
             <div>
               <div className="flex items-center gap-1.5">
                 <p className="text-sm text-muted-foreground">Current APY</p>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button type="button" className="text-muted-foreground hover:text-foreground">
-                        <Info className="h-3 w-3" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-sm">
-                      <p className="mb-2 font-semibold">Annual Percentage Yield (APY)</p>
-                      <div className="space-y-2 text-sm">
-                        <p>
-                          Your expected annual return from Mezo's Stability Pool, ranging from 5-8%
-                          APY.
-                        </p>
-                        <p>
-                          This is the real rate you earn after all protocol fees. Enable
-                          auto-compound to maximize your returns with compound interest!
-                        </p>
-                      </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button type="button" className="text-muted-foreground hover:text-foreground">
+                      <Info className="h-3 w-3" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-sm">
+                    <p className="mb-2 font-semibold">Annual Percentage Yield (APY)</p>
+                    <div className="space-y-2 text-sm">
+                      <p>
+                        Your expected annual return from Mezo's Stability Pool, ranging from 5-8%
+                        APY.
+                      </p>
+                      <p>
+                        This is the real rate you earn after all protocol fees. Enable auto-compound
+                        to maximize your returns with compound interest!
+                      </p>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
               </div>
               <p className="text-2xl font-bold tabular-nums text-lavanda">{apy.toFixed(2)}%</p>
             </div>
@@ -236,21 +228,19 @@ export function PositionCard({
           <div className="text-right">
             <div className="flex items-center justify-end gap-1.5">
               <p className="text-xs text-muted-foreground">Est. Monthly Yield</p>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button type="button" className="text-muted-foreground hover:text-foreground">
-                      <Info className="h-3 w-3" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p className="max-w-xs text-sm">
-                      Estimated monthly earnings based on your current position and APY. Actual
-                      yields may vary depending on Stability Pool performance.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button type="button" className="text-muted-foreground hover:text-foreground">
+                    <Info className="h-3 w-3" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p className="max-w-xs text-sm">
+                    Estimated monthly earnings based on your current position and APY. Actual yields
+                    may vary depending on Stability Pool performance.
+                  </p>
+                </TooltipContent>
+              </Tooltip>
             </div>
             <AmountDisplay
               amount={((Number(formattedValue) * apy) / 100 / 12).toFixed(2)}

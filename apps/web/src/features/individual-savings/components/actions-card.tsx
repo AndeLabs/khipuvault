@@ -6,16 +6,17 @@ import * as React from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useTransactionExecute } from "@/features/transactions";
 import { cn } from "@/lib/utils";
+import type { TransactionAction } from "@/types";
 
 interface ActionsCardProps {
   canClaimYields?: boolean;
   pendingYields?: string;
   autoCompoundEnabled?: boolean;
-  onClaimYields?: () => Promise<any>;
-  onToggleAutoCompound?: () => Promise<any>;
+  onClaimYields?: TransactionAction;
+  onToggleAutoCompound?: TransactionAction;
   isLoading?: boolean;
   className?: string;
 }
@@ -89,39 +90,37 @@ export function ActionsCard({
                     Active
                   </Badge>
                 )}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className="ml-auto text-muted-foreground hover:text-foreground"
-                      >
-                        <Info className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-sm">
-                      <p className="mb-2 font-semibold">How Auto-Compound Works:</p>
-                      <div className="space-y-2 text-sm">
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-success" />
-                          <span>Your yields are automatically reinvested into the pool</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-success" />
-                          <span>Earns compound interest on top of your yields</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-success" />
-                          <span>Maximizes returns over time (up to 30% more)</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <div className="h-1.5 w-1.5 rounded-full bg-success" />
-                          <span>No gas fees - done automatically by the protocol</span>
-                        </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="ml-auto text-muted-foreground hover:text-foreground"
+                    >
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-sm">
+                    <p className="mb-2 font-semibold">How Auto-Compound Works:</p>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-success" />
+                        <span>Your yields are automatically reinvested into the pool</span>
                       </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-success" />
+                        <span>Earns compound interest on top of your yields</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-success" />
+                        <span>Maximizes returns over time (up to 30% more)</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <div className="h-1.5 w-1.5 rounded-full bg-success" />
+                        <span>No gas fees - done automatically by the protocol</span>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
               </div>
               <p className="mb-2 text-sm text-muted-foreground">
                 {autoCompoundEnabled
@@ -194,40 +193,38 @@ export function ActionsCard({
                     Available
                   </Badge>
                 )}
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        type="button"
-                        className="ml-auto text-muted-foreground hover:text-foreground"
-                      >
-                        <Info className="h-4 w-4" />
-                      </button>
-                    </TooltipTrigger>
-                    <TooltipContent className="max-w-sm">
-                      <p className="mb-2 font-semibold">About Yields:</p>
-                      <div className="space-y-2 text-sm">
-                        <p>
-                          Yields are the profits generated from your mUSD deposits in Mezo's
-                          Stability Pool.
-                        </p>
-                        <p className="mt-2 font-medium">You can either:</p>
-                        <div className="flex items-start gap-2">
-                          <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-lavanda" />
-                          <span>
-                            <strong>Claim manually</strong> to receive yields in your wallet
-                          </span>
-                        </div>
-                        <div className="flex items-start gap-2">
-                          <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-lavanda" />
-                          <span>
-                            <strong>Enable auto-compound</strong> to automatically reinvest them
-                          </span>
-                        </div>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <button
+                      type="button"
+                      className="ml-auto text-muted-foreground hover:text-foreground"
+                    >
+                      <Info className="h-4 w-4" />
+                    </button>
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-sm">
+                    <p className="mb-2 font-semibold">About Yields:</p>
+                    <div className="space-y-2 text-sm">
+                      <p>
+                        Yields are the profits generated from your mUSD deposits in Mezo's Stability
+                        Pool.
+                      </p>
+                      <p className="mt-2 font-medium">You can either:</p>
+                      <div className="flex items-start gap-2">
+                        <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-lavanda" />
+                        <span>
+                          <strong>Claim manually</strong> to receive yields in your wallet
+                        </span>
                       </div>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                      <div className="flex items-start gap-2">
+                        <div className="mt-1.5 h-1.5 w-1.5 rounded-full bg-lavanda" />
+                        <span>
+                          <strong>Enable auto-compound</strong> to automatically reinvest them
+                        </span>
+                      </div>
+                    </div>
+                  </TooltipContent>
+                </Tooltip>
               </div>
               <p className="mb-1 text-sm text-muted-foreground">
                 {canClaimYields

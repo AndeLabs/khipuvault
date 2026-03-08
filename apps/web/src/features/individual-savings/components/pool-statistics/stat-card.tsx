@@ -3,7 +3,7 @@
 import { Info } from "lucide-react";
 import * as React from "react";
 
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -21,7 +21,7 @@ const variantClasses = {
   default: "bg-surface-elevated border-border",
 };
 
-export function StatCard({
+export const StatCard = React.memo(function StatCard({
   icon,
   label,
   value,
@@ -39,18 +39,16 @@ export function StatCard({
           {icon}
           <span>{label}</span>
         </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <button type="button" className="text-muted-foreground hover:text-foreground">
-                <Info className="h-3 w-3" />
-              </button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p className="max-w-xs text-sm">{tooltipText}</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button type="button" className="text-muted-foreground hover:text-foreground">
+              <Info className="h-3 w-3" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p className="max-w-xs text-sm">{tooltipText}</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
       <div className="space-y-1">
         <div
@@ -62,4 +60,4 @@ export function StatCard({
       </div>
     </div>
   );
-}
+});
