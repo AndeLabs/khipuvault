@@ -190,4 +190,76 @@ function useToast() {
   };
 }
 
-export { useToast, toast };
+// ============================================================================
+// TOAST HELPERS
+// ============================================================================
+
+/**
+ * Show a success toast notification
+ */
+function toastSuccess(title: string, description?: string) {
+  return toast({
+    title,
+    description,
+  });
+}
+
+/**
+ * Show an error toast notification
+ * Automatically extracts message from Error objects
+ */
+function toastError(error: unknown, fallbackMessage = "An error occurred. Please try again.") {
+  const description = error instanceof Error ? error.message : fallbackMessage;
+
+  return toast({
+    variant: "destructive",
+    title: "Error",
+    description,
+  });
+}
+
+/**
+ * Show a warning toast notification
+ */
+function toastWarning(title: string, description?: string) {
+  return toast({
+    variant: "destructive",
+    title,
+    description,
+  });
+}
+
+/**
+ * Show an info toast notification
+ */
+function toastInfo(title: string, description?: string) {
+  return toast({
+    title,
+    description,
+  });
+}
+
+/**
+ * Show a transaction-specific toast
+ */
+function toastTransaction(status: "pending" | "success" | "error", message?: string) {
+  const configs = {
+    pending: {
+      title: "Transaction Pending",
+      description: message || "Please wait while your transaction is being processed...",
+    },
+    success: {
+      title: "Transaction Successful",
+      description: message || "Your transaction has been confirmed.",
+    },
+    error: {
+      variant: "destructive" as const,
+      title: "Transaction Failed",
+      description: message || "Your transaction could not be completed.",
+    },
+  };
+
+  return toast(configs[status]);
+}
+
+export { useToast, toast, toastSuccess, toastError, toastWarning, toastInfo, toastTransaction };
