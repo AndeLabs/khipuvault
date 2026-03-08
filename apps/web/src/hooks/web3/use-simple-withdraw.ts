@@ -11,7 +11,7 @@ import { parseEther, type Address } from "viem";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 import { getErrorMessage, logWeb3Error } from "@/lib/errors";
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
+import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address;
 

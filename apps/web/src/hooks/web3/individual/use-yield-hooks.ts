@@ -9,9 +9,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback, useState } from "react";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
+import { queryKeys } from "@/lib/query-keys";
 import { MEZO_V3_ADDRESSES, INDIVIDUAL_POOL_V3_ABI } from "@/lib/web3/contracts-v3";
 
-import { QUERY_KEYS, INITIAL_TX_STATE, TransactionState } from "./constants";
+import { INITIAL_TX_STATE, TransactionState } from "./constants";
 
 const INDIVIDUAL_POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
 
@@ -59,9 +60,9 @@ export function useClaimYield() {
   useEffect(() => {
     if (isSuccess) {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.INDIVIDUAL_POOL,
+        queryKey: queryKeys.individualPool.all,
       });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.balance.all });
     }
   }, [isSuccess, queryClient]);
 
@@ -115,9 +116,9 @@ export function useClaimReferralRewards() {
   useEffect(() => {
     if (isSuccess) {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.INDIVIDUAL_POOL,
+        queryKey: queryKeys.individualPool.all,
       });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.balance.all });
     }
   }, [isSuccess, queryClient]);
 
@@ -178,7 +179,7 @@ export function useToggleAutoCompound() {
   useEffect(() => {
     if (isSuccess) {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.INDIVIDUAL_POOL,
+        queryKey: queryKeys.individualPool.all,
       });
     }
   }, [isSuccess, queryClient]);

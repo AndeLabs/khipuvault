@@ -10,7 +10,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useAccount, usePublicClient } from "wagmi";
 
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
+import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";
 
 /**
  * Hook to check if user has claimed their prize/capital for a specific round

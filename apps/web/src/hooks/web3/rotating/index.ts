@@ -24,6 +24,7 @@
 
 // Queries
 export * from "./use-rotating-pool";
+export * from "./use-user-rotating-pools";
 
 // Mutations
 export * from "./use-create-rotating-pool";

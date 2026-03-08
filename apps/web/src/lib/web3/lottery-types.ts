@@ -151,3 +151,71 @@ export function calculateExpectedValue(
   const expectedReturn = (probability * prizeAmount) / BigInt(10000);
   return expectedReturn - ticketCost;
 }
+
+// ============================================================================
+// V3 LOTTERY TYPES (Commit/Reveal Scheme)
+// ============================================================================
+
+/**
+ * V3 Round Status Enum (matches contract with commit/reveal scheme)
+ */
+export const LotteryRoundStatus = {
+  OPEN: 0,
+  COMMIT: 1,
+  REVEAL: 2,
+  COMPLETED: 3,
+  CANCELLED: 4,
+} as const;
+
+export type LotteryRoundStatusType = (typeof LotteryRoundStatus)[keyof typeof LotteryRoundStatus];
+
+/**
+ * V3 Round structure type (matches LotteryPoolV3 contract)
+ */
+export interface LotteryRoundV3 {
+  ticketPrice: bigint;
+  totalMusd: bigint;
+  maxTickets: bigint;
+  totalTicketsSold: bigint;
+  startTime: bigint;
+  endTime: bigint;
+  commitDeadline: bigint;
+  revealDeadline: bigint;
+  winner: string;
+  winnerPrize: bigint;
+  totalYield: bigint;
+  status: LotteryRoundStatusType;
+  operatorCommit: string;
+  revealedSeed: bigint;
+}
+
+/**
+ * V3 Participant structure type
+ */
+export interface LotteryParticipantV3 {
+  ticketCount: bigint;
+  musdContributed: bigint;
+  firstTicketIndex: bigint;
+  lastTicketIndex: bigint;
+  claimed: boolean;
+}
+
+/**
+ * Get V3 round status name
+ */
+export function getLotteryRoundStatusName(status: LotteryRoundStatusType): string {
+  switch (status) {
+    case LotteryRoundStatus.OPEN:
+      return "Accepting Tickets";
+    case LotteryRoundStatus.COMMIT:
+      return "Commit Phase";
+    case LotteryRoundStatus.REVEAL:
+      return "Reveal Phase";
+    case LotteryRoundStatus.COMPLETED:
+      return "Completed";
+    case LotteryRoundStatus.CANCELLED:
+      return "Cancelled";
+    default:
+      return "Unknown";
+  }
+}

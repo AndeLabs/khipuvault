@@ -7,8 +7,18 @@
 
 "use client";
 
-// Re-export lottery pool hooks
+// Query hooks (read operations)
+export * from "./use-lottery-queries";
+
+// Mutation hooks (write operations)
+export * from "./use-lottery-mutations";
+
+// Combined hooks
 export * from "./use-lottery-pool";
 export * from "./use-lottery-pool-events";
 export * from "./use-lottery-claim-status";
 export * from "./use-buy-tickets-with-approve";
+export * from "./use-lottery-countdown";
+
+// Utilities
+export * from "./lottery-helpers";

@@ -27,6 +27,8 @@ import {
   TESTNET_ADDRESSES,
   ZERO_ADDRESS,
   getCurrentNetwork,
+  PERFORMANCE_FEE_BPS,
+  REFERRAL_BONUS_BPS,
 } from "@khipu/shared";
 
 import type { Address } from "viem";
@@ -35,10 +37,23 @@ import type { Address } from "viem";
 // V3 CONTRACT ABIS
 // ============================================================================
 
+// V3 Pool ABIs
 import CooperativePoolV3ABI from "@/contracts/abis/CooperativePoolV3.json";
 import IndividualPoolV3ABI from "@/contracts/abis/IndividualPoolV3.json";
 import YieldAggregatorV3ABI from "@/contracts/abis/YieldAggregatorV3.json";
+import LotteryPoolV3ABI from "@/contracts/abis/LotteryPoolV3.json";
+import RotatingPoolABI from "@/contracts/abis/RotatingPool.json";
+
+// Token ABIs
 import MUSDABI from "@/contracts/mezo-abis/MUSD.json";
+
+// Mezo Protocol ABIs (Liquity-based)
+import BorrowerOperationsABI from "@/contracts/mezo-abis/BorrowerOperations.json";
+import TroveManagerABI from "@/contracts/mezo-abis/TroveManager.json";
+import PriceFeedABI from "@/contracts/mezo-abis/PriceFeed.json";
+import HintHelpersABI from "@/contracts/mezo-abis/HintHelpers.json";
+import SortedTrovesABI from "@/contracts/mezo-abis/SortedTroves.json";
+import StabilityPoolABI from "@/contracts/mezo-abis/StabilityPool.json";
 
 // Type for ABI module that may have default/abi wrapper
 type AbiModule = readonly unknown[] | { default?: readonly unknown[]; abi?: readonly unknown[] };
@@ -72,10 +87,24 @@ function extractABI(abiModule: unknown): readonly unknown[] {
   );
 }
 
+// V3 Pool ABIs
 export const INDIVIDUAL_POOL_V3_ABI = extractABI(IndividualPoolV3ABI);
 export const YIELD_AGGREGATOR_V3_ABI = extractABI(YieldAggregatorV3ABI);
 export const COOPERATIVE_POOL_V3_ABI = extractABI(CooperativePoolV3ABI);
+export const LOTTERY_POOL_V3_ABI = extractABI(LotteryPoolV3ABI);
+export const ROTATING_POOL_ABI = extractABI(RotatingPoolABI);
+
+// Token ABIs
 export const ERC20_ABI = extractABI(MUSDABI);
+export const MUSD_ABI = ERC20_ABI;
+
+// Mezo Protocol ABIs (Liquity-based system for MUSD)
+export const MEZO_BORROWER_OPERATIONS_ABI = extractABI(BorrowerOperationsABI);
+export const MEZO_TROVE_MANAGER_ABI = extractABI(TroveManagerABI);
+export const MEZO_PRICE_FEED_ABI = extractABI(PriceFeedABI);
+export const MEZO_HINT_HELPERS_ABI = extractABI(HintHelpersABI);
+export const MEZO_SORTED_TROVES_ABI = extractABI(SortedTrovesABI);
+export const MEZO_STABILITY_POOL_ABI = extractABI(StabilityPoolABI);
 
 // ============================================================================
 // V3 CONTRACT ADDRESSES (from @khipu/shared)
@@ -86,21 +115,33 @@ const addresses = getAddresses();
 
 export const MEZO_V3_ADDRESSES = {
   // V3 Pools (Upgradeable Proxies)
-  individualPoolV3: addresses.INDIVIDUAL_POOL as Address,
-  yieldAggregatorV3: addresses.YIELD_AGGREGATOR as Address,
-  cooperativePoolV3: addresses.COOPERATIVE_POOL as Address,
+  individualPool: addresses.INDIVIDUAL_POOL as Address,
+  individualPoolV3: addresses.INDIVIDUAL_POOL as Address, // alias
+  cooperativePool: addresses.COOPERATIVE_POOL as Address,
+  cooperativePoolV3: addresses.COOPERATIVE_POOL as Address, // alias
+  lotteryPool: addresses.LOTTERY_POOL as Address,
+  rotatingPool: addresses.ROTATING_POOL as Address,
+  yieldAggregator: addresses.YIELD_AGGREGATOR as Address,
+  yieldAggregatorV3: addresses.YIELD_AGGREGATOR as Address, // alias
+  mezoIntegration: addresses.MEZO_INTEGRATION as Address,
+  mezoIntegrationV3: addresses.MEZO_INTEGRATION as Address, // alias
 
   // Tokens
   musd: addresses.MUSD as Address,
 
-  // Mezo Integration V3
-  mezoIntegrationV3: addresses.MEZO_INTEGRATION as Address,
-
   // Mezo Protocol (External)
   borrowerOperations: addresses.BORROWER_OPERATIONS as Address,
+  mezoBorrowerOperations: addresses.BORROWER_OPERATIONS as Address, // alias
   troveManager: addresses.TROVE_MANAGER as Address,
+  mezoTroveManager: addresses.TROVE_MANAGER as Address, // alias
   priceFeed: addresses.PRICE_FEED as Address,
+  mezoPriceFeed: addresses.PRICE_FEED as Address, // alias
   hintHelpers: addresses.HINT_HELPERS as Address,
+  mezoHintHelpers: addresses.HINT_HELPERS as Address, // alias
+  sortedTroves: addresses.SORTED_TROVES as Address,
+  mezoSortedTroves: addresses.SORTED_TROVES as Address, // alias
+  stabilityPool: addresses.STABILITY_POOL as Address,
+  mezoStabilityPool: addresses.STABILITY_POOL as Address, // alias
 } as const;
 
 // ============================================================================
@@ -117,8 +158,8 @@ export const V3_FEATURES = {
     minDeposit: "10000000000000000000", // 10 MUSD
     maxDeposit: "100000000000000000000000", // 100k MUSD
     autoCompoundThreshold: "1000000000000000000", // 1 MUSD
-    referralBonus: 50, // 0.5% in basis points
-    performanceFee: 100, // 1% in basis points
+    referralBonus: REFERRAL_BONUS_BPS,
+    performanceFee: PERFORMANCE_FEE_BPS,
   },
   yieldAggregator: {
     multiVault: true,
@@ -130,8 +171,28 @@ export const V3_FEATURES = {
   cooperativePool: {
     flashLoanProtection: true,
     emergencyMode: true,
-    minContribution: "1000000000000000", // 0.001 BTC
+    /** Minimum contribution in wei (0.001 BTC) */
+    minContribution: "1000000000000000",
+    /** Minimum contribution as BTC string for forms */
+    minContributionBtc: "0.001",
+    /** Maximum members per pool */
     maxMembers: 100,
+    /** Minimum members required */
+    minMembers: 2,
+    /** Default max members for new pools */
+    defaultMaxMembers: 10,
+    /** Default max contribution in BTC */
+    defaultMaxContributionBtc: "0.1",
+  },
+  lotteryPool: {
+    /** Default ticket price in wei (0.001 BTC = 1e15 wei) */
+    defaultTicketPrice: "1000000000000000",
+    /** Default maximum tickets per round */
+    defaultMaxTickets: 1000,
+    /** Default round duration in seconds (7 days) */
+    defaultDuration: 7 * 24 * 60 * 60,
+    /** Maximum tickets per user per round */
+    maxTicketsPerUser: 10,
   },
 } as const;
 
@@ -200,6 +261,78 @@ export function shouldAutoCompound(yieldAmount: bigint, threshold: string): bool
 }
 
 // ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
+
+/**
+ * Format BTC amount (18 decimals on Mezo)
+ */
+export function formatBTC(amount: bigint): string {
+  const btc = Number(amount) / 1e18;
+  return btc.toFixed(6);
+}
+
+/**
+ * Format MUSD amount (18 decimals)
+ */
+export function formatMUSD(amount: bigint): string {
+  const musd = Number(amount) / 1e18;
+  return musd.toFixed(2);
+}
+
+/**
+ * Parse BTC amount to wei (18 decimals)
+ */
+export function parseBTC(amount: string): bigint {
+  const btcFloat = parseFloat(amount);
+  if (isNaN(btcFloat)) {
+    return 0n;
+  }
+  return BigInt(Math.floor(btcFloat * 1e18));
+}
+
+/**
+ * Get contract address for a given key
+ */
+export function getContractAddress(key: keyof typeof MEZO_V3_ADDRESSES): Address {
+  return MEZO_V3_ADDRESSES[key];
+}
+
+/**
+ * Validate if contract address is configured (not zero)
+ */
+export function isContractConfigured(address: string): boolean {
+  return address !== ZERO_ADDRESS;
+}
+
+/**
+ * Get all missing contract addresses
+ */
+export function getMissingAddresses(): string[] {
+  const missing: string[] = [];
+  const checked = new Set<string>(); // Avoid duplicates from aliases
+
+  for (const [key, value] of Object.entries(MEZO_V3_ADDRESSES)) {
+    if (!checked.has(value) && !isContractConfigured(value)) {
+      missing.push(key);
+      checked.add(value);
+    }
+  }
+
+  return missing;
+}
+
+/**
+ * Check if all critical contracts are configured
+ */
+export function areAllContractsConfigured(): boolean {
+  return (
+    isContractConfigured(MEZO_V3_ADDRESSES.individualPool) &&
+    isContractConfigured(MEZO_V3_ADDRESSES.musd)
+  );
+}
+
+// ============================================================================
 // EXPORTS (Legacy aliases for backward compatibility)
 // ============================================================================
 
@@ -207,8 +340,24 @@ export {
   INDIVIDUAL_POOL_V3_ABI as INDIVIDUAL_POOL_ABI,
   YIELD_AGGREGATOR_V3_ABI as YIELD_AGGREGATOR_ABI,
   COOPERATIVE_POOL_V3_ABI as COOPERATIVE_POOL_ABI,
+  LOTTERY_POOL_V3_ABI as LOTTERY_POOL_ABI,
   MEZO_V3_ADDRESSES as MEZO_TESTNET_ADDRESSES,
 };
 
-// Legacy exports for backward compatibility
-export const MUSD_ABI = ERC20_ABI;
+// Re-export from shared for convenience
+export {
+  getAddresses,
+  getAddress,
+  TESTNET_ADDRESSES,
+  ZERO_ADDRESS,
+  type ContractName,
+} from "@khipu/shared";
+
+// Re-export lottery types for convenience
+export {
+  LotteryRoundStatus,
+  type LotteryRoundStatusType,
+  type LotteryRoundV3,
+  type LotteryParticipantV3,
+  getLotteryRoundStatusName,
+} from "@/lib/web3/lottery-types";

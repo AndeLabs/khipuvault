@@ -14,8 +14,8 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useWatchContractEvent } from "wagmi";
 
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
-import { LOTTERY_POOL_ABI } from "@/lib/web3/lottery-pool-abi";
+import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";
+import { LOTTERY_POOL_ABI } from "@/lib/web3/contracts-v3";
 
 import type { Address } from "viem";
 
@@ -47,7 +47,7 @@ export function useLotteryPoolEvents() {
     onLogs(logs) {
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console
-        console.log("🔔 RoundCreated event detected:", logs);
+        console.log("[Lottery] RoundCreated event:", logs);
       }
       void queryClient.refetchQueries({ type: "active" });
     },
@@ -61,7 +61,7 @@ export function useLotteryPoolEvents() {
     onLogs(logs) {
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console
-        console.log("🔔 TicketsPurchased event detected:", logs);
+        console.log("[Lottery] TicketsPurchased event:", logs);
       }
       void queryClient.refetchQueries({ type: "active" });
     },
@@ -75,7 +75,7 @@ export function useLotteryPoolEvents() {
     onLogs(logs) {
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console
-        console.log("🔔 WinnerSelected event detected:", logs);
+        console.log("[Lottery] WinnerSelected event:", logs);
       }
       void queryClient.refetchQueries({ type: "active" });
     },
@@ -89,7 +89,7 @@ export function useLotteryPoolEvents() {
     onLogs(logs) {
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console
-        console.log("🔔 PrizeClaimed event detected:", logs);
+        console.log("[Lottery] PrizeClaimed event:", logs);
       }
       void queryClient.refetchQueries({ type: "active" });
     },

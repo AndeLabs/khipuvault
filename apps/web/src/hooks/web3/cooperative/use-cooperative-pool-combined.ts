@@ -9,9 +9,8 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
-
-import { QUERY_KEYS } from "./constants";
+import { queryKeys } from "@/lib/query-keys";
+import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";
 import {
   useCreatePool,
   useJoinPool,
@@ -19,7 +18,7 @@ import {
   useClaimYield,
   useClosePool,
 } from "./use-pool-mutations";
-import { usePoolCounter, usePerformanceFee, useEmergencyMode } from "./use-pool-queries";
+import { usePoolCounter, usePerformanceFee, useEmergencyMode } from "./queries";
 
 /**
  * Main hook combining all cooperative pool functionality
@@ -42,11 +41,11 @@ export function useCooperativePool() {
 
   // Utility functions
   const refetchAll = () => {
-    return queryClient.refetchQueries({ queryKey: QUERY_KEYS.BASE });
+    return queryClient.refetchQueries({ queryKey: queryKeys.cooperativePool.v3 });
   };
 
   const invalidateAll = () => {
-    return queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BASE });
+    return queryClient.invalidateQueries({ queryKey: queryKeys.cooperativePool.v3 });
   };
 
   // Return combined interface

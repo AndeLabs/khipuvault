@@ -176,8 +176,6 @@ describe("useMemberInfo", () => {
         args: [MOCK_POOL_ID, MOCK_ADDRESS],
         query: expect.objectContaining({
           enabled: true,
-          staleTime: 1000 * 60 * 2, // 2 min
-          gcTime: 1000 * 60 * 15, // 15 min
         }),
       })
     );
@@ -281,8 +279,6 @@ describe("usePeriodInfo", () => {
         args: [MOCK_POOL_ID, periodNumber],
         query: expect.objectContaining({
           enabled: true,
-          staleTime: 1000 * 60 * 3, // 3 min
-          gcTime: 1000 * 60 * 20, // 20 min
         }),
       })
     );
@@ -341,8 +337,6 @@ describe("usePoolMemberOrder", () => {
         args: [MOCK_POOL_ID, memberIndex],
         query: expect.objectContaining({
           enabled: true,
-          staleTime: 1000 * 60 * 10, // 10 min (order doesn't change)
-          gcTime: 1000 * 60 * 60, // 1 hour
         }),
       })
     );
@@ -536,42 +530,42 @@ describe("useRotatingPoolConstants", () => {
     expect(mockUseReadContract).toHaveBeenCalledWith(
       expect.objectContaining({
         functionName: "MIN_MEMBERS",
-        query: { staleTime: Infinity },
+        query: expect.objectContaining({ staleTime: Infinity }),
       })
     );
 
     expect(mockUseReadContract).toHaveBeenCalledWith(
       expect.objectContaining({
         functionName: "MAX_MEMBERS",
-        query: { staleTime: Infinity },
+        query: expect.objectContaining({ staleTime: Infinity }),
       })
     );
 
     expect(mockUseReadContract).toHaveBeenCalledWith(
       expect.objectContaining({
         functionName: "MIN_CONTRIBUTION",
-        query: { staleTime: Infinity },
+        query: expect.objectContaining({ staleTime: Infinity }),
       })
     );
 
     expect(mockUseReadContract).toHaveBeenCalledWith(
       expect.objectContaining({
         functionName: "MAX_CONTRIBUTION",
-        query: { staleTime: Infinity },
+        query: expect.objectContaining({ staleTime: Infinity }),
       })
     );
 
     expect(mockUseReadContract).toHaveBeenCalledWith(
       expect.objectContaining({
         functionName: "MIN_PERIOD_DURATION",
-        query: { staleTime: Infinity },
+        query: expect.objectContaining({ staleTime: Infinity }),
       })
     );
 
     expect(mockUseReadContract).toHaveBeenCalledWith(
       expect.objectContaining({
         functionName: "MAX_PERIOD_DURATION",
-        query: { staleTime: Infinity },
+        query: expect.objectContaining({ staleTime: Infinity }),
       })
     );
   });

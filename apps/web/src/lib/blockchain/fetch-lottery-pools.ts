@@ -8,13 +8,13 @@
  * - UUPS Upgradeable pattern
  */
 
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
+import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";
 import {
   LOTTERY_POOL_ABI,
   LotteryRoundStatus,
   type LotteryRoundV3,
   type LotteryParticipantV3,
-} from "@/lib/web3/lottery-pool-abi";
+} from "@/lib/web3/contracts-v3";
 
 import type { PublicClient } from "viem";
 

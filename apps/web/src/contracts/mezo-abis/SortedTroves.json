@@ -1,1 +1,136 @@
-[]
+[
+  {
+    "type": "function",
+    "name": "contains",
+    "inputs": [{ "name": "_id", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isFull",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "isEmpty",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getSize",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getMaxSize",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getFirst",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getLast",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getNext",
+    "inputs": [{ "name": "_id", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPrev",
+    "inputs": [{ "name": "_id", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "validInsertPosition",
+    "inputs": [
+      { "name": "_NICR", "type": "uint256", "internalType": "uint256" },
+      { "name": "_prevId", "type": "address", "internalType": "address" },
+      { "name": "_nextId", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "findInsertPosition",
+    "inputs": [
+      { "name": "_NICR", "type": "uint256", "internalType": "uint256" },
+      { "name": "_prevId", "type": "address", "internalType": "address" },
+      { "name": "_nextId", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [
+      { "name": "", "type": "address", "internalType": "address" },
+      { "name": "", "type": "address", "internalType": "address" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "insert",
+    "inputs": [
+      { "name": "_id", "type": "address", "internalType": "address" },
+      { "name": "_NICR", "type": "uint256", "internalType": "uint256" },
+      { "name": "_prevId", "type": "address", "internalType": "address" },
+      { "name": "_nextId", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "remove",
+    "inputs": [{ "name": "_id", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "reInsert",
+    "inputs": [
+      { "name": "_id", "type": "address", "internalType": "address" },
+      { "name": "_newNICR", "type": "uint256", "internalType": "uint256" },
+      { "name": "_prevId", "type": "address", "internalType": "address" },
+      { "name": "_nextId", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "NodeAdded",
+    "inputs": [
+      { "name": "_id", "type": "address", "indexed": false, "internalType": "address" },
+      { "name": "_NICR", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "NodeRemoved",
+    "inputs": [{ "name": "_id", "type": "address", "indexed": false, "internalType": "address" }],
+    "anonymous": false
+  }
+]

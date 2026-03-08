@@ -10,7 +10,7 @@
 import { formatUnits } from "viem";
 import { useAccount, useReadContract } from "wagmi";
 
-import { MEZO_TESTNET_ADDRESSES, MUSD_ABI } from "@/lib/web3/contracts";
+import { MEZO_TESTNET_ADDRESSES, MUSD_ABI } from "@/lib/web3/contracts-v3";
 
 const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`;
 
@@ -43,26 +43,4 @@ export function useMusdBalance() {
     isLoading,
     refetch,
   };
-}
-
-/**
- * Format mUSD amount for display
- */
-export function formatMusd(amount: bigint): string {
-  const formatted = formatUnits(amount, 18);
-  const num = parseFloat(formatted);
-
-  if (num >= 1000000) {
-    return `${(num / 1000000).toFixed(2)}M`;
-  }
-  if (num >= 1000) {
-    return `${(num / 1000).toFixed(2)}k`;
-  }
-  if (num >= 1) {
-    return num.toFixed(2);
-  }
-  if (num >= 0.01) {
-    return num.toFixed(4);
-  }
-  return num.toFixed(6);
 }

@@ -7,11 +7,13 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useCallback, useState } from "react";
+import { zeroAddress } from "viem";
 import { useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
+import { queryKeys } from "@/lib/query-keys";
 import { MEZO_V3_ADDRESSES, INDIVIDUAL_POOL_V3_ABI, V3_FEATURES } from "@/lib/web3/contracts-v3";
 
-import { QUERY_KEYS, INITIAL_TX_STATE, TransactionState } from "./constants";
+import { INITIAL_TX_STATE, TransactionState } from "./constants";
 
 const INDIVIDUAL_POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
 
@@ -48,7 +50,7 @@ export function useDeposit() {
         }
 
         // Use depositWithReferral if referrer is provided, otherwise use simple deposit
-        if (referrer && referrer !== "0x0000000000000000000000000000000000000000") {
+        if (referrer && referrer !== zeroAddress) {
           writeContract({
             address: INDIVIDUAL_POOL_ADDRESS,
             abi: INDIVIDUAL_POOL_V3_ABI,
@@ -82,9 +84,9 @@ export function useDeposit() {
   useEffect(() => {
     if (isSuccess) {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.INDIVIDUAL_POOL,
+        queryKey: queryKeys.individualPool.all,
       });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.balance.all });
     }
   }, [isSuccess, queryClient]);
 
@@ -150,9 +152,9 @@ export function usePartialWithdraw() {
   useEffect(() => {
     if (isSuccess) {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.INDIVIDUAL_POOL,
+        queryKey: queryKeys.individualPool.all,
       });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.balance.all });
     }
   }, [isSuccess, queryClient]);
 
@@ -206,9 +208,9 @@ export function useFullWithdraw() {
   useEffect(() => {
     if (isSuccess) {
       void queryClient.invalidateQueries({
-        queryKey: QUERY_KEYS.INDIVIDUAL_POOL,
+        queryKey: queryKeys.individualPool.all,
       });
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BALANCE });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.balance.all });
     }
   }, [isSuccess, queryClient]);
 

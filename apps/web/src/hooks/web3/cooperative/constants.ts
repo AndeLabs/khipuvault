@@ -1,9 +1,16 @@
 /**
- * @fileoverview Cooperative Pool V3 Constants and Types
+ * @fileoverview Cooperative Pool V3 Types and Constants
  * @module hooks/web3/cooperative/constants
+ *
+ * NOTE: Query keys are centralized in @/lib/query-keys
+ * NOTE: Query config (staleTime, etc.) is in @/lib/query-config
  */
 
 import type { Address } from "viem";
+
+// Re-export centralized query keys for backwards compatibility
+export { queryKeys } from "@/lib/query-keys";
+export { QUERY_PRESETS, TIME } from "@/lib/query-config";
 
 // ============================================================================
 // ENUMS
@@ -20,6 +27,7 @@ export enum PoolStatus {
 // ============================================================================
 
 export interface PoolInfo {
+  id?: number;
   minContribution: bigint;
   maxContribution: bigint;
   maxMembers: number;
@@ -49,40 +57,69 @@ export interface MemberWithAddress extends MemberInfo {
 export type ActionState = "idle" | "executing" | "processing" | "success" | "error";
 
 // ============================================================================
-// CONSTANTS
+// CONTRACT RESPONSE TYPES (match Solidity struct layout)
 // ============================================================================
 
-export const QUERY_KEYS = {
-  BASE: ["cooperative-pool-v3"] as const,
-  POOL_COUNTER: ["cooperative-pool-v3", "pool-counter"] as const,
-  PERFORMANCE_FEE: ["cooperative-pool-v3", "performance-fee"] as const,
-  EMERGENCY_MODE: ["cooperative-pool-v3", "emergency-mode"] as const,
-  POOL_INFO: (poolId: number) => ["cooperative-pool-v3", "pool-info", poolId] as const,
-  MEMBER_INFO: (poolId: number, address: Address) =>
-    ["cooperative-pool-v3", "member-info", poolId, address] as const,
-  POOL_MEMBERS: (poolId: number) => ["cooperative-pool-v3", "pool-members", poolId] as const,
-  MEMBER_YIELD: (poolId: number, address: Address) =>
-    ["cooperative-pool-v3", "member-yield", poolId, address] as const,
-} as const;
+/**
+ * Raw contract response for getMemberInfo
+ * Fields are bigint as returned by the EVM
+ */
+export interface MemberInfoContractResponse {
+  btcContributed: bigint;
+  shares: bigint;
+  joinedAt: bigint;
+  active: boolean;
+  yieldClaimed: bigint;
+}
 
-// PRODUCTION OPTIMIZED: Conservative stale times to minimize RPC load
-// Goal: Reduce RPC calls by 60-70% while maintaining acceptable UX
-// With 100 users viewing 10 pools each, aggressive intervals cause 1000+ RPC calls/minute
-export const STALE_TIMES = {
-  POOL_COUNTER: 120_000, // 2 min - counter only changes when pools created (rare)
-  PERFORMANCE_FEE: 600_000, // 10 min - admin config, almost never changes
-  EMERGENCY_MODE: 120_000, // 2 min - check less frequently, alert system handles emergencies
-  POOL_INFO: 60_000, // 1 min - pool info rarely changes during session
-  MEMBER_INFO: 60_000, // 1 min - member info rarely changes
-  POOL_MEMBERS: 120_000, // 2 min - member list changes slowly
-  MEMBER_YIELD: 120_000, // 2 min - yield accrues slowly, expensive RPC call
-} as const;
+/**
+ * Raw contract response for getPoolInfo
+ * Fields are bigint as returned by the EVM
+ */
+export interface PoolInfoContractResponse {
+  minContribution: bigint;
+  maxContribution: bigint;
+  maxMembers: bigint;
+  currentMembers: bigint;
+  createdAt: bigint;
+  status: number;
+  allowNewMembers: boolean;
+  creator: Address;
+  name: string;
+  totalBtcDeposited: bigint;
+  totalMusdMinted: bigint;
+  totalYieldGenerated: bigint;
+}
 
-// PRODUCTION OPTIMIZED: Conservative refetch intervals
-// These control automatic background refreshes - users can always manually refresh
-export const REFETCH_INTERVALS = {
-  POOL_INFO: 120_000, // 2 min - pool state changes slowly
-  MEMBER_INFO: 120_000, // 2 min - member state rarely changes
-  POOL_MEMBERS: 300_000, // 5 min - member list rarely changes
-  MEMBER_YIELD: 300_000, // 5 min - yield calculation is expensive, accrues slowly
-} as const;
+/**
+ * Parse MemberInfo from contract response
+ */
+export function parseMemberInfo(raw: MemberInfoContractResponse): MemberInfo {
+  return {
+    btcContributed: raw.btcContributed,
+    shares: raw.shares,
+    joinedAt: Number(raw.joinedAt),
+    active: raw.active,
+    yieldClaimed: raw.yieldClaimed,
+  };
+}
+
+/**
+ * Parse PoolInfo from contract response
+ */
+export function parsePoolInfo(raw: PoolInfoContractResponse): PoolInfo {
+  return {
+    minContribution: raw.minContribution,
+    maxContribution: raw.maxContribution,
+    maxMembers: Number(raw.maxMembers),
+    currentMembers: Number(raw.currentMembers),
+    createdAt: Number(raw.createdAt),
+    status: raw.status as PoolStatus,
+    allowNewMembers: raw.allowNewMembers,
+    creator: raw.creator,
+    name: raw.name || "Unknown Pool",
+    totalBtcDeposited: raw.totalBtcDeposited,
+    totalMusdMinted: raw.totalMusdMinted,
+    totalYieldGenerated: raw.totalYieldGenerated,
+  };
+}

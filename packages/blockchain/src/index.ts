@@ -4,27 +4,39 @@ import { IndividualPoolListener } from "./listeners/individual-pool";
 import { CooperativePoolListener } from "./listeners/cooperative-pool";
 import { LotteryPoolListener } from "./listeners/lottery-pool";
 import { RotatingPoolListener } from "./listeners/rotating-pool";
+import { MezoTroveManagerListener } from "./listeners/mezo-trove-manager";
+import { MezoStabilityPoolListener } from "./listeners/mezo-stability-pool";
 import { shutdownProvider, getProviderHealth } from "./provider";
 
-// Contract addresses (from env or hardcoded testnet addresses)
-// Using working deployment with deployer ownership
-const INDIVIDUAL_POOL_ADDRESS =
-  process.env.INDIVIDUAL_POOL_ADDRESS || "0xdfBEd2D3efBD2071fD407bF169b5e5533eA90393";
-const COOPERATIVE_POOL_ADDRESS =
-  process.env.COOPERATIVE_POOL_ADDRESS || "0xA39EE76DfC5106E78ABcB31e7dF5bcd4EfD3Cd1F";
-const LOTTERY_POOL_ADDRESS =
-  process.env.LOTTERY_POOL_ADDRESS || "0x8c9cc22f5184bB4E485dbb51531959A8Cf0624b4";
-const ROTATING_POOL_ADDRESS =
-  process.env.ROTATING_POOL_ADDRESS || "0x1b7AB2aF7d58Fb8a137c237d93068A24808a7B04";
+// Import addresses from centralized source (@khipu/shared)
+import { getAddressOrUndefined, isAddressConfigured, ZERO_ADDRESS } from "@khipu/shared";
 
-// Zero address constant for validation
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000";
+// Get contract addresses from @khipu/shared (Single Source of Truth)
+// Environment variables can override for development/testing
+const INDIVIDUAL_POOL_ADDRESS =
+  process.env.INDIVIDUAL_POOL_ADDRESS || getAddressOrUndefined("INDIVIDUAL_POOL") || "";
+const COOPERATIVE_POOL_ADDRESS =
+  process.env.COOPERATIVE_POOL_ADDRESS || getAddressOrUndefined("COOPERATIVE_POOL") || "";
+const LOTTERY_POOL_ADDRESS =
+  process.env.LOTTERY_POOL_ADDRESS || getAddressOrUndefined("LOTTERY_POOL") || "";
+const ROTATING_POOL_ADDRESS =
+  process.env.ROTATING_POOL_ADDRESS || getAddressOrUndefined("ROTATING_POOL") || "";
+
+// Mezo Protocol addresses (external)
+const MEZO_TROVE_MANAGER_ADDRESS =
+  process.env.MEZO_TROVE_MANAGER_ADDRESS || getAddressOrUndefined("TROVE_MANAGER") || "";
+const MEZO_STABILITY_POOL_ADDRESS =
+  process.env.MEZO_STABILITY_POOL_ADDRESS || getAddressOrUndefined("STABILITY_POOL") || "";
 
 /**
  * Check if an address is valid (non-empty and non-zero)
  */
 function isValidContractAddress(address: string): boolean {
-  return Boolean(address) && address !== ZERO_ADDRESS && /^0x[a-fA-F0-9]{40}$/.test(address);
+  return (
+    Boolean(address) &&
+    address.toLowerCase() !== ZERO_ADDRESS.toLowerCase() &&
+    /^0x[a-fA-F0-9]{40}$/.test(address)
+  );
 }
 
 export async function startIndexer() {
@@ -55,6 +67,27 @@ export async function startIndexer() {
     console.log("🔄 Rotating Pool (ROSCA) listener enabled");
   } else {
     console.log("⚠️ Rotating Pool not deployed, skipping listener");
+  }
+
+  // Add Mezo Protocol listeners
+  if (isValidContractAddress(MEZO_TROVE_MANAGER_ADDRESS)) {
+    orchestrator.addListener(
+      "MezoTroveManager",
+      new MezoTroveManagerListener(MEZO_TROVE_MANAGER_ADDRESS)
+    );
+    console.log("🏦 Mezo TroveManager listener enabled");
+  } else {
+    console.log("⚠️ Mezo TroveManager not configured, skipping listener");
+  }
+
+  if (isValidContractAddress(MEZO_STABILITY_POOL_ADDRESS)) {
+    orchestrator.addListener(
+      "MezoStabilityPool",
+      new MezoStabilityPoolListener(MEZO_STABILITY_POOL_ADDRESS)
+    );
+    console.log("💎 Mezo StabilityPool listener enabled");
+  } else {
+    console.log("⚠️ Mezo StabilityPool not configured, skipping listener");
   }
 
   // Start indexing
@@ -104,6 +137,8 @@ export { IndividualPoolListener } from "./listeners/individual-pool";
 export { CooperativePoolListener } from "./listeners/cooperative-pool";
 export { LotteryPoolListener } from "./listeners/lottery-pool";
 export { RotatingPoolListener } from "./listeners/rotating-pool";
+export { MezoTroveManagerListener } from "./listeners/mezo-trove-manager";
+export { MezoStabilityPoolListener } from "./listeners/mezo-stability-pool";
 export { BaseEventListener } from "./listeners/base";
 export { getProvider, getCurrentBlock, getBlockTimestamp } from "./provider";
 export { retryWithBackoff, batchProcess } from "./utils/retry";

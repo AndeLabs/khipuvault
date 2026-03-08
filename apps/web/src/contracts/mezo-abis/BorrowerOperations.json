@@ -1,1 +1,156 @@
-[]
+[
+  {
+    "type": "function",
+    "name": "openTrove",
+    "inputs": [
+      { "name": "_debtAmount", "type": "uint256", "internalType": "uint256" },
+      { "name": "_upperHint", "type": "address", "internalType": "address" },
+      { "name": "_lowerHint", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "closeTrove",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "addColl",
+    "inputs": [
+      { "name": "_upperHint", "type": "address", "internalType": "address" },
+      { "name": "_lowerHint", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawColl",
+    "inputs": [
+      { "name": "_amount", "type": "uint256", "internalType": "uint256" },
+      { "name": "_upperHint", "type": "address", "internalType": "address" },
+      { "name": "_lowerHint", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "withdrawMUSD",
+    "inputs": [
+      { "name": "_amount", "type": "uint256", "internalType": "uint256" },
+      { "name": "_upperHint", "type": "address", "internalType": "address" },
+      { "name": "_lowerHint", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "repayMUSD",
+    "inputs": [
+      { "name": "_amount", "type": "uint256", "internalType": "uint256" },
+      { "name": "_upperHint", "type": "address", "internalType": "address" },
+      { "name": "_lowerHint", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "adjustTrove",
+    "inputs": [
+      { "name": "_collWithdrawal", "type": "uint256", "internalType": "uint256" },
+      { "name": "_debtChange", "type": "uint256", "internalType": "uint256" },
+      { "name": "_isDebtIncrease", "type": "bool", "internalType": "bool" },
+      { "name": "_upperHint", "type": "address", "internalType": "address" },
+      { "name": "_lowerHint", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "claimCollateral",
+    "inputs": [],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "moveCollateralGainToTrove",
+    "inputs": [
+      { "name": "_borrower", "type": "address", "internalType": "address" },
+      { "name": "_upperHint", "type": "address", "internalType": "address" },
+      { "name": "_lowerHint", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "refinance",
+    "inputs": [
+      { "name": "_upperHint", "type": "address", "internalType": "address" },
+      { "name": "_lowerHint", "type": "address", "internalType": "address" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getBorrowingFee",
+    "inputs": [{ "name": "_debt", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRedemptionRate",
+    "inputs": [{ "name": "_collateralDrawn", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "minNetDebt",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "TroveCreated",
+    "inputs": [
+      { "name": "_borrower", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "_debt", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "_coll", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TroveUpdated",
+    "inputs": [
+      { "name": "_borrower", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "_debt", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "_coll", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "_stake", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "_operation", "type": "uint8", "indexed": false, "internalType": "uint8" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "MUSDBorrowingFeePaid",
+    "inputs": [
+      { "name": "_borrower", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "_fee", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  }
+]

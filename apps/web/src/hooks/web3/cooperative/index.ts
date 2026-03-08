@@ -14,7 +14,7 @@ export * from "./constants";
 export * from "./use-pool-helpers";
 
 // Re-export query hooks
-export * from "./use-pool-queries";
+export * from "./queries";
 
 // Re-export mutation hooks
 export * from "./use-pool-mutations";

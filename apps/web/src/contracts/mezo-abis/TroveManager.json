@@ -1,1 +1,360 @@
-[]
+[
+  {
+    "type": "function",
+    "name": "getTroveOwnersCount",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getTroveFromTroveOwnersArray",
+    "inputs": [{ "name": "_index", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "address", "internalType": "address" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getTroveStatus",
+    "inputs": [{ "name": "_borrower", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getTroveStake",
+    "inputs": [{ "name": "_borrower", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getTroveDebt",
+    "inputs": [{ "name": "_borrower", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getTroveColl",
+    "inputs": [{ "name": "_borrower", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getEntireDebtAndColl",
+    "inputs": [{ "name": "_borrower", "type": "address", "internalType": "address" }],
+    "outputs": [
+      { "name": "debt", "type": "uint256", "internalType": "uint256" },
+      { "name": "coll", "type": "uint256", "internalType": "uint256" },
+      { "name": "pendingMUSDDebtReward", "type": "uint256", "internalType": "uint256" },
+      { "name": "pendingCollateralReward", "type": "uint256", "internalType": "uint256" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getCurrentICR",
+    "inputs": [
+      { "name": "_borrower", "type": "address", "internalType": "address" },
+      { "name": "_price", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getNominalICR",
+    "inputs": [{ "name": "_borrower", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPendingCollateralReward",
+    "inputs": [{ "name": "_borrower", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getPendingMUSDDebtReward",
+    "inputs": [{ "name": "_borrower", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "hasPendingRewards",
+    "inputs": [{ "name": "_borrower", "type": "address", "internalType": "address" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "liquidate",
+    "inputs": [{ "name": "_borrower", "type": "address", "internalType": "address" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "liquidateTroves",
+    "inputs": [{ "name": "_n", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "batchLiquidateTroves",
+    "inputs": [{ "name": "_troveArray", "type": "address[]", "internalType": "address[]" }],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "redeemCollateral",
+    "inputs": [
+      { "name": "_MUSDAmount", "type": "uint256", "internalType": "uint256" },
+      { "name": "_firstRedemptionHint", "type": "address", "internalType": "address" },
+      { "name": "_upperPartialRedemptionHint", "type": "address", "internalType": "address" },
+      { "name": "_lowerPartialRedemptionHint", "type": "address", "internalType": "address" },
+      { "name": "_partialRedemptionHintNICR", "type": "uint256", "internalType": "uint256" },
+      { "name": "_maxIterations", "type": "uint256", "internalType": "uint256" },
+      { "name": "_maxFeePercentage", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getTCR",
+    "inputs": [{ "name": "_price", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "checkRecoveryMode",
+    "inputs": [{ "name": "_price", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "bool", "internalType": "bool" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getBorrowingRate",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getBorrowingRateWithDecay",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getBorrowingFee",
+    "inputs": [{ "name": "_MUSDDebt", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getBorrowingFeeWithDecay",
+    "inputs": [{ "name": "_MUSDDebt", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRedemptionRate",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRedemptionRateWithDecay",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getRedemptionFeeWithDecay",
+    "inputs": [{ "name": "_collateralDrawn", "type": "uint256", "internalType": "uint256" }],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "baseRate",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "lastFeeOperationTime",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "totalStakes",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "totalStakesSnapshot",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "totalCollateralSnapshot",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "MCR",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "CCR",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "event",
+    "name": "TroveUpdated",
+    "inputs": [
+      { "name": "_borrower", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "_debt", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "_coll", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "_stake", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      {
+        "name": "_operation",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum TroveManager.TroveManagerOperation"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TroveLiquidated",
+    "inputs": [
+      { "name": "_borrower", "type": "address", "indexed": true, "internalType": "address" },
+      { "name": "_debt", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "_coll", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      {
+        "name": "_operation",
+        "type": "uint8",
+        "indexed": false,
+        "internalType": "enum TroveManager.TroveManagerOperation"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Liquidation",
+    "inputs": [
+      { "name": "_liquidatedDebt", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "_liquidatedColl", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      {
+        "name": "_collGasCompensation",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "_MUSDGasCompensation",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "Redemption",
+    "inputs": [
+      {
+        "name": "_attemptedMUSDAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "_actualMUSDAmount",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      { "name": "_collateralSent", "type": "uint256", "indexed": false, "internalType": "uint256" },
+      { "name": "_collateralFee", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "BaseRateUpdated",
+    "inputs": [
+      { "name": "_baseRate", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "LastFeeOpTimeUpdated",
+    "inputs": [
+      { "name": "_lastFeeOpTime", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "TotalStakesUpdated",
+    "inputs": [
+      { "name": "_newTotalStakes", "type": "uint256", "indexed": false, "internalType": "uint256" }
+    ],
+    "anonymous": false
+  },
+  {
+    "type": "event",
+    "name": "SystemSnapshotsUpdated",
+    "inputs": [
+      {
+        "name": "_totalStakesSnapshot",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      },
+      {
+        "name": "_totalCollateralSnapshot",
+        "type": "uint256",
+        "indexed": false,
+        "internalType": "uint256"
+      }
+    ],
+    "anonymous": false
+  }
+]

@@ -16,6 +16,7 @@ vi.mock("wagmi", async () => {
     useAccount: vi.fn(() => ({
       address: "0x1234567890123456789012345678901234567890" as `0x${string}`,
       isConnected: true,
+      chain: { id: 31611 },
     })),
     useWriteContract: vi.fn(() => ({
       writeContract: mockWriteContract,
@@ -30,6 +31,9 @@ vi.mock("wagmi", async () => {
       data: undefined,
     })),
     useConfig: vi.fn(() => ({})),
+    useSwitchChain: vi.fn(() => ({
+      switchChainAsync: vi.fn(),
+    })),
   };
 });
 

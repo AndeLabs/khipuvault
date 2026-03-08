@@ -308,3 +308,25 @@ export function useHasClaimedRefund(poolId: bigint | undefined, memberAddress?: 
 
 // Export contract address for use in mutation hooks
 export { ROTATING_POOL_ADDRESS };
+
+/**
+ * Parse raw member data array from contract into typed MemberInfo
+ * The contract returns a tuple that maps to our MemberInfo interface
+ * @param data - Raw data from poolMembers() call
+ */
+export function parseMemberInfo(data: unknown): MemberInfo | null {
+  if (!data || !Array.isArray(data) || data.length < 8) {
+    return null;
+  }
+
+  return {
+    memberAddress: data[0] as Address,
+    memberIndex: data[1] as bigint,
+    contributionsMade: data[2] as bigint,
+    totalContributed: data[3] as bigint,
+    payoutReceived: data[4] as bigint,
+    yieldReceived: data[5] as bigint,
+    hasReceivedPayout: data[6] as boolean,
+    active: data[7] as boolean,
+  };
+}

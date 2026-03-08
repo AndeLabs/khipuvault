@@ -12,81 +12,14 @@ import { useState, useEffect, useCallback } from "react";
 import { parseEther } from "viem";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
+import { queryKeys } from "@/lib/query-keys";
 import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";
+import { COOPERATIVE_POOL_FRAGMENTS } from "@/contracts/abis/fragments";
 
-import { ActionState, QUERY_KEYS } from "./constants";
+import { ActionState } from "./constants";
 import { parsePoolError } from "./use-pool-helpers";
 
 const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePoolV3;
-
-// Minimal typed ABIs for mutations - ensures correct typing without full ABI import
-const JOIN_POOL_ABI = [
-  {
-    type: "function",
-    name: "joinPool",
-    inputs: [{ name: "poolId", type: "uint256" }],
-    outputs: [],
-    stateMutability: "payable",
-  },
-] as const;
-
-const LEAVE_POOL_ABI = [
-  {
-    type: "function",
-    name: "leavePool",
-    inputs: [{ name: "poolId", type: "uint256" }],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-] as const;
-
-const CREATE_POOL_ABI = [
-  {
-    type: "function",
-    name: "createPool",
-    inputs: [
-      { name: "name", type: "string" },
-      { name: "minContribution", type: "uint256" },
-      { name: "maxContribution", type: "uint256" },
-      { name: "maxMembers", type: "uint256" },
-    ],
-    outputs: [{ name: "poolId", type: "uint256" }],
-    stateMutability: "nonpayable",
-  },
-] as const;
-
-const CLAIM_YIELD_ABI = [
-  {
-    type: "function",
-    name: "claimYield",
-    inputs: [{ name: "poolId", type: "uint256" }],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-] as const;
-
-const CLOSE_POOL_ABI = [
-  {
-    type: "function",
-    name: "closePool",
-    inputs: [{ name: "poolId", type: "uint256" }],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-] as const;
-
-const WITHDRAW_PARTIAL_ABI = [
-  {
-    type: "function",
-    name: "withdrawPartial",
-    inputs: [
-      { name: "poolId", type: "uint256" },
-      { name: "withdrawAmount", type: "uint256" },
-    ],
-    outputs: [],
-    stateMutability: "nonpayable",
-  },
-] as const;
 
 // ============================================================================
 // BASE MUTATION HOOK
@@ -120,7 +53,7 @@ function usePoolMutation() {
   // Handle transaction success
   useEffect(() => {
     if (isSuccess && state === "processing") {
-      void queryClient.invalidateQueries({ queryKey: QUERY_KEYS.BASE });
+      void queryClient.invalidateQueries({ queryKey: queryKeys.cooperativePool.v3 });
       setState("success");
     }
   }, [isSuccess, state, queryClient]);
@@ -190,7 +123,7 @@ export function useCreatePool() {
 
         mutation.write({
           address: poolAddress,
-          abi: CREATE_POOL_ABI,
+          abi: COOPERATIVE_POOL_FRAGMENTS.createPool,
           functionName: "createPool",
           args: [name, min, max, BigInt(maxMembers)],
         });
@@ -237,7 +170,7 @@ export function useJoinPool() {
 
         mutation.write({
           address: poolAddress,
-          abi: JOIN_POOL_ABI,
+          abi: COOPERATIVE_POOL_FRAGMENTS.joinPool,
           functionName: "joinPool",
           args: [BigInt(poolId)],
           value: amount,
@@ -283,7 +216,7 @@ export function useLeavePool() {
 
         mutation.write({
           address: poolAddress,
-          abi: LEAVE_POOL_ABI,
+          abi: COOPERATIVE_POOL_FRAGMENTS.leavePool,
           functionName: "leavePool",
           args: [BigInt(poolId)],
         });
@@ -328,7 +261,7 @@ export function useClaimYield() {
 
         mutation.write({
           address: poolAddress,
-          abi: CLAIM_YIELD_ABI,
+          abi: COOPERATIVE_POOL_FRAGMENTS.claimYield,
           functionName: "claimYield",
           args: [BigInt(poolId)],
         });
@@ -373,7 +306,7 @@ export function useClosePool() {
 
         mutation.write({
           address: poolAddress,
-          abi: CLOSE_POOL_ABI,
+          abi: COOPERATIVE_POOL_FRAGMENTS.closePool,
           functionName: "closePool",
           args: [BigInt(poolId)],
         });
@@ -438,7 +371,7 @@ export function useWithdrawPartial() {
 
         mutation.write({
           address: poolAddress,
-          abi: WITHDRAW_PARTIAL_ABI,
+          abi: COOPERATIVE_POOL_FRAGMENTS.withdrawPartial,
           functionName: "withdrawPartial",
           args: [BigInt(poolId), amount],
         });

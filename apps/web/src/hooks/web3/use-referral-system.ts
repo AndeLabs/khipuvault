@@ -13,10 +13,10 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
-import { parseEther, type Address } from "viem";
+import { parseEther, maxUint256, zeroAddress, type Address } from "viem";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt, useReadContract } from "wagmi";
 
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
+import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address;
 const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as Address;
@@ -273,15 +273,11 @@ export function useReferralSystem() {
       if (!allowance || allowance < amount) {
         setState("approving");
 
-        const MAX_UINT256 = BigInt(
-          "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-        );
-
         approveWrite({
           address: MUSD_ADDRESS,
           abi: MUSD_ABI,
           functionName: "approve",
-          args: [POOL_ADDRESS, MAX_UINT256],
+          args: [POOL_ADDRESS, maxUint256],
         });
       } else {
         setState("claiming");
@@ -319,9 +315,7 @@ export function useReferralSystem() {
     // Data
     stats: referralStats,
     hasRewards: referralStats ? referralStats.rewards > 0n : false,
-    hasReferrer: referralStats
-      ? referralStats.referrer !== "0x0000000000000000000000000000000000000000"
-      : false,
+    hasReferrer: referralStats ? referralStats.referrer !== zeroAddress : false,
     loadingStats,
 
     // Actions

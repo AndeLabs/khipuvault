@@ -17,7 +17,7 @@
 
 import { useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
-import { parseEther } from "viem";
+import { parseEther, maxUint256 } from "viem";
 import {
   useBlockNumber,
   useAccount,
@@ -26,7 +26,7 @@ import {
   useReadContract,
 } from "wagmi";
 
-import { MEZO_TESTNET_ADDRESSES, MUSD_ABI } from "@/lib/web3/contracts";
+import { MEZO_TESTNET_ADDRESSES, MUSD_ABI } from "@/lib/web3/contracts-v3";
 
 const MUSD_ADDRESS = MEZO_TESTNET_ADDRESSES.musd as `0x${string}`;
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as `0x${string}`;
@@ -127,15 +127,11 @@ export function useMusdApproval() {
     }
 
     // Approve unlimited (max uint256)
-    const MAX_UINT256 = BigInt(
-      "0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
-    );
-
     writeContract({
       address: MUSD_ADDRESS,
       abi: MUSD_ABI,
       functionName: "approve",
-      args: [POOL_ADDRESS, MAX_UINT256],
+      args: [POOL_ADDRESS, maxUint256],
     });
   }
 

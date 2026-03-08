@@ -79,7 +79,7 @@ abstract contract NetworkConfig is Script {
             priceFeed: 0x86bCF0841622a5dAC14A313a15f96A95421b9366,
             hintHelpers: 0x4e4cBA3779d56386ED43631b4dCD6d8EacEcBCF6,
             troveManager: 0xE47c80e8c23f6B4A1aE41c34837a0599D5D16bb0,
-            stabilityPool: 0x3dE27A95C5f2f636D11c9c6AF8d4F61aa55cc9E1,
+            stabilityPool: 0x1CCA7E410eE41739792eA0A24e00349Dd247680e,
             feeCollector: 0x8e7E7BA2BD22e6f194821Ea2cEf903eaD949F257
         });
     }

@@ -1,17 +1,14 @@
 /**
- * @fileoverview Individual Pool V3 and Yield Aggregator Constants
+ * @fileoverview Individual Pool V3 and Yield Aggregator Types
  * @module hooks/web3/individual/constants
+ *
+ * NOTE: Query keys are centralized in @/lib/query-keys
+ * NOTE: Query config (staleTime, etc.) is in @/lib/query-config
  */
 
-// ============================================================================
-// QUERY KEYS
-// ============================================================================
-
-export const QUERY_KEYS = {
-  INDIVIDUAL_POOL: ["individual-pool-v3"] as const,
-  YIELD_AGGREGATOR: ["yield-aggregator-v3"] as const,
-  BALANCE: ["balance"] as const,
-} as const;
+// Re-export centralized query keys for backwards compatibility
+export { queryKeys } from "@/lib/query-keys";
+export { QUERY_PRESETS } from "@/lib/query-config";
 
 // ============================================================================
 // TRANSACTION STATE

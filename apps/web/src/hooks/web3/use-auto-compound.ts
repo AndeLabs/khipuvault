@@ -15,7 +15,7 @@ import { type Address } from "viem";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 
 import { getErrorMessage, logWeb3Error } from "@/lib/errors";
-import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts";
+import { MEZO_TESTNET_ADDRESSES } from "@/lib/web3/contracts-v3";
 
 const POOL_ADDRESS = MEZO_TESTNET_ADDRESSES.individualPool as Address;
 
@@ -59,9 +59,7 @@ export function useAutoCompound() {
     if (isSuccess && state === "processing") {
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console
-        console.log("✅ Auto-compound setting updated!");
-        // eslint-disable-next-line no-console
-        console.log("📝 Transaction hash:", receipt?.transactionHash);
+        console.log("[AutoCompound] Setting updated, tx:", receipt?.transactionHash);
       }
 
       // Immediately invalidate pool queries to update UI
@@ -97,7 +95,7 @@ export function useAutoCompound() {
 
       if (process.env.NODE_ENV === "development") {
         // eslint-disable-next-line no-console
-        console.log(`🔄 Setting auto-compound to: ${enabled}`);
+        console.log("[AutoCompound] Setting enabled:", enabled);
       }
       setState("confirming");
 

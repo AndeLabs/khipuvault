@@ -1,1 +1,67 @@
-[]
+[
+  {
+    "type": "function",
+    "name": "getRedemptionHints",
+    "inputs": [
+      { "name": "_MUSDamount", "type": "uint256", "internalType": "uint256" },
+      { "name": "_price", "type": "uint256", "internalType": "uint256" },
+      { "name": "_maxIterations", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [
+      { "name": "firstRedemptionHint", "type": "address", "internalType": "address" },
+      { "name": "partialRedemptionHintNICR", "type": "uint256", "internalType": "uint256" },
+      { "name": "truncatedMUSDamount", "type": "uint256", "internalType": "uint256" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "getApproxHint",
+    "inputs": [
+      { "name": "_CR", "type": "uint256", "internalType": "uint256" },
+      { "name": "_numTrials", "type": "uint256", "internalType": "uint256" },
+      { "name": "_inputRandomSeed", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [
+      { "name": "hintAddress", "type": "address", "internalType": "address" },
+      { "name": "diff", "type": "uint256", "internalType": "uint256" },
+      { "name": "latestRandomSeed", "type": "uint256", "internalType": "uint256" }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "computeNominalCR",
+    "inputs": [
+      { "name": "_coll", "type": "uint256", "internalType": "uint256" },
+      { "name": "_debt", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "computeCR",
+    "inputs": [
+      { "name": "_coll", "type": "uint256", "internalType": "uint256" },
+      { "name": "_debt", "type": "uint256", "internalType": "uint256" },
+      { "name": "_price", "type": "uint256", "internalType": "uint256" }
+    ],
+    "outputs": [{ "name": "", "type": "uint256", "internalType": "uint256" }],
+    "stateMutability": "pure"
+  },
+  {
+    "type": "function",
+    "name": "sortedTroves",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "contract ISortedTroves" }],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "troveManager",
+    "inputs": [],
+    "outputs": [{ "name": "", "type": "address", "internalType": "contract ITroveManager" }],
+    "stateMutability": "view"
+  }
+]

@@ -1,8 +1,8 @@
 /**
- * @fileoverview Cooperative Pool V3 Read Queries
- * @module hooks/web3/cooperative/use-pool-queries
+ * @fileoverview Individual Pool Detail Queries
+ * @module hooks/web3/cooperative/queries/use-pool-details
  *
- * All read-only queries for cooperative pool data
+ * Read-only queries for individual pool and member data
  */
 
 "use client";
@@ -13,98 +13,21 @@ import { type Address } from "viem";
 import { useAccount, useConfig } from "wagmi";
 
 import { queryKeys } from "@/lib/query-keys";
+import { QUERY_PRESETS } from "@/lib/query-config";
 import {
   MEZO_TESTNET_ADDRESSES,
   COOPERATIVE_POOL_V3_ABI as POOL_ABI,
 } from "@/lib/web3/contracts-v3";
 
 import {
-  PoolInfo,
-  MemberInfo,
-  MemberWithAddress,
-  PoolStatus,
-  STALE_TIMES,
-  REFETCH_INTERVALS,
-} from "./constants";
+  type MemberWithAddress,
+  type MemberInfoContractResponse,
+  type PoolInfoContractResponse,
+  parsePoolInfo,
+  parseMemberInfo,
+} from "../constants";
 
 const poolAddress = MEZO_TESTNET_ADDRESSES.cooperativePoolV3 as Address;
-
-// ============================================================================
-// GLOBAL POOL STATISTICS
-// ============================================================================
-
-/**
- * Get the total number of pools created
- */
-export function usePoolCounter() {
-  const { isConnected } = useAccount();
-  const config = useConfig();
-
-  return useQuery({
-    queryKey: [...queryKeys.cooperativePool.all, "pool-counter"],
-    queryFn: async () => {
-      const result = await readContract(config, {
-        address: poolAddress,
-        abi: POOL_ABI,
-        functionName: "poolCounter",
-        args: [],
-      });
-      return Number(result || 0n);
-    },
-    enabled: isConnected,
-    staleTime: STALE_TIMES.POOL_COUNTER,
-  });
-}
-
-/**
- * Get the current performance fee (in basis points)
- */
-export function usePerformanceFee() {
-  const { isConnected } = useAccount();
-  const config = useConfig();
-
-  return useQuery({
-    queryKey: [...queryKeys.cooperativePool.all, "performance-fee"],
-    queryFn: async () => {
-      const result = await readContract(config, {
-        address: poolAddress,
-        abi: POOL_ABI,
-        functionName: "performanceFee",
-        args: [],
-      });
-      return Number(result || 0n);
-    },
-    enabled: isConnected,
-    staleTime: STALE_TIMES.PERFORMANCE_FEE,
-  });
-}
-
-/**
- * Check if emergency mode is active
- */
-export function useEmergencyMode() {
-  const { isConnected } = useAccount();
-  const config = useConfig();
-
-  return useQuery({
-    queryKey: [...queryKeys.cooperativePool.all, "emergency-mode"],
-    queryFn: async () => {
-      const result = await readContract(config, {
-        address: poolAddress,
-        abi: POOL_ABI,
-        functionName: "emergencyMode",
-        args: [],
-      });
-      return Boolean(result);
-    },
-    enabled: isConnected,
-    staleTime: STALE_TIMES.EMERGENCY_MODE,
-  });
-}
-
-// ============================================================================
-// INDIVIDUAL POOL QUERIES
-// ============================================================================
 
 /**
  * Get detailed information about a specific pool
@@ -132,30 +55,14 @@ export function usePoolInfo(poolId: number) {
           return null;
         }
 
-        // Contract returns object, not array
-        const poolInfo: PoolInfo = {
-          minContribution: (result as any).minContribution || BigInt(0),
-          maxContribution: (result as any).maxContribution || BigInt(0),
-          maxMembers: Number((result as any).maxMembers || 0),
-          currentMembers: Number((result as any).currentMembers || 0),
-          createdAt: Number((result as any).createdAt || 0),
-          status: ((result as any).status ?? 0) as PoolStatus,
-          allowNewMembers: (result as any).allowNewMembers ?? false,
-          creator: (result as any).creator as Address,
-          name: (result as any).name || "Unknown Pool",
-          totalBtcDeposited: (result as any).totalBtcDeposited || BigInt(0),
-          totalMusdMinted: (result as any).totalMusdMinted || BigInt(0),
-          totalYieldGenerated: (result as any).totalYieldGenerated || BigInt(0),
-        };
-
-        return poolInfo;
-      } catch (err) {
+        return parsePoolInfo(result as PoolInfoContractResponse);
+      } catch {
         return null;
       }
     },
     enabled: poolId > 0,
-    staleTime: STALE_TIMES.POOL_INFO,
-    refetchInterval: REFETCH_INTERVALS.POOL_INFO,
+    staleTime: QUERY_PRESETS.POOL_INFO.staleTime,
+    refetchInterval: QUERY_PRESETS.POOL_INFO.refetchInterval,
     retry: 2,
   });
 
@@ -193,23 +100,14 @@ export function useMemberInfo(poolId: number, memberAddress?: Address) {
           return null;
         }
 
-        // Contract returns object, not array
-        const memberInfo: MemberInfo = {
-          btcContributed: (result as any).btcContributed ?? BigInt(0),
-          shares: (result as any).shares ?? BigInt(0),
-          joinedAt: Number((result as any).joinedAt ?? 0),
-          active: (result as any).active ?? false,
-          yieldClaimed: (result as any).yieldClaimed ?? BigInt(0),
-        };
-
-        return memberInfo;
-      } catch (err) {
+        return parseMemberInfo(result as MemberInfoContractResponse);
+      } catch {
         return null;
       }
     },
     enabled: poolId > 0 && !!userAddress,
-    staleTime: STALE_TIMES.MEMBER_INFO,
-    refetchInterval: REFETCH_INTERVALS.MEMBER_INFO,
+    staleTime: QUERY_PRESETS.POOL_INFO.staleTime,
+    refetchInterval: QUERY_PRESETS.POOL_INFO.refetchInterval,
     retry: 2,
   });
 
@@ -257,18 +155,14 @@ export function usePoolMembers(poolId: number) {
                 return null;
               }
 
-              // Contract returns object, not array
+              const parsed = parseMemberInfo(result as MemberInfoContractResponse);
               const memberInfo: MemberWithAddress = {
                 address: addr,
-                btcContributed: (result as any).btcContributed ?? BigInt(0),
-                shares: (result as any).shares ?? BigInt(0),
-                joinedAt: Number((result as any).joinedAt ?? 0),
-                active: (result as any).active ?? false,
-                yieldClaimed: (result as any).yieldClaimed ?? BigInt(0),
+                ...parsed,
               };
 
               return memberInfo;
-            } catch (err) {
+            } catch {
               return null;
             }
           })
@@ -279,13 +173,13 @@ export function usePoolMembers(poolId: number) {
         );
 
         return validMembers;
-      } catch (err) {
+      } catch {
         return [];
       }
     },
     enabled: poolId > 0,
-    staleTime: STALE_TIMES.POOL_MEMBERS,
-    refetchInterval: REFETCH_INTERVALS.POOL_MEMBERS,
+    staleTime: QUERY_PRESETS.POOL_MEMBERS.staleTime,
+    refetchInterval: QUERY_PRESETS.POOL_MEMBERS.refetchInterval,
     retry: 2,
   });
 
@@ -319,14 +213,14 @@ export function useMemberYield(poolId: number, memberAddress?: Address) {
           args: [BigInt(poolId), userAddress],
         });
 
-        return BigInt((result as unknown as bigint) || 0n);
-      } catch (err) {
-        return BigInt(0);
+        return typeof result === "bigint" ? result : 0n;
+      } catch {
+        return 0n;
       }
     },
     enabled: poolId > 0 && !!userAddress,
-    staleTime: STALE_TIMES.MEMBER_YIELD,
-    refetchInterval: REFETCH_INTERVALS.MEMBER_YIELD,
+    staleTime: QUERY_PRESETS.POOL_MEMBERS.staleTime,
+    refetchInterval: QUERY_PRESETS.POOL_MEMBERS.refetchInterval,
     retry: 2,
   });
 
