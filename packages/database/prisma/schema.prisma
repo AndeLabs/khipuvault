@@ -332,6 +332,281 @@ model LotteryTicket {
 }
 
 // ============================================================================
+// MEZO PROTOCOL MODELS
+// ============================================================================
+
+enum TroveStatus {
+  NON_EXISTENT
+  ACTIVE
+  CLOSED_BY_OWNER
+  CLOSED_BY_LIQUIDATION
+  CLOSED_BY_REDEMPTION
+}
+
+enum MezoTransactionType {
+  OPEN_TROVE
+  CLOSE_TROVE
+  ADD_COLLATERAL
+  WITHDRAW_COLLATERAL
+  BORROW_MUSD
+  REPAY_MUSD
+  ADJUST_TROVE
+  STABILITY_DEPOSIT
+  STABILITY_WITHDRAW
+  CLAIM_REWARDS
+  LIQUIDATION
+  REDEMPTION
+}
+
+// Mezo Trove - User CDP positions
+model MezoTrove {
+  id            String @id @default(cuid())
+  ownerAddress  String @unique // One trove per address
+
+  // Trove state
+  status        TroveStatus @default(NON_EXISTENT)
+  collateral    String      @default("0") // BTC in wei (18 decimals)
+  debt          String      @default("0") // MUSD in wei (18 decimals)
+  stake         String      @default("0") // Stake for rewards
+
+  // Calculated metrics (updated on each event)
+  collateralRatio Decimal?  @db.Decimal(18, 6) // CR as percentage (e.g., 150.50)
+
+  // Rewards
+  pendingBtcReward  String @default("0")
+  pendingMusdReward String @default("0")
+
+  // Position in sorted list
+  arrayIndex    Int?
+
+  // Blockchain info
+  openedTxHash    String?
+  openedBlock     Int?
+  openedAt        DateTime?
+  closedTxHash    String?
+  closedBlock     Int?
+  closedAt        DateTime?
+  lastUpdateBlock Int?
+  lastUpdateAt    DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  snapshots     MezoTroveSnapshot[]
+  transactions  MezoTransaction[]
+
+  @@index([ownerAddress])
+  @@index([status])
+  @@index([collateralRatio])
+  @@index([status, collateralRatio])
+  @@index([lastUpdateBlock])
+}
+
+// Mezo Trove Snapshot - Historical trove data
+model MezoTroveSnapshot {
+  id          String @id @default(cuid())
+  troveId     String
+  trove       MezoTrove @relation(fields: [troveId], references: [id], onDelete: Cascade)
+
+  // Snapshot data
+  collateral      String
+  debt            String
+  collateralRatio Decimal? @db.Decimal(18, 6)
+  btcPrice        String // Price at snapshot time
+
+  // Trigger info
+  eventType       String // What caused this snapshot
+  txHash          String
+  blockNumber     Int
+  timestamp       DateTime
+
+  createdAt DateTime @default(now())
+
+  @@index([troveId])
+  @@index([timestamp])
+  @@index([troveId, timestamp])
+  @@index([blockNumber])
+}
+
+// Mezo Stability Pool Deposit - User deposits in SP
+model MezoStabilityDeposit {
+  id            String @id @default(cuid())
+  userAddress   String @unique // One position per user
+
+  // Deposit state
+  initialDeposit    String @default("0") // Original MUSD deposited
+  compoundedDeposit String @default("0") // Current MUSD after liquidations
+
+  // Pending rewards
+  pendingBtcGain    String @default("0") // BTC from liquidations
+  pendingMusdGain   String @default("0") // MUSD rewards
+
+  // Historical totals
+  totalDeposited    String @default("0")
+  totalWithdrawn    String @default("0")
+  totalBtcClaimed   String @default("0")
+  totalMusdClaimed  String @default("0")
+
+  // Tracking for APY calculation
+  depositCount      Int @default(0)
+  withdrawCount     Int @default(0)
+
+  // Blockchain info
+  firstDepositBlock Int?
+  firstDepositAt    DateTime?
+  lastUpdateBlock   Int?
+  lastUpdateAt      DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  transactions MezoTransaction[]
+
+  @@index([userAddress])
+  @@index([compoundedDeposit])
+  @@index([lastUpdateBlock])
+}
+
+// Mezo Liquidation - Liquidation events
+model MezoLiquidation {
+  id              String @id @default(cuid())
+
+  // Liquidated trove info
+  liquidatedAddress String
+  liquidatedDebt    String // MUSD absorbed
+  liquidatedColl    String // BTC distributed
+
+  // Liquidation details
+  collGasCompensation String? // Gas comp for liquidator
+  musdGasCompensation String?
+
+  // System state at liquidation
+  btcPrice          String
+  isRecoveryMode    Boolean @default(false)
+  systemTCR         Decimal? @db.Decimal(18, 6)
+
+  // Blockchain info
+  txHash          String @unique
+  blockNumber     Int
+  logIndex        Int
+  timestamp       DateTime
+  liquidator      String? // Who triggered liquidation
+
+  createdAt DateTime @default(now())
+
+  @@index([liquidatedAddress])
+  @@index([timestamp])
+  @@index([blockNumber])
+  @@index([isRecoveryMode])
+}
+
+// Mezo Price Snapshot - BTC/USD price history
+model MezoPriceSnapshot {
+  id          String @id @default(cuid())
+
+  price       String // BTC/USD price in wei (18 decimals)
+  priceUsd    Decimal @db.Decimal(18, 2) // Human-readable USD price
+
+  // Source info
+  source      String @default("PriceFeed") // Contract source
+
+  // Blockchain info
+  blockNumber Int
+  timestamp   DateTime
+  txHash      String?
+
+  createdAt DateTime @default(now())
+
+  @@unique([blockNumber])
+  @@index([timestamp])
+  @@index([blockNumber])
+}
+
+// Mezo Transaction - All Mezo protocol transactions
+model MezoTransaction {
+  id            String @id @default(cuid())
+  userAddress   String
+
+  // Transaction type
+  type          MezoTransactionType
+
+  // Amounts involved
+  collateralChange String? // BTC delta (positive = add, negative = remove)
+  debtChange       String? // MUSD delta
+
+  // Related entities
+  troveId           String?
+  trove             MezoTrove? @relation(fields: [troveId], references: [id], onDelete: SetNull)
+  stabilityDepositId String?
+  stabilityDeposit   MezoStabilityDeposit? @relation(fields: [stabilityDepositId], references: [id], onDelete: SetNull)
+
+  // Blockchain info
+  txHash        String
+  blockNumber   Int
+  logIndex      Int
+  timestamp     DateTime
+  status        TransactionStatus @default(CONFIRMED)
+
+  // Gas info
+  gasUsed       String?
+  gasPrice      String?
+
+  // Additional data
+  metadata      Json?
+
+  createdAt DateTime @default(now())
+
+  @@unique([txHash, logIndex])
+  @@index([userAddress])
+  @@index([type])
+  @@index([troveId])
+  @@index([stabilityDepositId])
+  @@index([timestamp])
+  @@index([blockNumber])
+  @@index([userAddress, type])
+  @@index([userAddress, timestamp])
+}
+
+// Mezo System Stats - Aggregate protocol metrics
+model MezoSystemStats {
+  id            String @id @default(cuid())
+
+  // Trove stats
+  totalTroves       Int @default(0)
+  activeTroves      Int @default(0)
+  totalCollateral   String @default("0") // Total BTC locked
+  totalDebt         String @default("0") // Total MUSD minted
+  totalCollateralRatio Decimal? @db.Decimal(18, 6)
+
+  // Stability Pool stats
+  totalSpDeposits   String @default("0") // Total MUSD in SP
+  spDepositorCount  Int @default(0)
+
+  // Price
+  btcPrice          String @default("0")
+  btcPriceUsd       Decimal? @db.Decimal(18, 2)
+
+  // Protocol parameters
+  mcr               Decimal @default(110) @db.Decimal(8, 2) // Min Collateral Ratio
+  ccr               Decimal @default(150) @db.Decimal(8, 2) // Critical CR
+  borrowingFeeFloor Decimal @default(0.5) @db.Decimal(8, 4) // 0.5%
+  redemptionFeeFloor Decimal @default(0.5) @db.Decimal(8, 4)
+
+  // Recovery mode
+  isRecoveryMode    Boolean @default(false)
+
+  // Snapshot info
+  blockNumber       Int
+  timestamp         DateTime
+
+  createdAt DateTime @default(now())
+
+  @@unique([blockNumber])
+  @@index([timestamp])
+  @@index([isRecoveryMode])
+}
+
+// ============================================================================
 // INDEXER STATE
 // ============================================================================
 

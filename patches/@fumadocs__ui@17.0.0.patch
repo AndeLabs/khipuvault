@@ -1,0 +1,39 @@
+diff --git a/dist/components/toc/index.js b/dist/components/toc/index.js
+index ce1f8859f2162270c646f1c66659dad6dc966b25..862faaddfa2c21565a56774e61aeb8231e23855c 100644
+--- a/dist/components/toc/index.js
++++ b/dist/components/toc/index.js
+@@ -2,7 +2,14 @@
+ 
+ import { cn } from "../../cn.js";
+ import { mergeRefs } from "../../merge-refs.js";
+-import { createContext, use, useEffect, useEffectEvent, useRef } from "react";
++import { createContext, use, useEffect, useRef, useCallback, useLayoutEffect } from "react";
++
++// Polyfill for useEffectEvent
++function useEffectEvent(callback) {
++  const ref = useRef(callback);
++  useLayoutEffect(() => { ref.current = callback; });
++  return useCallback((...args) => ref.current?.(...args), []);
++}
+ import { jsx } from "react/jsx-runtime";
+ import * as Primitive from "fumadocs-core/toc";
+ import { useOnChange } from "fumadocs-core/utils/use-on-change";
+diff --git a/dist/contexts/search.js b/dist/contexts/search.js
+index 875031d1ce70d663d647e61eda30cc0878271990..8be1e79ce38527bd79ddd6510a5774b8102db1da 100644
+--- a/dist/contexts/search.js
++++ b/dist/contexts/search.js
+@@ -1,6 +1,13 @@
+ 'use client';
+ 
+-import { Suspense, createContext, use, useEffect, useEffectEvent, useMemo, useState } from "react";
++import { Suspense, createContext, use, useEffect, useMemo, useState, useRef, useCallback, useLayoutEffect } from "react";
++
++// Polyfill for useEffectEvent
++function useEffectEvent(callback) {
++  const ref = useRef(callback);
++  useLayoutEffect(() => { ref.current = callback; });
++  return useCallback((...args) => ref.current?.(...args), []);
++}
+ import { jsx, jsxs } from "react/jsx-runtime";
+ 
+ //#region src/contexts/search.tsx

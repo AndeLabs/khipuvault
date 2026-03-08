@@ -1,0 +1,22 @@
+diff --git a/dist/toc.js b/dist/toc.js
+index d653c770734e4ecedfcab1b4ce8e4f1dfb143917..ba151dc633c61a6e7e941c7ed7dfcbfd6627ef93 100644
+--- a/dist/toc.js
++++ b/dist/toc.js
+@@ -1,9 +1,16 @@
+ 'use client';
+ 
+-import { createContext, useContext, useEffect, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from "react";
++import { createContext, useContext, useEffect, useLayoutEffect, useMemo, useRef, useState, useCallback } from "react";
+ import { jsx } from "react/jsx-runtime";
+ import scrollIntoView from "scroll-into-view-if-needed";
+ 
++// Polyfill for useEffectEvent (not available in React 19 stable)
++function useEffectEvent(callback) {
++  const ref = useRef(callback);
++  useLayoutEffect(() => { ref.current = callback; });
++  return useCallback((...args) => ref.current?.(...args), []);
++}
++
+ //#region src/utils/merge-refs.ts
+ function mergeRefs(...refs) {
+ 	return (value) => {

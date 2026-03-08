@@ -1,0 +1,80 @@
+diff --git a/dist/components/dialog/search.js b/dist/components/dialog/search.js
+index 8566aa65c2c9131f836be985d13ad7f6137d471f..27b4a1ffe86c9b88b597384d4e02e2613329e706 100644
+--- a/dist/components/dialog/search.js
++++ b/dist/components/dialog/search.js
+@@ -6,7 +6,14 @@ import { useRouter } from "fumadocs-core/framework";
+ import { cn } from "@fumadocs/ui/cn";
+ import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+ import { ChevronRight, Hash, Search } from "lucide-react";
+-import { Fragment as Fragment$1, createContext, use, useCallback, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
++import { Fragment as Fragment$1, createContext, use, useCallback, useEffect, useMemo, useRef, useState, useLayoutEffect } from "react";
++
++// Polyfill for useEffectEvent
++function useEffectEvent(callback) {
++  const ref = useRef(callback);
++  useLayoutEffect(() => { ref.current = callback; });
++  return useCallback((...args) => ref.current?.(...args), []);
++}
+ import { cva } from "class-variance-authority";
+ import { useOnChange } from "fumadocs-core/utils/use-on-change";
+ import scrollIntoView from "scroll-into-view-if-needed";
+diff --git a/dist/components/ui/tabs.js b/dist/components/ui/tabs.js
+index 2a3b1ce4c4e9dc0afedb77bec1b0ad35a10cdc19..f5e392f6c91c8b9086eed5c97aa250b97780941d 100644
+--- a/dist/components/ui/tabs.js
++++ b/dist/components/ui/tabs.js
+@@ -1,7 +1,14 @@
+ 'use client';
+ 
+ import { jsx } from "react/jsx-runtime";
+-import { createContext, use, useEffectEvent, useLayoutEffect, useMemo, useRef, useState } from "react";
++import { createContext, use, useLayoutEffect, useMemo, useRef, useState, useCallback } from "react";
++
++// Polyfill for useEffectEvent
++function useEffectEvent(callback) {
++  const ref = useRef(callback);
++  useLayoutEffect(() => { ref.current = callback; });
++  return useCallback((...args) => ref.current?.(...args), []);
++}
+ import * as Primitive from "@radix-ui/react-tabs";
+ import { mergeRefs } from "@fumadocs/ui/merge-refs";
+ 
+diff --git a/dist/layouts/docs/page/client.js b/dist/layouts/docs/page/client.js
+index 373d27a46434a464fb471bb77d3bf9912b2b5b87..0ee002210778e061e9a34d26aa7775bc1725d709 100644
+--- a/dist/layouts/docs/page/client.js
++++ b/dist/layouts/docs/page/client.js
+@@ -10,7 +10,14 @@ import { usePathname } from "fumadocs-core/framework";
+ import { cn } from "@fumadocs/ui/cn";
+ import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+-import { Fragment as Fragment$1, createContext, use, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
++import { Fragment as Fragment$1, createContext, use, useEffect, useMemo, useRef, useState, useCallback, useLayoutEffect } from "react";
++
++// Polyfill for useEffectEvent
++function useEffectEvent(callback) {
++  const ref = useRef(callback);
++  useLayoutEffect(() => { ref.current = callback; });
++  return useCallback((...args) => ref.current?.(...args), []);
++}
+ import { getBreadcrumbItemsFromPath } from "fumadocs-core/breadcrumb";
+ import { isActive } from "@fumadocs/ui/urls";
+ import { useActiveAnchor } from "fumadocs-core/toc";
+diff --git a/dist/layouts/notebook/page/client.js b/dist/layouts/notebook/page/client.js
+index 584b44093284b70371057a546d714626e0d93396..69e6a7fe5f0bd4f3f1c6509361dd221f16c20c0d 100644
+--- a/dist/layouts/notebook/page/client.js
++++ b/dist/layouts/notebook/page/client.js
+@@ -10,7 +10,14 @@ import { usePathname } from "fumadocs-core/framework";
+ import { cn } from "@fumadocs/ui/cn";
+ import { Fragment, jsx, jsxs } from "react/jsx-runtime";
+ import { ChevronDown, ChevronLeft, ChevronRight } from "lucide-react";
+-import { Fragment as Fragment$1, createContext, use, useEffect, useEffectEvent, useMemo, useRef, useState } from "react";
++import { Fragment as Fragment$1, createContext, use, useEffect, useMemo, useRef, useState, useCallback, useLayoutEffect } from "react";
++
++// Polyfill for useEffectEvent
++function useEffectEvent(callback) {
++  const ref = useRef(callback);
++  useLayoutEffect(() => { ref.current = callback; });
++  return useCallback((...args) => ref.current?.(...args), []);
++}
+ import { getBreadcrumbItemsFromPath } from "fumadocs-core/breadcrumb";
+ import { isActive } from "@fumadocs/ui/urls";
+ import { useActiveAnchor } from "fumadocs-core/toc";

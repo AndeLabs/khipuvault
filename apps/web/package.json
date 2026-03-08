@@ -14,7 +14,15 @@
     "test": "vitest",
     "test:run": "vitest run",
     "test:coverage": "vitest run --coverage",
-    "test:ui": "vitest --ui"
+    "test:ui": "vitest --ui",
+    "e2e": "playwright test",
+    "e2e:ui": "playwright test --ui",
+    "e2e:debug": "playwright test --debug",
+    "e2e:report": "playwright show-report",
+    "e2e:headed": "playwright test --headed",
+    "e2e:chromium": "playwright test --project=chromium",
+    "e2e:firefox": "playwright test --project=firefox",
+    "e2e:webkit": "playwright test --project=webkit"
   },
   "dependencies": {
     "@genkit-ai/google-genai": "^1.20.0",
@@ -80,7 +88,9 @@
     "typescript": "^5.3.3",
     "viem": "^2.0.0",
     "wagmi": "^2.18.2",
-    "zod": "^3.24.2"
+    "web-vitals": "^5.1.0",
+    "zod": "^3.24.2",
+    "zustand": "^5.0.11"
   },
   "devDependencies": {
     "@khipu/eslint-config": "workspace:*",
@@ -95,6 +105,7 @@
     "eslint-plugin-security": "^3.0.1",
     "genkit-cli": "^1.20.0",
     "jsdom": "^27.4.0",
+    "msw": "^2.12.10",
     "vitest": "^4.0.14"
   }
 }
