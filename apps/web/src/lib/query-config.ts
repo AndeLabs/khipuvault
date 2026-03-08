@@ -101,6 +101,47 @@ export const QUERY_PRESETS = {
     refetchOnMount: false,
     retry: 2,
   },
+
+  // ===========================================================================
+  // PRODUCTION OPTIMIZED PRESETS
+  // Goal: Reduce RPC calls by 60-70% while maintaining acceptable UX
+  // With 100 users viewing 10 pools each, aggressive intervals cause 1000+ RPC calls/minute
+  // ===========================================================================
+
+  /**
+   * Pool counter/config - almost never changes
+   * Use for: pool counters, admin configs, emergency mode
+   */
+  POOL_CONFIG: {
+    staleTime: TIME.MINUTES(2),
+    gcTime: TIME.MINUTES(10),
+    retry: 3,
+    retryDelay: TIME.SECONDS(2),
+  },
+
+  /**
+   * Pool/Member info - changes slowly
+   * Use for: pool details, member info
+   */
+  POOL_INFO: {
+    staleTime: TIME.MINUTES(1),
+    gcTime: TIME.MINUTES(5),
+    refetchInterval: TIME.MINUTES(2),
+    retry: 3,
+    retryDelay: TIME.SECONDS(2),
+  },
+
+  /**
+   * Member lists - rarely changes
+   * Use for: pool members, yield calculations (expensive RPC)
+   */
+  POOL_MEMBERS: {
+    staleTime: TIME.MINUTES(2),
+    gcTime: TIME.MINUTES(10),
+    refetchInterval: TIME.MINUTES(5),
+    retry: 3,
+    retryDelay: TIME.SECONDS(2),
+  },
 } as const;
 
 /**
@@ -130,3 +171,243 @@ export const DEFAULT_QUERY_OPTIONS = {
 } as const;
 
 export type QueryPreset = keyof typeof QUERY_PRESETS;
+
+// ============================================================================
+// RETRY STRATEGIES
+// ============================================================================
+
+/**
+ * Retry delay functions for different scenarios
+ */
+export const RETRY_DELAYS = {
+  /**
+   * Exponential backoff (default)
+   * 1s -> 2s -> 4s -> 8s (max 30s)
+   */
+  exponential: (attemptIndex: number) => Math.min(1000 * 2 ** attemptIndex, 30000),
+
+  /**
+   * Linear backoff
+   * 1s -> 2s -> 3s -> 4s
+   */
+  linear: (attemptIndex: number) => Math.min(1000 * (attemptIndex + 1), 10000),
+
+  /**
+   * Constant delay
+   * 2s -> 2s -> 2s
+   */
+  constant: () => 2000,
+
+  /**
+   * Fast retry for critical operations
+   * 500ms -> 1s -> 1.5s
+   */
+  fast: (attemptIndex: number) => Math.min(500 * (attemptIndex + 1), 3000),
+
+  /**
+   * Aggressive retry for blockchain reads
+   * 1s -> 1.5s -> 2s -> 2.5s
+   */
+  blockchain: (attemptIndex: number) => Math.min(1000 + attemptIndex * 500, 5000),
+} as const;
+
+/**
+ * Retry condition functions
+ */
+export const RETRY_CONDITIONS = {
+  /**
+   * Always retry (default behavior)
+   */
+  always: () => true,
+
+  /**
+   * Never retry
+   */
+  never: () => false,
+
+  /**
+   * Retry only on network errors
+   */
+  networkOnly: (error: Error) => {
+    const message = error.message?.toLowerCase() ?? "";
+    return (
+      message.includes("network") ||
+      message.includes("timeout") ||
+      message.includes("econnrefused") ||
+      message.includes("fetch failed")
+    );
+  },
+
+  /**
+   * Retry on RPC errors (blockchain specific)
+   */
+  rpcErrors: (error: Error) => {
+    const message = error.message?.toLowerCase() ?? "";
+    return (
+      message.includes("rate limit") ||
+      message.includes("too many requests") ||
+      message.includes("429") ||
+      message.includes("503") ||
+      message.includes("timeout") ||
+      message.includes("econnrefused")
+    );
+  },
+
+  /**
+   * Don't retry on user rejection
+   */
+  notUserRejection: (error: Error) => {
+    const message = error.message?.toLowerCase() ?? "";
+    return !(
+      message.includes("user rejected") ||
+      message.includes("user denied") ||
+      message.includes("user cancelled")
+    );
+  },
+} as const;
+
+/**
+ * Pre-configured retry strategies
+ */
+export const RETRY_STRATEGIES = {
+  /**
+   * Default: 3 retries with exponential backoff
+   */
+  default: {
+    retry: 3,
+    retryDelay: RETRY_DELAYS.exponential,
+  },
+
+  /**
+   * Blockchain reads: More retries, blockchain-specific delay
+   */
+  blockchain: {
+    retry: 4,
+    retryDelay: RETRY_DELAYS.blockchain,
+  },
+
+  /**
+   * User transactions: Fast retry, skip user rejections
+   */
+  transaction: {
+    retry: 2,
+    retryDelay: RETRY_DELAYS.fast,
+  },
+
+  /**
+   * API calls: Standard retry
+   */
+  api: {
+    retry: 3,
+    retryDelay: RETRY_DELAYS.exponential,
+  },
+
+  /**
+   * Critical: More aggressive retry
+   */
+  critical: {
+    retry: 5,
+    retryDelay: RETRY_DELAYS.linear,
+  },
+
+  /**
+   * No retry
+   */
+  none: {
+    retry: false as const,
+  },
+} as const;
+
+// ============================================================================
+// FEATURE-SPECIFIC PRESETS
+// ============================================================================
+
+/**
+ * Lottery-specific query presets
+ */
+export const LOTTERY_QUERY_PRESETS = {
+  /** Current round - updates frequently */
+  CURRENT_ROUND: {
+    staleTime: TIME.SECONDS(10),
+    gcTime: TIME.MINUTES(2),
+  },
+  /** Round history - rarely changes */
+  ROUND_HISTORY: {
+    staleTime: TIME.SECONDS(30),
+    gcTime: TIME.MINUTES(5),
+    retry: 2,
+  },
+  /** User participation - changes after purchase */
+  USER_PARTICIPATION: {
+    staleTime: TIME.SECONDS(20),
+    gcTime: TIME.MINUTES(5),
+  },
+  /** Contract owner - almost never changes */
+  OWNER: {
+    staleTime: TIME.MINUTES(5),
+    gcTime: TIME.MINUTES(30),
+  },
+} as const;
+
+/**
+ * Individual pool query presets
+ */
+export const INDIVIDUAL_QUERY_PRESETS = {
+  /** User balances - needs to be fresh */
+  USER_INFO: {
+    staleTime: TIME.SECONDS(5),
+    gcTime: TIME.MINUTES(2),
+  },
+  /** Pool statistics - aggregate data */
+  POOL_STATS: {
+    staleTime: TIME.SECONDS(10),
+    gcTime: TIME.MINUTES(5),
+  },
+  /** Pool config - rarely changes */
+  POOL_CONFIG: {
+    staleTime: TIME.MINUTES(1),
+    gcTime: TIME.MINUTES(10),
+  },
+} as const;
+
+/**
+ * Mezo protocol query presets
+ */
+export const MEZO_QUERY_PRESETS = {
+  /** Price data - needs moderate freshness */
+  PRICE: {
+    staleTime: TIME.SECONDS(30),
+    gcTime: TIME.MINUTES(5),
+  },
+  /** Trove data - user positions */
+  TROVE: {
+    staleTime: TIME.SECONDS(15),
+    gcTime: TIME.MINUTES(5),
+  },
+  /** Stability pool - aggregate stats */
+  STABILITY_POOL: {
+    staleTime: TIME.SECONDS(30),
+    gcTime: TIME.MINUTES(5),
+  },
+  /** Borrower operations config */
+  BORROWER_CONFIG: {
+    staleTime: TIME.MINUTES(5),
+    gcTime: TIME.MINUTES(30),
+  },
+} as const;
+
+/**
+ * Token/balance query presets
+ */
+export const TOKEN_QUERY_PRESETS = {
+  /** Token balance - needs freshness */
+  BALANCE: {
+    staleTime: TIME.SECONDS(10),
+    gcTime: TIME.MINUTES(2),
+  },
+  /** Token allowance - for approvals */
+  ALLOWANCE: {
+    staleTime: TIME.SECONDS(10),
+    gcTime: TIME.MINUTES(2),
+  },
+} as const;

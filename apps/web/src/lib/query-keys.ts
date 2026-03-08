@@ -36,6 +36,7 @@ export const queryKeys = {
    */
   individualPool: {
     all: ["individual-pool"] as const,
+    v3: ["individual-pool-v3"] as const, // V3 specific base key
     userInfo: (address: string) => [...queryKeys.individualPool.all, "user-info", address] as const,
     poolInfo: () => [...queryKeys.individualPool.all, "pool-info"] as const,
     yields: (address: string) => [...queryKeys.individualPool.all, "yields", address] as const,
@@ -44,19 +45,44 @@ export const queryKeys = {
   },
 
   /**
+   * Yield Aggregator queries (V3)
+   */
+  yieldAggregator: {
+    all: ["yield-aggregator-v3"] as const,
+    vaults: () => [...queryKeys.yieldAggregator.all, "vaults"] as const,
+    userPosition: (address: string) =>
+      [...queryKeys.yieldAggregator.all, "user-position", address] as const,
+  },
+
+  /**
+   * Balance queries (for invalidation)
+   */
+  balance: {
+    all: ["balance"] as const,
+    user: (address: string) => [...queryKeys.balance.all, address] as const,
+  },
+
+  /**
    * Cooperative Pool queries
    */
   cooperativePool: {
     all: ["cooperative-pool"] as const,
+    v3: ["cooperative-pool-v3"] as const, // V3 specific base key
     pools: () => [...queryKeys.cooperativePool.all, "pools"] as const,
     pool: (poolId: number) => [...queryKeys.cooperativePool.all, "pool", poolId] as const,
+    poolInfo: (poolId: number) => [...queryKeys.cooperativePool.v3, "pool-info", poolId] as const,
     members: (poolId: number) => [...queryKeys.cooperativePool.all, "members", poolId] as const,
+    poolMembers: (poolId: number) =>
+      [...queryKeys.cooperativePool.v3, "pool-members", poolId] as const,
     memberInfo: (poolId: number, address: string) =>
-      [...queryKeys.cooperativePool.all, "member-info", poolId, address] as const,
+      [...queryKeys.cooperativePool.v3, "member-info", poolId, address] as const,
     memberYield: (poolId: number, address: string) =>
-      [...queryKeys.cooperativePool.all, "member-yield", poolId, address] as const,
+      [...queryKeys.cooperativePool.v3, "member-yield", poolId, address] as const,
     userPools: (address: string) =>
       [...queryKeys.cooperativePool.all, "user-pools", address] as const,
+    poolCounter: () => [...queryKeys.cooperativePool.v3, "pool-counter"] as const,
+    performanceFee: () => [...queryKeys.cooperativePool.v3, "performance-fee"] as const,
+    emergencyMode: () => [...queryKeys.cooperativePool.v3, "emergency-mode"] as const,
   },
 
   /**
@@ -165,4 +191,163 @@ export function invalidateTokenQueries(
       queryKey: queryKeys.tokens.btcBalance(userAddress),
     }),
   ]);
+}
+
+// ============================================================================
+// CACHE INVALIDATION HELPERS
+// ============================================================================
+
+type QueryClient = {
+  invalidateQueries: (options: { queryKey: readonly unknown[] }) => Promise<void>;
+  refetchQueries: (options: {
+    queryKey: readonly unknown[];
+    type?: "active" | "inactive" | "all";
+  }) => Promise<void>;
+  removeQueries: (options: { queryKey: readonly unknown[] }) => void;
+  resetQueries: (options: { queryKey: readonly unknown[] }) => Promise<void>;
+};
+
+/**
+ * Invalidation presets for common scenarios
+ */
+export const invalidationPresets = {
+  /**
+   * After a deposit transaction
+   * Invalidates: user info, pool stats, token balances
+   */
+  afterDeposit: (queryClient: QueryClient, userAddress: string) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.individualPool.userInfo(userAddress) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.individualPool.stats() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.tokens.musdBalance(userAddress) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.balance.user(userAddress) }),
+    ]),
+
+  /**
+   * After a withdrawal transaction
+   * Invalidates: user info, pool stats, token balances
+   */
+  afterWithdraw: (queryClient: QueryClient, userAddress: string) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.individualPool.userInfo(userAddress) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.individualPool.stats() }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.tokens.musdBalance(userAddress) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.balance.user(userAddress) }),
+    ]),
+
+  /**
+   * After joining a cooperative pool
+   * Invalidates: pool info, members, user pools
+   */
+  afterJoinPool: (queryClient: QueryClient, poolId: number, userAddress: string) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.cooperativePool.poolInfo(poolId) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.cooperativePool.poolMembers(poolId) }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.cooperativePool.memberInfo(poolId, userAddress),
+      }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.cooperativePool.userPools(userAddress) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.tokens.musdBalance(userAddress) }),
+    ]),
+
+  /**
+   * After leaving a cooperative pool
+   * Invalidates: pool info, members, user pools
+   */
+  afterLeavePool: (queryClient: QueryClient, poolId: number, userAddress: string) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.cooperativePool.poolInfo(poolId) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.cooperativePool.poolMembers(poolId) }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.cooperativePool.memberInfo(poolId, userAddress),
+      }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.cooperativePool.userPools(userAddress) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.tokens.musdBalance(userAddress) }),
+    ]),
+
+  /**
+   * After buying lottery tickets
+   * Invalidates: round info, user tickets, token balances
+   */
+  afterBuyTickets: (queryClient: QueryClient, roundId: number, userAddress: string) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.lotteryPool.roundInfo(roundId) }),
+      queryClient.invalidateQueries({
+        queryKey: queryKeys.lotteryPool.userTickets(roundId, userAddress),
+      }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.tokens.musdBalance(userAddress) }),
+    ]),
+
+  /**
+   * After claiming yield
+   * Invalidates: user info, yields, token balances
+   */
+  afterClaimYield: (queryClient: QueryClient, userAddress: string) =>
+    Promise.all([
+      queryClient.invalidateQueries({ queryKey: queryKeys.individualPool.userInfo(userAddress) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.individualPool.yields(userAddress) }),
+      queryClient.invalidateQueries({ queryKey: queryKeys.tokens.musdBalance(userAddress) }),
+    ]),
+
+  /**
+   * After any transaction (general)
+   * Refetches all active queries
+   */
+  afterTransaction: (queryClient: QueryClient) =>
+    queryClient.refetchQueries({ queryKey: [], type: "active" }),
+} as const;
+
+/**
+ * Smart invalidation based on transaction type
+ *
+ * @example
+ * ```ts
+ * await smartInvalidate(queryClient, "deposit", { userAddress, poolId });
+ * ```
+ */
+export async function smartInvalidate(
+  queryClient: QueryClient,
+  txType: "deposit" | "withdraw" | "joinPool" | "leavePool" | "buyTickets" | "claimYield",
+  context: { userAddress: string; poolId?: number; roundId?: number }
+): Promise<void> {
+  const { userAddress, poolId, roundId } = context;
+
+  switch (txType) {
+    case "deposit":
+    case "withdraw":
+      await invalidationPresets.afterDeposit(queryClient, userAddress);
+      break;
+    case "joinPool":
+      if (poolId !== undefined) {
+        await invalidationPresets.afterJoinPool(queryClient, poolId, userAddress);
+      }
+      break;
+    case "leavePool":
+      if (poolId !== undefined) {
+        await invalidationPresets.afterLeavePool(queryClient, poolId, userAddress);
+      }
+      break;
+    case "buyTickets":
+      if (roundId !== undefined) {
+        await invalidationPresets.afterBuyTickets(queryClient, roundId, userAddress);
+      }
+      break;
+    case "claimYield":
+      await invalidationPresets.afterClaimYield(queryClient, userAddress);
+      break;
+  }
+}
+
+/**
+ * Clear all cached data for a user (e.g., on disconnect)
+ */
+export function clearUserCache(queryClient: QueryClient, userAddress: string): void {
+  queryClient.removeQueries({ queryKey: queryKeys.individualPool.userInfo(userAddress) });
+  queryClient.removeQueries({ queryKey: queryKeys.individualPool.yields(userAddress) });
+  queryClient.removeQueries({ queryKey: queryKeys.cooperativePool.userPools(userAddress) });
+  queryClient.removeQueries({ queryKey: queryKeys.rotatingPool.userPools(userAddress) });
+  queryClient.removeQueries({ queryKey: queryKeys.tokens.musdBalance(userAddress) });
+  queryClient.removeQueries({ queryKey: queryKeys.tokens.btcBalance(userAddress) });
+  queryClient.removeQueries({ queryKey: queryKeys.user.profile(userAddress) });
+  queryClient.removeQueries({ queryKey: queryKeys.user.portfolio(userAddress) });
 }
