@@ -32,6 +32,7 @@ import authRouter from "./routes/auth";
 import healthRouter from "./routes/health";
 import lotteryRouter from "./routes/lottery";
 import metricsRouter from "./routes/metrics";
+import mezoRouter from "./routes/mezo";
 import poolsRouter from "./routes/pools";
 import transactionsRouter from "./routes/transactions";
 import usersRouter from "./routes/users";
@@ -219,6 +220,7 @@ app.use("/api/pools", poolsRouter);
 app.use("/api/transactions", transactionsRouter);
 app.use("/api/analytics", analyticsRouter);
 app.use("/api/lottery", lotteryRouter);
+app.use("/api/mezo", mezoRouter);
 
 // ===== ERROR HANDLING =====
 

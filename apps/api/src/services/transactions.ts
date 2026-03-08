@@ -1,5 +1,7 @@
 import { prisma } from "@khipu/database";
 
+import { paginatedQuery, type PaginatedResponse } from "../lib/pagination";
+import { normalizeAddress } from "../lib/validation-schemas";
 import { AppError } from "../middleware/error-handler";
 
 import type { Deposit } from "@prisma/client";
@@ -17,34 +19,16 @@ export class TransactionsService {
     return transaction;
   }
 
-  async getRecentTransactions(
-    limit = 50,
-    offset = 0
-  ): Promise<{
-    transactions: Deposit[];
-    pagination: {
-      total: number;
-      limit: number;
-      offset: number;
-      hasMore: boolean;
-    };
-  }> {
-    const transactions = await prisma.deposit.findMany({
-      orderBy: { timestamp: "desc" },
-      take: limit,
-      skip: offset,
-    });
-
-    const total = await prisma.deposit.count();
+  async getRecentTransactions(limit = 50, offset = 0): Promise<PaginatedResponse<Deposit>> {
+    const result = await paginatedQuery(
+      prisma.deposit,
+      { orderBy: { timestamp: "desc" as const } },
+      { limit, offset }
+    );
 
     return {
-      transactions,
-      pagination: {
-        total,
-        limit,
-        offset,
-        hasMore: offset + limit < total,
-      },
+      data: result.data,
+      pagination: result.pagination,
     };
   }
 
@@ -52,38 +36,21 @@ export class TransactionsService {
     poolAddress: string,
     limit = 50,
     offset = 0
-  ): Promise<{
-    transactions: Deposit[];
-    pagination: {
-      total: number;
-      limit: number;
-      offset: number;
-      hasMore: boolean;
-    };
-  }> {
-    const transactions = await prisma.deposit.findMany({
-      where: {
-        poolAddress: poolAddress.toLowerCase(),
-      },
-      orderBy: { timestamp: "desc" },
-      take: limit,
-      skip: offset,
-    });
+  ): Promise<PaginatedResponse<Deposit>> {
+    const normalizedAddress = normalizeAddress(poolAddress);
 
-    const total = await prisma.deposit.count({
-      where: {
-        poolAddress: poolAddress.toLowerCase(),
+    const result = await paginatedQuery(
+      prisma.deposit,
+      {
+        where: { poolAddress: normalizedAddress },
+        orderBy: { timestamp: "desc" as const },
       },
-    });
+      { limit, offset }
+    );
 
     return {
-      transactions,
-      pagination: {
-        total,
-        limit,
-        offset,
-        hasMore: offset + limit < total,
-      },
+      data: result.data,
+      pagination: result.pagination,
     };
   }
 

@@ -62,7 +62,7 @@ describe("TransactionsService", () => {
         take: 50,
         skip: 0,
       });
-      expect(result.transactions).toHaveLength(1);
+      expect(result.data).toHaveLength(1);
       expect(result.pagination.total).toBe(100);
       expect(result.pagination.hasMore).toBe(true);
     });
@@ -91,20 +91,23 @@ describe("TransactionsService", () => {
   });
 
   describe("getTransactionsByPool", () => {
+    const validPoolAddress = "0x1234567890AbCdEf1234567890aBcDeF12345678";
+    const validPoolAddressLower = "0x1234567890abcdef1234567890abcdef12345678";
+
     it("should return transactions for specific pool", async () => {
       const mockTransactions = [fixtures.mockDeposit];
       vi.mocked(prisma.deposit.findMany).mockResolvedValue(mockTransactions as any);
       vi.mocked(prisma.deposit.count).mockResolvedValue(50);
 
-      const result = await transactionsService.getTransactionsByPool("0xPool123", 20, 0);
+      const result = await transactionsService.getTransactionsByPool(validPoolAddress, 20, 0);
 
       expect(prisma.deposit.findMany).toHaveBeenCalledWith({
-        where: { poolAddress: "0xpool123" },
+        where: { poolAddress: validPoolAddressLower },
         orderBy: { timestamp: "desc" },
         take: 20,
         skip: 0,
       });
-      expect(result.transactions).toHaveLength(1);
+      expect(result.data).toHaveLength(1);
       expect(result.pagination.total).toBe(50);
     });
 
@@ -112,11 +115,11 @@ describe("TransactionsService", () => {
       vi.mocked(prisma.deposit.findMany).mockResolvedValue([]);
       vi.mocked(prisma.deposit.count).mockResolvedValue(0);
 
-      await transactionsService.getTransactionsByPool("0xABCDEF");
+      await transactionsService.getTransactionsByPool(validPoolAddress);
 
       expect(prisma.deposit.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
-          where: { poolAddress: "0xabcdef" },
+          where: { poolAddress: validPoolAddressLower },
         })
       );
     });
@@ -125,7 +128,7 @@ describe("TransactionsService", () => {
       vi.mocked(prisma.deposit.findMany).mockResolvedValue([fixtures.mockDeposit] as any);
       vi.mocked(prisma.deposit.count).mockResolvedValue(100);
 
-      const result = await transactionsService.getTransactionsByPool("0xPool123", 50, 40);
+      const result = await transactionsService.getTransactionsByPool(validPoolAddress, 50, 40);
 
       expect(result.pagination.hasMore).toBe(true); // 40 + 50 < 100
     });

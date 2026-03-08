@@ -5,6 +5,7 @@ import mongoSanitize from "express-mongo-sanitize";
 import DOMPurify from "isomorphic-dompurify";
 
 import { logger } from "../lib/logger";
+import { isValidAddress } from "../lib/validation-schemas";
 
 /**
  * Parse size string to bytes
@@ -132,6 +133,7 @@ export function validateContentType(allowedTypes: string[] = ["application/json"
 /**
  * Ethereum address validation middleware
  * Validates Ethereum addresses in request parameters
+ * Uses centralized validation from validation-schemas.ts
  */
 export function validateEthAddress(param: string = "address") {
   return (req: Request, res: Response, next: NextFunction) => {
@@ -141,10 +143,7 @@ export function validateEthAddress(param: string = "address") {
       return next();
     }
 
-    // Basic Ethereum address validation
-    const ethAddressRegex = /^0x[a-fA-F0-9]{40}$/;
-
-    if (!ethAddressRegex.test(address)) {
+    if (!isValidAddress(address)) {
       return res.status(400).json({
         error: "Invalid Address",
         message: "Invalid Ethereum address format",

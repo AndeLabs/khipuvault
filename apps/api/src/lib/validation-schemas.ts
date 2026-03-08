@@ -131,8 +131,28 @@ export const sortedPaginationQuerySchema = z.object({
       .max(PAGINATION_DEFAULTS.maxOffset)
       .optional()
       .default(PAGINATION_DEFAULTS.offset),
-    sortBy: z.string().optional(),
+    sortBy: z.string().max(50, "Sort field name too long").optional(),
     sortOrder: z.enum(["asc", "desc"]).optional().default("desc"),
+  }),
+});
+
+/**
+ * Timeline query params for analytics
+ * @example GET /api/analytics/timeline?days=30
+ */
+export const timelineQuerySchema = z.object({
+  query: z.object({
+    days: z.coerce.number().min(1).max(365).optional().default(30),
+  }),
+});
+
+/**
+ * Top items query params for leaderboards
+ * @example GET /api/analytics/top-pools?limit=10
+ */
+export const topItemsQuerySchema = z.object({
+  query: z.object({
+    limit: z.coerce.number().min(1).max(100).optional().default(10),
   }),
 });
 
@@ -247,6 +267,69 @@ export const poolAnalyticsSchema = z.object({
 });
 
 // ============================================================================
+// COMMON STRING FIELD LIMITS
+// ============================================================================
+
+/**
+ * Common field length limits (prevents DoS via large payloads)
+ */
+export const STRING_LIMITS = {
+  // Short fields
+  name: 100,
+  title: 200,
+  ensName: 100,
+
+  // Medium fields
+  description: 500,
+  avatar: 500,
+  url: 2000,
+
+  // Long fields
+  message: 1000,
+  content: 5000,
+
+  // Technical fields
+  txHash: 66, // 0x + 64 hex chars
+  address: 42, // 0x + 40 hex chars
+  uuid: 36,
+  sortField: 50,
+} as const;
+
+// ============================================================================
+// REUSABLE STRING SCHEMAS
+// ============================================================================
+
+/**
+ * Name field (pool name, user display name, etc.)
+ */
+export const nameSchema = z.string().min(1).max(STRING_LIMITS.name);
+
+/**
+ * Title field (notification titles, etc.)
+ */
+export const titleSchema = z.string().min(1).max(STRING_LIMITS.title);
+
+/**
+ * Description field
+ */
+export const descriptionSchema = z.string().max(STRING_LIMITS.description);
+
+/**
+ * URL field (avatar URLs, external links, etc.)
+ */
+export const urlSchema = z.string().url().max(STRING_LIMITS.url);
+
+/**
+ * ENS name field
+ */
+export const ensNameSchema = z.string().max(STRING_LIMITS.ensName);
+
+/**
+ * Message/content field
+ */
+export const messageSchema = z.string().min(1).max(STRING_LIMITS.message);
+
+// ============================================================================
 // BODY SCHEMAS
 // ============================================================================
 
@@ -255,8 +338,8 @@ export const poolAnalyticsSchema = z.object({
  */
 export const createNotificationBodySchema = z.object({
   body: z.object({
-    title: z.string().min(1).max(200),
-    message: z.string().min(1).max(1000),
+    title: titleSchema,
+    message: messageSchema,
     type: z.enum(["INFO", "WARNING", "SUCCESS", "ERROR"]).optional().default("INFO"),
   }),
 });
@@ -291,3 +374,18 @@ export type AddressParam = z.infer<typeof addressParamSchema>;
 export type PoolIdParam = z.infer<typeof poolIdParamSchema>;
 export type PaginationQuery = z.infer<typeof paginationQuerySchema>;
 export type AddressWithPagination = z.infer<typeof addressWithPaginationSchema>;
+
+/**
+ * Validated query types - use these in route handlers for type safety
+ */
+export type ValidatedPaginationQuery = z.infer<typeof paginationQuerySchema>["query"];
+export type ValidatedTimelineQuery = z.infer<typeof timelineQuerySchema>["query"];
+export type ValidatedTopItemsQuery = z.infer<typeof topItemsQuerySchema>["query"];
+export type ValidatedSortedPaginationQuery = z.infer<typeof sortedPaginationQuerySchema>["query"];
+
+/**
+ * Validated params types
+ */
+export type ValidatedAddressParams = z.infer<typeof addressParamSchema>["params"];
+export type ValidatedPoolIdParams = z.infer<typeof poolIdParamSchema>["params"];
+export type ValidatedTxHashParams = z.infer<typeof txHashParamSchema>["params"];

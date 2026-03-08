@@ -9,33 +9,27 @@ import { Router, type Router as ExpressRouter } from "express";
 import { z } from "zod";
 
 import { asyncHandler, sendSuccess } from "../lib/route-handler";
+import {
+  paginationQuerySchema,
+  ethereumAddressSchema,
+  addressParamSchema,
+  type ValidatedPaginationQuery,
+} from "../lib/validation-schemas";
 import { validate } from "../middleware/validate";
 import { requireAuth } from "../middleware/auth";
-import { AppError } from "../middleware/error-handler";
+import { verifyOwnership } from "../middleware/ownership";
 import { LotteryService } from "../services/lottery";
 
 const router: ExpressRouter = Router();
 const lotteryService = new LotteryService();
 
 // ============================================================================
-// VALIDATION SCHEMAS
+// VALIDATION SCHEMAS (using centralized base schemas)
 // ============================================================================
 
-const paginationSchema = z.object({
-  query: z.object({
-    limit: z
-      .string()
-      .transform((val) => parseInt(val, 10))
-      .pipe(z.number().int().min(1).max(100))
-      .optional(),
-    offset: z
-      .string()
-      .transform((val) => parseInt(val, 10))
-      .pipe(z.number().int().min(0))
-      .optional(),
-  }),
-});
-
+/**
+ * Round ID parameter schema
+ */
 const roundIdParamSchema = z.object({
   params: z.object({
     roundId: z
@@ -45,15 +39,12 @@ const roundIdParamSchema = z.object({
   }),
 });
 
-const addressParamSchema = z.object({
-  params: z.object({
-    address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
-  }),
-});
-
+/**
+ * User round schema - address + roundId params
+ */
 const userRoundSchema = z.object({
   params: z.object({
-    address: z.string().regex(/^0x[a-fA-F0-9]{40}$/, "Invalid Ethereum address"),
+    address: ethereumAddressSchema,
     roundId: z
       .string()
       .transform((val) => parseInt(val, 10))
@@ -79,12 +70,9 @@ router.get(
 // Public endpoint - get all rounds with pagination
 router.get(
   "/rounds",
-  validate(paginationSchema),
+  validate(paginationQuerySchema),
   asyncHandler(async (req, res) => {
-    const { limit = 20, offset = 0 } = req.query as {
-      limit?: number;
-      offset?: number;
-    };
+    const { limit, offset } = req.query as ValidatedPaginationQuery;
     const rounds = await lotteryService.getAllRounds(limit, offset);
     sendSuccess(res, rounds);
   })
@@ -116,12 +104,9 @@ router.get(
 // Public endpoint - get draw history (completed rounds with winners)
 router.get(
   "/draws",
-  validate(paginationSchema),
+  validate(paginationQuerySchema),
   asyncHandler(async (req, res) => {
-    const { limit = 20, offset = 0 } = req.query as {
-      limit?: number;
-      offset?: number;
-    };
+    const { limit, offset } = req.query as ValidatedPaginationQuery;
     const draws = await lotteryService.getDrawHistory(limit, offset);
     sendSuccess(res, draws);
   })
@@ -142,21 +127,14 @@ router.get(
 // USER-SPECIFIC ROUTES (require auth + ownership verification)
 // ============================================================================
 
-// Helper to verify user owns the requested address
-function verifyOwnership(userAddress: string, requestedAddress: string): void {
-  if (userAddress.toLowerCase() !== requestedAddress.toLowerCase()) {
-    throw new AppError(403, "You can only access your own lottery data");
-  }
-}
-
 // GET /api/lottery/user/:address/stats
 // Get user's lottery statistics (authenticated + ownership)
 router.get(
   "/user/:address/stats",
   requireAuth,
   validate(addressParamSchema),
+  verifyOwnership("address", "You can only access your own lottery data"),
   asyncHandler(async (req, res) => {
-    verifyOwnership(req.user!.address, req.params.address);
     const stats = await lotteryService.getUserStats(req.params.address);
     sendSuccess(res, stats);
   })
@@ -168,13 +146,10 @@ router.get(
   "/user/:address/history",
   requireAuth,
   validate(addressParamSchema),
-  validate(paginationSchema),
+  validate(paginationQuerySchema),
+  verifyOwnership("address", "You can only access your own lottery data"),
   asyncHandler(async (req, res) => {
-    verifyOwnership(req.user!.address, req.params.address);
-    const { limit = 20, offset = 0 } = req.query as {
-      limit?: number;
-      offset?: number;
-    };
+    const { limit, offset } = req.query as ValidatedPaginationQuery;
     const history = await lotteryService.getUserLotteryHistory(req.params.address, limit, offset);
     sendSuccess(res, history);
   })
@@ -186,8 +161,8 @@ router.get(
   "/user/:address/rounds/:roundId",
   requireAuth,
   validate(userRoundSchema),
+  verifyOwnership("address", "You can only access your own lottery data"),
   asyncHandler(async (req, res) => {
-    verifyOwnership(req.user!.address, req.params.address);
     const roundId = parseInt(req.params.roundId, 10);
     const ticket = await lotteryService.getUserTickets(req.params.address, roundId);
     sendSuccess(res, ticket);

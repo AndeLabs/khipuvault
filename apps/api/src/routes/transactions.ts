@@ -30,7 +30,8 @@ router.get(
   asyncHandler(async (req, res) => {
     const { limit = 50, offset = 0 } = req.query;
     const result = await transactionsService.getRecentTransactions(Number(limit), Number(offset));
-    sendSuccess(res, result);
+    // Map to legacy format for backward compatibility
+    sendSuccess(res, { transactions: result.data, pagination: result.pagination });
   })
 );
 
@@ -64,7 +65,8 @@ router.get(
       Number(limit),
       Number(offset)
     );
-    sendSuccess(res, result);
+    // Map to legacy format for backward compatibility
+    sendSuccess(res, { transactions: result.data, pagination: result.pagination });
   })
 );
 

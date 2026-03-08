@@ -1,12 +1,10 @@
 import { prisma } from "@khipu/database";
 
 import { cache, CACHE_TTL, CACHE_KEYS } from "../lib/cache";
+import { normalizeAddress, isValidAddress } from "../lib/validation-schemas";
 import { AppError } from "../middleware/error-handler";
 
 import type { User, Deposit, PoolType } from "@prisma/client";
-
-// Ethereum address validation regex
-const ETH_ADDRESS_REGEX = /^0x[a-fA-F0-9]{40}$/;
 
 // Type for user positions (poolType can be any valid PoolType or the string 'unknown')
 interface UserPosition {
@@ -24,10 +22,10 @@ interface UserPosition {
  * @throws AppError if address is invalid
  */
 function validateAndNormalizeAddress(address: string): string {
-  if (!ETH_ADDRESS_REGEX.test(address)) {
+  if (!isValidAddress(address)) {
     throw new AppError(400, "Invalid Ethereum address format");
   }
-  return address.toLowerCase();
+  return normalizeAddress(address);
 }
 
 export class UsersService {

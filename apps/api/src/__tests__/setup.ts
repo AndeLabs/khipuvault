@@ -173,17 +173,17 @@ export const fixtures = {
   mockDeposit: {
     id: "deposit-1",
     userAddress: "0x742d35cc6634c0532925a3b844bc9e7595f3a123",
-    poolAddress: "0xpool123",
+    poolAddress: "0x1234567890abcdef1234567890abcdef12345678",
     amount: "1000000000000000000",
     type: "DEPOSIT" as const,
-    txHash: "0xtx123",
+    txHash: "0xabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890",
     blockNumber: 12345,
     timestamp: new Date("2024-01-10"),
   },
 
   mockPool: {
     id: "pool-1",
-    contractAddress: "0xpool123",
+    contractAddress: "0x1234567890abcdef1234567890abcdef12345678",
     name: "Test Pool",
     poolType: "INDIVIDUAL" as const,
     createdAt: new Date("2024-01-01"),

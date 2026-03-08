@@ -1,37 +1,21 @@
 import { Router, type Router as ExpressRouter } from "express";
-import { z } from "zod";
 
 import { requireAuth, optionalAuth } from "../middleware/auth";
 import { asyncHandler } from "../middleware/error-handler";
 import { expensiveOperationLimiter } from "../middleware/rate-limit";
 import { validate } from "../middleware/validate";
+import {
+  paginationQuerySchema,
+  timelineQuerySchema,
+  topItemsQuerySchema,
+  type ValidatedPaginationQuery,
+  type ValidatedTimelineQuery,
+  type ValidatedTopItemsQuery,
+} from "../lib/validation-schemas";
 import { AnalyticsService } from "../services/analytics";
 
 const router: ExpressRouter = Router();
 const analyticsService = new AnalyticsService();
-
-/**
- * Reusable query parameter schemas with validation constraints
- * Prevents DoS attacks via unreasonably large limit/offset values
- */
-const paginationSchema = z.object({
-  query: z.object({
-    limit: z.coerce.number().min(1).max(100).optional().default(10),
-    offset: z.coerce.number().min(0).max(10000).optional().default(0),
-  }),
-});
-
-const timelineSchema = z.object({
-  query: z.object({
-    days: z.coerce.number().min(1).max(365).optional().default(30),
-  }),
-});
-
-const topItemsSchema = z.object({
-  query: z.object({
-    limit: z.coerce.number().min(1).max(100).optional().default(10),
-  }),
-});
 
 // GET /api/analytics/global
 router.get(
@@ -47,9 +31,9 @@ router.get(
 router.get(
   "/timeline",
   expensiveOperationLimiter,
-  validate(timelineSchema),
+  validate(timelineQuerySchema),
   asyncHandler(async (req, res) => {
-    const { days = 30 } = req.query as { days?: number };
+    const { days } = req.query as ValidatedTimelineQuery;
     const timeline = await analyticsService.getActivityTimeline(days);
     res.json(timeline);
   })
@@ -59,9 +43,9 @@ router.get(
 router.get(
   "/top-pools",
   expensiveOperationLimiter,
-  validate(topItemsSchema),
+  validate(topItemsQuerySchema),
   asyncHandler(async (req, res) => {
-    const { limit = 10 } = req.query as { limit?: number };
+    const { limit } = req.query as ValidatedTopItemsQuery;
     const pools = await analyticsService.getTopPools(limit);
     res.json(pools);
   })
@@ -73,9 +57,9 @@ router.get(
   "/top-users",
   expensiveOperationLimiter,
   requireAuth,
-  validate(topItemsSchema),
+  validate(topItemsQuerySchema),
   asyncHandler(async (req, res) => {
-    const { limit = 10 } = req.query as { limit?: number };
+    const { limit } = req.query as ValidatedTopItemsQuery;
     const users = await analyticsService.getTopUsers(limit);
     res.json(users);
   })
@@ -87,9 +71,9 @@ router.get(
   "/events",
   expensiveOperationLimiter,
   optionalAuth,
-  validate(paginationSchema),
+  validate(paginationQuerySchema),
   asyncHandler(async (req, res) => {
-    const { limit = 10, offset = 0 } = req.query as { limit?: number; offset?: number };
+    const { limit, offset } = req.query as ValidatedPaginationQuery;
     const result = await analyticsService.getEventLogs(limit, offset);
     res.json(result);
   })
