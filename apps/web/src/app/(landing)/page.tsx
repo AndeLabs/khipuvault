@@ -9,21 +9,45 @@
  * - testnet.khipuvault.com (testnet/live): Redirects to /dashboard
  */
 
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { Footer } from "@/components/layout/footer";
-import { Header } from "@/components/layout/header";
-import { Contracts } from "@/components/sections/contracts";
-import { CTA } from "@/components/sections/cta";
-import { FAQ } from "@/components/sections/faq";
-import { Hero } from "@/components/sections/hero";
-import { HowItWorks } from "@/components/sections/how-it-works";
-import { MezoInfo } from "@/components/sections/mezo-info";
-import { Partners } from "@/components/sections/partners";
-import { ProductGuides } from "@/components/sections/product-guides";
-import { Products } from "@/components/sections/products";
 import { shouldShowLanding } from "@/config/launch";
+
+// Lazy load heavy landing page components to avoid SSR issues
+const Header = dynamic(() => import("@/components/layout/header").then((m) => m.Header), {
+  ssr: false,
+});
+const Footer = dynamic(() => import("@/components/layout/footer").then((m) => m.Footer), {
+  ssr: false,
+});
+const Hero = dynamic(() => import("@/components/sections/hero").then((m) => m.Hero), {
+  ssr: false,
+});
+const Partners = dynamic(() => import("@/components/sections/partners").then((m) => m.Partners), {
+  ssr: false,
+});
+const HowItWorks = dynamic(
+  () => import("@/components/sections/how-it-works").then((m) => m.HowItWorks),
+  { ssr: false }
+);
+const Products = dynamic(() => import("@/components/sections/products").then((m) => m.Products), {
+  ssr: false,
+});
+const ProductGuides = dynamic(
+  () => import("@/components/sections/product-guides").then((m) => m.ProductGuides),
+  { ssr: false }
+);
+const MezoInfo = dynamic(() => import("@/components/sections/mezo-info").then((m) => m.MezoInfo), {
+  ssr: false,
+});
+const FAQ = dynamic(() => import("@/components/sections/faq").then((m) => m.FAQ), { ssr: false });
+const Contracts = dynamic(
+  () => import("@/components/sections/contracts").then((m) => m.Contracts),
+  { ssr: false }
+);
+const CTA = dynamic(() => import("@/components/sections/cta").then((m) => m.CTA), { ssr: false });
 
 export default function LandingPage() {
   const router = useRouter();
