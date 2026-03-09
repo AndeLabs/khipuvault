@@ -6,6 +6,9 @@
  *
  * SSR-Safe: Works both with and without WagmiProvider context.
  * Falls back to standalone publicClient when no Wagmi context.
+ *
+ * Network-Safe: Returns placeholder data when contracts aren't deployed
+ * (e.g., mainnet pre-launch).
  */
 
 "use client";
@@ -17,11 +20,19 @@ import { getPublicClient } from "@/lib/web3/config";
 import {
   COOPERATIVE_POOL_ABI,
   INDIVIDUAL_POOL_V3_ABI,
+  areAllContractsConfigured,
   MEZO_V3_ADDRESSES,
+  ZERO_ADDRESS,
 } from "@/lib/web3/contracts-v3";
 
-const INDIVIDUAL_POOL_ADDRESS = MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`;
-const COOPERATIVE_POOL_ADDRESS = MEZO_V3_ADDRESSES.cooperativePoolV3 as `0x${string}`;
+// Only use addresses if contracts are configured (not zero address)
+const contractsReady = areAllContractsConfigured();
+const INDIVIDUAL_POOL_ADDRESS = contractsReady
+  ? (MEZO_V3_ADDRESSES.individualPoolV3 as `0x${string}`)
+  : (ZERO_ADDRESS as `0x${string}`);
+const COOPERATIVE_POOL_ADDRESS = contractsReady
+  ? (MEZO_V3_ADDRESSES.cooperativePoolV3 as `0x${string}`)
+  : (ZERO_ADDRESS as `0x${string}`);
 
 export interface ProtocolStats {
   /** Total Value Locked across all pools in mUSD */
@@ -62,12 +73,13 @@ function formatTVL(value: bigint): string {
  * Works both with and without WagmiProvider context:
  * - Uses standalone publicClient from config (no Wagmi required)
  * - Safe for landing pages without Web3 context
+ * - Returns placeholder when contracts not deployed (mainnet pre-launch)
  */
 export function useProtocolStats(): ProtocolStats {
   // Use standalone client - no Wagmi context required
   const publicClient = getPublicClient();
 
-  // Fetch Individual Pool TVL
+  // Fetch Individual Pool TVL (only if contracts are deployed)
   const { data: individualTVL, isLoading: isLoadingIndividual } = useQuery({
     queryKey: ["protocol-stats", "individual-tvl"],
     queryFn: async () => {
@@ -85,6 +97,7 @@ export function useProtocolStats(): ProtocolStats {
     },
     staleTime: 30_000, // 30 seconds
     refetchInterval: 60_000, // 1 minute
+    enabled: contractsReady, // Only fetch if contracts are deployed
   });
 
   // Fetch Cooperative Pool count and TVL
@@ -129,6 +142,7 @@ export function useProtocolStats(): ProtocolStats {
     },
     staleTime: 30_000,
     refetchInterval: 60_000,
+    enabled: contractsReady, // Only fetch if contracts are deployed
   });
 
   // Calculate totals
