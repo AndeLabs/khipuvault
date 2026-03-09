@@ -639,3 +639,24 @@ model IndexerState {
   @@index([isHealthy])
   @@index([lastIndexedBlock])
 }
+
+// Block Hash - Store block hashes for reorg detection
+// Maintains a rolling window of recent block hashes to detect chain reorganizations
+model BlockHash {
+  id          String @id @default(cuid())
+  blockNumber Int    @unique
+  blockHash   String
+  parentHash  String
+  timestamp   DateTime
+
+  // Finalization status
+  isFinalized Boolean @default(false)
+  confirmedAt Int? // Block number when considered confirmed
+
+  createdAt DateTime @default(now())
+
+  @@index([blockNumber])
+  @@index([blockHash])
+  @@index([isFinalized])
+  @@index([blockNumber, isFinalized])
+}

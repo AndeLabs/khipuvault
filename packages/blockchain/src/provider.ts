@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
-import { retryWithBackoff } from "./utils/retry";
+
 import { getRpcUrl, getAllRpcUrls, getChainId, getNetworkName } from "@khipu/shared";
+
+import { retryWithBackoff } from "./utils/retry";
 
 // For backward compatibility - these will be set from environment
 export const MEZO_TESTNET_RPC = getRpcUrl();
@@ -91,7 +93,9 @@ class ResilientProvider {
   }
 
   private async reconnect(): Promise<void> {
-    if (this.isShuttingDown) return;
+    if (this.isShuttingDown) {
+      return;
+    }
 
     try {
       console.log("🔄 Reconnecting to RPC provider...");
@@ -130,7 +134,9 @@ class ResilientProvider {
   }
 
   private async healthCheck(): Promise<void> {
-    if (this.isShuttingDown) return;
+    if (this.isShuttingDown) {
+      return;
+    }
 
     try {
       const startTime = Date.now();
@@ -240,7 +246,7 @@ export async function shutdownProvider(): Promise<void> {
 export async function getCurrentBlock(): Promise<number> {
   return retryWithBackoff(async () => {
     const provider = getProvider();
-    return await provider.getBlockNumber();
+    return provider.getBlockNumber();
   }, MAX_RETRY_ATTEMPTS);
 }
 
@@ -254,7 +260,9 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes
  * Clean up old entries from timestamp cache
  */
 function cleanTimestampCache(): void {
-  if (blockTimestampCache.size < CACHE_MAX_SIZE) return;
+  if (blockTimestampCache.size < CACHE_MAX_SIZE) {
+    return;
+  }
 
   const now = Date.now();
   let cleaned = 0;
@@ -324,7 +332,7 @@ export async function getBlockTimestampCached(blockNumber: number): Promise<numb
 export async function getBlock(blockNumber: number): Promise<ethers.Block | null> {
   return retryWithBackoff(async () => {
     const provider = getProvider();
-    return await provider.getBlock(blockNumber);
+    return provider.getBlock(blockNumber);
   }, MAX_RETRY_ATTEMPTS);
 }
 

@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+
 import { getProvider } from "../provider";
 import { getReorgHandler, CONFIRMATION_DEPTH } from "../services/reorg-handler";
 
@@ -75,7 +76,21 @@ export abstract class BaseEventListener {
   protected abstract indexHistoricalEvents(fromBlock: number): Promise<void>;
 
   /**
+   * Store block hash for reorg detection
+   * Called automatically when processing events
+   */
+  protected async storeBlockHashIfNeeded(blockNumber: number): Promise<void> {
+    try {
+      await this.reorgHandler.storeBlockHash(blockNumber);
+    } catch (error) {
+      // Non-critical error - log but don't throw
+      console.error(`⚠️ Failed to store block hash for ${blockNumber}:`, error);
+    }
+  }
+
+  /**
    * Process a single event
+   * Subclasses should implement this to handle specific event types
    */
   protected abstract processEvent(
     event: ethers.Log,

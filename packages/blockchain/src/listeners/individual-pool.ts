@@ -1,5 +1,7 @@
 import { ethers } from "ethers";
+
 import { prisma, Prisma } from "@khipu/database";
+
 import { BaseEventListener } from "./base";
 import { getBlockTimestamp, getBlockTimestampCached } from "../provider";
 import { retryWithBackoff, isRetryableError } from "../utils/retry";
@@ -260,6 +262,9 @@ export class IndividualPoolListener extends BaseEventListener {
     const eventName = parsedLog.name;
     // Use cached timestamp for batch operations to reduce RPC calls
     const blockTimestamp = await getBlockTimestampCached(event.blockNumber);
+
+    // Store block hash for reorg detection (non-blocking)
+    await this.storeBlockHashIfNeeded(event.blockNumber);
 
     try {
       switch (eventName) {

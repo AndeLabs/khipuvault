@@ -1,15 +1,16 @@
 import "dotenv/config";
+import { getAddressOrUndefined, isAddressConfigured, ZERO_ADDRESS } from "@khipu/shared";
+
 import { IndexerOrchestrator } from "./indexer/orchestrator";
-import { IndividualPoolListener } from "./listeners/individual-pool";
 import { CooperativePoolListener } from "./listeners/cooperative-pool";
+import { IndividualPoolListener } from "./listeners/individual-pool";
 import { LotteryPoolListener } from "./listeners/lottery-pool";
-import { RotatingPoolListener } from "./listeners/rotating-pool";
-import { MezoTroveManagerListener } from "./listeners/mezo-trove-manager";
 import { MezoStabilityPoolListener } from "./listeners/mezo-stability-pool";
+import { MezoTroveManagerListener } from "./listeners/mezo-trove-manager";
+import { RotatingPoolListener } from "./listeners/rotating-pool";
 import { shutdownProvider, getProviderHealth } from "./provider";
 
 // Import addresses from centralized source (@khipu/shared)
-import { getAddressOrUndefined, isAddressConfigured, ZERO_ADDRESS } from "@khipu/shared";
 
 // Get contract addresses from @khipu/shared (Single Source of Truth)
 // Environment variables can override for development/testing
@@ -142,6 +143,13 @@ export { MezoStabilityPoolListener } from "./listeners/mezo-stability-pool";
 export { BaseEventListener } from "./listeners/base";
 export { getProvider, getCurrentBlock, getBlockTimestamp } from "./provider";
 export { retryWithBackoff, batchProcess } from "./utils/retry";
+export {
+  getReorgHandler,
+  ReorgHandler,
+  CONFIRMATION_DEPTH,
+  REORG_DETECTION_DEPTH,
+  REORG_MAX_DEPTH,
+} from "./services/reorg-handler";
 
 // Run if executed directly
 if (require.main === module) {
