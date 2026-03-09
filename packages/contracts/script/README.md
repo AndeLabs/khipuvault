@@ -91,6 +91,80 @@ forge script script/FixAuthorizations.s.sol \
 
 ---
 
+### 4. TransferOwnership.s.sol - Transfer to Multi-sig
+
+Transfers ownership of all KhipuVault contracts from EOA to a Gnosis Safe multi-sig.
+
+**Security Features:**
+
+- Validates multi-sig is a contract (not EOA)
+- Prevents transfer to zero address
+- Confirms current ownership before transfer
+- Comprehensive transfer report
+
+**Contracts Transferred:**
+
+- YieldAggregatorV3
+- MezoIntegrationV3
+- IndividualPoolV3
+- CooperativePoolV3
+- LotteryPoolV3
+- RotatingPool
+- StabilityPoolStrategy (if deployed)
+
+**Pre-requisites:**
+
+1. Deploy a Gnosis Safe multi-sig wallet
+2. Configure signers and threshold (recommended: 3/5 or 2/3)
+3. Update `MULTI_SIG_ADDRESS` in the script
+4. Update all contract addresses for your deployment
+
+**Usage:**
+
+```bash
+# 1. Update addresses in TransferOwnership.s.sol
+#    - MULTI_SIG_ADDRESS (your Gnosis Safe)
+#    - Contract addresses
+
+# 2. Dry run to verify
+forge script script/TransferOwnership.s.sol --rpc-url $RPC_URL -vvvv
+
+# 3. Execute transfer
+forge script script/TransferOwnership.s.sol \
+  --rpc-url $RPC_URL \
+  --private-key $DEPLOYER_PRIVATE_KEY \
+  --broadcast
+
+# 4. Verify ownership was transferred
+forge script script/VerifyOwnership.s.sol --rpc-url $RPC_URL -vvvv
+```
+
+**IMPORTANT:** This action is irreversible. Only the multi-sig signers can execute admin functions after transfer.
+
+---
+
+### 5. VerifyOwnership.s.sol - Verify Multi-sig Ownership
+
+Verifies that all contracts are owned by the expected multi-sig address.
+
+**Checks:**
+
+- All contracts have multi-sig as owner
+- Multi-sig address is a contract (Gnosis Safe)
+- No contracts have EOA or zero address as owner
+- Provides remediation steps if issues found
+
+**Usage:**
+
+```bash
+# Update EXPECTED_MULTI_SIG in script first
+forge script script/VerifyOwnership.s.sol --rpc-url $RPC_URL -vvvv
+```
+
+**Run this after TransferOwnership.s.sol to confirm successful transfer.**
+
+---
+
 ## Test Scripts (script/tests/)
 
 These are integration test scripts for testnet validation:
@@ -144,8 +218,10 @@ Scripts use `NetworkConfig.s.sol` for network-aware settings:
 
 ### Post-Deployment
 
-- [ ] Transfer ownership to multi-sig
-- [ ] Update documentation
+- [ ] Transfer ownership to multi-sig (use TransferOwnership.s.sol)
+- [ ] Verify ownership transfer (use VerifyOwnership.s.sol)
+- [ ] Test multi-sig can execute admin functions
+- [ ] Update documentation with multi-sig address
 - [ ] Notify team of new addresses
 
 ---
