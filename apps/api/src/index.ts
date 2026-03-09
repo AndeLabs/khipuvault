@@ -99,23 +99,21 @@ app.use(securityHeaders);
 app.use(
   cors({
     origin: (origin, callback) => {
-      // In production: require origin and validate against whitelist
+      // Allow requests without origin (server-to-server, curl, health checks, UptimeRobot)
+      // This is safe because CORS only protects browser requests
+      if (!origin) {
+        return callback(null, true);
+      }
+
+      // In production: validate against whitelist
       if (isProduction) {
-        if (!origin) {
-          // Block requests without origin in production (except health checks)
-          return callback(new Error("Origin header required"), false);
-        }
         if (corsOrigins.includes(origin)) {
           return callback(null, true);
         }
         return callback(new Error("Not allowed by CORS"), false);
       }
 
-      // In development: allow localhost origins and requests without origin
-      if (!origin) {
-        return callback(null, true);
-      }
-
+      // In development: allow localhost origins
       // HTTP URLs are acceptable for localhost development environments
       // These URLs are only used in local development, never in production
       /* eslint-disable @microsoft/sdl/no-insecure-url */
