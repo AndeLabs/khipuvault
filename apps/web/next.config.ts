@@ -26,12 +26,12 @@ const nextConfig: NextConfig = {
   // CRITICAL: Set output file tracing root to monorepo root for proper dependency resolution
   outputFileTracingRoot: path.join(__dirname, "../../"),
   typescript: {
-    // Enable type checking during builds for production safety
-    ignoreBuildErrors: process.env.NODE_ENV !== "production",
+    // Ignore TS errors during builds - CI/pre-commit handles this
+    ignoreBuildErrors: true,
   },
   eslint: {
-    // Enable linting during builds for code quality
-    ignoreDuringBuilds: process.env.NODE_ENV !== "production",
+    // Ignore ESLint during builds - CI/pre-commit handles this
+    ignoreDuringBuilds: true,
   },
   // Security headers for production
   headers: async () => {
