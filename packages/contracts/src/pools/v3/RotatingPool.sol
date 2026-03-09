@@ -164,6 +164,24 @@ contract RotatingPool is
     /// @dev Pool ID => Number of members who received payout
     mapping(uint256 => uint256) public membersWithPayoutCount;
 
+    /// @notice C-03 FIX: Order randomization commitment (pool creator submits hash)
+    mapping(uint256 => bytes32) public poolOrderCommitment;
+
+    /// @notice C-03 FIX: Whether order has been randomized
+    mapping(uint256 => bool) public poolOrderRandomized;
+
+    /// @notice C-03 FIX: Revealed random seed for transparency
+    mapping(uint256 => uint256) public poolRandomSeed;
+
+    /// @notice H-05 FIX: Pending BTC claims for contract wallets (pull pattern)
+    mapping(address => uint256) public pendingBtcClaims;
+
+    /// @notice H-05 FIX: Pending WBTC claims
+    mapping(address => uint256) public pendingWbtcClaims;
+
+    /// @notice H-05 FIX: Pending MUSD claims (for yields)
+    mapping(address => uint256) public pendingMusdClaims;
+
     /// @notice Minimum members per pool
     uint256 public constant MIN_MEMBERS = 3;
 
@@ -181,6 +199,17 @@ contract RotatingPool is
 
     /// @notice Maximum period duration (3 months)
     uint256 public constant MAX_PERIOD_DURATION = 90 days;
+
+    /// @notice H-02 FIX: Contribution deadline (from period start)
+    /// @dev Members must contribute within this time or face penalty
+    uint256 public constant CONTRIBUTION_DEADLINE = 3 days;
+
+    /// @notice H-02 FIX: Grace period after deadline (with penalty)
+    uint256 public constant GRACE_PERIOD = 1 days;
+
+    /// @notice H-02 FIX: Late contribution penalty (basis points)
+    /// @dev 500 = 5% penalty for late contributions
+    uint256 public constant LATE_PENALTY_BPS = 500;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
@@ -221,6 +250,19 @@ contract RotatingPool is
 
     event PerformanceFeeUpdated(uint256 oldFee, uint256 newFee);
 
+    /// @notice C-03 FIX: Order randomization events
+    event OrderCommitmentSubmitted(uint256 indexed poolId, bytes32 commitment);
+    event PayoutOrderRandomized(uint256 indexed poolId, uint256 seed);
+
+    /// @notice H-02 FIX: Late contribution penalty event
+    event LateContributionPenalty(uint256 indexed poolId, address indexed member, uint256 penaltyAmount);
+
+    /// @notice H-05 FIX: Pending withdrawal events (pull pattern)
+    event PayoutPending(uint256 indexed poolId, address indexed member, uint256 amount, bool isNative);
+    event BtcClaimPulled(address indexed user, uint256 amount);
+    event WbtcClaimPulled(address indexed user, uint256 amount);
+    event MusdClaimPulled(address indexed user, uint256 amount);
+
     event FeeCollectorUpdated(address indexed oldCollector, address indexed newCollector);
 
     event NativeBtcReceived(address indexed sender, uint256 amount);
@@ -253,6 +295,12 @@ contract RotatingPool is
     error InvalidAmount();
     error WrongContributionMode(); // Pool mode doesn't match contribution type
     error InsufficientNativeBtcBalance(); // Contract lacks native BTC for transfer
+    error OrderAlreadyRandomized(); // C-03 FIX: Order already shuffled
+    error OrderNotCommitted(); // C-03 FIX: No commitment submitted
+    error InvalidOrderReveal(); // C-03 FIX: Reveal doesn't match commitment
+    error InvalidCommitment(); // C-03 FIX: Zero commitment
+    error ContributionDeadlinePassed(); // H-02 FIX: Past grace period
+    error NoPendingClaims(); // H-05 FIX: No pending claims to pull
 
     /*//////////////////////////////////////////////////////////////
                               MODIFIERS
@@ -349,12 +397,12 @@ contract RotatingPool is
      * @return poolId Created pool ID
      */
     function createPool(
-        string memory name,
+        string calldata name, // GAS: calldata saves ~200 gas
         uint256 memberCount,
         uint256 contributionAmount,
         uint256 periodDuration,
         bool useNativeBtc,
-        address[] memory memberAddresses
+        address[] calldata memberAddresses // GAS: calldata saves gas for arrays
     ) external whenNotPaused returns (uint256 poolId) {
         if (memberCount < MIN_MEMBERS || memberCount > MAX_MEMBERS) {
             revert InvalidMemberCount();
@@ -391,10 +439,14 @@ contract RotatingPool is
 
         // If member addresses provided, add them automatically
         if (memberAddresses.length > 0) {
-            for (uint256 i = 0; i < memberAddresses.length && i < memberCount; i++) {
+            uint256 len = memberAddresses.length < memberCount ? memberAddresses.length : memberCount;
+            for (uint256 i = 0; i < len;) {
                 if (memberAddresses[i] != address(0)) {
                     _addMember(poolId, memberAddresses[i], i);
                 }
+                unchecked {
+                    ++i;
+                } // GAS: Safe, i bounded by len
             }
         }
 
@@ -462,6 +514,23 @@ contract RotatingPool is
 
         uint256 amount = pool.contributionAmount;
 
+        // H-02 FIX: Check contribution deadline and apply penalty if late
+        PeriodInfo memory currentPeriodInfo = poolPeriods[poolId][pool.currentPeriod];
+        uint256 deadline = currentPeriodInfo.startTime + CONTRIBUTION_DEADLINE;
+        uint256 graceEnd = deadline + GRACE_PERIOD;
+        uint256 penalty = 0;
+
+        if (block.timestamp > graceEnd) {
+            revert ContributionDeadlinePassed();
+        }
+
+        if (block.timestamp > deadline) {
+            // Late contribution - apply penalty
+            penalty = (amount * LATE_PENALTY_BPS) / 10000;
+            pool.totalYieldGenerated += penalty; // Penalty goes to pool yield
+            emit LateContributionPenalty(poolId, msg.sender, penalty);
+        }
+
         // H-02 FIX: Record deposit block for flash loan protection
         depositBlock[msg.sender] = block.number;
 
@@ -477,8 +546,8 @@ contract RotatingPool is
         uint256 currentPeriodCache = pool.currentPeriod;
 
         // External calls AFTER state updates
-        // Transfer BTC from member
-        WBTC.safeTransferFrom(msg.sender, address(this), amount);
+        // Transfer BTC from member (amount + penalty if late)
+        WBTC.safeTransferFrom(msg.sender, address(this), amount + penalty);
 
         // Deposit to Mezo and generate yields
         _depositToMezo(poolId, amount);
@@ -509,8 +578,25 @@ contract RotatingPool is
 
         uint256 amount = pool.contributionAmount;
 
-        // Validate native BTC amount
-        if (msg.value != amount) revert InvalidAmount();
+        // H-02 FIX: Check contribution deadline and apply penalty if late
+        PeriodInfo memory currentPeriodInfo = poolPeriods[poolId][pool.currentPeriod];
+        uint256 deadline = currentPeriodInfo.startTime + CONTRIBUTION_DEADLINE;
+        uint256 graceEnd = deadline + GRACE_PERIOD;
+        uint256 penalty = 0;
+
+        if (block.timestamp > graceEnd) {
+            revert ContributionDeadlinePassed();
+        }
+
+        if (block.timestamp > deadline) {
+            // Late contribution - apply penalty
+            penalty = (amount * LATE_PENALTY_BPS) / 10000;
+            pool.totalYieldGenerated += penalty; // Penalty goes to pool yield
+            emit LateContributionPenalty(poolId, msg.sender, penalty);
+        }
+
+        // Validate native BTC amount (including penalty if late)
+        if (msg.value != amount + penalty) revert InvalidAmount();
 
         // H-02 FIX: Record deposit block for flash loan protection
         depositBlock[msg.sender] = block.number;
@@ -527,7 +613,7 @@ contract RotatingPool is
         uint256 currentPeriodCache = pool.currentPeriod;
 
         // Deposit native BTC to Mezo and generate yields
-        _depositNativeBtcToMezo(poolId, amount);
+        _depositNativeBtcToMezo(poolId, amount + penalty);
 
         emit ContributionMade(poolId, msg.sender, currentPeriodCache, amount);
 
@@ -599,25 +685,110 @@ contract RotatingPool is
 
         // External transfers AFTER all state updates
         // UX IMPROVEMENT: Support both native BTC and WBTC payouts
+        // H-05 FIX: Use pull pattern for failed transfers (contract wallets)
         if (pool.useNativeBtc) {
-            // H-02 FIX: Verify sufficient native BTC balance before transfer
-            if (address(this).balance < payoutAmount) revert InsufficientNativeBtcBalance();
+            // C-01 FIX: Withdraw from Mezo to get native BTC
+            // BTC is stored as MUSD in YieldAggregator, need to convert back
+            uint256 btcToTransfer = _withdrawBtcFromMezo(poolId, payoutAmount);
 
-            // Pay out in native BTC for native BTC pools
-            (bool success,) = msg.sender.call{value: payoutAmount}("");
-            require(success, "Native BTC transfer failed");
+            // Pay out in native BTC for native BTC pools (with pull fallback)
+            (bool success,) = msg.sender.call{value: btcToTransfer}("");
+            if (!success) {
+                // H-05 FIX: Store for pull if push fails (contract wallets)
+                pendingBtcClaims[msg.sender] += btcToTransfer;
+                emit PayoutPending(poolId, msg.sender, btcToTransfer, true);
+            }
         } else {
-            // Pay out in WBTC for WBTC pools
-            WBTC.safeTransfer(msg.sender, payoutAmount);
+            // Pay out in WBTC for WBTC pools (with pull fallback)
+            try WBTC.transfer(msg.sender, payoutAmount) returns (bool transferSuccess) {
+                if (!transferSuccess) {
+                    pendingWbtcClaims[msg.sender] += payoutAmount;
+                    emit PayoutPending(poolId, msg.sender, payoutAmount, false);
+                }
+            } catch {
+                pendingWbtcClaims[msg.sender] += payoutAmount;
+                emit PayoutPending(poolId, msg.sender, payoutAmount, false);
+            }
         }
 
+        // Transfer yield (with pull fallback)
         if (netYield > 0) {
-            MUSD.safeTransfer(msg.sender, netYield);
+            try MUSD.transfer(msg.sender, netYield) returns (bool yieldSuccess) {
+                if (!yieldSuccess) {
+                    pendingMusdClaims[msg.sender] += netYield;
+                }
+            } catch {
+                pendingMusdClaims[msg.sender] += netYield;
+            }
         }
 
         if (feeAmount > 0) {
             MUSD.safeTransfer(feeCollector, feeAmount);
         }
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                    H-05 FIX: PULL PATTERN FUNCTIONS
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Pull pending BTC claims (for contract wallets that can't receive via push)
+     * @dev H-05 FIX: Implements pull-over-push pattern for failed native BTC transfers
+     */
+    function pullBtcClaim() external nonReentrant {
+        uint256 amount = pendingBtcClaims[msg.sender];
+        if (amount == 0) revert NoPendingClaims();
+
+        // CEI: Clear pending before transfer
+        pendingBtcClaims[msg.sender] = 0;
+
+        (bool success,) = msg.sender.call{value: amount}("");
+        require(success, "BTC transfer failed");
+
+        emit BtcClaimPulled(msg.sender, amount);
+    }
+
+    /**
+     * @notice Pull pending WBTC claims
+     * @dev H-05 FIX: Implements pull-over-push pattern for failed WBTC transfers
+     */
+    function pullWbtcClaim() external nonReentrant {
+        uint256 amount = pendingWbtcClaims[msg.sender];
+        if (amount == 0) revert NoPendingClaims();
+
+        // CEI: Clear pending before transfer
+        pendingWbtcClaims[msg.sender] = 0;
+
+        WBTC.safeTransfer(msg.sender, amount);
+
+        emit WbtcClaimPulled(msg.sender, amount);
+    }
+
+    /**
+     * @notice Pull pending MUSD claims (yields)
+     * @dev H-05 FIX: Implements pull-over-push pattern for failed MUSD transfers
+     */
+    function pullMusdClaim() external nonReentrant {
+        uint256 amount = pendingMusdClaims[msg.sender];
+        if (amount == 0) revert NoPendingClaims();
+
+        // CEI: Clear pending before transfer
+        pendingMusdClaims[msg.sender] = 0;
+
+        MUSD.safeTransfer(msg.sender, amount);
+
+        emit MusdClaimPulled(msg.sender, amount);
+    }
+
+    /**
+     * @notice Get total pending claims for a user
+     * @param user Address to check
+     * @return btc Pending BTC amount
+     * @return wbtc Pending WBTC amount
+     * @return musd Pending MUSD amount
+     */
+    function getPendingClaims(address user) external view returns (uint256 btc, uint256 wbtc, uint256 musd) {
+        return (pendingBtcClaims[user], pendingWbtcClaims[user], pendingMusdClaims[user]);
     }
 
     /**
@@ -647,11 +818,11 @@ contract RotatingPool is
         // External transfer AFTER state update
         // UX IMPROVEMENT: Support both native BTC and WBTC refunds
         if (pool.useNativeBtc) {
-            // H-02 FIX: Verify sufficient native BTC balance before transfer
-            if (address(this).balance < refundAmount) revert InsufficientNativeBtcBalance();
+            // C-01 FIX: Withdraw from Mezo to get native BTC for refund
+            uint256 btcToRefund = _withdrawBtcFromMezo(poolId, refundAmount);
 
             // Refund in native BTC for native BTC pools
-            (bool success,) = msg.sender.call{value: refundAmount}("");
+            (bool success,) = msg.sender.call{value: btcToRefund}("");
             require(success, "Native BTC refund failed");
         } else {
             // Refund in WBTC for WBTC pools
@@ -703,6 +874,126 @@ contract RotatingPool is
 
         // Initialize first period
         _initializePeriod(poolId, 0);
+
+        emit PoolStarted(poolId, block.timestamp);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                    C-03 FIX: FAIR ORDER RANDOMIZATION
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Submit commitment for order randomization (pool creator only)
+     * @dev Must be called after all members have joined, before pool starts
+     * @param poolId Pool identifier
+     * @param commitment Hash of (randomSeed, salt) - keccak256(abi.encodePacked(seed, salt))
+     */
+    function submitOrderCommitment(uint256 poolId, bytes32 commitment) external {
+        PoolInfo storage pool = pools[poolId];
+
+        if (pool.poolId == 0) revert InvalidPoolId();
+        if (msg.sender != pool.creator && msg.sender != owner()) revert InvalidAddress();
+        // Allow commitment in FORMING or ACTIVE (before any contributions)
+        // This supports both manual start and auto-start flows
+        bool isFormingOrEarlyActive =
+            pool.status == PoolStatus.FORMING || (pool.status == PoolStatus.ACTIVE && pool.totalBtcCollected == 0);
+        if (!isFormingOrEarlyActive) revert PoolNotForming();
+        if (poolMembersList[poolId].length != pool.memberCount) revert InsufficientContributions();
+        if (commitment == bytes32(0)) revert InvalidCommitment();
+        if (poolOrderRandomized[poolId]) revert OrderAlreadyRandomized();
+
+        poolOrderCommitment[poolId] = commitment;
+
+        emit OrderCommitmentSubmitted(poolId, commitment);
+    }
+
+    /**
+     * @notice Reveal seed and randomize payout order using Fisher-Yates shuffle
+     * @dev Uses commit-reveal to prevent manipulation
+     * @param poolId Pool identifier
+     * @param randomSeed The random seed that was committed
+     * @param salt The salt used in commitment
+     */
+    function revealAndRandomizeOrder(uint256 poolId, uint256 randomSeed, bytes32 salt) external nonReentrant {
+        PoolInfo storage pool = pools[poolId];
+
+        if (pool.poolId == 0) revert InvalidPoolId();
+        // Allow randomization in FORMING or ACTIVE (before any contributions)
+        // This supports both manual start and auto-start flows
+        bool isFormingOrEarlyActive =
+            pool.status == PoolStatus.FORMING || (pool.status == PoolStatus.ACTIVE && pool.totalBtcCollected == 0);
+        if (!isFormingOrEarlyActive) revert PoolNotForming();
+        if (poolOrderCommitment[poolId] == bytes32(0)) revert OrderNotCommitted();
+        if (poolOrderRandomized[poolId]) revert OrderAlreadyRandomized();
+
+        // Verify commitment matches reveal
+        bytes32 expectedCommit = keccak256(abi.encodePacked(randomSeed, salt));
+        if (expectedCommit != poolOrderCommitment[poolId]) revert InvalidOrderReveal();
+
+        // Store revealed seed for transparency
+        poolRandomSeed[poolId] = randomSeed;
+
+        // Perform Fisher-Yates shuffle
+        _shufflePayoutOrder(poolId, randomSeed);
+
+        poolOrderRandomized[poolId] = true;
+
+        emit PayoutOrderRandomized(poolId, randomSeed);
+    }
+
+    /**
+     * @notice Fisher-Yates shuffle implementation for fair order randomization
+     * @dev O(n) in-place shuffle with combined entropy sources
+     * @param poolId Pool identifier
+     * @param seed Initial random seed from commit-reveal
+     */
+    function _shufflePayoutOrder(uint256 poolId, uint256 seed) internal {
+        address[] storage members = poolMembersList[poolId];
+        uint256 n = members.length;
+
+        if (n <= 1) return; // Nothing to shuffle
+
+        // Add additional entropy from chain state (not predictable at commitment time)
+        uint256 entropy = uint256(
+            keccak256(abi.encodePacked(seed, block.prevrandao, block.timestamp, blockhash(block.number - 1), poolId, n))
+        );
+
+        // Fisher-Yates shuffle: iterate from end to start
+        for (uint256 i = n - 1; i > 0;) {
+            // Generate random index j where 0 <= j <= i
+            uint256 j = uint256(keccak256(abi.encodePacked(entropy, i))) % (i + 1);
+
+            // Swap members[i] and members[j]
+            if (i != j) {
+                address temp = members[i];
+                members[i] = members[j];
+                members[j] = temp;
+            }
+
+            unchecked {
+                --i;
+            }
+        }
+
+        // Update poolMemberOrder mapping to reflect new shuffled order
+        for (uint256 i = 0; i < n;) {
+            address member = members[i];
+            poolMemberOrder[poolId][i] = member;
+            poolMembers[poolId][member].memberIndex = i;
+
+            unchecked {
+                ++i;
+            }
+        }
+    }
+
+    /**
+     * @notice Check if order has been randomized for a pool
+     * @param poolId Pool identifier
+     * @return True if order was randomized
+     */
+    function isOrderRandomized(uint256 poolId) external view returns (bool) {
+        return poolOrderRandomized[poolId];
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -784,6 +1075,9 @@ contract RotatingPool is
      * @notice Add member to pool
      */
     function _addMember(uint256 poolId, address member, uint256 index) internal {
+        // H-01 FIX: Prevent duplicate members
+        if (poolMembers[poolId][member].active) revert AlreadyMember();
+
         poolMembers[poolId][member] = MemberInfo({
             memberAddress: member,
             memberIndex: index,
@@ -845,29 +1139,97 @@ contract RotatingPool is
 
     /**
      * @notice Deposit native BTC to Mezo and generate yields
-     * @dev UX IMPROVEMENT: Accepts native BTC and holds it in contract
-     *      Native BTC is held safely until payout claims
-     *      Future: Integrate with Mezo when MezoIntegration is deployed
+     * @dev C-01 FIX: Now integrates with Mezo for real yield generation
+     *      1. Deposits BTC to Mezo, receives MUSD
+     *      2. Deposits MUSD to YieldAggregator for yield generation
+     *      3. Tracks totalMusdMinted for proper accounting
+     *
+     * @custom:security-note REENTRANCY PROTECTION
+     * This function writes state AFTER external calls because we need the return
+     * value (musdAmount) from MEZO_INTEGRATION.depositAndMintNative().
+     * Protection is ensured by:
+     * - H-01 FIX: Runtime check that nonReentrant guard is active
+     * - All calling functions (joinPool, contribute, etc.) use nonReentrant
+     * - External contracts (MEZO_INTEGRATION, YIELD_AGGREGATOR) are trusted
      */
     function _depositNativeBtcToMezo(uint256 poolId, uint256 btcAmount) internal {
+        // H-01 FIX: Verify reentrancy protection is active at runtime
+        require(_reentrancyGuardEntered(), "Must be called with reentrancy guard");
+
         PoolInfo storage pool = pools[poolId];
 
-        // Native BTC is already in contract via msg.value
-        // We hold it safely until members claim their payouts
+        // C-01 FIX: Deposit BTC to Mezo and mint MUSD
+        uint256 musdAmount = MEZO_INTEGRATION.depositAndMintNative{value: btcAmount}();
 
-        // Note: For testnet without MezoIntegration deployed
-        // BTC remains in contract as backing until claim
-        // This is safe because:
-        // 1. BTC is not sent externally until claimPayout
-        // 2. Pool tracks totalBtcCollected for proper accounting
-        // 3. Members can claim their proportional share in native BTC
+        // C-01 FIX: Deposit MUSD to YieldAggregator for yield generation
+        MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
+        (, uint256 shares) = YIELD_AGGREGATOR.deposit(musdAmount);
+        require(shares > 0, "Deposit failed");
 
-        // Future enhancement: When MezoIntegration is deployed, uncomment:
-        // uint256 musdAmount = MEZO_INTEGRATION.depositAndMintNative{value: btcAmount}();
-        // MUSD.forceApprove(address(YIELD_AGGREGATOR), musdAmount);
-        // (, uint256 shares) = YIELD_AGGREGATOR.deposit(musdAmount);
-        // require(shares > 0, "Deposit failed");
-        // pool.totalMusdMinted += musdAmount;
+        // Update pool state with minted MUSD
+        pool.totalMusdMinted += musdAmount;
+    }
+
+    /**
+     * @notice C-01 FIX: Withdraw BTC from Mezo for payout
+     * @dev Converts MUSD back to native BTC via MezoIntegration
+     *      1. Calculates proportional MUSD to withdraw
+     *      2. Withdraws from YieldAggregator
+     *      3. Burns MUSD via MezoIntegration
+     *      4. Returns BTC amount received
+     *
+     * @custom:security-note REENTRANCY PROTECTION
+     * This function writes state AFTER external calls because we need return values
+     * from YIELD_AGGREGATOR.withdraw() and MEZO_INTEGRATION.burnAndWithdraw().
+     * Protection is ensured by:
+     * - H-02 FIX: Runtime check that nonReentrant guard is active
+     * - All calling functions (claimPayout, claimRefund) use nonReentrant
+     * - External contracts (YIELD_AGGREGATOR, MEZO_INTEGRATION) are trusted
+     *
+     * @param poolId Pool ID for accounting
+     * @param btcAmount Expected BTC amount (used for MUSD calculation)
+     * @return btcReceived Actual BTC received from Mezo
+     */
+    function _withdrawBtcFromMezo(uint256 poolId, uint256 btcAmount) internal returns (uint256 btcReceived) {
+        // H-02 FIX: Verify reentrancy protection is active at runtime
+        require(_reentrancyGuardEntered(), "Must be called with reentrancy guard");
+
+        PoolInfo storage pool = pools[poolId];
+
+        // Calculate proportional MUSD to withdraw
+        // Use current exchange rate from pool (totalMusdMinted / totalBtcCollected)
+        uint256 musdToWithdraw;
+        if (pool.totalBtcCollected > 0 && pool.totalMusdMinted > 0) {
+            // Proportional MUSD based on BTC amount
+            musdToWithdraw = (btcAmount * pool.totalMusdMinted) / pool.totalBtcCollected;
+        } else {
+            // Fallback: assume 1:1 ratio (shouldn't happen in normal flow)
+            musdToWithdraw = btcAmount;
+        }
+
+        // H-04 FIX: Initialize variable to 0 explicitly
+        uint256 musdWithdrawn = 0;
+        try YIELD_AGGREGATOR.withdraw(musdToWithdraw) returns (uint256 withdrawn) {
+            musdWithdrawn = withdrawn;
+        } catch {
+            // If withdrawal fails, check contract balance
+            uint256 musdBalance = MUSD.balanceOf(address(this));
+            musdWithdrawn = musdBalance >= musdToWithdraw ? musdToWithdraw : musdBalance;
+        }
+
+        if (musdWithdrawn > 0) {
+            // Approve Mezo to burn MUSD
+            MUSD.forceApprove(address(MEZO_INTEGRATION), musdWithdrawn);
+
+            // Burn MUSD and receive native BTC
+            btcReceived = MEZO_INTEGRATION.burnAndWithdraw(musdWithdrawn);
+
+            // Update pool accounting
+            pool.totalMusdMinted -= musdWithdrawn;
+        } else {
+            // Fallback: use native BTC balance if available
+            btcReceived = btcAmount <= address(this).balance ? btcAmount : address(this).balance;
+        }
     }
 
     /**
@@ -891,8 +1253,17 @@ contract RotatingPool is
 
     /**
      * @notice Check if period can be completed and complete it
+     * @dev CEI NOTE: This function is called AFTER external calls in makeContribution
+     * because period completion must only happen after successful deposit to Mezo.
+     * Protection is ensured by:
+     * - Runtime check that nonReentrant guard is active
+     * - Calling functions use nonReentrant modifier
+     * - Critical contribution accounting is updated BEFORE external calls
      */
     function _checkAndCompletePeriod(uint256 poolId) internal {
+        // CEI FIX: Verify reentrancy protection is active at runtime
+        require(_reentrancyGuardEntered(), "Must be called with reentrancy guard");
+
         PoolInfo storage pool = pools[poolId];
         uint256 currentPeriod = pool.currentPeriod;
 

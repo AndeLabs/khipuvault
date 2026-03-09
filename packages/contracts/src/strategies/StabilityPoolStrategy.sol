@@ -107,32 +107,13 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
                                 EVENTS
     //////////////////////////////////////////////////////////////*/
 
-    event Deposited(
-        address indexed user,
-        uint256 musdAmount,
-        uint256 sharesIssued,
-        uint256 timestamp
-    );
+    event Deposited(address indexed user, uint256 musdAmount, uint256 sharesIssued, uint256 timestamp);
 
-    event Withdrawn(
-        address indexed user,
-        uint256 musdAmount,
-        uint256 sharesBurned,
-        uint256 timestamp
-    );
+    event Withdrawn(address indexed user, uint256 musdAmount, uint256 sharesBurned, uint256 timestamp);
 
-    event CollateralGainsClaimed(
-        address indexed user,
-        uint256 collateralAmount,
-        uint256 feeAmount,
-        uint256 timestamp
-    );
+    event CollateralGainsClaimed(address indexed user, uint256 collateralAmount, uint256 feeAmount, uint256 timestamp);
 
-    event CollateralGainsHarvested(
-        uint256 totalGains,
-        uint256 feeAmount,
-        uint256 timestamp
-    );
+    event CollateralGainsHarvested(uint256 totalGains, uint256 feeAmount, uint256 timestamp);
 
     event PerformanceFeeUpdated(uint256 oldFee, uint256 newFee);
 
@@ -180,16 +161,10 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @param _feeCollector Address to collect performance fees
      * @param _performanceFee Performance fee in basis points (100 = 1%)
      */
-    constructor(
-        address _stabilityPool,
-        address _musd,
-        address _feeCollector,
-        uint256 _performanceFee
-    ) Ownable(msg.sender) {
-        if (_stabilityPool == address(0) ||
-            _musd == address(0) ||
-            _feeCollector == address(0)
-        ) revert InvalidAddress();
+    constructor(address _stabilityPool, address _musd, address _feeCollector, uint256 _performanceFee)
+        Ownable(msg.sender)
+    {
+        if (_stabilityPool == address(0) || _musd == address(0) || _feeCollector == address(0)) revert InvalidAddress();
 
         if (_performanceFee > MAX_PERFORMANCE_FEE) revert InvalidFee();
 
@@ -211,36 +186,21 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @dev Uses shares-based accounting for fair distribution of rewards
      * @dev Automatically harvests pending collateral gains before deposit
      */
-    function depositMUSD(uint256 _amount)
-        external
-        nonReentrant
-        whenNotPaused
-        returns (uint256 shares)
-    {
+    function depositMUSD(uint256 _amount) external nonReentrant whenNotPaused returns (uint256 shares) {
         if (_amount < MIN_DEPOSIT) revert MinimumDepositNotMet();
         if (emergencyMode) revert EmergencyModeActive();
 
-        // Harvest any pending collateral gains to update accounting
-        _harvestCollateralGains();
+        // CEI FIX: Harvest with deferred ETH transfer (state updates only, no ETH transfer)
+        (uint256 harvestedGains, uint256 harvestFee) = _harvestCollateralGainsInternal();
 
-        // Calculate shares to issue
+        // Calculate shares to issue (uses updated totalPendingCollateral from harvest)
         shares = _calculateSharesToIssue(_amount);
 
-        // Transfer MUSD from user
+        // Transfer MUSD from user (must happen before we can deposit to pool)
         MUSD_TOKEN.safeTransferFrom(msg.sender, address(this), _amount);
 
-        // Approve and deposit to Stability Pool
-        MUSD_TOKEN.forceApprove(address(STABILITY_POOL), _amount);
-        
-        try STABILITY_POOL.provideToSP(_amount, address(0)) {
-            // Success
-        } catch Error(string memory reason) {
-            revert StabilityPoolError(reason);
-        } catch {
-            revert StabilityPoolError("Unknown error depositing to Stability Pool");
-        }
-
-        // C-02 FIX: Record deposit block for flash loan protection
+        // EFFECTS: Update ALL state BEFORE external ETH transfers
+        // Flash loan protection
         depositBlock[msg.sender] = block.number;
 
         // Update user position
@@ -255,7 +215,29 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
         totalShares += shares;
         totalMusdDeposited += _amount;
 
+        // Emit events after all state updates
+        if (harvestedGains > 0) {
+            emit CollateralGainsHarvested(harvestedGains, harvestFee, block.timestamp);
+        }
         emit Deposited(msg.sender, _amount, shares, block.timestamp);
+
+        // INTERACTIONS: All external calls LAST (proper CEI pattern)
+        // Transfer harvest fee
+        if (harvestFee > 0) {
+            (bool feeSuccess,) = feeCollector.call{value: harvestFee}("");
+            if (!feeSuccess) revert TransferFailed();
+        }
+
+        // Approve and deposit to Stability Pool
+        MUSD_TOKEN.forceApprove(address(STABILITY_POOL), _amount);
+
+        try STABILITY_POOL.provideToSP(_amount, address(0)) {
+            // Success
+        } catch Error(string memory reason) {
+            revert StabilityPoolError(reason);
+        } catch {
+            revert StabilityPoolError("Unknown error depositing to Stability Pool");
+        }
     }
 
     /**
@@ -263,25 +245,65 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @param _amount Amount of MUSD to withdraw
      * @return sharesBurned Number of shares burned
      *
-     * @dev Automatically claims collateral gains before withdrawal
+     * @dev CEI FIX: All state updates before external calls
      */
-    function withdrawMUSD(uint256 _amount)
-        external
-        nonReentrant
-        noFlashLoan
-        returns (uint256 sharesBurned)
-    {
+    function withdrawMUSD(uint256 _amount) external nonReentrant noFlashLoan returns (uint256 sharesBurned) {
         if (_amount == 0) revert InvalidAmount();
 
         UserPosition storage position = positions[msg.sender];
         if (position.shares == 0) revert InsufficientShares();
 
-        // Calculate shares to burn
+        // CHECKS: Calculate shares to burn
         sharesBurned = _calculateSharesToBurn(_amount);
         if (sharesBurned > position.shares) revert InsufficientShares();
 
-        // Claim collateral gains first
-        _claimCollateralGains(msg.sender);
+        // Store current shares for collateral calculation before we modify them
+        uint256 userSharesBeforeWithdraw = position.shares;
+        uint256 totalSharesBeforeWithdraw = totalShares;
+
+        // CEI FIX: Harvest with deferred ETH transfer (state updates only, no ETH transfer)
+        (uint256 harvestedGains, uint256 harvestFee) = _harvestCollateralGainsInternal();
+
+        // Calculate user's collateral gains using pre-withdrawal shares
+        uint256 newCollateral = totalPendingCollateral - position.lastCollateralSnapshot;
+        uint256 userCollateralShare =
+            totalSharesBeforeWithdraw > 0 ? (newCollateral * userSharesBeforeWithdraw) / totalSharesBeforeWithdraw : 0;
+        uint256 collateralGains = position.pendingCollateralGains + userCollateralShare;
+
+        // EFFECTS: Update ALL state BEFORE external transfers
+        // Update collateral tracking
+        position.pendingCollateralGains = 0;
+        position.lastCollateralSnapshot = totalPendingCollateral;
+        if (collateralGains > 0) {
+            totalPendingCollateral -= collateralGains;
+        }
+
+        // Update shares
+        position.shares -= sharesBurned;
+        totalShares -= sharesBurned;
+        totalMusdDeposited -= _amount;
+
+        // Emit events after state updates
+        if (harvestedGains > 0) {
+            emit CollateralGainsHarvested(harvestedGains, harvestFee, block.timestamp);
+        }
+        emit Withdrawn(msg.sender, _amount, sharesBurned, block.timestamp);
+        if (collateralGains > 0) {
+            emit CollateralGainsClaimed(msg.sender, collateralGains, 0, block.timestamp);
+        }
+
+        // INTERACTIONS: All external calls LAST (proper CEI pattern)
+        // Transfer harvest fee
+        if (harvestFee > 0) {
+            (bool feeSuccess,) = feeCollector.call{value: harvestFee}("");
+            if (!feeSuccess) revert TransferFailed();
+        }
+
+        // Transfer collateral gains if any
+        if (collateralGains > 0) {
+            (bool success,) = msg.sender.call{value: collateralGains}("");
+            if (!success) revert TransferFailed();
+        }
 
         // Withdraw from Stability Pool
         try STABILITY_POOL.withdrawFromSP(_amount) {
@@ -294,15 +316,6 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
 
         // Transfer MUSD to user
         MUSD_TOKEN.safeTransfer(msg.sender, _amount);
-
-        // Update user position
-        position.shares -= sharesBurned;
-        
-        // Update global state
-        totalShares -= sharesBurned;
-        totalMusdDeposited -= _amount;
-
-        emit Withdrawn(msg.sender, _amount, sharesBurned, block.timestamp);
     }
 
     /**
@@ -311,12 +324,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      *
      * @dev Claims proportional share of collateral gains from liquidations
      */
-    function claimCollateralGains()
-        external
-        nonReentrant
-        noFlashLoan
-        returns (uint256 collateralGains)
-    {
+    function claimCollateralGains() external nonReentrant noFlashLoan returns (uint256 collateralGains) {
         collateralGains = _claimCollateralGains(msg.sender);
     }
 
@@ -332,11 +340,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @dev Updates global collateral accounting
      * @dev Can be called by anyone to update strategy state
      */
-    function harvestCollateralGains()
-        external
-        nonReentrant
-        returns (uint256 totalGains, uint256 feeAmount)
-    {
+    function harvestCollateralGains() external nonReentrant returns (uint256 totalGains, uint256 feeAmount) {
         (totalGains, feeAmount) = _harvestCollateralGains();
     }
 
@@ -346,11 +350,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      *
      * @dev Only callable when emergencyMode is enabled
      */
-    function emergencyWithdraw(uint256 _amount)
-        external
-        onlyOwner
-        nonReentrant
-    {
+    function emergencyWithdraw(uint256 _amount) external onlyOwner nonReentrant {
         if (!emergencyMode) revert NotEmergencyMode();
 
         STABILITY_POOL.withdrawFromSP(_amount);
@@ -366,14 +366,10 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @param _user User address
      * @return musdValue MUSD value of user's shares
      */
-    function getUserMusdValue(address _user)
-        external
-        view
-        returns (uint256 musdValue)
-    {
+    function getUserMusdValue(address _user) external view returns (uint256 musdValue) {
         UserPosition memory position = positions[_user];
         if (position.shares == 0) return 0;
-        
+
         musdValue = (position.shares * totalMusdDeposited) / totalShares;
     }
 
@@ -382,11 +378,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @param _user User address
      * @return pendingGains Pending collateral gains
      */
-    function getUserPendingGains(address _user)
-        external
-        view
-        returns (uint256 pendingGains)
-    {
+    function getUserPendingGains(address _user) external view returns (uint256 pendingGains) {
         UserPosition memory position = positions[_user];
         if (position.shares == 0) return position.pendingCollateralGains;
 
@@ -402,11 +394,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @param _user User address
      * @return sharePct User's share percentage (10000 = 100%)
      */
-    function getUserSharePercentage(address _user)
-        external
-        view
-        returns (uint256 sharePct)
-    {
+    function getUserSharePercentage(address _user) external view returns (uint256 sharePct) {
         if (totalShares == 0) return 0;
         return (positions[_user].shares * 10000) / totalShares;
     }
@@ -428,7 +416,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
     function getEstimatedAPY() external view returns (uint256 apy) {
         // Simplified estimation - in production, would track historical data
         if (totalMusdDeposited == 0) return 0;
-        
+
         // Calculate based on collateral gains over time
         // This is a placeholder - real implementation would use time-weighted calculations
         uint256 totalGainsValue = totalCollateralClaimed + totalPendingCollateral;
@@ -440,11 +428,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @param _user User address
      * @return position User position struct
      */
-    function getUserPosition(address _user)
-        external
-        view
-        returns (UserPosition memory position)
-    {
+    function getUserPosition(address _user) external view returns (UserPosition memory position) {
         return positions[_user];
     }
 
@@ -459,11 +443,7 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      *
      * @dev Uses proportional shares calculation
      */
-    function _calculateSharesToIssue(uint256 _amount)
-        internal
-        view
-        returns (uint256 shares)
-    {
+    function _calculateSharesToIssue(uint256 _amount) internal view returns (uint256 shares) {
         if (totalShares == 0 || totalMusdDeposited == 0) {
             // First deposit: 1:1 ratio
             return _amount;
@@ -478,27 +458,18 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @param _amount MUSD amount
      * @return shares Shares to burn
      */
-    function _calculateSharesToBurn(uint256 _amount)
-        internal
-        view
-        returns (uint256 shares)
-    {
+    function _calculateSharesToBurn(uint256 _amount) internal view returns (uint256 shares) {
         // shares = (amount * totalShares) / totalDeposited
         shares = (_amount * totalShares) / totalMusdDeposited;
     }
 
     /**
-     * @notice Harvest collateral gains from Stability Pool
+     * @notice Internal harvest - updates state but defers ETH transfer
      * @return totalGains Total collateral harvested
-     * @return feeAmount Fee collected
-     *
-     * @dev Internal function called before deposits/withdrawals
-     * @dev CEI PATTERN: State updates BEFORE external calls
+     * @return feeAmount Fee to be collected (caller must transfer)
+     * @dev CEI FIX: Separates state updates from ETH transfers
      */
-    function _harvestCollateralGains()
-        internal
-        returns (uint256 totalGains, uint256 feeAmount)
-    {
+    function _harvestCollateralGainsInternal() internal returns (uint256 totalGains, uint256 feeAmount) {
         // Get pending collateral from Stability Pool
         uint256 pendingCollateral = STABILITY_POOL.getDepositorCollateralGain(address(this));
 
@@ -516,15 +487,31 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
         feeAmount = (pendingCollateral * performanceFee) / 10000;
         totalGains = pendingCollateral - feeAmount;
 
-        // CEI FIX: Update global state BEFORE external calls
+        // STATE UPDATE: Update global state (caller handles ETH transfer)
         totalPendingCollateral += totalGains;
         totalCollateralClaimed += totalGains;
 
-        emit CollateralGainsHarvested(totalGains, feeAmount, block.timestamp);
+        // NOTE: ETH transfer deferred to caller for proper CEI ordering
+    }
 
-        // External call AFTER state updates
+    /**
+     * @notice Harvest collateral gains from Stability Pool
+     * @return totalGains Total collateral harvested
+     * @return feeAmount Fee collected
+     *
+     * @dev CEI PATTERN: State updates BEFORE external ETH transfer
+     */
+    function _harvestCollateralGains() internal returns (uint256 totalGains, uint256 feeAmount) {
+        // Harvest with state updates
+        (totalGains, feeAmount) = _harvestCollateralGainsInternal();
+
+        if (totalGains > 0) {
+            emit CollateralGainsHarvested(totalGains, feeAmount, block.timestamp);
+        }
+
+        // INTERACTION: External ETH transfer LAST
         if (feeAmount > 0) {
-            (bool success, ) = feeCollector.call{value: feeAmount}("");
+            (bool success,) = feeCollector.call{value: feeAmount}("");
             if (!success) revert TransferFailed();
         }
     }
@@ -535,38 +522,57 @@ contract StabilityPoolStrategy is Ownable, ReentrancyGuard, Pausable {
      * @return collateralGains Amount claimed
      * @dev CEI PATTERN: All state updates BEFORE external transfer
      */
-    function _claimCollateralGains(address _user)
-        internal
-        returns (uint256 collateralGains)
-    {
-        // Harvest latest gains first
-        _harvestCollateralGains();
+    function _claimCollateralGains(address _user) internal returns (uint256 collateralGains) {
+        // Harvest latest gains first - this follows CEI internally
+        // and updates totalPendingCollateral before any ETH transfer
+        (uint256 harvestedGains, uint256 harvestFee) = _harvestCollateralGainsInternal();
 
         UserPosition storage position = positions[_user];
-        if (position.shares == 0) return 0;
+        if (position.shares == 0) {
+            // Still need to send fee if harvested
+            if (harvestFee > 0) {
+                (bool feeSuccess,) = feeCollector.call{value: harvestFee}("");
+                if (!feeSuccess) revert TransferFailed();
+            }
+            return 0;
+        }
 
         // Calculate user's share of new collateral
         uint256 newCollateral = totalPendingCollateral - position.lastCollateralSnapshot;
-        uint256 userShare = (newCollateral * position.shares) / totalShares;
+        uint256 userShare = totalShares > 0 ? (newCollateral * position.shares) / totalShares : 0;
 
         // Total collateral to claim
         collateralGains = position.pendingCollateralGains + userShare;
 
-        if (collateralGains == 0) return 0;
-
-        // CEI FIX: ALL state updates BEFORE external call
+        // CEI FIX: ALL state updates BEFORE any external transfers
         // Reset user's pending gains and update snapshot
         position.pendingCollateralGains = 0;
         position.lastCollateralSnapshot = totalPendingCollateral;
 
         // Update global pending collateral
-        totalPendingCollateral -= collateralGains;
+        if (collateralGains > 0) {
+            totalPendingCollateral -= collateralGains;
+        }
 
-        emit CollateralGainsClaimed(_user, collateralGains, 0, block.timestamp);
+        if (harvestedGains > 0) {
+            emit CollateralGainsHarvested(harvestedGains, harvestFee, block.timestamp);
+        }
+        if (collateralGains > 0) {
+            emit CollateralGainsClaimed(_user, collateralGains, 0, block.timestamp);
+        }
 
-        // External call AFTER all state updates
-        (bool success, ) = _user.call{value: collateralGains}("");
-        if (!success) revert TransferFailed();
+        // INTERACTIONS: All external transfers LAST
+        // Transfer fee first (smaller amount, less attack surface)
+        if (harvestFee > 0) {
+            (bool feeSuccess,) = feeCollector.call{value: harvestFee}("");
+            if (!feeSuccess) revert TransferFailed();
+        }
+
+        // Transfer user gains
+        if (collateralGains > 0) {
+            (bool success,) = _user.call{value: collateralGains}("");
+            if (!success) revert TransferFailed();
+        }
     }
 
     /*//////////////////////////////////////////////////////////////

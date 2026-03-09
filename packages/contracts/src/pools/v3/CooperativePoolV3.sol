@@ -81,6 +81,9 @@ contract CooperativePoolV3 is BasePoolV3 {
     // H-01 FIX: Block-based flash loan protection per pool
     mapping(uint256 => mapping(address => uint256)) public memberJoinBlock;
 
+    // H-04 FIX: Track undeposited BTC per pool (for pools below MIN_POOL_SIZE)
+    mapping(uint256 => uint256) public poolUndepositedBtc;
+
     uint256 public poolCounter;
 
     // Cooperative pool specific constants
@@ -92,9 +95,9 @@ contract CooperativePoolV3 is BasePoolV3 {
     /**
      * @dev Storage gap for future upgrades
      * @custom:oz-upgrades-unsafe-allow state-variable-immutable
-     * Size: 50 slots - base pool slots (5) - cooperative pool slots (6) = 39 slots reserved
+     * Size: 50 slots - base pool slots (5) - cooperative pool slots (7 with H-04) = 38 slots reserved
      */
-    uint256[39] private __gap;
+    uint256[38] private __gap;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
@@ -110,19 +113,11 @@ contract CooperativePoolV3 is BasePoolV3 {
     );
 
     event MemberJoined(
-        uint256 indexed poolId,
-        address indexed member,
-        uint256 btcAmount,
-        uint256 shares,
-        uint256 timestamp
+        uint256 indexed poolId, address indexed member, uint256 btcAmount, uint256 shares, uint256 timestamp
     );
 
     event MemberLeft(
-        uint256 indexed poolId,
-        address indexed member,
-        uint256 btcAmount,
-        uint256 yieldAmount,
-        uint256 timestamp
+        uint256 indexed poolId, address indexed member, uint256 btcAmount, uint256 yieldAmount, uint256 timestamp
     );
 
     event PartialWithdrawal(
@@ -184,12 +179,10 @@ contract CooperativePoolV3 is BasePoolV3 {
      * @param _musd Address of MUSD token
      * @param _feeCollector Address to receive fees
      */
-    function initialize(
-        address _mezoIntegration,
-        address _yieldAggregator,
-        address _musd,
-        address _feeCollector
-    ) public initializer {
+    function initialize(address _mezoIntegration, address _yieldAggregator, address _musd, address _feeCollector)
+        public
+        initializer
+    {
         if (_mezoIntegration == address(0) || _yieldAggregator == address(0)) revert ZeroAddress();
 
         // Initialize base pool (handles _musd and _feeCollector validation)
@@ -225,12 +218,7 @@ contract CooperativePoolV3 is BasePoolV3 {
                          CORE FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
-    function createPool(
-        string memory name,
-        uint256 minContribution,
-        uint256 maxContribution,
-        uint256 maxMembers
-    )
+    function createPool(string memory name, uint256 minContribution, uint256 maxContribution, uint256 maxMembers)
         external
         whenNotPaused
         returns (uint256 poolId)
@@ -259,12 +247,7 @@ contract CooperativePoolV3 is BasePoolV3 {
         emit PoolCreated(poolId, msg.sender, name, minContribution, maxMembers, block.timestamp);
     }
 
-    function joinPool(uint256 poolId)
-        external
-        payable
-        nonReentrant
-        whenNotPaused
-    {
+    function joinPool(uint256 poolId) external payable nonReentrant whenNotPaused {
         uint256 btcAmount = msg.value;
 
         PoolInfo storage pool = pools[poolId];
@@ -303,18 +286,22 @@ contract CooperativePoolV3 is BasePoolV3 {
 
         pool.totalBtcDeposited += btcAmount;
 
+        // H-04 FIX: Properly track and deposit BTC when crossing MIN_POOL_SIZE
         if (pool.totalBtcDeposited >= MIN_POOL_SIZE) {
-            _depositToMezo(poolId, btcAmount);
+            // Calculate total to deposit: current contribution + any previously undeposited
+            uint256 toDeposit = btcAmount + poolUndepositedBtc[poolId];
+            poolUndepositedBtc[poolId] = 0; // Clear undeposited tracking
+
+            _depositToMezo(poolId, toDeposit);
+        } else {
+            // Pool still below MIN_POOL_SIZE - track as undeposited
+            poolUndepositedBtc[poolId] += btcAmount;
         }
 
         emit MemberJoined(poolId, msg.sender, btcAmount, member.shares, block.timestamp);
     }
 
-    function leavePool(uint256 poolId)
-        external
-        nonReentrant
-        noPoolFlashLoan(poolId)
-    {
+    function leavePool(uint256 poolId) external nonReentrant noPoolFlashLoan(poolId) {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
 
@@ -353,6 +340,7 @@ contract CooperativePoolV3 is BasePoolV3 {
 
         // CEI Pattern: External interactions AFTER all state changes
         if (oldTotalMusd > 0) {
+            // Pool is active with Mezo - withdraw from Mezo
             // Use library for applying share percentage
             uint256 musdToRepay = YieldCalculations.applySharePercentage(oldTotalMusd, memberShare);
 
@@ -362,17 +350,19 @@ contract CooperativePoolV3 is BasePoolV3 {
             uint256 totalNeeded = musdToRepay + memberYield;
 
             if (poolMusdBalance < totalNeeded && memberYield > 0) {
-                (uint256 aggregatorPrincipal, uint256 aggregatorYields) = YIELD_AGGREGATOR.getUserPosition(address(this));
+                (uint256 aggregatorPrincipal, uint256 aggregatorYields) =
+                    YIELD_AGGREGATOR.getUserPosition(address(this));
                 uint256 aggregatorBalance = aggregatorPrincipal + aggregatorYields;
 
                 // Use library for proportional share calculation
-                uint256 proportionalShare = YieldCalculations.calculateProportionalYield(aggregatorBalance, memberShares, oldTotalShares);
+                uint256 proportionalShare =
+                    YieldCalculations.calculateProportionalYield(aggregatorBalance, memberShares, oldTotalShares);
                 uint256 amountToWithdraw = totalNeeded - poolMusdBalance;
                 uint256 safeWithdraw = YieldCalculations.min(amountToWithdraw, proportionalShare);
 
                 if (safeWithdraw > 0) {
-                    try YIELD_AGGREGATOR.withdraw(safeWithdraw) {
-                    } catch {
+                    try YIELD_AGGREGATOR.withdraw(safeWithdraw) {}
+                    catch {
                         poolMusdBalance = MUSD.balanceOf(address(this));
                         if (poolMusdBalance >= musdToRepay) {
                             uint256 availableForYield = poolMusdBalance - musdToRepay;
@@ -390,10 +380,18 @@ contract CooperativePoolV3 is BasePoolV3 {
             MUSD.forceApprove(address(MEZO_INTEGRATION), musdToRepay);
             uint256 btcReturned = MEZO_INTEGRATION.burnAndWithdraw(musdToRepay);
             btcAmount = btcReturned;
+        } else {
+            // H-04 FIX: Pool below MIN_POOL_SIZE - BTC is still in contract undeposited
+            // M-04 FIX: Prevent underflow - use min to ensure safe subtraction
+            uint256 undepositedToReduce = poolUndepositedBtc[poolId] >= originalBtcContribution
+                ? originalBtcContribution
+                : poolUndepositedBtc[poolId];
+            poolUndepositedBtc[poolId] -= undepositedToReduce;
+            // btcAmount stays as originalBtcContribution - transferred from contract balance
         }
 
         // CEI Pattern: All external transfers at the END
-        (bool success, ) = msg.sender.call{value: btcAmount}("");
+        (bool success,) = msg.sender.call{value: btcAmount}("");
         require(success, "BTC transfer failed");
 
         if (netYield > 0) {
@@ -406,11 +404,7 @@ contract CooperativePoolV3 is BasePoolV3 {
         emit MemberLeft(poolId, msg.sender, btcAmount, memberYield, block.timestamp);
     }
 
-    function withdrawPartial(uint256 poolId, uint256 withdrawAmount)
-        external
-        nonReentrant
-        noPoolFlashLoan(poolId)
-    {
+    function withdrawPartial(uint256 poolId, uint256 withdrawAmount) external nonReentrant noPoolFlashLoan(poolId) {
         if (withdrawAmount == 0) revert InvalidAmount();
 
         PoolInfo storage pool = pools[poolId];
@@ -439,6 +433,7 @@ contract CooperativePoolV3 is BasePoolV3 {
         uint256 btcAmount = withdrawAmount;
 
         if (pool.totalMusdMinted > 0) {
+            // Pool active with Mezo - withdraw proportional MUSD and convert
             // Use library for share application
             uint256 musdToRepay = YieldCalculations.applySharePercentage(pool.totalMusdMinted, withdrawShare);
             pool.totalMusdMinted -= musdToRepay;
@@ -446,7 +441,8 @@ contract CooperativePoolV3 is BasePoolV3 {
             uint256 poolMusdBalance = MUSD.balanceOf(address(this));
 
             if (poolMusdBalance < musdToRepay) {
-                (uint256 aggregatorPrincipal, uint256 aggregatorYields) = YIELD_AGGREGATOR.getUserPosition(address(this));
+                (uint256 aggregatorPrincipal, uint256 aggregatorYields) =
+                    YIELD_AGGREGATOR.getUserPosition(address(this));
                 uint256 aggregatorBalance = aggregatorPrincipal + aggregatorYields;
                 // Use library for proportional and min calculations
                 uint256 proportionalShare = YieldCalculations.applySharePercentage(aggregatorBalance, withdrawShare);
@@ -454,28 +450,29 @@ contract CooperativePoolV3 is BasePoolV3 {
                 uint256 safeWithdraw = YieldCalculations.min(amountToWithdraw, proportionalShare);
 
                 if (safeWithdraw > 0) {
-                    try YIELD_AGGREGATOR.withdraw(safeWithdraw) {
-                    } catch {
-                    }
+                    try YIELD_AGGREGATOR.withdraw(safeWithdraw) {} catch {}
                 }
             }
 
             MUSD.forceApprove(address(MEZO_INTEGRATION), musdToRepay);
             uint256 btcReturned = MEZO_INTEGRATION.burnAndWithdraw(musdToRepay);
             btcAmount = btcReturned;
+        } else {
+            // H-04 FIX: Pool below MIN_POOL_SIZE - BTC in contract undeposited
+            // M-04 FIX: Prevent underflow - use min to ensure safe subtraction
+            uint256 undepositedToReduce =
+                poolUndepositedBtc[poolId] >= withdrawAmount ? withdrawAmount : poolUndepositedBtc[poolId];
+            poolUndepositedBtc[poolId] -= undepositedToReduce;
+            // btcAmount stays as withdrawAmount - from contract balance
         }
 
-        (bool success, ) = msg.sender.call{value: btcAmount}("");
+        (bool success,) = msg.sender.call{value: btcAmount}("");
         require(success, "BTC transfer failed");
 
         emit PartialWithdrawal(poolId, msg.sender, btcAmount, remainingContribution, block.timestamp);
     }
 
-    function claimYield(uint256 poolId)
-        external
-        nonReentrant
-        noPoolFlashLoan(poolId)
-    {
+    function claimYield(uint256 poolId) external nonReentrant noPoolFlashLoan(poolId) {
         PoolInfo storage pool = pools[poolId];
         MemberInfo storage member = poolMembers[poolId][msg.sender];
 
@@ -488,6 +485,7 @@ contract CooperativePoolV3 is BasePoolV3 {
         // Calculate fee using base function (handles emergency mode)
         (uint256 feeAmount, uint256 netYield) = _calculateFee(memberYield);
 
+        // CEI FIX: Update state BEFORE external calls
         member.yieldClaimed += memberYield;
 
         uint256 poolMusdBalance = MUSD.balanceOf(address(this));
@@ -495,7 +493,15 @@ contract CooperativePoolV3 is BasePoolV3 {
 
         if (poolMusdBalance < totalNeeded) {
             try YIELD_AGGREGATOR.claimYield() {
+                // CEI FIX: Re-read balance after external call succeeds
+                poolMusdBalance = MUSD.balanceOf(address(this));
+                // Verify we now have enough, adjust if needed
+                if (poolMusdBalance < totalNeeded && poolMusdBalance > 0) {
+                    memberYield = poolMusdBalance;
+                    (feeAmount, netYield) = _calculateFee(memberYield);
+                }
             } catch {
+                // External call failed - check what we have
                 poolMusdBalance = MUSD.balanceOf(address(this));
                 if (poolMusdBalance > 0) {
                     memberYield = poolMusdBalance;
@@ -506,6 +512,7 @@ contract CooperativePoolV3 is BasePoolV3 {
             }
         }
 
+        // INTERACTIONS: All transfers AFTER state updates
         MUSD.safeTransfer(msg.sender, netYield);
         if (feeAmount > 0) {
             MUSD.safeTransfer(feeCollector, feeAmount);
@@ -541,12 +548,7 @@ contract CooperativePoolV3 is BasePoolV3 {
     function getPoolStats(uint256 poolId)
         external
         view
-        returns (
-            uint256 totalBtc,
-            uint256 totalMusd,
-            uint256 totalYield,
-            uint256 avgApr
-        )
+        returns (uint256 totalBtc, uint256 totalMusd, uint256 totalYield, uint256 avgApr)
     {
         PoolInfo memory pool = pools[poolId];
         totalBtc = pool.totalBtcDeposited;
@@ -555,11 +557,35 @@ contract CooperativePoolV3 is BasePoolV3 {
         avgApr = YIELD_AGGREGATOR.getAverageApr();
     }
 
+    /**
+     * @notice H-04 FIX: Get undeposited BTC for a pool below MIN_POOL_SIZE
+     * @param poolId Pool identifier
+     * @return undeposited Amount of BTC not yet deposited to Mezo
+     */
+    function getUndepositedBtc(uint256 poolId) external view returns (uint256 undeposited) {
+        return poolUndepositedBtc[poolId];
+    }
+
     /*//////////////////////////////////////////////////////////////
                        INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice Internal function to deposit BTC to Mezo and generate yields
+     * @dev Deposits BTC to Mezo, receives MUSD, deposits to YieldAggregator
+     *
+     * @custom:security-note REENTRANCY PROTECTION (H-03 FIX)
+     * This function writes state AFTER external calls because we need the return
+     * value (musdAmount) from MEZO_INTEGRATION.depositAndMintNative().
+     * Protection is ensured by:
+     * - Runtime check that nonReentrant guard is active
+     * - Calling function (joinPool) uses nonReentrant modifier
+     * - External contracts (MEZO_INTEGRATION, YIELD_AGGREGATOR) are trusted
+     */
     function _depositToMezo(uint256 poolId, uint256 btcAmount) internal {
+        // H-03 FIX: Verify reentrancy protection is active at runtime
+        require(_reentrancyGuardEntered(), "Must be called with reentrancy guard");
+
         PoolInfo storage pool = pools[poolId];
 
         uint256 musdAmount = MEZO_INTEGRATION.depositAndMintNative{value: btcAmount}();
@@ -577,11 +603,7 @@ contract CooperativePoolV3 is BasePoolV3 {
         }
     }
 
-    function _calculateMemberYield(uint256 poolId, address member)
-        internal
-        view
-        returns (uint256 yield)
-    {
+    function _calculateMemberYield(uint256 poolId, address member) internal view returns (uint256 yield) {
         MemberInfo memory memberInfo = poolMembers[poolId][member];
         if (!memberInfo.active) return 0;
 

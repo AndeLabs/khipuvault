@@ -93,10 +93,17 @@ contract RotatingPoolTest is Test {
         musd = new MockMUSD();
         wbtc = new MockWBTC();
         yieldAggregator = new MockYieldAggregator(address(musd));
-        mezoIntegration = new MockMezoIntegration(address(wbtc), address(musd));
+        // C-01 FIX: Correct parameter order (musd first, then wbtc)
+        mezoIntegration = new MockMezoIntegration(address(musd), address(wbtc));
 
         // Fund yield aggregator for yields
         musd.mint(address(yieldAggregator), 10_000_000 ether);
+
+        // C-01 FIX: Fund MezoIntegration with MUSD so it can mint MUSD to depositors
+        musd.mint(address(mezoIntegration), 100_000_000 ether);
+
+        // Fund MezoIntegration with BTC so it can return BTC on withdrawals
+        vm.deal(address(mezoIntegration), 1000 ether);
 
         // Deploy RotatingPool with UUPS proxy pattern
         vm.startPrank(owner);
@@ -556,8 +563,13 @@ contract RotatingPoolTest is Test {
         assertEq(contributionsMade, 1);
         assertEq(totalContributed, CONTRIBUTION);
 
-        // Check contract received BTC
-        assertEq(address(pool).balance, CONTRIBUTION);
+        // C-01 FIX: BTC goes to MezoIntegration for yield generation, not held in pool
+        // Pool balance is 0, but totalBtcCollected tracks the amount
+        assertEq(address(pool).balance, 0);
+        (,,,,,,,,, uint256 totalBtcCollected, uint256 totalMusdMinted,,,,,) = pool.pools(poolId);
+        assertEq(totalBtcCollected, CONTRIBUTION);
+        // MUSD was minted and deposited to yield aggregator
+        assertTrue(totalMusdMinted > 0);
     }
 
     function testRevert_MakeContributionNative_WrongAmount() public {
@@ -693,18 +705,21 @@ contract RotatingPoolTest is Test {
         vm.prank(owner);
         pool.advancePeriod(poolId);
 
-        // Simulate accounting error - drain contract
-        uint256 contractBalance = address(pool).balance;
-        vm.prank(address(pool));
-        payable(owner).transfer(contractBalance);
-
         // FLASH LOAN PROTECTION: Move to next block to avoid SameBlockWithdrawal error
         vm.roll(block.number + 1);
 
-        // Member tries to claim payout - should revert with clear error
+        // C-01 FIX: BTC is now in Mezo, not pool contract
+        // Verify pool balance is 0 but payout should work via Mezo
+        assertEq(address(pool).balance, 0);
+
+        // Member 1 can claim payout - BTC comes from Mezo via _withdrawBtcFromMezo
         vm.prank(member1);
-        vm.expectRevert(RotatingPool.InsufficientNativeBtcBalance.selector);
         pool.claimPayout(poolId);
+
+        // Verify member received payout
+        (,,,, uint256 payoutReceived,, bool hasReceivedPayout,) = pool.poolMembers(poolId, member1);
+        assertTrue(hasReceivedPayout);
+        assertTrue(payoutReceived > 0);
     }
 
     function test_H02_Fix_BalanceCheckBeforeRefund() public {
@@ -725,14 +740,22 @@ contract RotatingPoolTest is Test {
         vm.prank(owner);
         pool.cancelPool(poolId, "Test cancellation");
 
-        // Simulate accounting error - drain contract
-        uint256 contractBalance = address(pool).balance;
-        vm.prank(address(pool));
-        payable(owner).transfer(contractBalance);
+        // C-01 FIX: BTC is now in Mezo, not pool contract
+        // Pool balance is 0 because BTC was deposited to Mezo
+        assertEq(address(pool).balance, 0);
 
-        // Member tries to claim refund - should revert with clear error
+        uint256 member1BalanceBefore = member1.balance;
+
+        // Member 1 can claim refund - BTC comes from Mezo via _withdrawBtcFromMezo
         vm.prank(member1);
-        vm.expectRevert(RotatingPool.InsufficientNativeBtcBalance.selector);
+        pool.claimRefund(poolId);
+
+        // Verify member received refund (some BTC back)
+        assertTrue(member1.balance > member1BalanceBefore);
+
+        // Cannot claim refund twice
+        vm.prank(member1);
+        vm.expectRevert(RotatingPool.RefundAlreadyClaimed.selector);
         pool.claimRefund(poolId);
     }
 
@@ -1074,5 +1097,137 @@ contract RotatingPoolTest is Test {
 
         uint256 balanceAfter = address(pool).balance;
         assertEq(balanceAfter - balanceBefore, 1 ether);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                    SECURITY FIX TESTS
+    //////////////////////////////////////////////////////////////*/
+
+    /// @notice H-01 FIX: Test duplicate member prevention in batch add
+    function test_H01_DuplicateMemberInBatch_Reverts() public {
+        address[] memory members = new address[](3);
+        members[0] = member1;
+        members[1] = member1; // Duplicate!
+        members[2] = member2;
+
+        vm.prank(owner);
+        vm.expectRevert(RotatingPool.AlreadyMember.selector);
+        pool.createPool("Duplicate Test", 3, CONTRIBUTION, PERIOD_DURATION, false, members);
+    }
+
+    /// @notice C-03 FIX: Test order randomization commit-reveal
+    /// @dev Pool can be ACTIVE if no contributions have been made yet
+    ///      This allows randomization after auto-start
+    function test_C03_OrderRandomization() public {
+        // Create pool with all members - will auto-start
+        address[] memory members = new address[](3);
+        members[0] = member1;
+        members[1] = member2;
+        members[2] = member3;
+
+        vm.prank(owner);
+        uint256 poolId = pool.createPool("Randomize Test", 3, CONTRIBUTION, PERIOD_DURATION, false, members);
+
+        // Pool is now ACTIVE but no contributions yet
+        // Check initial order
+        assertEq(pool.poolMemberOrder(poolId, 0), member1);
+        assertEq(pool.poolMemberOrder(poolId, 1), member2);
+        assertEq(pool.poolMemberOrder(poolId, 2), member3);
+
+        // Create commitment (seed = 12345, salt = "secret")
+        uint256 seed = 12345;
+        bytes32 salt = keccak256("secret");
+        bytes32 commitment = keccak256(abi.encodePacked(seed, salt));
+
+        // Submit commitment - pool is ACTIVE but no contributions
+        vm.prank(owner);
+        pool.submitOrderCommitment(poolId, commitment);
+
+        // Verify commitment stored
+        assertEq(pool.poolOrderCommitment(poolId), commitment);
+        assertFalse(pool.poolOrderRandomized(poolId));
+
+        // Reveal and randomize
+        vm.prank(owner);
+        pool.revealAndRandomizeOrder(poolId, seed, salt);
+
+        // Verify randomization happened
+        assertTrue(pool.poolOrderRandomized(poolId));
+        assertEq(pool.poolRandomSeed(poolId), seed);
+
+        // Verify view function works
+        assertTrue(pool.isOrderRandomized(poolId));
+    }
+
+    /// @notice C-03 FIX: Test invalid commitment reveal reverts
+    function test_C03_InvalidReveal_Reverts() public {
+        // Create pool with all members - will auto-start
+        address[] memory members = new address[](3);
+        members[0] = member1;
+        members[1] = member2;
+        members[2] = member3;
+
+        vm.prank(owner);
+        uint256 poolId = pool.createPool("Invalid Reveal", 3, CONTRIBUTION, PERIOD_DURATION, false, members);
+
+        // Submit commitment
+        bytes32 commitment = keccak256(abi.encodePacked(uint256(12345), keccak256("secret")));
+        vm.prank(owner);
+        pool.submitOrderCommitment(poolId, commitment);
+
+        // Try to reveal with wrong seed
+        vm.prank(owner);
+        vm.expectRevert(RotatingPool.InvalidOrderReveal.selector);
+        pool.revealAndRandomizeOrder(poolId, 99999, keccak256("secret"));
+    }
+
+    /// @notice C-03 FIX: Test randomization blocked after contributions
+    function test_C03_RandomizationBlockedAfterContribution() public {
+        address[] memory members = new address[](3);
+        members[0] = member1;
+        members[1] = member2;
+        members[2] = member3;
+
+        vm.prank(owner);
+        uint256 poolId = pool.createPool("Blocked Test", 3, CONTRIBUTION, PERIOD_DURATION, false, members);
+
+        // Make a contribution first
+        vm.prank(member1);
+        pool.makeContribution(poolId);
+
+        // Now try to submit commitment - should fail
+        bytes32 commitment = keccak256(abi.encodePacked(uint256(12345), keccak256("secret")));
+        vm.prank(owner);
+        vm.expectRevert(RotatingPool.PoolNotForming.selector);
+        pool.submitOrderCommitment(poolId, commitment);
+    }
+
+    /// @notice H-05 FIX: Test pending claims getter
+    function test_H05_GetPendingClaims() public {
+        (uint256 btc, uint256 wbtc_, uint256 musd_) = pool.getPendingClaims(member1);
+        assertEq(btc, 0);
+        assertEq(wbtc_, 0);
+        assertEq(musd_, 0);
+    }
+
+    /// @notice H-05 FIX: Test pull claim reverts when no pending
+    function test_H05_PullBtcClaim_NoPending_Reverts() public {
+        vm.prank(member1);
+        vm.expectRevert(RotatingPool.NoPendingClaims.selector);
+        pool.pullBtcClaim();
+    }
+
+    /// @notice H-05 FIX: Test pull WBTC claim reverts when no pending
+    function test_H05_PullWbtcClaim_NoPending_Reverts() public {
+        vm.prank(member1);
+        vm.expectRevert(RotatingPool.NoPendingClaims.selector);
+        pool.pullWbtcClaim();
+    }
+
+    /// @notice H-05 FIX: Test pull MUSD claim reverts when no pending
+    function test_H05_PullMusdClaim_NoPending_Reverts() public {
+        vm.prank(member1);
+        vm.expectRevert(RotatingPool.NoPendingClaims.selector);
+        pool.pullMusdClaim();
     }
 }

@@ -22,6 +22,27 @@ import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
  *      ✅ Auto-compounding
  *      ✅ Multi-vault support
  *
+ * ⚠️ C-02 NOTE: SIMULATED YIELDS FOR TESTNET
+ * Current implementation uses time-based APR calculation for testing.
+ * For production on Mezo mainnet, integrate with real ERC4626 vaults:
+ *
+ * PRODUCTION INTEGRATION OPTIONS:
+ * 1. Mezo MUSD Vault - Native MUSD yield (up to 30% APY)
+ * 2. Mezo Stability Pool - Liquidation rewards + MUSD yield
+ * 3. veBTC Integration - Protocol revenue sharing
+ *
+ * REQUIRED CHANGES FOR PRODUCTION:
+ * 1. Replace _depositToVault() to call vault.deposit(assets, receiver)
+ * 2. Replace _withdrawFromVault() to call vault.withdraw(assets, receiver, owner)
+ * 3. Replace _calculatePendingYield() to use vault.previewRedeem(shares) - principal
+ * 4. Add ERC4626 interface imports and vault validation
+ *
+ * SECURITY CONSIDERATIONS:
+ * - Validate vault conforms to ERC4626 interface
+ * - Check vault is not paused before deposits
+ * - Implement slippage protection on withdrawals
+ * - Use previewRedeem/previewWithdraw for accurate calculations
+ *
  * @custom:security-contact security@khipuvault.com
  * @author KhipuVault Team
  */
@@ -417,9 +438,20 @@ contract YieldAggregatorV3 is
                        INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
 
+    /**
+     * @notice C-02 FIX: Internal deposit to vault
+     * @dev TESTNET: Uses simulated 1:1 shares
+     *
+     * PRODUCTION ERC4626 INTEGRATION (pseudo-code):
+     * - Import IERC4626 from openzeppelin/contracts/interfaces/IERC4626.sol
+     * - Approve vault for amount
+     * - Call vault.deposit(amount, address(this)) for actual vault shares
+     * - Validate slippage with vault.previewDeposit(amount) * 99 / 100
+     */
     function _depositToVault(address user, address vaultAddress, uint256 amount) internal returns (uint256 shares) {
         MUSD_TOKEN.safeTransferFrom(user, address(this), amount);
 
+        // TESTNET: Simulated 1:1 shares (no real vault deposit)
         shares = amount;
 
         // H-3 FIX: Use SafeCast for all downcasting operations
@@ -442,6 +474,15 @@ contract YieldAggregatorV3 is
         totalValueLocked += amount;
     }
 
+    /**
+     * @notice C-02 FIX: Internal withdraw from vault
+     * @dev TESTNET: Returns amount + simulated yield
+     *
+     * PRODUCTION ERC4626 INTEGRATION (pseudo-code):
+     * - Calculate sharesToRedeem = vault.previewWithdraw(amount)
+     * - Call vault.redeem(sharesToRedeem, address(this), address(this))
+     * - Transfer withdrawn assets to user
+     */
     function _withdrawFromVault(address user, address vaultAddress, uint256 amount)
         internal
         returns (uint256 withdrawn)
@@ -451,6 +492,7 @@ contract YieldAggregatorV3 is
 
         uint256 pendingYield = _calculatePendingYield(user, vaultAddress);
 
+        // TESTNET: Simulated withdrawal (principal + time-based yield)
         withdrawn = amount + pendingYield;
 
         // H-3 FIX: Use SafeCast for all downcasting operations
@@ -465,6 +507,15 @@ contract YieldAggregatorV3 is
         totalValueLocked -= amount;
     }
 
+    /**
+     * @notice C-02 FIX: Calculate pending yield for user
+     * @dev TESTNET: Uses time-based APR simulation
+     *
+     * PRODUCTION ERC4626 INTEGRATION (pseudo-code):
+     * - Get currentValue = vault.previewRedeem(position.shares)
+     * - Calculate yield = currentValue - position.principal
+     * - Add any previously accrued yield
+     */
     function _calculatePendingYield(address user, address vaultAddress) internal view returns (uint256 pendingYield) {
         UserPositionPacked memory position = userVaultPositions[user][vaultAddress];
         // ✅ SECURITY FIX: Use threshold to prevent calculation errors with dust amounts
@@ -473,6 +524,7 @@ contract YieldAggregatorV3 is
         VaultInfoPacked memory vault = vaults[vaultAddress];
         if (!vault.active) return 0;
 
+        // TESTNET: Time-based yield simulation
         uint256 timeElapsed = block.timestamp - uint256(position.lastUpdateTime);
 
         pendingYield = (uint256(position.principal) * uint256(vault.apr) * timeElapsed) / (10000 * 365 days);
