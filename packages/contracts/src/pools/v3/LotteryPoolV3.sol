@@ -6,6 +6,9 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {SafeERC20} from "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import {IYieldAggregator} from "../../interfaces/IYieldAggregator.sol";
 import {SecureRandomness} from "../../libraries/SecureRandomness.sol";
+import {IVRFCoordinatorV2Plus} from
+    "chainlink-brownie-contracts/contracts/src/v0.8/vrf/dev/interfaces/IVRFCoordinatorV2Plus.sol";
+import {VRFV2PlusClient} from "chainlink-brownie-contracts/contracts/src/v0.8/vrf/dev/libraries/VRFV2PlusClient.sol";
 
 /**
  * @title LotteryPoolV3 - Production Grade No-Loss Lottery
@@ -13,15 +16,16 @@ import {SecureRandomness} from "../../libraries/SecureRandomness.sol";
  * @dev Features:
  *      ✅ UUPS Upgradeable Pattern (consistent with other V3 pools)
  *      ✅ Commit-Reveal randomness (secure without external oracle)
+ *      ✅ Chainlink VRF v2.5 integration (production-grade randomness)
  *      ✅ Flash loan protection (inherited from BasePoolV3)
  *      ✅ Emergency mode (inherited from BasePoolV3)
  *      ✅ MUSD-based (consistent with IndividualPoolV3)
- *      ✅ Modular architecture for future VRF integration
+ *      ✅ Modular architecture with configurable VRF
  *
  * How it works:
  * 1. Users buy tickets with MUSD
  * 2. MUSD generates yield via YieldAggregator
- * 3. At round end, commit-reveal selects winner
+ * 3. At round end, either commit-reveal or Chainlink VRF selects winner
  * 4. Winner gets: their principal + percentage of total yields
  * 5. Non-winners get: their principal back (no loss)
  * 6. Treasury gets: small percentage of yields
@@ -40,6 +44,7 @@ contract LotteryPoolV3 is BasePoolV3 {
         OPEN, // Accepting participants
         COMMIT, // Commit phase for randomness
         REVEAL, // Reveal phase for randomness
+        VRF_REQUESTED, // Chainlink VRF randomness requested
         COMPLETED, // Draw completed, claims open
         CANCELLED // Round cancelled, refunds available
 
@@ -68,6 +73,7 @@ contract LotteryPoolV3 is BasePoolV3 {
         RoundStatus status; // Current round status
         bytes32 operatorCommit; // Operator's commitment hash
         uint256 revealedSeed; // Revealed random seed
+        uint256 vrfRequestId; // Chainlink VRF request ID
     }
 
     /**
@@ -85,9 +91,21 @@ contract LotteryPoolV3 is BasePoolV3 {
      * @dev Stores contiguous ranges instead of individual tickets
      */
     struct TicketRange {
-        address owner;        // Owner of this ticket range
-        uint64 startTicket;   // First ticket in range (inclusive)
-        uint64 endTicket;     // Last ticket in range (inclusive)
+        address owner; // Owner of this ticket range
+        uint64 startTicket; // First ticket in range (inclusive)
+        uint64 endTicket; // Last ticket in range (inclusive)
+    }
+
+    /**
+     * @notice Chainlink VRF configuration
+     */
+    struct VRFConfig {
+        address coordinator; // VRF Coordinator address
+        bytes32 keyHash; // Gas lane key hash
+        uint256 subscriptionId; // VRF subscription ID
+        uint32 callbackGasLimit; // Gas limit for fulfillRandomWords
+        uint16 requestConfirmations; // Number of confirmations
+        bool enabled; // Whether to use VRF (false = commit-reveal fallback)
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -121,6 +139,15 @@ contract LotteryPoolV3 is BasePoolV3 {
     /// @notice Operator address (can commit/reveal)
     address public operator;
 
+    /// @notice Chainlink VRF configuration
+    VRFConfig public vrfConfig;
+
+    /// @notice Maps VRF request ID to round ID
+    mapping(uint256 => uint256) public vrfRequestToRound;
+
+    /// @notice VRF Coordinator interface (upgradeable-compatible)
+    IVRFCoordinatorV2Plus private s_vrfCoordinator;
+
     /*//////////////////////////////////////////////////////////////
                               CONSTANTS
     //////////////////////////////////////////////////////////////*/
@@ -143,11 +170,10 @@ contract LotteryPoolV3 is BasePoolV3 {
 
     /**
      * @dev Storage gap for future upgrades
-     * Size: 50 slots - base pool (5) - lottery pool (8) - ticketOwners (1) - ticketRanges (1) = 36 slots
-     * Note: Reduced by 1 for ticketOwners mapping added in C-02 FIX
-     * Note: Reduced by 1 for ticketRanges mapping added in M-02 FIX
+     * Base: 50 - base pool (5) - lottery pool (8) - ticketOwners (1) - ticketRanges (1)
+     *       - vrfConfig (1) - vrfRequestToRound (1) - s_vrfCoordinator (1) = 32 slots
      */
-    uint256[36] private __gap;
+    uint256[32] private __gap;
 
     /*//////////////////////////////////////////////////////////////
                                 EVENTS
@@ -167,12 +193,16 @@ contract LotteryPoolV3 is BasePoolV3 {
     event CommitSubmitted(uint256 indexed roundId, bytes32 commitment);
     event SeedRevealed(uint256 indexed roundId, uint256 seed);
 
+    event VRFRequested(uint256 indexed roundId, uint256 indexed requestId);
+    event VRFFulfilled(uint256 indexed roundId, uint256 indexed requestId, uint256 randomWord);
+
     event WinnerSelected(uint256 indexed roundId, address indexed winner, uint256 prize, uint256 winningTicket);
 
     event PrizeClaimed(uint256 indexed roundId, address indexed participant, uint256 amount, bool isWinner);
 
     event RoundCancelled(uint256 indexed roundId, string reason);
     event OperatorUpdated(address indexed oldOperator, address indexed newOperator);
+    event VRFConfigUpdated(address coordinator, bytes32 keyHash, uint256 subscriptionId, bool enabled);
 
     /*//////////////////////////////////////////////////////////////
                                 ERRORS
@@ -202,6 +232,9 @@ contract LotteryPoolV3 is BasePoolV3 {
     error NoParticipants();
     error EmergencyModeNotActive(); // M-01 FIX: New error for emergencyWithdraw
     error InsufficientParticipants(); // M-05 FIX: Need minimum participants for fair lottery
+    error OnlyVRFCoordinator(); // VRF: Only coordinator can fulfill
+    error VRFNotEnabled(); // VRF: VRF is not enabled
+    error InvalidVRFConfig(); // VRF: Invalid configuration
 
     /*//////////////////////////////////////////////////////////////
                               MODIFIERS
@@ -239,6 +272,51 @@ contract LotteryPoolV3 is BasePoolV3 {
 
         YIELD_AGGREGATOR = IYieldAggregator(_yieldAggregator);
         operator = _operator;
+
+        // VRF starts disabled - must be configured separately
+        vrfConfig.enabled = false;
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                        VRF CONFIGURATION
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Configure Chainlink VRF v2.5 settings
+     * @param _coordinator VRF Coordinator address (set to 0 to disable VRF)
+     * @param _keyHash Gas lane key hash
+     * @param _subscriptionId VRF subscription ID
+     * @param _callbackGasLimit Gas limit for callback (recommend 200000+)
+     * @param _requestConfirmations Number of confirmations (recommend 3+)
+     * @param _enabled Whether to enable VRF (false = use commit-reveal)
+     */
+    function setVRFConfig(
+        address _coordinator,
+        bytes32 _keyHash,
+        uint256 _subscriptionId,
+        uint32 _callbackGasLimit,
+        uint16 _requestConfirmations,
+        bool _enabled
+    ) external onlyOwner {
+        // If enabling VRF, validate configuration
+        if (_enabled) {
+            if (_coordinator == address(0)) revert InvalidVRFConfig();
+            if (_keyHash == bytes32(0)) revert InvalidVRFConfig();
+            if (_subscriptionId == 0) revert InvalidVRFConfig();
+            if (_callbackGasLimit < 100000) revert InvalidVRFConfig(); // Minimum gas
+            s_vrfCoordinator = IVRFCoordinatorV2Plus(_coordinator);
+        }
+
+        vrfConfig = VRFConfig({
+            coordinator: _coordinator,
+            keyHash: _keyHash,
+            subscriptionId: _subscriptionId,
+            callbackGasLimit: _callbackGasLimit,
+            requestConfirmations: _requestConfirmations,
+            enabled: _enabled
+        });
+
+        emit VRFConfigUpdated(_coordinator, _keyHash, _subscriptionId, _enabled);
     }
 
     /*//////////////////////////////////////////////////////////////
@@ -288,7 +366,8 @@ contract LotteryPoolV3 is BasePoolV3 {
             totalYield: 0,
             status: RoundStatus.OPEN,
             operatorCommit: bytes32(0),
-            revealedSeed: 0
+            revealedSeed: 0,
+            vrfRequestId: 0
         });
 
         emit RoundCreated(roundId, ticketPrice, maxTickets, endTime);
@@ -333,9 +412,7 @@ contract LotteryPoolV3 is BasePoolV3 {
 
         // M-02 FIX: Store ticket range instead of individual tickets (saves ~20k gas per ticket)
         // One SSTORE for the range vs N SSTOREs for individual tickets
-        ticketRanges[roundId].push(
-            TicketRange({owner: msg.sender, startTicket: firstTicket, endTicket: lastTicket})
-        );
+        ticketRanges[roundId].push(TicketRange({owner: msg.sender, startTicket: firstTicket, endTicket: lastTicket}));
 
         // Update state (CEI pattern)
         participant.ticketCount += uint128(ticketCount);
@@ -356,15 +433,99 @@ contract LotteryPoolV3 is BasePoolV3 {
     }
 
     /*//////////////////////////////////////////////////////////////
-                        COMMIT-REVEAL RANDOMNESS
+                    RANDOMNESS SELECTION (DUAL MODE)
     //////////////////////////////////////////////////////////////*/
 
     /**
-     * @notice Submit commitment for random seed (operator only)
+     * @notice Request randomness - uses VRF if enabled, otherwise requires commit-reveal
+     * @param roundId The round ID
+     */
+    function requestRandomness(uint256 roundId) external onlyOperator {
+        Round storage round = rounds[roundId];
+
+        if (round.startTime == 0) revert InvalidRoundId();
+        if (round.status != RoundStatus.OPEN) revert RoundNotOpen();
+        if (block.timestamp < round.endTime) revert CommitPhaseNotStarted();
+        if (round.totalTicketsSold == 0) revert NoParticipants();
+        // M-05 FIX: Require minimum participants for fair lottery
+        if (participantList[roundId].length < MIN_PARTICIPANTS) revert InsufficientParticipants();
+
+        // Use Chainlink VRF if enabled
+        if (vrfConfig.enabled) {
+            _requestVRFRandomness(roundId);
+        } else {
+            // Fallback to commit-reveal: operator must provide commitment
+            revert InvalidCommitment(); // Must use submitCommitment instead
+        }
+    }
+
+    /**
+     * @notice Internal function to request Chainlink VRF randomness
+     */
+    function _requestVRFRandomness(uint256 roundId) internal {
+        Round storage round = rounds[roundId];
+
+        // Build VRF request
+        VRFV2PlusClient.RandomWordsRequest memory req = VRFV2PlusClient.RandomWordsRequest({
+            keyHash: vrfConfig.keyHash,
+            subId: vrfConfig.subscriptionId,
+            requestConfirmations: vrfConfig.requestConfirmations,
+            callbackGasLimit: vrfConfig.callbackGasLimit,
+            numWords: 1, // We only need one random word
+            extraArgs: VRFV2PlusClient._argsToBytes(VRFV2PlusClient.ExtraArgsV1({nativePayment: false}))
+        });
+
+        // Request randomness from VRF Coordinator
+        uint256 requestId = s_vrfCoordinator.requestRandomWords(req);
+
+        // Store request mapping
+        vrfRequestToRound[requestId] = roundId;
+        round.vrfRequestId = requestId;
+        round.status = RoundStatus.VRF_REQUESTED;
+
+        emit VRFRequested(roundId, requestId);
+    }
+
+    /**
+     * @notice Chainlink VRF callback - called by coordinator with random words
+     * @param requestId The VRF request ID
+     * @param randomWords Array of random words from VRF
+     */
+    function rawFulfillRandomWords(uint256 requestId, uint256[] calldata randomWords) external {
+        // Only VRF Coordinator can call this
+        if (msg.sender != vrfConfig.coordinator) {
+            revert OnlyVRFCoordinator();
+        }
+
+        uint256 roundId = vrfRequestToRound[requestId];
+        if (roundId == 0) revert InvalidRoundId();
+
+        Round storage round = rounds[roundId];
+        if (round.status != RoundStatus.VRF_REQUESTED) revert DrawNotCompleted();
+
+        uint256 randomWord = randomWords[0];
+        round.revealedSeed = randomWord;
+        round.status = RoundStatus.REVEAL;
+
+        emit VRFFulfilled(roundId, requestId, randomWord);
+
+        // Select winner and complete round
+        _selectWinnerAndComplete(roundId, randomWord);
+    }
+
+    /*//////////////////////////////////////////////////////////////
+                    COMMIT-REVEAL RANDOMNESS (FALLBACK)
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @notice Submit commitment for random seed (operator only) - commit-reveal mode
      * @param roundId The round ID
      * @param commitment Hash of (seed + salt)
      */
     function submitCommitment(uint256 roundId, bytes32 commitment) external onlyOperator {
+        // Only allow commit-reveal if VRF is disabled
+        if (vrfConfig.enabled) revert VRFNotEnabled();
+
         Round storage round = rounds[roundId];
 
         if (round.startTime == 0) revert InvalidRoundId();
@@ -383,7 +544,7 @@ contract LotteryPoolV3 is BasePoolV3 {
     }
 
     /**
-     * @notice Reveal the random seed and select winner (operator only)
+     * @notice Reveal the random seed and select winner (operator only) - commit-reveal mode
      * @param roundId The round ID
      * @param seed The random seed
      * @param salt The salt used in commitment
@@ -516,6 +677,13 @@ contract LotteryPoolV3 is BasePoolV3 {
         return 0;
     }
 
+    /**
+     * @notice Get VRF configuration
+     */
+    function getVRFConfig() external view returns (VRFConfig memory) {
+        return vrfConfig;
+    }
+
     /*//////////////////////////////////////////////////////////////
                         INTERNAL FUNCTIONS
     //////////////////////////////////////////////////////////////*/
@@ -536,7 +704,7 @@ contract LotteryPoolV3 is BasePoolV3 {
 
         // ✅ SECURITY FIX: Use SecureRandomness library instead of simple modulo
         // Combines multiple entropy sources for better randomness:
-        // 1. Revealed seed from operator commit-reveal
+        // 1. Revealed seed from operator commit-reveal OR Chainlink VRF
         // 2. RANDAO (Ethereum's native randomness)
         // 3. Block hash from previous blocks
         // 4. Current block number and timestamp
@@ -672,10 +840,9 @@ contract LotteryPoolV3 is BasePoolV3 {
      *      2. Multi-block entropy (uses multiple block hashes)
      *      3. Additional entropy sources (msg.sender, timestamp, round data)
      *
-     * SECURITY NOTE: For mainnet production, integrate Chainlink VRF or similar
-     *                decentralized randomness oracle for cryptographic security.
-     *                This fallback is only for emergency situations when operator
-     *                fails to reveal within the deadline.
+     * SECURITY NOTE: This fallback is only for emergency situations when operator
+     *                fails to reveal within the deadline. In production, prefer
+     *                Chainlink VRF for cryptographic security.
      */
     function forceComplete(uint256 roundId) external onlyOwner nonReentrant {
         Round storage round = rounds[roundId];
