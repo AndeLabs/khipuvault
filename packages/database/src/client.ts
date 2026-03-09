@@ -1,4 +1,14 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
+
+// Re-export Prisma namespace and types
+export { Prisma, PrismaClient } from "@prisma/client";
+export type { Prisma as PrismaType } from "@prisma/client";
+
+// Export PrismaClientKnownRequestError for error handling
+export const PrismaClientKnownRequestError = Prisma.PrismaClientKnownRequestError;
+
+// Export transaction client type for typing $transaction callbacks
+export type TransactionClient = Parameters<Parameters<PrismaClient["$transaction"]>[0]>[0];
 
 // Singleton pattern for Prisma Client
 // Prevents multiple instances in development (hot reload)
@@ -62,6 +72,3 @@ const handleShutdown = async (signal: string) => {
 if (!globalForPrisma.prisma) {
   process.on("beforeExit", () => handleShutdown("beforeExit"));
 }
-
-// Export types
-export * from "@prisma/client";

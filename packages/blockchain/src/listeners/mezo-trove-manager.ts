@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { prisma, Prisma } from "@khipu/database";
+import { prisma, PrismaClientKnownRequestError, TransactionClient } from "@khipu/database";
 
 import { BaseEventListener } from "./base";
 import { getBlockTimestampCached } from "../provider";
@@ -46,7 +46,7 @@ export class MezoTroveManagerListener extends BaseEventListener {
         {
           shouldRetry: (err) => {
             // Don't retry if it's a duplicate key error - that's expected for idempotency
-            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+            if (err instanceof PrismaClientKnownRequestError && err.code === "P2002") {
               console.log(
                 `⏭️ Skipping duplicate ${eventName} event: ${event.transactionHash}:${event.index}`
               );
@@ -111,55 +111,9 @@ export class MezoTroveManagerListener extends BaseEventListener {
   }
 
   protected setupEventListeners(): void {
-    // Listen to TroveUpdated events
-    this.contract.on("TroveUpdated", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("TroveUpdated", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing TroveUpdated event:", error);
-      }
-    });
-
-    // Listen to TroveLiquidated events
-    this.contract.on("TroveLiquidated", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("TroveLiquidated", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing TroveLiquidated event:", error);
-      }
-    });
-
-    // Listen to Redemption events
-    this.contract.on("Redemption", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("Redemption", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing Redemption event:", error);
-      }
-    });
-
-    console.log("✅ Mezo TroveManager event listeners active");
+    // DEPRECATED: Filter-based listeners replaced by polling in base class
+    // Polling mode (eth_getLogs) is more reliable with Mezo RPC
+    console.log("✅ Mezo TroveManager using polling mode");
   }
 
   protected async indexHistoricalEvents(fromBlock: number): Promise<void> {
@@ -272,7 +226,7 @@ export class MezoTroveManagerListener extends BaseEventListener {
     }
 
     // Use transaction for atomicity
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Upsert trove record
       const trove = await tx.mezoTrove.upsert({
         where: { ownerAddress },
@@ -405,7 +359,7 @@ export class MezoTroveManagerListener extends BaseEventListener {
     const logIndex = event.index;
 
     // Use transaction for atomicity
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Update trove status to liquidated
       const trove = await tx.mezoTrove.upsert({
         where: { ownerAddress },

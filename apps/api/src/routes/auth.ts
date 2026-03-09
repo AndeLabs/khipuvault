@@ -45,7 +45,7 @@ router.get(
   "/nonce",
   authRateLimiter,
   asyncHandler(async (req: Request, res: Response) => {
-    const nonce = generateNonce();
+    const nonce = await generateNonce();
 
     res.json({
       nonce,

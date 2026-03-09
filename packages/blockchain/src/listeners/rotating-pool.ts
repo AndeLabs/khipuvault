@@ -1,16 +1,12 @@
 import { ethers } from "ethers";
 
-import { prisma, PrismaClient, Prisma } from "@khipu/database";
+import { prisma, PrismaClientKnownRequestError, TransactionClient } from "@khipu/database";
 
 import { BaseEventListener } from "./base";
 import { getBlockTimestampCached } from "../provider";
 import { retryWithBackoff, isRetryableError } from "../utils/retry";
 
-// Transaction client type for Prisma transactions
-type TransactionClient = Omit<
-  PrismaClient,
-  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
->;
+// TransactionClient type is imported from @khipu/database
 
 // Type guard for Prisma errors
 function isPrismaError(err: unknown): err is { code: string } {
@@ -127,167 +123,9 @@ export class RotatingPoolListener extends BaseEventListener {
   }
 
   protected setupEventListeners(): void {
-    // Listen to PoolCreated events
-    this.contract.on("PoolCreated", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("PoolCreated", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing PoolCreated event:", error);
-      }
-    });
-
-    // Listen to PoolStarted events
-    this.contract.on("PoolStarted", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("PoolStarted", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing PoolStarted event:", error);
-      }
-    });
-
-    // Listen to MemberJoined events
-    this.contract.on("MemberJoined", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("MemberJoined", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing MemberJoined event:", error);
-      }
-    });
-
-    // Listen to ContributionMade events
-    this.contract.on("ContributionMade", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("ContributionMade", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing ContributionMade event:", error);
-      }
-    });
-
-    // Listen to PayoutDistributed events
-    this.contract.on("PayoutDistributed", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("PayoutDistributed", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing PayoutDistributed event:", error);
-      }
-    });
-
-    // Listen to PeriodAdvanced events
-    this.contract.on("PeriodAdvanced", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("PeriodAdvanced", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing PeriodAdvanced event:", error);
-      }
-    });
-
-    // Listen to PeriodCompleted events
-    this.contract.on("PeriodCompleted", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("PeriodCompleted", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing PeriodCompleted event:", error);
-      }
-    });
-
-    // Listen to PoolCompleted events
-    this.contract.on("PoolCompleted", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("PoolCompleted", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing PoolCompleted event:", error);
-      }
-    });
-
-    // Listen to PoolCancelled events
-    this.contract.on("PoolCancelled", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("PoolCancelled", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing PoolCancelled event:", error);
-      }
-    });
-
-    // Listen to RefundClaimed events
-    this.contract.on("RefundClaimed", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("RefundClaimed", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing RefundClaimed event:", error);
-      }
-    });
-
-    console.log("✅ Rotating Pool (ROSCA) event listeners active");
+    // DEPRECATED: Filter-based listeners replaced by polling in base class
+    // Polling mode (eth_getLogs) is more reliable with Mezo RPC
+    console.log("✅ Rotating Pool (ROSCA) using polling mode");
   }
 
   protected async indexHistoricalEvents(fromBlock: number): Promise<void> {

@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { prisma, Prisma } from "@khipu/database";
+import { prisma, PrismaClientKnownRequestError, TransactionClient } from "@khipu/database";
 
 import { BaseEventListener } from "./base";
 import { getBlockTimestampCached } from "../provider";
@@ -39,7 +39,7 @@ export class MezoStabilityPoolListener extends BaseEventListener {
         {
           shouldRetry: (err) => {
             // Don't retry if it's a duplicate key error - that's expected for idempotency
-            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+            if (err instanceof PrismaClientKnownRequestError && err.code === "P2002") {
               console.log(
                 `⏭️ Skipping duplicate ${eventName} event: ${event.transactionHash}:${event.index}`
               );
@@ -104,55 +104,9 @@ export class MezoStabilityPoolListener extends BaseEventListener {
   }
 
   protected setupEventListeners(): void {
-    // Listen to UserDepositChanged events
-    this.contract.on("UserDepositChanged", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("UserDepositChanged", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing UserDepositChanged event:", error);
-      }
-    });
-
-    // Listen to CollateralGainWithdrawn events
-    this.contract.on("CollateralGainWithdrawn", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("CollateralGainWithdrawn", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing CollateralGainWithdrawn event:", error);
-      }
-    });
-
-    // Listen to StabilityPoolMUSDBalanceUpdated events
-    this.contract.on("StabilityPoolMUSDBalanceUpdated", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("StabilityPoolMUSDBalanceUpdated", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing StabilityPoolMUSDBalanceUpdated event:", error);
-      }
-    });
-
-    console.log("✅ Mezo StabilityPool event listeners active");
+    // DEPRECATED: Filter-based listeners replaced by polling in base class
+    // Polling mode (eth_getLogs) is more reliable with Mezo RPC
+    console.log("✅ Mezo StabilityPool using polling mode");
   }
 
   protected async indexHistoricalEvents(fromBlock: number): Promise<void> {
@@ -240,7 +194,7 @@ export class MezoStabilityPoolListener extends BaseEventListener {
     const logIndex = event.index;
 
     // Use transaction for atomicity
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Get or create stability deposit record
       const existingDeposit = await tx.mezoStabilityDeposit.findUnique({
         where: { userAddress: depositorAddress },
@@ -358,7 +312,7 @@ export class MezoStabilityPoolListener extends BaseEventListener {
     const logIndex = event.index;
 
     // Use transaction for atomicity
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Get existing deposit to calculate updated total
       const existingDeposit = await tx.mezoStabilityDeposit.findUnique({
         where: { userAddress: depositorAddress },
@@ -456,7 +410,7 @@ export class MezoStabilityPoolListener extends BaseEventListener {
     const logIndex = event.index;
 
     // Use transaction for atomicity
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Update or create system stats with new stability pool balance
       await tx.mezoSystemStats.upsert({
         where: { blockNumber: event.blockNumber },

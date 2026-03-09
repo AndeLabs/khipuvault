@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json.schemastore.org/zeabur.json",
+  "build": {
+    "type": "dockerfile",
+    "dockerfile": "apps/api/Dockerfile"
+  },
+  "env": {
+    "PORT": "3001",
+    "NODE_ENV": "production"
+  }
+}

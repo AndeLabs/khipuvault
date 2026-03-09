@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { prisma, Prisma } from "@khipu/database";
+import { prisma, PrismaClientKnownRequestError, TransactionClient } from "@khipu/database";
 
 import { BaseEventListener } from "./base";
 import { getBlockTimestamp, getBlockTimestampCached } from "../provider";
@@ -43,7 +43,7 @@ export class IndividualPoolListener extends BaseEventListener {
         {
           shouldRetry: (err) => {
             // Don't retry if it's a duplicate key error - that's expected for idempotency
-            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+            if (err instanceof PrismaClientKnownRequestError && err.code === "P2002") {
               console.log(
                 `⏭️ Skipping duplicate ${eventName} event: ${event.transactionHash}:${event.index}`
               );
@@ -108,103 +108,10 @@ export class IndividualPoolListener extends BaseEventListener {
   }
 
   protected setupEventListeners(): void {
-    // Listen to Deposited events (V3: includes referrer and totalDeposit)
-    this.contract.on("Deposited", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("Deposited", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing Deposited event:", error);
-      }
-    });
-
-    // Listen to PartialWithdrawn events (V3: replaced Withdrawn)
-    this.contract.on("PartialWithdrawn", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("PartialWithdrawn", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing PartialWithdrawn event:", error);
-      }
-    });
-
-    // Listen to FullWithdrawal events (V3: new event for full withdrawals)
-    this.contract.on("FullWithdrawal", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("FullWithdrawal", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing FullWithdrawal event:", error);
-      }
-    });
-
-    // Listen to YieldClaimed events (V3: includes fee breakdown)
-    this.contract.on("YieldClaimed", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("YieldClaimed", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing YieldClaimed event:", error);
-      }
-    });
-
-    // Listen to AutoCompounded events (V3: new feature)
-    this.contract.on("AutoCompounded", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("AutoCompounded", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing AutoCompounded event:", error);
-      }
-    });
-
-    // Listen to ReferralRewardsClaimed events (V3: new feature)
-    this.contract.on("ReferralRewardsClaimed", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("ReferralRewardsClaimed", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing ReferralRewardsClaimed event:", error);
-      }
-    });
-
-    console.log("✅ Individual Pool V3 event listeners active");
+    // DEPRECATED: Filter-based listeners replaced by polling in base class
+    // Polling mode (eth_getLogs) is more reliable with Mezo RPC
+    // All events are handled via processEvent() called by base class polling
+    console.log("✅ Individual Pool V3 using polling mode");
   }
 
   protected async indexHistoricalEvents(fromBlock: number): Promise<void> {
@@ -305,7 +212,7 @@ export class IndividualPoolListener extends BaseEventListener {
     const logIndex = event.index;
 
     // Use transaction for atomicity - all or nothing
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Ensure user exists
       const user = await tx.user.upsert({
         where: { address: userAddress },
@@ -383,7 +290,7 @@ export class IndividualPoolListener extends BaseEventListener {
     const logIndex = event.index;
 
     // Use transaction for atomicity - all or nothing
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Ensure user exists
       const user = await tx.user.upsert({
         where: { address: userAddress },
@@ -459,7 +366,7 @@ export class IndividualPoolListener extends BaseEventListener {
     const logIndex = event.index;
 
     // Use transaction for atomicity - all or nothing
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Ensure user exists
       const user = await tx.user.upsert({
         where: { address: userAddress },
@@ -541,7 +448,7 @@ export class IndividualPoolListener extends BaseEventListener {
     const logIndex = event.index;
 
     // Use transaction for atomicity - all or nothing
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Ensure user exists
       const user = await tx.user.upsert({
         where: { address: userAddress },
@@ -622,7 +529,7 @@ export class IndividualPoolListener extends BaseEventListener {
     const logIndex = event.index;
 
     // Use transaction for atomicity
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Ensure user exists and update activity
       await tx.user.upsert({
         where: { address: userAddress },
@@ -673,7 +580,7 @@ export class IndividualPoolListener extends BaseEventListener {
     const logIndex = event.index;
 
     // Use transaction for atomicity - all or nothing
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Ensure user exists
       const user = await tx.user.upsert({
         where: { address: referrerAddress },

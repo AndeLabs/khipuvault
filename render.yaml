@@ -1,0 +1,29 @@
+# Render Blueprint - Backup option for API hosting
+# https://render.com/docs/blueprint-spec
+
+services:
+  - type: web
+    name: khipuvault-api
+    runtime: docker
+    dockerfilePath: ./apps/api/Dockerfile
+    dockerContext: .
+    plan: free
+    region: oregon
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 3001
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://khipuvault.com,https://testnet.khipuvault.com
+
+databases:
+  - name: khipuvault-db
+    plan: free
+    databaseName: khipuvault
+    postgresMajorVersion: 16

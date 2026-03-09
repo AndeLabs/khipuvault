@@ -1,6 +1,6 @@
 import { ethers } from "ethers";
 
-import { prisma, Prisma } from "@khipu/database";
+import { prisma, PrismaClientKnownRequestError, TransactionClient } from "@khipu/database";
 
 import { BaseEventListener } from "./base";
 import { getBlockTimestampCached } from "../provider";
@@ -53,7 +53,7 @@ export class LotteryPoolListener extends BaseEventListener {
         {
           shouldRetry: (err) => {
             // Don't retry if it's a duplicate key error - that's expected for idempotency
-            if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === "P2002") {
+            if (err instanceof PrismaClientKnownRequestError && err.code === "P2002") {
               console.log(
                 `⏭️ Skipping duplicate ${eventName} event: ${event.transactionHash}:${event.index}`
               );
@@ -118,119 +118,9 @@ export class LotteryPoolListener extends BaseEventListener {
   }
 
   protected setupEventListeners(): void {
-    // Listen to RoundCreated events
-    this.contract.on("RoundCreated", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("RoundCreated", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing RoundCreated event:", error);
-      }
-    });
-
-    // Listen to TicketsPurchased events
-    this.contract.on("TicketsPurchased", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("TicketsPurchased", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing TicketsPurchased event:", error);
-      }
-    });
-
-    // Listen to WinnerSelected events
-    this.contract.on("WinnerSelected", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("WinnerSelected", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing WinnerSelected event:", error);
-      }
-    });
-
-    // Listen to PrizeClaimed events
-    this.contract.on("PrizeClaimed", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("PrizeClaimed", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing PrizeClaimed event:", error);
-      }
-    });
-
-    // Listen to RoundCancelled events
-    this.contract.on("RoundCancelled", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("RoundCancelled", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing RoundCancelled event:", error);
-      }
-    });
-
-    // Listen to CommitSubmitted events (for status tracking)
-    this.contract.on("CommitSubmitted", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("CommitSubmitted", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing CommitSubmitted event:", error);
-      }
-    });
-
-    // Listen to SeedRevealed events (for status tracking)
-    this.contract.on("SeedRevealed", async (...args) => {
-      const event = args[args.length - 1];
-      try {
-        const parsedLog = this.contract.interface.parseLog({
-          topics: [...event.topics],
-          data: event.data,
-        });
-        if (parsedLog) {
-          await this.processEventWithRetry("SeedRevealed", event, parsedLog);
-        }
-      } catch (error) {
-        console.error("❌ Error parsing SeedRevealed event:", error);
-      }
-    });
-
-    console.log("✅ Lottery Pool V3 event listeners active");
+    // DEPRECATED: Filter-based listeners replaced by polling in base class
+    // Polling mode (eth_getLogs) is more reliable with Mezo RPC
+    console.log("✅ Lottery Pool V3 using polling mode");
   }
 
   protected async indexHistoricalEvents(fromBlock: number): Promise<void> {
@@ -325,7 +215,7 @@ export class LotteryPoolListener extends BaseEventListener {
     const txHash = event.transactionHash;
     const logIndex = event.index;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Create or update lottery round
       await tx.lotteryRound.upsert({
         where: { roundId },
@@ -386,7 +276,7 @@ export class LotteryPoolListener extends BaseEventListener {
     const txHash = event.transactionHash;
     const logIndex = event.index;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Ensure user exists
       await tx.user.upsert({
         where: { address: participant },
@@ -465,7 +355,7 @@ export class LotteryPoolListener extends BaseEventListener {
     const txHash = event.transactionHash;
     const logIndex = event.index;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Update round with winner info
       await tx.lotteryRound.update({
         where: { roundId },
@@ -540,7 +430,7 @@ export class LotteryPoolListener extends BaseEventListener {
     const txHash = event.transactionHash;
     const logIndex = event.index;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Update ticket claim status
       await tx.lotteryTicket.updateMany({
         where: { roundId, userAddress: participant },
@@ -587,7 +477,7 @@ export class LotteryPoolListener extends BaseEventListener {
     const txHash = event.transactionHash;
     const logIndex = event.index;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Update round status
       await tx.lotteryRound.update({
         where: { roundId },
@@ -625,7 +515,7 @@ export class LotteryPoolListener extends BaseEventListener {
     const txHash = event.transactionHash;
     const logIndex = event.index;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Update round status to COMMIT
       await tx.lotteryRound.update({
         where: { roundId },
@@ -666,7 +556,7 @@ export class LotteryPoolListener extends BaseEventListener {
     const txHash = event.transactionHash;
     const logIndex = event.index;
 
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Update round status to REVEAL
       await tx.lotteryRound.update({
         where: { roundId },

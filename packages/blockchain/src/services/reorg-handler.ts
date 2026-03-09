@@ -17,7 +17,7 @@
 
 import { ethers } from "ethers";
 
-import { prisma } from "@khipu/database";
+import { prisma, TransactionClient } from "@khipu/database";
 
 import { getProvider } from "../provider";
 
@@ -397,7 +397,7 @@ export class ReorgHandler {
     let affectedEvents = 0;
 
     // Use a transaction to ensure atomicity
-    await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx: TransactionClient) => {
       // Mark orphaned deposits as REORGED (don't delete for audit trail)
       const depositResult = await tx.deposit.updateMany({
         where: {
