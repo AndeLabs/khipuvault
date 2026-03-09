@@ -1,49 +1,57 @@
 "use client";
 
-import { ExternalLink, Shield, Code2, FileCode } from "lucide-react";
+import { ExternalLink, Shield, Code2, FileCode, Clock } from "lucide-react";
+
+import { getAddressOrUndefined, type ContractName } from "@khipu/shared";
 
 import { AnimateOnScroll } from "@/components/animate-on-scroll";
 import { Button } from "@/components/ui/button";
 import { getExplorerUrl, SOCIAL_URLS } from "@/lib/config/urls";
-import { getAddress } from "@/lib/web3/contracts-v3";
 
 const EXPLORER_BASE_URL = `${getExplorerUrl()}/address`;
 
-const contracts = [
+interface ContractInfo {
+  name: string;
+  description: string;
+  contractKey: ContractName;
+  icon: typeof Shield;
+}
+
+const contractDefinitions: ContractInfo[] = [
   {
     name: "Individual Pool",
     description: "Personal savings vault with automated yield generation",
-    address: getAddress("INDIVIDUAL_POOL"),
+    contractKey: "INDIVIDUAL_POOL",
     icon: Shield,
   },
   {
     name: "Cooperative Pool",
     description: "Community pools for collective Bitcoin savings",
-    address: getAddress("COOPERATIVE_POOL"),
+    contractKey: "COOPERATIVE_POOL",
     icon: Code2,
   },
   {
     name: "Rotating Pool (ROSCA)",
     description: "Turn-based savings circles with Native BTC & WBTC support",
-    address: getAddress("ROTATING_POOL"),
+    contractKey: "ROTATING_POOL",
     icon: Code2,
   },
   {
     name: "Prize Pool (Lottery)",
     description: "No-loss lottery with 99% gas optimization and secure randomness",
-    address: getAddress("LOTTERY_POOL"),
+    contractKey: "LOTTERY_POOL",
     icon: Code2,
   },
   {
     name: "Yield Aggregator",
     description: "Optimizes yield across multiple strategies",
-    address: getAddress("YIELD_AGGREGATOR"),
+    contractKey: "YIELD_AGGREGATOR",
     icon: FileCode,
   },
   {
     name: "mUSD Token",
     description: "Mezo USD stablecoin used for deposits",
-    address: getAddress("MUSD"),
+    contractKey: "MUSD",
     icon: Shield,
   },
 ];
@@ -53,6 +61,16 @@ function truncateAddress(address: string): string {
 }
 
 export function Contracts() {
+  // Get contracts with valid addresses (filters out unconfigured ones)
+  const contracts = contractDefinitions
+    .map((def) => ({
+      ...def,
+      address: getAddressOrUndefined(def.contractKey),
+    }))
+    .filter((c) => c.address !== undefined);
+
+  const hasContracts = contracts.length > 0;
+
   return (
     <section id="contracts" className="bg-surface-elevated/50 py-20">
       <div className="container mx-auto max-w-7xl px-4">
@@ -63,49 +81,72 @@ export function Contracts() {
           </div>
           <h2 className="text-3xl font-bold text-white md:text-4xl">Smart Contracts</h2>
           <p className="mx-auto mt-4 max-w-2xl text-lg text-muted-foreground">
-            All our contracts are deployed on Mezo Testnet and open for verification. Transparency
-            and security are our priorities.
+            {hasContracts
+              ? "All our contracts are deployed on Mezo Testnet and open for verification. Transparency and security are our priorities."
+              : "Our contracts are currently deployed on Mezo Testnet. Mainnet deployment coming soon."}
           </p>
         </AnimateOnScroll>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {contracts.map((contract, index) => (
-            <AnimateOnScroll key={contract.address} delay={`${index * 100}ms`}>
-              <div className="group relative rounded-xl border border-border bg-surface p-6 transition-all duration-300 hover:border-primary/30">
-                <div className="flex items-start gap-4">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-                    <contract.icon className="h-5 w-5 text-primary" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-white transition-colors group-hover:text-primary">
-                      {contract.name}
-                    </h3>
-                    <p className="mt-1 text-sm text-muted-foreground">{contract.description}</p>
-                    <div className="mt-3 flex items-center gap-2">
-                      <code className="rounded bg-surface-elevated px-2 py-1 font-mono text-xs text-muted-foreground">
-                        {truncateAddress(contract.address)}
-                      </code>
-                      <a
-                        href={`${EXPLORER_BASE_URL}/${contract.address}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary transition-colors hover:text-accent"
-                        title="View on Explorer"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
+        {hasContracts ? (
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+            {contracts.map((contract, index) => (
+              <AnimateOnScroll key={contract.address} delay={`${index * 100}ms`}>
+                <div className="group relative rounded-xl border border-border bg-surface p-6 transition-all duration-300 hover:border-primary/30">
+                  <div className="flex items-start gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                      <contract.icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="font-semibold text-white transition-colors group-hover:text-primary">
+                        {contract.name}
+                      </h3>
+                      <p className="mt-1 text-sm text-muted-foreground">{contract.description}</p>
+                      <div className="mt-3 flex items-center gap-2">
+                        <code className="rounded bg-surface-elevated px-2 py-1 font-mono text-xs text-muted-foreground">
+                          {truncateAddress(contract.address!)}
+                        </code>
+                        <a
+                          href={`${EXPLORER_BASE_URL}/${contract.address}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary transition-colors hover:text-accent"
+                          title="View on Explorer"
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </a>
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
-            </AnimateOnScroll>
-          ))}
-        </div>
+              </AnimateOnScroll>
+            ))}
+          </div>
+        ) : (
+          <AnimateOnScroll className="mx-auto max-w-md">
+            <div className="rounded-xl border border-primary/20 bg-primary/5 p-8 text-center">
+              <Clock className="mx-auto mb-4 h-12 w-12 text-primary" />
+              <h3 className="mb-2 text-xl font-semibold text-white">Coming Soon to Mainnet</h3>
+              <p className="text-muted-foreground">
+                Our smart contracts are live on testnet. Try them now at{" "}
+                <a
+                  href="https://testnet.khipuvault.com"
+                  className="text-primary hover:underline"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  testnet.khipuvault.com
+                </a>
+              </p>
+            </div>
+          </AnimateOnScroll>
+        )}
 
         <AnimateOnScroll delay="500ms" className="mt-10 text-center">
-          <p className="mb-4 text-sm text-muted-foreground">
-            Network: Mezo Testnet (Chain ID: 31611)
-          </p>
+          {hasContracts && (
+            <p className="mb-4 text-sm text-muted-foreground">
+              Network: Mezo Testnet (Chain ID: 31611)
+            </p>
+          )}
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a href={SOCIAL_URLS.GITHUB} target="_blank" rel="noopener noreferrer">
               <Button variant="outline" className="gap-2">
