@@ -25,8 +25,6 @@ import { ProductGuides } from "@/components/sections/product-guides";
 import { Products } from "@/components/sections/products";
 import { shouldShowLanding } from "@/config/launch";
 
-export const dynamic = "force-dynamic";
-
 export default function LandingPage() {
   const router = useRouter();
   const [showLanding, setShowLanding] = useState<boolean | null>(null);
