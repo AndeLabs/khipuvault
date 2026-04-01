@@ -53,28 +53,28 @@
     "spell:check:changed": "cspell --gitignore $(git diff --name-only --cached --diff-filter=d)"
   },
   "devDependencies": {
-    "@commitlint/cli": "^20.4.1",
-    "@commitlint/config-conventional": "^20.4.1",
+    "@commitlint/cli": "^20.5.0",
+    "@commitlint/config-conventional": "^20.5.0",
     "@microsoft/eslint-plugin-sdl": "^1.1.0",
-    "@types/node": "^20.10.0",
-    "@vitest/coverage-v8": "^4.0.14",
-    "autoprefixer": "^10.4.21",
-    "cspell": "^9.6.4",
-    "eslint-plugin-no-secrets": "^2.2.1",
+    "@types/node": "^20.19.37",
+    "@vitest/coverage-v8": "^4.1.2",
+    "autoprefixer": "^10.4.27",
+    "cspell": "^9.7.0",
+    "eslint-plugin-no-secrets": "^2.3.3",
     "eslint-plugin-security": "^3.0.1",
     "headless-web3-provider": "^0.3.2",
     "husky": "^9.1.7",
     "license-checker": "^25.0.1",
-    "lint-staged": "^16.2.7",
-    "playwright": "^1.57.0",
+    "lint-staged": "^16.4.0",
+    "playwright": "^1.59.0",
     "prettier": "^3.1.0",
     "prettier-plugin-tailwindcss": "^0.7.2",
-    "snyk": "^1.1302.1",
+    "snyk": "^1.1303.2",
     "tsup": "^8.0.0",
     "tsx": "^4.21.0",
-    "turbo": "^2.3.0",
+    "turbo": "^2.9.3",
     "typescript": "^5.3.3",
-    "vitest": "^4.0.14"
+    "vitest": "^4.1.2"
   },
   "packageManager": "pnpm@9.0.0",
   "engines": {
@@ -111,6 +111,6 @@
     }
   },
   "dependencies": {
-    "web-vitals": "^5.1.0"
+    "web-vitals": "^5.2.0"
   }
 }
