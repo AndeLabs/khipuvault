@@ -32,7 +32,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "viem": "^2.21.58",
+    "viem": "^2.47.6",
     "zod": "^3.24.1"
   },
   "devDependencies": {
